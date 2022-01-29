@@ -4,4 +4,5 @@
 
 ---
 
-Runtime environments for serverless cloud computing for multiple coding langauges and platform aiming to create a consistent and predictable open standard for writing cloud functions.
+Runtime environments for serverless cloud computing for multiple coding languages and platforms, aiming to create a consistent and predictable open standard for writing cloud functions.
+
