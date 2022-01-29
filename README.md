@@ -1,4 +1,4 @@
-![open-runtimes](https://user-images.githubusercontent.com/1297371/151676025-dd5460d3-522f-408b-81e2-ca9dc7f54a45.png)
+![open-runtimes-box-bg-cover](https://user-images.githubusercontent.com/1297371/151676246-0e18f694-dfd7-4bab-b64b-f590fec76ef1.png)
 
 # Open Runtimes
 
