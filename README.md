@@ -23,4 +23,4 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 ## Architecture
 
-![Architecture](architecture.drawio.svg)
+![Architecture](architecture.v1.drawio.svg)
