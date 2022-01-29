@@ -12,7 +12,7 @@
 
 Runtime environments for serverless cloud computing for multiple coding languages, aiming to create a consistent and predictable open standard for writing cloud functions in containerized systems.
 
-## Supported Runtimes
+## Images
 
 | Name    | Version | Docker Hub                 | Pulls |
 |---------|---------|----------------------------|-------|
