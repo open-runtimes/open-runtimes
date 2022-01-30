@@ -24,3 +24,10 @@ Runtime environments for serverless cloud computing for multiple coding language
 ## Architecture
 
 ![Architecture](architecture.v2.drawio.svg)
+
+* **Load Balancer** - get requests for endpoints and responsible for balancing and scaling the requests between multiple hosts where runtime executors are available. This is the layer where you want to implement auto-scaling and keep track of which host has which runtimes available to allow wise spending of computing resources.
+* **Executor** - is responsible for starting runtimes (AKA cold starts), and directing requests, environment variables, and user inputs to each runtime. In addition, the Executor will also be responsible for managing timeouts, max runtime allowed in parallel, and cleanup of inactive runtimes in the chosen interval.
+* **Adapter** - Software layer component that interacts with the container orchestration engine to manage the compute runtimes.
+* **Runtime** - A containerized isolated environment to run user-provided code. The runtime is spinning an HTTP TCP server on startup from one of the supported languages and handles requests on demand. Multiple runtimes of the same function can potentially run on the same or multiple hosts.
+* **Function** - Packaged code is mounted to each Runtime and is being executed inside the isolated environment. The package code should already be compiled and provided with all required dependencies.
+* **Build** - composed from a queue and set of workers, the build process receives the raw codebase from the filesystem or a VCS and compiles or packages it with all dependencies. The build help with providing the dev's Function as a ready-to-execute codebase for the Runtime.
