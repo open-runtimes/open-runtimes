@@ -12,6 +12,22 @@
 
 Runtime environments for serverless cloud computing for multiple coding languages, aiming to create a consistent and predictable open standard for writing cloud functions in containerized systems.
 
+- [Open Runtimes ⚡️](#open-runtimes-️)
+  - [Features](#features)
+  - [Roadmap](#roadmap)
+  - [Images](#images)
+  - [Architecture](#architecture)
+    - [Load Balancer](#load-balancer)
+    - [Executor](#executor)
+    - [Adapter](#adapter)
+    - [Runtime](#runtime)
+    - [Function](#function)
+    - [Build](#build)
+  - [Contributing](#contributing)
+  - [Security](#security)
+  - [Follow Us](#follow-us)
+  - [License](#license)
+
 ## Features
 
 * **Flexibility** (WIP) - Designed to work with multiple orchestrators using different adapters. For now only Docker and Swarm are supported, Kubernetes support is planned.
@@ -63,3 +79,21 @@ The Functions is a user provider packaged of code that is mounted to each Runtim
 ### Build
 
 The Build is composed from a queue and set of workers, the build process receives the raw codebase from the filesystem or a VCS and compiles or packages it with all dependencies. The build help with providing the dev's Function as a ready-to-execute codebase for the Runtime.
+
+## Contributing
+
+All code contributions - including those of people having commit access - must go through a pull request and be approved by a core developer before being merged. This is to ensure a proper review of all the code.
+
+We truly ❤️ pull requests! If you wish to help, you can learn more about how you can contribute to this project in the [contribution guide](CONTRIBUTING.md).
+
+## Security
+
+For security issues, kindly email us at [security@appwrite.io](mailto:security@appwrite.io) instead of posting a public issue on GitHub.
+
+## Follow Us
+
+Join our growing community around the world! See our official [Blog](https://medium.com/appwrite-io). Follow us on [Twitter](https://twitter.com/appwrite), [Facebook Page](https://www.facebook.com/appwrite.io), [Facebook Group](https://www.facebook.com/groups/appwrite.developers/) , [Dev Community](https://dev.to/appwrite) or join our live [Discord server](https://appwrite.io/discord) for more help, ideas, and discussions.
+
+## License
+
+This repository is available under the [BSD 3-Clause License](./LICENSE).
