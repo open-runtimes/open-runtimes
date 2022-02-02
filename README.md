@@ -1,4 +1,4 @@
-# Open Runtimes
+# ⚡️ Open Runtimes
 
 ![open-runtimes-box-bg-cover](https://user-images.githubusercontent.com/1297371/151676246-0e18f694-dfd7-4bab-b64b-f590fec76ef1.png)
 
@@ -12,7 +12,22 @@
 
 Runtime environments for serverless cloud computing for multiple coding languages, aiming to create a consistent and predictable open standard for writing cloud functions in containerized systems.
 
-## Images
+## ⭐️ Features
+
+* **Flexibility** (WIP) - Designed to work with multiple orchestrators using different adapters. For now only Docker and Swarm are supported, Kubernetes support is planned.
+* **Performance** - Cold starts in less than ~100ms warm stars has added latency of less than 1ms.
+* **Wide Support** - Support over 10 different coding languages and over 20 different runtimes. Adding new ones is straight forward.
+* **Open Source** - Released under the MIT license, free to use and extend.
+* **Ecosystem** - Fast growing ecosystem of ready-to-use functions for easy reuse on different platforms.
+
+## 🗺 Roadmap
+
+* Kubernetes Adapter - Native cloud support and easy deployment
+* Official CLI - Easy deployments
+* Catalog - Browse the open-runtimes functions ecosystem
+* Autoscaling - Automated scaling features based on hosts and runtime metrics
+
+## 🏞 Images
 
 | Name    | Version | Docker Hub                 | Pulls |
 |---------|---------|----------------------------|-------|
@@ -21,7 +36,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 | PHP     | 8.0     | [open-runtimes/php:8.0](https://hub.docker.com/r/open-runtimes/php)      | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
 
 
-## Architecture
+## ⚙️ Architecture
 
 ![Architecture](architecture.v2.drawio.svg)
 
