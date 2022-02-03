@@ -34,7 +34,7 @@ module.exports = (req, res) => {
 
 Internally the request body sent to the runtime and all runtimes looks like so:
 
-```json
+```json5
 {
     "path": "/usr/code",
     "file": "index.js",
