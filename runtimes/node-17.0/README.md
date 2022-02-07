@@ -18,7 +18,7 @@ Enter the node runtime folder:
 cd open-runtimes/runtimes/node-17.0
 ```
 
-Prepare the example script:
+Run the example script:
 
 ```bash
 docker-compose up -d
@@ -26,7 +26,7 @@ docker-compose up -d
 
 You can now send `POST` request to `http://localhost:6001`. Make sure you have header `x-internal-challenge: test-$-1234`, and JSON body `{ "path": "/usr/code", "file": "index.js" }`.
 
-If you do any changes to example script, restart the script with `docker-compose restart`.
+If you make changes to example script, restart to apply changes with `docker-compose restart`.
 
 # Notes
 
