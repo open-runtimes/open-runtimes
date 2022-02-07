@@ -18,7 +18,7 @@ Enter the node runtime folder:
 cd open-runtimes/runtimes/node-17.0
 ```
 
-Run the example script:
+Run the included example cloud function:
 
 ```bash
 docker-compose up -d
@@ -26,11 +26,11 @@ docker-compose up -d
 
 You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: example1234`, and JSON body `{ "path": "/usr/code", "file": "index.js" }`.
 
-If you make changes to example script, restart to apply changes with `docker-compose restart`.
+You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
 
 # Notes
 
-Functions for this runtime must be exported directly through the `module.exports` object.
+When writing functions for this runtime , ensure they are exported directly through the `module.exports` object.
 
 An example of this is:
 
