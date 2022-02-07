@@ -4,7 +4,31 @@ This is the Open Runtime that both builds and runs NodeJS code.
 
 The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to communicate between the Executor and the NodeJS code.
 
-# Notes:
+# Usage
+
+Clone the repository:
+
+```bash
+git clone https://github.com/open-runtimes/open-runtimes.git
+```
+
+Enter the node runtime folder:
+
+```bash
+cd open-runtimes/runtimes/node-17.0
+```
+
+Prepare the example script:
+
+```bash
+docker-compose up -d
+```
+
+You can now send `POST` request to `http://localhost:6001`. Make sure you have header `x-internal-challenge: test-$-1234`, and JSON body `{ "path": "/usr/code", "file": "index.js" }`.
+
+If you do any changes to example script, restart the script with `docker-compose restart`.
+
+# Notes
 
 Functions for this runtime must be exported directly through the `module.exports` object.
 
