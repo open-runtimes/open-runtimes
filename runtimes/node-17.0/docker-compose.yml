@@ -6,9 +6,9 @@ services:
     build:
       context: .
     ports: 
-      - 6001:3000
+      - 3000:3000
     environment:
       - INTERNAL_RUNTIME_KEY
     volumes:
-      - ./example:/usr/test-code:ro
-    command: sh /usr/local/src/test.sh
+      - ./example:/usr/example-code:ro
+    command: sh /usr/local/src/example.sh

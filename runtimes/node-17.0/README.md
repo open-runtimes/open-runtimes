@@ -24,7 +24,7 @@ Run the example script:
 docker-compose up -d
 ```
 
-You can now send `POST` request to `http://localhost:6001`. Make sure you have header `x-internal-challenge: test-$-1234`, and JSON body `{ "path": "/usr/code", "file": "index.js" }`.
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: example1234`, and JSON body `{ "path": "/usr/code", "file": "index.js" }`.
 
 If you make changes to example script, restart to apply changes with `docker-compose restart`.
 
