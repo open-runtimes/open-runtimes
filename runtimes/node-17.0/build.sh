@@ -1,3 +1,4 @@
+#!/bin/sh
 # Install User Function Dependencies if package.json exists
 cd /usr/code
 if [ -f package.json ]; then
