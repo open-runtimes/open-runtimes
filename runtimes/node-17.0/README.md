@@ -29,7 +29,7 @@ curl -H "X-Internal-Challenge: password" -H "Content-Type: application/json" -X 
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
 
-Alternatively, you can clone [this](https://github.com/open-runtimes/open-runtimes) repository and execute `docker-compose up` in `runtimes/node-17.0` folder. Then, you can send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: password`. You can also make changes to the script in `example` folder and apply the changes with the `docker-compose restart` command.
+Alternatively, you can clone [open-runtimes](https://github.com/open-runtimes/open-runtimes) repository and execute `docker-compose up` in `runtimes/node-17.0` folder. Then, you can send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: password`. You can also make changes to the script in `example` folder and apply the changes with the `docker-compose restart` command.
 
 # Notes
 
@@ -60,3 +60,5 @@ module.exports = (req, res) => {
     });
 }
 ```
+
+The default entrypoint is `index.js`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.js"}`.
