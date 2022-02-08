@@ -24,7 +24,7 @@ docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=password --rm --interactive --tt
 3. In new terminal window, execute function:
 
 ```
-curl -H "X-Internal-Challenge: password" -H "Content-Type: application/json" -X POST http://localhost:3000/
+curl -H "X-Internal-Challenge: password" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
 ```
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
@@ -49,15 +49,19 @@ cd open-runtimes/runtimes/node-17.0
 docker-compose up -d
 ```
 
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: password`, and JSON body `{ "path": "/usr/code", "file": "index.js" }`.
+4. Execute the function:
+
+```bash
+curl -H "X-Internal-Challenge: password" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
+```
+
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: password`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":{} }`.
 
 You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
 
 ## Notes
 
-When writing functions for this runtime, ensure they are exported directly through the `module.exports` object.
-
-An example of this is:
+- When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
 
 ```js
 module.exports = (req, res) => {
@@ -65,10 +69,10 @@ module.exports = (req, res) => {
 }
 ```
 
-The `res` parameter has two methods:
+- The `res` parameter has two methods:
 
-- `send()`: Send a string response to the client.
-- `json()`: Send a JSON response to the client.
+    - `send()`: Send a string response to the client.
+    - `json()`: Send a JSON response to the client.
 
 You can respond with `json()` by providing object:
 
@@ -83,4 +87,4 @@ module.exports = (req, res) => {
 }
 ```
 
-The default entrypoint is `index.js`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.js"}`.
+- The default entrypoint is `index.js`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.js"}`.

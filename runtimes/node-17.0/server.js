@@ -2,6 +2,9 @@ const path = require("path");
 const micro = require("micro");
 const { json, send } = require("micro");
 
+const DEFAULT_PATH = '/usr/code';
+const DEFAULT_FILE = 'index.js';
+
 const server = micro(async (req, res) => {
     const body = await json(req);
 
@@ -28,7 +31,7 @@ const server = micro(async (req, res) => {
     };
 
     try {
-        let userFunction = require(path.join(body.path ?? '/usr/code', body.file ?? 'index.js'));
+        let userFunction = require(path.join(body.path ?? DEFAULT_PATH, body.file ?? DEFAULT_FILE));
 
         if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
             throw new Error('Function not found.');
