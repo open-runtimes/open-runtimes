@@ -56,17 +56,25 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 All runtimes share a common basic structure, but each additionally adds runtime-specific files to properly support it's package manager.
 
-Directory `example` includes example script using language of the specific runtime.
+```
+.
+├── build.sh
+├── docker-compose.yml
+├── Dockerfile
+├── example
+│   ├── (runtime-specific)
+├── example.sh
+├── launch.sh
+├── README.md
+└── server.X
+```
 
-Initial file of runtime is `Dockerfile`, an image definition that prepares environment for the runtime to run on. These images are usually based on Linux Alpine or Linux Ubuntu.
-
-The runtime has 3 main actions scripts:
-
-- Build source code into executable script. This action is described in `build.sh` and can be either package installations, or build process of the runtime.
-- Take executable script and prepare server that will execute it. File `launch.sh` explains this process, and runs HTTP server on port `3000`.
-- All-in-one `example.sh` script that takes content of `example` directory, builds it, and launched HTTP server. This script can be easily executed by running `docker-compose up` thanks to `docker-compose.yml` file.
-
-A runtime-specific HTTP server implementation can be found in `server.X` file where `X` is file extention used by specific programming language, for instance `server.js`.
+- `example` directory includes example script using language of the specific runtime.
+- `Dockerfile` file holds an image definition that prepares environment for the runtime to run on. These images are usually based on Linux Alpine or Linux Ubuntu.
+- `server.X` file is a runtime-specific HTTP server implementation. File extention is different for every programming language, for instance, Python is `server.py`.
+- `build.sh` script builds source code into executable script. This ca be either package installations, or build process of the runtime.
+- `launch.sh` script take executable script and prepare server that will execute it by running HTTP server on port `3000`
+- `example.sh` script is all-in-one solution that builds a script and launches HTTP server. This script is really handy for simple usage without executor.
 
 Every request sent to any of the runtimes must have header `X-Internal-Challenge`. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `example1234` as the key and we strongly recommend adjusting this key before production use.
 
