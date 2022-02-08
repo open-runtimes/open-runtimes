@@ -87,4 +87,6 @@ module.exports = (req, res) => {
 }
 ```
 
+- To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
+
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.js"}`.
