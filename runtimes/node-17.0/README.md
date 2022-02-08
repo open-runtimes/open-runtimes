@@ -6,7 +6,7 @@ The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Serv
 
 To learn more about runtimes, visit [Runtimes introduction](https://github.com/open-runtimes/open-runtimes#runtimes-introduction) section of the main README.md.
 
-# Usage
+## Usage
 
 1. Create a folder and enter it. Add code into `index.js` file:
 
@@ -29,9 +29,31 @@ curl -H "X-Internal-Challenge: password" -H "Content-Type: application/json" -X 
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
 
-Alternatively, you can clone [open-runtimes](https://github.com/open-runtimes/open-runtimes) repository and execute `docker-compose up` in `runtimes/node-17.0` folder. Then, you can send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: password`. You can also make changes to the script in `example` folder and apply the changes with the `docker-compose restart` command.
+## Local development
 
-# Notes
+1. Clone the [open-runtimes](https://github.com/open-runtimes/open-runtimes) repository:
+
+```bash
+git clone https://github.com/open-runtimes/open-runtimes.git
+```
+
+2. Enter the node runtime folder:
+
+```bash
+cd open-runtimes/runtimes/node-17.0
+```
+
+3. Run the included example cloud function:
+
+```bash
+docker-compose up -d
+```
+
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: password`, and JSON body `{ "path": "/usr/code", "file": "index.js" }`.
+
+You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
+
+## Notes
 
 When writing functions for this runtime, ensure they are exported directly through the `module.exports` object.
 

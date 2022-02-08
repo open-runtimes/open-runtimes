@@ -16,7 +16,7 @@ Runtime environments for serverless cloud computing for multiple coding language
   - [Features](#features)
   - [Roadmap](#roadmap)
   - [Images](#images)
-  - [Runtimes introduction](#runtimes-introduction)
+  - [Introduction](#introduction)
   - [Architecture](#architecture)
     - [Load Balancer](#load-balancer)
     - [Executor](#executor)
@@ -52,7 +52,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 | Node.js | 16.0    | [open-runtimes/node.js:16.0](https://hub.docker.com/r/open-runtimes/node.js) | [Node.js Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node.js?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node.js) |
 | PHP     | 8.0     | [open-runtimes/php:8.0](https://hub.docker.com/r/open-runtimes/php)      | [PHP Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
 
-## Runtimes introduction
+## Introduction
 
 All runtimes share a common basic structure, but each additionally adds runtime-specific files to properly support it's package manager.
 
