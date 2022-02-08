@@ -15,22 +15,33 @@ const server = micro(async (req, res) => {
         payload: body.payload ?? {},
     };
 
+    let isResponded = false;
     const response = {
-        send: (text, status = 200) => send(res, status, text),
-        json: (json, status = 200) => send(res, status, json),
+        send: (text, status = 200) => {
+            isResponded = true;
+            send(res, status, text);
+        },
+        json: (json, status = 200) => {
+            isResponded = true;
+            send(res, status, json);
+        },
     };
+
     try {
-        let userFunction = require(path.join(body.path, body.file));
+        let userFunction = require(path.join(body.path ?? '/usr/code', body.file ?? 'index.js'));
 
         if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
-            throw new Error('User function is not valid.')
+            throw new Error('Function not found.');
         }
-        userFunction(request, response).catch(e => {
-            send(res, 500, {
-                code: 500,
-                message: e.code === 'MODULE_NOT_FOUND' ? 'Code file not found.' : e.stack || e
+
+        await userFunction(request, response);
+
+        if(!isResponded) {
+            send(res, 200, {
+                code: 200,
+                message: 'No code output.'
             });
-        });
+        }
     } catch (e) {
         send(res, 500, {
             code: 500,

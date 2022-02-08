@@ -8,27 +8,28 @@ To learn more about runtimes, visit [Runtimes introduction](https://github.com/o
 
 # Usage
 
-Clone the repository:
+1. Create a folder and enter it. Add code into `index.js` file:
 
 ```bash
-git clone https://github.com/open-runtimes/open-runtimes.git
+mkdir node-random && cd node-random
+echo 'module.exports = (req, res) => { res.json({ n: Math.random() }) }' > index.js
 ```
 
-Enter the node runtime folder:
+2. Spin-up open-runtime:
 
 ```bash
-cd open-runtimes/runtimes/node-17.0
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=password --rm --interactive --tty --volume $PWD:/usr/deploy-code:ro open-runtimes/node:17.0 sh /usr/local/src/deploy.sh
 ```
 
-Run the included example cloud function:
+3. In new terminal window, execute function:
 
-```bash
-docker-compose up -d
+```
+curl -H "X-Internal-Challenge: password" -H "Content-Type: application/json" -X POST http://localhost:3000/
 ```
 
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: example1234`, and JSON body `{ "path": "/usr/code", "file": "index.js" }`.
+Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
 
-You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
+Alternatively, you can clone [this](https://github.com/open-runtimes/open-runtimes) repository and execute `docker-compose up` in `runtimes/node-17.0` folder. Then, you can send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: password`. You can also make changes to the script in `example` folder and apply the changes with the `docker-compose restart` command.
 
 # Notes
 

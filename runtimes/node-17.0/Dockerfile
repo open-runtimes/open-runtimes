@@ -23,7 +23,7 @@ COPY . .
 
 RUN ["chmod", "+x", "/usr/local/src/launch.sh"]
 RUN ["chmod", "+x", "/usr/local/src/build.sh"]
-RUN ["chmod", "+x", "/usr/local/src/example.sh"]
+RUN ["chmod", "+x", "/usr/local/src/deploy.sh"]
 RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/local/src"]
 RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/code"]
 RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/workspace"]
