@@ -4,6 +4,8 @@ This is the Open Runtime that builds and runs NodeJS code based on a `node:17-al
 
 The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
 
+To learn more about runtimes, visit [Runtimes introduction](https://github.com/open-runtimes/open-runtimes#runtimes-introduction) section of the main README.md.
+
 # Usage
 
 Clone the repository:
@@ -30,48 +32,30 @@ You can also make changes to the example code and apply the changes with the `do
 
 # Notes
 
-When writing functions for this runtime , ensure they are exported directly through the `module.exports` object.
+When writing functions for this runtime, ensure they are exported directly through the `module.exports` object.
 
 An example of this is:
 
 ```js
 module.exports = (req, res) => {
-    res.send('Hello World!');
+    res.send('Hello Open Runtimes 👋');
 }
 ```
 
-The res object has two methods:
-`send`: Send a string response to the client.
-`json`: Send a JSON response to the client.
+The `res` parameter has two methods:
 
-An example of the `json` method looks like this:
+- `send()`: Send a string response to the client.
+- `json()`: Send a JSON response to the client.
+
+You can respond with `json()` by providing object:
 
 ```js
 module.exports = (req, res) => {
     res.json({
-        'normal': 'Hello World!',
-        'env1': req.env['ENV1'],
-        'payload': req.payload
+        'message': 'Hello Open Runtimes 👋',
+        'env': req.env,
+        'payload': req.payload,
+        'headers': req.headers
     });
-}
-```
-
-Internally the request body sent to the runtime and all runtimes looks like so:
-
-```json5
-{
-    "path": "/usr/code",
-    "file": "index.js",
-
-    // following will be exposed to the function
-    "env": {
-        // env variables
-    },
-    "payload": {
-        // payload
-    },
-    "headers": {
-        // headers
-    }
 }
 ```

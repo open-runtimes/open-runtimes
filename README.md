@@ -16,6 +16,7 @@ Runtime environments for serverless cloud computing for multiple coding language
   - [Features](#features)
   - [Roadmap](#roadmap)
   - [Images](#images)
+  - [Runtimes introduction](#runtimes-introduction)
   - [Architecture](#architecture)
     - [Load Balancer](#load-balancer)
     - [Executor](#executor)
@@ -51,6 +52,54 @@ Runtime environments for serverless cloud computing for multiple coding language
 | Node.js | 16.0    | [open-runtimes/node.js:16.0](https://hub.docker.com/r/open-runtimes/node.js) | [Node.js Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node.js?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node.js) |
 | PHP     | 8.0     | [open-runtimes/php:8.0](https://hub.docker.com/r/open-runtimes/php)      | [PHP Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
 
+## Runtimes introduction
+
+All runtimes share a common basic structure, but each additionally adds runtime-specific files to properly support it's package manager.
+
+```
+.
+├── build.sh
+├── docker-compose.yml
+├── Dockerfile
+├── example
+│   ├── (runtime-specific)
+├── example.sh
+├── launch.sh
+├── README.md
+└── server.X
+```
+
+- `example` directory includes example script using language of the specific runtime. File `docker-compose.yml` is configuration to easily run example code with `docker-compose up`.
+- `Dockerfile` file holds an image definition that prepares environment for the runtime to run on. These images are usually based on Linux Alpine or Linux Ubuntu.
+- `server.X` file is a runtime-specific HTTP server implementation. File extention is different for every programming language, for instance, Python is `server.py`.
+- `build.sh` script builds source code into executable script. This ca be either package installations, or build process of the runtime.
+- `launch.sh` script take executable script and prepare server that will execute it by running HTTP server on port `3000`
+- `example.sh` script is all-in-one solution that builds a script and launches HTTP server. This script is really handy for simple usage without executor.
+- `README.md` is runtime documentation.
+
+Every request sent to any of the runtimes must have header `X-Internal-Challenge`. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `example1234` as the key and we strongly recommend adjusting this key before production use.
+
+All requests should also have JSON body with the following structure:
+
+```json5
+{
+    // Directory where the code is placed
+    "path": "/usr/code",
+    // Script entrypoint
+    "file": "index.js",
+
+    // Following will be exposed to the function
+    "env": {
+        // Environment varialbes
+    },
+    "payload": {
+        // Execution data
+    },
+    "headers": {
+        // Request headers
+    }
+}
+```
 
 ## Architecture
 
