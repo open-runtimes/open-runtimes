@@ -54,7 +54,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 ## Runtimes introduction
 
-All runtimes share the same folder structure, but each also adds runtime-specific files to properly support it's package manager.
+All runtimes share a common basic structure, but each additionally adds runtime-specific files to properly support it's package manager.
 
 Directory `example` includes example script using language of the specific runtime.
 
@@ -68,7 +68,7 @@ The runtime has 3 main actions scripts:
 
 A runtime-specific HTTP server implementation can be found in `server.X` file where `X` is file extention used by specific programming language, for instance `server.js`.
 
-Every request sent to any of the runtimes must have header `X-Internal-Challenge`. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `example1234` key and we strongly recommend adjusting this key before production use.
+Every request sent to any of the runtimes must have header `X-Internal-Challenge`. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `example1234` as the key and we strongly recommend adjusting this key before production use.
 
 All requests should also have JSON body with the following structure:
 
