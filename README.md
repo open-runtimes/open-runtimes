@@ -63,7 +63,7 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 ├── Dockerfile
 ├── example
 │   ├── (runtime-specific)
-├── example.sh
+├── deploy.sh
 ├── launch.sh
 ├── README.md
 └── server.X
@@ -74,10 +74,10 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 - `server.X` file is a runtime-specific HTTP server implementation. File extention is different for every programming language, for instance, Python is `server.py`.
 - `build.sh` script builds source code into executable script. This ca be either package installations, or build process of the runtime.
 - `launch.sh` script take executable script and prepare server that will execute it by running HTTP server on port `3000`
-- `example.sh` script is all-in-one solution that builds a script and launches HTTP server. This script is really handy for simple usage without executor.
+- `deploy.sh` script is all-in-one solution that builds a script and launches HTTP server. This script is really handy for simple usage without executor.
 - `README.md` is runtime documentation.
 
-Every request sent to any of the runtimes must have header `X-Internal-Challenge`. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `example1234` as the key and we strongly recommend adjusting this key before production use.
+Every request sent to any of the runtimes must have header `X-Internal-Challenge`. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `password` as the key and we strongly recommend adjusting this key before production use.
 
 All requests should also have JSON body with the following structure:
 
@@ -100,6 +100,8 @@ All requests should also have JSON body with the following structure:
     }
 }
 ```
+
+All body parameters are optional. The values used in the example above are the default values.
 
 ## Architecture
 
