@@ -16,7 +16,7 @@ Runtime environments for serverless cloud computing for multiple coding language
   - [Features](#features)
   - [Roadmap](#roadmap)
   - [Images](#images)
-  - [Repository Structure](#repository-structure)
+  - [Structure](#structure)
   - [Architecture](#architecture)
     - [Load Balancer](#load-balancer)
     - [Executor](#executor)
@@ -52,8 +52,41 @@ Runtime environments for serverless cloud computing for multiple coding language
 | Node.js | 16.0    | [open-runtimes/node.js:16.0](https://hub.docker.com/r/open-runtimes/node.js) | [Node.js Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node.js?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node.js) |
 | PHP     | 8.0     | [open-runtimes/php:8.0](https://hub.docker.com/r/open-runtimes/php)      | [PHP Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
 
+## Architecture
 
-## Repository Structure
+![Architecture](architecture.v2.drawio.svg)
+
+### Load Balancer
+
+The Load Balancer get requests for endpoints and responsible for balancing and scaling the requests between multiple hosts where runtime executors are available. This is the layer where you want to implement auto-scaling and keep track of which host has which runtimes available to allow wise spending of computing resources.
+
+### Executor
+
+The Executor is responsible for starting runtimes (AKA cold starts), and directing requests, environment variables, and user inputs to each runtime. In addition, the Executor will also be responsible for managing timeouts, max runtime allowed in parallel, and cleanup of inactive runtimes in the chosen interval.
+
+### Adapter
+
+The Adapter is a software layer component that interacts with the container orchestration engine to manage the compute runtimes.
+
+### Runtime
+
+The Runtime is a containerized isolated environment to run user-provided code. The runtime is spinning an HTTP TCP server on startup from one of the supported languages and handles requests on demand. Multiple runtimes of the same function can potentially run on the same or multiple hosts.
+
+### Function
+
+The Functions is a user provider packaged of code that is mounted to each Runtime and is executed inside the isolated environment. The package code should already be compiled and provided with all required dependencies.
+
+### Build
+
+The Build is composed from a queue and set of workers, the build process receives the raw codebase from the filesystem or a VCS and compiles or packages it with all dependencies. The build help with providing the dev's Function as a ready-to-execute codebase for the Runtime.
+
+## Contributing
+
+All code contributions - including those of people having commit access - must go through a pull request and be approved by a core developer before being merged. This is to ensure a proper review of all the code.
+
+We truly ❤️ pull requests! If you wish to help, you can learn more about how you can contribute to this project in the [contribution guide](CONTRIBUTING.md).
+
+## Structure
 
 All runtimes share a common basic structure, but each additionally adds runtime-specific files to properly support it's package manager.
 
@@ -106,40 +139,6 @@ All requests should also have JSON body with the following structure:
 ```
 
 All body parameters are optional. The values used in the example above are the default values.
-
-## Architecture
-
-![Architecture](architecture.v2.drawio.svg)
-
-### Load Balancer
-
-The Load Balancer get requests for endpoints and responsible for balancing and scaling the requests between multiple hosts where runtime executors are available. This is the layer where you want to implement auto-scaling and keep track of which host has which runtimes available to allow wise spending of computing resources.
-
-### Executor
-
-The Executor is responsible for starting runtimes (AKA cold starts), and directing requests, environment variables, and user inputs to each runtime. In addition, the Executor will also be responsible for managing timeouts, max runtime allowed in parallel, and cleanup of inactive runtimes in the chosen interval.
-
-### Adapter
-
-The Adapter is a software layer component that interacts with the container orchestration engine to manage the compute runtimes.
-
-### Runtime
-
-The Runtime is a containerized isolated environment to run user-provided code. The runtime is spinning an HTTP TCP server on startup from one of the supported languages and handles requests on demand. Multiple runtimes of the same function can potentially run on the same or multiple hosts.
-
-### Function
-
-The Functions is a user provider packaged of code that is mounted to each Runtime and is executed inside the isolated environment. The package code should already be compiled and provided with all required dependencies.
-
-### Build
-
-The Build is composed from a queue and set of workers, the build process receives the raw codebase from the filesystem or a VCS and compiles or packages it with all dependencies. The build help with providing the dev's Function as a ready-to-execute codebase for the Runtime.
-
-## Contributing
-
-All code contributions - including those of people having commit access - must go through a pull request and be approved by a core developer before being merged. This is to ensure a proper review of all the code.
-
-We truly ❤️ pull requests! If you wish to help, you can learn more about how you can contribute to this project in the [contribution guide](CONTRIBUTING.md).
 
 ## Security
 

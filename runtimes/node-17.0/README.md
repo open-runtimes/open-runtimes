@@ -90,3 +90,25 @@ module.exports = (req, res) => {
 - To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
 
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.js"}`.
+
+
+## Authors
+
+**Eldad Fux**
+
++ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
++ [https://github.com/eldadfux](https://github.com/eldadfux)
+
+**Bradley Schofield**
+
++ [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
+
+**Matej Bačo**
+
++ [https://github.com/Meldiron](https://github.com/Meldiron)
+
+## Contributing
+
+For security issues, please email security@appwrite.io instead of posting a public issue in GitHub.
+
+You can refer to the [Contributing Guide](https://github.com/open-runtimes/open-runtimes/blob/main/CONTRIBUTING.md) for more info.
