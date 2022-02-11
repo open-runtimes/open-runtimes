@@ -16,7 +16,6 @@ Runtime environments for serverless cloud computing for multiple coding language
   - [Features](#features)
   - [Roadmap](#roadmap)
   - [Images](#images)
-  - [Structure](#structure)
   - [Architecture](#architecture)
     - [Load Balancer](#load-balancer)
     - [Executor](#executor)
@@ -24,6 +23,7 @@ Runtime environments for serverless cloud computing for multiple coding language
     - [Runtime](#runtime)
     - [Function](#function)
     - [Build](#build)
+  - [Structure](#structure)
   - [Contributing](#contributing)
   - [Security](#security)
   - [Follow Us](#follow-us)
@@ -80,12 +80,6 @@ The Functions is a user provider packaged of code that is mounted to each Runtim
 
 The Build is composed from a queue and set of workers, the build process receives the raw codebase from the filesystem or a VCS and compiles or packages it with all dependencies. The build help with providing the dev's Function as a ready-to-execute codebase for the Runtime.
 
-## Contributing
-
-All code contributions - including those of people having commit access - must go through a pull request and be approved by a core developer before being merged. This is to ensure a proper review of all the code.
-
-We truly ❤️ pull requests! If you wish to help, you can learn more about how you can contribute to this project in the [contribution guide](CONTRIBUTING.md).
-
 ## Structure
 
 All runtimes share a common basic structure, but each additionally adds runtime-specific files to properly support it's package manager.
@@ -139,6 +133,12 @@ All requests should also have JSON body with the following structure:
 ```
 
 All body parameters are optional. The values used in the example above are the default values.
+
+## Contributing
+
+All code contributions - including those of people having commit access - must go through a pull request and be approved by a core developer before being merged. This is to ensure a proper review of all the code.
+
+We truly ❤️ pull requests! If you wish to help, you can learn more about how you can contribute to this project in the [contribution guide](CONTRIBUTING.md).
 
 ## Security
 
