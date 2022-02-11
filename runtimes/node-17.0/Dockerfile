@@ -7,7 +7,7 @@ RUN addgroup -S open-runtimes -g 2000 && adduser -S open-runtimes -G open-runtim
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code
 RUN mkdir -p /usr/workspace
-RUN mkdir -p /usr/builtCode
+RUN mkdir -p /usr/build-code
 
 WORKDIR /usr/local/src
 
@@ -21,16 +21,15 @@ RUN npm ci && npm cache clean --force
 
 COPY . .
 
-RUN ["chmod", "+x", "/usr/local/src/launch.sh"]
+RUN ["chmod", "+x", "/usr/local/src/start.sh"]
 RUN ["chmod", "+x", "/usr/local/src/build.sh"]
-RUN ["chmod", "+x", "/usr/local/src/deploy.sh"]
 RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/local/src"]
 RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/code"]
 RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/workspace"]
-RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/builtCode"]
+RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/build-code"]
 
 USER open-runtimes
 
 EXPOSE 3000
 
-CMD ["/usr/local/src/launch.sh"]
+CMD ["/usr/local/src/start.sh"]

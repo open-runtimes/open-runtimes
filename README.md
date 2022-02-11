@@ -91,8 +91,7 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 ├── Dockerfile
 ├── example
 │   ├── (runtime-specific)
-├── deploy.sh
-├── launch.sh
+├── start.sh
 ├── README.md
 └── server.X
 ```
@@ -104,8 +103,7 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 | Dockerfile         	| Instructions to build a runtime, install it's dependencies and setup the runtime server. These images are usually based on official alpine or ubuntu. 	|
 | server.X           	| A HTTP server implemented in the respective runtime's language. File extension depends on your runtime. For instance, Python is `server.py`           	|
 | build.sh           	| Script responsible for building user code. This can be package installations, or any specific build process the runtime requires.                     	|
-| launch.sh          	| Script to launch the HTTP server on port `3000`. Additionally, it also copies the user supplied code to a directory accessible to the server.         	|
-| deploy.sh          	| A convenience script for easy command line execution of custom functions. This script is really handy for simple usage without executor.              	|
+| start.sh          	| Script to launch the HTTP server on port `3000`. Additionally, it also copies the user supplied code to a directory accessible to the server.         	|
 | README.md          	| Runtime specific documentation ( if any )                                                                                                             	|
 
 Every request sent to any of the runtimes must have the `X-Internal-Challenge` header. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
