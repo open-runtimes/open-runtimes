@@ -114,7 +114,7 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 | deploy.sh          	| A convenience script for easy command line execution of custom functions. This script is really handy for simple usage without executor.              	|
 | README.md          	| Runtime specific documentation ( if any )                                                                                                             	|
 
-Every request sent to any of the runtimes must have the `X-Internal-Challenge` header. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `password` as the key and we strongly recommend changing this key before production use.
+Every request sent to any of the runtimes must have the `X-Internal-Challenge` header. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
 
 All requests should also have JSON body with the following structure:
 
