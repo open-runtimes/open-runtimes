@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  open-runtimes-python:
+    container_name: open-runtimes-python
+    build:
+      context: .
+    ports: 
+      - 3000:3000
+    environment:
+      - INTERNAL_RUNTIME_KEY
+    volumes:
+      - ./example:/usr/example-code:ro
+    command: sh /usr/local/src/deploy.sh
