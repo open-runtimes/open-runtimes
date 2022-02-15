@@ -13,9 +13,12 @@ const fetch = require("node-fetch");
 */
 
 module.exports = async (req, res) => {
-    const todo = await fetch("https://jsonplaceholder.typicode.com/todos/1").then(r => r.json());
+    const payload = JSON.parse(req.payload);
+
+    const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`).then(r => r.json());
 
     res.json({
+        payload: payload,
         message: 'Hello Open Runtimes 👋',
         todo
     });

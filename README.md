@@ -153,7 +153,7 @@ cd runtimes/node-17.0 && docker-compose up -d && cd ../..
 When the runtime with example code is running, you can run a test for it:
 
 ```bash
-docker run --rm -v $(pwd):/app:rw -w /app php:8.0-cli-alpine sh -c "vendor/bin/phpunit --configuration phpunit.xml tests"
+docker run -e INTERNAL_RUNTIME_KEY='secret-key' --rm -v $(pwd):/app:rw -w /app php:8.0-cli-alpine sh -c "vendor/bin/phpunit --configuration phpunit.xml tests"
 ```
 
 ## Contributing

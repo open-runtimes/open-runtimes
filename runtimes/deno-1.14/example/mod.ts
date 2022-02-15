@@ -13,7 +13,9 @@ import axiod from "https://deno.land/x/axiod/mod.ts";
 */
 
 export default async function(req: any, res: any) {
-    const todo = (await axiod.get("https://jsonplaceholder.typicode.com/todos/1")).data;
+    const payload = JSON.parse(req.payload);
+
+    const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`)).data;
 
     res.json({
         message: 'Hello Open Runtimes 👋',
