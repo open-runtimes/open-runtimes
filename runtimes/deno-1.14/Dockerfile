@@ -1,4 +1,4 @@
-FROM node:17-alpine
+FROM denoland/deno:alpine-1.14.1
 
 LABEL maintainer="team@appwrite.io"
 
@@ -11,13 +11,9 @@ RUN mkdir -p /usr/builds
 
 WORKDIR /usr/local/src
 
-RUN apk add --no-cache rsync
+ENV DENO_DIR=/usr/builds/deno-cache
 
-COPY package* /usr/local/src/
-
-RUN npm install pm2 -g
-
-RUN npm ci && npm cache clean --force
+RUN deno install -qAf --unstable https://deno.land/x/denon@2.4.9/denon.ts
 
 COPY . .
 
@@ -32,4 +28,4 @@ USER open-runtimes
 
 EXPOSE 3000
 
-CMD ["/usr/local/src/start.sh"]
+CMD [ "/usr/local/src/start.sh" ]
