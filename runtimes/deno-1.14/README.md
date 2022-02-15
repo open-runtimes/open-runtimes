@@ -11,20 +11,20 @@ To learn more about runtimes, visit [Runtimes introduction](https://github.com/o
 1. Create a folder and enter it. Add code into `index.js` file:
 
 ```bash
-mkdir node-or && cd node-or
-echo 'module.exports = async (req, res) => { res.json({ n: Math.random() }) }' > index.js
+mkdir deno-or && cd deno-or
+echo 'export default async function(req: any, res: any) { res.json({ n: Math.random() }) }' > mod.ts
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/node:17.0 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/deno:1.14 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/node:17.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/deno:1.14 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
