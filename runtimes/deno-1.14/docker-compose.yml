@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-node:
-    container_name: open-runtimes-node
+  open-runtimes-deno:
+    container_name: open-runtimes-deno
     build:
       context: .
     ports: 

@@ -1,4 +1,4 @@
-const fetch = require("node-fetch");
+import axiod from "https://deno.land/x/axiod/mod.ts";
 
 /*
     'req' variable has:
@@ -12,8 +12,8 @@ const fetch = require("node-fetch");
     If an error is thrown, a response with code 500 will be returned.
 */
 
-module.exports = async (req, res) => {
-    const todo = await fetch("https://jsonplaceholder.typicode.com/todos/1").then(r => r.json());
+export default async function(req: any, res: any) {
+    const todo = (await axiod.get("https://jsonplaceholder.typicode.com/todos/1")).data;
 
     res.json({
         message: 'Hello Open Runtimes 👋',
