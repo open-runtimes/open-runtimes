@@ -14,7 +14,7 @@ class RuntimeTest extends TestCase
         $ch = \curl_init();
 
         $optArray = array(
-            CURLOPT_URL => 'http://172.17.0.1:3000', // Docker loopback address to host machine's localhost
+            CURLOPT_URL => 'http://localhost:3000', // Docker loopback address to host machine's localhost
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => \json_encode($body),
