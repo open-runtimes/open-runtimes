@@ -32,8 +32,10 @@ install:
   - composer install
 
 script:
-  - cd runtimes/${RUNTIME} && docker-compose up -d && cd ../../
+  - cd runtimes/${RUNTIME}
+  - docker-compose up -d
   - sleep 5
   - docker-compose ps
-  - docker-compose logs open-runtimes-${RUNTIME}
+  - docker-compose logs
+  - cd ../../
   - INTERNAL_RUNTIME_KEY=secret-key vendor/bin/phpunit tests/RuntimeTest.php
