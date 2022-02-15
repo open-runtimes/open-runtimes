@@ -40,7 +40,7 @@ class Deno114 extends TestCase
     public function testRuntimeExample(): void
     {
         $response = $this->call([
-            'file' => 'test1.ts'
+            'file' => 'test.ts'
         ]);
 
         self::assertEquals(200, $response['code']);
@@ -52,7 +52,7 @@ class Deno114 extends TestCase
         self::assertEquals(false, $response['body']['todo']['completed']);
 
         $response = $this->call([
-            'file' => 'test1.ts',
+            'file' => 'tests.ts',
             'payload' => '{"id":"2"}'
         ]);
 
@@ -63,13 +63,5 @@ class Deno114 extends TestCase
         self::assertEquals('2', $response['body']['todo']['id']);
         self::assertEquals('quis ut nam facilis et officia qui', $response['body']['todo']['title']);
         self::assertEquals(false, $response['body']['todo']['completed']);
-
-
-        $response = $this->call([
-            'file' => 'test2.ts',
-        ]);
-
-        self::assertEquals(200, $response['code']);
-        self::assertEquals(true, $response['body']['ok']);
     }
 }
