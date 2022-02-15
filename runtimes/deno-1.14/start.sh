@@ -1,8 +1,8 @@
 #!/bin/sh
 cp /tmp/code.tar.gz /usr/workspace/code.tar.gz 
-cd /usr/workspace
+cd /usr/workspace 
 tar -zxf /usr/workspace/code.tar.gz -C /usr/code 
 rm /usr/workspace/code.tar.gz
-cp -R /usr/code/node_modules/* /usr/local/src/node_modules
-cd /usr/local/src
-npm start
+export DENO_DIR="/usr/code/deno-cache"
+cd /usr/local/src/
+denon run --allow-net --allow-read --allow-env server.ts
