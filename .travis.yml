@@ -21,11 +21,11 @@ notifications:
   email:
     - team@appwrite.io
 
-# before_install:
-#   - >
-#     if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
-#       echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
-#     fi
+before_install:
+  - >
+    if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
+      echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
+    fi
 
 install:
   - docker --version
