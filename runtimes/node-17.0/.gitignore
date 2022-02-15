@@ -1,6 +1,7 @@
 # Open-runtime related
 example/code.tar.gz
 example/package-lock.json
+example/node_modules
 
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node

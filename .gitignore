@@ -1,3 +1,6 @@
 .DS_Store
 vendor
 .phpunit.result.cache
+tests/**/code.tar.gz
+tests/**/node_modules
+tests/**/package-lock.json

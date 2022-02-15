@@ -144,17 +144,7 @@ docker run --rm --interactive --tty --volume $PWD:/app composer install
 
 Once ready, you can test runtimes. First, you need to pick which runtime you want to test. In this example you will be testing `node-17.0` runtime. You can test any runtime; make sure the value is the name of the runtime folder in `runtimes` directory.
 
-You can start a specific runtime by running the command:
-
-```bash
-cd runtimes/node-17.0 && docker-compose up -d && cd ../..
-```
-
-When the runtime with example code is running, you can run a test for it:
-
-```bash
-docker run -e INTERNAL_RUNTIME_KEY='secret-key' --rm -v $(pwd):/app:rw -w /app php:8.0-cli-alpine sh -c "vendor/bin/phpunit --configuration phpunit.xml tests"
-```
+TODO: Finish testing section using script from `.travis.yml`.
 
 ## Contributing
 
