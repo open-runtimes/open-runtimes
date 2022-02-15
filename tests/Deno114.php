@@ -40,7 +40,7 @@ class Deno114 extends TestCase
     public function testRuntimeExample(): void
     {
         $response = $this->call([
-            'file' => 'test.ts'
+            'file' => 'tests.ts'
         ]);
 
         self::assertEquals(200, $response['code']);
