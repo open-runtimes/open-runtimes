@@ -1,0 +1,35 @@
+dist: focal
+
+arch:
+  - amd64
+
+# services:
+#   - docker
+
+os: linux
+
+language: php
+
+php:
+  - 8.0
+
+env:
+  - RUNTIME=deno-1.14
+  - RUNTIME=node-17.0
+
+notifications:
+  email:
+    - team@appwrite.io
+
+# before_install:
+#   - >
+#     if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
+#       echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
+#    fi
+
+install:
+#   - docker --version
+  - composer install
+
+script:
+  - RUNTIME=${RUNTIME} vendor/bin/phpunit tests/RuntimeTest.php

@@ -1,0 +1,12 @@
+# This docker-compose sets up PHP environment used for testing
+
+version: '3'
+
+services:
+  open-runtimes-tests:
+    image: php:8.0-cli-alpine
+    container_name: open-runtimes-tests
+    command: sh -c "vendor/bin/phpunit --configuration phpunit.xml tests/RuntimeTest.php"
+    workdit: /app
+    volumes:
+      - ./:/app:rw

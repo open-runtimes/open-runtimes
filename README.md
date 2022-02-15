@@ -132,6 +132,30 @@ All requests should also have JSON body with the following structure:
 
 All body parameters are optional. The values used in the example above are the default values.
 
+## Testing
+
+We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by Travis CI, and tests run for all runtimes.
+
+Before running the tests, make sure to install all required PHP libraries:
+
+```bash
+docker run --rm --interactive --tty --volume $PWD:/app composer install
+```
+
+Once ready, you can test runtimes. First, you need to pick which runtime you want to test. In this example you will be testing `node-17.0` runtime. You can test any runtime; make sure the value is the name of the runtime folder in `runtimes` directory.
+
+You can start a specific runtime by running the command:
+
+```bash
+cd runtimes/node-17.0 && docker-compose up -d && cd ../..
+```
+
+When the runtime with example code is running, you can run a test for it:
+
+```bash
+docker run --rm -v $(pwd):/app:rw -w /app php:8.0-cli-alpine sh -c "vendor/bin/phpunit --configuration phpunit.xml tests"
+```
+
 ## Contributing
 
 All code contributions - including those of people having commit access - must go through a pull request and be approved by a core developer before being merged. This is to ensure a proper review of all the code.
