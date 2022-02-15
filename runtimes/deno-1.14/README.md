@@ -18,7 +18,7 @@ echo 'export default async function(req: any, res: any) { res.json({ n: Math.ran
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/deno:1.14 sh /usr/local/src/build.sh
+ENTRYPOINT_NAME=mod.ts docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/deno:1.14 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
