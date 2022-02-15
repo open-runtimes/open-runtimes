@@ -10,5 +10,5 @@ services:
     environment:
       - INTERNAL_RUNTIME_KEY
     volumes:
-      - ./example:/usr/example-code:ro
-    command: sh /usr/local/src/example.sh
+      - ./example:/usr/deploy-code:ro
+    command: sh /usr/local/src/deploy.sh
