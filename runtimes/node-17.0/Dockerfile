@@ -7,7 +7,7 @@ RUN addgroup -S open-runtimes -g 2000 && adduser -S open-runtimes -G open-runtim
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code
 RUN mkdir -p /usr/workspace
-RUN mkdir -p /usr/build-code
+RUN mkdir -p /usr/builds
 
 WORKDIR /usr/local/src
 
@@ -26,7 +26,7 @@ RUN ["chmod", "+x", "/usr/local/src/build.sh"]
 RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/local/src"]
 RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/code"]
 RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/workspace"]
-RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/build-code"]
+RUN ["chown", "-R", "open-runtimes:open-runtimes", "/usr/builds"]
 
 USER open-runtimes
 
