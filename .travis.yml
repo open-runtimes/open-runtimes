@@ -23,6 +23,9 @@ env:
   - RUNTIME=python-3.10
     PHP_CLASS=Python310
     ENTRYPOINT=tests.py
+  - RUNTIME=php-8.1
+    PHP_CLASS=PHP81
+    ENTRYPOINT=tests.php
 
 notifications:
   email:

@@ -1,30 +1,35 @@
-# Python Runtime 3.10
+TODO: Update whole readme
+TODO: Update example to do HTTP request
+TODO: We are not installing user code libraries I think
+TODO: Add tests
 
-This is the Open Runtime that builds and runs Python code based on a `python:3.10.2-alpine` base image. 
+# PHP Runtime 8.1
 
-The runtime itself uses [Flask](https://flask.palletsprojects.com/en/2.0.x) as the Web Server to process the execution requests.
+This is the Open Runtime that builds and runs NodeJS code based on a `node:17-alpine` base image. 
+
+The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
 
 To learn more about runtimes, visit [Structure](https://github.com/open-runtimes/open-runtimes#structure) section of the main README.md.
 
 ## Usage
 
-1. Create a folder and enter it. Add code into `main.py` file:    
+1. Create a folder and enter it. Add code into `index.js` file:
 
 ```bash
-mkdir python-or && cd python-or
-printf "import random\n\ndef main(req, res):\n    return res.json({'n': random.random() })" > main.py
+mkdir node-or && cd node-or
+echo 'module.exports = async (req, res) => { res.json({ n: Math.random() }) }' > index.js
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/python:3.10 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/node:17.0 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/python:3.10 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/node:17.0 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -43,10 +48,10 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the python runtime folder:
+2. Enter the node runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/python-3.10
+cd open-runtimes/runtimes/node-17.0
 ```
 
 3. Run the included example cloud function:
@@ -67,11 +72,11 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing functions for this runtime, ensure they are exported with a name of `main`. An example of this is:
+- When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
 
-```python
-def main(req, res):
-    res.send('Hello Open Runtimes 👋')
+```js
+module.exports = (req, res) => {
+    res.send('Hello Open Runtimes 👋');
 }
 ```
 
@@ -82,20 +87,21 @@ def main(req, res):
 
 You can respond with `json()` by providing object:
 
-```python
-def main(req, res):
+```js
+module.exports = (req, res) => {
     res.json({
         'message': 'Hello Open Runtimes 👋',
         'env': req.env,
         'payload': req.payload,
         'headers': req.headers
-    })
+    });
 }
 ```
 
-- To handle dependencies, you need to have `requirements.txt` file. Dependencies will be automatically cached and installed, so you don't need to include `__pycache__` folder in your function.
+- To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
 
-- The default entrypoint is `main.py`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.py"}`.
+- The default entrypoint is `index.js`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.js"}`.
+
 
 ## Authors
 
@@ -111,10 +117,6 @@ def main(req, res):
 **Matej Bačo**
 
 + [https://github.com/Meldiron](https://github.com/Meldiron)
-
-**Jake Barnby**
-
-+ [https://github.com/abnegate](https://github.com/abnegate)
 
 ## Contributing
 

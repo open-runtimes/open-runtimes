@@ -13,3 +13,7 @@ tests/**/deno-cache
 # Python
 tests/**/runtime-env
 tests/**/__pycache__
+
+# PHP
+tests/**/vendor
+tests/**/composer.lock

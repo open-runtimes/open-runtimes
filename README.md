@@ -52,6 +52,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 | Node.js | 17.0    | [open-runtimes/node:17.0](https://hub.docker.com/r/open-runtimes/node) | [Node.js Examples](/runtimes/node-17.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node) |
 | Deno | 1.14    | [open-runtimes/deno:1.14](https://hub.docker.com/r/open-runtimes/deno) | [Deno Examples](/runtimes/deno-1.14/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/deno) |
 | Python | 3.10    | [open-runtimes/python:3.10](https://hub.docker.com/r/open-runtimes/python) | [Python Examples](/runtimes/python-3.10/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/python) |
+| PHP | 8.1    | [open-runtimes/php:8.1](https://hub.docker.com/r/open-runtimes/php) | [PHP Examples](/runtimes/php-8.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
 
 ## Architecture
 
@@ -105,6 +106,7 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 | server.X           	| A HTTP server implemented in the respective runtime's language. File extension depends on your runtime. For instance, Python is `server.py`           	|
 | build.sh           	| Script responsible for building user code. This can be package installations, or any specific build process the runtime requires.                     	|
 | start.sh          	| Script to launch the HTTP server on port `3000`. Additionally, it also copies the user supplied code to a directory accessible to the server.         	|
+| prepare.sh          | (optional) If a runtime requires preparation before building (for instance PHP), this file holds the logic for mapping some files.                     	|
 | README.md          	| Runtime specific documentation ( if any )                                                                                                             	|
 
 Every request sent to any of the runtimes must have the `X-Internal-Challenge` header. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
