@@ -8,5 +8,5 @@ namespace Tests;
 
 class Node170 extends Base
 {
-    protected string $endpoint = 'tests.js';
+    protected string $entrypoint = 'tests.js';
 }
