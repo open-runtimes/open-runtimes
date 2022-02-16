@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  open-runtimes-python:
+    container_name: open-runtimes-python
+    build:
+      context: .
+    ports: 
+      - 3000:3000
+    environment:
+      - INTERNAL_RUNTIME_KEY
+      - ENTRYPOINT_NAME
+    volumes:
+      - ./example/:/usr/code:rw
+      - ./example/:/tmp:ro
+    command: sh -c "sh /usr/local/src/build.sh && sh /usr/local/src/start.sh"

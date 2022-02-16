@@ -10,6 +10,11 @@ tests/**/package-lock.json
 # Deno
 tests/**/deno-cache
 
+# Python
+tests/**/runtime-env
+tests/**/__pycache__
+tests/**/__pycache__
+
 # Ruby
 tests/**/Gemfile.lock
 tests/**/vendor

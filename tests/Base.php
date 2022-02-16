@@ -41,6 +41,11 @@ abstract class Base extends TestCase
 
         $resultJson = \json_decode($result, true);
 
+        if($response >= 500) {
+            \var_dump($response);
+            \var_dump($resultJson);
+        }
+
         return [
             'code' => $response,
             'body' => $resultJson
