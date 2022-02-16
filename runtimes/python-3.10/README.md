@@ -1,4 +1,4 @@
-# Node Runtime 17.0
+# Python Runtime 17.0
 
 This is the Open Runtime that builds and runs Python code based on a `python:3.10.2-alpine` base image. 
 
@@ -43,7 +43,7 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the node runtime folder:
+2. Enter the python runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/python-3.10
@@ -69,7 +69,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 - When writing functions for this runtime, ensure they are exported with a name of `main`. An example of this is:
 
-```js
+```python
 def main(req, res):
     res.send('Hello Open Runtimes 👋')
 }
@@ -82,7 +82,7 @@ def main(req, res):
 
 You can respond with `json()` by providing object:
 
-```js
+```python
 def main(req, res):
     res.json({
         'message': 'Hello Open Runtimes 👋',
