@@ -1,4 +1,4 @@
-# Ruby Runtime 17.0
+# Ruby Runtime 3.1
 
 This is the Open Runtime that builds and runs Ruby code based on a `ruby:3.1.0-alpine` base image. 
 
