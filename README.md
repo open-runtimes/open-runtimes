@@ -24,6 +24,7 @@ Runtime environments for serverless cloud computing for multiple coding language
     - [Function](#function)
     - [Build](#build)
   - [Structure](#structure)
+  - [Testing](#testing)
   - [Contributing](#contributing)
   - [Security](#security)
   - [Follow Us](#follow-us)
@@ -133,6 +134,24 @@ All requests should also have JSON body with the following structure:
 ```
 
 All body parameters are optional. The values used in the example above are the default values.
+
+## Testing
+
+We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by Travis CI, and tests run for all runtimes.
+
+Before running the tests, make sure to install all required PHP libraries:
+
+```bash
+docker run --rm --interactive --tty --volume $PWD:/app composer install
+```
+
+Once ready, you can test runtimes. First, you need to pick which runtime you want to test. In this example you will be testing `node-17.0` runtime. You can test any runtime; make sure to get runtime name, php class name, and entrypoint from a runtime-related test in PHP file in `tests` directory.
+
+To run tests, you execute `tests.sh` while providing information about runtime you want to test:
+
+```bash
+RUNTIME='node-17.0' PHP_CLASS='Node170' ENTRYPOINT='tests.js' sh tests.sh
+```
 
 ## Contributing
 
