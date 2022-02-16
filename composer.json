@@ -1,0 +1,31 @@
+{
+    "name": "open-runtimes/open-runtimes",
+    "description": "Open Runtimes PHP project for testing. PHPUnit tests can test all runtimes automatically.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Eldad Fux",
+            "email": "eldad@appwrite.io"
+        }
+    ],
+    "autoload": {
+        "psr-4": {}
+    },
+    "autoload-dev": {
+        "psr-4": {"Tests\\": "tests"}
+    },
+    "require": {
+        "php": ">=7.0.0",
+        "ext-curl": "*",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "twig/twig": "^3.3",
+        "matthiasmullie/minify": "^1.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5.13"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
