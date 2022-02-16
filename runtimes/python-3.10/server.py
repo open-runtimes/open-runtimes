@@ -32,7 +32,7 @@ class Request:
         if 'payload' in self.parsedRequest:
             self.payload = self.parsedRequest['payload'];
         else:
-            self.payload = {};
+            self.payload = '{}';
 
 
 @app.route('/', defaults={'u_path': ''}, methods = ['POST'])
