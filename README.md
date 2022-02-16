@@ -49,9 +49,9 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 | Name    | Version | Docker Hub                 | Examples | Pulls |
 |---------|---------|----------------------------|----------|-------|
-| Node.js | 15.0    | [open-runtimes/node.js:15.0](https://hub.docker.com/r/open-runtimes/node.js) | [Node.js Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node.js?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node.js) |
-| Node.js | 16.0    | [open-runtimes/node.js:16.0](https://hub.docker.com/r/open-runtimes/node.js) | [Node.js Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node.js?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node.js) |
-| PHP     | 8.0     | [open-runtimes/php:8.0](https://hub.docker.com/r/open-runtimes/php)      | [PHP Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
+| Node.js | 17.0    | [open-runtimes/node:17.0](https://hub.docker.com/r/open-runtimes/node) | [Node.js Examples](/runtimes/node-17.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node) |
+| Deno | 1.14    | [open-runtimes/deno:1.14](https://hub.docker.com/r/open-runtimes/deno) | [Deno Examples](/runtimes/deno-1.14/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/deno) |
+| Python | 3.10    | [open-runtimes/python:3.10](https://hub.docker.com/r/open-runtimes/python) | [Python Examples](/runtimes/python-3.10/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/python) |
 
 ## Architecture
 
