@@ -20,6 +20,8 @@ export default async function(req: any, res: any) {
     res.json({
         isTest: true,
         message: 'Hello Open Runtimes 👋',
+        header: req.headers['x-test-header'],
+        env: req.env['test-env'],
         todo
     });
 }

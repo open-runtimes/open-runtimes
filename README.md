@@ -142,9 +142,13 @@ Before running the tests, make sure to install all required PHP libraries:
 docker run --rm --interactive --tty --volume $PWD:/app composer install
 ```
 
-Once ready, you can test runtimes. First, you need to pick which runtime you want to test. In this example you will be testing `node-17.0` runtime. You can test any runtime; make sure the value is the name of the runtime folder in `runtimes` directory.
+Once ready, you can test runtimes. First, you need to pick which runtime you want to test. In this example you will be testing `node-17.0` runtime. You can test any runtime; make sure to get runtime name, php class name, and entrypoint from a runtime-related test in PHP file in `tests` directory.
 
-TODO: Finish testing section using script from `.travis.yml`.
+To run tests, you execute `tests.sh` while providing information about runtime you want to test:
+
+```bash
+RUNTIME='node-17.0' PHP_CLASS='Node170' ENTRYPOINT='tests.js' sh tests.sh
+```
 
 ## Contributing
 
