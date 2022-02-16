@@ -54,6 +54,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 | PHP     | 8.0     | [open-runtimes/php:8.0](https://hub.docker.com/r/open-runtimes/php)      | [PHP Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
 | Ruby    | 3.0     | [open-runtimes/ruby:3.0](https://hub.docker.com/r/open-runtimes/ruby)    | [Ruby Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
 | Ruby    | 3.1     | [open-runtimes/ruby:3.1](https://hub.docker.com/r/open-runtimes/ruby)    | [Ruby Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
+| Ruby | 3.1    | [open-runtimes/ruby:3.1](https://hub.docker.com/r/open-runtimes/ruby) | [Ruby Examples](/runtimes/ruby-3.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/ruby) |
 
 ## Architecture
 

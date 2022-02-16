@@ -20,6 +20,9 @@ env:
   - RUNTIME=deno-1.14
     PHP_CLASS=Deno114
     ENTRYPOINT=tests.ts
+  - RUNTIME=ruby-3.1
+    PHP_CLASS=Ruby31
+    ENTRYPOINT=tests.rb
 
 notifications:
   email:

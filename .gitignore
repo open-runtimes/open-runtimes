@@ -9,3 +9,7 @@ tests/**/package-lock.json
 
 # Deno
 tests/**/deno-cache
+
+# Ruby
+tests/**/Gemfile.lock
+tests/**/vendor

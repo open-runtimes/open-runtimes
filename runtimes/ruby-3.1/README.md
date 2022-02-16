@@ -1,21 +1,18 @@
-# Ruby Runtime 3.1
+# Ruby Runtime 17.0
 
-This is the Open Runtime that builds and runs NodeJS code based on a `ruby:3.1.0-alpine3.15` base image. 
+This is the Open Runtime that builds and runs Ruby code based on a `ruby:3.1.0-alpine` base image. 
 
-The runtime itself uses [Puma](https://github.com/puma/puma) as the Web Server to process the execution requests.
+The runtime itself uses [Sinatra](https://github.com/sinatra/sinatra) as the Web Server to process the execution requests.
 
-To learn more about runtimes, visit [Runtimes introduction](https://github.com/open-runtimes/open-runtimes#runtimes-introduction) section of the main README.md.
+To learn more about runtimes, visit [Structure](https://github.com/open-runtimes/open-runtimes#structure) section of the main README.md.
 
 ## Usage
 
 1. Create a folder and enter it. Add code into `index.rb` file:
 
 ```bash
-mkdir ruby-test && cd ruby-test
-echo "def main(request, response) \
-    return response.json({ message: 'Hello World!' }) \
-end
-" > index.rb
+mkdir ruby-or && cd ruby-or
+printf 'def main(request, response)\n    return response.json({:n => rand()})\nend' > index.rb
 ```
 
 2. Build the code:
@@ -36,7 +33,7 @@ docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --
 curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
 ```
 
-Output `{ "message": "Hello World!" }` will be displayed after the execution.
+Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
 
 ## Local development
 
@@ -46,7 +43,7 @@ Output `{ "message": "Hello World!" }` will be displayed after the execution.
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the node runtime folder:
+2. Enter the ruby runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/ruby-3.1
@@ -70,6 +67,16 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
+TODO: Update all notes
+
+- When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
+
+```ruby
+module.exports = (req, res) => {
+    res.send('Hello Open Runtimes 👋');
+}
+```
+
 - The `res` parameter has two methods:
 
     - `send()`: Send a string response to the client.
@@ -77,20 +84,20 @@ You can also make changes to the example code and apply the changes with the `do
 
 You can respond with `json()` by providing object:
 
-```rb
-def main(req, res)
+```ruby
+module.exports = (req, res) => {
     res.json({
         'message': 'Hello Open Runtimes 👋',
         'env': req.env,
         'payload': req.payload,
         'headers': req.headers
-    })
-end
+    });
+}
 ```
 
-- To handle dependencies, you need to have a `Gemfile` file. Dependencies will be automatically cached and installed, so you don't need to include `vendor` folder in your function.
+- To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
 
-- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{ "file" : "app.rb" }`.
+- The default entrypoint is `index.js`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.js"}`.
 
 
 ## Authors
@@ -103,6 +110,10 @@ end
 **Bradley Schofield**
 
 + [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
+
+**Matej Bačo**
+
++ [https://github.com/Meldiron](https://github.com/Meldiron)
 
 **Jake Barnby**
 

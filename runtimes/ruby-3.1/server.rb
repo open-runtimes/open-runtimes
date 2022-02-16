@@ -1,12 +1,15 @@
 require 'sinatra'
 require 'json'
 
+DEFAULT_PATH = '/usr/code';
+DEFAULT_FILE = 'index.rb';
+
 before do
   content_type :json
 end
 
 class RuntimeRequest
-  def initialize(payload = '', env = {}, headers = {})
+  def initialize(payload = '{}', env = {}, headers = {})
     @payload = payload
     @env = env
     @headers = headers
@@ -53,7 +56,10 @@ post '/' do
   request.body.rewind
   data = JSON.parse(request.body.read)
 
-  if data['path'].nil? || data['path'] == '' || data['file'].nil? || data['file'] == ''
+  requestFile = data['file'] || DEFAULT_FILE
+  requestPath = data['path'] || DEFAULT_PATH
+
+  if requestPath.nil? || requestPath == '' || requestFile.nil? || requestFile == ''
     status 400
     content_type :json
     return { code: 500, message: 'Bad Request' }.to_json
@@ -63,11 +69,12 @@ post '/' do
   runtimeResponse = RuntimeResponse.new
 
   begin
-    load(data['path'] + '/' + data['file'])
+    load(requestPath + '/' + requestFile)
   rescue Exception => e
+    p e
     status 500
     content_type :json
-    return { code: 500, message: 'File not found or is not a valid ruby file.' }.to_json
+    return { code: 500, message: 'File not found or is not a valid ruby file. ' }.to_json
   end
 
   unless defined?(main = ())
@@ -79,6 +86,7 @@ post '/' do
   begin
     response = main(requestData, runtimeResponse)
   rescue Exception => e
+    p e
     status 500
     content_type :json
     return { code: 500, message: e.backtrace.join("\n") }.to_json
