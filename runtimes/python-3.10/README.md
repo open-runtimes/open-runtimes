@@ -1,20 +1,18 @@
-# Python Runtime 3.10
+# Node Runtime 17.0
 
-This is the Open Runtime that builds and runs Python code based on a `python:3.10.2-alpine3.15` base image. 
+This is the Open Runtime that builds and runs Python code based on a `python:3.10.2-alpine` base image. 
 
-The runtime itself uses [Flask](https://flask.palletsprojects.com/en/2.0.x/) as the Web Server to process the execution requests.
+The runtime itself uses [Flask](https://flask.palletsprojects.com/en/2.0.x) as the Web Server to process the execution requests.
 
-To learn more about runtimes, visit [Runtimes introduction](https://github.com/open-runtimes/open-runtimes#runtimes-introduction) section of the main README.md.
+To learn more about runtimes, visit [Structure](https://github.com/open-runtimes/open-runtimes#structure) section of the main README.md.
 
 ## Usage
 
-1. Create a folder and enter it. Add code in a new `index.py` file:
+1. Create a folder and enter it. Add code into `main.py` file:    
 
 ```bash
-mkdir python-test && cd  python-test
-echo "def main(req, res): \
-    return res.json({'Hello': 'World!'}) \
-" > index.py
+mkdir python-or && cd python-or
+printf "import random\n\ndef main(req, res):\n    return res.json({'n': random.random() })" > main.py
 ```
 
 2. Build the code:
@@ -35,7 +33,7 @@ docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --
 curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
 ```
 
-Output `{ "Hello": "World!" }` will be displayed after the execution.
+Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
 
 ## Local development
 
@@ -45,7 +43,7 @@ Output `{ "Hello": "World!" }` will be displayed after the execution.
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the Python 3.10 runtime folder:
+2. Enter the node runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/python-3.10
@@ -69,6 +67,14 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
+- When writing functions for this runtime, ensure they are exported with a name of `main`. An example of this is:
+
+```js
+def main(req, res):
+    res.send('Hello Open Runtimes 👋')
+}
+```
+
 - The `res` parameter has two methods:
 
     - `send()`: Send a string response to the client.
@@ -76,7 +82,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 You can respond with `json()` by providing object:
 
-```python
+```js
 def main(req, res):
     res.json({
         'message': 'Hello Open Runtimes 👋',
@@ -87,9 +93,9 @@ def main(req, res):
 }
 ```
 
-- To handle dependencies, you need to have a `requirements.txt` file. Dependencies will be automatically cached and installed.
+- To handle dependencies, you need to have `requirements.txt` file. Dependencies will be automatically cached and installed, so you don't need to include `__pycache__` folder in your function.
 
-- The default entrypoint is `index.py`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{ "file": "app.py" }`.
+- The default entrypoint is `main.py`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.py"}`.
 
 ## Authors
 
@@ -101,6 +107,10 @@ def main(req, res):
 **Bradley Schofield**
 
 + [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
+
+**Matej Bačo**
+
++ [https://github.com/Meldiron](https://github.com/Meldiron)
 
 **Jake Barnby**
 

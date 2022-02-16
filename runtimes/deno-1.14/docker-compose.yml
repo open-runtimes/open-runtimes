@@ -9,6 +9,7 @@ services:
       - 3000:3000
     environment:
       - INTERNAL_RUNTIME_KEY
+      - ENTRYPOINT_NAME
     volumes:
       - ./example/:/usr/code:rw
       - ./example/:/tmp:ro

@@ -1,4 +1,5 @@
-#
+import requests
+
 #    'req' variable has:
 #        'headers' - object with request headers
 #        'payload' - object with request body data
@@ -9,6 +10,9 @@
 #    
 #    If an error is thrown, a response with code 500 will be returned.
 
-
 def main(req, res):
-    return res.json({'message': 'Hello Open Runtimes 👋'})
+    todo = (requests.get('https://jsonplaceholder.typicode.com/todos/1', auth=('user', 'pass'))).json()
+    return res.json({
+        'message': 'Hello Open Runtimes 👋',
+        'todo': todo
+    })

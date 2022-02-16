@@ -4,6 +4,9 @@ import pathlib
 import os
 import importlib.util
 
+DEFAULT_PATH = '/usr/code'
+DEFAULT_FILE = 'main.py'
+
 app = Flask(__name__);
 
 class Response:
@@ -48,11 +51,14 @@ def handler(u_path):
     req = Request(request);
     resp = Response();
 
-    # Import function from request
-    if requestData['path'] is not None and requestData['file'] is not None:
-        fullPath = pathlib.Path(requestData['path']);
+    requestPath = requestData.get('path', DEFAULT_PATH)
+    requestFile = requestData.get('file', DEFAULT_FILE) 
 
-        userFunction = importlib.machinery.SourceFileLoader('module.userfunc', str(fullPath) + '/' + requestData['file']).load_module()
+    # Import function from request
+    if requestPath is not None and requestFile is not None:
+        fullPath = pathlib.Path(requestPath);
+
+        userFunction = importlib.machinery.SourceFileLoader('module.userfunc', str(fullPath) + '/' + requestFile).load_module()
         # Check if function exists
         if userFunction is None:
             return {'message': 'function not found, Did you forget to name it `main`?', 'code': 500}, 500;

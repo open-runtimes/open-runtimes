@@ -49,6 +49,8 @@ Runtime environments for serverless cloud computing for multiple coding language
 | Name    | Version | Docker Hub                 | Examples | Pulls |
 |---------|---------|----------------------------|----------|-------|
 | Node.js | 17.0    | [open-runtimes/node:17.0](https://hub.docker.com/r/open-runtimes/node) | [Node.js Examples](/runtimes/node-17.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node) |
+| Deno | 1.14    | [open-runtimes/deno:1.14](https://hub.docker.com/r/open-runtimes/deno) | [Deno Examples](/runtimes/deno-1.14/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/deno) |
+| Python | 3.10    | [open-runtimes/python:3.10](https://hub.docker.com/r/open-runtimes/python) | [Python Examples](/runtimes/python-3.10/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/python) |
 
 ## Architecture
 

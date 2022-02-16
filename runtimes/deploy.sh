@@ -6,11 +6,5 @@ docker buildx build --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 echo 'Deno 1.14...'
 docker buildx build --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le -t open-runtimes/deno:1.14 ./deno-1.14/ --push
 
-echo 'Python 3.8...'
-docker buildx build --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le -t open-runtimes/python:3.8 ./python-3.8/ --push
-
-echo 'Python 3.9...'
-docker buildx build --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le -t open-runtimes/python:3.9 ./python-3.9/ --push
-
 echo 'Python 3.10...'
 docker buildx build --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le -t open-runtimes/python:3.10 ./python-3.10/ --push
