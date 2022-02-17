@@ -9,7 +9,10 @@ mkdir -p /usr/local/src/user_code/lib
 # Rename Main Function Dart
 mv /usr/local/src/user_code/$ENTRYPOINT_NAME /usr/local/src/user_code/lib/main.dart
 
-cd /usr/local/src/user_code
+# Move all other user code into directory
+mv /usr/local/src/user_code/*.dart /usr/local/src/user_code/lib/
+
+cd /usr/local/src/user_code/
 
 # Add a pubspec.yaml if one doesn't already exist.
 if [ ! -f "pubspec.yaml" ]; then
@@ -36,5 +39,4 @@ cd /usr/local/src
 dart compile exe server.dart -o runtime
 
 # Finish build by preparing tar to use for starting the runtime
-cd /usr/local/src/runtime
-tar --exclude code.tar.gz -zcvf /usr/code/code.tar.gz .
+tar --exclude code.tar.gz -zcvf /usr/code/code.tar.gz runtime

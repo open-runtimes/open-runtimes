@@ -3,7 +3,7 @@ import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import '{entrypoint}' as user_code;
 import 'dart:io' show Platform;
-import 'function_types.dart';
+import 'package:function_types/function_types.dart';
 
 void main() async {
   await shelf_io.serve((req) async {

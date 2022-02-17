@@ -1,6 +1,6 @@
 import 'dart:async';
-// import 'package:function_types/function_types.dart';
-import 'function_types.dart';
+import 'package:function_types/function_types.dart';
+// import 'function_types.dart';
 
 /*
     'req' variable has:
