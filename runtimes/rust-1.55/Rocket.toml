@@ -1,0 +1,11 @@
+[debug]
+port = 3000
+address = "0.0.0.0"
+
+[staging]
+port = 3000
+address = "0.0.0.0"
+
+[release]
+port = 3000
+address = "0.0.0.0"
