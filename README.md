@@ -120,9 +120,7 @@ All requests should also have JSON body with the following structure:
     "env": {
         // Environment varialbes
     },
-    "payload": {
-        // Execution data
-    },
+    "payload": "{}",
     "headers": {
         // Request headers
     }
