@@ -67,7 +67,7 @@ $server->on("Request", function($req, $res) {
     $response = new Response($res);
 
     try {
-        $userFunction = include(USER_CODE_PATH . '/' . getenv('INTERNAL_RUNTIME_KEY'));
+        $userFunction = include(USER_CODE_PATH . '/' . getenv('INTERNAL_RUNTIME_ENTRYPOINT'));
 
         if (!is_callable($userFunction)) {
             return throw new Exception('Function not valid');

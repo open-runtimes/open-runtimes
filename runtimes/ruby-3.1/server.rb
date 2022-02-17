@@ -66,12 +66,12 @@ post '/' do
 
   request.body.rewind
   data = JSON.parse(request.body.read)
-  
+
   requestData = RuntimeRequest.new(data['payload'], data['env'], data['headers'])
   runtimeResponse = RuntimeResponse.new
 
   begin
-    load(USER_CODE_PATH + '/' + ENV['INTERNAL_RUNTIME_KEY'])
+    load(USER_CODE_PATH + '/' + ENV['INTERNAL_RUNTIME_ENTRYPOINT'])
   rescue Exception => e
     p e
     status 500
