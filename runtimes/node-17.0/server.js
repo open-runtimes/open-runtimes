@@ -15,7 +15,7 @@ const server = micro(async (req, res) => {
     const request = {
         env: body.env ?? {},
         headers: body.headers ?? {},
-        payload: body.payload ?? {},
+        payload: body.payload ?? '{}',
     };
 
     const response = {

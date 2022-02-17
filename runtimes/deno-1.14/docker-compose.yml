@@ -1,14 +1,15 @@
 version: '3'
 
 services:
-  open-runtimes-deno:
-    container_name: open-runtimes-deno
+  open-runtimes-deno-1.14:
+    container_name: open-runtimes-deno-1.14
     build:
       context: .
     ports: 
       - 3000:3000
     environment:
       - INTERNAL_RUNTIME_KEY
+      - ENTRYPOINT_NAME
     volumes:
       - ./example/:/usr/code:rw
       - ./example/:/tmp:ro

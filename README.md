@@ -24,6 +24,7 @@ Runtime environments for serverless cloud computing for multiple coding language
     - [Function](#function)
     - [Build](#build)
   - [Structure](#structure)
+  - [Testing](#testing)
   - [Contributing](#contributing)
   - [Security](#security)
   - [Follow Us](#follow-us)
@@ -48,9 +49,9 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 | Name    | Version | Docker Hub                 | Examples | Pulls |
 |---------|---------|----------------------------|----------|-------|
-| Node.js | 15.0    | [open-runtimes/node.js:15.0](https://hub.docker.com/r/open-runtimes/node.js) | [Node.js Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node.js?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node.js) |
-| Node.js | 16.0    | [open-runtimes/node.js:16.0](https://hub.docker.com/r/open-runtimes/node.js) | [Node.js Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node.js?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node.js) |
-| PHP     | 8.0     | [open-runtimes/php:8.0](https://hub.docker.com/r/open-runtimes/php)      | [PHP Examples]() | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/php) |
+| Node.js | 17.0    | [open-runtimes/node:17.0](https://hub.docker.com/r/open-runtimes/node) | [Node.js Examples](/runtimes/node-17.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/node) |
+| Deno | 1.14    | [open-runtimes/deno:1.14](https://hub.docker.com/r/open-runtimes/deno) | [Deno Examples](/runtimes/deno-1.14/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/deno) |
+| Python | 3.10    | [open-runtimes/python:3.10](https://hub.docker.com/r/open-runtimes/python) | [Python Examples](/runtimes/python-3.10/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/open-runtimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/open-runtimes/python) |
 
 ## Architecture
 
@@ -131,6 +132,24 @@ All requests should also have JSON body with the following structure:
 ```
 
 All body parameters are optional. The values used in the example above are the default values.
+
+## Testing
+
+We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by Travis CI, and tests run for all runtimes.
+
+Before running the tests, make sure to install all required PHP libraries:
+
+```bash
+docker run --rm --interactive --tty --volume $PWD:/app composer install
+```
+
+Once ready, you can test runtimes. First, you need to pick which runtime you want to test. In this example you will be testing `node-17.0` runtime. You can test any runtime; make sure to get runtime name, php class name, and entrypoint from a runtime-related test in PHP file in `tests` directory.
+
+To run tests, you execute `tests.sh` while providing information about runtime you want to test:
+
+```bash
+RUNTIME='node-17.0' PHP_CLASS='Node170' ENTRYPOINT='tests.js' sh tests.sh
+```
 
 ## Contributing
 
