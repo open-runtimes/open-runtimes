@@ -25,7 +25,7 @@ env:
     ENTRYPOINT=tests.py
   - RUNTIME=dart-2.15
     PHP_CLASS=Dart215
-    ENTRYPOINT=tests.dart
+    ENTRYPOINT=main.dart
   - RUNTIME=ruby-3.1
     PHP_CLASS=Ruby31
     ENTRYPOINT=tests.rb
