@@ -8,5 +8,4 @@ namespace Tests;
 
 class Python310 extends Base
 {
-    protected string $entrypoint = 'tests.py';
 }

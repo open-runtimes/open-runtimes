@@ -4,8 +4,7 @@ import pathlib
 import os
 import importlib.util
 
-DEFAULT_PATH = '/usr/code'
-DEFAULT_FILE = 'main.py'
+USER_CODE_PATH = '/usr/code-start'
 
 app = Flask(__name__);
 
@@ -51,21 +50,15 @@ def handler(u_path):
     req = Request(request);
     resp = Response();
 
-    requestPath = requestData.get('path', DEFAULT_PATH)
-    requestFile = requestData.get('file', DEFAULT_FILE) 
-
     # Import function from request
-    if requestPath is not None and requestFile is not None:
-        fullPath = pathlib.Path(requestPath);
+    fullPath = pathlib.Path(USER_CODE_PATH);
 
-        userFunction = importlib.machinery.SourceFileLoader('module.userfunc', str(fullPath) + '/' + requestFile).load_module()
-        # Check if function exists
-        if userFunction is None:
-            return {'message': 'function not found, Did you forget to name it `main`?', 'code': 500}, 500;
+    userFunction = importlib.machinery.SourceFileLoader('module.userfunc', str(fullPath) + '/' + os.getenv('INTERNAL_RUNTIME_KEY')).load_module()
+    # Check if function exists
+    if userFunction is None:
+        return {'message': 'function not found, Did you forget to name it `main`?', 'code': 500}, 500;
 
-        try:
-            return userFunction.main(req, resp);
-        except Exception as e:
-            return {'message': str("".join(traceback.TracebackException.from_exception(e).format())), 'code': 500}, 500;
-    else:
-        return {'message': 'no path or file specified', 'code': 500}, 500;
+    try:
+        return userFunction.main(req, resp);
+    except Exception as e:
+        return {'message': str("".join(traceback.TracebackException.from_exception(e).format())), 'code': 500}, 500;

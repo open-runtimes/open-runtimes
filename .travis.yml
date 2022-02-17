@@ -23,6 +23,12 @@ env:
   - RUNTIME=python-3.10
     PHP_CLASS=Python310
     ENTRYPOINT=tests.py
+  - RUNTIME=ruby-3.1
+    PHP_CLASS=Ruby31
+    ENTRYPOINT=tests.rb
+  - RUNTIME=php-8.0
+    PHP_CLASS=PHP80
+    ENTRYPOINT=tests.php
   - RUNTIME=swift-5.5
     PHP_CLASS=Swift55
     ENTRYPOINT=Tests.swift

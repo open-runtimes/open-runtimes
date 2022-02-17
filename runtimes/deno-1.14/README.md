@@ -30,7 +30,7 @@ docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --
 4. In new terminal window, execute function:
 
 ```
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
@@ -58,10 +58,10 @@ docker-compose up -d
 4. Execute the function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":{} }`.
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":"{}" }`.
 
 You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
 
@@ -95,7 +95,7 @@ export default async function(req: any, res: any) {
 
 - Dependencies are handeled automatically. Open Runtimes automatically cache and install them during build process.
 
-- The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.ts"}`.
+- The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.ts`.
 
 
 ## Authors
