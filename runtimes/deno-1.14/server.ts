@@ -37,7 +37,7 @@ app.use(async (ctx) => {
   };
 
   try {
-    const userFunction = (await import(path.join(body.path ?? DEFAULT_PATH, body.file ?? DEFAULT_FILE))).default;
+    const userFunction = (await import((body.path ?? DEFAULT_PATH) + '/' + (body.file ?? DEFAULT_FILE))).default;
 
     if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
       throw new Error("User function is not valid.")
