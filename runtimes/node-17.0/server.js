@@ -2,7 +2,7 @@ const path = require("path");
 const micro = require("micro");
 const { json, send } = require("micro");
 
-const USER_CODE_PATH = '/usr/code';
+const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
     const body = await json(req);

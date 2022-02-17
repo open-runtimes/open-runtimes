@@ -1,7 +1,7 @@
 import { Application } from "https://deno.land/x/oak@v10.1.0/mod.ts";
 import * as path from "https://deno.land/std@0.119.0/path/mod.ts";
 
-const USER_CODE_PATH = '/usr/code';
+const USER_CODE_PATH = '/usr/code-start';
 
 const app = new Application();
 

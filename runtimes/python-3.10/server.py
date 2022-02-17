@@ -4,7 +4,7 @@ import pathlib
 import os
 import importlib.util
 
-USER_CODE_PATH = '/usr/code'
+USER_CODE_PATH = '/usr/code-start'
 
 app = Flask(__name__);
 
