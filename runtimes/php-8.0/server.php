@@ -68,7 +68,7 @@ $server->on("Request", function($req, $res) {
     $response = new Response($res);
 
     try {
-        $userFunction = include(join_paths($body['path'] ?? DEFAULT_PATH, $body['file'] ?? DEFAULT_FILE));
+        $userFunction = include(($body['path'] ?? DEFAULT_PATH) . '/' . ($body['file'] ?? DEFAULT_FILE));
 
         if (!is_callable($userFunction)) {
             return throw new Exception('Function not valid');
