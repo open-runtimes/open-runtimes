@@ -9,6 +9,7 @@ services:
       - 3000:3000
     environment:
       - INTERNAL_RUNTIME_KEY
+      - ENTRYPOINT_NAME
     volumes:
-      - ./example:/usr/example-code:ro
-    command: sh /usr/local/src/deploy.sh
+      - ./example:/usr/code:ro
+    command: sh -c "sh /usr/local/src/build.sh && sh /usr/local/src/start.sh"

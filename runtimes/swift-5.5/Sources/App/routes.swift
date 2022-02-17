@@ -2,8 +2,8 @@ import Vapor
 import Foundation
 
 struct RequestValue: Codable {
-    let path: String? = "/usr/code"
-    let file: String? = "index.swift"
+    var path: String? = "/usr/code"
+    var file: String? = "index.swift"
     let env: [String: String]?
     let headers: [String: String]?
     let payload: String?
