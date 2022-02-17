@@ -10,5 +10,3 @@ docker ps -a
 docker logs --tail 50 open-runtimes-test
 cd ../../
 INTERNAL_RUNTIME_KEY=test-secret-key vendor/bin/phpunit --configuration phpunit.xml tests/${PHP_CLASS}.php
-docker logs --tail 50 open-runtimes-test
-docker rm -f open-runtimes-test
