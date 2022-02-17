@@ -14,3 +14,6 @@ docker build -t open-runtimes/ruby:3.1 ./ruby-3.1/
 
 echo 'PHP 8.0...'
 docker build -t open-runtimes/php:8.0 ./php-8.0/
+
+echo 'Dart 2.15...'
+docker build -t open-runtimes/dart:2.15 ./dart-2.15/

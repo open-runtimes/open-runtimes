@@ -1,6 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:function_types/function_types.dart';
-// import 'function_types.dart';
+import 'package:dio/dio.dart' hide Response;
 
 /*
     'req' variable has:
@@ -15,7 +16,14 @@ import 'package:function_types/function_types.dart';
 */
 
 Future<void> start(Request req, Response res) async {
+
+  final payload = jsonDecode(req.payload);
+
+  final id = payload['id'] ?? '1';
+  final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/$id');
+
   res.json({
-    'areDevelopersAwesome': true
+    'message': "Hello Open Runtimes 👋",
+    'todo': todo.data
   });
 }

@@ -30,10 +30,6 @@ doc/api/
 .flutter-plugins
 .flutter-plugins-dependencies
 
-### Dart Patch ###
-# dotenv environment variables file
-.env
-
 # End of https://www.toptal.com/developers/gitignore/api/dart
 
 # OS
