@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  open-runtimes-node-17.0:
+    container_name: open-runtimes-node-17.0
+    build:
+      context: .
+    ports: 
+      - 3000:3000
+    environment:
+      - INTERNAL_RUNTIME_KEY
+      - ENTRYPOINT_NAME
+    volumes:
+      - ./example/:/usr/code:rw
+      - ./example/:/tmp:ro
+    command: sh -c "sh /usr/local/src/build.sh && sh /usr/local/src/start.sh"

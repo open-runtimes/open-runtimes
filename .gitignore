@@ -13,3 +13,8 @@ tests/**/deno-cache
 # Python
 tests/**/runtime-env
 tests/**/__pycache__
+
+# Dart
+
+tests/**/.dart_tool/
+tests/**/.packages

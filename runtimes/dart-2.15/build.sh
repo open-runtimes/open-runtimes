@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Copy User Code
-cp -a /usr/code/. /usr/local/src/user_code
+cp -a /usr/code/* /usr/local/src/user_code
 
 # make lib directory if not exist
 mkdir -p /usr/local/src/user_code/lib
@@ -35,6 +35,6 @@ cd /usr/local/src
 # Compile the Code
 dart compile exe server.dart -o runtime
 
-rm -r /usr/code/*
-
-cp /usr/local/src/runtime /usr/code/
+# Finish build by preparing tar to use for starting the runtime
+cd /usr/local/src/runtime
+tar --exclude code.tar.gz -zcvf /usr/code/code.tar.gz .
