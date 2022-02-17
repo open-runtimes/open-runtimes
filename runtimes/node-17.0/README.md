@@ -4,7 +4,7 @@ This is the Open Runtime that builds and runs NodeJS code based on a `node:17-al
 
 The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
 
-To learn more about runtimes, visit [Runtimes introduction](https://github.com/open-runtimes/open-runtimes#runtimes-introduction) section of the main README.md.
+To learn more about runtimes, visit [Structure](https://github.com/open-runtimes/open-runtimes#structure) section of the main README.md.
 
 ## Usage
 

@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-node-17.0:
-    container_name: open-runtimes-node-17.0
+  open-runtimes-python:
+    container_name: open-runtimes-python
     build:
       context: .
     ports: 

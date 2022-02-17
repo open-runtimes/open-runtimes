@@ -1,4 +1,4 @@
-import axiod from "https://deno.land/x/axiod/mod.ts";
+const fetch = require("node-fetch");
 
 /*
     'req' variable has:
@@ -12,13 +12,16 @@ import axiod from "https://deno.land/x/axiod/mod.ts";
     If an error is thrown, a response with code 500 will be returned.
 */
 
-export default async function(req: any, res: any) {
+module.exports = async (req, res) => {
     const payload = JSON.parse(req.payload);
 
-    const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`)).data;
+    const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`).then(r => r.json());
 
     res.json({
+        isTest: true,
         message: 'Hello Open Runtimes 👋',
+        header: req.headers['x-test-header'],
+        env: req.env['test-env'],
         todo
     });
 }

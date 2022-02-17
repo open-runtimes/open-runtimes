@@ -18,7 +18,10 @@ export default async function(req: any, res: any) {
     const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`)).data;
 
     res.json({
+        isTest: true,
         message: 'Hello Open Runtimes 👋',
+        header: req.headers['x-test-header'],
+        env: req.env['test-env'],
         todo
     });
 }
