@@ -23,10 +23,10 @@ Future<void> start(Request req, Response res) async {
   final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/$id');
 
   res.json({
-    isTest: true,
+    'isTest': true,
     'message': "Hello Open Runtimes 👋",
-    header: req.headers['x-test-header'],
-    env: req.env['test-env'],
+    'header': req.headers['x-test-header'],
+    'env': req.env['test-env'],
     'todo': todo.data,
   });
 }
