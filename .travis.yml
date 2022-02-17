@@ -23,6 +23,9 @@ env:
   - RUNTIME=python-3.10
     PHP_CLASS=Python310
     ENTRYPOINT=tests.py
+  - RUNTIME=rust-1.55
+    PHP_CLASS=Rust155
+    ENTRYPOINT=tests.rs
 
 notifications:
   email:
