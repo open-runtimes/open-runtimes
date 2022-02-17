@@ -1,5 +1,13 @@
 <?php 
 
+require 'vendor/autoload.php';
+
+use GuzzleHttp\Client;
+
+$client = new Client([
+    'base_uri' => 'https://jsonplaceholder.typicode.com'
+]);
+
 /*
   '$req' variable has:
     'headers' - object with request headers
@@ -11,8 +19,14 @@
   If an error is thrown, a response with code 500 will be returned.
 */
 
-return function($req, $res) {
+return function($req, $res) use ($client) {
+    $payload = \json_decode($req['payload'], true);
+
+    $response = $client->request('GET', '/todos/' . ($payload['id'] ?? 1));
+    $todo = \json_decode($response->getBody()->getContents(), true);
+
     $res->json([
-        'areDevelopersAwesome' => true
+        'message' => 'Hello Open Runtimes 👋',
+        'todo' => $todo
     ]);
 };

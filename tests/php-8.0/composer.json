@@ -12,6 +12,7 @@
     "require": {
         "php": ">=7.4.0",
         "ext-curl": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.0"
     }
 }

@@ -1,35 +1,30 @@
-TODO: Update whole readme
-TODO: Update example to do HTTP request
-TODO: We are not installing user code libraries I think
-TODO: Add tests
+# PHP Runtime 8.0
 
-# PHP Runtime 8.1
+This is the Open Runtime that builds and runs PHP code based on a `php:8.0.14-cli-alpine` base image. 
 
-This is the Open Runtime that builds and runs NodeJS code based on a `node:17-alpine` base image. 
-
-The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
+The runtime itself uses [Swoole](https://github.com/swoole/swoole-src) as the Web Server to process the execution requests.
 
 To learn more about runtimes, visit [Structure](https://github.com/open-runtimes/open-runtimes#structure) section of the main README.md.
 
 ## Usage
 
-1. Create a folder and enter it. Add code into `index.js` file:
+1. Create a folder and enter it. Add code into `index.php` file:
 
 ```bash
-mkdir node-or && cd node-or
-echo 'module.exports = async (req, res) => { res.json({ n: Math.random() }) }' > index.js
+mkdir php-or && cd php-or
+printf "<?\nreturn function(\$req, \$res) { \$res->json([ 'n' => \mt_rand() / \mt_getrandmax() ]); };" > index.php
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/node:17.0 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/php:8.0 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/node:17.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/php:8.0 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -48,10 +43,10 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the node runtime folder:
+2. Enter the PHP runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/node-17.0
+cd open-runtimes/runtimes/php-8.0
 ```
 
 3. Run the included example cloud function:
@@ -74,7 +69,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 - When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
 
-```js
+```php
 module.exports = (req, res) => {
     res.send('Hello Open Runtimes 👋');
 }
@@ -87,7 +82,7 @@ module.exports = (req, res) => {
 
 You can respond with `json()` by providing object:
 
-```js
+```php
 module.exports = (req, res) => {
     res.json({
         'message': 'Hello Open Runtimes 👋',
@@ -117,6 +112,10 @@ module.exports = (req, res) => {
 **Matej Bačo**
 
 + [https://github.com/Meldiron](https://github.com/Meldiron)
+
+**Jake Barnby**
+
++ [https://github.com/abnegate](https://github.com/abnegate)
 
 ## Contributing
 

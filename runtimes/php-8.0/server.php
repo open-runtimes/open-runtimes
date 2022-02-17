@@ -1,7 +1,7 @@
 <?php
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 
-const DEFAULT_PATH = '/usr/code';
+const DEFAULT_PATH = '/usr/code-start';
 const DEFAULT_FILE = 'index.php';
 
 function join_paths() {
@@ -34,6 +34,7 @@ class Response {
 
 $server->on("Request", function($req, $res) {
     $body =  json_decode($req->getContent(), true);
+    $body['payload'] = \is_string($body['payload']) ? $body['payload'] : \json_encode($body['payload'], JSON_FORCE_OBJECT);
 
     // Get internal_challenge header
     $internal_challenge = $req->header['x-internal-challenge'];
@@ -58,11 +59,11 @@ $server->on("Request", function($req, $res) {
         return;
     }
 
-    $request = new stdClass();
-
-    $request->env = $body['env'] ?? [];
-    $request->headers = $body['headers'] ?? [];
-    $request->payload = $body['payload'] ?? '{}';
+    $request = [
+        'env' => $body['env'] ?? [],
+        'headers' => $body['headers'] ?? [],
+        'payload' => $body['payload'] ?? '{}'
+    ];
 
     $response = new Response($res);
 
