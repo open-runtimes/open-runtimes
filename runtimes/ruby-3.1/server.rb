@@ -66,13 +66,7 @@ post '/' do
 
   request.body.rewind
   data = JSON.parse(request.body.read)
-
-  if requestPath.nil? || requestPath == '' || requestFile.nil? || requestFile == ''
-    status 400
-    content_type :json
-    return { code: 500, message: 'Bad Request' }.to_json
-  end
-
+  
   requestData = RuntimeRequest.new(data['payload'], data['env'], data['headers'])
   runtimeResponse = RuntimeResponse.new
 
