@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'json'
 
-DEFAULT_PATH = '/usr/code';
+DEFAULT_PATH = '/usr/code-start';
 DEFAULT_FILE = 'index.rb';
 
 before do
@@ -41,6 +41,10 @@ end
 post '/' do
   challenge = request.env['HTTP_X_INTERNAL_CHALLENGE'] || ''
 
+  put challenge
+  put ENV
+  put ENV['INTERNAL_RUNTIME_KEY']
+
   if challenge == ''
     status 401
     content_type :json
@@ -65,7 +69,7 @@ post '/' do
     return { code: 500, message: 'Bad Request' }.to_json
   end
 
-  requestData = RuntimeRequest.new(data['payload'], data['env'], headers)
+  requestData = RuntimeRequest.new(data['payload'].to_json, data['env'], headers)
   runtimeResponse = RuntimeResponse.new
 
   begin
