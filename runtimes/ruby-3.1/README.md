@@ -72,9 +72,9 @@ TODO: Update all notes
 - When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
 
 ```ruby
-module.exports = (req, res) => {
-    res.send('Hello Open Runtimes 👋');
-}
+def main(req, res)
+    return res.send('Hello Open Runtimes 👋')
+end
 ```
 
 - The `res` parameter has two methods:
@@ -85,19 +85,19 @@ module.exports = (req, res) => {
 You can respond with `json()` by providing object:
 
 ```ruby
-module.exports = (req, res) => {
-    res.json({
-        'message': 'Hello Open Runtimes 👋',
-        'env': req.env,
-        'payload': req.payload,
-        'headers': req.headers
-    });
-}
+def main(req, res)
+    return res.json({
+        :message => 'Hello Open Runtimes 👋',
+        :env => req.env,
+        :payload => req.payload,
+        :headers => req.headers,
+    })
+end
 ```
 
-- To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
+- To handle dependencies, you need to have `Gemfile` file. Dependencies will be automatically cached and installed, so you don't need to include any local denepdencies folder in your function.
 
-- The default entrypoint is `index.js`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.js"}`.
+- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.rb"}`.
 
 
 ## Authors
