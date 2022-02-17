@@ -26,6 +26,12 @@ env:
   - RUNTIME=dart-2.15
     PHP_CLASS=Dart215
     ENTRYPOINT=tests.dart
+  - RUNTIME=ruby-3.1
+    PHP_CLASS=Ruby31
+    ENTRYPOINT=tests.rb
+  - RUNTIME=php-8.0
+    PHP_CLASS=PHP80
+    ENTRYPOINT=tests.php
 
 notifications:
   email:

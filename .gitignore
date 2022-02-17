@@ -15,6 +15,13 @@ tests/**/runtime-env
 tests/**/__pycache__
 
 # Dart
-
 tests/**/.dart_tool/
 tests/**/.packages
+
+# Ruby
+tests/**/Gemfile.lock
+tests/**/vendor
+
+# PHP
+tests/**/vendor
+tests/**/composer.lock

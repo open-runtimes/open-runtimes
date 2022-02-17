@@ -2,8 +2,7 @@ const path = require("path");
 const micro = require("micro");
 const { json, send } = require("micro");
 
-const DEFAULT_PATH = '/usr/code';
-const DEFAULT_FILE = 'index.js';
+const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
     const body = await json(req);
@@ -23,7 +22,7 @@ const server = micro(async (req, res) => {
         json: (json, status = 200) => send(res, status, json),
     };
     try {
-        let userFunction = require(path.join(body.path ?? DEFAULT_PATH, body.file ?? DEFAULT_FILE));
+        let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
 
         if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
             throw new Error("User function is not valid.")
