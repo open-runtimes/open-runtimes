@@ -12,13 +12,13 @@ import requests
 #    If an error is thrown, a response with code 500 will be returned.
 
 def main(req, res):
-    payload = json.load(req.payload)
+    payload = json.loads(req.payload)
     todo_id = payload.get('id', 1)
 
     header_data = req.headers.get('x-test-header', None)
-    env_data = req.headers.env('test-env', None)
+    env_data = req.env.get('test-env', None)
 
-    todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + todo_id)).json()
+    todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + str(todo_id))).json()
     return res.json({
         'isTest': True,
         'message': 'Hello Open Runtimes 👋',
