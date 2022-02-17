@@ -14,6 +14,10 @@ tests/**/deno-cache
 tests/**/runtime-env
 tests/**/__pycache__
 
+# Ruby
+tests/**/Gemfile.lock
+tests/**/vendor
+
 # PHP
 tests/**/vendor
 tests/**/composer.lock
