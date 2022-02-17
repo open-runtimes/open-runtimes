@@ -8,7 +8,7 @@ let pipe = Pipe()
 task.standardOutput = pipe
 task.standardError = pipe
 task.arguments = ["-c", "swift package dump-package"]
-task.launchPath = "/bin/bash"
+task.executableURL = URL(fileURLWithPath: "/bin/bash")
 try! task.run()
 
 let data = pipe.fileHandleForReading.readDataToEndOfFile()
@@ -85,7 +85,7 @@ func writePackageStrings() {
         guard let match = match else { return }
 
         let lastRange = Range(match.range(at: match.numberOfRanges - 1), in: text)
-        let lastMatch = text.substring(with: lastRange!)
+        let lastMatch = String(text[lastRange!])
         var last = lastMatch
         if last.last != "," {
             last += ","
@@ -118,7 +118,7 @@ func writeProductStrings() {
         guard let match = match else { return }
         
         let lastRange = Range(match.range(at: match.numberOfRanges - 1), in: text)
-        let lastMatch = text.substring(with: lastRange!)
+        let lastMatch = String(text[lastRange!])
         var last = lastMatch
         if last.last != "," {
             last += ","
