@@ -16,7 +16,7 @@ require 'json'
 def main(req, res)
     payload = JSON.parse(req.payload)
 
-    todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + (payload['id'] || '12')).body)
+    todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + (payload['id'] || '1')).body)
 
     return res.json({
         :message => 'Hello Open Runtimes 👋',

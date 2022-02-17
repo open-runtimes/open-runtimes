@@ -10,6 +10,18 @@ end
 
 class RuntimeRequest
   def initialize(payload = '{}', env = {}, headers = {})
+    if payload == nil
+      payload = '{}'
+    end
+
+    if headers == nil
+      headers = {}
+    end
+
+    if env == nil
+      env = {}
+    end
+
     @payload = payload
     @env = env
     @headers = headers
@@ -41,10 +53,6 @@ end
 post '/' do
   challenge = request.env['HTTP_X_INTERNAL_CHALLENGE'] || ''
 
-  put challenge
-  put ENV
-  put ENV['INTERNAL_RUNTIME_KEY']
-
   if challenge == ''
     status 401
     content_type :json
@@ -69,7 +77,7 @@ post '/' do
     return { code: 500, message: 'Bad Request' }.to_json
   end
 
-  requestData = RuntimeRequest.new(data['payload'].to_json, data['env'], headers)
+  requestData = RuntimeRequest.new(data['payload'], data['env'], data['headers'])
   runtimeResponse = RuntimeResponse.new
 
   begin
