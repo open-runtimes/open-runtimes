@@ -7,6 +7,8 @@ docker run --rm -d --name open-runtimes-test -v $(pwd):/usr/code:rw -v $(pwd):/t
 echo "Sleeping for 15 seconds, to make sure runtime has built and started"
 sleep 15
 docker ps
+docker ps -a
+docker logs --tail 100 open-runtimes-test
 cd ../../
 INTERNAL_RUNTIME_KEY=test-secret-key vendor/bin/phpunit tests/${PHP_CLASS}.php
 docker logs --tail 100 open-runtimes-test
