@@ -70,9 +70,11 @@ You can also make changes to the example code and apply the changes with the `do
 - When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
 
 ```php
-module.exports = (req, res) => {
-    res.send('Hello Open Runtimes 👋');
-}
+<?php 
+
+return function($req, $res) {
+    $res->send('Hello Open Runtimes 👋');
+};
 ```
 
 - The `res` parameter has two methods:
@@ -83,20 +85,19 @@ module.exports = (req, res) => {
 You can respond with `json()` by providing object:
 
 ```php
-module.exports = (req, res) => {
-    res.json({
-        'message': 'Hello Open Runtimes 👋',
-        'env': req.env,
-        'payload': req.payload,
-        'headers': req.headers
-    });
-}
+return function($req, $res) {
+    $res->json([
+        'message' => 'Hello Open Runtimes 👋',
+        'env' => $req['env'],
+        'payload' => $req['payload'],
+        'headers' => $req['headers']
+    ]);
+};
 ```
 
-- To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
+- To handle dependencies, you need to have `composer.json` file. Dependencies will be automatically cached and installed, so you don't need to include `vendor` folder in your function.
 
-- The default entrypoint is `index.js`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.js"}`.
-
+- The default entrypoint is `index.php`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.php"}`.
 
 ## Authors
 
