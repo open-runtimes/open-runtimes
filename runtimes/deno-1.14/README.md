@@ -95,7 +95,7 @@ export default async function(req: any, res: any) {
 
 - Dependencies are handeled automatically. Open Runtimes automatically cache and install them during build process.
 
-- The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.ts"}`.
+- The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.ts`.
 
 
 ## Authors

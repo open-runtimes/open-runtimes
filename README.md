@@ -116,11 +116,6 @@ All requests should also have JSON body with the following structure:
 
 ```json5
 {
-    // Directory where the code is placed
-    "path": "/usr/code",
-    // Script entrypoint
-    "file": "index.js",
-
     // Following will be exposed to the function
     "env": {
         // Environment varialbes

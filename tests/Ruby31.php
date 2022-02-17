@@ -8,5 +8,4 @@ namespace Tests;
 
 class Ruby31 extends Base
 {
-    protected string $entrypoint = 'tests.rb';
 }

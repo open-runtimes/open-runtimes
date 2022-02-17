@@ -97,7 +97,7 @@ return function($req, $res) {
 
 - To handle dependencies, you need to have `composer.json` file. Dependencies will be automatically cached and installed, so you don't need to include `vendor` folder in your function.
 
-- The default entrypoint is `index.php`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.php"}`.
+- The default entrypoint is `index.php`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.php`.
 
 ## Authors
 

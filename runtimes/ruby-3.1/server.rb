@@ -1,8 +1,7 @@
 require 'sinatra'
 require 'json'
 
-DEFAULT_PATH = '/usr/code-start';
-DEFAULT_FILE = 'index.rb';
+USER_CODE_PATH = '/usr/code-start';
 
 before do
   content_type :json
@@ -68,9 +67,6 @@ post '/' do
   request.body.rewind
   data = JSON.parse(request.body.read)
 
-  requestFile = data['file'] || DEFAULT_FILE
-  requestPath = data['path'] || DEFAULT_PATH
-
   if requestPath.nil? || requestPath == '' || requestFile.nil? || requestFile == ''
     status 400
     content_type :json
@@ -81,7 +77,7 @@ post '/' do
   runtimeResponse = RuntimeResponse.new
 
   begin
-    load(requestPath + '/' + requestFile)
+    load(USER_CODE_PATH + '/' + ENV['INTERNAL_RUNTIME_KEY'])
   rescue Exception => e
     p e
     status 500
