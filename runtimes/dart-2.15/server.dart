@@ -5,6 +5,8 @@ import '{entrypoint}' as user_code;
 import 'dart:io' show Platform;
 import 'package:function_types/function_types.dart';
 
+// const USER_CODE_PATH = '/usr/code-start';
+
 void main() async {
   await shelf_io.serve((req) async {
     if (req.method != 'POST') {
@@ -21,7 +23,7 @@ void main() async {
       final request = Request(
         env: body['env'] ?? {},
         headers: body['headers'] ?? {},
-        payload: body['payload'] ?? '',
+        payload: body['payload'] ?? '{}',
       );
 
       final response = Response();
