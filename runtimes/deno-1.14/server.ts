@@ -1,8 +1,7 @@
 import { Application } from "https://deno.land/x/oak@v10.1.0/mod.ts";
 import * as path from "https://deno.land/std@0.119.0/path/mod.ts";
 
-const DEFAULT_PATH = '/usr/code';
-const DEFAULT_FILE = 'mod.ts';
+const USER_CODE_PATH = '/usr/code';
 
 const app = new Application();
 
@@ -37,7 +36,7 @@ app.use(async (ctx) => {
   };
 
   try {
-    const userFunction = (await import((body.path ?? DEFAULT_PATH) + '/' + (body.file ?? DEFAULT_FILE))).default;
+    const userFunction = (await import(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT)).default;
 
     if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
       throw new Error("User function is not valid.")

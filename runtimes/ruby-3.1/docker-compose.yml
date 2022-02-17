@@ -10,6 +10,7 @@ services:
     environment:
       - INTERNAL_RUNTIME_KEY
       - ENTRYPOINT_NAME
+      - INTERNAL_RUNTIME_ENTRYPOINT
     volumes:
       - ./example/:/usr/code:rw
     command: sh -c "sh /usr/local/src/build.sh && cp /usr/code/code.tar.gz /tmp/code.tar.gz && sh /usr/local/src/start.sh"

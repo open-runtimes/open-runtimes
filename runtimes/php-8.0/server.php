@@ -1,8 +1,7 @@
 <?php
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 
-const DEFAULT_PATH = '/usr/code-start';
-const DEFAULT_FILE = 'index.php';
+const USER_CODE_PATH = '/usr/code-start';
 
 function join_paths() {
     $paths = array();
@@ -68,7 +67,7 @@ $server->on("Request", function($req, $res) {
     $response = new Response($res);
 
     try {
-        $userFunction = include(($body['path'] ?? DEFAULT_PATH) . '/' . ($body['file'] ?? DEFAULT_FILE));
+        $userFunction = include(USER_CODE_PATH . '/' . getenv('INTERNAL_RUNTIME_KEY'));
 
         if (!is_callable($userFunction)) {
             return throw new Exception('Function not valid');

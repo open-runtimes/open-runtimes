@@ -10,8 +10,6 @@ error_reporting(E_ALL);
 
 abstract class Base extends TestCase
 {
-    protected string $entrypoint;
-
     public function setUp(): void
     {
     }
@@ -50,7 +48,6 @@ abstract class Base extends TestCase
     public function testRuntime(): void
     {
         $response = $this->call([
-            'file' => $this->entrypoint
         ]);
 
         self::assertEquals(200, $response['code']);
@@ -62,7 +59,6 @@ abstract class Base extends TestCase
         self::assertEquals(false, $response['body']['todo']['completed']);
 
         $response = $this->call([
-            'file' => $this->entrypoint,
             'payload' => '{"id":"2"}'
         ]);
 
@@ -75,7 +71,6 @@ abstract class Base extends TestCase
         self::assertEquals(false, $response['body']['todo']['completed']);
 
         $response = $this->call([
-            'file' => $this->entrypoint,
             'headers' => [
                 'x-test-header' => 'Header secret'
             ],

@@ -8,5 +8,4 @@ namespace Tests;
 
 class PHP80 extends Base
 {
-    protected string $entrypoint = 'tests.php';
 }
