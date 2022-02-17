@@ -2,8 +2,11 @@
 vendor
 .phpunit.result.cache
 
-# Node
+# Tests
+
 tests/**/code.tar.gz
+
+# Node
 tests/**/node_modules
 tests/**/package-lock.json
 
@@ -13,3 +16,8 @@ tests/**/deno-cache
 # Python
 tests/**/runtime-env
 tests/**/__pycache__
+
+# Rust
+tests/**/Cargo.lock
+tests/**/debug
+tests/**/target
