@@ -36,7 +36,7 @@ app.use(async (ctx) => {
   };
 
   try {
-    const userFunction = (await import(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT)).default;
+    const userFunction = (await import(USER_CODE_PATH + '/' + Deno.env.get("INTERNAL_RUNTIME_ENTRYPOINT"))).default;
 
     if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
       throw new Error("User function is not valid.")
