@@ -23,6 +23,9 @@ env:
   - RUNTIME=python-3.10
     PHP_CLASS=Python310
     ENTRYPOINT=tests.py
+  - RUNTIME=swift-5.5
+    PHP_CLASS=Swift55
+    ENTRYPOINT=Tests.swift
 
 notifications:
   email:
