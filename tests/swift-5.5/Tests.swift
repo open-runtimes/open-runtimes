@@ -15,19 +15,29 @@ import Collections
 //    
 //    If an error is thrown, a response with code 500 will be returned.
 
-func main(req: RequestValue, res: RequestResponse) -> RequestResponse {
-    print(req)
-    
-    let payload = try! JSONSerialization.jsonObject(with: req.payload!.data(using: .utf8)!, options: []) as! [String: Any]
-    let todoId = payload["id"] as! Int
+func main(req: RequestValue, res: RequestResponse) throws -> RequestResponse {
 
-    let headerData = req.headers!["x-test-header"]
-    let envData = req.env!["test-env"]
+    let headerData = req.headers?["x-test-header"]
+    let envData = req.env?["test-env"]
 
-    let todo = (try! JSONSerialization.jsonObject(
-        with: (try! URLRequest(url: URL(string: "https://jsonplaceholder.typicode.com/todos/\(todoId)")!)).httpBody!, 
-        options: []) as! [String: Any]
-    )
+    var todoId: String = "1"
+    var todo: [String: Any]? = nil
+
+    if let string = req.payload, !string.isEmpty,
+        let payload = try? JSONSerialization.jsonObject(with: string.data(using: .utf8)!, options: []) as? [String: Any] {
+            todoId = payload["id"] as! String
+    }
+
+    let group = DispatchGroup()
+    let url = URL(string: "https://jsonplaceholder.typicode.com/todos/\(todoId)")!
+    let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+        defer { group.leave() }
+        guard let data = data else { return }
+        todo = try! JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+    }
+    group.enter()
+    task.resume()
+    group.wait()
 
     return res.json(data: [
         "isTest": true,

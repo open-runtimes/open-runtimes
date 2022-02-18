@@ -94,6 +94,7 @@ func writePackageStrings() {
         
         text = text.replacingOccurrences(of: lastMatch, with: replacement)
 
+        // Set bool pointer to true to stop enumeration
         stop.pointee = true
     }
     try! text.write(
@@ -127,6 +128,7 @@ func writeProductStrings() {
         
         text = text.replacingOccurrences(of: lastMatch, with: replacement)
         
+        // Set bool pointer to true to stop enumeration
         stop.pointee = true
     }
     try! text.write(

@@ -47,8 +47,7 @@ abstract class Base extends TestCase
 
     public function testRuntime(): void
     {
-        $response = $this->call([
-        ]);
+        $response = $this->call('');
 
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);

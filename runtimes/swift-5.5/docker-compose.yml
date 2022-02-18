@@ -11,5 +11,5 @@ services:
       - INTERNAL_RUNTIME_KEY
       - ENTRYPOINT_NAME
     volumes:
-      - ./example:/usr/code:ro
-    command: sh -c "sh /usr/local/src/build.sh && sh /usr/local/src/start.sh"
+      - ./example:/usr/code:rw
+    command: sh -c "sh /usr/local/src/build.sh && cp /usr/code/code.tar.gz /tmp/code.tar.gz && sh /usr/local/src/start.sh"

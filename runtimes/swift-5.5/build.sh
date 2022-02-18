@@ -11,6 +11,4 @@ rm "Sources/App/dependencies.swift"
 swift package resolve
 swift build --configuration release
 cp "$(swift build --configuration release --show-bin-path)/Run" /usr/workspace/
-cd /usr/workspace
-touch code.tar.gz
-tar --exclude code.tar.gz -zcf code.tar.gz .
+tar -zcf /usr/code/code.tar.gz -C /usr/workspace .
