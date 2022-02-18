@@ -25,7 +25,7 @@ abstract class Base extends TestCase
             CURLOPT_URL => 'http://localhost:3000',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => \json_encode($body),
+            CURLOPT_POSTFIELDS => \json_encode($body, JSON_FORCE_OBJECT),
             CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
             CURLOPT_HTTPHEADER => array('Content-Type: application/json', 'X-Internal-Challenge: ' . \getenv('INTERNAL_RUNTIME_KEY'))
         );
@@ -47,7 +47,8 @@ abstract class Base extends TestCase
 
     public function testRuntime(): void
     {
-        $response = $this->call('');
+        $response = $this->call([
+        ]);
 
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);
