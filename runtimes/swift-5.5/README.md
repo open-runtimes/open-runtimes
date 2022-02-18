@@ -36,10 +36,10 @@ docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --
 4. In new terminal window, execute function:
 
 ```
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
-Output `{ "Hello": "World!" }` will be displayed after the execution.
+Output `{ "n": 0.7232589496628183 }` with a random float will be displayed after the execution.
 
 ## Local development
 
@@ -64,7 +64,7 @@ docker-compose up -d
 4. Execute the function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
 You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":{} }`.
@@ -80,21 +80,20 @@ You can also make changes to the example code and apply the changes with the `do
 
 You can respond with `json()` by providing object:
 
-```js
+```swift
 func main(req: RequestValue, res: RequestResponse) -> RequestResponse {
     res.json(data : [
         "message": "Hello Open Runtimes 👋",
         "env": req.env,
         "payload": req.payload,
         "headers": req.headers
-    ]);
+    ])
 }
 ```
 
 - To handle dependencies, you need to have `Package.swift` file. Dependencies will be automatically cached and installed, so you don't need to include `.build` folder in your function.
 
-- The default entrypoint is `index.swift`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{ "file": "app.swift"}`.
-
+- The default entrypoint is `index.swift`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{ "file": "app.swift" }`.
 
 ## Authors
 
