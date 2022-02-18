@@ -1,4 +1,4 @@
-FROM denoland/deno:alpine-1.13.1
+FROM denoland/deno:alpine-1.13
 
 LABEL maintainer="team@appwrite.io"
 

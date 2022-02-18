@@ -1,6 +1,6 @@
 # Node Runtime 15.5
 
-This is the Open Runtime that builds and runs NodeJS code based on a `node:17-alpine` base image. 
+This is the Open Runtime that builds and runs NodeJS code based on a `node:15.5-alpine` base image. 
 
 The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
 
