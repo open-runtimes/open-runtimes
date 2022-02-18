@@ -23,6 +23,9 @@ env:
   - RUNTIME=python-3.10
     PHP_CLASS=Python310
     ENTRYPOINT=tests.py
+  - RUNTIME=dart-2.15
+    PHP_CLASS=Dart215
+    ENTRYPOINT=tests.dart
   - RUNTIME=ruby-3.1
     PHP_CLASS=Ruby31
     ENTRYPOINT=tests.rb
@@ -45,4 +48,4 @@ install:
   - composer install
 
 script:
-  - RUNTIME=${RUNTIME} PHP_CLASS=${PHP_CLASS} ENTRYPOINT=${ENTRYPOINT} sh tests.sh
+  - export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh tests.sh

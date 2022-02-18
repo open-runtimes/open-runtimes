@@ -25,7 +25,7 @@ abstract class Base extends TestCase
             CURLOPT_URL => 'http://localhost:3000',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => \json_encode($body),
+            CURLOPT_POSTFIELDS => \json_encode($body, JSON_FORCE_OBJECT),
             CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
             CURLOPT_HTTPHEADER => array('Content-Type: application/json', 'X-Internal-Challenge: ' . \getenv('INTERNAL_RUNTIME_KEY'))
         );
@@ -38,6 +38,10 @@ abstract class Base extends TestCase
         \curl_close($ch);
 
         $resultJson = \json_decode($result, true);
+
+        if($response >= 500) {
+            \var_dump($resultJson);
+        }
         
         return [
             'code' => $response,
