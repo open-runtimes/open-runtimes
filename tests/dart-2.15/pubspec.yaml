@@ -1,5 +1,5 @@
-name: open_runtimes_example
-description: Dart runtime example
+name: open_runtimes_test
+description: Dart runtime test
 version: 1.0.0
 publish_to: none
 # homepage: https://www.example.com

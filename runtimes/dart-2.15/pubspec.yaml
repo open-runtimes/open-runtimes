@@ -9,5 +9,4 @@ environment:
 
 dependencies:
   shelf: ^1.2.0
-  function_types:
-    path: ./function_types/
+  

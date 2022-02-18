@@ -48,4 +48,4 @@ install:
   - composer install
 
 script:
-  - RUNTIME=${RUNTIME} PHP_CLASS=${PHP_CLASS} ENTRYPOINT=${ENTRYPOINT} sh tests.sh
+  - export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh tests.sh

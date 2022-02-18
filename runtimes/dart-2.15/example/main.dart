@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:function_types/function_types.dart';
 import 'package:dio/dio.dart' hide Response;
 
 /*
@@ -15,7 +14,7 @@ import 'package:dio/dio.dart' hide Response;
     If an error is thrown, a response with code 500 will be returned.
 */
 
-Future<void> start(Request req, Response res) async {
+Future<void> start(final req, final res) async {
 
   final payload = jsonDecode(req.payload);
 
