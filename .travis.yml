@@ -18,26 +18,32 @@ env:
     PHP_CLASS=Node170
     ENTRYPOINT=tests.js
     IMAGE=openruntimes/node:17.0
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
   - RUNTIME=deno-1.14
     PHP_CLASS=Deno114
     ENTRYPOINT=tests.ts
     IMAGE=openruntimes/deno:1.14
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
   - RUNTIME=python-3.10
     PHP_CLASS=Python310
     ENTRYPOINT=tests.py
     IMAGE=openruntimes/python:3.10
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
   - RUNTIME=dart-2.15
     PHP_CLASS=Dart215
     ENTRYPOINT=tests.dart
     IMAGE=openruntimes/dart:2.15
+    ARCH=linux/amd64,linux/arm64,linux/arm/v7
   - RUNTIME=ruby-3.1
     PHP_CLASS=Ruby31
     ENTRYPOINT=tests.rb
     IMAGE=openruntimes/ruby:3.1
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
   - RUNTIME=php-8.0
     PHP_CLASS=PHP80
     ENTRYPOINT=tests.php
     IMAGE=openruntimes/php:8.0
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le
 
 notifications:
   email:
@@ -63,11 +69,11 @@ install:
 
 script:
   - export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh tests.sh
-  - export RUNTIME=${RUNTIME}; export IMAGE=${IMAGE}; sh deploy.sh
+  - export RUNTIME=${RUNTIME}; ARCH=${ARCH}; export IMAGE=${IMAGE}; sh deploy.sh
 
 deploy:
   - provider: script
     edge: true
-    script: export RUNTIME=${RUNTIME}; export IMAGE=${IMAGE}; sh deploy.sh
+    script: export RUNTIME=${RUNTIME}; ARCH=${ARCH}; export IMAGE=${IMAGE}; sh deploy.sh
     on:
       tags: true
