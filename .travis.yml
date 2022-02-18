@@ -112,12 +112,12 @@ env:
     PHP_CLASS=PHP80
     ENTRYPOINT=tests.php
     IMAGE=openruntimes/php:8.0
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le
+    ARCH=linux/amd64
   - RUNTIME=php-8.1
     PHP_CLASS=PHP81
     ENTRYPOINT=tests.php
     IMAGE=openruntimes/php:8.1
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le
+    ARCH=linux/amd64
 
 notifications:
   email:
