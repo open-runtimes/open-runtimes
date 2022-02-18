@@ -29,7 +29,7 @@ docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --
 
 4. In new terminal window, execute function:
 
-```
+```bash
 curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
@@ -43,7 +43,7 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the deno runtime folder:
+2. Enter the Deno runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/deno-1.14
@@ -67,9 +67,9 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing functions for this runtime, ensure they are exported. An example of this is:
+- When writing function for this runtime, ensure it is exported as default one. An example of this is:
 
-```js
+```typescript
 export default async function(req: any, res: any) {
     res.send('Hello Open Runtimes 👋');
 }
@@ -82,7 +82,7 @@ export default async function(req: any, res: any) {
 
 You can respond with `json()` by providing object:
 
-```js
+```typescript
 export default async function(req: any, res: any) {
     res.json({
         'message': 'Hello Open Runtimes 👋',
