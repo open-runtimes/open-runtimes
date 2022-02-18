@@ -63,6 +63,7 @@ install:
 
 script:
   - export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh tests.sh
+  - export RUNTIME=${RUNTIME}; export IMAGE=${IMAGE};sh ./runtimes/deploy.sh
 
 deploy:
   - provider: script
