@@ -78,12 +78,12 @@ env:
     PHP_CLASS=Dart215
     ENTRYPOINT=tests.dart
     IMAGE=openruntimes/dart:2.15
-    ARCH=linux/amd64
+    ARCH=linux/amd64,linux/arm64,linux/arm/v7
   - RUNTIME=dart-2.14
     PHP_CLASS=Dart214
     ENTRYPOINT=tests.dart
     IMAGE=openruntimes/dart:2.14
-    ARCH=linux/amd64
+    ARCH=linux/amd64,linux/arm64,linux/arm/v7
   - RUNTIME=dart-2.13
     PHP_CLASS=Dart213
     ENTRYPOINT=tests.dart
