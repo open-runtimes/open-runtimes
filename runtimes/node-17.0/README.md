@@ -29,7 +29,7 @@ docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --
 
 4. In new terminal window, execute function:
 
-```
+```bash
 curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
@@ -67,7 +67,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
+- When writing function for this runtime, ensure is is exported directly through the `module.exports` object. An example of this is:
 
 ```js
 module.exports = (req, res) => {
