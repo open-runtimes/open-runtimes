@@ -38,10 +38,18 @@ notifications:
     - team@appwrite.io
 
 before_install:
+  - curl -fsSL https://get.docker.com | sh
+  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+  - mkdir -p $HOME/.docker
+  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+  - sudo service docker start
   - >
     if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
       echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
     fi
+  - docker --version
+  - docker run --rm --privileged linuxkit/binfmt:v0.8
+  - docker buildx create --use
 
 install:
   - docker --version
@@ -49,3 +57,10 @@ install:
 
 script:
   - export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh tests.sh
+
+deploy:
+  - provider: script
+    edge: true
+    script: bash ./runtimes/deploy.sh
+    on:
+      tags: true
