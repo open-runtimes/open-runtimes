@@ -1,6 +1,6 @@
-FROM php:8.1.2-cli-alpine3.15 as step0
+FROM php:8.1.3RC1-cli-alpine3.15 as step0
 
-ENV PHP_SWOOLE_VERSION=v4.7.0
+ENV PHP_SWOOLE_VERSION=v4.8.7
 
 RUN \
   apk add --no-cache --virtual .deps \
@@ -26,7 +26,7 @@ RUN \
   make && make install && \
   cd ..
 
-FROM php:8.1.2-cli-alpine3.15 as final
+FROM php:8.1.3RC1-cli-alpine3.15 as final
 
 LABEL maintainer="team@appwrite.io"
 
@@ -62,7 +62,7 @@ WORKDIR /usr/local/src/
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20200930/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20200930/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20200930/
+COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20210902/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20210902/
 
 COPY composer* /usr/local/src/
 
