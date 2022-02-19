@@ -44,17 +44,17 @@ env:
     PHP_CLASS=Deno114
     ENTRYPOINT=tests.ts
     IMAGE=openruntimes/deno:1.14
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    ARCH=linux/amd64
   - RUNTIME=deno-1.13
     PHP_CLASS=Deno113
     ENTRYPOINT=tests.ts
     IMAGE=openruntimes/deno:1.13
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    ARCH=linux/amd64
   - RUNTIME=deno-1.12
     PHP_CLASS=Deno112
     ENTRYPOINT=tests.ts
     IMAGE=openruntimes/deno:1.12
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    ARCH=linux/amd64
 
   # Python
   - RUNTIME=python-3.10
