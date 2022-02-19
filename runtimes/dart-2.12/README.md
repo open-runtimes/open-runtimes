@@ -18,7 +18,7 @@ printf "import 'dart:async';\nimport 'dart:math';\nFuture<void> start(final req,
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/dart:2.12 sh /usr/local/src/build.sh
+docker run -e ENTRYPOINT_NAME=main.dart --rm --interactive --tty --volume $PWD:/usr/code openruntimes/dart:2.12 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
@@ -71,9 +71,8 @@ You can also make changes to the example code and apply the changes with the `do
 
 ```dart
 import 'dart:async';
-import 'package:function_types/function_types.dart';
 
-Future<void> start(Request req, Response res) async {
+Future<void> start(final req, final res) async {
   res.send('Hello Open Runtimes 👋');
 }
 ```
@@ -87,9 +86,8 @@ You can respond with `json()` by providing object:
 
 ```dart
 import 'dart:async';
-import 'package:function_types/function_types.dart';
 
-Future<void> start(Request req, Response res) async {
+Future<void> start(final req, final res) async {
   res.json({
     'message': "Hello Open Runtimes 👋",
     'env': req.env,
@@ -101,7 +99,7 @@ Future<void> start(Request req, Response res) async {
 
 - To handle dependencies, you need to have `pubspec.yaml` file. Dependencies will be automatically cached and installed, so you don't need to include any dependencies folders in your function.
 
-- The default entrypoint is `main.dart`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.dart`.
+- The default entrypoint is `main.dart`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.dart`.
 
 ## Authors
 

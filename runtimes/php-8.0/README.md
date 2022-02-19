@@ -18,7 +18,7 @@ printf "<?\nreturn function(\$req, \$res) { \$res->json([ 'n' => \mt_rand() / \m
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/php:8.0 sh /usr/local/src/build.sh
+docker run -e ENTRYPOINT_NAME=index.php --rm --interactive --tty --volume $PWD:/usr/code openruntimes/php:8.0 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
@@ -70,7 +70,7 @@ You can also make changes to the example code and apply the changes with the `do
 - When writing function for this runtime, ensure it is the only returned one. An example of this is:
 
 ```php
-<?php 
+<?php
 
 return function($req, $res) {
     $res->send('Hello Open Runtimes 👋');
@@ -97,7 +97,13 @@ return function($req, $res) {
 
 - To handle dependencies, you need to have `composer.json` file. Dependencies will be automatically cached and installed, so you don't need to include `vendor` folder in your function.
 
-- The default entrypoint is `index.php`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.php`.
+- If you plan to use libraries in your PHP code, make sure to include follwing like at the top of your code:
+
+```php
+require 'vendor/autoload.php';
+```
+
+- The default entrypoint is `index.php`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.php`.
 
 ## Authors
 

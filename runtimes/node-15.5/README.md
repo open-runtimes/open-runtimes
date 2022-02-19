@@ -18,7 +18,7 @@ echo 'module.exports = async (req, res) => { res.json({ n: Math.random() }) }' >
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/node:15.5 sh /usr/local/src/build.sh
+docker run -e ENTRYPOINT_NAME=index.js --rm --interactive --tty --volume $PWD:/usr/code openruntimes/node:15.5 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
@@ -95,7 +95,7 @@ module.exports = (req, res) => {
 
 - To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
 
-- The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.js`.
+- The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.js`.
 
 
 ## Authors

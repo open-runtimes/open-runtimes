@@ -18,7 +18,7 @@ printf 'def main(request, response)\n    return response.json({:n => rand()})\ne
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/ruby:3.1 sh /usr/local/src/build.sh
+docker run -e ENTRYPOINT_NAME=index.rb --rm --interactive --tty --volume $PWD:/usr/code openruntimes/ruby:3.1 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
@@ -67,8 +67,6 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-TODO: Update all notes
-
 - When writing function for this runtime, ensure it is named `main`. An example of this is:
 
 ```ruby
@@ -97,7 +95,7 @@ end
 
 - To handle dependencies, you need to have `Gemfile` file. Dependencies will be automatically cached and installed, so you don't need to include any local denepdencies folder in your function.
 
-- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.rb`.
+- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.rb`.
 
 
 ## Authors

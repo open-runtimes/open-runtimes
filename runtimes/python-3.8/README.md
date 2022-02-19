@@ -18,7 +18,7 @@ printf "import random\n\ndef main(req, res):\n    return res.json({'n': random.r
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/python:3.8 sh /usr/local/src/build.sh
+docker run -e ENTRYPOINT_NAME=main.py --rm --interactive --tty --volume $PWD:/usr/code openruntimes/python:3.8 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
@@ -71,8 +71,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 ```python
 def main(req, res):
-    res.send('Hello Open Runtimes 👋')
-}
+    return res.send('Hello Open Runtimes 👋')
 ```
 
 - The `res` parameter has two methods:
@@ -84,18 +83,17 @@ You can respond with `json()` by providing object:
 
 ```python
 def main(req, res):
-    res.json({
+    return res.json({
         'message': 'Hello Open Runtimes 👋',
         'env': req.env,
         'payload': req.payload,
         'headers': req.headers
     })
-}
 ```
 
 - To handle dependencies, you need to have `requirements.txt` file. Dependencies will be automatically cached and installed, so you don't need to include `__pycache__` folder in your function.
 
-- The default entrypoint is `main.py`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.py`.
+- The default entrypoint is `main.py`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.py`.
 
 ## Authors
 
