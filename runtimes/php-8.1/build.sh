@@ -18,4 +18,4 @@ cp -r /usr/local/src/vendor /usr/builds/vendor
 
 # Finish build by preparing tar to use for starting the runtime
 cd /usr/builds
-tar --exclude code.tar.gz -zcvf /usr/code/code.tar.gz .
+tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .

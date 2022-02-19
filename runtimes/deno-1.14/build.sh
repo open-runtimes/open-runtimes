@@ -18,4 +18,4 @@ cd /usr/builds
 deno cache $ENTRYPOINT_NAME
 
 # Finish build by preparing tar to use for starting the runtime
-tar --exclude code.tar.gz -zcvf /usr/code/code.tar.gz .
+tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .
