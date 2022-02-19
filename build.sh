@@ -34,22 +34,22 @@ echo 'Ruby 3.1...'
 docker build -t openruntimes/ruby:3.1 ./runtimes/ruby-3.1/
 
 echo 'Ruby 3.0...'
-docker build -t openruntimes/ruby:3.0 ./ruby-3.0/
+docker build -t openruntimes/ruby:3.0 ./runtimes/ruby-3.0/
 
 echo 'PHP 8.1...'
-docker build -t openruntimes/php:8.1 ./php-8.1/
+docker build -t openruntimes/php:8.1 ./runtimes/php-8.1/
 
 echo 'PHP 8.0...'
-docker build -t openruntimes/php:8.0 ./php-8.0/
+docker build -t openruntimes/php:8.0 ./runtimes/php-8.0/
 
 echo 'Dart 2.15...'
-docker build -t openruntimes/dart:2.15 ./dart-2.15/
+docker build -t openruntimes/dart:2.15 ./runtimes/dart-2.15/
 
 echo 'Dart 2.14...'
-docker build -t openruntimes/dart:2.14 ./dart-2.14/
+docker build -t openruntimes/dart:2.14 ./runtimes/dart-2.14/
 
 echo 'Dart 2.13...'
-docker build -t openruntimes/dart:2.13 ./dart-2.13/
+docker build -t openruntimes/dart:2.13 ./runtimes/dart-2.13/
 
 echo 'Dart 2.12...'
-docker build -t openruntimes/dart:2.12 ./dart-2.12/
+docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12/
