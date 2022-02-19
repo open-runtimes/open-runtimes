@@ -39,4 +39,4 @@ cd /usr/local/src
 dart compile exe server.dart -o runtime
 
 # Finish build by preparing tar to use for starting the runtime
-tar --exclude code.tar.gz -zcvf /usr/code/code.tar.gz runtime
+tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz runtime
