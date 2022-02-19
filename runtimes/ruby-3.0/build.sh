@@ -17,4 +17,4 @@ bundle install
 # Finish build by preparing tar to use for starting the runtime
 cd /usr/builds
 cp -R /usr/local/src/vendor /usr/builds/vendor
-tar --exclude code.tar.gz -zcvf /usr/code/code.tar.gz .
+tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .

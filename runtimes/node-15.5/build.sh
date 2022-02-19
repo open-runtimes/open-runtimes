@@ -15,4 +15,4 @@ mkdir -p node_modules
 cp -R /usr/local/src/node_modules/* /usr/builds/node_modules
 
 # Finish build by preparing tar to use for starting the runtime
-tar --exclude code.tar.gz -zcvf /usr/code/code.tar.gz .
+tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .
