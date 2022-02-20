@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-// Runtime: php-8.1
+// Runtime: php-8.0
 // PHP class: PHP80
 // Entrypoint: tests.php
 

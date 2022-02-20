@@ -1,6 +1,6 @@
 # Ruby Runtime 3.1
 
-This is the Open Runtime that builds and runs Ruby code based on a `ruby:3.1.0-alpine` base image. 
+This is the Open Runtime that builds and runs Ruby code based on a `ruby:3.1-alpine` base image. 
 
 The runtime itself uses [Sinatra](https://github.com/sinatra/sinatra) as the Web Server to process the execution requests.
 
@@ -18,18 +18,18 @@ printf 'def main(request, response)\n    return response.json({:n => rand()})\ne
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/ruby:3.1 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/ruby:3.1 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/ruby:3.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=index.rb --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/ruby:3.1 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
 
-```
+```bash
 curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
@@ -69,7 +69,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 TODO: Update all notes
 
-- When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
+- When writing function for this runtime, ensure it is named `main`. An example of this is:
 
 ```ruby
 def main(req, res)

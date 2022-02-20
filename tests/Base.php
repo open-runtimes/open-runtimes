@@ -38,6 +38,10 @@ abstract class Base extends TestCase
         \curl_close($ch);
 
         $resultJson = \json_decode($result, true);
+
+        if($response >= 500) {
+            \var_dump($resultJson);
+        }
         
         return [
             'code' => $response,

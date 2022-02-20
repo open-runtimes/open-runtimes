@@ -1,6 +1,6 @@
 # Deno Runtime 1.14
 
-This is the Open Runtime that builds and runs Deno code based on a `deno:alpine-1.14.1` base image. 
+This is the Open Runtime that builds and runs Deno code based on a `deno:alpine-1.14.3` base image. 
 
 The runtime itself uses [oak](https://deno.land/x/oak@v10.2.1) as the Web Server to process the execution requests.
 
@@ -18,18 +18,18 @@ echo 'export default async function(req: any, res: any) { res.json({ n: Math.ran
 2. Build the code:
 
 ```bash
-ENTRYPOINT_NAME=mod.ts docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/deno:1.14 sh /usr/local/src/build.sh
+ENTRYPOINT_NAME=mod.ts docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:1.14 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/deno:1.14 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/deno:1.14 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
 
-```
+```bash
 curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
@@ -43,7 +43,7 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the deno runtime folder:
+2. Enter the Deno runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/deno-1.14
@@ -67,9 +67,9 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing functions for this runtime, ensure they are exported. An example of this is:
+- When writing function for this runtime, ensure it is exported as default one. An example of this is:
 
-```js
+```typescript
 export default async function(req: any, res: any) {
     res.send('Hello Open Runtimes 👋');
 }
@@ -82,7 +82,7 @@ export default async function(req: any, res: any) {
 
 You can respond with `json()` by providing object:
 
-```js
+```typescript
 export default async function(req: any, res: any) {
     res.json({
         'message': 'Hello Open Runtimes 👋',

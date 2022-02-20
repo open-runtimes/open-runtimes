@@ -1,6 +1,6 @@
 # Node Runtime 17.0
 
-This is the Open Runtime that builds and runs NodeJS code based on a `node:17-alpine` base image. 
+This is the Open Runtime that builds and runs NodeJS code based on a `node:17.0-alpine` base image. 
 
 The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
 
@@ -18,18 +18,18 @@ echo 'module.exports = async (req, res) => { res.json({ n: Math.random() }) }' >
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/node:17.0 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/node:17.0 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/node:17.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key INTERNAL_RUNTIME_ENTRYPOINT=index.js --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/node:17.0 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
 
-```
+```bash
 curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
@@ -67,7 +67,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
+- When writing function for this runtime, ensure is is exported directly through the `module.exports` object. An example of this is:
 
 ```js
 module.exports = (req, res) => {

@@ -13,39 +13,140 @@ language: php
 php:
   - 8.0
 
+vm:
+  size: large
+
 env:
+  # Node
   - RUNTIME=node-17.0
     PHP_CLASS=Node170
     ENTRYPOINT=tests.js
+    IMAGE=openruntimes/node:17.0
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+  - RUNTIME=node-16.0
+    PHP_CLASS=Node160
+    ENTRYPOINT=tests.js
+    IMAGE=openruntimes/node:16.0
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+  - RUNTIME=node-15.5
+    PHP_CLASS=Node155
+    ENTRYPOINT=tests.js
+    IMAGE=openruntimes/node:15.5
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+  - RUNTIME=node-14.5
+    PHP_CLASS=Node145
+    ENTRYPOINT=tests.js
+    IMAGE=openruntimes/node:14.5
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+
+  # Deno
   - RUNTIME=deno-1.14
     PHP_CLASS=Deno114
     ENTRYPOINT=tests.ts
+    IMAGE=openruntimes/deno:1.14
+    ARCH=linux/amd64
+  - RUNTIME=deno-1.13
+    PHP_CLASS=Deno113
+    ENTRYPOINT=tests.ts
+    IMAGE=openruntimes/deno:1.13
+    ARCH=linux/amd64
+  - RUNTIME=deno-1.12
+    PHP_CLASS=Deno112
+    ENTRYPOINT=tests.ts
+    IMAGE=openruntimes/deno:1.12
+    ARCH=linux/amd64
+
+  # Python
   - RUNTIME=python-3.10
     PHP_CLASS=Python310
     ENTRYPOINT=tests.py
+    IMAGE=openruntimes/python:3.10
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+  - RUNTIME=python-3.9
+    PHP_CLASS=Python39
+    ENTRYPOINT=tests.py
+    IMAGE=openruntimes/python:3.9
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+  - RUNTIME=python-3.8
+    PHP_CLASS=Python38
+    ENTRYPOINT=tests.py
+    IMAGE=openruntimes/python:3.8
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+
+  # Dart
+  - RUNTIME=dart-2.15
+    PHP_CLASS=Dart215
+    ENTRYPOINT=tests.dart
+    IMAGE=openruntimes/dart:2.15
+    ARCH=linux/amd64,linux/arm64
+  - RUNTIME=dart-2.14
+    PHP_CLASS=Dart214
+    ENTRYPOINT=tests.dart
+    IMAGE=openruntimes/dart:2.14
+    ARCH=linux/amd64,linux/arm64
+  - RUNTIME=dart-2.13
+    PHP_CLASS=Dart213
+    ENTRYPOINT=tests.dart
+    IMAGE=openruntimes/dart:2.13
+    ARCH=linux/amd64
+  - RUNTIME=dart-2.12
+    PHP_CLASS=Dart212
+    ENTRYPOINT=tests.dart
+    IMAGE=openruntimes/dart:2.12
+    ARCH=linux/amd64
+
+  # Ruby
   - RUNTIME=ruby-3.1
     PHP_CLASS=Ruby31
     ENTRYPOINT=tests.rb
+    IMAGE=openruntimes/ruby:3.1
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+  - RUNTIME=ruby-3.0
+    PHP_CLASS=Ruby30
+    ENTRYPOINT=tests.rb
+    IMAGE=openruntimes/ruby:3.0
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+
+  # PHP
   - RUNTIME=php-8.0
     PHP_CLASS=PHP80
     ENTRYPOINT=tests.php
-  - RUNTIME=swift-5.5
-    PHP_CLASS=Swift55
-    ENTRYPOINT=Tests.swift
+    IMAGE=openruntimes/php:8.0
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+  - RUNTIME=php-8.1
+    PHP_CLASS=PHP81
+    ENTRYPOINT=tests.php
+    IMAGE=openruntimes/php:8.1
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
 notifications:
   email:
     - team@appwrite.io
 
 before_install:
+  - curl -fsSL https://get.docker.com | sh
+  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+  - mkdir -p $HOME/.docker
+  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+  - sudo service docker start
   - >
     if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
       echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
     fi
+  - docker --version
+  - docker run --rm --privileged linuxkit/binfmt:v0.8
+  - docker buildx create --use
 
 install:
   - docker --version
   - composer install
 
 script:
-  - RUNTIME=${RUNTIME} PHP_CLASS=${PHP_CLASS} ENTRYPOINT=${ENTRYPOINT} sh tests.sh
+  - export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh tests.sh
+
+deploy:
+  - provider: script
+    edge: true
+    script: export RUNTIME=${RUNTIME}; ARCH=${ARCH}; export IMAGE=${IMAGE}; sh deploy.sh
+    on:
+      tags: true

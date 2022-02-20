@@ -18,18 +18,18 @@ printf "<?\nreturn function(\$req, \$res) { \$res->json([ 'n' => \mt_rand() / \m
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/php:8.0 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/php:8.0 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/php:8.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=index.php --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/php:8.0 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
 
-```
+```bash
 curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
@@ -67,7 +67,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing functions for this runtime, ensure they are exported directly through the `module.exports` object. An example of this is:
+- When writing function for this runtime, ensure it is the only returned one. An example of this is:
 
 ```php
 <?php 
