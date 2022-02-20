@@ -7,7 +7,7 @@ docker run -d --name open-runtimes-test -v $(pwd):/usr/code:rw -e INTERNAL_RUNTI
 echo "Sleeping to make sure runtime has built and started"
 case "${RUNTIME}" in
   *"swift"*)
-    sleep 200
+    sleep 500
     ;;
   *)
     sleep 10
