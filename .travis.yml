@@ -119,6 +119,13 @@ env:
     IMAGE=openruntimes/php:8.1
     ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
+  # Swift
+  - RUNTIME=swift-5.5
+    PHP_CLASS=Swift55
+    ENTRYPOINT=Tests.swift
+    IMAGE=openruntimes/swift:5.5
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+
 notifications:
   email:
     - team@appwrite.io
