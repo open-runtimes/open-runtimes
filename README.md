@@ -5,7 +5,7 @@
 ---
 
 [![Discord](https://img.shields.io/discord/937092945713172480?label=discord&style=flat-square)](https://discord.gg/mkZcevnxuf)
-[![Build Status](https://img.shields.io/travis/com/appwrite/appwrite?style=flat-square)](https://travis-ci.com/appwrite/appwrite)
+[![Build Status](https://img.shields.io/travis/com/open-runtimes/open-runtimes/master?style=flat-square)](https://travis-ci.com/open-runtimes/open-runtimes)
 [![Twitter Account](https://img.shields.io/twitter/follow/appwrite?color=00acee&label=twitter&style=flat-square)](https://twitter.com/appwrite)
 
 <!-- [![Docker Pulls](https://img.shields.io/docker/pulls/appwrite/appwrite?color=f02e65&style=flat-square)](https://hub.docker.com/r/appwrite/appwrite) -->
@@ -34,7 +34,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 * **Flexibility** (WIP) - Designed to work with multiple orchestrators using different adapters. For now only Docker and Swarm are supported, Kubernetes support is planned.
 * **Performance** - Cold starts in less than ~100ms warm stars has added latency of less than 1ms.
-* **Wide Support** - Support over 10 different coding languages and over 20 different runtimes. Adding new ones is straight forward.
+* **Wide Support** - Support over 6 (and counting) different coding languages and 18 (and counting) different runtimes. Adding new ones is straight forward.
 * **Open Source** - Released under the MIT license, free to use and extend.
 * **Ecosystem** - Fast growing ecosystem of ready-to-use functions for easy reuse on different platforms.
 
@@ -49,12 +49,24 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 | Name    | Version | Docker Hub                 | Examples | Pulls |
 |---------|---------|----------------------------|----------|-------|
-| Node.js | 17.0    | [openruntimes/node:17.0](https://hub.docker.com/r/openruntimes/node) | [Node.js Examples](/runtimes/node-17.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
-| Deno | 1.14    | [openruntimes/deno:1.14](https://hub.docker.com/r/openruntimes/deno) | [Deno Examples](/runtimes/deno-1.14/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/deno) |
-| Python | 3.10    | [openruntimes/python:3.10](https://hub.docker.com/r/openruntimes/python) | [Python Examples](/runtimes/python-3.10/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
-| Ruby | 3.1    | [openruntimes/ruby:3.1](https://hub.docker.com/r/openruntimes/ruby) | [Ruby Examples](/runtimes/ruby-3.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
-| PHP | 8.0    | [openruntimes/php:8.0](https://hub.docker.com/r/openruntimes/php) | [PHP Examples](/runtimes/php-8.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/php) |
-| Dart | 2.15    | [openruntimes/dart:2.15](https://hub.docker.com/r/openruntimes/dart) | [PHP Examples](/runtimes/dart-2.15/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
+| Node.js | 17.0    | [openruntimes/node:17.0](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-17.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
+| Node.js | 16.0    | [openruntimes/node:16.0](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-16.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
+| Node.js | 15.5    | [openruntimes/node:15.5](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-15.5/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
+| Node.js | 14.5    | [openruntimes/node:14.5](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-14.5/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
+| Deno | 1.14    | [openruntimes/deno:1.14](https://hub.docker.com/r/openruntimes/deno) | [Examples](/runtimes/deno-1.14/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/deno) |
+| Deno | 1.13    | [openruntimes/deno:1.13](https://hub.docker.com/r/openruntimes/deno) | [Examples](/runtimes/deno-1.13/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/deno) |
+| Deno | 1.12    | [openruntimes/deno:1.12](https://hub.docker.com/r/openruntimes/deno) | [Examples](/runtimes/deno-1.12/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/deno) |
+| Python | 3.10    | [openruntimes/python:3.10](https://hub.docker.com/r/openruntimes/python) | [Examples](/runtimes/python-3.10/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
+| Python | 3.9    | [openruntimes/python:3.9](https://hub.docker.com/r/openruntimes/python) | [Examples](/runtimes/python-3.9/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
+| Python | 3.8    | [openruntimes/python:3.8](https://hub.docker.com/r/openruntimes/python) | [Examples](/runtimes/python-3.8/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
+| Ruby | 3.1    | [openruntimes/ruby:3.1](https://hub.docker.com/r/openruntimes/ruby) | [Examples](/runtimes/ruby-3.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
+| Ruby | 3.0    | [openruntimes/ruby:3.0](https://hub.docker.com/r/openruntimes/ruby) | [Examples](/runtimes/ruby-3.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
+| PHP | 8.1    | [openruntimes/php:8.1](https://hub.docker.com/r/openruntimes/php) | [Examples](/runtimes/php-8.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/php) |
+| PHP | 8.0    | [openruntimes/php:8.0](https://hub.docker.com/r/openruntimes/php) | [Examples](/runtimes/php-8.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/php) |
+| Dart | 2.15    | [openruntimes/dart:2.15](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.15/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
+| Dart | 2.14    | [openruntimes/dart:2.14](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.14/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
+| Dart | 2.13    | [openruntimes/dart:2.13](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.13/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
+| Dart | 2.12    | [openruntimes/dart:2.12](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.12/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
 
 ## Architecture
 
