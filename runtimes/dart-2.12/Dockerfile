@@ -17,4 +17,4 @@ RUN dart --disable-analytics
 
 EXPOSE 3000
 
-CMD ["tail", "-f", "/dev/null"]
+CMD ["/usr/local/src/start.sh"]
