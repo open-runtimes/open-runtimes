@@ -1,12 +1,42 @@
 import Vapor
 import Foundation
 
-struct RequestValue: Codable {
-    var path: String? = "/usr/code"
-    var file: String? = "index.swift"
-    var env: [String: String]? = [:]
-    var headers: [String: String]? = [:]
-    var payload: String? = ""
+struct RequestValue {
+    var path: String = "/usr/code"
+    var file: String = "index.swift"
+    var env: [String: String] = [:]
+    var headers: [String: String] = [:]
+    var payload: String = ""
+
+    enum CodingKeys: String, CodingKey {
+        case path
+        case file
+        case env
+        case headers
+        case payload
+    }
+}
+
+extension RequestValue : Decodable {
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let path = try? values.decodeIfPresent(String.self, forKey: .path) {
+            self.path = path
+        }
+        if let file = try? values.decodeIfPresent(String.self, forKey: .file) {
+            self.file = file
+        }
+        if let env = try? values.decodeIfPresent([String: String].self, forKey: .env) {
+            self.env = env
+        }
+        if let headers = try? values.decodeIfPresent([String: String].self, forKey: .headers) {
+            self.headers = headers
+        }
+        if let payload = try? values.decodeIfPresent(String.self, forKey: .payload) {
+            self.payload = payload
+        }
+    }
 }
 
 class RequestResponse {
