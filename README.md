@@ -5,7 +5,7 @@
 ---
 
 [![Discord](https://img.shields.io/discord/937092945713172480?label=discord&style=flat-square)](https://discord.gg/mkZcevnxuf)
-[![Build Status](https://img.shields.io/travis/com/open-runtimes/open-runtimes/master?style=flat-square)](https://travis-ci.com/open-runtimes/open-runtimes)
+[![Build Status](https://img.shields.io/travis/com/open-runtimes/open-runtimes/master?style=flat-square)](https://travis-ci.com/github/open-runtimes/open-runtimes)
 [![Twitter Account](https://img.shields.io/twitter/follow/appwrite?color=00acee&label=twitter&style=flat-square)](https://twitter.com/appwrite)
 
 <!-- [![Docker Pulls](https://img.shields.io/docker/pulls/appwrite/appwrite?color=f02e65&style=flat-square)](https://hub.docker.com/r/appwrite/appwrite) -->
