@@ -17,14 +17,15 @@ import Collections
 
 func main(req: RequestValue, res: RequestResponse) throws -> RequestResponse {
 
-    let headerData = req.headers?["x-test-header"]
-    let envData = req.env?["test-env"]
+    let headerData = req.headers["x-test-header"]
+    let envData = req.env["test-env"]
 
     var todoId: String = "1"
     var todo: [String: Any]? = nil
 
-    if let string = req.payload, !string.isEmpty,
-        let payload = try? JSONSerialization.jsonObject(with: string.data(using: .utf8)!, options: []) as? [String: Any] {
+    if !req.payload.isEmpty,
+        let data = req.payload.data(using: .utf8),
+        let payload = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
             todoId = payload["id"] as! String
     }
 
