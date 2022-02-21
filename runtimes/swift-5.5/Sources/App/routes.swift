@@ -71,8 +71,8 @@ extension RequestResponse {
     }
 }
 
-extension RequestResponse: ResponseEncodable {
-    func encodeResponse(for request: Request) -> EventLoopFuture<Response> {
+extension RequestResponse: AsyncResponseEncodable {
+    func encodeResponse(for request: Request) async throws -> Response {
         var headers = HTTPHeaders()
         
         switch self.isJson {
@@ -81,15 +81,17 @@ extension RequestResponse: ResponseEncodable {
         case true:
             headers.add(name: .contentType, value: "application/json")
         }
-        
-        return request.eventLoop.makeSucceededFuture(.init(
-            status: self.statusCode, headers: headers, body: .init(string: self.data)
-        ))
+
+        return Response(
+            status: self.statusCode, 
+            headers: headers, 
+            body: .init(string: self.data)
+        )
     }
 }
 
 func routes(_ app: Application) throws {
-    app.on(.POST, "", body: .stream) { req -> RequestResponse in
+    app.on(.POST, "", body: .stream) { req async throws -> RequestResponse in
         if (!req.headers.contains(name: "x-internal-challenge") || req.headers["x-internal-challenge"].isEmpty) {
             return RequestResponse.unauthorized()
         }
@@ -108,7 +110,7 @@ func routes(_ app: Application) throws {
                     request = try JSONDecoder().decode(RequestValue.self, from: body.data(using: .utf8)!)
             }
 
-            return try main(req: request, res: response)
+            return try await main(req: request, res: response)
         } catch let error {
             return RequestResponse.error(from: error)
         }
