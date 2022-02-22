@@ -12,6 +12,9 @@ WORKDIR /usr/local/src
 
 COPY . .
 
+RUN chmod +x /usr/local/src/start.sh
+RUN chmod +x /usr/local/src/build.sh
+
 ENV FLASK_APP="/usr/local/src/server.py"
 
 EXPOSE 3000

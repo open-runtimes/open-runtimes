@@ -70,6 +70,9 @@ COPY ./start.sh /usr/local/src/
 COPY ./build.sh /usr/local/src/
 COPY ./prepare.php /usr/local/src/
 
+RUN chmod +x /usr/local/src/start.sh
+RUN chmod +x /usr/local/src/build.sh
+
 # Enable Extensions
 RUN echo extension=swoole.so >> /usr/local/etc/php/conf.d/swoole.ini
 
