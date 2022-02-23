@@ -18,7 +18,7 @@ printf "<?\nreturn function(\$req, \$res) { \$res->json([ 'n' => \mt_rand() / \m
 2. Build the code:
 
 ```bash
-docker run -e ENTRYPOINT_NAME=index.php --rm --interactive --tty --volume $PWD:/usr/code openruntimes/php:8.1 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/php:8.1 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
