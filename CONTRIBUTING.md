@@ -72,7 +72,7 @@ To install a working development environment follow these instructions:
 
 **Composer CLI**
 ```bash
-composer update --ignore-platform-reqs --optimize-autoloader --no-plugins --no-scripts --prefer-dist
+composer install
 ```
 
 **Docker (UNIX)**
