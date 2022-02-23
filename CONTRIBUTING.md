@@ -1,7 +1,7 @@
 
 # Contributing
 
-We would ❤️ for you to contribute to Open-runtimes and help make it better! We want contributing to Open-runtimes to be fun, enjoyable, and educational for anyone and everyone. All contributions are welcome, including issues, new docs as well as updates and tweaks, blog posts, workshops, and more.
+We would ❤️ for you to contribute to Open Runtimes and help make it better! We want contributing to Open Runtimes to be fun, enjoyable, and educational for anyone and everyone. All contributions are welcome, including issues, new docs as well as updates and tweaks, blog posts, workshops, and more.
 
 ## How to Start?
 
