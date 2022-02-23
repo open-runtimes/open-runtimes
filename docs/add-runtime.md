@@ -81,7 +81,6 @@ The `Response` class must have two functions.
 - A `send(string)` function which will return text to the request
 - and a `json(object)` function which will return JSON to the request setting the appropriate headers
 
-For interpreted languages use the `path` and `file` parameters to find the file and require it.
 Please make sure to add appropriate checks to make sure the imported file is a function that you can execute.
 
 1. Finally execute the function and handle whatever response the user's code returns. Try to wrap the function into a `try catch` statement to handle any errors the user's function encounters and return them cleanly to the executor with the error schema.
