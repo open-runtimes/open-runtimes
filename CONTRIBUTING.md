@@ -5,7 +5,7 @@ We would ❤️ for you to contribute to Open Runtimes and help make it better! 
 
 ## How to Start?
 
-If you are worried or don’t know where to start, check out our next section explaining what kind of help we could use and where can you get involved. You can reach out with questions to [Eldad Fux (@eldadfux)](https://twitter.com/eldadfux) or anyone from the [Open-runtimes team on Discord](https://discord.gg/fP6W2qEzfQ). You can also submit an issue, and a maintainer can guide you!
+If you are worried or don’t know where to start, check out our next section explaining what kind of help we could use and where can you get involved. You can reach out with questions to [Eldad Fux (@eldadfux)](https://twitter.com/eldadfux) or anyone from the [Open Runtimes team on Discord](https://discord.gg/fP6W2qEzfQ). You can also submit an issue, and a maintainer can guide you!
 
 ## Code of Conduct
 
