@@ -153,7 +153,7 @@ $this->runtimes['dart'] = $dart;
 ```
 This is an example of what you would do for a compiled language such as dart.
 
-The first line is creating a new language entry, The first parameter is the internal name and the second one is the external one which is what the user will see in projects that use OpenRuntimes such as Appwrite.
+The first line is creating a new language entry, The first parameter is the internal name and the second one is the external one which is what the user will see in projects that use Open Runtimes such as Appwrite.
 
 The second line adds a new version to the language entry, I'll break down the parameters:
 ```
