@@ -128,30 +128,19 @@ RUN chmod +x ./start.sh
 
 If needed use the `RUN` commands to install any dependencies you require for the build stage.
 
-Finally, you'll add a `CMD` command. For an interpreted language this should be:
+Finally, you'll add a `CMD` command. this should be:
 ```
 CMD ["/usr/local/src/start.sh"]
 ```
 Since this will use your launch script when the runtime starts.
 
-For a compiled language this must be:
-```
-CMD ["tail", "-f", "/dev/null"]
-```
-so the build steps can be run.
-
 ## 3. Building your Docker image and adding it to the list
 With your runtime successfully created you can now move on to building your Docker image and adding it to the script files used for generating all of the image files.
 
-Open up the `/runtimes/buildLocalOnly.sh` script first and add your runtime to it. The following is an example with dart version 2.12
+Open up the `./build.sh` script first and add your runtime to it. The following is an example with dart version 2.12
 ```
 echo 'Dart 2.12...'
 docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12
-```
-Next, open up the `/runtimes/build.sh` script and also add your runtime to it. This one is slightly different as this is the one that will be used for cross-platform compiles and deploying it to Docker hub. The following is an example also with dart version 2.12:
-```
-echo  'Dart 2.12...'
-docker buildx build --platform linux/amd64,linux/arm64 -t dart-runtime:2.12 ./runtimes/dart-2.12/ --push
 ```
 
 ## 4. Adding the runtime to the runtimes list
