@@ -143,7 +143,7 @@ echo 'Dart 2.12...'
 docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12
 ```
 
-## 4. Adding the runtime to the runtimes list
+<!-- ## 4. Adding the runtime to the runtimes list
 In `src/Runtimes/Runtimes` create a new entry in the `__construct()` method in the Runtimes class like so:
 ```
 $dart = new Runtime('dart', 'Dart');
@@ -163,11 +163,11 @@ For interpreted languages, this is normally the same as the Build Image, but for
 We recommend using Alpine when possible and using Ubuntu if the runtime doesn't work on Alpine.
 4: Platforms Supported - These are the architectures this runtime is available to.
 ```
-The third line simply adds the new runtime to the main list.
+The third line simply adds the new runtime to the main list. -->
 
-## 5. Adding tests
+## 4. Adding tests
 
-### 5.1 Writing your test execution script
+### 4.1 Writing your test execution script
 Adding tests for your runtime is simple, go into the `/tests/resources` folder and create a folder for the language you are creating then within the folder create a source code file for the language you are writing a runtime for as if you were creating a user function for your runtime. Within this user function you are writing all you need to do is return some JSON with the following schema:
 ```json
 {
@@ -176,7 +176,7 @@ Adding tests for your runtime is simple, go into the `/tests/resources` folder a
     "payload": request.payload, // Payload from the request
 }
 ```
-### 5.2 Creating the test packaging script for your runtime
+### 4.2 Creating the test packaging script for your runtime
 With your test execution written you can move on to writing the script used to package your test execution script into a tarball for later use by the test system. Move into `/test/resources` again and notice how we have shell scripts for all runtimes we have made tests for. 
 
 Next create a shell script yourself with your language name. As an example, the shell script name for dart would be `package-dart.sh`
@@ -195,7 +195,7 @@ This command adds execution permissions to your script and executes it.
 
 NOTE: If you ever want to repackage your script you can simply run: `./tests/resources/package-LANGUAGE_NAME.sh` in the root of the `php-runtimes` project since you don't have to change permissions more than once.
 
-### 5.3 Adding your runtime to the main testing script
+### 4.3 Adding your runtime to the main testing script
 Now you have created your test execution script and have packaged it up for your runtime to execute you can now add it to the main testing script. Open up the `./tests/Runtimes/RuntimesTest.php` file and find the part where we are defining `$this->tests`.
 
 Once you have found this, Add your own entry into this array like so:
@@ -212,12 +212,12 @@ Make sure to replace all instances of `LANGUAGE_NAME` with your language's name 
 
 Once you have done this and saved it, it is finally time to move onto one of the final steps.
 
-### 5.4 Running the tests.
+### 4.4 Running the tests.
 Running the tests is easy, simply run `docker-compose up` in the root of the `php-runtimes` folder. This will launch a Docker container with the test script and start running through all the runtimes making sure to test them thoroughly.
 
 If all tests pass then congratulations! You can now go ahead and file a PR against the `php-runtimes` repo making sure to target the `refactor` branch, make sure you're ready to respond to any feedback which can arise during our code review.
 
-## 6. Raise a pull request
+## 5. Raise a pull request
 First of all, commit the changes with the message `Added XXX Runtime` and push it. This will publish a new branch to your forked version of OpenRuntimes. If you visit it at `github.com/YOUR_USERNAME/php-runtimes`, you will see a new alert saying you are ready to submit a pull request. Follow the steps GitHub provides, and at the end, you will have your pull request submitted.
 
 ## ![face_with_head_bandage](https://github.githubassets.com/images/icons/emoji/unicode/1f915.png) Stuck ?
