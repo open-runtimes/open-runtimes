@@ -96,7 +96,7 @@ docker build -t {{Image Tag Name}} ./runtimes/{{Folder of your runtime}}
 
 ## Introducing New Features
 
-We would 💖 for you to contribute to Open-runtimes, but we would also like to make sure Open-runtimes is as great as possible and loyal to its vision and mission statement 🙏.
+We would 💖 for you to contribute to Open Runtimes, but we would also like to make sure Open Runtimes is as great as possible and loyal to its vision and mission statement 🙏.
 
 For us to find the right balance, please open an issue explaining your ideas before introducing a new pull request.
 
