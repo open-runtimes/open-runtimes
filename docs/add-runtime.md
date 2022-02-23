@@ -155,7 +155,7 @@ CMD ["tail", "-f", "/dev/null"]
 so the build steps can be run.
 
 ## 3. Building your Docker image and adding it to the list
-With your runtime successfully created you can now move on to building your docker image and adding it to the script files used for generating all of the image files.
+With your runtime successfully created you can now move on to building your Docker image and adding it to the script files used for generating all of the image files.
 
 Open up the `/runtimes/buildLocalOnly.sh` script first and add your runtime to it. The following is an example with dart version 2.12
 ```
