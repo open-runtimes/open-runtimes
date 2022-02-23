@@ -160,7 +160,7 @@ With your runtime successfully created you can now move on to building your Dock
 Open up the `/runtimes/buildLocalOnly.sh` script first and add your runtime to it. The following is an example with dart version 2.12
 ```
 echo 'Dart 2.12...'
-docker build -t dart-runtime:2.12 ./runtimes/dart-2.12
+docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12
 ```
 Next, open up the `/runtimes/build.sh` script and also add your runtime to it. This one is slightly different as this is the one that will be used for cross-platform compiles and deploying it to Docker hub. The following is an example also with dart version 2.12:
 ```
