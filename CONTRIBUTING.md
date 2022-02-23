@@ -106,7 +106,7 @@ This is also important for the Open Runtimes lead developers to be able to give 
 
 ## Other Ways to Help
 
-Pull requests are great, but there are many other areas where you can help Open-runtimes.
+Pull requests are great, but there are many other areas where you can help Open Runtimes.
 
 ### Blogging & Speaking
 
