@@ -13,6 +13,9 @@ WORKDIR /usr/local/src
 
 COPY . .
 
+RUN chmod +x /usr/local/src/start.sh
+RUN chmod +x /usr/local/src/build.sh
+
 RUN dart --disable-analytics
 
 EXPOSE 3000

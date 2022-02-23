@@ -16,6 +16,9 @@ RUN deno install -qAf --unstable https://deno.land/x/denon@2.4.9/denon.ts
 
 COPY . .
 
+RUN chmod +x /usr/local/src/start.sh
+RUN chmod +x /usr/local/src/build.sh
+
 EXPOSE 3000
 
 CMD [ "/usr/local/src/start.sh" ]
