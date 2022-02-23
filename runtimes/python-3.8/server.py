@@ -62,3 +62,7 @@ def handler(u_path):
         return userFunction.main(req, resp);
     except Exception as e:
         return {'message': str("".join(traceback.TracebackException.from_exception(e).format())), 'code': 500}, 500;
+
+if __name__ == "__main__":
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=3000)
