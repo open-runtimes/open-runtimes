@@ -132,7 +132,7 @@ All requests should also have JSON body with the following structure:
 {
     // Following will be exposed to the function
     "env": {
-        // Environment varialbes
+        // Environment variables
     },
     "payload": "{}",
     "headers": {
