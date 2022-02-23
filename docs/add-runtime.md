@@ -49,8 +49,7 @@ The build script is always executed during the build stage of a function deploym
 The `start.sh` file for an interpreted runtime should extract the `/tmp/code.tar.gz` file that contains both the user's code and the dependencies. This tarball was created by OpenRuntimes from the `/usr/code` folder and should install the dependencies that were pre-installed by the build stage and move them into the relevant locations for that runtime. It will then run the server ready for execution.
 
 ---
-Compiled Languages only have a `build.sh` file.
-The `build.sh` script for a compiled runtime is used to move the user's source code and rename it into source files for the runtime (The `INTERNAL_RUNTIME_ENTRYPOINT` environment variable can help with this) it will also build the code and move it into the `/usr/code` folder. Compiled runtime executables **must** be called `runtime` for the ubuntu or alpine images to detect and run them.
+The `build.sh` script for a compiled runtime is used to move the user's source code and rename it into source files for the runtime (The `INTERNAL_RUNTIME_ENTRYPOINT` environment variable can help with this) it will also build the code and move it into the `/usr/code` folder.
 
 #### Note:
 `/tmp/code.tar.gz` is always created from the `/usr/code` folder as an output of the build stage. If you need any files for either compiled or interpreted runtimes you should place them there and extract them from the `/tmp/code.tar.gz` during the `start.sh` script to get the files you need.
@@ -81,10 +80,12 @@ The `Response` class must have two functions.
 - A `send(string)` function which will return text to the request
 - and a `json(object)` function which will return JSON to the request setting the appropriate headers
 
+For languages that have dynamic typing such as JS you can pass an object with these attributes if you like.
+
 For interpreted languages use the `path` and `file` parameters to find the file and require it.
 Please make sure to add appropriate checks to make sure the imported file is a function that you can execute.
 
-1. Finally execute the function and handle whatever response the user's code returns. Try to wrap the function into a `try catch` statement to handle any errors the user's function encounters and return them cleanly to the executor with the error schema.
+1. Finally execute the function and handle whatever response the user's code returns. Wrap the function into a `try catch` statement to handle any errors the user's function encounters and return them cleanly to the executor with the error schema.
 
 ### 2.4 The Error Schema
 All errors that occur during the execution of a user's function **MUST** be returned using this JSON Object otherwise OpenRuntimes will be unable to parse them for the user.
@@ -106,13 +107,7 @@ FROM Dart:2.12 # Dart is used as an example.
 ```
 This will download and require the image when you build your runtime and allow you to use the toolset of the language you are building a runtime for.
 
-Create a user and group for the runtime, this user will be used to both build and run the code:
-```bash
-RUN groupadd -g 2000 openruntimes \
-&& useradd -m -u 2001 -g openruntimes openruntimes
-```
-
-then create the folders you will use in your build step:
+Create the folders you will use in your build step:
 ```bash
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code
@@ -131,17 +126,8 @@ Next, you want to make sure you are adding execute permissions to any scripts yo
 RUN chmod +x ./build.sh
 RUN chmod +x ./start.sh
 ```
-Note: Do not chmod a `start.sh` file if you don't have one.
 
 If needed use the `RUN` commands to install any dependencies you require for the build stage.
-
-Next set the permissions for the user you created so your build and run step will have access to them:
-```
-RUN ["chown", "-R", "openruntimes:openruntimes", "/usr/local/src"]
-RUN ["chown", "-R", "openruntimes:openruntimes", "/usr/code"]
-RUN ["chown", "-R", "openruntimes:openruntimes", "/usr/workspace"]
-RUN ["chown", "-R", "openruntimes:openruntimes", "/usr/builtCode"]
-```
 
 Finally, you'll add a `CMD` command. For an interpreted language this should be:
 ```
