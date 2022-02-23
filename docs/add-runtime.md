@@ -82,7 +82,6 @@ The `Response` class must have two functions.
 
 For languages that have dynamic typing such as JS you can pass an object with these attributes if you like.
 
-For interpreted languages use the `path` and `file` parameters to find the file and require it.
 Please make sure to add appropriate checks to make sure the imported file is a function that you can execute.
 
 1. Finally execute the function and handle whatever response the user's code returns. Wrap the function into a `try catch` statement to handle any errors the user's function encounters and return them cleanly to the executor with the error schema.
@@ -97,9 +96,9 @@ All errors that occur during the execution of a user's function **MUST** be retu
 ```
 
 ### 2.5 Writing your Dockerfile
-The Dockerfile is very important as it's the environment you are creating to run build the runtime and also run the code if you are writing an Interpreted Runtime (Compiled runtimes will use an alpine or ubuntu image to run the compiled executable.)
+The Dockerfile is very important as it's the environment you are creating to run build the runtime and also run the code if you are writing an interpreted runtime (compiled runtimes will use an `alpine` or `ubuntu` image to run the compiled executable.)
 
-The first thing you need to do is find a docker image to base your runtime off, You can find these at [Docker Hub](https://hub.docker.com). If possible try to use verified official builds of the language you are creating a runtime for.
+The first thing you need to do is find a Docker image to base your runtime off. You can find these at [Docker Hub](https://hub.docker.com). If possible try to use verified official builds of the language you are creating a runtime for.
 
 Next in your Dockerfile at the start add the docker image you want to base it off at the top like so:
 ```bash
@@ -142,12 +141,12 @@ CMD ["tail", "-f", "/dev/null"]
 so the build steps can be run.
 
 ## 3. Building your Docker image and adding it to the list
-With your runtime successfully created you can now move on to building your docker image and adding it to the script files used for generating all of the image files.
+With your runtime successfully created you can now move on to building your Docker image and adding it to the script files used for generating all of the image files.
 
 Open up the `/runtimes/buildLocalOnly.sh` script first and add your runtime to it. The following is an example with dart version 2.12
 ```
 echo 'Dart 2.12...'
-docker build -t dart-runtime:2.12 ./runtimes/dart-2.12
+docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12
 ```
 Next, open up the `/runtimes/build.sh` script and also add your runtime to it. This one is slightly different as this is the one that will be used for cross-platform compiles and deploying it to Docker hub. The following is an example also with dart version 2.12:
 ```

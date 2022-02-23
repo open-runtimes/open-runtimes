@@ -55,9 +55,9 @@ $ git checkout -b [name_of_your_new_branch]
 $ git push origin [name_of_your_new_branch]
 ```
 
-5. Submit your changes for review
+5. Submit your changes for review  
    If you go to your repository on GitHub, you'll see a `Compare & pull request` button. Click on that button.
-6. Start a Pull Request
+6. Start a Pull Request  
    Now submit the pull request and click on `Create pull request`.
 7. Get a code review approval/reject
 8. After approval, merge your PR
@@ -97,7 +97,7 @@ docker build -t {{Image Tag Name}} ./{{Folder of your runtime}}
 
 ## Introducing New Features
 
-We would 💖 you to contribute to Open-runtimes, but we would also like to make sure Open-runtimes is as great as possible and loyal to its vision and mission statement 🙏.
+We would 💖 for you to contribute to Open-runtimes, but we would also like to make sure Open-runtimes is as great as possible and loyal to its vision and mission statement 🙏.
 
 For us to find the right balance, please open an issue explaining your ideas before introducing a new pull request.
 
