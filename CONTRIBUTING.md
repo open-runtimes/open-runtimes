@@ -55,7 +55,7 @@ $ git checkout -b [name_of_your_new_branch]
 $ git push origin [name_of_your_new_branch]
 ```
 
-5. Submit your changes for review
+5. Submit your changes for review  
    If you go to your repository on GitHub, you'll see a `Compare & pull request` button. Click on that button.
 6. Start a Pull Request  
    Now submit the pull request and click on `Create pull request`.
