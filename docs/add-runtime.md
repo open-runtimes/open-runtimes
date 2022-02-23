@@ -95,7 +95,7 @@ All errors that occur during the execution of a user's function **MUST** be retu
 ```
 
 ### 2.5 Writing your Dockerfile
-The Dockerfile is very important as it's the environment you are creating to run build the runtime and also run the code if you are writing an Interpreted Runtime (Compiled runtimes will use an alpine or ubuntu image to run the compiled executable.)
+The Dockerfile is very important as it's the environment you are creating to run build the runtime and also run the code if you are writing an interpreted runtime (compiled runtimes will use an `alpine` or `ubuntu` image to run the compiled executable.)
 
 The first thing you need to do is find a docker image to base your runtime off, You can find these at [Docker Hub](https://hub.docker.com). If possible try to use verified official builds of the language you are creating a runtime for.
 
