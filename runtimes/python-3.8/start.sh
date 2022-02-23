@@ -7,4 +7,4 @@ source /usr/code-start/runtime-env/bin/activate
 export VIRTUAL_ENV="/usr/code-start/runtime-env"
 export PATH="$VIRTUAL_ENV/bin:$PATH"
 cd /usr/local/src/
-python3 /usr/code-start/runtime-env/bin/flask run --host=0.0.0.0 --port=3000
+python3 server.py
