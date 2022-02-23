@@ -42,11 +42,11 @@ README.md - A readme file explaining the runtime and any special notes for the r
 ### 2.2 Differences between compiled and interpreted runtimes
 Runtimes within OpenRuntimes are created differently depending on whether they are compiled or interpreted. This is due to the fundamental differences between the two ways of running the code.
 
-Interpreted languages have both a `build.sh` file and a `launch.sh` file.
+Interpreted languages have both a `build.sh` file and a `start.sh` file.
 The `build.sh` file for an interpreted runtime is normally used for installing any dependencies for both the server itself and the user's code and then to copy it to the `/usr/code` folder which is then packaged and can be used later for running the server.
 The build script is always executed during the build stage of a function deployment.
 
-The `launch.sh` file for an interpreted runtime should extract the `/tmp/code.tar.gz` file that contains both the user's code and the dependencies. This tarball was created by OpenRuntimes from the `/usr/code` folder and should install the dependencies that were pre-installed by the build stage and move them into the relevant locations for that runtime. It will then run the server ready for execution.
+The `start.sh` file for an interpreted runtime should extract the `/tmp/code.tar.gz` file that contains both the user's code and the dependencies. This tarball was created by OpenRuntimes from the `/usr/code` folder and should install the dependencies that were pre-installed by the build stage and move them into the relevant locations for that runtime. It will then run the server ready for execution.
 
 ---
 Compiled Languages only have a `build.sh` file.
@@ -59,21 +59,18 @@ The `build.sh` script for a compiled runtime is used to move the user's source c
 Internally the runtime can be anything you like as long as it follows the standards set by the other runtimes.
 
 The best way to go about writing a runtime is like so:
-Initialize a web server that runs on port 3000 and uses any IP Address (0.0.0.0) and on each `POST` request do the following:
+Initialize a web server that runs on port 3000 and binds to the 0.0.0.0 IP and on each `POST` request do the following:
 1. Check that the `x-internal-challenge` header matches the `INTERNAL_RUNTIME_KEY` environment variable. If not return an error with a `401` status code and an `unauthorized` error message.
 2. Decode the executor's JSON POST request. This normally looks like so:
 ```json
 {
- "path": "/usr/code",
- "file": "index.js",
  "env": {
-         "hello":"world!"
-    },
+    "hello":"world!"
+ },
  "payload":"An Example Payload",
  "timeout": 10
 }
 ```
-For a compiled language you can disregard the `path` and `file` attribute if you like,
 
 `timeout` is also an optional parameter to deal with, if you can handle it please do. Otherwise, it doesn't matter since the connection will simply be dropped by the executor.
 
@@ -87,7 +84,7 @@ The `Response` class must have two functions.
 For interpreted languages use the `path` and `file` parameters to find the file and require it.
 Please make sure to add appropriate checks to make sure the imported file is a function that you can execute.
 
-5. Finally execute the function and handle whatever response the user's code returns. Try to wrap the function into a `try catch` statement to handle any errors the user's function encounters and return them cleanly to the executor with the error schema.
+1. Finally execute the function and handle whatever response the user's code returns. Try to wrap the function into a `try catch` statement to handle any errors the user's function encounters and return them cleanly to the executor with the error schema.
 
 ### 2.4 The Error Schema
 All errors that occur during the execution of a user's function **MUST** be returned using this JSON Object otherwise OpenRuntimes will be unable to parse them for the user.
@@ -129,12 +126,12 @@ WORKDIR /usr/local/src
 COPY . /usr/local/src
 ```
 
-Next, you want to make sure you are adding execute permissions to any scripts you may run, the main ones are `build.sh` and `launch.sh`. You can run commands in Dockerfile's using the `RUN` prefix like so:
+Next, you want to make sure you are adding execute permissions to any scripts you may run, the main ones are `build.sh` and `start.sh`. You can run commands in Dockerfile's using the `RUN` prefix like so:
 ```
 RUN chmod +x ./build.sh
-RUN chmod +x ./launch.sh
+RUN chmod +x ./start.sh
 ```
-Note: Do not chmod a `launch.sh` file if you don't have one.
+Note: Do not chmod a `start.sh` file if you don't have one.
 
 If needed use the `RUN` commands to install any dependencies you require for the build stage.
 
@@ -148,7 +145,7 @@ RUN ["chown", "-R", "openruntimes:openruntimes", "/usr/builtCode"]
 
 Finally, you'll add a `CMD` command. For an interpreted language this should be:
 ```
-CMD ["/usr/local/src/launch.sh"]
+CMD ["/usr/local/src/start.sh"]
 ```
 Since this will use your launch script when the runtime starts.
 
