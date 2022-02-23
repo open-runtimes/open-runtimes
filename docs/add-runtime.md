@@ -101,7 +101,7 @@ The Dockerfile is very important as it's the environment you are creating to run
 
 The first thing you need to do is find a Docker image to base your runtime off. You can find these at [Docker Hub](https://hub.docker.com). If possible try to use verified official builds of the language you are creating a runtime for.
 
-Next in your Dockerfile at the start add the docker image you want to base it off at the top like so:
+Next in your Dockerfile at the start, add the Docker image you want to base it off at the top like so:
 ```bash
 FROM Dart:2.12 # Dart is used as an example.
 ```
