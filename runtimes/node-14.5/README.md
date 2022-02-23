@@ -18,7 +18,7 @@ echo 'module.exports = async (req, res) => { res.json({ n: Math.random() }) }' >
 2. Build the code:
 
 ```bash
-docker run -e ENTRYPOINT_NAME=index.js --rm --interactive --tty --volume $PWD:/usr/code openruntimes/node:14.5 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/node:14.5 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
