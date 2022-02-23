@@ -89,8 +89,7 @@ docker run --rm --interactive --tty --volume "%cd%":/app composer update --ignor
 
 4. Build the runtimes you want to test using the docker build command:
 ```
-cd ./runtimes/
-docker build -t {{Image Tag Name}} ./{{Folder of your runtime}}
+docker build -t {{Image Tag Name}} ./runtimes/{{Folder of your runtime}}
 ```
 
 3. [Follow our contribution guide to learn how you can add support for more runtimes.](https://github.com/appwrite/php-runtimes/blob/main/docs/add-runtime.md)
