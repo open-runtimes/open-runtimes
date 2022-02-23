@@ -11,6 +11,7 @@ For a runtime to work, two prerequisites **must** be met due to the way OpenRunt
  Note: Both Compiled and Interpreted languages work with OpenRuntime's execution model but are written in slightly different ways.
 
 It's really easy to contribute to an open-source project, but when using GitHub, there are a few steps we need to follow. This section will take you step-by-step through the process of preparing your local version of OpenRuntimes, where you can make any changes without affecting OpenRuntimes right away.
+
 > If you are experienced with GitHub or have made a pull request before, you can skip to [Implement new runtime](https://github.com/open-runtimes/open-runtimes/blob/main/docs/tutorials/add-runtime.md#2-implement-new-runtime).
 
 ### 1.1 Fork the OpenRuntimes repository
