@@ -15,7 +15,7 @@ deno cache server.ts
 
 # Cache user function depdenencies
 cd /usr/builds
-deno cache $ENTRYPOINT_NAME
+deno cache $INTERNAL_RUNTIME_ENTRYPOINT
 
 # Finish build by preparing tar to use for starting the runtime
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .
