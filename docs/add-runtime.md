@@ -50,7 +50,7 @@ The `launch.sh` file for an interpreted runtime should extract the `/tmp/code.ta
 
 ---
 Compiled Languages only have a `build.sh` file.
-The `build.sh` script for a compiled runtime is used to move the user's source code and rename it into source files for the runtime (The `ENTRYPOINT_NAME` environment variable can help with this) it will also build the code and move it into the `/usr/code` folder. Compiled runtime executables **must** be called `runtime` for the ubuntu or alpine images to detect and run them.
+The `build.sh` script for a compiled runtime is used to move the user's source code and rename it into source files for the runtime (The `INTERNAL_RUNTIME_ENTRYPOINT` environment variable can help with this) it will also build the code and move it into the `/usr/code` folder. Compiled runtime executables **must** be called `runtime` for the ubuntu or alpine images to detect and run them.
 
 #### Note:
 `/tmp/code.tar.gz` is always created from the `/usr/code` folder in the build stage. If you need any files for either compiled or interpreted runtimes you should place them there and extract them from the `/tmp/code.tar.gz` during the `launch.sh` script to get the files you need.
