@@ -168,55 +168,64 @@ The third line simply adds the new runtime to the main list. -->
 
 ## 4. Adding tests
 
-### 4.1 Writing your test execution script
-Adding tests for your runtime is simple, go into the `/tests/resources` folder and create a folder for the language you are creating then within the folder create a source code file for the language you are writing a runtime for as if you were creating a user function for your runtime. Within this user function you are writing all you need to do is return some JSON with the following schema:
-```json5
+### 4.1 Creating your test script
+Create a new folder in `./tests` and name it the same name as the folder where you placed your runtime code. For example, if you are creating a runtime for dart 2.12 you would name it `dart-2.12`.
+
+Next create a new PHP file in the `./tests` folder again and name it the name of your language followed by it's version with **no dots and no spaces**. For example, if you are creating a runtime for dart 2.12 you would name it `dart212.php`. Within this PHP file you will place the following code:
+
+```php
+<?php
+
+namespace Tests;
+
+// Runtime: {{runtime name}}
+// PHP class: {{ file name }}
+// Entrypoint: {{ entrypoint name}}
+
+class {{ file name }} extends Base
 {
-    "normal": "Hello World!",
-    "env1": request.env['ENV1'], // ENV1 from the request environment variable
-    "payload": request.payload, // Payload from the request
 }
 ```
-### 4.2 Creating the test packaging script for your runtime
-With your test execution written you can move on to writing the script used to package your test execution script into a tarball for later use by the test system. Move into `/test/resources` again and notice how we have shell scripts for all runtimes we have made tests for. 
+Note: Make sure to replace `{{runtime name}}` with the name of your runtime for example: `dart-2.12` and the `{{file name}}` with the same name as the file you are currently working in without `.php` so for example `Dart212`. Also make sure to replace `{{entrypoint name}}` with `test` then the file extension of the language you are adding.
 
-Next create a shell script yourself with your language name. As an example, the shell script name for dart would be `package-dart.sh`
+Next go back into the folder you created earlier in `./tests/` and create a new source file for your language called `test` with the extension of the language you are adding. For example, if you are creating a runtime for dart 2.12 you would name it `test.dart`.
 
-Within this newly created script copy-paste this script and replace all the `LANGUAGE_NAME` parts with your language's name
+Within the folder you will need to create a function for your runtime that will do the following:
+
+1. Decode the payload as JSON
+2. Set a variable called `id` to the value of the `id` key in the payload or to `1` if it doesn't exist.
+3. Fetch `https://jsonplaceholder.typicode.com/todos/$id` using a HTTP Client that you got from your language's package manager (This is to test your dependency installation stage is working.)
+4. Return res.json with the following Schema:
+```json5
+    "isTest": true,
+    "message": "Hello Open Runtimes 👋",
+    "header": req.headers['x-test-header'],
+    "env": req.env['test-env'],
+    "todo": {{data from your request}},
 ```
-echo  'LANGUAGE_NAME Packaging...'
-rm $(pwd)/tests/resources/LANGUAGE_NAME.tar.gz
-tar -zcvf $(pwd)/tests/resources/LANGUAGE_NAME.tar.gz -C $(pwd)/tests/resources/LANGUAGE_NAME .
+
+### 4.2 Adding your runtime to travis
+
+Edit the `.travis.yml` file and add your runtime to the `env` section of it like so:
+```yaml
+  # {{Language Name}}
+  - RUNTIME={{full runtime name with version, e.g. dart-2.12}}
+    PHP_CLASS={{Name of the PHP Class you made earlier, e.g. Dart212}}
+    ENTRYPOINT={{Name of your entrypoint file, e.g. test.dart}}
+    SERVER_PROCESS="{{The name of the process that will be launched in your container, e.g. runtime}}"
+    IMAGE={{Full image name including the openruntime/ prefix, e.g. openruntimes/dart-2.12}}
+    ARCH={{List of architecture supported by this runtime seperated by commas, e.g. linux/amd64,linux/arm64}}
 ```
-Then save this file. Then `cd` into the root of the `php-runtimes` project in a terminal. Run the following command replacing the `LANGUAGE_NAME` with your language's name:
+You will have to create multiple of these for each version of the language you are adding.
+
+### 4.3 Running the tests.
+To run your tests go ahead and run the following command in your terminal:
+```bash
+RUNTIME={{Your Runtime}} ENTRYPOINT={{ your entrypoint }} SERVER_PROCESS={{ your process }} PHP_CLASS={{ your class }} ./tests.sh 
 ```
-chmod +x ./tests/resources/package-LANGUAGE_NAME.sh && ./tests/resources/package-LANGUAGE_NAME.sh
-```
-This command adds execution permissions to your script and executes it.
+Replace the curly brackets with the values you set in `.travis.yml` and make sure to run the command in the root of the repository.
 
-NOTE: If you ever want to repackage your script you can simply run: `./tests/resources/package-LANGUAGE_NAME.sh` in the root of the `php-runtimes` project since you don't have to change permissions more than once.
-
-### 4.3 Adding your runtime to the main testing script
-Now you have created your test execution script and have packaged it up for your runtime to execute you can now add it to the main testing script. Open up the `./tests/Runtimes/RuntimesTest.php` file and find the part where we are defining `$this->tests`.
-
-Once you have found this, Add your own entry into this array like so:
-```php
-'LANGUAGE_NAME-VERSION'  =>  [
-    'code'  =>  $functionsDir .  ' /LANGUAGE_NAME.tar.gz',
-    'entrypoint'  =>  'Test file', // Replace with the name of the test file you wrote in ./tests/resources/LANGUAGE_NAME
-    'timeout'  =>  15,
-    'runtime'  =>  'LANGUAGE_NAME-VERSION',
-    'tarname'  =>  'LANGUAGE_NAME-VERSION.tar.gz', // Note: If your version has a point in it replace it with a dash instead for this value.
-],
-```
-Make sure to replace all instances of `LANGUAGE_NAME` with your language's name and `VERSION` with your runtime's version.
-
-Once you have done this and saved it, it is finally time to move onto one of the final steps.
-
-### 4.4 Running the tests.
-Running the tests is easy, simply run `docker-compose up` in the root of the `php-runtimes` folder. This will launch a Docker container with the test script and start running through all the runtimes making sure to test them thoroughly.
-
-If all tests pass then congratulations! You can now go ahead and file a PR against the `php-runtimes` repo making sure to target the `refactor` branch, make sure you're ready to respond to any feedback which can arise during our code review.
+If all tests pass then move on to the next step, otherwise you will need to troubleshoot the problem before continuing.
 
 ## 5. Raise a pull request
 First of all, commit the changes with the message `Added XXX Runtime` and push it. This will publish a new branch to your forked version of Open Runtimes. If you visit it at `github.com/YOUR_USERNAME/php-runtimes`, you will see a new alert saying you are ready to submit a pull request. Follow the steps GitHub provides, and at the end, you will have your pull request submitted.
