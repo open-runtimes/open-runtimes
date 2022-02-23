@@ -110,19 +110,19 @@ Pull requests are great, but there are many other areas where you can help Open 
 
 ### Blogging & Speaking
 
-Blogging, speaking about, or creating tutorials about one of Open-runtimes’s many features is great way to contribute and help our project grow.
+Blogging, speaking about, or creating tutorials about any of Open Runtimes’s many features are great ways to contribute and help our project grow.
 
 ### Presenting at Meetups
 
-Presenting at meetups and conferences about your Open-runtimes projects. Your unique challenges and successes in building things with Open-runtimes can provide great speaking material. We’d love to review your talk abstract/CFP, so get in touch with us if you’d like some help!
+Present at meetups and conferences about your Open Runtimes projects. Your unique challenges and successes in building things with Open Runtimes can provide great speaking material. We’d love to review your talk abstract/CFP, so get in touch with us if you’d like some help!
 
 ### Sending Feedbacks & Reporting Bugs
 
-Sending feedback is a great way for us to understand your different use cases of Open-runtimes better. If you had any issues, bugs, or want to share about your experience, feel free to do so on our GitHub issues page or at our [Discord channel](https://discord.gg/fP6W2qEzfQ).
+Sending feedback is a great way for us to understand your different use cases of Open Runtimes better. If you had any issues, bugs, or want to share about your experience, feel free to do so on our GitHub issues page or at our [Discord channel](https://discord.gg/fP6W2qEzfQ).
 
 ### Submitting New Ideas
 
-If you think Open-runtimes could use a new feature, please open an issue on our GitHub repository, stating as much information as you can think about your new idea and its implications. We would also use this issue to gather more information, get more feedback from the community, and have a proper discussion about the new feature.
+If you think Open Runtimes could use a new feature, please open an issue on our GitHub repository, stating as much information as you can think about your new idea and its implications. We would also use this issue to gather more information, get more feedback from the community, and have a proper discussion about the new feature.
 
 ### Improving Documentation
 
@@ -130,4 +130,4 @@ Submitting documentation updates, enhancements, designs, or bug fixes. Spelling 
 
 ### Helping Someone
 
-Searching for Open-runtimes, GitHub or StackOverflow and helping someone else who needs help. You can also help by teaching others how to contribute to Open-runtimes's repo!
+Search for Open Runtimes on GitHub or StackOverflow and help someone else who needs help. You can also help by teaching others how to contribute to Open Runtimes's repo!

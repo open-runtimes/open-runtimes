@@ -1,22 +1,22 @@
 # Creating a new functions runtime 🏃
 
-This document is part of the OpenRuntimes contributors' guide. Before you continue reading this document make sure you have read the [Code of Conduct](https://github.com/open-runtimes/open-runtimes/blob/main/CODE_OF_CONDUCT.md) and the [Contributing Guide](https://github.com/open-runtimes/open-runtimes/blob/main/CONTRIBUTING.md).
+This document is part of the Open Runtimes contributors' guide. Before you continue reading this document make sure you have read the [Code of Conduct](https://github.com/open-runtimes/open-runtimes/blob/main/CODE_OF_CONDUCT.md) and the [Contributing Guide](https://github.com/open-runtimes/open-runtimes/blob/main/CONTRIBUTING.md).
 
 ## 1. Prerequisites
-For a runtime to work, two prerequisites **must** be met due to the way OpenRuntime's Runtime Execution Model works:
+For a runtime to work, two prerequisites **must** be met due to the way Open Runtimes's Runtime Execution Model works:
 
  - [ ] The Language in question must be able to run a web server that can serve JSON and text.
  - [ ] The Runtime must be able to be packaged into a Docker container
  
- Note: Both Compiled and Interpreted languages work with OpenRuntime's execution model but are written in slightly different ways.
+ Note: Both Compiled and Interpreted languages work with Open Runtimes's execution model but are written in slightly different ways.
 
-It's really easy to contribute to an open-source project, but when using GitHub, there are a few steps we need to follow. This section will take you step-by-step through the process of preparing your local version of OpenRuntimes, where you can make any changes without affecting OpenRuntimes right away.
+It's really easy to contribute to an open-source project, but when using GitHub, there are a few steps we need to follow. This section will take you step-by-step through the process of preparing your local version of Open Runtimes, where you can make any changes without affecting Open Runtimes right away.
 
 > If you are experienced with GitHub or have made a pull request before, you can skip to [Implement new runtime](https://github.com/open-runtimes/open-runtimes/blob/main/docs/tutorials/add-runtime.md#2-implement-new-runtime).
 
-### 1.1 Fork the OpenRuntimes repository
+### 1.1 Fork the Open Runtimes repository
 
-Before making any changes, you will need to fork OpenRuntimes's repository to keep branches on the official repo clean. To do that, visit [OpenRuntimes's Runtime repository](https://github.com/open-runtimes/open-runtimes) and click on the fork button.
+Before making any changes, you will need to fork Open Runtimes's repository to keep branches on the official repo clean. To do that, visit [Open Runtimes's Runtime repository](https://github.com/open-runtimes/open-runtimes) and click on the fork button.
 
 [![Fork button](https://github.com/appwrite/appwrite/raw/master/docs/tutorials/images/fork.png)](https://github.com/appwrite/appwrite/blob/master/docs/tutorials/images/fork.png)
 
@@ -34,20 +34,20 @@ Finally, you will need to create a `feat-XXX-YYY-runtime` branch based on the `r
 ### 2.1 Preparing the files for your new runtime
 The first step to writing a new runtime is to create a folder within `/runtimes` with the name of the runtime and the version separated by a dash. For instance, if I was to write a Rust Runtime with version 1.55 the folder name would be: `rust-1.55`
 
-Within that folder you will need to create a few basic files that all OpenRuntimes runtimes require:
+Within that folder you will need to create a few basic files that all Open Runtimes runtimes require:
 ```
 Dockerfile - Dockerfile that explains how the container will be built.
 README.md - A readme file explaining the runtime and any special notes for the runtime. A good example of this is the PHP 8.0 runtime.
 ```
 
 ### 2.2 Differences between compiled and interpreted runtimes
-Runtimes within OpenRuntimes are created differently depending on whether they are compiled or interpreted. This is due to the fundamental differences between the two ways of running the code.
+Runtimes within Open Runtimes are created differently depending on whether they are compiled or interpreted. This is due to the fundamental differences between the two ways of running the code.
 
 Interpreted languages have both a `build.sh` file and a `start.sh` file.
 The `build.sh` file for an interpreted runtime is normally used for installing any dependencies for both the server itself and the user's code and then to copy it to the `/usr/code` folder which is then packaged and can be used later for running the server.
 The build script is always executed during the build stage of a function deployment.
 
-The `start.sh` file for an interpreted runtime should extract the `/tmp/code.tar.gz` file that contains both the user's code and the dependencies. This tarball was created by OpenRuntimes from the `/usr/code` folder and should install the dependencies that were pre-installed by the build stage and move them into the relevant locations for that runtime. It will then run the server ready for execution.
+The `start.sh` file for an interpreted runtime should extract the `/tmp/code.tar.gz` file that contains both the user's code and the dependencies. This tarball was created by Open Runtimes from the `/usr/code` folder and should install the dependencies that were pre-installed by the build stage and move them into the relevant locations for that runtime. It will then run the server ready for execution.
 
 ---
 The `build.sh` script for a compiled runtime is used to move the user's source code and rename it into source files for the runtime (The `INTERNAL_RUNTIME_ENTRYPOINT` environment variable can help with this) it will also build the code and move it into the `/usr/code` folder.
@@ -72,7 +72,7 @@ Initialize a web server that runs on port 3000 and binds to the 0.0.0.0 IP and o
 }
 ```
 
-`timeout` is also an optional parameter to deal with, if you can handle it please do. Otherwise, it doesn't matter since the connection will simply be dropped by the executor.
+`timeout` is also an optional parameter to deal with, if you can handle it, please do. Otherwise, it doesn't matter since the connection will simply be dropped by the executor.
 
 You must create two classes for users to use within their scripts. A `Request` Class and a `Response` class
 The `Request` class must store `env`, `payload` and `headers` and pass them to the user's function. 
@@ -89,7 +89,7 @@ Please make sure to add appropriate checks to make sure the imported file is a f
 
 ### 2.4 The Error Schema
 All errors that occur during the execution of a user's function **MUST** be returned using this JSON Object otherwise OpenRuntimes will be unable to parse them for the user.
-```json
+```json5
 {
     "code": 500, // (Int) Use 404 if function not found or use 401 if the x-internal-challenge check failed.
     "message": "Error: Tried to divide by 0 \n /usr/code/index.js:80:7", // (String) Try to return a stacktrace and detailed error message if possible. This is shown to the user.
@@ -170,7 +170,7 @@ The third line simply adds the new runtime to the main list. -->
 
 ### 4.1 Writing your test execution script
 Adding tests for your runtime is simple, go into the `/tests/resources` folder and create a folder for the language you are creating then within the folder create a source code file for the language you are writing a runtime for as if you were creating a user function for your runtime. Within this user function you are writing all you need to do is return some JSON with the following schema:
-```json
+```json5
 {
     "normal": "Hello World!",
     "env1": request.env['ENV1'], // ENV1 from the request environment variable
@@ -221,6 +221,6 @@ If all tests pass then congratulations! You can now go ahead and file a PR again
 ## 5. Raise a pull request
 First of all, commit the changes with the message `Added XXX Runtime` and push it. This will publish a new branch to your forked version of Open Runtimes. If you visit it at `github.com/YOUR_USERNAME/php-runtimes`, you will see a new alert saying you are ready to submit a pull request. Follow the steps GitHub provides, and at the end, you will have your pull request submitted.
 
-## ![face_with_head_bandage](https://github.githubassets.com/images/icons/emoji/unicode/1f915.png) Stuck ?
+##🤕 Stuck ?
 
 If you need any help with the contribution, feel free to head over to [our Discord channel](https://discord.gg/fP6W2qEzfQ) and we'll be happy to help you out.
