@@ -41,7 +41,7 @@ For the initial start, fork the project and use git clone command to download th
 $ git pull
 ```
 
-2. Create new branch from `master` like: `doc-548-submit-a-pull-request-section-to-contribution-guide`<br/>
+2. Create new branch from `main` like: `doc-548-submit-a-pull-request-section-to-contribution-guide`<br/>
 
 ```
 $ git checkout -b [name_of_your_new_branch]
