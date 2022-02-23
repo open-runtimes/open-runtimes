@@ -18,7 +18,7 @@ printf 'def main(request, response)\n    return response.json({:n => rand()})\ne
 2. Build the code:
 
 ```bash
-docker run -e ENTRYPOINT_NAME=index.rb --rm --interactive --tty --volume $PWD:/usr/code openruntimes/ruby:3.1 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/ruby:3.1 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:

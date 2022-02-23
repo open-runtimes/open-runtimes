@@ -18,7 +18,7 @@ printf "import random\n\ndef main(req, res):\n    return res.json({'n': random.r
 2. Build the code:
 
 ```bash
-docker run -e ENTRYPOINT_NAME=main.py --rm --interactive --tty --volume $PWD:/usr/code openruntimes/python:3.8 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/python:3.8 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
