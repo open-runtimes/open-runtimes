@@ -67,8 +67,6 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-TODO: Update all notes
-
 - When writing function for this runtime, ensure it is named `main`. An example of this is:
 
 ```ruby
@@ -97,7 +95,7 @@ end
 
 - To handle dependencies, you need to have `Gemfile` file. Dependencies will be automatically cached and installed, so you don't need to include any local denepdencies folder in your function.
 
-- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.rb`.
+- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.rb`.
 
 
 ## Authors

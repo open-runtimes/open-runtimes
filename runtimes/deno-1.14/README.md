@@ -18,7 +18,7 @@ echo 'export default async function(req: any, res: any) { res.json({ n: Math.ran
 2. Build the code:
 
 ```bash
-ENTRYPOINT_NAME=mod.ts docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:1.14 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:1.14 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
@@ -95,7 +95,7 @@ export default async function(req: any, res: any) {
 
 - Dependencies are handeled automatically. Open Runtimes automatically cache and install them during build process.
 
-- The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_KEY` environment variable, for instance, `INTERNAL_RUNTIME_KEY=src/app.ts`.
+- The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.ts`.
 
 
 ## Authors

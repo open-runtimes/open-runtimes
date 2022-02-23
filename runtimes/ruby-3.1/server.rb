@@ -76,7 +76,7 @@ post '/' do
     p e
     status 500
     content_type :json
-    return { code: 500, message: 'File not found or is not a valid ruby file. ' }.to_json
+    return { code: 500, message: 'File not found or is not a valid ruby file.' }.to_json
   end
 
   unless defined?(main = ())
