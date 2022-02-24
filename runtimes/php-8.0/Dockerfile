@@ -30,6 +30,8 @@ FROM php:8.0.14-cli-alpine3.15 as final
 
 LABEL maintainer="team@appwrite.io"
 
+ENV INTERNAL_RUNTIME_ENTRYPOINT=index.php
+
 RUN \
   apk update \
   && apk add --no-cache --virtual .deps \
