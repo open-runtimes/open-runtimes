@@ -3,7 +3,7 @@ import Foundation
 
 struct RequestValue {
     var path: String = "/usr/code"
-    var file: String = "index.swift"
+    var file: String = "Sources/index.swift"
     var env: [String: String] = [:]
     var headers: [String: String] = [:]
     var payload: String = ""

@@ -43,7 +43,7 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the node runtime folder:
+2. Enter the Node runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/node-15.5
