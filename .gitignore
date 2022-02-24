@@ -25,3 +25,6 @@ tests/**/vendor
 # PHP
 tests/**/vendor
 tests/**/composer.lock
+
+# Swift
+tests/**/Run
