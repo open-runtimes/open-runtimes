@@ -2,6 +2,8 @@ FROM node:14.5-alpine
 
 LABEL maintainer="team@appwrite.io"
 
+ENV INTERNAL_RUNTIME_ENTRYPOINT=index.js
+
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code
 RUN mkdir -p /usr/code-start
