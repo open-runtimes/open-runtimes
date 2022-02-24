@@ -2,6 +2,8 @@ FROM python:3.9-alpine3.15
 
 LABEL maintainer="team@appwrite.io"
 
+ENV INTERNAL_RUNTIME_ENTRYPOINT=main.py
+
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code
 RUN mkdir -p /usr/code-start

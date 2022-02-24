@@ -11,14 +11,14 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `main.dart` file:
 
 ```bash
-mkdir dart-or && cd dart-or
-printf "import 'dart:async';\nimport 'dart:math';\nFuture<void> start(final req, final res) async {\n  res.json({'n': new Random().nextDouble() });\n}" > main.dart
+mkdir dart-or && cd dart-or && mkdir lib
+printf "import 'dart:async';\nimport 'dart:math';\nFuture<void> start(final req, final res) async {\n  res.json({'n': new Random().nextDouble() });\n}" > lib/main.dart
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e INTERNAL_RUNTIME_ENTRYPOINT=main.dart --rm --interactive --tty --volume $PWD:/usr/code openruntimes/dart:2.15 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=lib/main.dart --rm --interactive --tty --volume $PWD:/usr/code openruntimes/dart:2.15 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
@@ -99,7 +99,9 @@ Future<void> start(final req, final res) async {
 
 - To handle dependencies, you need to have `pubspec.yaml` file. Dependencies will be automatically cached and installed, so you don't need to include any dependencies folders in your function.
 
-- The default entrypoint is `main.dart`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.dart`.
+- The default entrypoint is `lib/main.dart`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=lib/app.dart`.
+
+- Dart function is a Dart library package, which means, your code has to be inside `lib` folder. You can learn more in [Dart documentation](https://dart.dev/guides/libraries/create-library-packages).
 
 ## Authors
 

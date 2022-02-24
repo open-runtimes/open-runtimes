@@ -2,6 +2,8 @@ FROM denoland/deno:alpine-1.13.2
 
 LABEL maintainer="team@appwrite.io"
 
+ENV INTERNAL_RUNTIME_ENTRYPOINT=mod.ts
+
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code
 RUN mkdir -p /usr/code-start

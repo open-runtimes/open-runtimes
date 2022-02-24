@@ -3,14 +3,8 @@
 # Copy User Code
 cp -a /usr/code/* /usr/local/src/user_code
 
-# make lib directory if not exist
-mkdir -p /usr/local/src/user_code/lib
-
 # Rename Main Function Dart
 mv /usr/local/src/user_code/$INTERNAL_RUNTIME_ENTRYPOINT /usr/local/src/user_code/lib/main.dart
-
-# Move all other user code into directory
-mv /usr/local/src/user_code/*.dart /usr/local/src/user_code/lib/
 
 cd /usr/local/src/user_code/
 
