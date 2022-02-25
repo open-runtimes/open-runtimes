@@ -4,10 +4,11 @@
 set -e
 
 # Copy User Code
-cp -a /usr/code/* /usr/local/src/user_code
+cp -R /usr/code/* /usr/local/src/user_code
 
 # Rename Main Function Dart
-mv /usr/local/src/user_code/$INTERNAL_RUNTIME_ENTRYPOINT /usr/local/src/user_code/lib/main.dart
+mkdir -p /usr/local/src/user_code/lib
+mv -n /usr/code/$INTERNAL_RUNTIME_ENTRYPOINT /usr/local/src/user_code/lib/main.dart
 
 cd /usr/local/src/user_code/
 

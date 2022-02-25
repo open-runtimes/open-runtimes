@@ -60,6 +60,7 @@ $ git push origin [name_of_your_new_branch]
 7. Get a code review approval/reject
 8. After approval, merge your PR
 9. GitHub will automatically delete the branch after the merge is done. (they can still be restored).
+
 ## Installation
 
 To install a working development environment follow these instructions:
@@ -70,7 +71,7 @@ To install a working development environment follow these instructions:
 
 **Composer CLI**
 ```bash
-composer install
+composer update --ignore-platform-reqs --optimize-autoloader --no-plugins --no-scripts --prefer-dist
 ```
 
 **Docker (UNIX)**
@@ -100,7 +101,7 @@ For us to find the right balance, please open an issue explaining your ideas bef
 
 This will allow the Open Runtimes community to have sufficient discussion about the new feature value and how it fits in the product roadmap and vision.
 
-This is also important for the Open Runtimes lead developers to be able to give technical input and different emphasis regarding the feature design and architecture. Some bigger features might need to go through our [RFC process](https://github.com/appwrite/rfc).
+This is also important for the Open Runtimes lead developers to be able to give technical input and different emphasis regarding the feature design and architecture.
 
 ## Other Ways to Help
 
@@ -108,7 +109,7 @@ Pull requests are great, but there are many other areas where you can help Open 
 
 ### Blogging & Speaking
 
-Blogging, speaking about, or creating tutorials about any of Open Runtimes’s many features are great ways to contribute and help our project grow.
+Blogging, speaking about, or creating tutorials about any of Open Runtimes’s many usages are great ways to contribute and help our project grow.
 
 ### Presenting at Meetups
 
