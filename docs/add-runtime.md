@@ -171,7 +171,7 @@ The third line simply adds the new runtime to the main list. -->
 ### 4.1 Creating your test script
 Create a new folder in `./tests` and name it the same name as the folder where you placed your runtime code. For example, if you are creating a runtime for dart 2.12 you would name it `dart-2.12`.
 
-Next create a new PHP file in the `./tests` folder again and name it the name of your language followed by it's version with **no dots and no spaces**. For example, if you are creating a runtime for dart 2.12 you would name it `dart212.php`. Within this PHP file you will place the following code:
+Next create a new PHP file in the `./tests` folder and name it by your language followed by it's version with **no dots and no spaces**. For example, if you are creating a runtime for dart 2.12 you would name it `dart212.php`. Within this PHP file you will place the following code:
 
 ```php
 <?php
