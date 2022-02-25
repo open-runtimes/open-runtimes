@@ -118,7 +118,7 @@ RUN mkdir -p /usr/builds
 Next copy your source code and set the working directory for the image like so:
 ```
 WORKDIR /usr/local/src
-COPY . /usr/local/src
+COPY . .
 ```
 
 Next, you want to make sure you are adding execute permissions to any scripts you may run, the main ones are `build.sh` and `start.sh`. You can run commands in Dockerfile's using the `RUN` prefix like so:
