@@ -26,7 +26,7 @@ func main(req: RequestValue, res: RequestResponse) throws -> RequestResponse {
     if !req.payload.isEmpty,
         let data = req.payload.data(using: .utf8),
         let payload = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-            todoId = payload["id"] as! String
+            todoId = payload["id"] as? String ?? "1"
     }
 
     let group = DispatchGroup()
