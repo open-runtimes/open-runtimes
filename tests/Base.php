@@ -49,7 +49,7 @@ abstract class Base extends TestCase
         ];
     }
 
-    public function testRuntime(): void
+    public function testRuntimeEmptyBody(): void
     {
         $response = $this->call([
         ]);
@@ -61,11 +61,29 @@ abstract class Base extends TestCase
         self::assertEquals('1', $response['body']['todo']['id']);
         self::assertEquals('delectus aut autem', $response['body']['todo']['title']);
         self::assertEquals(false, $response['body']['todo']['completed']);
+    }
 
+    public function testRuntimeEmptyObjectPayload(): void 
+    {
+        $response = $this->call([
+            'payload' => '{}'
+        ]);
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals(true, $response['body']['isTest']);
+        self::assertEquals('Hello Open Runtimes 👋', $response['body']['message']);
+        self::assertEquals('1', $response['body']['todo']['userId']);
+        self::assertEquals('1', $response['body']['todo']['id']);
+        self::assertEquals('delectus aut autem', $response['body']['todo']['title']);
+        self::assertEquals(false, $response['body']['todo']['completed']);
+    }
+
+    public function testRuntimePopulatedPayload(): void 
+    {
         $response = $this->call([
             'payload' => '{"id":"2"}'
         ]);
-
+    
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);
         self::assertEquals('Hello Open Runtimes 👋', $response['body']['message']);
@@ -73,7 +91,10 @@ abstract class Base extends TestCase
         self::assertEquals('2', $response['body']['todo']['id']);
         self::assertEquals('quis ut nam facilis et officia qui', $response['body']['todo']['title']);
         self::assertEquals(false, $response['body']['todo']['completed']);
+    }
 
+    public function testRuntimeHeadersAndEnv(): void 
+    {
         $response = $this->call([
             'headers' => [
                 'x-test-header' => 'Header secret'
@@ -82,10 +103,48 @@ abstract class Base extends TestCase
                 'test-env' => 'Environment secret'
             ]
         ]);
-
+    
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);
         self::assertEquals('Header secret', $response['body']['header']);
         self::assertEquals('Environment secret', $response['body']['env']);
+    }
+
+    public function testRuntimePayloadAndHeadersAndEnv(): void 
+    {
+        $response = $this->call([
+            'payload' => '{"id":"2"}',
+            'headers' => [
+                'x-test-header' => 'Header secret'
+            ],
+            'env' => [
+                'test-env' => 'Environment secret'
+            ]
+        ]);
+    
+        self::assertEquals(200, $response['code']);
+        self::assertEquals(true, $response['body']['isTest']);
+        self::assertEquals('Hello Open Runtimes 👋', $response['body']['message']);
+        self::assertEquals('1', $response['body']['todo']['userId']);
+        self::assertEquals('2', $response['body']['todo']['id']);
+        self::assertEquals('quis ut nam facilis et officia qui', $response['body']['todo']['title']);
+        self::assertEquals(false, $response['body']['todo']['completed']);
+        self::assertEquals('Header secret', $response['body']['header']);
+        self::assertEquals('Environment secret', $response['body']['env']);
+    }
+
+    public function testRuntimeGarbageBody(): void
+    {
+        $response = $this->call([
+            "garbage" => "garbage"
+        ]);
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals(true, $response['body']['isTest']);
+        self::assertEquals('Hello Open Runtimes 👋', $response['body']['message']);
+        self::assertEquals('1', $response['body']['todo']['userId']);
+        self::assertEquals('1', $response['body']['todo']['id']);
+        self::assertEquals('delectus aut autem', $response['body']['todo']['title']);
+        self::assertEquals(false, $response['body']['todo']['completed']);
     }
 }
