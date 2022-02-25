@@ -50,7 +50,7 @@ The build script is always executed during the build stage of a function deploym
 The `start.sh` file for an interpreted runtime should extract the `/tmp/code.tar.gz` file that contains both the user's code and the dependencies. This tarball was created by Open Runtimes from the `/usr/code` folder and should install the dependencies that were pre-installed by the build stage and move them into the relevant locations for that runtime. It will then run the server ready for execution.
 
 ---
-The `build.sh` script for a compiled runtime is used to move the user's source code and rename it into source files for the runtime (The `INTERNAL_RUNTIME_ENTRYPOINT` environment variable can help with this) it will also build the code and move it into the `/usr/code` folder.
+The `build.sh` script for a compiled runtime is used to move the user's source code and rename it into source files for the runtime (The `INTERNAL_RUNTIME_ENTRYPOINT` environment variable can help with this). It will also build the code and move it into the `/usr/code` folder.
 
 #### Note:
 `/tmp/code.tar.gz` is always created from the `/usr/code` folder as an output of the build stage. If you need any files for either compiled or interpreted runtimes you should place them there and extract them from the `/tmp/code.tar.gz` during the `start.sh` script to get the files you need.
