@@ -112,7 +112,7 @@ Create the folders you will use in your build step:
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code
 RUN mkdir -p /usr/workspace
-RUN mkdir -p /usr/builtCode
+RUN mkdir -p /usr/builds
 ```
 
 Next copy your source code and set the working directory for the image like so:
