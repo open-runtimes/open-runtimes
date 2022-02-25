@@ -138,7 +138,7 @@ Since this will use your launch script when the runtime starts.
 ## 3. Building your Docker image and adding it to the list
 With your runtime successfully created you can now move on to building your Docker image and adding it to the script files used for generating all of the image files.
 
-Open up the `./build.sh` script first and add your runtime to it. The following is an example with dart version 2.12
+Open up the `./build.sh` script at the root of the project and add your runtime to it. The following is an example with dart version 2.12
 ```
 echo 'Dart 2.12...'
 docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12
