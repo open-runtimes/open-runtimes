@@ -1,8 +1,4 @@
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
-
 import AsyncHTTPClient
 
 //    'req' variable has:
