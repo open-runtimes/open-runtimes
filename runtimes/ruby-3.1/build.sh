@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Fail build if any command fails
+set -e
+
 # Prepare separate directory to prevent changing user's files
 cp -R /usr/code/* /usr/builds
 

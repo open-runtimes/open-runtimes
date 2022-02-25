@@ -1,9 +1,13 @@
 #!/bin/sh
+
+# Fail build if any command fails
+set -e
+
 cp -a /usr/code/. /usr/local/src/Sources/App/Custom/
 cd /usr/local/src
 if [ -f "./Sources/App/Custom/Package.swift" ]; then
     cd ./Sources/App/Custom
-    swift ../dependencies.swift || exit 1
+    swift ../dependencies.swift
     rm "Package.swift" 
     cd /usr/local/src
 fi
