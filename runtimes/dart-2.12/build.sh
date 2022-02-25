@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Fail build if any command fails
+set -e
+
 # Copy User Code
 cp -a /usr/code/* /usr/local/src/user_code
 
