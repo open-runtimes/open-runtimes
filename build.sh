@@ -42,6 +42,9 @@ docker build -t openruntimes/php:8.1 ./runtimes/php-8.1/
 echo 'PHP 8.0...'
 docker build -t openruntimes/php:8.0 ./runtimes/php-8.0/
 
+echo 'Dart 2.16...'
+docker build -t openruntimes/dart:2.16 ./runtimes/dart-2.16/
+
 echo 'Dart 2.15...'
 docker build -t openruntimes/dart:2.15 ./runtimes/dart-2.15/
 
