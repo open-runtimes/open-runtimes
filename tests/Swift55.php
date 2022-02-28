@@ -8,5 +8,4 @@ namespace Tests;
 
 class Swift55 extends Base
 {
-    protected string $entrypoint = 'Tests.swift';
 }

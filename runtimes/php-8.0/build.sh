@@ -14,7 +14,7 @@ else
     php /usr/local/src/prepare.php
 fi
 
-# Merge the node_modules from the server into the user's node_modules to be restored later.
+# Merge the vendor from the server into the user's vendor to be restored later.
 cd /usr/local/src/
 composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --no-scripts --prefer-dist --no-dev
 cp -r /usr/local/src/vendor /usr/builds/vendor

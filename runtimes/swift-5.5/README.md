@@ -49,7 +49,7 @@ Output `{ "n": 0.7232589496628183 }` with a random float will be displayed after
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the node runtime folder:
+2. Enter the Swift runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/swift-5.5
@@ -93,7 +93,9 @@ func main(req: RequestValue, res: RequestResponse) -> RequestResponse {
 
 - To handle dependencies, you need to have `Package.swift` file. Dependencies will be automatically cached and installed, so you don't need to include `.build` folder in your function.
 
-- The default entrypoint is `index.swift`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{ "file": "app.swift" }`.
+- The default entrypoint is `Sources/index.swift`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{ "file": "app.swift" }`.
+
+- Swift does not require `INTERNAL_RUNTIME_ENTRYPOINT` like other runtimes. In Swift, you only need to make sure a function called `main` is defined in any of your `.swift` files.
 
 ## Authors
 
