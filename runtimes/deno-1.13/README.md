@@ -97,6 +97,7 @@ export default async function(req: any, res: any) {
 
 - The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.ts`.
 
+- Deno runtime currently does'nt support ARM, because there are no official ARM images.
 
 ## Authors
 
