@@ -97,6 +97,8 @@ func main(req: RequestValue, res: RequestResponse) -> RequestResponse {
 
 - Swift does not require `INTERNAL_RUNTIME_ENTRYPOINT` like other runtimes. In Swift, you only need to make sure a function called `main` is defined in any of your `.swift` files.
 
+- Swift runtime currently doesn't support ARM, because there are no official ARM images.
+
 ## Authors
 
 **Eldad Fux**

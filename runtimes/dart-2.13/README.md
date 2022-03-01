@@ -103,6 +103,8 @@ Future<void> start(final req, final res) async {
 
 - Dart function is a Dart library package, which means, your code has to be inside `lib` folder. You can learn more in [Dart documentation](https://dart.dev/guides/libraries/create-library-packages).
 
+- This image does not support ARM, upgrade to `dart-2.14` for ARM support.
+
 ## Authors
 
 **Eldad Fux**
