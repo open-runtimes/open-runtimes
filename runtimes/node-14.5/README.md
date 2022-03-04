@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir node-or && cd node-or
-echo 'module.exports = async (req, res) => { res.json({ n: Math.random() }) }' > index.js
+printf "module.exports = async (req, res) => {\n    res.json({ n: Math.random() })\n}" > index.js
 ```
 
 2. Build the code:

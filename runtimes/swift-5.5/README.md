@@ -12,13 +12,7 @@ To learn more about runtimes, visit [Runtimes introduction](https://github.com/o
 
 ```bash
 mkdir swift-test && cd swift-test
-echo "\
-import Foundation\
-\
-func main(req: RequestValue, res: RequestResponse) -> RequestResponse {\
-    return res.json(data: [\"Hello": "World!\"])\
-}\
-" > index.swift
+printf "import Foundation\nfunc main(req: RequestValue, res: RequestResponse) -> RequestResponse {\n    return res.json(data: [\"Hello": "World!\"])\n}" > index.swift
 ```
 
 2. Build the code:
