@@ -97,6 +97,7 @@ module.exports = (req, res) => {
 
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.js`.
 
+- Library `micro` that we use under-the-hood reserved key `code` of the response JSON to have functionality of setting a response code. Please avoid using this keyword in your response when using `res.json()`.
 
 ## Authors
 
