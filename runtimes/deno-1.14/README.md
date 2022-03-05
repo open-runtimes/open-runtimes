@@ -1,6 +1,6 @@
 # Deno Runtime 1.14
 
-This is the Open Runtime that builds and runs Deno code based on a `deno:alpine-1.14.1` base image. 
+This is the Open Runtime that builds and runs Deno code based on a `deno:alpine-1.14.3` base image. 
 
 The runtime itself uses [oak](https://deno.land/x/oak@v10.2.1) as the Web Server to process the execution requests.
 
@@ -18,19 +18,19 @@ echo 'export default async function(req: any, res: any) { res.json({ n: Math.ran
 2. Build the code:
 
 ```bash
-ENTRYPOINT_NAME=mod.ts docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/deno:1.14 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:1.14 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/deno:1.14 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/deno:1.14 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
 
-```
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
+```bash
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
@@ -43,7 +43,7 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the deno runtime folder:
+2. Enter the Deno runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/deno-1.14
@@ -58,18 +58,18 @@ docker-compose up -d
 4. Execute the function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":{} }`.
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":"{}" }`.
 
 You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
 
 ## Notes
 
-- When writing functions for this runtime, ensure they are exported. An example of this is:
+- When writing function for this runtime, ensure it is exported as default one. An example of this is:
 
-```js
+```typescript
 export default async function(req: any, res: any) {
     res.send('Hello Open Runtimes 👋');
 }
@@ -82,7 +82,7 @@ export default async function(req: any, res: any) {
 
 You can respond with `json()` by providing object:
 
-```js
+```typescript
 export default async function(req: any, res: any) {
     res.json({
         'message': 'Hello Open Runtimes 👋',
@@ -95,8 +95,9 @@ export default async function(req: any, res: any) {
 
 - Dependencies are handeled automatically. Open Runtimes automatically cache and install them during build process.
 
-- The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.ts"}`.
+- The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.ts`.
 
+- Deno runtime currently doesn't support ARM, because there are no official ARM images.
 
 ## Authors
 

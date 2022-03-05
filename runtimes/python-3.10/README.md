@@ -1,6 +1,6 @@
-# Python Runtime 17.0
+# Python Runtime 3.10
 
-This is the Open Runtime that builds and runs Python code based on a `python:3.10.2-alpine` base image. 
+This is the Open Runtime that builds and runs Python code based on a `python:3.10-alpine` base image. 
 
 The runtime itself uses [Flask](https://flask.palletsprojects.com/en/2.0.x) as the Web Server to process the execution requests.
 
@@ -18,19 +18,19 @@ printf "import random\n\ndef main(req, res):\n    return res.json({'n': random.r
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code open-runtimes/python:3.10 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/python:3.10 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro open-runtimes/python:3.10 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=main.py --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/python:3.10 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
 
-```
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
+```bash
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
@@ -43,7 +43,7 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the python runtime folder:
+2. Enter the Python runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/python-3.10
@@ -58,21 +58,20 @@ docker-compose up -d
 4. Execute the function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": {}}'
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":{} }`.
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":"{}" }`.
 
 You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
 
 ## Notes
 
-- When writing functions for this runtime, ensure they are exported with a name of `main`. An example of this is:
+- When writing function for this runtime, ensure it is named `main`. An example of this is:
 
 ```python
 def main(req, res):
-    res.send('Hello Open Runtimes 👋')
-}
+    return res.send('Hello Open Runtimes 👋')
 ```
 
 - The `res` parameter has two methods:
@@ -84,18 +83,17 @@ You can respond with `json()` by providing object:
 
 ```python
 def main(req, res):
-    res.json({
+    return res.json({
         'message': 'Hello Open Runtimes 👋',
         'env': req.env,
         'payload': req.payload,
         'headers': req.headers
     })
-}
 ```
 
 - To handle dependencies, you need to have `requirements.txt` file. Dependencies will be automatically cached and installed, so you don't need to include `__pycache__` folder in your function.
 
-- The default entrypoint is `main.py`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{"file":"src/app.py"}`.
+- The default entrypoint is `main.py`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.py`.
 
 ## Authors
 

@@ -8,5 +8,4 @@ namespace Tests;
 
 class Deno114 extends Base
 {
-    protected string $entrypoint = 'tests.ts';
 }

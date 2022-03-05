@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  open-runtimes-dart-2.14:
+    container_name: open-runtimes-dart-2.14
+    build:
+      context: .
+    ports: 
+      - 3000:3000
+    environment:
+      - INTERNAL_RUNTIME_KEY
+      - INTERNAL_RUNTIME_ENTRYPOINT
+    volumes:
+      - ./example/:/usr/code:rw
+    command: sh -c "sh /usr/local/src/build.sh && cp /usr/code/code.tar.gz /tmp/code.tar.gz && sh /usr/local/src/start.sh"
