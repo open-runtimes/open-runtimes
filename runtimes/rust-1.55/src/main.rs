@@ -26,11 +26,9 @@ impl Response {
 
 #[derive(Deserialize)]
 pub struct RequestValue {
-    path: Option<String>,
-    file: Option<String>,
-    env: Map<String, Value>,
+    env: Option<Map<String, Value>>,
     headers: Option<Map<String, Value>>,
-    payload: String
+    payload: Option<String>
 }
 
 #[derive(Debug, Deserialize)]

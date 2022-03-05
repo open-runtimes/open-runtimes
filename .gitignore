@@ -33,3 +33,5 @@ tests/**/Run
 tests/**/Cargo.lock
 tests/**/debug
 tests/**/target
+tests/**/*.rs.bk
+tests/**/*.pdb
