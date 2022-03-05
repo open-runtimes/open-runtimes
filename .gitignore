@@ -2,11 +2,8 @@
 vendor
 .phpunit.result.cache
 
-# Tests
-
-tests/**/code.tar.gz
-
 # Node
+tests/**/code.tar.gz
 tests/**/node_modules
 tests/**/package-lock.json
 
