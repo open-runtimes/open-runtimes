@@ -30,8 +30,9 @@ class Response {
     }
 }
 
+$userFunction = null;
 
-$server->on("Request", function($req, $res) {
+$server->on("Request", function($req, $res) use(&$userFunction) {
     $body =  json_decode($req->getContent(), true);
     $body['payload'] = \is_string($body['payload']) ? $body['payload'] : \json_encode($body['payload'], JSON_FORCE_OBJECT);
 
@@ -67,7 +68,9 @@ $server->on("Request", function($req, $res) {
     $response = new Response($res);
 
     try {
-        $userFunction = include(USER_CODE_PATH . '/' . getenv('INTERNAL_RUNTIME_ENTRYPOINT'));
+        if($userFunction == null) {
+            $userFunction = include(USER_CODE_PATH . '/' . getenv('INTERNAL_RUNTIME_ENTRYPOINT'));
+        }
 
         if (!is_callable($userFunction)) {
             return throw new Exception('Function not valid');
