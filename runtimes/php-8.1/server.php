@@ -68,7 +68,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $response = new Response($res);
 
     try {
-        if($userFunction == null) {
+        if($userFunction === null) {
             $userFunction = include(USER_CODE_PATH . '/' . getenv('INTERNAL_RUNTIME_ENTRYPOINT'));
         }
 
