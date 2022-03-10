@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir dart-or && cd dart-or && mkdir lib
-printf "import 'dart:async';\nimport 'dart:math';\nFuture<void> start(final req, final res) async {\n  res.json({'n': new Random().nextDouble() });\n}" > lib/main.dart
+printf "import 'dart:async';\nimport 'dart:math';\nFuture<void> start(final req, final res) async {\n    res.json({'n': new Random().nextDouble() });\n}" > lib/main.dart
 ```
 
 2. Build the code:

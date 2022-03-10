@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir deno-or && cd deno-or
-echo 'export default async function(req: any, res: any) { res.json({ n: Math.random() }) }' > mod.ts
+printf "export default async function(req: any, res: any) {\n    res.json({ n: Math.random() })\n}" > mod.ts
 ```
 
 2. Build the code:

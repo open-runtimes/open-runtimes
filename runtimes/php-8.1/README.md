@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir php-or && cd php-or
-printf "<?\nreturn function(\$req, \$res) { \$res->json([ 'n' => \mt_rand() / \mt_getrandmax() ]); };" > index.php
+printf "<?\nreturn function(\$req, \$res) {\n    \$res->json([ 'n' => \mt_rand() / \mt_getrandmax() ]);\n};" > index.php
 ```
 
 2. Build the code:
