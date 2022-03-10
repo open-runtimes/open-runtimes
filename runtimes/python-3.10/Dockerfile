@@ -6,7 +6,6 @@ ENV INTERNAL_RUNTIME_ENTRYPOINT=main.py
 
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code
-RUN mkdir -p /usr/code-start
 RUN mkdir -p /usr/workspace
 RUN mkdir -p /usr/builds
 

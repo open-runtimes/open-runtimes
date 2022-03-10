@@ -2,9 +2,7 @@ from flask import Flask, request, jsonify
 import traceback
 import pathlib
 import os
-import importlib.util
-
-USER_CODE_PATH = '/usr/code-start'
+import importlib
 
 app = Flask(__name__);
 
@@ -51,15 +49,19 @@ def handler(u_path):
     resp = Response();
 
     # Import function from request
-    fullPath = pathlib.Path(USER_CODE_PATH);
+    userPath = os.getenv('INTERNAL_RUNTIME_ENTRYPOINT')
+    if userPath.endswith('.py'):
+        size = len(userPath)
+        userPath = userPath[:size - 3]
+    userPath = userPath.replace("/", ".")
+    userModule = importlib.import_module("userlib." + userPath)
 
-    userFunction = importlib.machinery.SourceFileLoader('module.userfunc', str(fullPath) + '/' + os.getenv('INTERNAL_RUNTIME_ENTRYPOINT')).load_module()
     # Check if function exists
-    if userFunction is None:
+    if userModule is None:
         return {'message': 'function not found, Did you forget to name it `main`?', 'code': 500}, 500;
 
     try:
-        return userFunction.main(req, resp);
+        return userModule.main(req, resp);
     except Exception as e:
         return {'message': str("".join(traceback.TracebackException.from_exception(e).format())), 'code': 500}, 500;
 
