@@ -19,13 +19,7 @@ const server = micro(async (req, res) => {
 
     const response = {
         send: (text, status = 200) => send(res, status, text),
-        json: (json, status = 200) => {
-            if(json.code) {
-                throw new Error("Key 'code' is a reserved key. It cannot be used in the response. Use a different key instead.");
-            }
-
-            send(res, status, json);
-        },
+        json: (json, status = 200) => send(res, status, json),
     };
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
