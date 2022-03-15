@@ -55,13 +55,13 @@ post '/' do
   if challenge == ''
     status 401
     content_type :json
-    return { message: 'Unauthorized' }.to_json
+    return 'Unauthorized'
   end
 
   if challenge != ENV['INTERNAL_RUNTIME_KEY']
     status 401
     content_type :json
-    return { message: 'Unauthorized' }.to_json
+    return 'Unauthorized'
   end
 
   request.body.rewind
@@ -76,13 +76,13 @@ post '/' do
     p e
     status 500
     content_type :json
-    return { message: 'File not found or is not a valid ruby file.' }.to_json
+    return 'File not found or is not a valid ruby file.'
   end
 
   unless defined?(main = ())
     status 500
     content_type :json
-    return { message: 'File does not specify a main() function.' }.to_json
+    return 'File does not specify a main() function.'
   end
 
   begin
@@ -91,7 +91,7 @@ post '/' do
     p e
     status 500
     content_type :json
-    return { message: e.backtrace.join("\n") }.to_json
+    return e.backtrace.join("\n")
   end
 
   status 200
@@ -101,5 +101,5 @@ end
 error do
   status 500
   content_type :json
-  return { message: env['sinatra.error'].message }.to_json
+  return env['sinatra.error'].message
 end
