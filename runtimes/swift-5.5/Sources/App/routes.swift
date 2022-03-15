@@ -65,13 +65,8 @@ extension RequestResponse {
     
     fileprivate static func error(from data: Error) -> RequestResponse {
         let response = RequestResponse()
-        
-        do {
-            response.data = String(data: data.localizedDescription, encoding: String.Encoding.utf8)!
-        } catch _ {
-            response.data = "Something went wrong internally. Check the docker logs."
-        }
-            
+
+        response.data = data.localizedDescription
         response.statusCode = HTTPResponseStatus.internalServerError
         response.isJson = true
         return response
