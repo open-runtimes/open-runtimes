@@ -18,7 +18,9 @@ func main(req: RequestValue, res: RequestResponse) async throws -> RequestRespon
 
     var todoId: String = "1"
 
-    if(req.payload.isEmpty) {
+    var reqPayload = req.payload
+
+    if(req.payload === "") {
         req.payload = "{}"
     }
 
