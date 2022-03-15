@@ -53,14 +53,12 @@ post '/' do
   challenge = request.env['HTTP_X_INTERNAL_CHALLENGE'] || ''
 
   if challenge == ''
-    status 401
-    content_type :json
+    status 500
     return 'Unauthorized'
   end
 
   if challenge != ENV['INTERNAL_RUNTIME_KEY']
-    status 401
-    content_type :json
+    status 500
     return 'Unauthorized'
   end
 
@@ -75,13 +73,11 @@ post '/' do
   rescue Exception => e
     p e
     status 500
-    content_type :json
     return 'File not found or is not a valid ruby file.'
   end
 
   unless defined?(main = ())
     status 500
-    content_type :json
     return 'File does not specify a main() function.'
   end
 
@@ -90,7 +86,6 @@ post '/' do
   rescue Exception => e
     p e
     status 500
-    content_type :json
     return e.backtrace.join("\n")
   end
 
@@ -100,6 +95,5 @@ end
 
 error do
   status 500
-  content_type :json
   return env['sinatra.error'].message
 end

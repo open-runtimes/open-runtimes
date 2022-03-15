@@ -58,7 +58,7 @@ extension RequestResponse {
         } else {
             self.statusCode = HTTPResponseStatus.internalServerError;
             self.data = "Something went wrong encoding the Response JSON Object!"
-            self.isJson = true
+            self.isJson = false
         }
         return self;
     }
@@ -73,14 +73,14 @@ extension RequestResponse {
         }
             
         response.statusCode = HTTPResponseStatus.internalServerError
-        response.isJson = true
+        response.isJson = false
         return response
     }
     
     fileprivate static func unauthorized() -> RequestResponse {
         let response = RequestResponse()
-        response.statusCode = HTTPResponseStatus.unauthorized
-        response.isJson = true
+        response.statusCode = HTTPResponseStatus.internalServerError
+        response.isJson = false
         response.data = "Unauthorized"
         return response
     }

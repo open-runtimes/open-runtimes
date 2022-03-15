@@ -40,7 +40,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $internal_challenge = $req->header['x-internal-challenge'];
 
     if (empty($internal_challenge)) {
-        $res->status(401);
+        $res->status(500);
         $res->end('Unauthorized');
         return;
     }
@@ -48,7 +48,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $key = getenv('INTERNAL_RUNTIME_KEY');
 
     if ($key != $internal_challenge) {
-        $res->status(401);
+        $res->status(500);
         $res->end('Unauthorized');
         return;
     }
