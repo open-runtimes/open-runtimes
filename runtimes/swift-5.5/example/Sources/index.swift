@@ -1,30 +1,31 @@
-//
-//  File.swift
-//  
-//
-//  Created by Bradley Schofield on 21/12/2021.
-//
-
 import Foundation
 import AsyncHTTPClient
 
-/*
-    'req' variable has:
-        'headers' - object with request headers
-        'payload' - object with request body data
-        'env' - object with environment variables
-    'res' variable has:
-        'send(text, status)' - function to return text response. Status code defaults to 200
-        'json(obj, status)' - function to return JSON response. Status code defaults to 200
-    
-    If an error is thrown, a response with code 500 will be returned.
-*/
+//    'req' variable has:
+//        'headers' - object with request headers
+//        'payload' - object with request body data
+//        'env' - object with environment variables
+//    'res' variable has:
+//        'send(text, status)' - function to return text response. Status code defaults to 200
+//        'json(obj, status)' - function to return JSON response. Status code defaults to 200
+//    
+//    If an error is thrown, a response with code 500 will be returned.
 
 func main(req: RequestValue, res: RequestResponse) async throws -> RequestResponse {
+
+    let headerData = req.headers["x-test-header"]
+    let envData = req.env["test-env"]
+
     var todoId: String = "1"
 
+    var reqPayload = req.payload
+
+    if(req.payload == "") {
+        reqPayload = "{}"
+    }
+
     if !req.payload.isEmpty,
-        let data = req.payload.data(using: .utf8),
+        let data = reqPayload.data(using: .utf8),
         let payload = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
             todoId = payload["id"] as? String ?? "1"
     }
@@ -36,7 +37,10 @@ func main(req: RequestValue, res: RequestResponse) async throws -> RequestRespon
     let todo = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
 
     return res.json(data: [
+        "isTest": true,
         "message": "Hello Open Runtimes 👋",
-        "todo": todo
+        "todo": todo,
+        "header": headerData,
+        "env": envData
     ])
 }
