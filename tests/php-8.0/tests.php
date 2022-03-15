@@ -20,7 +20,7 @@ $client = new Client([
 */
 
 return function($req, $res) use ($client) {
-    $payload = \json_decode($req['payload'], true);
+    $payload = \json_decode($req['payload'] ?? '{}', true);
 
     $response = $client->request('GET', '/todos/' . ($payload['id'] ?? 1));
     $todo = \json_decode($response->getBody()->getContents(), true);

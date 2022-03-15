@@ -18,6 +18,10 @@ func main(req: RequestValue, res: RequestResponse) async throws -> RequestRespon
 
     var todoId: String = "1"
 
+    if(req.payload.isEmpty) {
+        req.payload = "{}"
+    }
+
     if !req.payload.isEmpty,
         let data = req.payload.data(using: .utf8),
         let payload = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
