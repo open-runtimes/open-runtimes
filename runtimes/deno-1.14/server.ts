@@ -1,4 +1,4 @@
-import { Application } from "https://deno.land/x/oak@v10.1.0/mod.ts";
+import { Application } from "https://deno.land/x/oak@v8.0.0/mod.ts";
 import * as path from "https://deno.land/std@0.119.0/path/mod.ts";
 
 const USER_CODE_PATH = '/usr/code-start';
@@ -12,7 +12,6 @@ app.use(async (ctx) => {
   if (ctx.request.headers.get("x-internal-challenge") !== Deno.env.get("INTERNAL_RUNTIME_KEY")) {
     ctx.response.status = 401;
     ctx.response.body = {
-      code: 401,
       message: "Unauthorized"
     };
     return;
@@ -46,7 +45,6 @@ app.use(async (ctx) => {
   } catch (error) {
     ctx.response.status = 500;
     ctx.response.body = {
-      code: 500,
       message: error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message
     };
   }

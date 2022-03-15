@@ -37,12 +37,12 @@ class Request:
 def handler(u_path):
 
     if (request.headers.get('x-internal-challenge') != os.getenv('INTERNAL_RUNTIME_KEY')):
-        return {'message': 'Unauthorized', 'code': 401}, 401;
+        return {'message': 'Unauthorized'}, 401;
 
     requestData = request.get_json();
 
     if requestData is None:
-        return {'message': 'no data received', 'code': 500}, 500;
+        return {'message': 'no data received'}, 500;
     
     # Create new request and response object
     req = Request(request);
@@ -58,12 +58,12 @@ def handler(u_path):
 
     # Check if function exists
     if userModule is None:
-        return {'message': 'function not found, Did you forget to name it `main`?', 'code': 500}, 500;
+        return {'message': 'function not found, Did you forget to name it `main`?'}, 500;
 
     try:
         return userModule.main(req, resp);
     except Exception as e:
-        return {'message': str("".join(traceback.TracebackException.from_exception(e).format())), 'code': 500}, 500;
+        return {'message': str("".join(traceback.TracebackException.from_exception(e).format()))}, 500;
 
 if __name__ == "__main__":
     from waitress import serve

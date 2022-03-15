@@ -57,7 +57,7 @@ extension RequestResponse {
             self.isJson = true
         } else {
             self.statusCode = HTTPResponseStatus.internalServerError;
-            self.data = "{\"code\": 500, \"message\": \"Something went wrong encoding the Response JSON Object!\"}"
+            self.data = "{\"message\": \"Something went wrong encoding the Response JSON Object!\"}"
             self.isJson = true
         }
         return self;
@@ -66,7 +66,6 @@ extension RequestResponse {
     fileprivate static func error(from data: Error) -> RequestResponse {
         let response = RequestResponse()
         var jsonObject = [String:Any]()
-        jsonObject["code"] = 500
         jsonObject["message"] = data.localizedDescription
         
         do {
@@ -74,7 +73,7 @@ extension RequestResponse {
             let jsonString = String(data: jsonData, encoding: String.Encoding.utf8)!
             response.data = jsonString
         } catch _ {
-            response.data = "{\"code\": 500, \"message\": \"Something went wrong internally. Check the docker logs.\"}"
+            response.data = "{\"message\": \"Something went wrong internally. Check the docker logs.\"}"
         }
             
         response.statusCode = HTTPResponseStatus.internalServerError
@@ -86,7 +85,7 @@ extension RequestResponse {
         let response = RequestResponse()
         response.statusCode = HTTPResponseStatus.unauthorized
         response.isJson = true
-        response.data = "{\"code\": 401, \"message\": \"Unauthorized\"}"
+        response.data = "{\"message\": \"Unauthorized\"}"
         return response
     }
 }
