@@ -10,7 +10,7 @@ end
 class RuntimeRequest
   def initialize(payload = '{}', env = {}, headers = {})
     if payload == nil
-      payload = '{}'
+      payload = ''
     end
 
     if headers == nil
