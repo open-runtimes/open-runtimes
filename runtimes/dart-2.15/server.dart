@@ -21,7 +21,7 @@ void main() async {
       final request = Request(
         env: body['env'] ?? {},
         headers: body['headers'] ?? {},
-        payload: body['payload'] ?? '{}',
+        payload: body['payload'] ?? '',
       );
 
       final response = Response();
