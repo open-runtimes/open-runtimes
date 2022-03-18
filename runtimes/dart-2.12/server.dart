@@ -13,7 +13,7 @@ void main() async {
       return shelf.Response(500, body: 'Invalid request');
     }
     if (req.headers['x-internal-challenge'] != Platform.environment['INTERNAL_RUNTIME_KEY']) {
-      return shelf.Response(401, body: 'Unauthorized');
+      return shelf.Response(500, body: 'Unauthorized');
     }
     try {
       final bodystring = await req.readAsString();

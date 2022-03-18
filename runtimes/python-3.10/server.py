@@ -37,7 +37,7 @@ class Request:
 def handler(u_path):
 
     if (request.headers.get('x-internal-challenge') != os.getenv('INTERNAL_RUNTIME_KEY')):
-        return 'Unauthorized', 401;
+        return 'Unauthorized', 500;
 
     requestData = request.get_json();
 

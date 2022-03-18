@@ -10,7 +10,7 @@ app.use(async (ctx) => {
   const body = await value;
 
   if (ctx.request.headers.get("x-internal-challenge") !== Deno.env.get("INTERNAL_RUNTIME_KEY")) {
-    ctx.response.status = 401;
+    ctx.response.status = 500;
     ctx.response.body = "Unauthorized";
     return;
   }
