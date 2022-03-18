@@ -11,9 +11,7 @@ app.use(async (ctx) => {
 
   if (ctx.request.headers.get("x-internal-challenge") !== Deno.env.get("INTERNAL_RUNTIME_KEY")) {
     ctx.response.status = 401;
-    ctx.response.body = {
-      message: "Unauthorized"
-    };
+    ctx.response.body = "Unauthorized";
     return;
   }
 
@@ -44,9 +42,7 @@ app.use(async (ctx) => {
     await userFunction(request, response);
   } catch (error) {
     ctx.response.status = 500;
-    ctx.response.body = {
-      message: error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message
-    };
+    ctx.response.body = error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message;
   }
 });
 

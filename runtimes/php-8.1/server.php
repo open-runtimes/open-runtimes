@@ -41,9 +41,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     if (empty($internal_challenge)) {
         $res->status(401);
-        $res->end(json_encode([
-            'message' => 'Unauthorized',
-        ]));
+        $res->end('Unauthorized');
         return;
     }
 
@@ -51,9 +49,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     if ($key != $internal_challenge) {
         $res->status(401);
-        $res->end(json_encode([
-            'message' => 'Unauthorized',
-        ]));
+        $res->end('Unauthorized');
         return;
     }
 
@@ -76,9 +72,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         $userFunction($request, $response);
     } catch (\Throwable $e) {
         $res->status(500);
-        return $res->end(json_encode([
-            'message' => $e->getMessage()."\r\n".$e->getTraceAsString(),
-        ]));
+        return $res->end($e->getMessage()."\r\n".$e->getTraceAsString());
     }
 });
 
