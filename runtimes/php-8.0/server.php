@@ -42,7 +42,6 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     if (empty($internal_challenge)) {
         $res->status(401);
         $res->end(json_encode([
-            'code' => 401,
             'message' => 'Unauthorized',
         ]));
         return;
@@ -53,7 +52,6 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     if ($key != $internal_challenge) {
         $res->status(401);
         $res->end(json_encode([
-            'code' => 401,
             'message' => 'Unauthorized',
         ]));
         return;
@@ -79,7 +77,6 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     } catch (\Throwable $e) {
         $res->status(500);
         return $res->end(json_encode([
-            'code' => 500,
             'message' => $e->getMessage()."\r\n".$e->getTraceAsString(),
         ]));
     }

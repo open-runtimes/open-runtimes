@@ -15,7 +15,7 @@ void main() async {
     if (req.headers['x-internal-challenge'] !=
         Platform.environment['INTERNAL_RUNTIME_KEY']) {
       return shelf.Response(401,
-          body: jsonEncode({'code': 401, 'message': 'Unauthorized'}));
+          body: jsonEncode({'message': 'Unauthorized'}));
     }
     try {
       final bodystring = await req.readAsString();
@@ -31,13 +31,10 @@ void main() async {
       return shelf.Response.ok(response.body);
     } on FormatException catch (_) {
       return shelf.Response(500,
-          body: jsonEncode({
-            'code': 500,
-            'message': 'Unable to properly load request body'
-          }));
+          body: jsonEncode({'message': 'Unable to properly load request body'}));
     } catch (e) {
       return shelf.Response(500,
-          body: jsonEncode({'code': 500, 'message': e.toString()}));
+          body: jsonEncode({'message': e.toString()}));
     }
   }, '0.0.0.0', 3000);
 }
