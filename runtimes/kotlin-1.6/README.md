@@ -2,7 +2,7 @@
 
 This is the Open Runtime that builds and runs Kotlin code based on a `openjdk:17-jdk-slim` base image.
 
-The runtime itself uses [kotlinlin](https://github.com/tipsy/kotlinlin) as the Web Server to process the execution requests.
+The runtime itself uses [Javalin](https://github.com/tipsy/javalin) as the Web Server to process the execution requests.
 
 To learn more about runtimes, visit [Structure](https://github.com/open-runtimes/open-runtimes#structure) section of the main README.md.
 
