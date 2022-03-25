@@ -86,7 +86,7 @@ fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse = res.json(
 
 - To handle dependencies, you need to have any `.gradle` file including a `dependencies` block. Dependencies will be automatically cached and installed, so you don't need to include the `build` folder in your function.
 
-- The default entrypoint is `Index.kotlin`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/App.kotlin`.
+- The default entrypoint is `Index.kt`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/App.kt`.
 
 ## Authors
 
