@@ -151,6 +151,14 @@ env:
     IMAGE=openruntimes/swift:5.5
     ARCH=linux/amd64,linux/arm64
 
+# Kotlin
+  - RUNTIME=kotlin-1.6
+    PHP_CLASS=Kotlin16
+    ENTRYPOINT=Tests.kt
+    SERVER_PROCESS="kotlin-runtime-1.0.0"
+    IMAGE=openruntimes/kotlin:1.6
+    ARCH=linux/amd64,linux/arm64
+
 notifications:
   email:
     - team@appwrite.io
