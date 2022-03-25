@@ -9,6 +9,9 @@ cd /usr/local/src/src/main/java/io/openruntimes/java
 
 # Apply all gradle files to the root project
 for filename in ./*.gradle*; do
+    if [ ! -f "${filename}" ]; then
+        continue;
+    fi
     mv "${filename}" "/usr/local/src/${filename}"
     echo "apply from: \"${filename}\"" >> /usr/local/src/build.gradle
 done
@@ -30,7 +33,7 @@ public class Wrapper {
 ${CODE}
 }" > Wrapper.java
 
-# Remove the user code file
+# Remove the user code file (copy)
 rm "${INTERNAL_RUNTIME_ENTRYPOINT}"
 
 # Build the jar
