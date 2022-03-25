@@ -28,3 +28,6 @@ tests/**/composer.lock
 
 # Swift
 tests/**/Run
+**/code.tar.gz
+**runtime*.jar
+*.DS_Store

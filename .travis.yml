@@ -151,6 +151,26 @@ env:
     IMAGE=openruntimes/swift:5.5
     ARCH=linux/amd64,linux/arm64
 
+  # Java
+  - RUNTIME=java-8.0
+    PHP_CLASS=Java8
+    ENTRYPOINT=Tests.java
+    SERVER_PROCESS="java-runtime-1.0.0"
+    IMAGE=openruntimes/java:8.0
+    ARCH=linux/amd64,linux/arm64
+  - RUNTIME=java-11.0
+    PHP_CLASS=Java11
+    ENTRYPOINT=Tests.java
+    SERVER_PROCESS="java-runtime-1.0.0"
+    IMAGE=openruntimes/java:11.0
+    ARCH=linux/amd64,linux/arm64
+  - RUNTIME=java-17.0
+    PHP_CLASS=Java17
+    ENTRYPOINT=Tests.java
+    SERVER_PROCESS="java-runtime-1.0.0"
+    IMAGE=openruntimes/java:17.0
+    ARCH=linux/amd64,linux/arm64
+
 notifications:
   email:
     - team@appwrite.io
