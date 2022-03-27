@@ -30,7 +30,7 @@ RUN git clone --depth 1 --branch $DROGON_VERSION https://github.com/drogonframew
     && cd / \
     && rm -rf /drogon
 
-RUN mkdir -p /usr/local/src/ \
+RUN mkdir -p /usr/local/src/build \
     && mkdir -p /usr/code \
     && mkdir -p /usr/workspace
 

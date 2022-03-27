@@ -61,5 +61,5 @@ static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
     response["header"] = headerData;
     response["env"] = envData;
     
-    return res->json(response);
+    return res.json(response);
 }
