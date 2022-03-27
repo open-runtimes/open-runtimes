@@ -27,11 +27,15 @@ int main()
                 RuntimeResponse &runtimeResponse = *new RuntimeResponse();
                 const shared_ptr<HttpResponse> httpResponse = HttpResponse::newHttpResponse();
 
-                Wrapper::main(runtimeRequest, runtimeResponse);
-
-                httpResponse->setStatusCode(static_cast<HttpStatusCode>(runtimeResponse.statusCode));
-                httpResponse->setBody(runtimeResponse.data);
-
+                try {
+                    Wrapper::main(runtimeRequest, runtimeResponse);
+                    httpResponse->setStatusCode(static_cast<HttpStatusCode>(runtimeResponse.statusCode));
+                    httpResponse->setBody(runtimeResponse.data);
+                } catch (const std::exception& e) {
+                    httpResponse->setStatusCode(static_cast<HttpStatusCode>(runtimeResponse.statusCode));
+                    httpResponse->setBody(e.what());
+                }
+                
                 callback(httpResponse);
             },
             {Post})
