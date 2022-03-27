@@ -151,6 +151,14 @@ env:
     IMAGE=openruntimes/swift:5.5
     ARCH=linux/amd64,linux/arm64
 
+  # C++
+  - RUNTIME=cpp-17
+    PHP_CLASS=Cpp17
+    ENTRYPOINT=tests.cc
+    SERVER_PROCESS="cpp_runtime"
+    IMAGE=openruntimes/cpp:17
+    ARCH=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x
+
 notifications:
   email:
     - team@appwrite.io
