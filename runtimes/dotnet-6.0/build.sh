@@ -44,7 +44,7 @@ build() {
 
     # Tar the executable
     cd /usr/local/src/bin/Release/net6.0/publish/
-    tar --exclude /usr/code/code.tar.gz -czf /usr/code/code.tar.gz .
+    tar -czf /usr/code/code.tar.gz .
 }
 
 write_cs_wrapper() {
