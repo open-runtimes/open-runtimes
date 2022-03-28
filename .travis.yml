@@ -151,6 +151,14 @@ env:
     IMAGE=openruntimes/swift:5.5
     ARCH=linux/amd64,linux/arm64
 
+  # DotNet
+  - RUNTIME=dotnet-6.0
+    PHP_CLASS=DotNet60
+    ENTRYPOINT=Tests.cs
+    SERVER_PROCESS="DotNetRuntime.dll"
+    IMAGE=openruntimes/dotnet:6.0
+    ARCH=linux/amd64,linux/arm64
+
 notifications:
   email:
     - team@appwrite.io

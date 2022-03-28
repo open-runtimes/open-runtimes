@@ -1,0 +1,2 @@
+<!-- All blocks are optional, only PackageReferences will be read. Additional properties only provide IDE support. -->
+ <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
