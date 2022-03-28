@@ -24,11 +24,15 @@ const server = micro(async (req, res) => {
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
 
-        if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply || userFunction.default)) {
+        if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
             throw new Error("User function is not valid.")
         }
 
         if(userFunction.default) {
+            if (!(userFunction.default.constructor || userFunction.default.call || userFunction.default.apply)) {
+                throw new Error("User function is not valid.")
+            }
+            
             await userFunction.default(request, response);
         } else {
             await userFunction(request, response);
