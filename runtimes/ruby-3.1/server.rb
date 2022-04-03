@@ -76,7 +76,7 @@ post '/' do
     p e
     status 500
     content_type :json
-    return { code: 500, message: "Exception Occurred #{e.class}. Message: #{e.message}. Backtrace:  \n #{e.backtrace.join("\n")}" }.to_json
+    return { code: 500, message: "#{e.backtrace.join("\n")}" }.to_json
   end
 
   unless defined?(main = ())
