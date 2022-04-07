@@ -12,6 +12,9 @@ docker build -t openruntimes/node:15.5 ./runtimes/node-15.5/
 echo 'Node 14.5...'
 docker build -t openruntimes/node:14.5 ./runtimes/node-14.5/
 
+echo 'Deno 1.20...'
+docker build -t openruntimes/deno:1.20 ./runtimes/deno-1.20/
+
 echo 'Deno 1.14...'
 docker build -t openruntimes/deno:1.14 ./runtimes/deno-1.14/
 
