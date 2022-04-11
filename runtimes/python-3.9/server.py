@@ -7,10 +7,18 @@ import importlib
 app = Flask(__name__);
 
 class Response:
-    def send(self, text):
-        return text;
-    def json(self, obj):
-        return jsonify(obj);
+    _response = None
+    _status = None
+
+    def __init__(self):
+        self._response = None
+        self._status = None
+    def send(self, text, status = 200):
+        self._status = status
+        self._response = text
+    def json(self, obj, status = 200):
+        self._status = status
+        self._response = jsonify(obj)
 
 class Request:
     def __init__(self, request):
@@ -58,12 +66,17 @@ def handler(u_path):
 
     # Check if function exists
     if userModule is None:
-        return {'message': 'function not found, Did you forget to name it `main`?', 'code': 500}, 500;
+        return {'message': 'function not found, Did you forget to name it `main`?', 'code': 500}, 500
 
     try:
-        return userModule.main(req, resp);
+        userModule.main(req, resp)
+
+        print(resp._response)
+        print(resp._status)
+
+        return resp._response, resp._status
     except Exception as e:
-        return {'message': str("".join(traceback.TracebackException.from_exception(e).format())), 'code': 500}, 500;
+        return {'message': str("".join(traceback.TracebackException.from_exception(e).format())), 'code': 500}, 500
 
 if __name__ == "__main__":
     from waitress import serve
