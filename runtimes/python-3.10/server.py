@@ -71,9 +71,6 @@ def handler(u_path):
     try:
         userModule.main(req, resp)
 
-        print(resp._response)
-        print(resp._status)
-
         return resp._response, resp._status
     except Exception as e:
         return {'message': str("".join(traceback.TracebackException.from_exception(e).format())), 'code': 500}, 500
