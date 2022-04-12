@@ -3,8 +3,6 @@ package io.openruntimes.kotlin
 import io.javalin.Javalin
 import io.javalin.http.Context
 import io.javalin.plugin.json.jsonMapper
-import io.openruntimes.kotlin.RuntimeResponse.Companion.error
-import io.openruntimes.kotlin.RuntimeResponse.Companion.unauthorized
 import kotlinx.coroutines.runBlocking
 
 suspend fun main() {
@@ -33,11 +31,6 @@ suspend fun execute(ctx: Context) {
     try {
         ctx.result(codeWrapper.main(request, response).data)
     } catch (e: Exception) {
-        val output = listOf(
-            e.message ?? "", 
-            e.stackTraceToString() ?? ""
-        ).joinToString("\r\n")
-
-        ctx.status(500).result(output)
+        ctx.status(500).result(e.stackTraceToString())
     }
 }
