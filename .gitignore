@@ -41,3 +41,4 @@ tests/cpp-17/CMakeCache.txt
 tests/cpp-17/Makefile
 tests/cpp-17/cmake_install.cmake
 tests/cpp-17/cpp_runtime
+runtimes/*/.idea
