@@ -32,7 +32,7 @@ int main()
                     httpResponse->setStatusCode(static_cast<HttpStatusCode>(runtimeResponse.statusCode));
                     httpResponse->setBody(runtimeResponse.data);
                 } catch (const std::exception& e) {
-                    httpResponse->setStatusCode(static_cast<HttpStatusCode>(runtimeResponse.statusCode));
+                    httpResponse->setStatusCode(static_cast<HttpStatusCode>(500));
                     httpResponse->setBody(e.what());
                 }
                 
