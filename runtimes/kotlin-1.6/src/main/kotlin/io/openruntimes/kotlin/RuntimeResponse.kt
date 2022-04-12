@@ -20,15 +20,5 @@ class RuntimeResponse(
 
     companion object {
         var mapper: JsonMapper? = null
-
-        @JvmStatic
-        fun error(error: Throwable): RuntimeResponse {
-            return RuntimeResponse("{\"message\": \"" + error.message + "\"}", 500)
-        }
-
-        @JvmStatic
-        fun unauthorized(): RuntimeResponse {
-            return RuntimeResponse("{\"message\": \"Unauthorized\"}", 401)
-        }
     }
 }
