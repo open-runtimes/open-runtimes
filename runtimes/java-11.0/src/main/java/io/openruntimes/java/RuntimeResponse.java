@@ -41,12 +41,4 @@ public class RuntimeResponse {
         this.statusCode = statusCode;
         return this;
     }
-
-    public static RuntimeResponse error(Throwable error) {
-        return new RuntimeResponse("{\"message\": \"" + error.getMessage() + "\"}", 500);
-    }
-
-    public static RuntimeResponse unauthorized() {
-        return new RuntimeResponse("{\"message\": \"Unauthorized\"}", 401);
-    }
 }
