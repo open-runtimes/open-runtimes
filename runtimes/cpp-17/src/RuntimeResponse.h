@@ -25,22 +25,6 @@ namespace runtime
             statusCode = code;
             return *this;
         }
-
-        static RuntimeResponse error(const std::exception &e)
-        {
-            RuntimeResponse resp;
-            resp.data = e.what();
-            resp.statusCode = 500;
-            return resp;
-        }
-
-        static RuntimeResponse unauthorized()
-        {
-            RuntimeResponse resp;
-            resp.data = R"({"code": 401, "message": "Unauthorized"})";
-            resp.statusCode = 500;
-            return resp;
-        }
     };
 }
 
