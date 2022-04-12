@@ -3,6 +3,8 @@ package io.openruntimes.java;
 import org.rapidoid.http.Req;
 import org.rapidoid.http.Resp;
 import org.rapidoid.setup.On;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 public class Server {
 
@@ -26,7 +28,13 @@ public class Server {
         try {
             return resp.result(codeWrapper.main(request, response).data);
         } catch (Exception e) {
-            return resp.result(RuntimeResponse.error(e));
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            
+            String exceptionAsString = sw.toString();
+            String result = String.join("\r\n", e.getMessage(), exceptionAsString);
+            return resp.code(500).result(result);
         }
     }
 }
