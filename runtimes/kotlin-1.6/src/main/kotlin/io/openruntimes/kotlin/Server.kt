@@ -29,6 +29,11 @@ suspend fun execute(ctx: Context) {
     try {
         ctx.result(codeWrapper.main(request, response).data)
     } catch (e: Exception) {
-        ctx.json(error(e))
+        val output = listOf(
+            e.message ?? "", 
+            e.stackTraceToString() ?? ""
+        ).joinToString("\r\n")
+
+        ctx.status(500).result(output)
     }
 }
