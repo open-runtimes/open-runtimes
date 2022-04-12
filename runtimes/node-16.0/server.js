@@ -28,7 +28,15 @@ const server = micro(async (req, res) => {
             throw new Error("User function is not valid.")
         }
 
-        await userFunction(request, response);
+        if(userFunction.default) {
+            if (!(userFunction.default.constructor || userFunction.default.call || userFunction.default.apply)) {
+                throw new Error("User function is not valid.")
+            }
+            
+            await userFunction.default(request, response);
+        } else {
+            await userFunction(request, response);
+        }
     } catch (e) {
         send(res, 500, e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
     }

@@ -73,7 +73,7 @@ post '/' do
   rescue Exception => e
     p e
     status 500
-    return 'File not found or is not a valid ruby file.'
+    return e.backtrace.join("\n")
   end
 
   unless defined?(main = ())
