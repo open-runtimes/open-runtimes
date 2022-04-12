@@ -28,6 +28,10 @@ namespace drogon
             request.env = (*json)["env"];
             request.headers = (*json)["headers"];
         }
+        if (request.payload.empty())
+        {
+            request.payload = "";
+        }
         return request;
     }
 }
