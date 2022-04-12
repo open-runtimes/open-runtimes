@@ -17,8 +17,12 @@ suspend fun main() {
 suspend fun execute(ctx: Context) {
     RuntimeResponse.mapper = ctx.jsonMapper()
 
+    if (ctx.header("x-internal-challenge").isNullOrBlank()) {
+        ctx.status(500).result("Unauthorized");
+        return;
+    }
     if (ctx.header("x-internal-challenge") != System.getenv("INTERNAL_RUNTIME_KEY")) {
-        ctx.json(unauthorized())
+        ctx.status(500).result("Unauthorized")
         return
     }
 
