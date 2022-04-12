@@ -31,10 +31,8 @@ public class Server {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
-            
-            String exceptionAsString = sw.toString();
-            String result = String.join("\r\n", e.getMessage(), exceptionAsString);
-            return resp.code(500).result(result);
+
+            return resp.code(500).result(sw.toString());
         }
     }
 }

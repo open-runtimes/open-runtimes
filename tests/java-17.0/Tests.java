@@ -9,10 +9,11 @@ import com.google.gson.Gson;
 final Gson gson = new Gson();
 
 public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exception {
+    String payloadString = req.getPayload() == null || req.getPayload().isEmpty() 
+        ? "{}" 
+        : req.getPayload();
 
-    Map<String, Object> payload = gson.fromJson(
-        req.getPayload() == null ? "{}" : req.getPayload(), 
-        Map.class);
+    Map<String, Object> payload = gson.fromJson(payloadString, Map.class);
 
     String header = "";
     Map<String, String> headers = req.getHeaders();
