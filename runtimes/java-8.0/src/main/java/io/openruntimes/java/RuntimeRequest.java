@@ -23,6 +23,8 @@ public class RuntimeRequest {
         Map<String, Object> data = request.data();
         if (data.containsKey("payload")) {
             this.payload = (String) data.get("payload");
+        } else {
+            this.payload = "";
         }
         if (data.containsKey("headers")) {
             this.headers = (Map<String, String>) data.get("headers");
