@@ -152,6 +152,12 @@ env:
     ARCH=linux/amd64,linux/arm64
 
   # DotNet
+  - RUNTIME=dotnet-3.1
+    PHP_CLASS=DotNet31
+    ENTRYPOINT=Tests.cs
+    SERVER_PROCESS="DotNetRuntime.dll"
+    IMAGE=openruntimes/dotnet:3.1
+    ARCH=linux/amd64,linux/arm64
   - RUNTIME=dotnet-6.0
     PHP_CLASS=DotNet60
     ENTRYPOINT=Tests.cs
