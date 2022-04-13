@@ -20,18 +20,18 @@ int main()
 
                 if (req->getHeader("x-internal-challenge") != std::getenv("INTERNAL_RUNTIME_KEY"))
                 {
-                    res->setStatusCode(static_cast<HttpStatusCode>(500))
+                    res->setStatusCode(static_cast<HttpStatusCode>(500));
                     res->setBody("Unauthorized");
                     callback(res);
                     return;
                 }
-`
-                const std::unique_ptr<RuntimeResponse> runtimeResponse(new RuntimeResponse());
+
+                const std::shared_ptr<RuntimeResponse> runtimeResponse(new RuntimeResponse());
 
                 try {
-                    Wrapper::main(runtimeRequest, runtimeResponse);
-                    res->setStatusCode(static_cast<HttpStatusCode>(runtimeResponse.statusCode));
-                    res->setBody(runtimeResponse.data);
+                    Wrapper::main(runtimeRequest, *runtimeResponse);
+                    res->setStatusCode(static_cast<HttpStatusCode>(runtimeResponse->statusCode));
+                    res->setBody(runtimeResponse->data);
                 } catch (const std::exception& e) { 
                     res->setStatusCode(static_cast<HttpStatusCode>(500));
                     res->setBody(e.what());

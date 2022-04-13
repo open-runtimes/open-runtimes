@@ -16,6 +16,7 @@ static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
     Json::CharReaderBuilder builder;
     Json::CharReader *reader = builder.newCharReader();
     Json::Value payload;
+    
     bool parsingSuccessful = reader->parse(
         req.payload.c_str(),
         req.payload.c_str() + req.payload.size(),
