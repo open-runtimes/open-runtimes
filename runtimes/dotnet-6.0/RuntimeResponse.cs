@@ -32,16 +32,6 @@ public class RuntimeResponse
         StatusCode = statusCode;
         return this;
     }
-
-    internal static RuntimeResponse Error(Exception e) => new(
-        data: e.Message,
-        statusCode: 500
-    );
-
-    internal static RuntimeResponse Unauthorized() => new(
-        data: "{\"code\": 401, \"message\": \"Unauthorized\"}",
-        statusCode: 401
-    );
 }
 
 
