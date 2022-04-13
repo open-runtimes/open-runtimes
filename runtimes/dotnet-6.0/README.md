@@ -84,10 +84,9 @@ public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
     });
 ```
 
-- To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
+- To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically cached and installed, so you don't need to include the `.nuget` folder in your function.
 
 - The default entrypoint is `Index.cs`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/App.cs`.
-
 
 ## Authors
 
