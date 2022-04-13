@@ -10,16 +10,20 @@ static async Task<IResult> Execute(
     [FromHeader(Name = "x-internal-challenge")] string? challengeId,
     [FromBody] RuntimeRequest? request)
 {
-    if (challengeId != Environment.GetEnvironmentVariable("INTERNAL_RUNTIME_KEY"))
+    if (challengeId is not null 
+        && challengeId != Environment.GetEnvironmentVariable("INTERNAL_RUNTIME_KEY"))
     {
-        return Results.Unauthorized();
+        return Results.Problem(
+            detail: "Unauthorized",
+            statusCode: 500);
     }
 
     try
     {
-        var response = await new Wrapper().Main(
-            req: request ?? new(),
-            res: new());
+        var codeWrapper = new Wrapper();
+        var req = request ?? new(); 
+        var res = new RuntimeResponse();
+        var response = await codeWrapper.Main(req, res);
 
         return Results.Text(
             content: response.Data,
