@@ -59,3 +59,9 @@ docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12/
 
 echo 'Swift 5.5...'
 docker build -t openruntimes/swift:5.5 ./runtimes/swift-5.5/
+
+echo '.NET 3.1...'
+docker build -t openruntimes/dotnet-3.1 ./runtimes/dotnet-3.1/
+
+echo '.NET 6.0...'
+docker build -t openruntimes/dotnet-6.0 ./runtimes/dotnet-6.0/
