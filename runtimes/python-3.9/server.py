@@ -66,7 +66,7 @@ def handler(u_path):
 
     # Check if function exists
     if userModule is None:
-        return {'message': 'function not found, Did you forget to name it `main`?', 'code': 500}, 500
+        return {'message': 'Function not found. Ensure the function is called `main`?', 'code': 500}, 500
 
     try:
         userModule.main(req, resp)
