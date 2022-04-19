@@ -1,4 +1,3 @@
-.DS_Store
 vendor
 .phpunit.result.cache
 
@@ -28,6 +27,15 @@ tests/**/composer.lock
 
 # Swift
 tests/**/Run
-**/code.tar.gz
+
+# Java/Kotlin
 **runtime*.jar
-*.DS_Store
+
+# C++
+**/cmake-build-debug
+**/CMakeFiles
+**/CMakeCache.txt
+**/cpp_runtime
+
+**.idea
+**.DS_Store

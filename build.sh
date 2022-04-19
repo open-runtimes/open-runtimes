@@ -71,3 +71,6 @@ docker build -t openruntimes/java-11.0 ./runtimes/java-11.0/
 
 echo 'Java 17...'
 docker build -t openruntimes/java-17.0 ./runtimes/java-17.0/
+
+echo 'C++ 2017...'
+docker build -t openruntimes/cpp:17 ./runtimes/cpp-17/
