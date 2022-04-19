@@ -74,3 +74,9 @@ docker build -t openruntimes/java-17.0 ./runtimes/java-17.0/
 
 echo 'C++ 2017...'
 docker build -t openruntimes/cpp:17 ./runtimes/cpp-17/
+
+echo '.NET 3.1...'
+docker build -t openruntimes/dotnet-3.1 ./runtimes/dotnet-3.1/
+
+echo '.NET 6.0...'
+docker build -t openruntimes/dotnet-6.0 ./runtimes/dotnet-6.0/
