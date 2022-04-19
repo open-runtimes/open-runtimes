@@ -12,7 +12,7 @@ import requests
 #    If an error is thrown, a response with code 500 will be returned.
 
 def main(req, res):
-    payload = json.loads(req.payload)
+    payload = json.loads('{}' if not req.payload else req.payload)
     todo_id = payload.get('id', 1)
 
     header_data = req.headers.get('x-test-header', None)
