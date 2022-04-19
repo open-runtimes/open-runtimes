@@ -59,3 +59,6 @@ docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12/
 
 echo 'Swift 5.5...'
 docker build -t openruntimes/swift:5.5 ./runtimes/swift-5.5/
+
+echo 'Kotlin 1.6...'
+docker build -t openruntimes/kotlin:1.6 ./runtimes/kotlin-1.6/
