@@ -1,4 +1,3 @@
-.DS_Store
 vendor
 .phpunit.result.cache
 
@@ -28,17 +27,15 @@ tests/**/composer.lock
 
 # Swift
 tests/**/Run
-runtimes/cpp-17/.idea
-runtimes/cpp-17/cmake-build-debug
-runtimes/cpp-17/example/CMakeFiles
-runtimes/cpp-17/example/CMakeCache.txt
-runtimes/cpp-17/example/Makefile
-runtimes/cpp-17/example/cmake_install.cmake
-runtimes/cpp-17/example/code.tar.gz
-runtimes/cpp-17/example/cpp_runtime
-tests/cpp-17/CMakeFiles
-tests/cpp-17/CMakeCache.txt
-tests/cpp-17/Makefile
-tests/cpp-17/cmake_install.cmake
-tests/cpp-17/cpp_runtime
-runtimes/*/.idea
+
+# Java/Kotlin
+**runtime*.jar
+
+# C++
+**/cmake-build-debug
+**/CMakeFiles
+**/CMakeCache.txt
+**/cpp_runtime
+
+**.idea
+**.DS_Store

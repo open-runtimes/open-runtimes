@@ -10,7 +10,7 @@ end
 class RuntimeRequest
   def initialize(payload = '{}', env = {}, headers = {})
     if payload == nil
-      payload = '{}'
+      payload = ''
     end
 
     if headers == nil
@@ -53,15 +53,13 @@ post '/' do
   challenge = request.env['HTTP_X_INTERNAL_CHALLENGE'] || ''
 
   if challenge == ''
-    status 401
-    content_type :json
-    return { code: 401, message: 'Unauthorized' }.to_json
+    status 500
+    return 'Unauthorized'
   end
 
   if challenge != ENV['INTERNAL_RUNTIME_KEY']
-    status 401
-    content_type :json
-    return { code: 401, message: 'Unauthorized' }.to_json
+    status 500
+    return 'Unauthorized'
   end
 
   request.body.rewind
@@ -75,14 +73,12 @@ post '/' do
   rescue Exception => e
     p e
     status 500
-    content_type :json
-    return { code: 500, message: 'File not found or is not a valid ruby file.' }.to_json
+    return e.backtrace.join("\n")
   end
 
   unless defined?(main = ())
     status 500
-    content_type :json
-    return { code: 500, message: 'File does not specify a main() function.' }.to_json
+    return 'File does not specify a main() function.'
   end
 
   begin
@@ -90,8 +86,7 @@ post '/' do
   rescue Exception => e
     p e
     status 500
-    content_type :json
-    return { code: 500, message: e.backtrace.join("\n") }.to_json
+    return e.backtrace.join("\n")
   end
 
   status 200
@@ -100,6 +95,5 @@ end
 
 error do
   status 500
-  content_type :json
-  return { code: 500, message: env['sinatra.error'].message }.to_json
+  return env['sinatra.error'].message
 end
