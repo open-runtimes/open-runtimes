@@ -12,10 +12,8 @@ void main() async {
     if (req.method != 'POST') {
       return shelf.Response(500, body: 'Invalid request');
     }
-    if (req.headers['x-internal-challenge'] !=
-        Platform.environment['INTERNAL_RUNTIME_KEY']) {
-      return shelf.Response(401,
-          body: jsonEncode({'code': 401, 'message': 'Unauthorized'}));
+    if (req.headers['x-internal-challenge'] != Platform.environment['INTERNAL_RUNTIME_KEY']) {
+      return shelf.Response(500, body: 'Unauthorized');
     }
     try {
       final bodystring = await req.readAsString();
@@ -23,21 +21,16 @@ void main() async {
       final request = Request(
         env: body['env'] ?? {},
         headers: body['headers'] ?? {},
-        payload: body['payload'] ?? '{}',
+        payload: body['payload'] ?? '',
       );
 
       final response = Response();
       await user_code.start(request, response);
       return shelf.Response.ok(response.body);
     } on FormatException catch (_) {
-      return shelf.Response(500,
-          body: jsonEncode({
-            'code': 500,
-            'message': 'Unable to properly load request body'
-          }));
+      return shelf.Response(500, body: 'Unable to properly load request body');
     } catch (e) {
-      return shelf.Response(500,
-          body: jsonEncode({'code': 500, 'message': e.toString()}));
+      return shelf.Response(500, body: e.toString());
     }
   }, '0.0.0.0', 3000);
 }

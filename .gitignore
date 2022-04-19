@@ -1,4 +1,3 @@
-.DS_Store
 vendor
 .phpunit.result.cache
 
@@ -28,33 +27,21 @@ tests/**/composer.lock
 
 # Swift
 tests/**/Run
-runtimes/cpp-17/.idea
-runtimes/cpp-17/cmake-build-debug
-runtimes/cpp-17/example/CMakeFiles
-runtimes/cpp-17/example/CMakeCache.txt
-runtimes/cpp-17/example/Makefile
-runtimes/cpp-17/example/cmake_install.cmake
-runtimes/cpp-17/example/code.tar.gz
-runtimes/cpp-17/example/cpp_runtime
-tests/cpp-17/CMakeFiles
-tests/cpp-17/CMakeCache.txt
-tests/cpp-17/Makefile
-tests/cpp-17/cmake_install.cmake
-tests/cpp-17/cpp_runtime
-runtimes/dotnet-6.0/Example/DotNetRuntime
-runtimes/dotnet-6.0/Example/DotNetRuntime.deps.json
-runtimes/dotnet-6.0/Example/DotNetRuntime.dll
-runtimes/dotnet-6.0/Example/DotNetRuntime.pdb
-runtimes/dotnet-6.0/Example/DotNetRuntime.runtimeconfig.json
-runtimes/dotnet-6.0/Example/code.tar.gz
-runtimes/dotnet-6.0/Example/web.config
-runtimes/dotnet-6.0/bin
-runtimes/dotnet-6.0/obj
-tests/dotnet-6.0/DotNetRuntime
-tests/dotnet-6.0/DotNetRuntime.deps.json
-tests/dotnet-6.0/DotNetRuntime.dll
-tests/dotnet-6.0/DotNetRuntime.pdb
-tests/dotnet-6.0/DotNetRuntime.runtimeconfig.json
-tests/dotnet-6.0/web.config
-runtimes/dotnet-6.0/.vs
-.vscode
+
+# Java/Kotlin
+**runtime*.jar
+
+# C++
+**/cmake-build-debug
+**/CMakeFiles
+**/CMakeCache.txt
+**/cpp_runtime
+
+# .NET
+tests/**/bin
+tests/**/obj
+tests/**/DotNetRuntime*
+tests/**/web.config
+
+**.idea
+**.DS_Store

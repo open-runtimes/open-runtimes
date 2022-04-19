@@ -60,6 +60,21 @@ docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12/
 echo 'Swift 5.5...'
 docker build -t openruntimes/swift:5.5 ./runtimes/swift-5.5/
 
+echo 'Kotlin 1.6...'
+docker build -t openruntimes/kotlin:1.6 ./runtimes/kotlin-1.6/
+
+echo 'Java 8...'
+docker build -t openruntimes/java-8.0 ./runtimes/java-8.0/
+
+echo 'Java 11...'
+docker build -t openruntimes/java-11.0 ./runtimes/java-11.0/
+
+echo 'Java 17...'
+docker build -t openruntimes/java-17.0 ./runtimes/java-17.0/
+
+echo 'C++ 2017...'
+docker build -t openruntimes/cpp:17 ./runtimes/cpp-17/
+
 echo '.NET 3.1...'
 docker build -t openruntimes/dotnet-3.1 ./runtimes/dotnet-3.1/
 
