@@ -157,6 +157,56 @@ env:
     IMAGE=openruntimes/swift:5.5
     ARCH=linux/amd64,linux/arm64
 
+  # Kotlin
+  - RUNTIME=kotlin-1.6
+    PHP_CLASS=Kotlin16
+    ENTRYPOINT=Tests.kt
+    SERVER_PROCESS="kotlin-runtime-1.0.0"
+    IMAGE=openruntimes/kotlin:1.6
+    ARCH=linux/amd64,linux/arm64
+
+  # Java
+  - RUNTIME=java-8.0
+    PHP_CLASS=Java8
+    ENTRYPOINT=Tests.java
+    SERVER_PROCESS="java-runtime-1.0.0"
+    IMAGE=openruntimes/java:8.0
+    ARCH=linux/amd64,linux/arm64
+  - RUNTIME=java-11.0
+    PHP_CLASS=Java11
+    ENTRYPOINT=Tests.java
+    SERVER_PROCESS="java-runtime-1.0.0"
+    IMAGE=openruntimes/java:11.0
+    ARCH=linux/amd64,linux/arm64
+  - RUNTIME=java-17.0
+    PHP_CLASS=Java17
+    ENTRYPOINT=Tests.java
+    SERVER_PROCESS="java-runtime-1.0.0"
+    IMAGE=openruntimes/java:17.0
+    ARCH=linux/amd64,linux/arm64
+
+  # C++
+  - RUNTIME=cpp-17
+    PHP_CLASS=Cpp17
+    ENTRYPOINT=tests.cc
+    SERVER_PROCESS="cpp_runtime"
+    IMAGE=openruntimes/cpp:17
+    ARCH=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x
+
+  # DotNet
+  - RUNTIME=dotnet-3.1
+    PHP_CLASS=DotNet31
+    ENTRYPOINT=Tests.cs
+    SERVER_PROCESS="DotNetRuntime.dll"
+    IMAGE=openruntimes/dotnet:3.1
+    ARCH=linux/amd64,linux/arm64
+  - RUNTIME=dotnet-6.0
+    PHP_CLASS=DotNet60
+    ENTRYPOINT=Tests.cs
+    SERVER_PROCESS="DotNetRuntime.dll"
+    IMAGE=openruntimes/dotnet:6.0
+    ARCH=linux/amd64,linux/arm64
+
 notifications:
   email:
     - team@appwrite.io
