@@ -1,0 +1,7 @@
+POST http://0.0.0.0:3000
+content-type: application/json
+X-internal-Challenge: test-secret-key
+
+{
+    "garbage": "garbage"
+}
