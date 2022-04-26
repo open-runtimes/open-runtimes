@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart' hide Response;
 
 /*
@@ -20,8 +21,7 @@ Future<void> start(final req, final res) async {
   final id = payload['id'] ?? '1';
   final todo =
       await Dio().get('https://jsonplaceholder.typicode.com/todos/$id');
-  print(todo);
-
+  print('stdout');
   res.json({
     'isTest': true,
     'message': "Hello Open Runtimes 👋",

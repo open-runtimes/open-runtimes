@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import '{entrypoint}' as user_code;
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, stdout, Stdout;
 import 'function_types.dart';
 
 // const USER_CODE_PATH = '/usr/code-start';
@@ -28,7 +28,7 @@ void main() async {
       );
 
       final response = Response();
-      runZonedGuarded(
+      await runZonedGuarded(
         () async {
           await user_code.start(request, response);
         },
@@ -39,12 +39,23 @@ void main() async {
           },
         ),
       );
-      print(userLogs);
-      return shelf.Response.ok(response.body);
+      return shelf.Response.ok(
+          jsonEncode({
+            "response": response.body,
+            "stdout": userLogs.join('\n'),
+            "stderr": ""
+          }),
+          headers: {"content-type": "application/json"});
     } on FormatException catch (_) {
-      return shelf.Response(500, body: 'Unable to properly load request body');
+      return shelf.Response(500, body: {
+        'stderr': 'Unable to properly load request body',
+        'stdout': userLogs
+      });
     } catch (e) {
-      return shelf.Response(500, body: e.toString());
+      return shelf.Response(500, body: {
+        'stderr': e.toString(),
+        'stdout': userLogs,
+      });
     }
   }, '0.0.0.0', 3000);
 }
