@@ -17,9 +17,14 @@ const server = micro(async (req, res) => {
         payload: body.payload ?? '',
     };
 
+    console.stdlog = console.log.bind(console);
+    logs = [];
+    console.log = function(){
+        logs.push(Array.from(arguments));
+    }
     const response = {
-        send: (text, status = 200) => send(res, status, text),
-        json: (json, status = 200) => send(res, status, json),
+        send: (text, status = 200) => send(res, status, {response: text, stdout: logs}),
+        json: (json, status = 200) => send(res, status, {response: json, stdout: logs}),
     };
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
@@ -38,8 +43,10 @@ const server = micro(async (req, res) => {
             await userFunction(request, response);
         }
     } catch (e) {
-        send(res, 500, e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
+        send(res, 500, {stdout: logs, stderr: e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e});
     }
+    logs.length = 0;
+    console.log = console.stdlog;
 });
 
 server.listen(3000);
