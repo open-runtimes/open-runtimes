@@ -18,13 +18,25 @@ const server = micro(async (req, res) => {
     };
 
     console.stdlog = console.log.bind(console);
+    console.stderror = console.error.bind(console);
+    console.stdinfo = console.info.bind(console);
+    console.stddebug = console.debug.bind(console);
+    console.stdwarn = console.warn.bind(console);
     logs = [];
-    console.log = function(){
-        logs.push(Array.from(arguments));
+    console.log = console.error = console.info = console.warn = console.debug = function(){
+        var args = [];
+        Array.from(arguments).forEach(arg => {
+            if(arg instanceof Object || Array.isArray(arg)) {    
+                args.push(JSON.stringify(arg));
+            } else {
+                args.push(arg)
+            }
+        });
+        logs.push(args.join(" "));
     }
     const response = {
-        send: (text, status = 200) => send(res, status, {response: text, stdout: logs}),
-        json: (json, status = 200) => send(res, status, {response: json, stdout: logs}),
+        send: (text, status = 200) => send(res, status, {response: text, stdout: logs.join('\n')}),
+        json: (json, status = 200) => send(res, status, {response: json, stdout: logs.join('\n')}),
     };
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
@@ -43,10 +55,14 @@ const server = micro(async (req, res) => {
             await userFunction(request, response);
         }
     } catch (e) {
-        send(res, 500, {stdout: logs, stderr: e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e});
+        send(res, 500, {stdout: logs.join('\n'), stderr: e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e});
     }
-    logs.length = 0;
+    logs = [];
     console.log = console.stdlog;
+    console.error = console.stderror;
+    console.debug = console.stddebug;
+    console.warn = console.stdwarn;
+    console.info = console.stdinfo;
 });
 
 server.listen(3000);
