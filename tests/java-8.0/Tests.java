@@ -55,5 +55,18 @@ public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exce
     data.put("env", env);
     data.put("todo", todo);
 
+    // Print to user function stdout
+    System.out.println("User function stdout");
+
+    // Print to user function stderr
+    System.err.println("User function stderr");
+
+    Exception e = new Exception("User function exception 1");
+    // Prints to user function stderr by default
+    e.printStackTrace();
+
+    // Will be caught by server and stack trace logged to user function stderr
+    //throw new Exception("User function exception 2");
+
     return res.json(data);
 }
