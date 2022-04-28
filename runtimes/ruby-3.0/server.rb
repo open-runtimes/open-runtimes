@@ -81,12 +81,30 @@ post '/' do
     return 'File does not specify a main() function.'
   end
 
+  system_out = $sdtout
+  system_err = $stderr
+  user_out = StringIO.new
+  user_err = StringIO.new
+  $stdout = user_out
+  $stderr = user_err
+
   begin
-    response = main(requestData, runtimeResponse)
+    user_response = main(requestData, runtimeResponse)
+    response = JSON.parse({
+      'response' => user_response.response,
+      'stdout' => user_out.string
+    })
   rescue Exception => e
-    p e
     status 500
-    return e.backtrace.join("\n")
+    return JSON.parse({
+      'stdout' => user_out.string
+      'stderr' => user_err.string + "\n" + e.backtrace.join("\n")
+    })
+  ensure
+    user_out = nil
+    user_err = nil
+    $stdout = system_out
+    $stderr = system_err
   end
 
   status 200

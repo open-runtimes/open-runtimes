@@ -16,6 +16,9 @@ def main(req, res)
 
     todo = JSON.parse(HTTParty.get("https://jsonplaceholder.typicode.com/todos/" + (payload['id'] || '1')).body)
 
+    puts 'User function stdout'
+    $stderr.puts 'User function stderr'
+
     return res.json({
         'isTest': true,
         'message': 'Hello Open Runtimes 👋',
