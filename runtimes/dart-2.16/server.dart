@@ -53,12 +53,12 @@ void main() async {
     } on FormatException catch (_) {
       return shelf.Response(500, body: jsonEncode({
         'stderr': 'Unable to properly load request body',
-        'stdout': userLogs
+        'stdout': userLogs.join('\n')
       }), headers: headers);
     } catch (e) {
       return shelf.Response(500, body: jsonEncode({
         'stderr': e.toString(),
-        'stdout': userLogs,
+        'stdout': userLogs.join('\n'),
       }), headers: headers);
     }
   }, '0.0.0.0', 3000);
