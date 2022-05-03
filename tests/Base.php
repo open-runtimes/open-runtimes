@@ -161,6 +161,6 @@ abstract class Base extends TestCase
 
     public function testConsoleLogs(): void {
         $response = $this->call([]);
-        self::assertEquals('stdout', $response['body']['stdout']);
+        self::assertStringStartsWith('stdout', $response['body']['stdout']);
     }
 }
