@@ -26,6 +26,9 @@ void main() async {
         headers: body['headers'] ?? {},
         payload: body['payload'] ?? '',
       );
+      final headers = {
+        'content-type': 'application/json'
+      };
 
       final response = Response();
       await runZonedGuarded(
@@ -45,17 +48,17 @@ void main() async {
             "stdout": userLogs.join('\n'),
             "stderr": ""
           }),
-          headers: {"content-type": "application/json"});
+          headers: headers);
     } on FormatException catch (_) {
       return shelf.Response(500, body: {
         'stderr': 'Unable to properly load request body',
         'stdout': userLogs
-      });
+      }, headers: headers);
     } catch (e) {
       return shelf.Response(500, body: {
         'stderr': e.toString(),
         'stdout': userLogs,
-      });
+      }, headers: headers);
     }
   }, '0.0.0.0', 3000);
 }
