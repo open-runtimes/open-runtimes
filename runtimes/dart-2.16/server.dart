@@ -18,6 +18,10 @@ void main() async {
         Platform.environment['INTERNAL_RUNTIME_KEY']) {
       return shelf.Response(500, body: 'Unauthorized');
     }
+    final headers = {
+      'content-type': 'application/json'
+    };
+    
     try {
       final bodystring = await req.readAsString();
       final body = jsonDecode(bodystring);
@@ -26,9 +30,6 @@ void main() async {
         headers: body['headers'] ?? {},
         payload: body['payload'] ?? '',
       );
-      final headers = {
-        'content-type': 'application/json'
-      };
 
       final response = Response();
       await runZonedGuarded(
@@ -50,15 +51,15 @@ void main() async {
           }),
           headers: headers);
     } on FormatException catch (_) {
-      return shelf.Response(500, body: {
+      return shelf.Response(500, body: jsonEncode({
         'stderr': 'Unable to properly load request body',
         'stdout': userLogs
-      }, headers: headers);
+      }), headers: headers);
     } catch (e) {
-      return shelf.Response(500, body: {
+      return shelf.Response(500, body: jsonEncode({
         'stderr': e.toString(),
         'stdout': userLogs,
-      }, headers: headers);
+      }), headers: headers);
     }
   }, '0.0.0.0', 3000);
 }
