@@ -45,7 +45,7 @@ class RuntimeResponse
   end
 
   def json(object)
-    @response = object.to_json
+    @response = object
   end
 end
 
@@ -81,17 +81,18 @@ post '/' do
     return 'File does not specify a main() function.'
   end
 
-  system_out = $stdout
-  system_err = $stderr
-  user_out = StringIO.new
-  user_err = StringIO.new
-  $stdout = user_out
-  $stderr = user_err
-
   begin
+    system_out = $stdout
+    system_err = $stderr
+    user_out = StringIO.new
+    user_err = StringIO.new
+    $stdout = user_out
+    $stderr = user_err
+
     user_response = main(requestData, runtimeResponse)
+
     response = {
-      response: user_response.response,
+      response: user_response,
       stdout: user_out.string
     }.to_json
   rescue Exception => e
