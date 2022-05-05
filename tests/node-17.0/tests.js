@@ -16,7 +16,15 @@ module.exports = async (req, res) => {
     const payload = JSON.parse(req.payload === '' ? '{}' : req.payload);
 
     const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`).then(r => r.json());
-    console.log('stdout');
+    console.log('log');
+    console.warn('warning');
+    console.error('error');
+    console.info('info');
+    console.debug('debug');
+    console.log('log1', 'log2');
+    console.log({hello: 'world'});
+    console.log(['hello', 'world']);
+
     res.json({
         isTest: true,
         message: 'Hello Open Runtimes 👋',
@@ -25,3 +33,19 @@ module.exports = async (req, res) => {
         todo
     });
 }
+
+/* 
+
+console.log("Log");
+console.warning("Log");
+console.error("Log");
+console.info("Log");
+
+console.log("MSG1", "MSG2");
+console.log(number);
+console.log(string);
+console.log(boolean);
+console.log(float);
+console.log(object);
+console.log(array);
+*/
