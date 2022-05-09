@@ -2,9 +2,14 @@ plugins {
 	id 'java'
 }
 
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  }
+}
+
 group = 'io.openruntimes'
 version = '1.0.0'
-sourceCompatibility = '8'
 
 repositories {
 	mavenCentral()
