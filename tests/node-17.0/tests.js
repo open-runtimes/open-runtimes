@@ -33,19 +33,3 @@ module.exports = async (req, res) => {
         todo
     });
 }
-
-/* 
-
-console.log("Log");
-console.warning("Log");
-console.error("Log");
-console.info("Log");
-
-console.log("MSG1", "MSG2");
-console.log(number);
-console.log(string);
-console.log(boolean);
-console.log(float);
-console.log(object);
-console.log(array);
-*/
