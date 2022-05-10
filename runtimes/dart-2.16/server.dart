@@ -46,19 +46,19 @@ void main() async {
       return shelf.Response.ok(
           jsonEncode({
             "response": response.body,
-            "stdout": userLogs.join(''),
+            "stdout": userLogs.join('\n'),
             "stderr": ""
           }),
           headers: headers);
     } on FormatException catch (_) {
       return shelf.Response(500, body: jsonEncode({
         'stderr': 'Unable to properly load request body',
-        'stdout': userLogs.join('')
+        'stdout': userLogs.join('\n')
       }), headers: headers);
     } catch (e) {
       return shelf.Response(500, body: jsonEncode({
         'stderr': e.toString(),
-        'stdout': userLogs.join(''),
+        'stdout': userLogs.join('\n'),
       }), headers: headers);
     }
   }, '0.0.0.0', 3000);
