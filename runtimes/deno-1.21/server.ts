@@ -26,10 +26,10 @@ app.use(async (ctx) => {
   const stdinfo = console.info.bind(console);
   const stddebug = console.debug.bind(console);
   const stdwarn = console.warn.bind(console);
-  let logs = [];
+  let logs: any[] = [];
 
   console.log = console.error = console.info = console.warn = console.debug = function(){
-    var args = [];
+    var args:any[] = [];
     Array.from(arguments).forEach(arg => {
         if(arg instanceof Object || Array.isArray(arg)) {    
             args.push(JSON.stringify(arg));
