@@ -14,10 +14,10 @@ class Request {
 
 class Response {
   int _status = 200;
-  String? _text;
+  dynamic _text;
 
   int get status => _status;
-  String? get body => _text;
+  dynamic get body => _text;
 
   Response send(String? text, {int status = 200}) {
     _text = text;
@@ -26,7 +26,7 @@ class Response {
   }
 
   Response json(Map<String, dynamic> json, {int status = 200}) {
-    _text = jsonEncode(json);
+    _text = json;
     _status = status;
     return this;
   }
