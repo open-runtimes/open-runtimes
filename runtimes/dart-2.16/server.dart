@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import '{entrypoint}' as user_code;
+import 'dart:io' show Platform;
 import 'function_types.dart';
 
 // const USER_CODE_PATH = '/usr/code-start';
