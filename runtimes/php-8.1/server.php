@@ -61,7 +61,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     if ($key != $internal_challenge) {
         $res->status(500);
-        $res->end('Unauthorized');
+        $res->end(json_encode(['stderr' => 'Unauthorized']));
         return;
     }
 
