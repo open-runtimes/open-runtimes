@@ -24,7 +24,9 @@ return function($req, $res) use ($client) {
 
     $response = $client->request('GET', '/todos/' . ($payload['id'] ?? 1));
     $todo = \json_decode($response->getBody()->getContents(), true);
-
+    echo "log1\n";
+    print("{hello: world}\n");
+    print("[hello, world]");
     $res->json([
         'message' => 'Hello Open Runtimes 👋',
         'todo' => $todo
