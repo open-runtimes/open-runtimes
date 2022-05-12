@@ -28,3 +28,10 @@ tests/**/composer.lock
 
 # Swift
 tests/**/Run
+
+# Rust
+tests/**/Cargo.lock
+tests/**/debug
+tests/**/target
+tests/**/*.rs.bk
+tests/**/*.pdb

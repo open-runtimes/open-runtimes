@@ -59,3 +59,6 @@ docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12/
 
 echo 'Swift 5.5...'
 docker build -t openruntimes/swift:5.5 ./runtimes/swift-5.5/
+
+echo 'Rust 1.55...'
+docker build -t openruntimes/rust:1.55 ./runtimes/rust-1.55/

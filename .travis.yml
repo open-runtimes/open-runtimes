@@ -151,6 +151,15 @@ env:
     IMAGE=openruntimes/swift:5.5
     ARCH=linux/amd64,linux/arm64
 
+  # Rust
+  - RUNTIME=rust-1.55
+    PHP_CLASS=Rust155
+    ENTRYPOINT=tests.rs
+    IMAGE=openruntimes/rust:1.55
+    SERVER_PROCESS="./Run serve"
+    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    # TODO: Fix arch and server process
+
 notifications:
   email:
     - team@appwrite.io
