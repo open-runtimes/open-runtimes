@@ -73,12 +73,12 @@ post '/' do
   rescue Exception => e
     p e
     status 500
-    return e.backtrace.join("\n")
+    return {stderr: e.backtrace.join("\n") }.to_json
   end
 
   unless defined?(main = ())
     status 500
-    return 'File does not specify a main() function.'
+    return { stderr: 'File does not specify a main() function.' }.to_json
   end
 
   begin
@@ -114,5 +114,5 @@ end
 
 error do
   status 500
-  return env['sinatra.error'].message
+  return { stderr: env['sinatra.error'].message }.to_json
 end
