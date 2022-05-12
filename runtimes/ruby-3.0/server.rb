@@ -54,12 +54,12 @@ post '/' do
 
   if challenge == ''
     status 500
-    return 'Unauthorized'
+    return { stderr: 'Unauthorized' }.to_json
   end
 
   if challenge != ENV['INTERNAL_RUNTIME_KEY']
     status 500
-    return 'Unauthorized'
+    return { stderr: 'Unauthorized' }.to_json
   end
 
   request.body.rewind
