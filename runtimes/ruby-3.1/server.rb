@@ -45,7 +45,7 @@ class RuntimeResponse
   end
 
   def json(object)
-    @response = object.to_json
+    @response = object
   end
 end
 
