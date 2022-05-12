@@ -56,7 +56,9 @@ public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exce
     data.put("todo", todo);
 
     // Print to user function stdout
-    System.out.println("stdout");
+    System.out.println("log1");
+    System.out.println("{hello: world}");
+    System.out.println("[hello, world]");
 
     return res.json(data);
 }
