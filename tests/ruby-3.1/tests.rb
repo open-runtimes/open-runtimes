@@ -12,7 +12,7 @@ require 'json'
 #    If an error is thrown, a response with code 500 will be returned.
 
 def main(req, res)
-    payload = JSON.parse(req.payload)
+    payload = JSON.parse(req.payload === '' ? '{}' : req.payload)
 
     todo = JSON.parse(HTTParty.get("https://jsonplaceholder.typicode.com/todos/" + (payload['id'] || '1')).body)
 

@@ -10,18 +10,15 @@ app.use(async (ctx) => {
   const body = await value;
 
   if (ctx.request.headers.get("x-internal-challenge") !== Deno.env.get("INTERNAL_RUNTIME_KEY")) {
-    ctx.response.status = 401;
-    ctx.response.body = {
-      code: 401,
-      message: "Unauthorized"
-    };
+    ctx.response.status = 500;
+    ctx.response.body = "Unauthorized";
     return;
   }
 
   const request = {
     env: body.env ?? {},
     headers: body.headers ?? {},
-    payload: body.payload ?? '{}'
+    payload: body.payload ?? ''
   };
 
   const response = {
@@ -45,10 +42,7 @@ app.use(async (ctx) => {
     await userFunction(request, response);
   } catch (error) {
     ctx.response.status = 500;
-    ctx.response.body = {
-      code: 500,
-      message: error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message
-    };
+    ctx.response.body = error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message;
   }
 });
 

@@ -37,7 +37,7 @@ class Request:
         if 'payload' in self.parsedRequest:
             self.payload = self.parsedRequest['payload'];
         else:
-            self.payload = '{}';
+            self.payload = '';
 
 
 @app.route('/', defaults={'u_path': ''}, methods = ['POST'])
@@ -45,12 +45,12 @@ class Request:
 def handler(u_path):
 
     if (request.headers.get('x-internal-challenge') != os.getenv('INTERNAL_RUNTIME_KEY')):
-        return {'message': 'Unauthorized', 'code': 401}, 401;
+        return 'Unauthorized', 500;
 
     requestData = request.get_json();
 
     if requestData is None:
-        return {'message': 'no data received', 'code': 500}, 500;
+        return 'No data received', 500;
     
     # Create new request and response object
     req = Request(request);
@@ -66,14 +66,14 @@ def handler(u_path):
 
     # Check if function exists
     if userModule is None:
-        return {'message': 'Function not found. Ensure the function is called `main`?', 'code': 500}, 500
+        return 'Function not found, Did you forget to name it `main`?', 500;
 
     try:
         userModule.main(req, resp)
 
         return resp._response, resp._status
     except Exception as e:
-        return {'message': str("".join(traceback.TracebackException.from_exception(e).format())), 'code': 500}, 500
+        return str("".join(traceback.TracebackException.from_exception(e).format())), 500;
 
 if __name__ == "__main__":
     from waitress import serve
