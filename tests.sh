@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+echo ${IMAGE}
 cd runtimes/${RUNTIME}
 docker build -t open-runtimes/test-runtime .
 cd ../../

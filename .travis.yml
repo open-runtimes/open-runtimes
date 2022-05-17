@@ -235,7 +235,7 @@ install:
   - composer install
 
 script:
-  - export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh tests.sh
+  - export IMAGE=${IMAGE} export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh tests.sh
 
 deploy:
   - provider: script
