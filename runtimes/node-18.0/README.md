@@ -1,30 +1,30 @@
-# PHP Runtime 8.1
+# Node Runtime 18.0
 
-This is the Open Runtime that builds and runs PHP code based on a `php:8.1.6-alpine` base image. 
+This is the Open Runtime that builds and runs NodeJS code based on a `node:18.0-alpine` base image. 
 
-The runtime itself uses [Swoole](https://github.com/swoole/swoole-src) as the Web Server to process the execution requests.
+The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
 
 To learn more about runtimes, visit [Structure](https://github.com/open-runtimes/open-runtimes#structure) section of the main README.md.
 
 ## Usage
 
-1. Create a folder and enter it. Add code into `index.php` file:
+1. Create a folder and enter it. Add code into `index.js` file:
 
 ```bash
-mkdir php-or && cd php-or
-printf "<?\nreturn function(\$req, \$res) {\n    \$res->json([ 'n' => \mt_rand() / \mt_getrandmax() ]);\n};" > index.php
+mkdir node-or && cd node-or
+printf "module.exports = async (req, res) => {\n    res.json({ n: Math.random() })\n}" > index.js
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/php:8.1 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/node:18.0 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=index.php --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/php:8.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=index.js --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/node:18.0 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -43,10 +43,10 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the PHP runtime folder:
+2. Enter the Node runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/php-8.1
+cd open-runtimes/runtimes/node-18.0
 ```
 
 3. Run the included example cloud function:
@@ -67,14 +67,12 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing function for this runtime, ensure it is the only returned one. An example of this is:
+- When writing function for this runtime, ensure is is exported directly through the `module.exports` object. An example of this is:
 
-```php
-<?php
-
-return function($req, $res) {
-    $res->send('Hello Open Runtimes 👋');
-};
+```js
+module.exports = (req, res) => {
+    res.send('Hello Open Runtimes 👋');
+}
 ```
 
 - The `res` parameter has two methods:
@@ -84,26 +82,21 @@ return function($req, $res) {
 
 You can respond with `json()` by providing object:
 
-```php
-return function($req, $res) {
-    $res->json([
-        'message' => 'Hello Open Runtimes 👋',
-        'env' => $req['env'],
-        'payload' => $req['payload'],
-        'headers' => $req['headers']
-    ]);
-};
+```js
+module.exports = (req, res) => {
+    res.json({
+        'message': 'Hello Open Runtimes 👋',
+        'env': req.env,
+        'payload': req.payload,
+        'headers': req.headers
+    });
+}
 ```
 
-- To handle dependencies, you need to have `composer.json` file. Dependencies will be automatically cached and installed, so you don't need to include `vendor` folder in your function.
+- To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
 
-- If you plan to use libraries in your PHP code, make sure to include follwing like at the top of your code:
+- The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.js`.
 
-```php
-require 'vendor/autoload.php';
-```
-
-- The default entrypoint is `index.php`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.php`.
 
 ## Authors
 
@@ -119,10 +112,6 @@ require 'vendor/autoload.php';
 **Matej Bačo**
 
 + [https://github.com/Meldiron](https://github.com/Meldiron)
-
-**Jake Barnby**
-
-+ [https://github.com/abnegate](https://github.com/abnegate)
 
 ## Contributing
 

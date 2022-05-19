@@ -47,6 +47,12 @@ env:
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
     # Deno
+    - RUNTIME=deno-1.21
+      PHP_CLASS=Deno121
+      ENTRYPOINT=tests.ts
+      SERVER_PROCESS=server.ts
+      IMAGE=openruntimes/deno:${VERSION}-1.21
+      ARCH=linux/amd64
     - RUNTIME=deno-1.14
       PHP_CLASS=Deno114
       ENTRYPOINT=tests.ts
@@ -87,6 +93,12 @@ env:
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
     # Dart
+    - RUNTIME=dart-2.17
+      PHP_CLASS=Dart217
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.17
+      SERVER_PROCESS=/usr/code-start/runtime
+      ARCH=linux/amd64,linux/arm64
     - RUNTIME=dart-2.16
       PHP_CLASS=Dart216
       ENTRYPOINT=lib/tests.dart
@@ -181,6 +193,12 @@ env:
       SERVER_PROCESS="java-runtime-1.0.0"
       IMAGE=openruntimes/java:${VERSION}-17.0
       ARCH=linux/amd64,linux/arm64
+    - RUNTIME=java-18.0
+      PHP_CLASS=Java18
+      ENTRYPOINT=Tests.java
+      SERVER_PROCESS="java-runtime-1.0.0"
+      IMAGE=openruntimes/java:${VERSION}-18.0
+      ARCH=linux/amd64,linux/arm64
 
     # C++
     - RUNTIME=cpp-17
@@ -203,6 +221,7 @@ env:
       SERVER_PROCESS="DotNetRuntime.dll"
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
+
 
 notifications:
   email:
