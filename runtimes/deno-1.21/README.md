@@ -1,6 +1,6 @@
-# Deno Runtime 1.14
+# Deno Runtime 1.21
 
-This is the Open Runtime that builds and runs Deno code based on a `deno:alpine-1.21.2` base image. 
+This is the Open Runtime that builds and runs Deno code based on a `deno:alpine-1.21.3` base image. 
 
 The runtime itself uses [oak](https://deno.land/x/oak@v10.2.1) as the Web Server to process the execution requests.
 
@@ -18,13 +18,13 @@ printf "export default async function(req: any, res: any) {\n    res.json({ n: M
 2. Build the code:
 
 ```bash
-docker run -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:1.14 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:1.21 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/deno:1.14 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/deno:1.21 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -46,7 +46,7 @@ git clone https://github.com/open-runtimes/open-runtimes.git
 2. Enter the Deno runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/deno-1.14
+cd open-runtimes/runtimes/deno-1.21
 ```
 
 3. Run the included example cloud function:

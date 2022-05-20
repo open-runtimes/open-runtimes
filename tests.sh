@@ -13,11 +13,11 @@ echo "Waiting for server..."
 max_wait=500
 wait_interval=10
 wait_count=0
-while [ -z "$(docker container top open-runtimes-test-serve | grep "${SERVER_PROCESS}")" ]; do
-    [ $wait_count -gt $max_wait ] && echo "Server failed to start" && exit 1
-    wait_count=$((wait_count + wait_interval))
-    sleep $wait_interval
-done
+# while [ -z "$(docker container top open-runtimes-test-serve | grep "${SERVER_PROCESS}")" ]; do
+#     [ $wait_count -gt $max_wait ] && echo "Server failed to start" && exit 1
+#     wait_count=$((wait_count + wait_interval))
+#     sleep $wait_interval
+# done
 sleep $wait_interval
 cd ../../
 echo "Running tests..."

@@ -17,195 +17,211 @@ vm:
   size: large
 
 env:
-  # Node
-  - RUNTIME=node-17.0
-    PHP_CLASS=Node170
-    ENTRYPOINT=tests.js
-    SERVER_PROCESS=pm2
-    IMAGE=openruntimes/node:17.0
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-  - RUNTIME=node-16.0
-    PHP_CLASS=Node160
-    ENTRYPOINT=tests.js
-    SERVER_PROCESS=pm2
-    IMAGE=openruntimes/node:16.0
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-  - RUNTIME=node-15.5
-    PHP_CLASS=Node155
-    ENTRYPOINT=tests.js
-    SERVER_PROCESS=pm2
-    IMAGE=openruntimes/node:15.5
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-  - RUNTIME=node-14.5
-    PHP_CLASS=Node145
-    ENTRYPOINT=tests.js
-    SERVER_PROCESS=pm2
-    IMAGE=openruntimes/node:14.5
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+  global:
+    - VERSION=v1
+  jobs:
+    # Node
+    - RUNTIME=node-17.0
+      PHP_CLASS=Node170
+      ENTRYPOINT=tests.js
+      SERVER_PROCESS=pm2
+      IMAGE=openruntimes/node:${VERSION}-17.0
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    - RUNTIME=node-16.0
+      PHP_CLASS=Node160
+      ENTRYPOINT=tests.js
+      SERVER_PROCESS=pm2
+      IMAGE=openruntimes/node:${VERSION}-16.0
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    - RUNTIME=node-15.5
+      PHP_CLASS=Node155
+      ENTRYPOINT=tests.js
+      SERVER_PROCESS=pm2
+      IMAGE=openruntimes/node:${VERSION}-15.5
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    - RUNTIME=node-14.5
+      PHP_CLASS=Node145
+      ENTRYPOINT=tests.js
+      SERVER_PROCESS=pm2
+      IMAGE=openruntimes/node:${VERSION}-14.5
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
-  # Deno
-  - RUNTIME=deno-1.21
-    PHP_CLASS=Deno121
-    ENTRYPOINT=tests.ts
-    SERVER_PROCESS=server.ts
-    IMAGE=openruntimes/deno:1.21
-    ARCH=linux/amd64
-  - RUNTIME=deno-1.14
-    PHP_CLASS=Deno114
-    ENTRYPOINT=tests.ts
-    SERVER_PROCESS=server.ts
-    IMAGE=openruntimes/deno:1.14
-    ARCH=linux/amd64
-  - RUNTIME=deno-1.13
-    PHP_CLASS=Deno113
-    ENTRYPOINT=tests.ts
-    SERVER_PROCESS=server.ts
-    IMAGE=openruntimes/deno:1.13
-    ARCH=linux/amd64
-  - RUNTIME=deno-1.12
-    PHP_CLASS=Deno112
-    ENTRYPOINT=tests.ts
-    SERVER_PROCESS=server.ts
-    IMAGE=openruntimes/deno:1.12
-    ARCH=linux/amd64
+    # Deno
+    - RUNTIME=deno-1.21
+      PHP_CLASS=Deno121
+      ENTRYPOINT=tests.ts
+      SERVER_PROCESS=server.ts
+      IMAGE=openruntimes/deno:${VERSION}-1.21
+      ARCH=linux/amd64
+    - RUNTIME=deno-1.14
+      PHP_CLASS=Deno114
+      ENTRYPOINT=tests.ts
+      SERVER_PROCESS=server.ts
+      IMAGE=openruntimes/deno:${VERSION}-1.14
+      ARCH=linux/amd64
+    - RUNTIME=deno-1.13
+      PHP_CLASS=Deno113
+      ENTRYPOINT=tests.ts
+      SERVER_PROCESS=server.ts
+      IMAGE=openruntimes/deno:${VERSION}-1.13
+      ARCH=linux/amd64
+    - RUNTIME=deno-1.12
+      PHP_CLASS=Deno112
+      ENTRYPOINT=tests.ts
+      SERVER_PROCESS=server.ts
+      IMAGE=openruntimes/deno:${VERSION}-1.12
+      ARCH=linux/amd64
 
-  # Python
-  - RUNTIME=python-3.10
-    PHP_CLASS=Python310
-    ENTRYPOINT=tests.py
-    SERVER_PROCESS=server.py
-    IMAGE=openruntimes/python:3.10
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-  - RUNTIME=python-3.9
-    PHP_CLASS=Python39
-    ENTRYPOINT=tests.py
-    SERVER_PROCESS=server.py
-    IMAGE=openruntimes/python:3.9
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-  - RUNTIME=python-3.8
-    PHP_CLASS=Python38
-    ENTRYPOINT=tests.py
-    SERVER_PROCESS=server.py
-    IMAGE=openruntimes/python:3.8
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    # Python
+    - RUNTIME=python-3.10
+      PHP_CLASS=Python310
+      ENTRYPOINT=tests.py
+      SERVER_PROCESS=server.py
+      IMAGE=openruntimes/python:${VERSION}-3.10
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    - RUNTIME=python-3.9
+      PHP_CLASS=Python39
+      ENTRYPOINT=tests.py
+      SERVER_PROCESS=server.py
+      IMAGE=openruntimes/python:${VERSION}-3.9
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    - RUNTIME=python-3.8
+      PHP_CLASS=Python38
+      ENTRYPOINT=tests.py
+      SERVER_PROCESS=server.py
+      IMAGE=openruntimes/python:${VERSION}-3.8
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
-  # Dart
-  - RUNTIME=dart-2.16
-    PHP_CLASS=Dart216
-    ENTRYPOINT=lib/tests.dart
-    IMAGE=openruntimes/dart:2.16
-    SERVER_PROCESS=/usr/code-start/runtime
-    ARCH=linux/amd64,linux/arm64
-  - RUNTIME=dart-2.15
-    PHP_CLASS=Dart215
-    ENTRYPOINT=lib/tests.dart
-    IMAGE=openruntimes/dart:2.15
-    SERVER_PROCESS=/usr/code-start/runtime
-    ARCH=linux/amd64,linux/arm64
-  - RUNTIME=dart-2.14
-    PHP_CLASS=Dart214
-    ENTRYPOINT=lib/tests.dart
-    SERVER_PROCESS=/usr/code-start/runtime
-    IMAGE=openruntimes/dart:2.14
-    ARCH=linux/amd64,linux/arm64
-  - RUNTIME=dart-2.13
-    PHP_CLASS=Dart213
-    ENTRYPOINT=lib/tests.dart
-    SERVER_PROCESS=/usr/code-start/runtime
-    IMAGE=openruntimes/dart:2.13
-    ARCH=linux/amd64
-  - RUNTIME=dart-2.12
-    PHP_CLASS=Dart212
-    ENTRYPOINT=lib/tests.dart
-    SERVER_PROCESS=/usr/code-start/runtime
-    IMAGE=openruntimes/dart:2.12
-    ARCH=linux/amd64
+    # Dart
+    - RUNTIME=dart-2.17
+      PHP_CLASS=Dart217
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.17
+      SERVER_PROCESS=/usr/code-start/runtime
+      ARCH=linux/amd64,linux/arm64
+    - RUNTIME=dart-2.16
+      PHP_CLASS=Dart216
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.16
+      SERVER_PROCESS=/usr/code-start/runtime
+      ARCH=linux/amd64,linux/arm64
+    - RUNTIME=dart-2.15
+      PHP_CLASS=Dart215
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.15
+      SERVER_PROCESS=/usr/code-start/runtime
+      ARCH=linux/amd64,linux/arm64
+    - RUNTIME=dart-2.14
+      PHP_CLASS=Dart214
+      ENTRYPOINT=lib/tests.dart
+      SERVER_PROCESS=/usr/code-start/runtime
+      IMAGE=openruntimes/dart:${VERSION}-2.14
+      ARCH=linux/amd64,linux/arm64
+    - RUNTIME=dart-2.13
+      PHP_CLASS=Dart213
+      ENTRYPOINT=lib/tests.dart
+      SERVER_PROCESS=/usr/code-start/runtime
+      IMAGE=openruntimes/dart:${VERSION}-2.13
+      ARCH=linux/amd64
+    - RUNTIME=dart-2.12
+      PHP_CLASS=Dart212
+      ENTRYPOINT=lib/tests.dart
+      SERVER_PROCESS=/usr/code-start/runtime
+      IMAGE=openruntimes/dart:${VERSION}-2.12
+      ARCH=linux/amd64
 
-  # Ruby
-  - RUNTIME=ruby-3.1
-    PHP_CLASS=Ruby31
-    ENTRYPOINT=tests.rb
-    SERVER_PROCESS=puma
-    IMAGE=openruntimes/ruby:3.1
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-  - RUNTIME=ruby-3.0
-    PHP_CLASS=Ruby30
-    ENTRYPOINT=tests.rb
-    SERVER_PROCESS=puma
-    IMAGE=openruntimes/ruby:3.0
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    # Ruby
+    - RUNTIME=ruby-3.1
+      PHP_CLASS=Ruby31
+      ENTRYPOINT=tests.rb
+      SERVER_PROCESS=puma
+      IMAGE=openruntimes/ruby:${VERSION}-3.1
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    - RUNTIME=ruby-3.0
+      PHP_CLASS=Ruby30
+      ENTRYPOINT=tests.rb
+      SERVER_PROCESS=puma
+      IMAGE=openruntimes/ruby:${VERSION}-3.0
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
-  # PHP
-  - RUNTIME=php-8.0
-    PHP_CLASS=PHP80
-    ENTRYPOINT=tests.php
-    SERVER_PROCESS=server.php
-    IMAGE=openruntimes/php:8.0
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-  - RUNTIME=php-8.1
-    PHP_CLASS=PHP81
-    ENTRYPOINT=tests.php
-    SERVER_PROCESS=server.php
-    IMAGE=openruntimes/php:8.1
-    ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    # PHP
+    - RUNTIME=php-8.0
+      PHP_CLASS=PHP80
+      ENTRYPOINT=tests.php
+      SERVER_PROCESS=server.php
+      IMAGE=openruntimes/php:${VERSION}-8.0
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    - RUNTIME=php-8.1
+      PHP_CLASS=PHP81
+      ENTRYPOINT=tests.php
+      SERVER_PROCESS=server.php
+      IMAGE=openruntimes/php:${VERSION}-8.1
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
-  # Swift
-  - RUNTIME=swift-5.5
-    PHP_CLASS=Swift55
-    ENTRYPOINT=Tests.swift
-    SERVER_PROCESS="./Run serve"
-    IMAGE=openruntimes/swift:5.5
-    ARCH=linux/amd64,linux/arm64
+    # Swift
+    - RUNTIME=swift-5.5
+      PHP_CLASS=Swift55
+      ENTRYPOINT=Tests.swift
+      SERVER_PROCESS="./Run serve"
+      IMAGE=openruntimes/swift:${VERSION}-5.5
+      ARCH=linux/amd64,linux/arm64
 
-  # Kotlin
-  - RUNTIME=kotlin-1.6
-    PHP_CLASS=Kotlin16
-    ENTRYPOINT=Tests.kt
-    SERVER_PROCESS="kotlin-runtime-1.0.0"
-    IMAGE=openruntimes/kotlin:1.6
-    ARCH=linux/amd64,linux/arm64
+    # Kotlin
+    - RUNTIME=kotlin-1.6
+      PHP_CLASS=Kotlin16
+      ENTRYPOINT=Tests.kt
+      SERVER_PROCESS="kotlin-runtime-1.0.0"
+      IMAGE=openruntimes/kotlin:${VERSION}-1.6
+      ARCH=linux/amd64,linux/arm64
 
-  # Java
-  - RUNTIME=java-8.0
-    PHP_CLASS=Java8
-    ENTRYPOINT=Tests.java
-    SERVER_PROCESS="java-runtime-1.0.0"
-    IMAGE=openruntimes/java:8.0
-    ARCH=linux/amd64,linux/arm64
-  - RUNTIME=java-11.0
-    PHP_CLASS=Java11
-    ENTRYPOINT=Tests.java
-    SERVER_PROCESS="java-runtime-1.0.0"
-    IMAGE=openruntimes/java:11.0
-    ARCH=linux/amd64,linux/arm64
-  - RUNTIME=java-17.0
-    PHP_CLASS=Java17
-    ENTRYPOINT=Tests.java
-    SERVER_PROCESS="java-runtime-1.0.0"
-    IMAGE=openruntimes/java:17.0
-    ARCH=linux/amd64,linux/arm64
+    # Java
+    - RUNTIME=java-8.0
+      PHP_CLASS=Java8
+      ENTRYPOINT=Tests.java
+      SERVER_PROCESS="java-runtime-1.0.0"
+      IMAGE=openruntimes/java:${VERSION}-8.0
+      ARCH=linux/amd64,linux/arm64
+    - RUNTIME=java-11.0
+      PHP_CLASS=Java11
+      ENTRYPOINT=Tests.java
+      SERVER_PROCESS="java-runtime-1.0.0"
+      IMAGE=openruntimes/java:${VERSION}-11.0
+      ARCH=linux/amd64,linux/arm64
+    - RUNTIME=java-17.0
+      PHP_CLASS=Java17
+      ENTRYPOINT=Tests.java
+      SERVER_PROCESS="java-runtime-1.0.0"
+      IMAGE=openruntimes/java:${VERSION}-17.0
+      ARCH=linux/amd64,linux/arm64
+    - RUNTIME=java-18.0
+      PHP_CLASS=Java18
+      ENTRYPOINT=Tests.java
+      SERVER_PROCESS="java-runtime-1.0.0"
+      IMAGE=openruntimes/java:${VERSION}-18.0
+      ARCH=linux/amd64,linux/arm64
 
-  # C++
-  - RUNTIME=cpp-17
-    PHP_CLASS=Cpp17
-    ENTRYPOINT=tests.cc
-    SERVER_PROCESS="cpp_runtime"
-    IMAGE=openruntimes/cpp:17
-    ARCH=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x
+    # C++
+    - RUNTIME=cpp-17
+      PHP_CLASS=Cpp17
+      ENTRYPOINT=tests.cc
+      SERVER_PROCESS="cpp_runtime"
+      IMAGE=openruntimes/cpp:${VERSION}-17
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
-  # DotNet
-  - RUNTIME=dotnet-3.1
-    PHP_CLASS=DotNet31
-    ENTRYPOINT=Tests.cs
-    SERVER_PROCESS="DotNetRuntime.dll"
-    IMAGE=openruntimes/dotnet:3.1
-    ARCH=linux/amd64,linux/arm64
-  - RUNTIME=dotnet-6.0
-    PHP_CLASS=DotNet60
-    ENTRYPOINT=Tests.cs
-    SERVER_PROCESS="DotNetRuntime.dll"
-    IMAGE=openruntimes/dotnet:6.0
-    ARCH=linux/amd64,linux/arm64
+    # DotNet
+    - RUNTIME=dotnet-3.1
+      PHP_CLASS=DotNet31
+      ENTRYPOINT=Tests.cs
+      SERVER_PROCESS="DotNetRuntime.dll"
+      IMAGE=openruntimes/dotnet:${VERSION}-3.1
+      ARCH=linux/amd64,linux/arm64
+    - RUNTIME=dotnet-6.0
+      PHP_CLASS=DotNet60
+      ENTRYPOINT=Tests.cs
+      SERVER_PROCESS="DotNetRuntime.dll"
+      IMAGE=openruntimes/dotnet:${VERSION}-6.0
+      ARCH=linux/amd64,linux/arm64
+
 
 notifications:
   email:
