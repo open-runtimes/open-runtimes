@@ -3,7 +3,10 @@ package io.openruntimes.kotlin
 import io.javalin.Javalin
 import io.javalin.http.Context
 import io.javalin.plugin.json.jsonMapper
-import kotlinx.coroutines.runBlocking
+import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 suspend fun main() {
     Javalin
