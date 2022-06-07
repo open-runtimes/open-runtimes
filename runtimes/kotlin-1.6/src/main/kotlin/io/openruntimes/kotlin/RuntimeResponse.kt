@@ -3,7 +3,7 @@ package io.openruntimes.kotlin
 import io.javalin.plugin.json.JsonMapper
 
 class RuntimeResponse(
-    var data: Any,
+    var data: Any = "",
     var statusCode: Int = 200
 ) {
     fun json(data: Map<String, Any?>, statusCode: Int = 200): RuntimeResponse {
