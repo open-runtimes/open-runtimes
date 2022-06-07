@@ -100,6 +100,9 @@ func routes(_ app: Application) throws {
             return RequestResponse.unauthorized()
         }
 
+        setvbuf(stdout, nil, _IONBF, 0)
+        setvbuf(stderr, nil, _IONBF, 0)
+
         let outPipe = Pipe()
         let errPipe = Pipe()
         var outString = ""
@@ -109,22 +112,21 @@ func routes(_ app: Application) throws {
             var request = RequestValue() 
             let response = RequestResponse()
 
-            defer {
-                freopen("/dev/stdout", "a", stdout)
-                outPipe.fileHandleForReading.closeFile()
-                errPipe.fileHandleForReading.closeFile()
-            }
-
-            // Set up a read handler which fires when data is written to our inputPipe
             outPipe.fileHandleForReading.readabilityHandler = { fileHandle in
                 let data = fileHandle.availableData
                 if let string = String(data: data, encoding: String.Encoding.utf8) {
                     outString += string
                 }
             }
+            errPipe.fileHandleForReading.readabilityHandler = { fileHandle in
+                let data = fileHandle.availableData
+                if let string = String(data: data, encoding: String.Encoding.utf8) {
+                    errString += string
+                }
+            }
 
-            dup2(outPipe.fileHandleForReading.fileDescriptor, STDOUT_FILENO)
-            dup2(errPipe.fileHandleForReading.fileDescriptor, STDERR_FILENO)
+            dup2(outPipe.fileHandleForWriting.fileDescriptor, STDOUT_FILENO)
+            dup2(errPipe.fileHandleForWriting.fileDescriptor, STDERR_FILENO)
 
             if let body = req.body.string,
                 !body.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
