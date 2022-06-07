@@ -28,9 +28,34 @@ suspend fun execute(ctx: Context) {
     val request = RuntimeRequest(ctx)
     val response = RuntimeResponse()
 
+    val outStream = ByteArrayOutputStream()
+    val errStream = ByteArrayOutputStream()
+    val userOut = PrintStream(outStream)
+    val userErr = PrintStream(errStream)
+    val systemOut = System.out
+    val systemErr = System.err
+
+    System.setOut(userOut)
+    System.setErr(userErr)
+
     try {
-        ctx.result(codeWrapper.main(request, response).data)
+        val userResponse = codeWrapper.main(request, response)
+        val output = mutableMapOf(
+            "response" to userResponse.data,
+            "stdout" to outStream.toString()
+        )
+        ctx.result(output)
     } catch (e: Exception) {
-        ctx.status(500).result(e.stackTraceToString())
+        e.printStackTrace()
+        val output = mutableMapOf(
+            "stdout" to outStream.toString(),
+            "stderr" to errStream.toString()
+        )
+        ctx.status(500).result(output)
+    } finally {
+         System.out.flush();
+         System.err.flush();
+         System.setOut(systemOut);
+         System.setErr(systemErr);
     }
 }
