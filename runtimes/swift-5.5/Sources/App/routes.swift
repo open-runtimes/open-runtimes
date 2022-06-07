@@ -30,9 +30,8 @@ extension RequestValue : Decodable {
 }
 
 class RequestResponse {
-    var data: String = ""
+    var data: Any = ""
     var statusCode: HTTPResponseStatus = HTTPResponseStatus.ok
-    private var isJson: Bool = false
 
     init (data: String = "") {
         self.data = data
@@ -41,41 +40,27 @@ class RequestResponse {
 
 extension RequestResponse {
     func send(data: String) -> RequestResponse {
-        self.isJson = false
         self.data = data
         self.statusCode = HTTPResponseStatus.ok
         return self
     }
     
     func json(data: [String: Any?]) -> RequestResponse {
-        if let JSONData = try? JSONSerialization.data(
-          withJSONObject: data,
-          options: .prettyPrinted
-        ), let JSONText = String(data: JSONData, encoding: String.Encoding.utf8) {
-            self.statusCode = HTTPResponseStatus.ok
-            self.data = JSONText
-            self.isJson = true
-        } else {
-            self.statusCode = HTTPResponseStatus.internalServerError;
-            self.data = "Something went wrong encoding the Response JSON Object!"
-            self.isJson = false
-        }
-        return self;
+        self.data = data
+        self.statusCode = HTTPResponseStatus.ok
+        return self
     }
     
     fileprivate static func error(from data: Error) -> RequestResponse {
         let response = RequestResponse()
-
         response.data = data.localizedDescription
         response.statusCode = HTTPResponseStatus.internalServerError
-        response.isJson = false
         return response
     }
     
     fileprivate static func unauthorized() -> RequestResponse {
         let response = RequestResponse()
         response.statusCode = HTTPResponseStatus.internalServerError
-        response.isJson = false
         response.data = "Unauthorized"
         return response
     }
@@ -84,18 +69,23 @@ extension RequestResponse {
 extension RequestResponse: AsyncResponseEncodable {
     func encodeResponse(for request: Request) async throws -> Response {
         var headers = HTTPHeaders()
-        
-        switch self.isJson {
-        case false:
-            headers.add(name: .contentType, value: "text/plain")
-        case true:
-            headers.add(name: .contentType, value: "application/json")
+        headers.add(name: .contentType, value: "application/json")
+
+        if let JSONData = try? JSONSerialization.data(
+          withJSONObject: self.data,
+          options: .prettyPrinted
+        ), let JSONText = String(data: JSONData, encoding: String.Encoding.utf8) {
+            self.statusCode = HTTPResponseStatus.ok
+            self.data = JSONText
+        } else {
+            self.statusCode = HTTPResponseStatus.internalServerError
+            self.data = "Something went wrong encoding the Response JSON Object!"
         }
 
         return Response(
             status: self.statusCode, 
             headers: headers, 
-            body: .init(string: self.data)
+            body: .init(string: self.data as! String)
         )
     }
 }
@@ -110,19 +100,49 @@ func routes(_ app: Application) throws {
             return RequestResponse.unauthorized()
         }
 
+        let outPipe = Pipe()
+        let errPipe = Pipe()
+        var outString = ""
+        var errString = ""
+
         do {
             var request = RequestValue() 
             let response = RequestResponse()
 
-            if let body = req.body.string, 
+            defer {
+                freopen("/dev/stdout", "a", stdout)
+                outPipe.fileHandleForReading.closeFile()
+                errPipe.fileHandleForReading.closeFile()
+            }
+
+            // Set up a read handler which fires when data is written to our inputPipe
+            outPipe.fileHandleForReading.readabilityHandler = { fileHandle in
+                let data = fileHandle.availableData
+                if let string = String(data: data, encoding: String.Encoding.utf8) {
+                    outString += string
+                }
+            }
+
+            dup2(outPipe.fileHandleForReading.fileDescriptor, STDOUT_FILENO)
+            dup2(errPipe.fileHandleForReading.fileDescriptor, STDERR_FILENO)
+
+            if let body = req.body.string,
                 !body.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
                 body != "\"\"" {
                     request = try JSONDecoder().decode(RequestValue.self, from: body.data(using: .utf8)!)
             }
 
-            return try await main(req: request, res: response)
+            let userResponse = try await main(req: request, res: response)
+            var output = [String:Any?]()
+            output["response"] = userResponse.data
+            output["stdout"] = outString
+            return userResponse.json(data: output)
         } catch let error {
-            return RequestResponse.error(from: error)
+            errString += error.localizedDescription
+            var output = [String:Any?]()
+            output["stdout"] = outString
+            output["stderr"] = errString
+            return RequestResponse().json(data: output)
         }
     }
 }

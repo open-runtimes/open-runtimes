@@ -38,9 +38,9 @@ fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse {
     )
 
     // Print to user function stdout
-    println("log1");
-    println("{hello: world}");
-    println("[hello, world]");
+    println("log1")
+    println("{hello: world}")
+    println("[hello, world]")
 
     return res.json(mapOf(
         "isTest" to true,
