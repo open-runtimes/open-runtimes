@@ -3,10 +3,11 @@ package io.openruntimes.kotlin
 import io.javalin.Javalin
 import io.javalin.http.Context
 import io.javalin.plugin.json.jsonMapper
-import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.ByteArrayOutputStream
+import java.io.StringWriter
+import java.io.PrintStream
+import java.io.PrintWriter
+import kotlinx.coroutines.runBlocking
 
 suspend fun main() {
     Javalin
@@ -16,8 +17,6 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
-    RuntimeResponse.mapper = ctx.jsonMapper()
-
     if (ctx.header("x-internal-challenge").isNullOrBlank()) {
         ctx.status(500).result("Unauthorized");
         return;
@@ -47,14 +46,14 @@ suspend fun execute(ctx: Context) {
             "response" to userResponse.data,
             "stdout" to outStream.toString()
         )
-        ctx.result(output)
+        ctx.json(output)
     } catch (e: Exception) {
         e.printStackTrace()
         val output = mutableMapOf(
             "stdout" to outStream.toString(),
             "stderr" to errStream.toString()
         )
-        ctx.status(500).result(output)
+        ctx.status(500).json(output)
     } finally {
          System.out.flush();
          System.err.flush();
