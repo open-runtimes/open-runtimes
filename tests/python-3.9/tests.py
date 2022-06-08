@@ -19,6 +19,11 @@ def main(req, res):
     env_data = req.env.get('test-env', None)
 
     todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + str(todo_id))).json()
+
+    print('log1')
+    print('{hello: world}')
+    print('[hello, world]')
+
     return res.json({
         'isTest': True,
         'message': 'Hello Open Runtimes 👋',
