@@ -9,19 +9,20 @@ namespace runtime
 {
     struct RuntimeResponse
     {
-        std::string data;
+        std::string stringValue;
+        Json::Value jsonValue;
         int statusCode{200};
 
         RuntimeResponse &json(const Json::Value &json, int code = 200)
         {
-            data = json.toStyledString();
+            jsonValue = json;
             statusCode = code;
             return *this;
         }
 
         RuntimeResponse &send(const std::string &string, int code = 200)
         {
-            data = string;
+            stringValue = string;
             statusCode = code;
             return *this;
         }
