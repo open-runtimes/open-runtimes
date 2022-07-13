@@ -3,6 +3,8 @@ version: '3'
 services:
   open-runtimes-bun-edge:
     container_name: open-runtimes-bun-edge
+    ulimits:
+      memlock: -1
     build:
       context: .
     ports: 
