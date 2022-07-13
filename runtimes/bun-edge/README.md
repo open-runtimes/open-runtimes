@@ -9,20 +9,20 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `mod.ts` file:
 
 ```bash
-mkdir deno-or && cd deno-or
-printf "export default async function(req: any, res: any) {\n    res.json({ n: Math.random() })\n}" > mod.ts
+mkdir bun-or && cd bun-or
+printf "module.exports = async (req, res) => {\n    res.json({ n: Math.random() })\n}" > index.js
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:1.21 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=index.ts --rm --interactive --tty --volume $PWD:/usr/code openruntimes/bun:edge sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/deno:1.21 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=index.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/bun:edge sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -41,10 +41,10 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the Deno runtime folder:
+2. Enter the Bun runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/deno-1.21
+cd open-runtimes/runtimes/bun-edge
 ```
 
 3. Run the included example cloud function:
@@ -94,8 +94,6 @@ export default async function(req: any, res: any) {
 - Dependencies are handeled automatically. Open Runtimes automatically cache and install them during build process.
 
 - The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.ts`.
-
-- Deno runtime currently doesn't support ARM, because there are no official ARM images.
 
 ## Authors
 

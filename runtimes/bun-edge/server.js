@@ -1,4 +1,3 @@
-/*
 const USER_CODE_PATH = '/usr/code-start';
 
 export default {
@@ -47,13 +46,5 @@ export default {
         status: 500
       });
     }
-  },
-};
-*/
-
-export default {
-  port: 3000,
-  fetch(request) {
-    return new Response("Welcome to Bun!");
   },
 };
