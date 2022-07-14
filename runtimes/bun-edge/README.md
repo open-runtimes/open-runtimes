@@ -1,6 +1,6 @@
 # Bun Runtime (edge)
 
-This is the Open Runtime that builds and runs Deno code based on a `jarredsumner/bun:edge` base image. 
+This is the Open Runtime that runs TypeScript (or JavaScript) code based on a `jarredsumner/bun:edge` base image. 
 
 To learn more about runtimes, visit [Structure](https://github.com/open-runtimes/open-runtimes#structure) section of the main README.md.
 
