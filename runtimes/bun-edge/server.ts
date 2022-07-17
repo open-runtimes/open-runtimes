@@ -1,12 +1,9 @@
 const USER_CODE_PATH = '/usr/code-start';
 
-// TODO: There must be a better way
-declare const process: any;
-
 export default {
   port: 3000,
   async fetch(request: Request) {
-    const body = await request.json();
+    const body: any = await request.json();
 
     if (request.headers.get("x-internal-challenge") !== process.env.INTERNAL_RUNTIME_KEY) {
       return new Response("Unauthorized", {
