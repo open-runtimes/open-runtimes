@@ -61,6 +61,10 @@ static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
     response["todo"] = todo;
     response["header"] = headerData;
     response["env"] = envData;
-    
+
+    std::cout << "log1" << std::endl;
+    std::cout << "{hello: world}" << std::endl;
+    std::cout << "[hello, world]" << std::endl;
+
     return res.json(response);
 }

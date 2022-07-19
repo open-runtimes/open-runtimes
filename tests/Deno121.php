@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: Deno114
 // Entrypoint: tests.ts
 
-class Deno121 extends Base
+class Deno121 extends BaseJS
 {
 }

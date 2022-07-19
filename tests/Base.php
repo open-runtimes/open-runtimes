@@ -54,6 +54,8 @@ abstract class Base extends TestCase
         $response = $this->call([
         ]);
 
+        $response['body'] = $response['body']['response'];
+
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);
         self::assertEquals('Hello Open Runtimes 👋', $response['body']['message']);
@@ -69,13 +71,14 @@ abstract class Base extends TestCase
             'payload' => '{}'
         ]);
 
+        $body = $response['body']['response'];
         self::assertEquals(200, $response['code']);
-        self::assertEquals(true, $response['body']['isTest']);
-        self::assertEquals('Hello Open Runtimes 👋', $response['body']['message']);
-        self::assertEquals('1', $response['body']['todo']['userId']);
-        self::assertEquals('1', $response['body']['todo']['id']);
-        self::assertEquals('delectus aut autem', $response['body']['todo']['title']);
-        self::assertEquals(false, $response['body']['todo']['completed']);
+        self::assertEquals(true, $body['isTest']);
+        self::assertEquals('Hello Open Runtimes 👋', $body['message']);
+        self::assertEquals('1', $body['todo']['userId']);
+        self::assertEquals('1', $body['todo']['id']);
+        self::assertEquals('delectus aut autem', $body['todo']['title']);
+        self::assertEquals(false, $body['todo']['completed']);
     }
 
     public function testRuntimePopulatedPayload(): void 
@@ -83,6 +86,8 @@ abstract class Base extends TestCase
         $response = $this->call([
             'payload' => '{"id":"2"}'
         ]);
+
+        $response['body'] = $response['body']['response'];
     
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);
@@ -103,6 +108,8 @@ abstract class Base extends TestCase
                 'test-env' => 'Environment secret'
             ]
         ]);
+
+        $response['body'] = $response['body']['response'];
     
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);
@@ -121,6 +128,8 @@ abstract class Base extends TestCase
                 'test-env' => 'Environment secret'
             ]
         ]);
+
+        $response['body'] = $response['body']['response'];
     
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);
@@ -139,6 +148,8 @@ abstract class Base extends TestCase
             "garbage" => "garbage"
         ]);
 
+        $response['body'] = $response['body']['response'];
+
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);
         self::assertEquals('Hello Open Runtimes 👋', $response['body']['message']);
@@ -146,5 +157,10 @@ abstract class Base extends TestCase
         self::assertEquals('1', $response['body']['todo']['id']);
         self::assertEquals('delectus aut autem', $response['body']['todo']['title']);
         self::assertEquals(false, $response['body']['todo']['completed']);
+    }
+
+    public function testConsoleLogs(): void {
+        $response = $this->call([]);
+        self::assertStringStartsWith("log1\n{hello: world}\n[hello, world]", $response['body']['stdout']);
     }
 }

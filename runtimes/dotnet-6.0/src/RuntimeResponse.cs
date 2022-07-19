@@ -1,10 +1,8 @@
-using System.Text.Json;
-
 namespace DotNetRuntime;
 
 public class RuntimeResponse
 {
-    public string Data { get; set; }
+    public object Data { get; set; }
     public int StatusCode { get; set; }
 
     public RuntimeResponse(
@@ -28,7 +26,7 @@ public class RuntimeResponse
         Dictionary<string, object?> data,
         int statusCode = 200)
     {
-        Data = JsonSerializer.Serialize(data);
+        Data = data;
         StatusCode = statusCode;
         return this;
     }

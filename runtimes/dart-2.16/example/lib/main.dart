@@ -16,10 +16,14 @@ import 'package:dio/dio.dart' hide Response;
 
 Future<void> start(final req, final res) async {
 
-  final payload = jsonDecode(req.payload);
+  final payload = jsonDecode(req.payload == '' ? '{}' : req.payload);
 
   final id = payload['id'] ?? '1';
   final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/$id');
+
+  print('log1');
+  print({'hello': 'world'});
+  print(['hello', 'world']);
 
   res.json({
     'message': "Hello Open Runtimes 👋",

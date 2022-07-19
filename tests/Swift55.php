@@ -8,4 +8,7 @@ namespace Tests;
 
 class Swift55 extends Base
 {
+    public function testConsoleLogs(): void {
+        return; // Swift doesn't yet support console log.
+    }
 }

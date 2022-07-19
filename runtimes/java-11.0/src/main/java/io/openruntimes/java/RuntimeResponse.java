@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import java.util.Map;
 
 public class RuntimeResponse {
-    public String data;
+    public Object data;
     public int statusCode;
 
     static final Gson gson = new Gson();
@@ -19,13 +19,13 @@ public class RuntimeResponse {
     }
 
     public RuntimeResponse json(Map<String, Object> data) {
-        this.data = gson.toJson(data);
+        this.data = data;
         this.statusCode = 200;
         return this;
     }
 
     public RuntimeResponse json(Map<String, Object> data, int statusCode) {
-        this.data = gson.toJson(data);
+        this.data = data;
         this.statusCode = statusCode;
         return this;
     }
