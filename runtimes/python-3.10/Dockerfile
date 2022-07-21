@@ -1,5 +1,7 @@
 FROM python:3.10-alpine3.15
 
+RUN apk --no-cache add musl-dev linux-headers g++
+
 LABEL maintainer="team@appwrite.io"
 
 ENV INTERNAL_RUNTIME_ENTRYPOINT=main.py
@@ -12,8 +14,6 @@ RUN mkdir -p /usr/builds
 WORKDIR /usr/local/src
 
 COPY . .
-
-RUN apk --no-cache add musl-dev linux-headers g++
 
 RUN chmod +x /usr/local/src/start.sh
 RUN chmod +x /usr/local/src/build.sh
