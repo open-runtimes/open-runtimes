@@ -6,19 +6,14 @@ set -e
 # Prepare separate directory to prevent changing user's files
 cp -R /usr/code/* /usr/builds
 
-# Prepare Deno cache folder
-mkdir -p /usr/builds/deno-cache
 
-# Set Deno Cache directory
-export DENO_DIR="/usr/builds/deno-cache"
-
-# Cache Server Depdenencies
-cd /usr/local/src/
-deno cache server.ts
-
-# Cache user function depdenencies
+# Cache server and user function dependencies
 cd /usr/builds
-deno cache $INTERNAL_RUNTIME_ENTRYPOINT
+deno vendor /usr/local/src/server.ts $INTERNAL_RUNTIME_ENTRYPOINT
+mkdir -p vendor
+
+# Check for build error
+deno check $INTERNAL_RUNTIME_ENTRYPOINT
 
 # Finish build by preparing tar to use for starting the runtime
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .
