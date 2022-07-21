@@ -1,5 +1,7 @@
 FROM python:3.8-alpine3.15
 
+RUN apk --no-cache add musl-dev linux-headers g++
+
 LABEL maintainer="team@appwrite.io"
 
 ENV INTERNAL_RUNTIME_ENTRYPOINT=main.py
