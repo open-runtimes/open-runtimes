@@ -11,6 +11,8 @@ RUN mkdir -p /usr/builds
 
 WORKDIR /usr/local/src
 
+RUN apk --no-cache add musl-dev linux-headers g++
+
 COPY . .
 
 RUN chmod +x /usr/local/src/start.sh
