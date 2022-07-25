@@ -36,7 +36,7 @@ void main() async {
         () async {
           await user_code.start(request, response);
         },
-        (e, stackTrace) => print('Oh noes! $e $stackTrace'),
+        (e, stackTrace) => print('$e $stackTrace'),
         zoneSpecification: ZoneSpecification(
           print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
             userLogs.add(line);
