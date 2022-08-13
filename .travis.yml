@@ -59,6 +59,12 @@ env:
       SERVER_PROCESS=server.ts
       IMAGE=openruntimes/deno:${VERSION}-1.21
       ARCH=linux/amd64
+    - RUNTIME=deno-1.24
+      PHP_CLASS=Deno124
+      ENTRYPOINT=tests.ts
+      SERVER_PROCESS=server.ts
+      IMAGE=openruntimes/deno:${VERSION}-1.24
+      ARCH=linux/amd64
     # - RUNTIME=deno-1.14
     #   PHP_CLASS=Deno114
     #   ENTRYPOINT=tests.ts
