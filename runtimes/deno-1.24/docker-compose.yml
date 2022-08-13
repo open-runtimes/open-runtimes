@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-deno-1.21:
-    container_name: open-runtimes-deno-1.21
+  open-runtimes-deno-1.24:
+    container_name: open-runtimes-deno-1.24
     build:
       context: .
     ports: 
