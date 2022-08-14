@@ -93,24 +93,6 @@ env:
       IMAGE=openruntimes/dart:${VERSION}-2.15
       SERVER_PROCESS=/usr/code-start/runtime
       ARCH=linux/amd64,linux/arm64
-    - RUNTIME=dart-2.14
-      PHP_CLASS=Dart214
-      ENTRYPOINT=lib/tests.dart
-      SERVER_PROCESS=/usr/code-start/runtime
-      IMAGE=openruntimes/dart:${VERSION}-2.14
-      ARCH=linux/amd64,linux/arm64
-    - RUNTIME=dart-2.13
-      PHP_CLASS=Dart213
-      ENTRYPOINT=lib/tests.dart
-      SERVER_PROCESS=/usr/code-start/runtime
-      IMAGE=openruntimes/dart:${VERSION}-2.13
-      ARCH=linux/amd64
-    - RUNTIME=dart-2.12
-      PHP_CLASS=Dart212
-      ENTRYPOINT=lib/tests.dart
-      SERVER_PROCESS=/usr/code-start/runtime
-      IMAGE=openruntimes/dart:${VERSION}-2.12
-      ARCH=linux/amd64
 
     # Ruby
     - RUNTIME=ruby-3.1
