@@ -27,8 +27,9 @@ app.use(async (ctx) => {
   const stddebug = console.debug.bind(console);
   const stdwarn = console.warn.bind(console);
   let logs: any[] = [];
+  let errors: any[] = [];
 
-  console.log = console.error = console.info = console.warn = console.debug = function(){
+  console.log = console.info = console.debug = function(){
     var args:any[] = [];
     Array.from(arguments).forEach(arg => {
         if(arg instanceof Object || Array.isArray(arg)) {    
@@ -40,14 +41,26 @@ app.use(async (ctx) => {
     logs.push(args.join(" "));
   }
 
+  console.error = console.warn = function(){
+    var args:any[] = [];
+    Array.from(arguments).forEach(arg => {
+        if(arg instanceof Object || Array.isArray(arg)) {    
+            args.push(JSON.stringify(arg));
+        } else {
+            args.push(arg)
+        }
+    });
+    errors.push(args.join(" "));
+  }
+
   const response = {
     send: (text: string, status = 200) => {
       ctx.response.status = status;
-      ctx.response.body = {response: text, stdout: logs.join('\n')};
+      ctx.response.body = {response: text, stdout: logs.join('\n'), stderr: errors.join('\n')};
     },
     json: (json: Record<string, unknown>, status = 200) => {
       ctx.response.status = status;
-      ctx.response.body = {response: json, stdout: logs.join('\n')};
+      ctx.response.body = {response: json, stdout: logs.join('\n'), stderr: errors.join('\n')};
     }
   };
 
@@ -61,9 +74,10 @@ app.use(async (ctx) => {
     await userFunction(request, response);
   } catch (error) {
     ctx.response.status = 500;
-    ctx.response.body = {stdout: logs.join('\n'), stderr: error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message};
+    ctx.response.body = {stdout: logs.join('\n'), stderr: errors.join('\n') + "\n" + error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message};
   }
   logs = [];
+  errors = [];
   console.log = stdlog;
   console.error = stderror;
   console.debug = stddebug;
