@@ -100,33 +100,9 @@ func routes(_ app: Application) throws {
             return RequestResponse.unauthorized()
         }
 
-        setvbuf(stdout, nil, _IONBF, 0)
-        setvbuf(stderr, nil, _IONBF, 0)
-
-        let outPipe = Pipe()
-        let errPipe = Pipe()
-        var outString = ""
-        var errString = ""
-
         do {
             var request = RequestValue() 
             let response = RequestResponse()
-
-            outPipe.fileHandleForReading.readabilityHandler = { fileHandle in
-                let data = fileHandle.availableData
-                if let string = String(data: data, encoding: String.Encoding.utf8) {
-                    outString += string
-                }
-            }
-            errPipe.fileHandleForReading.readabilityHandler = { fileHandle in
-                let data = fileHandle.availableData
-                if let string = String(data: data, encoding: String.Encoding.utf8) {
-                    errString += string
-                }
-            }
-
-            dup2(outPipe.fileHandleForWriting.fileDescriptor, STDOUT_FILENO)
-            dup2(errPipe.fileHandleForWriting.fileDescriptor, STDERR_FILENO)
 
             if let body = req.body.string,
                 !body.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
@@ -135,15 +111,15 @@ func routes(_ app: Application) throws {
             }
 
             let userResponse = try await main(req: request, res: response)
+
             var output = [String:Any?]()
             output["response"] = userResponse.data
-            output["stdout"] = outString
+            output["stdout"] = ""
             return userResponse.json(data: output)
         } catch let error {
-            errString += error.localizedDescription
             var output = [String:Any?]()
-            output["stdout"] = outString
-            output["stderr"] = errString
+            output["stdout"] = ""
+            output["stderr"] = error.localizedDescription
             return RequestResponse().json(data: output)
         }
     }
