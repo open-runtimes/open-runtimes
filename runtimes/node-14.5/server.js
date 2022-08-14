@@ -23,7 +23,8 @@ const server = micro(async (req, res) => {
     console.stddebug = console.debug.bind(console);
     console.stdwarn = console.warn.bind(console);
     logs = [];
-    console.log = console.error = console.info = console.warn = console.debug = function(){
+    errors = [];
+    console.log = console.info = console.debug = function(){
         var args = [];
         Array.from(arguments).forEach(arg => {
             if(arg instanceof Object || Array.isArray(arg)) {    
@@ -34,9 +35,21 @@ const server = micro(async (req, res) => {
         });
         logs.push(args.join(" "));
     }
+
+    console.error = console.warn = function(){
+        var args = [];
+        Array.from(arguments).forEach(arg => {
+            if(arg instanceof Object || Array.isArray(arg)) {    
+                args.push(JSON.stringify(arg));
+            } else {
+                args.push(arg)
+            }
+        });
+        errors.push(args.join(" "));
+    }
     const response = {
-        send: (text, status = 200) => send(res, status, {response: text, stdout: logs.join('\n')}),
-        json: (json, status = 200) => send(res, status, {response: json, stdout: logs.join('\n')}),
+        send: (text, status = 200) => send(res, status, {response: text, stdout: logs.join('\n'), stderr: errors.join('\n')}),
+        json: (json, status = 200) => send(res, status, {response: json, stdout: logs.join('\n'), stderr: errors.join('\n')}),
     };
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
@@ -55,9 +68,10 @@ const server = micro(async (req, res) => {
             await userFunction(request, response);
         }
     } catch (e) {
-        send(res, 500, {stdout: logs.join('\n'), stderr: e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e});
+        send(res, 500, {stdout: logs.join('\n'), stderr: errors.join('\n') + "\n" + e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e});
     }
     logs = [];
+    errors = [];
     console.log = console.stdlog;
     console.error = console.stderror;
     console.debug = console.stddebug;
