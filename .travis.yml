@@ -18,7 +18,7 @@ vm:
 
 env:
   global:
-    - VERSION=v1
+    - VERSION=v2
   jobs:
     # Node
     - RUNTIME=node-18.0
