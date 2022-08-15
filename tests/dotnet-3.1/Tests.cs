@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -24,6 +25,10 @@ public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
 
     var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{id.ToString()}");
     var todo = JsonConvert.DeserializeObject<Dictionary<string, object>>(response, settings: null);
+
+    Console.WriteLine("log1");
+    Console.WriteLine("{hello: world}");
+    Console.WriteLine("[hello, world]");
 
     return res.Json(new Dictionary<string, object>()
     {

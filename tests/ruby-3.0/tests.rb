@@ -16,6 +16,10 @@ def main(req, res)
 
     todo = JSON.parse(HTTParty.get("https://jsonplaceholder.typicode.com/todos/" + (payload['id'] || '1')).body)
 
+    puts 'log1'
+    puts '{hello: world}'
+    puts '[hello, world]'
+
     return res.json({
         'isTest': true,
         'message': 'Hello Open Runtimes 👋',

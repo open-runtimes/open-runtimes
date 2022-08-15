@@ -3,6 +3,10 @@ package io.openruntimes.kotlin
 import io.javalin.Javalin
 import io.javalin.http.Context
 import io.javalin.plugin.json.jsonMapper
+import java.io.ByteArrayOutputStream
+import java.io.StringWriter
+import java.io.PrintStream
+import java.io.PrintWriter
 import kotlinx.coroutines.runBlocking
 
 suspend fun main() {
@@ -13,8 +17,6 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
-    RuntimeResponse.mapper = ctx.jsonMapper()
-
     if (ctx.header("x-internal-challenge").isNullOrBlank()) {
         ctx.status(500).result("Unauthorized");
         return;
@@ -28,9 +30,34 @@ suspend fun execute(ctx: Context) {
     val request = RuntimeRequest(ctx)
     val response = RuntimeResponse()
 
+    val outStream = ByteArrayOutputStream()
+    val errStream = ByteArrayOutputStream()
+    val userOut = PrintStream(outStream)
+    val userErr = PrintStream(errStream)
+    val systemOut = System.out
+    val systemErr = System.err
+
+    System.setOut(userOut)
+    System.setErr(userErr)
+
     try {
-        ctx.result(codeWrapper.main(request, response).data)
+        val userResponse = codeWrapper.main(request, response)
+        val output = mutableMapOf(
+            "response" to userResponse.data,
+            "stdout" to outStream.toString()
+        )
+        ctx.json(output)
     } catch (e: Exception) {
-        ctx.status(500).result(e.stackTraceToString())
+        e.printStackTrace()
+        val output = mutableMapOf(
+            "stdout" to outStream.toString(),
+            "stderr" to errStream.toString()
+        )
+        ctx.status(500).json(output)
+    } finally {
+         System.out.flush();
+         System.err.flush();
+         System.setOut(systemOut);
+         System.setErr(systemErr);
     }
 }

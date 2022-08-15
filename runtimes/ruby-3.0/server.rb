@@ -45,7 +45,7 @@ class RuntimeResponse
   end
 
   def json(object)
-    @response = object.to_json
+    @response = object
   end
 end
 
@@ -54,12 +54,12 @@ post '/' do
 
   if challenge == ''
     status 500
-    return 'Unauthorized'
+    return { stderr: 'Unauthorized' }.to_json
   end
 
   if challenge != ENV['INTERNAL_RUNTIME_KEY']
     status 500
-    return 'Unauthorized'
+    return { stderr: 'Unauthorized' }.to_json
   end
 
   request.body.rewind
@@ -73,20 +73,39 @@ post '/' do
   rescue Exception => e
     p e
     status 500
-    return e.backtrace.join("\n")
+    return {stderr: e.backtrace.join("\n") }.to_json
   end
 
   unless defined?(main = ())
     status 500
-    return 'File does not specify a main() function.'
+    return { stderr: 'File does not specify a main() function.' }.to_json
   end
 
   begin
-    response = main(requestData, runtimeResponse)
+    system_out = $stdout
+    system_err = $stderr
+    user_out = StringIO.new
+    user_err = StringIO.new
+    $stdout = user_out
+    $stderr = user_err
+
+    user_response = main(requestData, runtimeResponse)
+
+    response = {
+      response: user_response,
+      stdout: user_out.string
+    }.to_json
   rescue Exception => e
-    p e
     status 500
-    return e.backtrace.join("\n")
+    return {
+      stdout: user_out.string,
+      stderr: user_err.string + "\n" + e.backtrace.join("\n")
+    }.to_json
+  ensure
+    $stdout = system_out
+    $stderr = system_err
+    user_out = nil
+    user_err = nil
   end
 
   status 200
@@ -95,5 +114,5 @@ end
 
 error do
   status 500
-  return env['sinatra.error'].message
+  return { stderr: env['sinatra.error'].message }.to_json
 end

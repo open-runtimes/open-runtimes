@@ -14,19 +14,31 @@ function join_paths() {
 }
 
 class Response {
-    function __construct($res) {
-        $this->res = $res;
+    private mixed $response;
+    private int $status = 200;
+    private array $headers = [];
+
+    function getStatus(): int {
+        return $this->status;
+    }
+
+    function getResponse(): mixed  {
+        return $this->response;
+    }
+
+    function getHeaders(): array {
+        return $this->headers;
     }
 
     function send($text, $status = 200) {
-        $this->res->status($status);
-        $this->res->end($text);
+        $this->response = $text;
+        $this->status = $status;
     }
 
     function json($json, $status = 200) {
-        $this->res->status($status);
-        $this->res->headers['Content-Type'] = 'application/json';
-        $this->res->end(json_encode($json, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+        $this->status = $status;
+        $this->response = $json;
+        $this->headers['Content-Type'] = 'application/json';
     }
 }
 
@@ -41,7 +53,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     if (empty($internal_challenge)) {
         $res->status(500);
-        $res->end('Unauthorized');
+        $res->end(json_encode(['stderr' => 'Unauthorized']));
         return;
     }
 
@@ -49,7 +61,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     if ($key != $internal_challenge) {
         $res->status(500);
-        $res->end('Unauthorized');
+        $res->end(json_encode(['stderr' => 'Unauthorized']));
         return;
     }
 
@@ -69,10 +81,17 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         if (!is_callable($userFunction)) {
             return throw new Exception('Function not valid');
         }
+        ob_start();
         $userFunction($request, $response);
+        $stdout = ob_get_clean();
+
+        $res->status($response->getStatus());
+        $res->header = $response->getHeaders();
+        $res->end(json_encode(['response' => $response->getResponse(), 'stdout' => $stdout], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+        $stdout = '';
     } catch (\Throwable $e) {
         $res->status(500);
-        return $res->end($e->getMessage()."\r\n".$e->getTraceAsString());
+        return $res->end(json_encode(['stderr' => $e->getMessage()."\r\n".$e->getTraceAsString()], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
     }
 });
 

@@ -37,6 +37,11 @@ fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse {
         MutableMap::class.java
     )
 
+    // Print to user function stdout
+    println("log1")
+    println("{hello: world}")
+    println("[hello, world]")
+
     return res.json(mapOf(
         "isTest" to true,
         "message" to "Hello Open Runtimes 👋",

@@ -17,6 +17,15 @@ module.exports = async (req, res) => {
 
     const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`).then(r => r.json());
 
+    console.log('log');
+    console.warn('warning');
+    console.error('error');
+    console.info('info');
+    console.debug('debug');
+    console.log('log1', 'log2');
+    console.log({hello: 'world'});
+    console.log(['hello', 'world']);
+
     res.json({
         isTest: true,
         message: 'Hello Open Runtimes 👋',
