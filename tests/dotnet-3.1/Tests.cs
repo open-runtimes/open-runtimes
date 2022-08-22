@@ -30,13 +30,13 @@ public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
     Console.WriteLine("{hello: world}");
     Console.WriteLine("[hello, world]");
 
-    return res.Json(new Dictionary<string, object>()
+    return res.Json(new Dictionary<string, object?>()
     {
         { "isTest", true },
         { "message", "Hello Open Runtimes 👋" },
         { "header", header },
         { "env", env },
-        { "null-env", req.Env["null-env"] },
+        { "null-env", req.Env.ContainsKey("null-env") ? req.Env["null-env"] : null },
         { "todo", todo }
     });
 }

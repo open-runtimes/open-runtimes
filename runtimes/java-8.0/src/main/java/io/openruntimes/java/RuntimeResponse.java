@@ -1,6 +1,7 @@
 package io.openruntimes.java;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.Map;
 
@@ -8,7 +9,9 @@ public class RuntimeResponse {
     public Object data;
     public int statusCode;
 
-    static final Gson gson = new Gson();
+    static final Gson gson = new GsonBuilder()
+        .serializeNulls()
+        .create();
 
     public RuntimeResponse() {
     }
