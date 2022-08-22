@@ -105,7 +105,8 @@ abstract class Base extends TestCase
                 'x-test-header' => 'Header secret'
             ],
             'env' => [
-                'test-env' => 'Environment secret'
+                'test-env' => 'Environment secret',
+                'null-env' => null
             ]
         ]);
 
@@ -125,7 +126,8 @@ abstract class Base extends TestCase
                 'x-test-header' => 'Header secret'
             ],
             'env' => [
-                'test-env' => 'Environment secret'
+                'test-env' => 'Environment secret',
+                'null-env' => null
             ]
         ]);
 
