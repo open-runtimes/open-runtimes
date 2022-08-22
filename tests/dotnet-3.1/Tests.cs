@@ -36,6 +36,7 @@ public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
         { "message", "Hello Open Runtimes 👋" },
         { "header", header },
         { "env", env },
+        { "null-env", req.Env["null-env"] },
         { "todo", todo }
     });
 }

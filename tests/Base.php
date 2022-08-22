@@ -116,6 +116,7 @@ abstract class Base extends TestCase
         self::assertEquals(true, $response['body']['isTest']);
         self::assertEquals('Header secret', $response['body']['header']);
         self::assertEquals('Environment secret', $response['body']['env']);
+        self::assertNull($response['body']['null-env']);
     }
 
     public function testRuntimePayloadAndHeadersAndEnv(): void 
@@ -142,6 +143,7 @@ abstract class Base extends TestCase
         self::assertEquals(false, $response['body']['todo']['completed']);
         self::assertEquals('Header secret', $response['body']['header']);
         self::assertEquals('Environment secret', $response['body']['env']);
+        self::assertNull($response['body']['null-env']);
     }
 
     public function testRuntimeGarbageBody(): void

@@ -29,6 +29,7 @@ export default async function(req: any, res: any) {
         message: 'Hello Open Runtimes 👋',
         header: req.headers['x-test-header'],
         env: req.env['test-env'],
+        'null-env': req.env['null-env'],
         todo
     });
 }

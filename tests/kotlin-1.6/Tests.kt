@@ -47,6 +47,7 @@ fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse {
         "message" to "Hello Open Runtimes 👋",
         "header" to header,
         "env" to env,
+        "null-env" to req.env["test-env"],
         "todo" to todo
     ))
 }

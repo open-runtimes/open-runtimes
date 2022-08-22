@@ -44,6 +44,7 @@ func main(req: RequestValue, res: RequestResponse) async throws -> RequestRespon
         "message": "Hello Open Runtimes 👋",
         "todo": todo,
         "header": headerData,
-        "env": envData
+        "env": envData,
+        "null-env": req.env["null-env"]
     ])
 }

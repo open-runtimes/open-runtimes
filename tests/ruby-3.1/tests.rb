@@ -25,6 +25,7 @@ def main(req, res)
         'message': 'Hello Open Runtimes 👋',
         'todo': todo,
         'header': req.headers['x-test-header'],
-        'env': req.env['test-env']
+        'env': req.env['test-env'],
+        'null-env': req.env['null-env']
     })
 end

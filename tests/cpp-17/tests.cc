@@ -61,6 +61,7 @@ static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
     response["todo"] = todo;
     response["header"] = headerData;
     response["env"] = envData;
+    response["null-env"] = req.env["null-env"];
 
     std::cout << "log1" << std::endl;
     std::cout << "{hello: world}" << std::endl;

@@ -29,5 +29,6 @@ def main(req, res):
         'message': 'Hello Open Runtimes 👋',
         'todo': todo,
         'header': header_data,
-        'env': env_data
+        'env': env_data,
+        'null-env': req.env.get('null-env', None)
     })

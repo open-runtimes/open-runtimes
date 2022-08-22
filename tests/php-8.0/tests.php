@@ -34,6 +34,7 @@ return function($req, $res) use ($client) {
         'message' => 'Hello Open Runtimes 👋',
         'header' => $req['headers']['x-test-header'],
         'env' => $req['env']['test-env'],
+        'null-env' => $req['env']['null-env'],
         'todo' => $todo
     ]);
 };

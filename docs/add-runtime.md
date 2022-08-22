@@ -221,6 +221,7 @@ Within the folder you will need to create a function for your runtime that will 
     "message": "Hello Open Runtimes 👋",
     "header": req.headers['x-test-header'],
     "env": req.env['test-env'],
+    "null-env": req.env['null-env'],
     "todo": {{body from your todo API http response}},
 ```
 

@@ -53,6 +53,7 @@ public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exce
     data.put("message", "Hello Open Runtimes 👋");
     data.put("header", header);
     data.put("env", env);
+    data.put("null-env", envs.get("null-env"));
     data.put("todo", todo);
 
     // Print to user function stdout
