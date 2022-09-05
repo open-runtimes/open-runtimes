@@ -2,10 +2,10 @@
 
 namespace Tests;
 
-// Runtime: dart-2.17
-// PHP class: Dart217
+// Runtime: dart-2.18
+// PHP class: Dart218
 // Entrypoint: lib/tests.dart
 
-class Dart217 extends Base
+class Dart218 extends Base
 {
 }
