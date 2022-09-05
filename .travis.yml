@@ -75,6 +75,12 @@ env:
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
     # Dart
+    - RUNTIME=dart-2.18
+      PHP_CLASS=Dart218
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.18
+      SERVER_PROCESS=/usr/code-start/runtime
+      ARCH=linux/amd64,linux/arm64
     - RUNTIME=dart-2.17
       PHP_CLASS=Dart217
       ENTRYPOINT=lib/tests.dart
