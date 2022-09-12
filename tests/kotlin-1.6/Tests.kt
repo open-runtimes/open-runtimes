@@ -15,7 +15,7 @@ fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse {
     )
 
     val header = req.headers["x-test-header"] ?: ""
-    val env = req.env["test-env"] ?: ""
+    val varData = req.variables["test-variable"] ?: ""
     val id = payload["id"] ?: "1"
 
     val url = URL("https://jsonplaceholder.typicode.com/todos/$id")
@@ -46,7 +46,7 @@ fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse {
         "isTest" to true,
         "message" to "Hello Open Runtimes 👋",
         "header" to header,
-        "env" to env,
+        "variable" to varData,
         "todo" to todo
     ))
 }

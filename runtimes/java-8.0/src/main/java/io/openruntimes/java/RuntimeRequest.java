@@ -7,16 +7,16 @@ import java.util.Map;
 public class RuntimeRequest {
     private String payload;
     private Map<String, String> headers;
-    private Map<String, String> env;
+    private Map<String, String> variables;
 
     public RuntimeRequest(
             String payload,
             Map<String, String> headers,
-            Map<String, String> env
+            Map<String, String> variables
     ) {
         this.payload = payload;
         this.headers = headers;
-        this.env = env;
+        this.variables = variables;
     }
 
     public RuntimeRequest(Req request) {
@@ -29,8 +29,8 @@ public class RuntimeRequest {
         if (data.containsKey("headers")) {
             this.headers = (Map<String, String>) data.get("headers");
         }
-        if (data.containsKey("env")) {
-            this.env = (Map<String, String>) data.get("env");
+        if (data.containsKey("variables")) {
+            this.variables = (Map<String, String>) data.get("variables");
         }
     }
 
@@ -38,7 +38,7 @@ public class RuntimeRequest {
     }
 
     public String getPayload() {
-        return payload;
+        return this.payload;
     }
 
     public void setPayload(String payload) {
@@ -46,19 +46,19 @@ public class RuntimeRequest {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return this.headers;
     }
 
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public Map<String, String> getEnv() {
-        return env;
+    public Map<String, String> getVariables() {
+        return this.variables;
     }
 
-    public void setEnv(Map<String, String> env) {
-        this.env = env;
+    public void setVariables(Map<String, String> variables) {
+        this.variables = variables;
     }
 }
 

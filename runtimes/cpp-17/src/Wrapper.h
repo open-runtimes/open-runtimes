@@ -16,11 +16,11 @@ namespace runtime
         static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &resp)
         {
             std::string payload = req.payload;
-            Json::Value env = req.env;
+            Json::Value variables = req.variables;
             Json::Value headers = req.headers;
             Json::Value json;
             json["payload"] = payload;
-            json["env"] = env;
+            json["variables"] = variables;
             json["headers"] = headers;
             return resp.json(json);
         }

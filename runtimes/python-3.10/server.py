@@ -29,10 +29,10 @@ class Request:
     def __init__(self, request):
         self.parsedRequest = request.get_json()
 
-        if 'env' in self.parsedRequest:
-            self.env = self.parsedRequest['env']
+        if 'variables' in self.parsedRequest:
+            self.variables = self.parsedRequest['variables']
         else:
-            self.env = {}
+            self.variables = {}
 
         if 'headers' in self.parsedRequest:
             self.headers = self.parsedRequest['headers']

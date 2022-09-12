@@ -10,7 +10,7 @@ namespace runtime
     struct RuntimeRequest
     {
         std::string payload;
-        Json::Value env;
+        Json::Value variables;
         Json::Value headers;
     };
 }
@@ -25,7 +25,7 @@ namespace drogon
         if (json)
         {
             request.payload = (*json)["payload"].asString();
-            request.env = (*json)["env"];
+            request.variables = (*json)["variables"];
             request.headers = (*json)["headers"];
         }
         if (request.payload.empty())

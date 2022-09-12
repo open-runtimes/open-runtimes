@@ -11,7 +11,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res)
 {
     std::string headerData = req.headers["x-test-header"];
-    std::string envData = req.env["test-env"];
+    std::string variableData = req.variables["test-variable"];
     std::string id;
 
     Json::CharReaderBuilder builder;
@@ -63,7 +63,7 @@ static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res)
     response["message"] = "Hello Open Runtimes 👋";
     response["todo"] = todo;
     response["header"] = headerData;
-    response["env"] = envData;
+    response["variable"] = variableData;
 
     return res->json(response);
 }

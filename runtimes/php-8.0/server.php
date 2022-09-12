@@ -67,7 +67,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     }
 
     $request = [
-        'env' => $body['env'] ?? [],
+        'variables' => $body['variables'] ?? [],
         'headers' => $body['headers'] ?? [],
         'payload' => $body['payload'] ?? ''
     ];

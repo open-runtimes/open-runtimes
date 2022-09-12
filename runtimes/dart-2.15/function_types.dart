@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 class Request {
-  final Map<String, dynamic> env;
+  final Map<String, dynamic> variables;
   final Map<String, dynamic> headers;
   final String payload;
 
   Request({
-    this.env = const {},
+    this.variables = const {},
     this.headers = const {},
     this.payload = '',
   });

@@ -81,7 +81,7 @@ import java.util.HashMap;
 public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exception {
     Map<String, Object> result = new HashMap<>();
     result.put("message", "Hello Open Runtimes 👋");
-    result.put("env", req.getEnv());
+    result.put("variables", req.getVariables());
     result.put("headers", req.getHeaders());
     result.put("payload", req.getPayload());
     return res.json(result);
