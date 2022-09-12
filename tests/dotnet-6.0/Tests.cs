@@ -19,7 +19,7 @@ public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
         : "";
 
     var varData = req.Variables.ContainsKey("test-variable")
-        ? req.Vvariables["test-variable"]
+        ? req.Variables["test-variable"]
         : "";
 
     var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{id}");
