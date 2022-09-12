@@ -19,8 +19,8 @@ public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
         ? req.Headers["x-test-header"]
         : "";
 
-    var env = req.Env.ContainsKey("test-env")
-        ? req.Env["test-env"]
+    var variableData = req.Variables.ContainsKey("test-variable")
+        ? req.Variables["test-variable"]
         : "";
 
     var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{id.ToString()}");
@@ -35,7 +35,7 @@ public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
         { "isTest", true },
         { "message", "Hello Open Runtimes 👋" },
         { "header", header },
-        { "env", env },
+        { "variable", variableData },
         { "todo", todo }
     });
 }

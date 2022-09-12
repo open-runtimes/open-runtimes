@@ -86,7 +86,7 @@ You can respond with `json()` by providing object:
 export default async function(req: any, res: any) {
     res.json({
         'message': 'Hello Open Runtimes 👋',
-        'env': req.env,
+        'variables': req.variables,
         'payload': req.payload,
         'headers': req.headers
     });

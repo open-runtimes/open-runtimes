@@ -78,7 +78,7 @@ You can respond with `json()` by providing object:
 static RuntimeResponse *main(const RuntimeRequest& req, RuntimeResponse* res) { 
     Json::Value result; 
     result["message"] = "Hello Open Runtimes 👋";
-    result["env"] = req.env;
+    result["variables"] = req.variables;
     result["headers"] = req.headers;
     return res->json(result) 
 }

@@ -4,7 +4,7 @@ import AsyncHTTPClient
 //    'req' variable has:
 //        'headers' - object with request headers
 //        'payload' - object with request body data
-//        'env' - object with environment variables
+//        'variables' - object with function variables
 //    'res' variable has:
 //        'send(text, status)' - function to return text response. Status code defaults to 200
 //        'json(obj, status)' - function to return JSON response. Status code defaults to 200
@@ -14,7 +14,7 @@ import AsyncHTTPClient
 func main(req: RequestValue, res: RequestResponse) async throws -> RequestResponse {
 
     let headerData = req.headers["x-test-header"]
-    let envData = req.env["test-env"]
+    let varData = req.variables["test-variable"]
 
     var todoId: String = "1"
 
@@ -44,6 +44,6 @@ func main(req: RequestValue, res: RequestResponse) async throws -> RequestRespon
         "message": "Hello Open Runtimes 👋",
         "todo": todo,
         "header": headerData,
-        "env": envData
+        "variable": varData
     ])
 }

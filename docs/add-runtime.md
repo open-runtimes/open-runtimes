@@ -81,7 +81,7 @@ Initialize a web server that runs on port 3000 and binds to the 0.0.0.0 IP and o
 2. Decode the executor's JSON POST request. This normally looks like so:
 ```json
 {
- "env": {
+ "variables": {
     "USER_KEY":"abcd1234"
  },
  "headers": {
@@ -93,7 +93,7 @@ Initialize a web server that runs on port 3000 and binds to the 0.0.0.0 IP and o
 
 You must create two classes for users to use within their scripts.
 
-A `Request` Class and a `Response` class. The `Request` class must store `env`, `payload` and `headers` and pass them to the user's function. The Request always goes before the response in the user's function parameters.
+A `Request` Class and a `Response` class. The `Request` class must store `variables`, `payload` and `headers` and pass them to the user's function. The Request always goes before the response in the user's function parameters.
 
 The `Response` class must have two functions:
 
@@ -220,13 +220,13 @@ Within the folder you will need to create a function for your runtime that will 
     "isTest": true,
     "message": "Hello Open Runtimes 👋",
     "header": req.headers['x-test-header'],
-    "env": req.env['test-env'],
+    "variables": req.variables['test-variables'],
     "todo": {{body from your todo API http response}},
 ```
 
 ### 4.2 Adding your runtime to Travis
 
-Edit the `.travis.yml` file and add your runtime to the `env` section of it like so:
+Edit the `.travis.yml` file and add your runtime to the `variables` section of it like so:
 
 ```yaml
   # {{Language Name}}

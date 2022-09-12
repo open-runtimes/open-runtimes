@@ -139,8 +139,8 @@ All requests should also have JSON body with the following structure:
 ```json5
 {
     // Following will be exposed to the function
-    "env": {
-        // Environment variables
+    "variables": {
+        // Function variables
     },
     "payload": "{}",
     "headers": {

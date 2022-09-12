@@ -16,7 +16,7 @@ app.use(async (ctx) => {
   }
 
   const request = {
-    env: body.env ?? {},
+    variables: body.variables ?? {},
     headers: body.headers ?? {},
     payload: body.payload ?? ''
   };

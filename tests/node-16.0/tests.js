@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
     'req' variable has:
         'headers' - object with request headers
         'payload' - object with request body data
-        'env' - object with environment variables
+        'variables' - object with function variables
     'res' variable has:
         'send(text, status)' - function to return text response. Status code defaults to 200
         'json(obj, status)' - function to return JSON response. Status code defaults to 200
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
         isTest: true,
         message: 'Hello Open Runtimes 👋',
         header: req.headers['x-test-header'],
-        env: req.env['test-env'],
+        variable: req.variables['test-variable'],
         todo
     });
 }

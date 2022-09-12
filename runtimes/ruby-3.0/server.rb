@@ -8,7 +8,7 @@ before do
 end
 
 class RuntimeRequest
-  def initialize(payload = '{}', env = {}, headers = {})
+  def initialize(payload = '{}', variables = {}, headers = {})
     if payload == nil
       payload = ''
     end
@@ -17,12 +17,12 @@ class RuntimeRequest
       headers = {}
     end
 
-    if env == nil
-      env = {}
+    if variables == nil
+      variables = {}
     end
 
     @payload = payload
-    @env = env
+    @variables = variables
     @headers = headers
   end
 
@@ -30,8 +30,8 @@ class RuntimeRequest
     @payload
   end
 
-  def env
-    @env
+  def variables
+    @variables
   end
 
   def headers
@@ -65,7 +65,7 @@ post '/' do
   request.body.rewind
   data = JSON.parse(request.body.read)
 
-  requestData = RuntimeRequest.new(data['payload'], data['env'], data['headers'])
+  requestData = RuntimeRequest.new(data['payload'], data['variables'], data['headers'])
   runtimeResponse = RuntimeResponse.new
 
   begin

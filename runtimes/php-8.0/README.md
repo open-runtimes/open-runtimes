@@ -88,7 +88,7 @@ You can respond with `json()` by providing object:
 return function($req, $res) {
     $res->json([
         'message' => 'Hello Open Runtimes 👋',
-        'env' => $req['env'],
+        'variables' => $req['variables'],
         'payload' => $req['payload'],
         'headers' => $req['headers']
     ]);

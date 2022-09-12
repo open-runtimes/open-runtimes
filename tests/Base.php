@@ -98,14 +98,14 @@ abstract class Base extends TestCase
         self::assertEquals(false, $response['body']['todo']['completed']);
     }
 
-    public function testRuntimeHeadersAndEnv(): void 
+    public function testRuntimeHeadersAndVariables(): void 
     {
         $response = $this->call([
             'headers' => [
                 'x-test-header' => 'Header secret'
             ],
-            'env' => [
-                'test-env' => 'Environment secret'
+            'variables' => [
+                'test-variable' => 'Variable secret'
             ]
         ]);
 
@@ -114,18 +114,18 @@ abstract class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals(true, $response['body']['isTest']);
         self::assertEquals('Header secret', $response['body']['header']);
-        self::assertEquals('Environment secret', $response['body']['env']);
+        self::assertEquals('Variable secret', $response['body']['variable']);
     }
 
-    public function testRuntimePayloadAndHeadersAndEnv(): void 
+    public function testRuntimePayloadAndHeadersAndVariables(): void 
     {
         $response = $this->call([
             'payload' => '{"id":"2"}',
             'headers' => [
                 'x-test-header' => 'Header secret'
             ],
-            'env' => [
-                'test-env' => 'Environment secret'
+            'variables' => [
+                'test-variable' => 'Variable secret'
             ]
         ]);
 
@@ -139,7 +139,7 @@ abstract class Base extends TestCase
         self::assertEquals('quis ut nam facilis et officia qui', $response['body']['todo']['title']);
         self::assertEquals(false, $response['body']['todo']['completed']);
         self::assertEquals('Header secret', $response['body']['header']);
-        self::assertEquals('Environment secret', $response['body']['env']);
+        self::assertEquals('Variable secret', $response['body']['variable']);
     }
 
     public function testRuntimeGarbageBody(): void

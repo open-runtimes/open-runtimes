@@ -4,7 +4,7 @@ namespace DotNetRuntime
 	{
 		public string Payload { get; set; } = "";
 
-		public Dictionary<string, string> Env { get; set; } =
+		public Dictionary<string, string> Variables { get; set; } =
 			new Dictionary<string, string>();
 
 		public Dictionary<string, string> Headers { get; set; } =

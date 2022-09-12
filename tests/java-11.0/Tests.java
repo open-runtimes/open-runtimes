@@ -21,10 +21,10 @@ public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exce
         header = headers.get("x-test-header");
     }
 
-    String env = "";
-    Map<String, String> envs = req.getEnv();
-    if (envs != null && envs.containsKey("test-env")) {
-        env = envs.get("test-env");
+    String varData = "";
+    Map<String, String> variables = req.getVariables();
+    if (variables != null && variables.containsKey("test-variable")) {
+        varData = variables.get("test-variable");
     }
 
     String id = "1";
@@ -52,7 +52,7 @@ public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exce
     data.put("isTest", true);
     data.put("message", "Hello Open Runtimes 👋");
     data.put("header", header);
-    data.put("env", env);
+    data.put("variable", varData);
     data.put("todo", todo);
 
     System.out.println("log1");

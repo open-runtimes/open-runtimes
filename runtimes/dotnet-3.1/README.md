@@ -78,7 +78,7 @@ You can respond with `json()` by providing object:
 public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res) => 
     res.Json(new Dictionary<string, object>() {
         { "message" , "Hello Open Runtimes 👋" },
-        { "env", req.Env },
+        { "variables", req.variables },
         { "headers", req.Headers },
         { "payload", req.Payload }
     });

@@ -2,12 +2,12 @@ import Vapor
 import Foundation
 
 struct RequestValue {
-    var env: [String: String] = [:]
+    var variables: [String: String] = [:]
     var headers: [String: String] = [:]
     var payload: String = ""
 
     enum CodingKeys: String, CodingKey {
-        case env
+        case variables
         case headers
         case payload
     }
@@ -17,8 +17,8 @@ extension RequestValue : Decodable {
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
 
-        if let env = try? values.decodeIfPresent([String: String].self, forKey: .env) {
-            self.env = env
+        if let variables = try? values.decodeIfPresent([String: String].self, forKey: .variables) {
+            self.variables = variables
         }
         if let headers = try? values.decodeIfPresent([String: String].self, forKey: .headers) {
             self.headers = headers

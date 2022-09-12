@@ -78,7 +78,7 @@ You can respond with `json()` by providing object:
 @Throws(Exception::class)
 fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse = res.json(mapOf(
     "message" to "Hello Open Runtimes 👋",
-    "env" to req.env,
+    "variables" to req.variables,
     "headers" to req.headers,
     "payload" to req.payload
 ))
