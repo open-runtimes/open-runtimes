@@ -8,8 +8,8 @@ import 'package:dio/dio.dart' hide Response;
         'payload' - object with request body data
         'variables' - object with function variables
     'res' variable has:
-        'send(text, status)' - function to return text response. Status code defaults to 200
-        'json(obj, status)' - function to return JSON response. Status code defaults to 200
+        'send(text, status: status)' - function to return text response. Status code defaults to 200
+        'json(obj, status: status)' - function to return JSON response. Status code defaults to 200
     
     If an error is thrown, a response with code 500 will be returned.
 */
