@@ -2,7 +2,7 @@ version: '3'
 
 services:
   open-runtimes-perl-5.36:
-    container_name: open-runtimesperl-5.36
+    container_name: open-runtimes-perl-5.36
     build:
       context: .
     ports: 
