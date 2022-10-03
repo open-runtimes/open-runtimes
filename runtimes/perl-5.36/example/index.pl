@@ -10,7 +10,7 @@ sub main {
    $variables = $req->getVariables();
    $headers = $req->getHeaders();
    
-   $id = $payload->{id} || 1;
+   $id = decode_json($payload)->{'id'} || 1;
 
    $client = LWP::UserAgent->new;
    $response = $client->get("https://jsonplaceholder.typicode.com/todos/$id");

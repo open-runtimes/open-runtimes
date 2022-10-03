@@ -82,4 +82,4 @@ echo '.NET 6.0...'
 docker build -t openruntimes/dotnet-6.0 ./runtimes/dotnet-6.0/
 
 echo 'Perl 5.36...'
-docker build -t openruntimes/perl-5.36 ./runtimes/perl-5.36
+docker build -t openruntimes/perl-5.36 ./runtimes/perl-5.36/
