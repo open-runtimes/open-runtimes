@@ -198,6 +198,13 @@ env:
       ENTRYPOINT=tests.go
       SERVER_PROCESS="server"
       IMAGE=openruntimes/go:${VERSION}-1.19
+
+    # Pascal
+    - RUNTIME=pascal-3.2
+      PHP_CLASS=Pascal32
+      ENTRYPOINT=Index.pas
+      SERVER_PROCESS=Server
+      IMAGE=openruntimes/pascal:${VERSION}-3.2
       ARCH=linux/amd64,linux/arm64
 
 notifications:
