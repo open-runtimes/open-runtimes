@@ -6,7 +6,7 @@ namespace Tests;
 // PHP class: Perl536
 // Entrypoint: tests.pl
 
-sleep(10);
+sleep(60);
 
 class Perl536 extends Base
 {
