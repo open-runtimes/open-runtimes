@@ -12,12 +12,11 @@ RUN mkdir -p /usr/builds
 
 WORKDIR /usr/local/src
 
-RUN cpanm Carton
-RUN cpanm --installdeps -n .
-
-ONBUILD RUN carton install
-
 COPY . .
+
+RUN apt-get update; apt-get install -y curl gcc build-essential
+RUN cpanm Carton
+RUN carton install
 
 RUN chmod +x /usr/local/src/start.sh
 RUN chmod +x /usr/local/src/build.sh

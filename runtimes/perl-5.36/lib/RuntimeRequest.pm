@@ -12,17 +12,17 @@ sub new {
     return $self;
 }
 
-sub payload {
+sub getPayload {
     my ($self) = @_;
     return $self->{_payload};
 }
 
-sub variables {
+sub getVariables {
     my ($self) = @_;
     return $self->{_variables};
 }
 
-sub headers {
+sub getHeaders {
     my ($self) = @_;
     return $self->{_headers};
 }

@@ -2,3 +2,4 @@ requires 'Mojolicious::Lite';
 requires 'Try::Tiny';
 requires 'Data::Dump';
 requires 'Env';
+requires 'Capture::Tiny';

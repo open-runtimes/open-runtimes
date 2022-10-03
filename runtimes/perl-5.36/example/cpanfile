@@ -1,0 +1,4 @@
+requires 'JSON::XS';
+requires 'LWP::Simple';
+requires 'Acme::RandomEmoji';
+requires 'LWP::Protocol::https';

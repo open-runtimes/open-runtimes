@@ -1,3 +1,4 @@
 local/
 !.env
 !build.sh
+example/*.tar.gz
