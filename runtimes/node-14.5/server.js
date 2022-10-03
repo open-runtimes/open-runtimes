@@ -1,6 +1,8 @@
-const path = require("path");
-const micro = require("micro");
-const { json, send } = require("micro");
+import micro from 'micro';
+
+// Node 14.5 has no support for destructuring in imports,
+// results in a SyntaxError, so we're doing it here.
+const { send, json } = micro;
 
 const USER_CODE_PATH = '/usr/code-start';
 
@@ -22,8 +24,8 @@ const server = micro(async (req, res) => {
     console.stdinfo = console.info.bind(console);
     console.stddebug = console.debug.bind(console);
     console.stdwarn = console.warn.bind(console);
-    logs = [];
-    errors = [];
+    let logs = []
+    let errors = [];
     console.log = console.info = console.debug = function(){
         var args = [];
         Array.from(arguments).forEach(arg => {
@@ -52,7 +54,7 @@ const server = micro(async (req, res) => {
         json: (json, status = 200) => send(res, status, {response: json, stdout: logs.join('\n'), stderr: errors.join('\n')}),
     };
     try {
-        let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
+        const userFunction = (await import(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT)).default;
 
         if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
             throw new Error("User function is not valid.")
