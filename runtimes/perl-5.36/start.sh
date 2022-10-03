@@ -11,6 +11,6 @@ if [ -f "/usr/code-start/cpanfile" ]; then
 fi
 
 export PERL5LIB=./lib:./local/lib/perl5:$PERL5LIB
-export INTERNAL_RUNTIME_KEY=secret-key
+export $(grep -v '^#' .env | xargs -d '\n')
 echo $PERL5LIB
 perl server.pl daemon -l http://*:3000

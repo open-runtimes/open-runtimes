@@ -3,20 +3,26 @@
 use Mojolicious::Lite -signatures;
 use Try::Tiny;
 use Env;
+use Data::Dump "pp";
 
 use RuntimeRequest;
 use RuntimeResponse;
 
 post '/' => sub ($c) {
-  my $req = new RuntimeRequest($c->req->json, {}, $c->req->headers->to_hash);
+  my $json = $c->req->json;
+  my $req = new RuntimeRequest(
+    $json->{payload}, 
+    $json->{variables}, 
+    $json->{headers}
+  );
   my $res = new RuntimeResponse();
 
-  my $challenge = $c->req->headers->header('HTTP_X_INTERNAL_CHALLENGE') || '';
+  my $challenge = $c->req->headers->header('x-internal-challenge') || '';
 
   if ($challenge eq '' || $challenge ne $ENV{INTERNAL_RUNTIME_KEY}) {
     $c->render(
       json => {
-        error => 'Unauthorized',
+        error => 'unauthorized',
       }, status => 401
     );
     return;
@@ -31,7 +37,8 @@ post '/' => sub ($c) {
   } catch {
     $c->render(
       json => {
-        error => $_
+        code => 500,
+        message => "Error: $_"
       }, status => 500
     );
   };
