@@ -2,7 +2,8 @@ FROM perl:5.36-slim
 
 LABEL maintainer="team@appwrite.io"
 
-ENV INTERNAL_RUNTIME_ENTRYPOINT=index.pl
+ENV INTERNAL_RUNTIME_KEY $INTERNAL_RUNTIME_KEY
+ENV INTERNAL_RUNTIME_ENTRYPOINT $INTERNAL_RUNTIME_ENTRYPOINT
 
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code

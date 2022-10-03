@@ -186,6 +186,13 @@ env:
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
 
+    # Perl
+    - RUNTIME=perl-5.36
+      PHP_CLASS=Perl536
+      ENTRYPOINT=tests.pl
+      SERVER_PROCESS=server.pl
+      IMAGE=openruntimes/perl:${VERSION}-5.36
+      ARCH=linux/amd64
 
 notifications:
   email:

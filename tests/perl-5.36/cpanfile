@@ -1,0 +1,3 @@
+requires 'JSON::XS';
+requires 'LWP::Simple';
+requires 'LWP::Protocol::https';
