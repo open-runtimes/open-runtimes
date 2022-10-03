@@ -12,11 +12,13 @@ if [ -f "cpanfile" ]; then
    cat /usr/builds/cpanfile >> /usr/local/src/cpanfile
 fi
 
-# Finish build by preparing tar to use for starting the runtime
+# Copy User Function Dependencies
 cd /usr/builds
 cp -R /usr/local/src/local .
 
+# Insta;ll dependencies
 export PERL5LIB=./lib:./local/lib/perl5:$PERL5LIB
 carton install
 
+# Finish build by preparing tar to use for starting the runtime
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .
