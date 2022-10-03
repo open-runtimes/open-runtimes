@@ -2,6 +2,7 @@
   "name": "open-runtimes-node",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "pm2 start server.js --no-daemon",
