@@ -22,7 +22,8 @@ post '/' => sub ($c) {
   if ($challenge eq '' || $challenge ne $ENV{INTERNAL_RUNTIME_KEY}) {
     $c->render(
       json => {
-        error => 'unauthorized',
+        code => 401,
+        message => 'Unauthorized',
       }, status => 401
     );
     return;
