@@ -14,7 +14,7 @@ use constant USER_CODE_PATH => '/usr/code-start';
 use lib USER_CODE_PATH;
 
 app->renderer->default_format('json');
-
+app->exception_format('json');
 
 post '/' => sub ($c) {
   my $challenge = $c->req->headers->header('x-internal-challenge') || '';
@@ -76,3 +76,6 @@ __DATA__
 
 @@ not_found.json.ep
 {"code":404,"stderr":"Not found"}
+
+@@ exception.json.ep
+{"code":500,"stderr":$exception->message}

@@ -14,4 +14,4 @@ export PERL5LIB=./lib:./local/lib/perl5:$PERL5LIB
 
 echo $PERL5LIB
 carton install
-perl server.pl daemon -l http://*:3000
+perl server.pl daemon -m production -l http://*:3000 
