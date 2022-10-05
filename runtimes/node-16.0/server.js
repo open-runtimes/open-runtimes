@@ -66,7 +66,7 @@ const server = micro(async (req, res) => {
             await userFunction(request, response);
         }
     } catch (e) {
-        send(res, 500, {stdout: logs.join('\n'), stderr: errors.join('\n') + "\n" + e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e});
+        send(res, 500, {stdout: logs.join('\n'), stderr: errors.join('\n') + "\n" + e.code === 'ERR_MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e});
     }
     logs = [];
     errors = [];
