@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open-runtimes-swift
+  labels:
+    app.kubernetes.io/name: open-runtimes-swift
+    app.kubernetes.io/component: backend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: open-runtimes-swift
+      app.kubernetes.io/component: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: open-runtimes-swift
+        app.kubernetes.io/component: backend
+    spec:
+      containers:
+        - name: open-runtimes-swift
+          image: open-runtimes-swift
+          env:
+            - name: INTERNAL_RUNTIME_KEY
+              value: "secret-key"
+          command: ["/bin/sh"]
+          args: ["-c", "sh /usr/local/src/build.sh && cp /usr/code/code.tar.gz /tmp/code.tar.gz && sh /usr/local/src/start.sh"]
+          volumeMounts:
+            - mountPath: /usr/code
+              name: code
+          ports:
+            - containerPort: 3000
+      volumes:
+        - name: code
+          hostPath:
+            path: /example
