@@ -1,4 +1,7 @@
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 private static readonly HttpClient http = new HttpClient();
 

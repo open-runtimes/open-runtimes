@@ -11,20 +11,20 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `Index.cs` file:
 
 ```bash
-mkdir node-or && cd node-or
-printf "public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res) => res.Json(new Dictionary<string, object>() {{ \"n\", new System.Random().NextDouble() }} );" > Index.cs
+mkdir dotnet-or && cd dotnet-or
+printf "using System.Threading.Tasks;\nusing System.Collections.Generic;\n\npublic async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res) => res.Json(new Dictionary<string, object>() {{ \"n\", new System.Random().NextDouble() }} );" > Index.cs
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/dotnet:3.1 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD:/usr/code openruntimes/dotnet:v2-3.1 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/dotnet:3.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/dotnet:v2-3.1 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
