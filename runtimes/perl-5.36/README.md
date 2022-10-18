@@ -28,7 +28,7 @@ EOL
 ```bash
 docker run --rm --interactive --tty \
   -e INTERNAL_RUNTIME_KEY=secret-key \
-  -e INTERNAL_RUNTIME_ENTRYPOINT=index.pl
+  -e INTERNAL_RUNTIME_ENTRYPOINT=index.pl \
   --volume $PWD:/usr/code  \
   openruntimes/perl:5.36 sh /usr/local/src/build.sh
 ```
