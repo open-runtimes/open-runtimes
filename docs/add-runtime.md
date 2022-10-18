@@ -126,7 +126,7 @@ The first thing you need to do is find a Docker image to base your runtime off. 
 Next, in your Dockerfile at the start, add the Docker image you want to base it off at the top like so:
 
 ```bash
-FROM Dart:2.12 # Dart is used as an example.
+FROM dart:2.12 # Dart is used as an example.
 ```
 
 This will download and require the image when you build your runtime and allow you to use the toolset of the language you are building a runtime for.
@@ -174,11 +174,11 @@ Since this will use your launch script when the runtime starts.
 
 With your runtime successfully created, you can now move on to building your Docker image and adding it to the script files used for generating all of the image files.
 
-Open up the `./build.sh` script at the root of the project and add your runtime to it. The following is an example with dart version 2.12:
+Open up the `./build.sh` script at the root of the project and add your runtime to it. The runtimes should be ordered alphabetically. The following is an example with dart version 2.12:
 
 ```bash
 echo 'Dart 2.12...'
-docker build -t openruntimes/dart:2.12 ./runtimes/dart-2.12
+docker build -t openruntimes/dart:v2-2.12 ./runtimes/dart-2.12
 ```
 
 ## 4. Adding tests
@@ -226,16 +226,16 @@ Within the folder you will need to create a function for your runtime that will 
 
 ### 4.2 Adding your runtime to Travis
 
-Edit the `.travis.yml` file and add your runtime to the `variables` section of it like so:
+Edit the `.travis.yml` file and add your runtime to the `env.jobs` section of it like so:
 
 ```yaml
-  # {{Language Name}}
-  - RUNTIME={{full runtime name with version, e.g. dart-2.12}}
-    PHP_CLASS={{Name of the PHP Class you made earlier, e.g. Dart212}}
-    ENTRYPOINT={{Name of your entrypoint file, e.g. test.dart}}
-    SERVER_PROCESS="{{The name of the process that will be launched in your container, e.g. runtime}}"
-    IMAGE={{Full image name including the openruntime/ prefix, e.g. openruntimes/dart-2.12}}
-    ARCH={{List of architecture supported by this runtime seperated by commas, e.g. linux/amd64,linux/arm64}}
+# {{Language Name}}
+- RUNTIME={{full runtime name with version, e.g. dart-2.12}}
+  PHP_CLASS={{Name of the PHP Class you made earlier, e.g. Dart212}}
+  ENTRYPOINT={{Name of your entrypoint file, e.g. test.dart}}
+  SERVER_PROCESS="{{The name of the process that will be launched in your container, e.g. runtime}}"
+  IMAGE={{Full image name including the openruntime/ prefix and the version placeholder, e.g. openruntimes/dart:${VERSION}-2.12}}
+  ARCH={{List of architecture supported by this runtime seperated by commas, e.g. linux/amd64,linux/arm64}}
 ```
 
 You will have to create multiple of these for each version of the language you are adding. Please don't add too many, and for initial pull reuqest, we highly recommend only adding one version, as it will be easier to review and update.
@@ -251,6 +251,10 @@ RUNTIME={{Your Runtime}} ENTRYPOINT={{ your entrypoint }} SERVER_PROCESS={{ your
 Replace the curly brackets with the values you set in `.travis.yml` and make sure to run the command in the root of the repository.
 
 If all tests pass then move on to the next step, otherwise you will need to troubleshoot the problem before continuing.
+
+## 5. Update the Readme
+
+Update the [Images table](https://github.com/open-runtimes/open-runtimes#images) on the [Readme](https://github.com/open-runtimes/open-runtimes/blob/main/README.md). The table should be sorted alphabetically by image.
 
 ## 5. Raise a pull request
 

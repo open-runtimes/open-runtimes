@@ -10,8 +10,8 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 
 static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res)
 {
-    std::string headerData = req.headers["x-test-header"];
-    std::string variableData = req.variables["test-variable"];
+    std::string headerData = req.headers["x-test-header"].asString();
+    std::string variableData = req.variables["test-variable"].asString();
     std::string id;
 
     Json::CharReaderBuilder builder;
@@ -65,5 +65,5 @@ static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res)
     response["header"] = headerData;
     response["variable"] = variableData;
 
-    return res->json(response);
+    return res.json(response);
 }

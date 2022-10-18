@@ -13,18 +13,19 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir cpp-or && cd cpp-or
-printf "static RuntimeResponse* main(const RuntimeRequest& req, RuntimeResponse* res) { Json::Value result; result[\"n\"] = rand() / (RAND_MAX + 1.); return res->json(result); }" > index.cc
+printf "static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) { Json::Value result; result[\"n\"] = rand() / (RAND_MAX + 1.); return res.json(result); }" > index.cc
 ```
 
 2. Build the code:
+
 ```bash
-docker run  -e INTERNAL_RUNTIME_ENTRYPOINT=index.cc --rm --interactive --tty --volume $PWD:/usr/code openruntimes/cpp:17 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=index.cc --rm --interactive --tty --volume $PWD:/usr/code openruntimes/cpp:v2-17 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/cpp:17 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/cpp:v2-17 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -75,12 +76,12 @@ You can also make changes to the example code and apply the changes with the `do
 You can respond with `json()` by providing object:
 
 ```cpp
-static RuntimeResponse *main(const RuntimeRequest& req, RuntimeResponse* res) { 
-    Json::Value result; 
+static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
+    Json::Value result;
     result["message"] = "Hello Open Runtimes 👋";
     result["variables"] = req.variables;
     result["headers"] = req.headers;
-    return res->json(result) 
+    return res.json(result)
 }
 ```
 
