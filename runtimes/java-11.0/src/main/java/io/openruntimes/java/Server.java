@@ -19,10 +19,10 @@ public class Server {
 
     public static Resp execute(Req req, Resp resp) {
         if (!req.headers().containsKey("x-internal-challenge") || req.headers().get("x-internal-challenge").isEmpty()) {
-            return resp.code(500).result("Unauthorized");
+            return resp.code(401).result("Unauthorized");
         }
         if (!req.headers().get("x-internal-challenge").equals(System.getenv("INTERNAL_RUNTIME_KEY"))) {
-            return resp.code(500).result("Unauthorized");
+            return resp.code(401).result("Unauthorized");
         }
 
         Wrapper codeWrapper = new Wrapper();
@@ -44,7 +44,7 @@ public class Server {
             Map<String, Object> output = new HashMap<String, Object>();
             output.put("response", userResponse.data);
             output.put("stdout", outStream.toString());
-            return resp.result(RuntimeResponse.gson.toJson(output));
+            return resp.code(userResponse.statusCode).result(RuntimeResponse.gson.toJson(output));
         } catch (Exception e) {
             e.printStackTrace();
             Map<String, Object> output = new HashMap<String, Object>();
