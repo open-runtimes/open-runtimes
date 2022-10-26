@@ -19,30 +19,30 @@ import (
 */
 
 func Main(req Request, res *Response) error {
-	todo, err := http.Get("https://jsonplaceholder.typicode.com/todos/1")
+	todoResp, err := http.Get("https://jsonplaceholder.typicode.com/todos/1")
 	if err != nil {
 		return err
 	}
 
-	body, err := io.ReadAll(todo.Body)
+	todoBody, err := io.ReadAll(todoResp.Body)
 	if err != nil {
 		return err
 	}
 
 	// As the JSON we're receiving is unstructured. So using interface{}
 	var f interface{}
-	if err := json.Unmarshal([]byte(body), &f); err != nil {
+	if err := json.Unmarshal([]byte(todoBody), &f); err != nil {
 		return err
 	}
 
 	// Type asserting to get the data
-	resp_todo, _ := f.(map[string]interface{})
+	todo, _ := f.(map[string]interface{})
 
 	// Using maps to send the all the necessary data
 	data := make(map[string]interface{})
 
-	data["message"] = "Hello from Openruntime"
-	data["todo"] = resp_todo
+	data["message"] = "Hello Open Runtimes 👋"
+	data["todo"] = todo
 
 	res.json(data, 200)
 	return nil

@@ -46,10 +46,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	userPath := os.Getenv("INTERNAL_RUNTIME_ENTRYPOINT")
 	if userPath == "" {
-		http.Error(w, "File entry point not set or file not found", http.StatusBadRequest)
+		http.Error(w, "File entry point not set or file not found", 404)
 		return
 	}
-	// Check if user code file is .go file
+
 	if !strings.HasSuffix(userPath, ".go") {
 		http.Error(w, "Unsupported code file", 500)
 		return
@@ -63,6 +63,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := new(Response)
+
+	// Call User Function, Main()
 	err = Main(request, response)
 	if err != nil {
 		errFromFunc := fmt.Sprintf("Error: ", err)
