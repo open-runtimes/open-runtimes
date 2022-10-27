@@ -5,29 +5,24 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
-/*
-   'req' variable has:
-       'headers' - object with request headers
-       'payload' - object with request body data
-       'variables' - object with function variables
-   'res' variable has:
-       'send(text, status)' - function to return text response. Status code defaults to 200
-       'json(obj, status)' - function to return JSON response. Status code defaults to 200
-
-   If an error is thrown, a response with code 500 will be returned.
-*/
-
-func Main(req Request, res Response) error {
+func Main(req Request, res *Response) error {
 
 	var id string
-	if id = req.Payload; id == "" || id == "{}" {
+	if id = req.Payload; id == "{}" || id == "" {
+		fmt.Println("Got to sting type {}")
 		id = "1"
+
+	} else {
+		temp := id[1 : len(id)-1]
+		temp = strings.Split(temp, ":")[1]
+		id = temp[1 : len(temp)-1]
 	}
 
 	headerData := req.Headers["x-test-header"]
-	variableData := req.Variables["test-variables"]
+	variableData := req.Variables["test-variable"]
 
 	todoResp, err := http.Get("https://jsonplaceholder.typicode.com/todos/" + id)
 	if err != nil {
@@ -39,6 +34,8 @@ func Main(req Request, res Response) error {
 		return err
 	}
 
+	// As the response we're going to receive from the above url is unstructured
+	// use interface{}
 	var f interface{}
 	if err := json.Unmarshal([]byte(todoBody), &f); err != nil {
 		return err
@@ -47,17 +44,18 @@ func Main(req Request, res Response) error {
 	// Type asserting to get the data
 	todo, _ := f.(map[string]interface{})
 
-	fmt.Println("log1")
-	fmt.Println("{hello: world}")
-	fmt.Println("[hello, world]")
+	fmt.Fprintln(&res.buffStdout, "log1")
+	fmt.Fprintln(&res.buffStdout, "{hello: world}")
+	fmt.Fprintln(&res.buffStdout, "[hello, world]")
 
-	// Using maps to respond with all the necessary data
+	// Use maps to respond with all the necessary data
 	data := make(map[string]interface{})
 	data["isTest"] = true
 	data["message"] = "Hello Open Runtimes 👋"
 	data["header"] = headerData
-	data["variables"] = variableData
+	data["variable"] = variableData
 	data["todo"] = todo
 
+	res.json(data, 200)
 	return nil
 }
