@@ -8,14 +8,12 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 ## Usage
 
 1. Create a folder and enter it. Add code into `main.go` file:
-
 ```bash
 mkdir go-or && cd go-or
-printf " "> main.go
+printf "package main\n\nimport \"math/rand\"\n\nfunc Main(req Request, res *Response) error {\n  data := make(map[string]interface{})\n  data[\"n\"]= rand.Float64()\n  res.json(data, 200)\n  return nil\n}" > main.go
 ```
 
 2. Build the code:
-
 ```bash
 docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/go:v2-1.19 sh /usr/local/src/build.sh 
 ``` 
@@ -77,7 +75,6 @@ You can respond with `json()` by providing object:
 package main
 
 func Main(req Request, res *Response) error {
-	// Using maps to send the all the necessary data
 	data := make(map[string]interface{})
 
 	data["message"] = "Hello Open Runtimes 👋"
@@ -90,7 +87,23 @@ func Main(req Request, res *Response) error {
 }
 ```
 
-- To handle dependencies, you don't need to include any `go.mod` or `go.sum` files. Just import the required the packages into the function. Dependencies will be automatically downloaded. 
+If you need to use print methods for `console log`, use format print functions like `fmt.Fprintln()` to write into `res.buffStdout` buffer:
+
+```go
+package main
+
+func Main(req Request, res *Response) error {
+
+	fmt.Fprint(&res.buffStdout, "Hello")
+	fmt.Fprintf(&res.buffStdout, "Hello")
+	fmt.Fprintln(&res.buffStdout, "Hello")
+	return nil
+}
+```
+
+- Make sure to name your function `Main()` and package as `main`
+
+- To handle dependencies, you don't need to include any `go.mod` or `go.sum` files. Just import the required packages into the function. Dependencies will be automatically downloaded. 
 
 - The default entrypoint is `main.go`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.go`.
 
