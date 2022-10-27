@@ -19,10 +19,10 @@ public class Server {
 
     public static Resp execute(Req req, Resp resp) {
         if (!req.headers().containsKey("x-internal-challenge") || req.headers().get("x-internal-challenge").isEmpty()) {
-            return resp.code(401).result("Unauthorized");
+            return resp.code(500).result("Unauthorized");
         }
         if (!req.headers().get("x-internal-challenge").equals(System.getenv("INTERNAL_RUNTIME_KEY"))) {
-            return resp.code(401).result("Unauthorized");
+            return resp.code(500).result("Unauthorized");
         }
 
         Wrapper codeWrapper = new Wrapper();
