@@ -15,7 +15,12 @@ import (
        'send(text, status)' - function to return text response.
        'json(obj, status)' - function to return JSON response.
 
-   If an error is thrown, a response with code 500 will be returned.
+	If an error occures, return it to server, server will handle it.
+
+	If you want to use fmt.Println() or fmt.Printf(), etc to print stdout
+	kindly use res.buffStdout buffer, to write into it. The server will handle
+	then for you. Like as show below:
+	   fmt.Fprintln(&res.buffStdout, "{hello: world}")
 */
 
 func Main(req Request, res *Response) error {
@@ -29,7 +34,8 @@ func Main(req Request, res *Response) error {
 		return err
 	}
 
-	// As the JSON we're receiving is unstructured. So using interface{}
+	// As the response we're going to receive from the above url is unstructured
+	// use interface{}
 	var f interface{}
 	if err := json.Unmarshal([]byte(todoBody), &f); err != nil {
 		return err
@@ -38,7 +44,7 @@ func Main(req Request, res *Response) error {
 	// Type asserting to get the data
 	todo, _ := f.(map[string]interface{})
 
-	// Using maps to send the all the necessary data
+	// Use maps to respond with all the necessary data
 	data := make(map[string]interface{})
 
 	data["message"] = "Hello Open Runtimes 👋"

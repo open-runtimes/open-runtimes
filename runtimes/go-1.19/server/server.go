@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -16,8 +17,10 @@ type Request struct {
 }
 
 type Response struct {
-	Status   int         `json:"status"`
-	Response interface{} `json:"data"`
+	Status     int          `json:"status,omitempty"`
+	Response   interface{}  `json:"response"`
+	Stdout     string       `json:"stdout"`
+	buffStdout bytes.Buffer `json:"-"`
 }
 
 func (res *Response) send(text string, status int) {
@@ -27,7 +30,9 @@ func (res *Response) send(text string, status int) {
 
 func (res *Response) json(obj interface{}, status int) {
 	res.Response = obj
-	res.Status = status
+	if status != 200 {
+		res.Status = status
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -64,20 +69,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	response := new(Response)
 
+	newEncoder := json.NewEncoder(w)
+
 	// Call User Function, Main()
 	err = Main(request, response)
 	if err != nil {
 		errFromFunc := fmt.Sprintf("Error: ", err)
 		response.send(errFromFunc, 500)
+
+		newEncoder.Encode(response)
+		w.WriteHeader(500)
+		return
 	}
 
-	data, err := json.Marshal(response)
-	if err != nil {
-		http.Error(w, "Error while marshalling data", 500)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(data)
+	response.Stdout = response.buffStdout.String()
+	newEncoder.Encode(response)
 
 	return
 }
