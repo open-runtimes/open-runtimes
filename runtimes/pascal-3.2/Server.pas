@@ -98,7 +98,7 @@ begin
 
   if (ARequest.GetCustomHeader(challengeHeader) <> GetEnvironmentVariable(challengeEnv)) then
   begin
-    AResponse.Code := 401;
+    AResponse.Code := 500;
     AResponse.Contents.Text := 'Unauthorized';
     exit;
   end;
