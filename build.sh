@@ -60,6 +60,9 @@ docker build -t openruntimes/python:v2-3.9 ./runtimes/python-3.9/
 echo 'Python 3.10...'
 docker build -t openruntimes/python:v2-3.10 ./runtimes/python-3.10/
 
+echo 'Python 3.11...'
+docker build -t openruntimes/python:v2-3.11 ./runtimes/python-3.11/
+
 echo 'Ruby 3.0...'
 docker build -t openruntimes/ruby:v2-3.0 ./runtimes/ruby-3.0/
 
