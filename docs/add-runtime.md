@@ -220,7 +220,7 @@ Within the folder you will need to create a function for your runtime that will 
     "isTest": true,
     "message": "Hello Open Runtimes 👋",
     "header": req.headers['x-test-header'],
-    "variables": req.variables['test-variables'],
+    "variable": req.variables['test-variable'],
     "todo": {{body from your todo API http response}},
 ```
 
@@ -256,7 +256,7 @@ If all tests pass then move on to the next step, otherwise you will need to trou
 
 Update the [Images table](https://github.com/open-runtimes/open-runtimes#images) on the [Readme](https://github.com/open-runtimes/open-runtimes/blob/main/README.md). The table should be sorted alphabetically by image.
 
-## 5. Raise a pull request
+## 6. Raise a pull request
 
 First of all, commit the changes with the message `Added XXX Runtime` and push it. This will publish a new branch to your forked version of Open Runtimes. If you visit it at `github.com/YOUR_USERNAME/php-runtimes`, you will see a new alert saying you are ready to submit a pull request. Follow the steps GitHub provides, and at the end, you will have your pull request submitted.
 
