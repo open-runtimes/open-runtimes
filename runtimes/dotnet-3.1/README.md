@@ -43,7 +43,7 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the Node runtime folder:
+2. Enter the .NET runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/dotnet-3.1
@@ -69,14 +69,15 @@ You can also make changes to the example code and apply the changes with the `do
 
 - The `res` parameter has two methods:
 
-    - `send()`: Send a string response to the client.
-    - `json()`: Send a JSON response to the client.
+    - `Send()`: Send a string response to the client.
+    - `Json()`: Send a JSON response to the client.
 
-You can respond with `json()` by providing object:
+You can respond with `Json()` by providing object:
 
 ```cs
 public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res) => 
-    res.Json(new Dictionary<string, object>() {
+    res.Json(new Dictionary<string, object>() 
+    {
         { "message" , "Hello Open Runtimes 👋" },
         { "variables", req.variables },
         { "headers", req.Headers },
