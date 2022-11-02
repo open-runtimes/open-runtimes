@@ -1,5 +1,5 @@
 -module(server_handler).
--include("src/server_app.hrl").
+-include("src/server_res.hrl").
 
 -define(INTERNAL_RUNTIME_KEY, os:getenv("INTERNAL_RUNTIME_KEY")).
 
