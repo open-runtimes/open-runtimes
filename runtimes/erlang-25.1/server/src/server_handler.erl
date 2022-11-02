@@ -1,5 +1,5 @@
 -module(server_handler).
--include("src/server_const.hrl").
+-include("src/server_app.hrl").
 
 -export([
     init/2,

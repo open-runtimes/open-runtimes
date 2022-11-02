@@ -1,5 +1,5 @@
 -module(server_res).
--include("src/server_const.hrl").
+-include("src/server_app.hrl").
 
 -export([new/3, send/1, send/2, json/1, json/2]).
 
