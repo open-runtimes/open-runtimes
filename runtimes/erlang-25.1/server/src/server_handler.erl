@@ -56,10 +56,10 @@ handle_req(Req, _State) ->
             io:fwrite("Body: ~w~n", [Body]),
             Body0 = jsone:decode(Body),
             io:fwrite("Body0: ~w~n", [Body0]),
-            Req0 = #req{
-              variables = maps:get(variables, Body0, #{}),
-              headers = maps:get(headers, Body0, #{}),
-              payload = maps:get(payload, Body0, #{})
+            Req0 = #{
+              variables => maps:get(variables, Body0, #{}),
+              headers => maps:get(headers, Body0, #{}),
+              payload => maps:get(payload, Body0, #{})
             },
 
             Res = try

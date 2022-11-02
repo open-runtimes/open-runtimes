@@ -2,7 +2,11 @@
 
 -export([main/1]).
 
-main({_, V, H, P } = Req) ->
+main(#{
+    variables := V,
+    headers := H,
+    payload := P
+  } = Req) ->
   io:fwrite("~nReq: ~w ~n~n", [Req]),
   io:fwrite("Vars: ~w Headers: ~w Payload: ~w~n~n", [V, H, P]),
   % io:fwrite("Req Headers: ~w~n", [maps:get(headers, Req)]),
