@@ -7,7 +7,7 @@
     {cowboy, "2.9.0"}    %% HTTP Server
 ]}.
 
-{plugins, [my, configure]}.
+{plugins, [configure]}.
 % {plugins_dir, "{{root_dir}}/plugins"}.
 % {plugins, [{my, "./plugins/my"}]}.
 % {plugins, [{my, {git_subdir, "file:///usr/code/server/plugins/my", {branch, "master"}, "plugins/my"}}]}.
