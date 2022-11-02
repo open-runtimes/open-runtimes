@@ -1,6 +1,8 @@
 -module(server_handler).
 -include("src/server_app.hrl").
 
+-define(INTERNAL_RUNTIME_KEY, os:getenv("INTERNAL_RUNTIME_KEY")).
+
 -export([
     init/2,
     allowed_methods/2,
