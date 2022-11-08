@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-elixir-1.14:
-    container_name: open-runtimes-elixir-1.14
+  open-runtimes-erlang-25.1:
+    container_name: open-runtimes-erlang-25.1
     build:
       context: .
     ports:
