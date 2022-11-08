@@ -5,3 +5,5 @@ cd /usr/workspace
 tar -zxf /usr/workspace/code.tar.gz -C /usr/code
 rm /usr/workspace/code.tar.gz
 cd /usr/code
+
+./bin/server foreground
