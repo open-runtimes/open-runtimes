@@ -10,4 +10,4 @@ cd /usr/local/src/server
 rebar3 as prod release
 
 # Tar the app
-tar -zcvf /usr/code/code.tar.gz /usr/local/src/server/_build/prod/rel/server/
+tar -C /usr/local/src/server/_build/prod/rel/server -czvf /usr/code/code.tar.gz .
