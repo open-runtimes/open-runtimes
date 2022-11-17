@@ -90,7 +90,7 @@ import 'dart:async';
 Future<void> start(final req, final res) async {
   res.json({
     'message': "Hello Open Runtimes 👋",
-    'env': req.env,
+    'variables': req.variables,
     'payload': req.payload,
     'headers': req.headers
   });

@@ -6,7 +6,7 @@ import 'package:dio/dio.dart' hide Response;
     'req' variable has:
         'headers' - object with request headers
         'payload' - object with request body data
-        'env' - object with environment variables
+        'variables' - object with variables
     'res' variable has:
         'send(text, status)' - function to return text response. Status code defaults to 200
         'json(obj, status)' - function to return JSON response. Status code defaults to 200
@@ -27,7 +27,7 @@ Future<void> start(final req, final res) async {
     'isTest': true,
     'message': "Hello Open Runtimes 👋",
     'header': req.headers['x-test-header'],
-    'env': req.env['test-env'],
+    'variable': req.variables['test-variable'],
     'todo': todo.data,
   });
 }
