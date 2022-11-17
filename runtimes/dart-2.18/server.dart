@@ -26,7 +26,7 @@ void main() async {
       final bodystring = await req.readAsString();
       final body = jsonDecode(bodystring);
       final request = Request(
-        env: body['env'] ?? {},
+        variables: body['variables'] ?? {},
         headers: body['headers'] ?? {},
         payload: body['payload'] ?? '',
       );
