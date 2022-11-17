@@ -4,7 +4,7 @@ plugins {
 
 group = 'io.openruntimes'
 version = '1.0.0'
-sourceCompatibility = '11'
+sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
