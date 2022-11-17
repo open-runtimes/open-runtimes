@@ -27,7 +27,7 @@ Future<void> start(final req, final res) async {
     'isTest': true,
     'message': "Hello Open Runtimes 👋",
     'header': req.headers['x-test-header'],
-    'env': req.env['test-env'],
+    'variable': req.variables['test-variable'],
     'todo': todo.data,
   });
 }
