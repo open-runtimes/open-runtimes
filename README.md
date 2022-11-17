@@ -33,7 +33,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 ## Features
 
 * **Flexibility** (WIP) - Designed to work with multiple orchestrators using different adapters. For now only Docker and Swarm are supported, Kubernetes support is planned.
-* **Performance** - Cold starts in less than ~100ms warm stars has added latency of less than 1ms.
+* **Performance** - Cold starts in less than ~100ms & executions in less than 1ms.
 * **Wide Support** - Supports 11 (and counting) different programming languages and 18 (and counting) different runtimes. Adding new ones is straight forward.
 * **Open Source** - Released under the MIT license, free to use and extend.
 * **Ecosystem** - Fast growing ecosystem of ready-to-use functions for easy reuse on different platforms.
