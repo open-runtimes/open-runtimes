@@ -16,9 +16,11 @@
         "psr-4": {"Tests\\": "tests"}
     },
     "require": {
-        "php": ">=7.0.0"
+        "php": ">=7.1.0"
     },
     "require-dev": {
+        "ext-curl": "*",
+        "ext-json": "*",
         "phpunit/phpunit": "^9.5.13"
     },
     "minimum-stability": "dev",
