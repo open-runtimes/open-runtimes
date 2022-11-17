@@ -191,6 +191,12 @@ env:
       SERVER_PROCESS="DotNetRuntime.dll"
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
+    - RUNTIME=dotnet-7.0
+      PHP_CLASS=DotNet70
+      ENTRYPOINT=Tests.cs
+      SERVER_PROCESS="DotNetRuntime.dll"
+      IMAGE=openruntimes/dotnet:${VERSION}-7.0
+      ARCH=linux/amd64,linux/arm64
 
 
 notifications:
