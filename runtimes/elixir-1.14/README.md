@@ -84,7 +84,7 @@ defmodule Handler do
 end
 ```
 
-- To handle dependencies, you need to have any `mix.exs` file including a `deps` block. Dependencies will be automatically cached and installed, so you don't need to include the `deps` or `_build` folder. For exact version please add `mix.lock` generate file.
+- To handle dependencies, you need to have any `mix.lock` file including a `deps` block. Dependencies will be automatically cached and installed, so you don't need to include the `deps` or `_build` folder.
 
 - The default entrypoint is `handler.ex`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/handler.ex`.
 
