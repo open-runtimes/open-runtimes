@@ -47,10 +47,13 @@ const server = micro(async (req, res) => {
         });
         errors.push(args.join(" "));
     }
+
+    let responseSent = false;
     const response = {
-        send: (text, status = 200) => send(res, status, {response: text, stdout: logs.join('\n'), stderr: errors.join('\n')}),
-        json: (json, status = 200) => send(res, status, {response: json, stdout: logs.join('\n'), stderr: errors.join('\n')}),
+        send: (text, status = 200) => responseSent = true && send(res, status, {response: text, stdout: logs.join('\n'), stderr: errors.join('\n')}),
+        json: (json, status = 200) => responseSent = true && send(res, status, {response: json, stdout: logs.join('\n'), stderr: errors.join('\n')}),
     };
+
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
 
@@ -68,7 +71,11 @@ const server = micro(async (req, res) => {
             await userFunction(request, response);
         }
     } catch (e) {
-        send(res, 500, {stdout: logs.join('\n'), stderr: errors.join('\n') + "\n" + e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e});
+        responseSent = true && send(res, 500, {stdout: logs.join('\n'), stderr: errors.join('\n') + "\n" + e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e});
+    } finally {
+        if(!responseSent) {
+            send(res, 200, {response: 'OK', stdout: logs.join('\n'), stderr: errors.join('\n')});
+        }
     }
     logs = [];
     errors = [];

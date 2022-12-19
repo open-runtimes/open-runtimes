@@ -65,6 +65,17 @@ abstract class Base extends TestCase
         self::assertEquals(false, $response['body']['todo']['completed']);
     }
 
+    public function testRuntimeNoResponse(): void
+    {
+        $response = $this->call([
+            'payload' => '{"noResponse":true}'
+        ]);
+    
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('OK', $response['body']['response']);
+        self::assertStringContainsString('Exit with no response.', $response['body']['stdout']);
+    }
+
     public function testRuntimeEmptyObjectPayload(): void 
     {
         $response = $this->call([
