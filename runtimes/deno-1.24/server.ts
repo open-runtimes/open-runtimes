@@ -53,12 +53,15 @@ app.use(async (ctx) => {
     errors.push(args.join(" "));
   }
 
+  let responseSent = false;
   const response = {
     send: (text: string, status = 200) => {
+      responseSent = true;
       ctx.response.status = status;
       ctx.response.body = {response: text, stdout: logs.join('\n'), stderr: errors.join('\n')};
     },
     json: (json: Record<string, unknown>, status = 200) => {
+      responseSent = true;
       ctx.response.status = status;
       ctx.response.body = {response: json, stdout: logs.join('\n'), stderr: errors.join('\n')};
     }
@@ -73,9 +76,16 @@ app.use(async (ctx) => {
 
     await userFunction(request, response);
   } catch (error) {
+    responseSent = true;
     ctx.response.status = 500;
     ctx.response.body = {stdout: logs.join('\n'), stderr: errors.join('\n') + "\n" + error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message};
+  } finally {
+    if(!responseSent) {
+        ctx.response.status = 200;
+        ctx.response.body = {response: 'OK', stdout: logs.join('\n'), stderr: errors.join('\n')};
+    }
   }
+
   logs = [];
   errors = [];
   console.log = stdlog;

@@ -15,6 +15,11 @@ import axiod from "https://deno.land/x/axiod/mod.ts";
 export default async function(req: any, res: any) {
     const payload = JSON.parse(req.payload  === '' ? '{}' : req.payload);
 
+    if(payload.noResponse) {
+        console.log("Exit with no response.");
+        return;
+    }
+
     const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`)).data;
     console.log('log');
     console.warn('warning');

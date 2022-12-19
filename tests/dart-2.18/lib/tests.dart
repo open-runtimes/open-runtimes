@@ -17,6 +17,11 @@ import 'package:dio/dio.dart' hide Response;
 Future<void> start(final req, final res) async {
   final payload = jsonDecode(req.payload == '' ? '{}' : req.payload);
 
+  if(payload['noResponse'] ?? false) {
+    print("Exit with no response.");
+    return;
+  }
+
   final id = payload['id'] ?? '1';
   final todo =
       await Dio().get('https://jsonplaceholder.typicode.com/todos/$id');
