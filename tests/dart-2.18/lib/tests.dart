@@ -18,11 +18,18 @@ Future<void> start(final req, final res) async {
   final payload = jsonDecode(req.payload == '' ? '{}' : req.payload);
 
   final id = payload['id'] ?? '1';
-  final todo =
-      await Dio().get('https://jsonplaceholder.typicode.com/todos/$id');
-  print('log1');
-  print({'hello': 'world'});
-  print(['hello', 'world']);
+  final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/$id');
+
+  print('String1');
+  print(42);
+  print(4.2);
+  print(true);
+
+  print("String2");
+  print("String3");
+  print("String4");
+  print("String5");
+
   res.json({
     'isTest': true,
     'message': "Hello Open Runtimes 👋",

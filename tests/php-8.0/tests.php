@@ -25,9 +25,15 @@ return function($req, $res) use ($client) {
     $response = $client->request('GET', '/todos/' . ($payload['id'] ?? 1));
     $todo = \json_decode($response->getBody()->getContents(), true);
 
-    echo "log1\n";
-    print("{hello: world}\n");
-    print("[hello, world]");
+    echo "String";
+    echo 42;
+    echo 4.2;
+    var_dump(true); // Echo and print gives 1 instead of true
+
+    print("String2");
+    print("String3");
+    print("String4");
+    print("String5");
     
     $res->json([
         'isTest' => true,

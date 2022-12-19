@@ -1,5 +1,5 @@
-import { Application } from "https://deno.land/x/oak@v10.5.1/mod.ts";
-import * as path from "https://deno.land/std@0.138.0/path/mod.ts";
+import { Application } from "https://deno.land/x/oak@v10.6.0/mod.ts";
+import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
 
 const USER_CODE_PATH = '/usr/code-start';
 
@@ -26,11 +26,12 @@ app.use(async (ctx) => {
   const stdinfo = console.info.bind(console);
   const stddebug = console.debug.bind(console);
   const stdwarn = console.warn.bind(console);
-  let logs: any[] = [];
-  let errors: any[] = [];
 
-  console.log = console.info = console.debug = function(){
-    var args:any[] = [];
+  const logs: any[] = [];
+  const errors: any[] = [];
+
+  console.log = console.info = console.debug = console.warn = function() {
+    const args:any[] = [];
     Array.from(arguments).forEach(arg => {
         if(arg instanceof Object || Array.isArray(arg)) {    
             args.push(JSON.stringify(arg));
@@ -41,8 +42,8 @@ app.use(async (ctx) => {
     logs.push(args.join(" "));
   }
 
-  console.error = console.warn = function(){
-    var args:any[] = [];
+  console.error = function() {
+    const args:any[] = [];
     Array.from(arguments).forEach(arg => {
         if(arg instanceof Object || Array.isArray(arg)) {    
             args.push(JSON.stringify(arg));
@@ -76,8 +77,7 @@ app.use(async (ctx) => {
     ctx.response.status = 500;
     ctx.response.body = {stdout: logs.join('\n'), stderr: errors.join('\n') + "\n" + error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message};
   }
-  logs = [];
-  errors = [];
+
   console.log = stdlog;
   console.error = stderror;
   console.debug = stddebug;
