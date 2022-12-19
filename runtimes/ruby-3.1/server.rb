@@ -62,7 +62,6 @@ post '/' do
     return { stderr: 'Unauthorized' }.to_json
   end
 
-
   request.body.rewind
   data = JSON.parse(request.body.read)
 
@@ -92,10 +91,17 @@ post '/' do
 
     user_response = main(requestData, runtimeResponse)
 
-    response = {
-      response: user_response,
-      stdout: user_out.string
-    }.to_json
+    if !user_response
+      response = {
+        response: "OK",
+        stdout: user_out.string
+      }.to_json
+    else
+      response = {
+        response: user_response,
+        stdout: user_out.string
+      }.to_json
+    end
   rescue Exception => e
     status 500
     return {

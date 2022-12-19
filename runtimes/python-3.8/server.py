@@ -11,16 +11,19 @@ app = Flask(__name__)
 class Response:
     _response = None
     _status = None
+    _responseSent = False
 
     def __init__(self):
         self._response = None
         self._status = None
 
     def send(self, text, status = 200):
+        self._responseSent = True
         self._status = status
         self._response = text
 
     def json(self, obj, status = 200):
+        self._responseSent = True
         self._status = status
         self._response = obj
 
@@ -78,6 +81,13 @@ def handler(u_path):
         sys.stderr = usererr = StringIO()
 
         userModule.main(req, resp)
+
+        if _responseSent is False:
+            output = {
+                "response": "OK",
+                "stdout": userout.getvalue()
+            }
+            return jsonify(output), 200
 
         output = {
             "response": resp._response,

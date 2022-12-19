@@ -43,6 +43,17 @@ void main() async {
           },
         ),
       );
+
+      if(!response.responseSent) {
+         return shelf.Response.ok(
+          jsonEncode({
+            "response": "OK",
+            "stdout": userLogs.join('\n'),
+            "stderr": ""
+          }),
+          headers: headers);
+      }
+
       return shelf.Response.ok(
           jsonEncode({
             "response": response.body,

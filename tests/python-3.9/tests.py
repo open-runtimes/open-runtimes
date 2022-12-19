@@ -14,6 +14,11 @@ import requests
 def main(req, res):
     payload = json.loads('{}' if not req.payload else req.payload)
     todo_id = payload.get('id', 1)
+    noResponse = payload.get('noResponse', False)
+
+    if noResponse is True:
+        print("Exit with no response.")
+        return
 
     header_data = req.headers.get('x-test-header', None)
     var_data = req.variables.get('test-variable', None)

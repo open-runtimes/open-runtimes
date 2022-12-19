@@ -14,6 +14,11 @@ require 'json'
 def main(req, res)
     payload = JSON.parse(req.payload === '' ? '{}' : req.payload)
 
+    if(payload['noResponse'] || false) {
+        puts "Exit with no response."
+        return
+    }
+
     todo = JSON.parse(HTTParty.get("https://jsonplaceholder.typicode.com/todos/" + (payload['id'] || '1')).body)
 
     puts 'log1'
