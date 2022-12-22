@@ -16,7 +16,7 @@ fi
 
 # Merge the vendor from the server into the user's vendor to be restored later.
 cd /usr/local/src/
-composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --no-scripts --prefer-dist --no-dev
+composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev
 cp -r /usr/local/src/vendor /usr/builds/vendor
 
 # Finish build by preparing tar to use for starting the runtime
