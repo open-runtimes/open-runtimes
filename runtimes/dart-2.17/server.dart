@@ -32,11 +32,10 @@ void main() async {
       );
 
       final response = Response();
-      await runZonedGuarded(
+      await runZoned(
         () async {
           await user_code.start(request, response);
         },
-        (e, stackTrace) => print('$e $stackTrace'),
         zoneSpecification: ZoneSpecification(
           print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
             userLogs.add(line);
