@@ -15,8 +15,6 @@ import 'package:dio/dio.dart' hide Response;
 */
 
 Future<void> start(final req, final res) async {
-  String endpoint = req.variables['APPWRITE_ENDPOINT'];
-
   final payload = jsonDecode(req.payload == '' ? '{}' : req.payload);
 
   final id = payload['id'] ?? '1';
