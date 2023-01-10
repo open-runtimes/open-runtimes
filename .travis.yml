@@ -171,6 +171,12 @@ env:
       SERVER_PROCESS="cpp_runtime"
       IMAGE=openruntimes/cpp:${VERSION}-17
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+    - RUNTIME=cpp-20
+      PHP_CLASS=Cpp20
+      ENTRYPOINT=tests.cc
+      SERVER_PROCESS="cpp_runtime"
+      IMAGE=openruntimes/cpp:${VERSION}-20
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
     # DotNet
     - RUNTIME=dotnet-3.1
