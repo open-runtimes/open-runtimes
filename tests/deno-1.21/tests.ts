@@ -1,6 +1,5 @@
 import axiod from "https://deno.land/x/axiod/mod.ts";
-import { Application } from "https://deno.land/x/oak@v10.5.1/mod.ts";
-import * as path from "https://deno.land/std@0.138.0/path/mod.ts";
+
 /*
     'req' variable has:
         'headers' - object with request headers
