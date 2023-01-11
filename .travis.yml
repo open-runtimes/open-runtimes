@@ -186,7 +186,7 @@ env:
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
     
-    #Go
+    # Go
     - RUNTIME=go-1.19
       PHP_CLASS=Go119
       ENTRYPOINT=tests.go

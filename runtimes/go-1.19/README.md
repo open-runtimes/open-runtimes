@@ -21,13 +21,13 @@ docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/go:v2-1
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=main.go --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/go:v2-1.19 sh usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=main.go --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/go:v2-1.19 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
 
 ```bash 
-curl -H "X-Inrernal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d `{"payload": "{}"}`
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d `{"payload": "{}"}`
 ```
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution
@@ -79,8 +79,8 @@ func Main(req Request, res *Response) error {
 
 	data["message"] = "Hello Open Runtimes 👋"
 	data["variables"] = "req.Varaibles"
-    data["headers"] = "req.Headers"
-    data["payload"] = "req.Payload"
+	data["headers"] = "req.Headers"
+	data["payload"] = "req.Payload"
 
 	res.json(data, 200)
 	return nil

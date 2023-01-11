@@ -1,6 +1,6 @@
 #/bin/sh 
 
-#Fail bild if any command fails
+# Fail bild if any command fails
 set -e 
 
 # Preapre separate directory to prevent changing user's files

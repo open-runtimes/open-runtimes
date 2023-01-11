@@ -8,9 +8,9 @@ import (
 
 /*
    'req' variable has:
-       'headers' - object with request headers
-       'payload' - object with request body data
-       'variables' - object with function variables
+       'Headers' - map with request headers
+       'Payload' - string with request body data
+       'Variables' - map with function variables
    'res' variable has:
        'send(text, status)' - function to return text response.
        'json(obj, status)' - function to return JSON response.
