@@ -16,9 +16,8 @@ go mod tidy
 go mod vendor
 go clean -modcache
 
-# Remove server.go file, as we copy all these files to server folder
-# again for starting the server
-rm server.go 
+# compile the code 
+go build -o server
 
 # Ready the tar file for starting the runtime
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .
