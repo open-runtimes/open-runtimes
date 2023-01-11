@@ -5,7 +5,7 @@ const { text, json, send } = require("micro");
 const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
-    if (req.headers[`x-internal-challenge`] !== process.env['INTERNAL_RUNTIME_KEY']) {
+    if (req.headers[`x-openruntimes-secret`] !== process.env['INTERNAL_RUNTIME_KEY']) {
         return send(res, 500, 'Unauthorized');
     }
 
@@ -113,8 +113,8 @@ const server = micro(async (req, res) => {
         res.setHeader(header, output.headers[header]);
     }
 
-    res.setHeader('x-opr-logs', encodeURIComponent(logs.join('\n')));
-    res.setHeader('x-opr-errors', encodeURIComponent(errors.join('\n')));
+    res.setHeader('x-openruntimes-logs', encodeURIComponent(logs.join('\n')));
+    res.setHeader('x-openruntimes-errors', encodeURIComponent(errors.join('\n')));
 
     send(res, output.status, output.body); 
 });

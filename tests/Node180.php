@@ -6,6 +6,8 @@ namespace Tests;
 // PHP class: Node180
 // Entrypoint: tests.js
 
-class Node180 extends Base
+// export RUNTIME="node-18.0"; export PHP_CLASS="Node180"; export ENTRYPOINT="tests.js"; sh tests.sh
+
+class Node180 extends BaseV3
 {
 }
