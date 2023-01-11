@@ -1,6 +1,6 @@
 const fs = require("fs");
 const micro = require("micro");
-const { text, send } = require("micro");
+const { text, json, send } = require("micro");
 
 const USER_CODE_PATH = '/usr/code-start';
 
@@ -12,10 +12,20 @@ const server = micro(async (req, res) => {
     const logs = [];
     const errors = [];
 
+    const contentType = req.headers['content-type'] ?? 'text/plain';
+    const body = contentType === 'application/json' ? await json(req) : await text(req);
+
+    const headers = {};
+    Object.keys(req.headers).filter((header) => !header.startsWith('x-openruntimes-')).forEach((header) => {
+        headers[header] = req.headers[header];
+    });
+
     const context = {
         req: {
-            body: await text(req),
-            // TODO: Add more
+            body: body,
+            headers: headers,
+            method: req.method,
+            url: req.url
         },
         res: {
             headers: {},
@@ -32,6 +42,9 @@ const server = micro(async (req, res) => {
                     status: this.status,
                     headers: this.headers
                 }
+            },
+            empty: function () {
+                return this.send('', 204, {});
             },
             json: function (obj, status, headers = {}) {
                 headers['content-type'] = 'application/json';
@@ -97,7 +110,7 @@ const server = micro(async (req, res) => {
     }
 
     output.body = output.body ?? '';
-    output.status = output.status ?? 200;
+    output.status = output.status ?? 204;
     output.headers = output.headers ?? {};
 
     for(const header in output.headers) {
@@ -107,7 +120,7 @@ const server = micro(async (req, res) => {
     res.setHeader('x-opr-logs', encodeURIComponent(logs.join('\n')));
     res.setHeader('x-opr-errors', encodeURIComponent(errors.join('\n')));
 
-    send(res, output.status ?? 200, output.body ?? ''); 
+    send(res, output.status, output.body); 
 });
 
 server.listen(3000);

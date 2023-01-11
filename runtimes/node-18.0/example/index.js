@@ -1,8 +1,12 @@
-module.exports = async (context) => {
-    context.log("OK1");
-    context.log("OK2");
-    context.error("OK3");
-    context.error("OK4");
+const fetch = require("node-fetch");
 
-    return context.res.send('Works!!!', 202, { 'x-my-something': 'works' });
+module.exports = async (context) => {
+    const payload = context.req.body;
+
+    const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`).then(r => r.json());
+
+    return context.res.json({
+        message: 'Hello Open Runtimes 👋',
+        todo
+    });
 }
