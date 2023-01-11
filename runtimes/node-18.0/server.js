@@ -51,7 +51,6 @@ const server = micro(async (req, res) => {
                 return this.send(JSON.stringify(obj), status, headers);
             },
             file: function (path, status, headers = {}) {
-                headers['content-type'] = 'application/octet-stream';
                 return this.send(fs.readFileSync(path), status, headers);
             },
             redirect: function (url, status = 301, headers = {}) {
@@ -105,6 +104,10 @@ const server = micro(async (req, res) => {
         output = context.res.send('', 500);
     }
 
+    if(!output) {
+        output = {};
+    }
+
     output.body = output.body ?? '';
     output.status = output.status ?? 204;
     output.headers = output.headers ?? {};
@@ -115,7 +118,7 @@ const server = micro(async (req, res) => {
 
     res.setHeader('x-openruntimes-logs', encodeURIComponent(logs.join('\n')));
     res.setHeader('x-openruntimes-errors', encodeURIComponent(errors.join('\n')));
-
+    
     send(res, output.status, output.body); 
 });
 
