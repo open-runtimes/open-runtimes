@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: Node160
 // Entrypoint: tests.js
 
-class Node160 extends BaseJS
+class Node160 extends Base
 {
 }

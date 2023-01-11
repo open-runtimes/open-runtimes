@@ -161,6 +161,24 @@ abstract class Base extends TestCase
 
     public function testConsoleLogs(): void {
         $response = $this->call([]);
-        self::assertStringStartsWith("log1\n{hello: world}\n[hello, world]", $response['body']['stdout']);
+        
+        // TODO: @Meldiron Test stderr
+
+        $stdout = $response['body']['stdout'];
+
+        self::assertStringContainsString("String", $stdout);
+        self::assertStringContainsString(42, $stdout);
+        self::assertStringContainsString(4.2, $stdout);
+
+        // Extra log methods
+        self::assertStringContainsString("String2", $stdout);
+        self::assertStringContainsString("String3", $stdout);
+        self::assertStringContainsString("String4", $stdout);
+        self::assertStringContainsString("String5", $stdout);
+
+        // Keep this as last assertion
+        // Allow `True` for Python
+        $stdout = \strtolower($stdout);
+        self::assertStringContainsString("true", $stdout);
     }
 }

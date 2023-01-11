@@ -55,10 +55,15 @@ public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exce
     data.put("variable", varData);
     data.put("todo", todo);
 
-    // Print to user function stdout
-    System.out.println("log1");
-    System.out.println("{hello: world}");
-    System.out.println("[hello, world]");
+    System.out.println("String1");
+    System.out.println(42);
+    System.out.println(4.2);
+    System.out.println(true);
+
+    System.out.println("String2");
+    System.out.println("String3");
+    System.out.println("String4");
+    System.out.println("String5");
 
     return res.json(data);
 }

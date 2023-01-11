@@ -83,7 +83,7 @@ const server = micro(async (req, res) => {
         },
     };
 
-    let output;
+    let output = {};
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
 
@@ -103,10 +103,6 @@ const server = micro(async (req, res) => {
     } catch (e) {
         context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
         output = context.res.send('', 500);
-    }
-
-    if(!output) {
-        output = {};
     }
 
     output.body = output.body ?? '';

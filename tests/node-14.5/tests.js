@@ -17,14 +17,15 @@ module.exports = async (req, res) => {
 
     const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`).then(r => r.json());
 
-    console.log('log');
-    console.warn('warning');
-    console.error('error');
-    console.info('info');
-    console.debug('debug');
-    console.log('log1', 'log2');
-    console.log({hello: 'world'});
-    console.log(['hello', 'world']);
+    console.log('String');
+    console.log(42);
+    console.log(4.2);
+    console.log(true);
+
+    console.log('String2');
+    console.info('String3');
+    console.debug('String4');
+    console.warn('String5');
 
     res.json({
         isTest: true,

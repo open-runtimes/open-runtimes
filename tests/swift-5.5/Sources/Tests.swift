@@ -35,9 +35,15 @@ func main(req: RequestValue, res: RequestResponse) async throws -> RequestRespon
     let data = try await response.body.collect(upTo: 1024 * 1024)
     let todo = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
 
-    print("log1")
-    print("{hello: world}")
-    print("[hello, world]")
+    print("String1")
+    print(42)
+    print(4.2)
+    print(true)
+
+    print("String2")
+    print("String3")
+    print("String4")
+    print("String5")
 
     return res.json(data: [
         "isTest": true,

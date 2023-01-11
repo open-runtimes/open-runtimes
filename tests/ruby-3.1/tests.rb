@@ -16,9 +16,15 @@ def main(req, res)
 
     todo = JSON.parse(HTTParty.get("https://jsonplaceholder.typicode.com/todos/" + (payload['id'] || '1')).body)
 
-    puts 'log1'
-    puts '{hello: world}'
-    puts '[hello, world]'
+    puts 'String1'
+    puts 42
+    puts 4.2
+    puts true
+
+    puts "String2"
+    puts "String3"
+    puts "String4"
+    puts "String5"
     
     return res.json({
         'isTest': true,

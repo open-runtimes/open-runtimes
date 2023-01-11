@@ -2,10 +2,10 @@
 
 namespace Tests;
 
-// Runtime: deno-1.14
-// PHP class: Deno114
+// Runtime: deno-1.21
+// PHP class: Deno121
 // Entrypoint: tests.ts
 
-class Deno121 extends BaseJS
+class Deno121 extends Base
 {
 }

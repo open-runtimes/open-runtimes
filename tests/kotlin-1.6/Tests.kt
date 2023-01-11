@@ -37,10 +37,15 @@ fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse {
         MutableMap::class.java
     )
 
-    // Print to user function stdout
-    println("log1")
-    println("{hello: world}")
-    println("[hello, world]")
+    System.out.println("String1");
+    System.out.println(42);
+    System.out.println(4.2);
+    System.out.println(true);
+
+    System.out.println("String2");
+    System.out.println("String3");
+    System.out.println("String4");
+    System.out.println("String5");
 
     return res.json(mapOf(
         "isTest" to true,
