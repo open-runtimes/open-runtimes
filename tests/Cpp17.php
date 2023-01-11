@@ -4,7 +4,7 @@ namespace Tests;
 
 // Runtime: cpp-17
 // PHP class: Cpp17
-// Entrypoint: index.cc
+// Entrypoint: tests.cc
 
 class Cpp17 extends Base
 {

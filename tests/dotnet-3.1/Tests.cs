@@ -26,9 +26,15 @@ public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
     var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{id.ToString()}");
     var todo = JsonConvert.DeserializeObject<Dictionary<string, object>>(response, settings: null);
 
-    Console.WriteLine("log1");
-    Console.WriteLine("{hello: world}");
-    Console.WriteLine("[hello, world]");
+    Console.WriteLine("String1");
+    Console.WriteLine(42);
+    Console.WriteLine(4.2);
+    Console.WriteLine(true);
+
+    Console.WriteLine("String2");
+    Console.WriteLine("String3");
+    Console.WriteLine("String4");
+    Console.WriteLine("String5");
 
     return res.Json(new Dictionary<string, object>()
     {

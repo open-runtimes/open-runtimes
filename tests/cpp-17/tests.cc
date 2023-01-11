@@ -62,9 +62,16 @@ static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
     response["header"] = headerData;
     response["variable"] = varData;
 
-    std::cout << "log1" << std::endl;
-    std::cout << "{hello: world}" << std::endl;
-    std::cout << "[hello, world]" << std::endl;
+    std::cout << "String1" << std::endl;
+    std::cout << 42 << std::endl;
+    std::cout << 4.2 << std::endl;
+    std::cout << std::boolalpha; // This prevents true to be converted to 1
+    std::cout << true << std::endl;
+
+    std::cout << "String2" << std::endl;
+    std::cout << "String3" << std::endl;
+    std::cout << "String4" << std::endl;
+    std::cout << "String5" << std::endl;
 
     return res.json(response);
 }

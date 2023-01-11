@@ -20,9 +20,15 @@ def main(req, res):
 
     todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + str(todo_id))).json()
 
-    print('log1')
-    print('{hello: world}')
-    print('[hello, world]')
+    print('String')
+    print(42)
+    print(4.2)
+    print(True)
+
+    print("String2")
+    print("String3")
+    print("String4")
+    print("String5")
 
     return res.json({
         'isTest': True,
