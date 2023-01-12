@@ -154,8 +154,6 @@ abstract class BaseV3 extends TestCase
         self::assertEquals('value2', $response['headers']['header2']);
         self::assertEquals('value2', $body['header2']);
 
-        \var_dump($response['headers']['set-cookie']);
-
         self::assertArrayHasKey('cookie1', $body['cookies']);
         self::assertArrayHasKey('cookie2', $body['cookies']);
 
