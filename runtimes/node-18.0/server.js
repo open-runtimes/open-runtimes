@@ -14,7 +14,10 @@ const server = micro(async (req, res) => {
     const response = {
         headers: {},
         body: '',
-        code: 200
+        code: 200,
+
+        cookies: {},
+        contentType: null,
     };
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
@@ -42,11 +45,11 @@ const server = micro(async (req, res) => {
             },
 
             getContentType: function() {
-                return response.headers['content-type'] ?? null;
+                return response.contentType
             },
 
             getCookies: function() {
-                return response.headers['cookie'] ?? null;
+                return response.cookies;
             },
 
             getHeaders: function() {
@@ -68,12 +71,12 @@ const server = micro(async (req, res) => {
             },
 
             setContentType: function(contentType) {
-                response.headers['content-type'] = contentType;
+                response.contentType = contentType;
                 return this;
             },
 
             setCookies: function(cookies) {
-                response.headers['cookie'] = cookies;
+                response.cookies = cookies;
                 return this;
             },
 
@@ -87,8 +90,8 @@ const server = micro(async (req, res) => {
                 return this;
             },
 
-            addCookie: function(name, value, expire, path, domain, secure, httponly, samesite) {
-                // TODO: Implement and test in complexResponse
+            addCookie: function(name, value, expire, maxage, path, domain, secure, httponly, samesite) {
+                response.cookies[name] = { value, expire, maxage, path, domain, secure, httponly, samesite };
             },
 
             send: function (body, code, headers) {
@@ -96,10 +99,49 @@ const server = micro(async (req, res) => {
                 if (code !== undefined) { response.code = code; }
                 if (headers !== undefined) { response.headers = headers; }
 
+                const resHeaders = { ...response.headers };
+
+                if(response.contentType) {
+                    resHeaders['content-type'] = response.contentType;
+                }
+
+                if(response.cookies && Object.keys(response.cookies).length > 0) {
+                    resHeaders['set-cookie'] = Object.keys(response.cookies).map((name) => {
+                        const cookie = response.cookies[name];
+
+                        const attributes = [];
+                        attributes.push(`${name}=${cookie.value}`);
+
+                        if(cookie.domain) {
+                            attributes.push(`Domain=${cookie.domain}`);
+                        }
+                        if(cookie.expire) {
+                            attributes.push(`Expire=${cookie.expire}`);
+                        }
+                        if(cookie.maxage) {
+                            attributes.push(`Max-Age=${cookie.maxage}`);
+                        }
+                        if(cookie.path) {
+                            attributes.push(`Path=${cookie.path}`);
+                        }
+                        if(cookie.samesite) {
+                            attributes.push(`SameSite=${cookie.samesite}`);
+                        }
+                        if(cookie.secure) {
+                            attributes.push(`Secure`);
+                        }
+                        if(cookie.httponly) {
+                            attributes.push(`HttpOnly`);
+                        }
+
+                        return attributes.join('; ');
+                    }).join('; ');
+                }
+
                 return {
                     body: response.body,
                     code: response.code,
-                    headers: response.headers
+                    headers: resHeaders
                 }
             },
             empty: function () {

@@ -30,7 +30,8 @@ module.exports = async (context) => {
             context.res.addHeader('header2', 'value2');
             context.res.setBody('👌');
             context.res.setContentType('application/json');
-            context.res.setCookies('cookie1=value1; cookie2=value2');
+            context.res.addCookie('cookie1', 'value1');
+            context.res.addCookie('cookie2', 'value2', 'Wed, 21 Oct 2015 07:28:00 GMT', 2592000, '/', 'google.com', true, true, 'Lax');
 
             context.res.setBody(JSON.stringify({
                 code: context.res.getCode(),
