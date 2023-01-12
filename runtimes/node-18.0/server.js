@@ -5,18 +5,23 @@ const { text, json, send } = require("micro");
 const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
-    if (req.headers[`x-openruntimes-secret`] !== process.env['INTERNAL_RUNTIME_KEY']) {
+    if (req.headers[`x-open-runtimes-secret`] !== process.env['INTERNAL_RUNTIME_KEY']) {
         return send(res, 500, 'Unauthorized');
     }
 
     const logs = [];
     const errors = [];
+    const response = {
+        headers: {},
+        body: '',
+        code: 200
+    };
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
     const body = contentType === 'application/json' ? await json(req) : await text(req);
 
     const headers = {};
-    Object.keys(req.headers).filter((header) => !header.startsWith('x-openruntimes-')).forEach((header) => {
+    Object.keys(req.headers).filter((header) => !header.startsWith('x-open-runtimes-')).forEach((header) => {
         headers[header] = req.headers[header];
     });
 
@@ -28,34 +33,88 @@ const server = micro(async (req, res) => {
             url: req.url
         },
         res: {
-            headers: {},
-            body: '',
-            status: 200,
+            getBody: function() {
+                return response.body;
+            },
 
-            send: function (body, status, headers) {
-                if (body !== undefined) { this.body = body; }
-                if (status !== undefined) { this.status = status; }
-                if (headers !== undefined) { this.headers = headers; }
+            getCode: function() {
+                return response.code;
+            },
+
+            getContentType: function() {
+                return response.headers['content-type'] ?? null;
+            },
+
+            getCookies: function() {
+                return response.headers['cookie'] ?? null;
+            },
+
+            getHeaders: function() {
+                return response.headers;
+            },
+
+            getHeader: function(key) {
+                return response.headers[key] ?? null;
+            },
+
+            setBody: function(body) {
+                response.body = body;
+                return this;
+            },
+
+            setCode: function(code) {
+                response.code = code;
+                return this;
+            },
+
+            setContentType: function(contentType) {
+                response.headers['content-type'] = contentType;
+                return this;
+            },
+
+            setCookies: function(cookies) {
+                response.headers['cookie'] = cookies;
+                return this;
+            },
+
+            setHeaders: function(headers) {
+                response.headers = headers;
+                return this;
+            },
+
+            addHeader: function(key, value) {
+                response.headers[key] = value;
+                return this;
+            },
+
+            addCookie: function(name, value, expire, path, domain, secure, httponly, samesite) {
+                // TODO: Implement and test in complexResponse
+            },
+
+            send: function (body, code, headers) {
+                if (body !== undefined) { response.body = body; }
+                if (code !== undefined) { response.code = code; }
+                if (headers !== undefined) { response.headers = headers; }
 
                 return {
-                    body: this.body,
-                    status: this.status,
-                    headers: this.headers
+                    body: response.body,
+                    code: response.code,
+                    headers: response.headers
                 }
             },
             empty: function () {
                 return this.send('', 204, {});
             },
-            json: function (obj, status, headers = {}) {
+            json: function (obj, code, headers = {}) {
                 headers['content-type'] = 'application/json';
-                return this.send(JSON.stringify(obj), status, headers);
+                return this.send(JSON.stringify(obj), code, headers);
             },
-            file: function (path, status, headers = {}) {
-                return this.send(fs.readFileSync(path), status, headers);
+            file: function (path, code, headers = {}) {
+                return this.send(fs.readFileSync(path), code, headers);
             },
-            redirect: function (url, status = 301, headers = {}) {
+            redirect: function (url, code = 301, headers = {}) {
                 headers['location'] = url;
-                return this.send(undefined, status, headers);
+                return this.send(undefined, code, headers);
             }
         },
         log: function () {
@@ -109,17 +168,17 @@ const server = micro(async (req, res) => {
     }
 
     output.body = output.body ?? '';
-    output.status = output.status ?? 204;
+    output.code = output.code ?? 204;
     output.headers = output.headers ?? {};
 
     for(const header in output.headers) {
         res.setHeader(header, output.headers[header]);
     }
 
-    res.setHeader('x-openruntimes-logs', encodeURIComponent(logs.join('\n')));
-    res.setHeader('x-openruntimes-errors', encodeURIComponent(errors.join('\n')));
+    res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
+    res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
     
-    send(res, output.status, output.body); 
+    send(res, output.code, output.body); 
 });
 
 server.listen(3000);

@@ -34,7 +34,7 @@ abstract class BaseV3 extends TestCase
                 $key = strtolower(trim($header[0]));
                 $responseHeaders[$key] = trim($header[1]);
 
-                if(\in_array($key, ['x-openruntimes-logs', 'x-openruntimes-errors'])) {
+                if(\in_array($key, ['x-open-runtimes-logs', 'x-open-runtimes-errors'])) {
                     $responseHeaders[$key] = \urldecode($responseHeaders[$key]);
                 }
         
@@ -43,7 +43,7 @@ abstract class BaseV3 extends TestCase
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POSTFIELDS => \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body,
             CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
-            CURLOPT_HTTPHEADER => \array_merge(array('x-openruntimes-secret: ' . \getenv('INTERNAL_RUNTIME_KEY')), $headers)
+            CURLOPT_HTTPHEADER => \array_merge(array('x-open-runtimes-secret: ' . \getenv('INTERNAL_RUNTIME_KEY')), $headers)
         );
         
         \curl_setopt_array($ch, $optArray);
@@ -138,9 +138,26 @@ abstract class BaseV3 extends TestCase
     public function testComplexResponse(): void
     {
         $response = $this->execute(headers: ['x-action: complexResponse']);
+        $body = \json_decode($response['body'], true);
+
         self::assertEquals(201, $response['code']);
-        self::assertEquals('👌', $response['body']);
+        self::assertEquals(201, $body['code']);
+
+        self::assertEquals('application/json', $body['contentType']);
+        self::assertEquals('application/json', $response['headers']['content-type']);
+
+        self::assertEquals('value1', $body['headers']['header1']);
         self::assertEquals('value1', $response['headers']['header1']);
+        self::assertEquals('value1', $body['header1']);
+
+        self::assertEquals('value2', $body['headers']['header2']);
+        self::assertEquals('value2', $response['headers']['header2']);
+        self::assertEquals('value2', $body['header2']);
+
+        self::assertEquals('cookie1=value1; cookie2=value2', $body['cookies']);
+        self::assertEquals('cookie1=value1; cookie2=value2', $response['headers']['cookie']);
+
+        self::assertEquals('👌', $body['body']);
     }
 
     public function testException(): void
@@ -148,13 +165,13 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(headers: ['x-action: nonExistingAction']);
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertEmpty($response['headers']['x-openruntimes-logs']);
-        self::assertStringContainsString('Unkonwn action', $response['headers']['x-openruntimes-errors']);
+        self::assertEmpty($response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Unkonwn action', $response['headers']['x-open-runtimes-errors']);
     }
 
     public function testWrongSecret(): void
     {
-        $response = $this->execute(headers: ['x-openruntimes-secret: wrongSecret']);
+        $response = $this->execute(headers: ['x-open-runtimes-secret: wrongSecret']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Unauthorized', $response['body']);
     }
@@ -195,7 +212,7 @@ abstract class BaseV3 extends TestCase
 
     public function testRequestHeaders(): void
     {
-        $response = $this->execute(headers: ['x-action: requestHeaders', 'x-first-header: first-value', 'x-openruntimes-custom-header: should-be-hidden']);
+        $response = $this->execute(headers: ['x-action: requestHeaders', 'x-first-header: first-value', 'x-open-runtimes-custom-header: should-be-hidden']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('application/json', $response['headers']['content-type']);
 
@@ -203,7 +220,7 @@ abstract class BaseV3 extends TestCase
 
         self::assertEquals('requestHeaders', $body['x-action']);
         self::assertEquals('first-value', $body['x-first-header']);
-        self::assertArrayNotHasKey('x-openruntimes-custom-header', $body);
+        self::assertArrayNotHasKey('x-open-runtimes-custom-header', $body);
     }
 
     public function testRequestBodyPlaintext(): void
@@ -249,10 +266,10 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(headers: ['x-action: logs' ]);
         self::assertEquals(200, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertStringContainsString('Debug log', $response['headers']['x-openruntimes-logs']);
-        self::assertStringContainsString(42, $response['headers']['x-openruntimes-logs']);
-        self::assertStringContainsString(4.2, $response['headers']['x-openruntimes-logs']);
-        self::assertStringContainsString('true', \strtolower($response['headers']['x-openruntimes-logs'])); //strlower allows True in Python
-        self::assertStringContainsString('Error log', $response['headers']['x-openruntimes-errors']);
+        self::assertStringContainsString('Debug log', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString(42, $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString(4.2, $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('true', \strtolower($response['headers']['x-open-runtimes-logs'])); //strlower allows True in Python
+        self::assertStringContainsString('Error log', $response['headers']['x-open-runtimes-errors']);
     }
 }
