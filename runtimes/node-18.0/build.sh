@@ -9,19 +9,21 @@ cp -R /usr/code/* /usr/builds
 # Install User Function Dependencies if package.json exists
 cd /usr/builds
 
-if [ $# -eq 0 ]
+# Ensure package.json exists
+if [ ! -f package.json ]
   then
-    if [ -f package.json ]
-      then
-        npm install
-      else
-        echo "No dependencies found."
-    fi
-  else
-    eval "$1"
+    npm init --yes
 fi
 
+INSTALL_COMMAND=${1:-'npm install'}
+BUILD_COMMAND=${2:-''}    
+
+eval "$INSTALL_COMMAND"
+eval "$BUILD_COMMAND"
+
 # Merge the node_modules from the server into the user's node_modules to be restored later.
+cd /usr/builds
+mkdir -p node_modules
 cp -R /usr/local/src/node_modules/* /usr/builds/node_modules
 
 # Finish build by preparing tar to use for starting the runtime
