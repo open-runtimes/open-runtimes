@@ -14,7 +14,7 @@ const server = micro(async (req, res) => {
     const response = {
         headers: {},
         body: '',
-        code: 200,
+        statusCode: 200,
 
         cookies: {},
         contentType: null,
@@ -40,8 +40,8 @@ const server = micro(async (req, res) => {
                 return response.body;
             },
 
-            getCode: function() {
-                return response.code;
+            getStatusCode: function() {
+                return response.statusCode;
             },
 
             getContentType: function() {
@@ -65,8 +65,8 @@ const server = micro(async (req, res) => {
                 return this;
             },
 
-            setCode: function(code) {
-                response.code = code;
+            setStatusCode: function(statusCode) {
+                response.statusCode = statusCode;
                 return this;
             },
 
@@ -94,9 +94,9 @@ const server = micro(async (req, res) => {
                 response.cookies[name] = { value, expire, maxage, path, domain, secure, httponly, samesite };
             },
 
-            send: function (body, code, headers) {
+            send: function (body, statusCode, headers) {
                 if (body !== undefined) { response.body = body; }
-                if (code !== undefined) { response.code = code; }
+                if (statusCode !== undefined) { response.statusCode = statusCode; }
                 if (headers !== undefined) { response.headers = headers; }
 
                 const resHeaders = { ...response.headers };
@@ -140,23 +140,23 @@ const server = micro(async (req, res) => {
 
                 return {
                     body: response.body,
-                    code: response.code,
+                    statusCode: response.statusCode,
                     headers: resHeaders
                 }
             },
             empty: function () {
                 return this.send('', 204, {});
             },
-            json: function (obj, code, headers = {}) {
+            json: function (obj, statusCode, headers = {}) {
                 headers['content-type'] = 'application/json';
-                return this.send(JSON.stringify(obj), code, headers);
+                return this.send(JSON.stringify(obj), statusCode, headers);
             },
-            file: function (path, code, headers = {}) {
-                return this.send(fs.readFileSync(path), code, headers);
+            file: function (path, statusCode, headers = {}) {
+                return this.send(fs.readFileSync(path), statusCode, headers);
             },
-            redirect: function (url, code = 301, headers = {}) {
+            redirect: function (url, statusCode = 301, headers = {}) {
                 headers['location'] = url;
-                return this.send(undefined, code, headers);
+                return this.send(undefined, statusCode, headers);
             }
         },
         log: function () {
@@ -210,7 +210,7 @@ const server = micro(async (req, res) => {
     }
 
     output.body = output.body ?? '';
-    output.code = output.code ?? 204;
+    output.statusCode = output.statusCode ?? 204;
     output.headers = output.headers ?? {};
 
     for(const header in output.headers) {
@@ -220,7 +220,7 @@ const server = micro(async (req, res) => {
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
     res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
     
-    send(res, output.code, output.body); 
+    send(res, output.statusCode, output.body); 
 });
 
 server.listen(3000);

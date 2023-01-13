@@ -25,7 +25,7 @@ module.exports = async (context) => {
         case 'statusResponse':
             return context.res.send('FAIL', 404);
         case 'complexResponse':
-            context.res.setCode(201);
+            context.res.setStatusCode(201);
             context.res.setHeaders({ 'header1': 'value1' })
             context.res.addHeader('header2', 'value2');
             context.res.setBody('👌');
@@ -34,7 +34,7 @@ module.exports = async (context) => {
             context.res.addCookie('cookie2', 'value2', 'Wed, 21 Oct 2015 07:28:00 GMT', 2592000, '/', 'google.com', true, true, 'Lax');
 
             context.res.setBody(JSON.stringify({
-                code: context.res.getCode(),
+                code: context.res.getStatusCode(),
                 contentType: context.res.getContentType(),
                 body: context.res.getBody(),
                 headers: context.res.getHeaders(),
