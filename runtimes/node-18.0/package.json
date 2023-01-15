@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "micro": "^9.3.4"
+    "micro": "^9.3.4",
+    "parse-multipart-data": "^1.5.0",
+    "qs": "^6.11.0"
   }
 }

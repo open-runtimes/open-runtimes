@@ -10,6 +10,8 @@ module.exports = async (context) => {
             return context.res.json({ json: true, message: 'Developers are awesome.' });
         case 'fileResponse':
             return context.res.file(__dirname + '/resources/picture.png', undefined, { 'content-type': 'image/png' });
+        case 'htmlResponse':
+            return context.res.html('<h1>Title</h1>');
         case 'redirectResponse':
             return context.res.redirect('https://github.com/');
         case 'emptyResponse':
@@ -52,7 +54,12 @@ module.exports = async (context) => {
         case 'requestBodyPlaintext':
             return context.res.send(context.req.body);
         case 'requestBodyJson':
-            return context.res.send(context.req.body.data ?? 'Missing key');
+        case 'requestBodyUrlEncoded':
+        case 'requestBodyFormData':
+            return context.res.json({
+                key1: context.req.body.key1 ?? 'Missing key',
+                key2: context.req.body.key2 ?? 'Missing key',
+            })
         case 'envVars':
             return context.res.json({ var: process.env.CUSTOM_ENV_VAR, emptyVar: process.env.NOT_DEFINED_VAR ?? null });
         case 'logs':
