@@ -54,11 +54,10 @@ module.exports = async (context) => {
         case 'requestBodyPlaintext':
             return context.res.send(context.req.body);
         case 'requestBodyJson':
-        case 'requestBodyUrlEncoded':
-        case 'requestBodyFormData':
             return context.res.json({
                 key1: context.req.body.key1 ?? 'Missing key',
                 key2: context.req.body.key2 ?? 'Missing key',
+                raw: context.req.rawBody
             })
         case 'envVars':
             return context.res.json({ var: process.env.CUSTOM_ENV_VAR, emptyVar: process.env.NOT_DEFINED_VAR ?? null });

@@ -128,8 +128,9 @@ abstract class BaseV3 extends TestCase
     public function testNoResponse(): void
     {
         $response = $this->execute(headers: ['x-action' => 'noResponse']);
-        self::assertEquals(204, $response['code']);
+        self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
+        self::assertStringContainsString('Return statement missing. return context.res.empty() if no response is expected.', $response['headers']['x-open-runtimes-errors']);
     }
 
     public function testDoubleResponse(): void
@@ -262,46 +263,23 @@ abstract class BaseV3 extends TestCase
 
     public function testRequestBodyJson(): void
     {
-        $response = $this->execute(body: '{"key1":"OK","key2":"👋"}', headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
+        $response = $this->execute(body: '{"key1":"OK","key2":"👋","key3":"value3"}', headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('{"key1":"OK","key2":"👋"}', $response['body']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals('OK', $body['key1']);
+        self::assertEquals('👋', $body['key2']);
+        self::assertEquals('{"key1":"OK","key2":"👋","key3":"value3"}', $body['raw']);
 
         $response = $this->execute(body: '{"data":"OK"}', headers: ['x-action' => 'requestBodyJson', 'content-type' => 'text/plain']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('{"key1":"Missing key","key2":"Missing key"}', $response['body']);
-    }
 
-    public function testRequestBodyUrlEncoded(): void
-    {
-        $response = $this->execute(body: 'key1=OK&key2=%F0%9F%91%8B', headers: ['x-action' => 'requestBodyUrlEncoded', 'content-type' => 'application/x-www-form-urlencoded']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('{"key1":"OK","key2":"👋"}', $response['body']);
+        $body = \json_decode($response['body'], true);
 
-        $response = $this->execute(body: 'Plain body', headers: ['x-action' => 'requestBodyUrlEncoded', 'content-type' => 'application/x-www-form-urlencoded']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('{"key1":"Missing key","key2":"Missing key"}', $response['body']);
-
-        $response = $this->execute(body: 'key1=OK&key2=%F0%9F%91%8B', headers: ['x-action' => 'requestBodyUrlEncoded', 'content-type' => 'text/plain']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('{"key1":"Missing key","key2":"Missing key"}', $response['body']);
-    }
-
-
-    public function testRequestBodyFormData(): void
-    {
-        $formData = '--MY_AWESOME_BOUNDARY\nContent-Disposition: form-data; name="key1"\n\nOK\n--MY_AWESOME_BOUNDARY\nContent-Disposition: form-data; name="key2"\n\n👋\n--MY_AWESOME_BOUNDARY--"';
-
-        $response = $this->execute(body: $formData, headers: ['x-action' => 'requestBodyFormData', 'content-type' => 'multipart/form-data; boundary=MY_AWESOME_BOUNDARY']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('{"key1":"OK","key2":"👋"}', $response['body']);
-
-        $response = $this->execute(body: $formData, headers: ['x-action' => 'requestBodyFormData', 'content-type' => 'multipart/form-data']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('{"key1":"Missing key","key2":"Missing key"}', $response['body']);
-
-        $response = $this->execute(body: $formData, headers: ['x-action' => 'requestBodyFormData', 'content-type' => 'text/plain']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('{"key1":"Missing key","key2":"Missing key"}', $response['body']);
+        self::assertEquals('Missing key', $body['key1']);
+        self::assertEquals('Missing key', $body['key2']);
+        self::assertEquals('{"data":"OK"}', $body['raw']);
     }
 
     public function testEnvVars(): void

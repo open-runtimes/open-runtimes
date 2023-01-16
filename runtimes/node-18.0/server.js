@@ -23,22 +23,11 @@ const server = micro(async (req, res) => {
     };
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
-    let body = null;
+    const rawBody = await parseText(req);
+    let body = rawBody;
 
     if (contentType.includes('application/json')) {
         body = await parseJson(req);
-    } else if (contentType.includes('application/x-www-form-urlencoded')) {
-        body = parseUrlEncoded(await parseText(req));
-    } else if (contentType.includes('multipart/form-data')) {
-        const boundarySearch = contentType.match(/boundary=(.*)/);
-        if (boundarySearch) {
-            const boundary = boundarySearch[1];
-            body = parseMultipart((await parseBuffer(req)), boundary); // TODO: Always gives empty array, making test fail
-        }
-    }
-
-    if (body === null) {
-        body = await parseText(req);
     }
 
     const headers = {};
@@ -48,8 +37,9 @@ const server = micro(async (req, res) => {
 
     const context = {
         req: {
-            body: body,
-            headers: headers,
+            rawBody,
+            body,
+            headers,
             method: req.method,
             url: req.url
         },
@@ -205,7 +195,7 @@ const server = micro(async (req, res) => {
         },
     };
 
-    let output = {};
+    let output = null;
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
 
@@ -227,8 +217,9 @@ const server = micro(async (req, res) => {
         output = context.res.send('', 500);
     }
 
-    if (!output) {
-        output = {};
+    if(output === null || output === undefined) {
+        context.error('Return statement missing. return context.res.empty() if no response is expected.');
+        output = context.res.send('', 500);
     }
 
     output.body = output.body ?? '';
