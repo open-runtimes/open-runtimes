@@ -23,7 +23,7 @@ module.exports = async (context) => {
             context.res.send('This should be ignored.');
             return context.res.send('This should be returned.');
         case 'headersResponse':
-            return context.res.send('OK', 200, { 'first-header': 'first-value', 'second-header': 'second-value' });
+            return context.res.send('OK', 200, { 'first-header': 'first-value', 'second-header': context.req.headers['x-open-runtimes-custom-in-header'] ?? 'missing', 'x-open-runtimes-custom-out-header': 'third-value' });
         case 'statusResponse':
             return context.res.send('FAIL', 404);
         case 'complexResponse':

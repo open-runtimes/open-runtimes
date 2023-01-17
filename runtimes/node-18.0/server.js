@@ -225,6 +225,10 @@ const server = micro(async (req, res) => {
     output.headers = output.headers ?? {};
 
     for (const header in output.headers) {
+        if(header.startsWith('x-open-runtimes-')) {
+            continue;
+        }
+        
         res.setHeader(header, output.headers[header]);
     }
 
