@@ -1,7 +1,5 @@
 const fs = require("fs");
 const micro = require("micro");
-const { parse: parseUrlEncoded } = require("qs");
-const { parse: parseMultipart } = require('parse-multipart-data');
 const { text: parseText, json: parseJson, buffer: parseBuffer, send } = require("micro");
 
 const USER_CODE_PATH = '/usr/code-start';
