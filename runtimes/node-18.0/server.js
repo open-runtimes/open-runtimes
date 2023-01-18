@@ -193,6 +193,10 @@ const server = micro(async (req, res) => {
         },
     };
 
+    console.log = console.info = console.debug = console.warn = console.error = function() {
+        logs.push('Unsupported log noticed. Use context.log() or context.error() for logging.');
+    }
+
     let output = null;
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);

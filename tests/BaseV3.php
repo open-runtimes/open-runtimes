@@ -305,5 +305,7 @@ abstract class BaseV3 extends TestCase
         self::assertStringContainsString(4.2, $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('true', \strtolower($response['headers']['x-open-runtimes-logs'])); //strlower allows True in Python
         self::assertStringContainsString('Error log', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringNotContainsString('Native log', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Unsupported log noticed. Use context.log() or context.error() for logging.', $response['headers']['x-open-runtimes-logs']);
     }
 }

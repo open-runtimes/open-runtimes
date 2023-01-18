@@ -62,6 +62,7 @@ module.exports = async (context) => {
         case 'envVars':
             return context.res.json({ var: process.env.CUSTOM_ENV_VAR, emptyVar: process.env.NOT_DEFINED_VAR ?? null });
         case 'logs':
+            console.log('Native log');
             context.log('Debug log');
             context.error('Error log');
             
