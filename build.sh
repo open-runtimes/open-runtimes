@@ -3,6 +3,9 @@ echo 'Starting local build...'
 echo 'C++ 2017...'
 docker build -t openruntimes/cpp:v2-17 ./runtimes/cpp-17/
 
+echo 'Crystal 1.7...'
+docker build -t openruntimes/crystal:v2-1.7.1 ./runtimes/crystal-1.7.1/
+
 echo 'Dart 2.15...'
 docker build -t openruntimes/dart:v2-2.15 ./runtimes/dart-2.15/
 

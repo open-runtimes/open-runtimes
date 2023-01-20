@@ -1,0 +1,10 @@
+name: open_runtimes_example
+version: 0.1.0
+
+targets:
+  example:
+    main: src/main.cr
+
+crystal: 1.7.1
+
+license: MIT

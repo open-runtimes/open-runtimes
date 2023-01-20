@@ -1,0 +1,10 @@
+name: code
+version: 0.1.0
+
+targets:
+  test:
+    main: ./test.cr
+
+crystal: 1.7.1
+
+license: MIT
