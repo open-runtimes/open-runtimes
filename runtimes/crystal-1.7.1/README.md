@@ -56,7 +56,11 @@ Output `{"message":"Hello Open Runtimes 👋","todo":{"userId":1,"id":1,"title":
 
 ## Local development
 
-1. Clone the [open-runtimes](
+1. Clone [open-runtimes](https://github.com/open-runtimes/open-runtimes)
+
+```bash
+git clone https://github.com/open-runtimes/open-runtimes.git
+```
 
 2. Enter the Crystal runtime folder:
 
