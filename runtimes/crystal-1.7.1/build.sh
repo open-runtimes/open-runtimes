@@ -15,7 +15,7 @@ shards install --without-development
 cd /usr/local/src
 
 # Replace {entrypoint} in server.cr with INTERNAL_RUNTIME_ENTRYPOINT
-sed -i "s/{entrypoint}/$INTERNAL_RUNTIME_ENTRYPOINT/g" server.cr
+sed -i "s#{entrypoint}#$INTERNAL_RUNTIME_ENTRYPOINT#g" server.cr
 
 # Install dependencies
 shards install --without-development
