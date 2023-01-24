@@ -5,7 +5,7 @@ const { text: parseText, json: parseJson, buffer: parseBuffer, send } = require(
 const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
-    if (req.headers[`x-open-runtimes-secret`] !== process.env['INTERNAL_RUNTIME_KEY']) {
+    if (req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
         return send(res, 500, 'Unauthorized');
     }
 
@@ -15,9 +15,6 @@ const server = micro(async (req, res) => {
         headers: {},
         body: '',
         statusCode: 200,
-
-        cookies: {},
-        contentType: null,
     };
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
@@ -42,131 +39,27 @@ const server = micro(async (req, res) => {
             url: req.url
         },
         res: {
-            getBody: function () {
-                return response.body;
-            },
-
-            getStatusCode: function () {
-                return response.statusCode;
-            },
-
-            getContentType: function () {
-                return response.contentType
-            },
-
-            getCookies: function () {
-                return response.cookies;
-            },
-
-            getHeaders: function () {
-                return response.headers;
-            },
-
-            getHeader: function (key) {
-                return response.headers[key] ?? null;
-            },
-
-            setBody: function (body) {
-                response.body = body;
-                return this;
-            },
-
-            setStatusCode: function (statusCode) {
-                response.statusCode = statusCode;
-                return this;
-            },
-
-            setContentType: function (contentType) {
-                response.contentType = contentType;
-                return this;
-            },
-
-            setCookies: function (cookies) {
-                response.cookies = cookies;
-                return this;
-            },
-
-            setHeaders: function (headers) {
-                response.headers = headers;
-                return this;
-            },
-
-            addHeader: function (key, value) {
-                response.headers[key] = value;
-                return this;
-            },
-
-            addCookie: function (name, value, expire, maxage, path, domain, secure, httponly, samesite) {
-                response.cookies[name] = { value, expire, maxage, path, domain, secure, httponly, samesite };
-            },
-
             send: function (body, statusCode, headers) {
                 if (body !== undefined) { response.body = body; }
                 if (statusCode !== undefined) { response.statusCode = statusCode; }
                 if (headers !== undefined) { response.headers = headers; }
 
-                const resHeaders = { ...response.headers };
-
-                if (response.contentType) {
-                    resHeaders['content-type'] = response.contentType;
-                }
-
-                if (response.cookies && Object.keys(response.cookies).length > 0) {
-                    resHeaders['set-cookie'] = Object.keys(response.cookies).map((name) => {
-                        const cookie = response.cookies[name];
-
-                        const attributes = [];
-                        attributes.push(`${name}=${cookie.value}`);
-
-                        if (cookie.domain) {
-                            attributes.push(`Domain=${cookie.domain}`);
-                        }
-                        if (cookie.expire) {
-                            attributes.push(`Expire=${cookie.expire}`);
-                        }
-                        if (cookie.maxage) {
-                            attributes.push(`Max-Age=${cookie.maxage}`);
-                        }
-                        if (cookie.path) {
-                            attributes.push(`Path=${cookie.path}`);
-                        }
-                        if (cookie.samesite) {
-                            attributes.push(`SameSite=${cookie.samesite}`);
-                        }
-                        if (cookie.secure) {
-                            attributes.push(`Secure`);
-                        }
-                        if (cookie.httponly) {
-                            attributes.push(`HttpOnly`);
-                        }
-
-                        return attributes.join('; ');
-                    }).join('; ');
-                }
-
                 return {
                     body: response.body,
                     statusCode: response.statusCode,
-                    headers: resHeaders
+                    headers: response.headers
                 }
+            },
+            json: function (obj, statusCode, headers = {}) {
+                headers['Content-Type'] = 'application/json';
+                return this.send(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
                 return this.send('', 204, {});
             },
-            json: function (obj, statusCode, headers = {}) {
-                headers['content-type'] = 'application/json';
-                return this.send(JSON.stringify(obj), statusCode, headers);
-            },
-            html: function (html, statusCode, headers = {}) {
-                headers['content-type'] = 'text/html';
-                return this.send(html, statusCode, headers);
-            },
-            file: function (path, statusCode, headers = {}) {
-                return this.send(fs.readFileSync(path), statusCode, headers);
-            },
             redirect: function (url, statusCode = 301, headers = {}) {
                 headers['location'] = url;
-                return this.send(undefined, statusCode, headers);
+                return this.send('', statusCode, headers);
             }
         },
         log: function () {
@@ -199,7 +92,7 @@ const server = micro(async (req, res) => {
 
     let output = null;
     try {
-        let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
+        let userFunction = require(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
 
         if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
             throw new Error("User function is not valid.");

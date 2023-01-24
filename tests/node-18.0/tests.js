@@ -8,10 +8,6 @@ module.exports = async (context) => {
             return context.res.send('Hello World 👋');
         case 'jsonResponse':
             return context.res.json({ json: true, message: 'Developers are awesome.' });
-        case 'fileResponse':
-            return context.res.file(__dirname + '/resources/picture.png', undefined, { 'content-type': 'image/png' });
-        case 'htmlResponse':
-            return context.res.html('<h1>Title</h1>');
         case 'redirectResponse':
             return context.res.redirect('https://github.com/');
         case 'emptyResponse':
@@ -26,25 +22,6 @@ module.exports = async (context) => {
             return context.res.send('OK', 200, { 'first-header': 'first-value', 'second-header': context.req.headers['x-open-runtimes-custom-in-header'] ?? 'missing', 'x-open-runtimes-custom-out-header': 'third-value' });
         case 'statusResponse':
             return context.res.send('FAIL', 404);
-        case 'complexResponse':
-            context.res.setStatusCode(201);
-            context.res.setHeaders({ 'header1': 'value1' })
-            context.res.addHeader('header2', 'value2');
-            context.res.setBody('👌');
-            context.res.setContentType('application/json');
-            context.res.addCookie('cookie1', 'value1');
-            context.res.addCookie('cookie2', 'value2', 'Wed, 21 Oct 2015 07:28:00 GMT', 2592000, '/', 'google.com', true, true, 'Lax');
-
-            context.res.setBody(JSON.stringify({
-                code: context.res.getStatusCode(),
-                contentType: context.res.getContentType(),
-                body: context.res.getBody(),
-                headers: context.res.getHeaders(),
-                header1: context.res.getHeader('header1'),
-                header2: context.res.getHeader('header2'),
-                cookies: context.res.getCookies()
-            }));
-            return context.res.send();
         case 'requestMethod':
             return context.res.send(context.req.method);
         case 'requestUrl':

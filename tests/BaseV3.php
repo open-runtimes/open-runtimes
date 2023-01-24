@@ -23,7 +23,7 @@ abstract class BaseV3 extends TestCase
 
         $headers = \array_merge([
             'content-type' => 'text/plain',
-            'x-open-runtimes-secret' => \getenv('INTERNAL_RUNTIME_KEY')
+            'x-open-runtimes-secret' => \getenv('OPEN_RUNTIMES_SECRET')
         ], $headers);
         $headersParsed = [];
 
@@ -89,26 +89,6 @@ abstract class BaseV3 extends TestCase
         self::assertEquals('Developers are awesome.', $body['message']);
     }
 
-    public function testFileResponse(): void
-    {
-        $response = $this->execute(headers: ['x-action' => 'fileResponse']);
-
-        self::assertEquals(200, $response['code']);
-        self::assertEquals(2283072, \strlen($response['body']));
-        self::assertEquals(2283072, $response['headers']['content-length']);
-        self::assertEquals('image/png', $response['headers']['content-type']);
-    }
-
-
-    public function testHtmlResponse(): void
-    {
-        $response = $this->execute(headers: ['x-action' => 'htmlResponse']);
-
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('<h1>Title</h1>', $response['body']);
-        self::assertEquals('text/html', $response['headers']['content-type']);
-    }
-
     public function testRedirectResponse(): void
     {
         $response = $this->execute(headers: ['x-action' => 'redirectResponse']);
@@ -155,33 +135,6 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(headers: ['x-action' => 'statusResponse']);
         self::assertEquals(404, $response['code']);
         self::assertEquals('FAIL', $response['body']);
-    }
-
-    public function testComplexResponse(): void
-    {
-        $response = $this->execute(headers: ['x-action' => 'complexResponse']);
-        $body = \json_decode($response['body'], true);
-
-        self::assertEquals(201, $response['code']);
-        self::assertEquals(201, $body['code']);
-
-        self::assertEquals('application/json', $body['contentType']);
-        self::assertEquals('application/json', $response['headers']['content-type']);
-
-        self::assertEquals('value1', $body['headers']['header1']);
-        self::assertEquals('value1', $response['headers']['header1']);
-        self::assertEquals('value1', $body['header1']);
-
-        self::assertEquals('value2', $body['headers']['header2']);
-        self::assertEquals('value2', $response['headers']['header2']);
-        self::assertEquals('value2', $body['header2']);
-
-        self::assertArrayHasKey('cookie1', $body['cookies']);
-        self::assertArrayHasKey('cookie2', $body['cookies']);
-
-        self::assertEquals('cookie1=value1; cookie2=value2; Domain=google.com; Expire=Wed, 21 Oct 2015 07:28:00 GMT; Max-Age=2592000; Path=/; SameSite=Lax; Secure; HttpOnly', $response['headers']['set-cookie']);
-
-        self::assertEquals('👌', $body['body']);
     }
 
     public function testException(): void
