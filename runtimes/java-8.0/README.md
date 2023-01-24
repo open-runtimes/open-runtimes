@@ -12,7 +12,15 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir java-or && cd java-or
-printf "import java.util.Collections;\n\npublic RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exception {\n    return res.json(Collections.singletonMap(\"n\", Math.random()));\n}" > Index.java
+tee -a Index.java << END
+import java.util.Collections;
+
+public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exception {
+    return res.json(Collections.singletonMap("n", Math.random()));
+}
+
+END
+
 ```
 
 2. Build the code:

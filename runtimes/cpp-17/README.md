@@ -13,7 +13,15 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir cpp-or && cd cpp-or
-printf "static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) { Json::Value result; result[\"n\"] = rand() / (RAND_MAX + 1.); return res.json(result); }" > index.cc
+tee -a index.cc << END
+static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
+    Json::Value result;
+    result["n"] = rand() / (RAND_MAX + 1.);
+    return res.json(result);
+}
+
+END
+
 ```
 
 2. Build the code:

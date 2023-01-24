@@ -12,7 +12,13 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir kotlin-or && cd kotlin-or
-printf "fun main(req: RuntimeRequest, res: RuntimeResponse) = res.json(mapOf(\"n\" to Math.random()))" > Index.kt
+tee -a Index.kt << END
+fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse {
+    return res.json(mapOf("n" to Math.random()));
+}
+
+END
+
 ```
 
 2. Build the code:

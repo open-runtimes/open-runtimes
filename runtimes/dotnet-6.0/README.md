@@ -12,7 +12,14 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir dotnet-or && cd dotnet-or
-printf "public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res) => res.Json(new() {{ \"n\", new System.Random().NextDouble() }} );" > Index.cs
+tee -a Index.cs << END
+public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
+{
+    return res.Json(new() {{ "n", new System.Random().NextDouble() }} );
+}
+
+END
+
 ```
 
 2. Build the code:

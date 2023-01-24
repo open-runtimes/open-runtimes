@@ -12,7 +12,17 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir dotnet-or && cd dotnet-or
-printf "using System.Threading.Tasks;\nusing System.Collections.Generic;\n\npublic async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res) => res.Json(new Dictionary<string, object>() {{ \"n\", new System.Random().NextDouble() }} );" > Index.cs
+tee -a Index.cs << END
+using System.Threading.Tasks;
+using System.Collections.Generic;
+
+public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
+{
+    return res.Json(new Dictionary<string, object>() {{ "n", new System.Random().NextDouble() }} );
+}
+
+END
+
 ```
 
 2. Build the code:

@@ -12,7 +12,14 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir python-or && cd python-or
-printf "import random\n\ndef main(req, res):\n    return res.json({'n': random.random() })" > main.py
+tee -a main.py << END
+import random
+
+def main(req, res):
+    return res.json({'n': random.random() })
+
+END
+
 ```
 
 2. Build the code:

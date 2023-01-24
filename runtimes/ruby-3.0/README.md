@@ -12,7 +12,13 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir ruby-or && cd ruby-or
-printf "def main(request, response)\n    return response.json({:n => rand()})\nend" > index.rb
+tee -a index.rb << END
+def main(request, response)
+    return response.json({:n => rand()})
+end
+
+END
+
 ```
 
 2. Build the code:

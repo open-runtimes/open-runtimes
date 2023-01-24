@@ -12,7 +12,13 @@ To learn more about runtimes, visit [Runtimes introduction](https://github.com/o
 
 ```bash
 mkdir swift-test && cd swift-test
-printf "func main(req: RequestValue, res: RequestResponse) -> RequestResponse {\n    return res.json(data: [\"n\": Double.random(in:0...1)])\n}" > index.swift
+tee -a index.swift << END
+func main(req: RequestValue, res: RequestResponse) -> RequestResponse {
+    return res.json(data: ["n": Double.random(in:0...1)]);
+}
+
+END
+
 ```
 
 2. Build the code:
