@@ -18,13 +18,13 @@ printf "export default async function(req: any, res: any) {\n    res.json({ n: M
 2. Build the code:
 
 ```bash
-docker run -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:v2-1.24 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:v3-1.24 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/deno:v2-1.24 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/deno:v3-1.24 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
