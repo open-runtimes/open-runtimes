@@ -39,7 +39,7 @@ const server = micro(async (req, res) => {
             url: req.url
         },
         res: {
-            send: function (body, statusCode, headers) {
+            send: function (body, statusCode = 200, headers = {}) {
                 if (body !== undefined) { response.body = body; }
                 if (statusCode !== undefined) { response.statusCode = statusCode; }
                 if (headers !== undefined) { response.headers = headers; }
@@ -50,7 +50,7 @@ const server = micro(async (req, res) => {
                     headers: response.headers
                 }
             },
-            json: function (obj, statusCode, headers = {}) {
+            json: function (obj, statusCode = 200, headers = {}) {
                 headers['Content-Type'] = 'application/json';
                 return this.send(JSON.stringify(obj), statusCode, headers);
             },
@@ -58,7 +58,7 @@ const server = micro(async (req, res) => {
                 return this.send('', 204, {});
             },
             redirect: function (url, statusCode = 301, headers = {}) {
-                headers['location'] = url;
+                headers['Location'] = url;
                 return this.send('', statusCode, headers);
             }
         },
@@ -118,7 +118,7 @@ const server = micro(async (req, res) => {
     }
 
     output.body = output.body ?? '';
-    output.statusCode = output.statusCode ?? 204;
+    output.statusCode = output.statusCode ?? 200;
     output.headers = output.headers ?? {};
 
     for (const header in output.headers) {
