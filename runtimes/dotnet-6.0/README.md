@@ -15,7 +15,9 @@ mkdir dotnet-or && cd dotnet-or
 tee -a Index.cs << END
 public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
 {
-    return res.Json(new() {{ "n", new System.Random().NextDouble() }} );
+    return res.Json(new() {{
+        "n", new System.Random().NextDouble()
+    }});
 }
 
 END

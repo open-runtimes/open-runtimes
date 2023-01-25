@@ -18,7 +18,9 @@ using System.Collections.Generic;
 
 public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
 {
-    return res.Json(new Dictionary<string, object>() {{ "n", new System.Random().NextDouble() }} );
+    return res.Json(new Dictionary<string, object>() {{
+        "n", new System.Random().NextDouble()
+    }});
 }
 
 END
