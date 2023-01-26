@@ -54,7 +54,7 @@ module.exports = async (context) => {
             context.log(4.2);
             context.log(true);
 
-            return context.res.send();
+            return context.res.send('');
         default:
             throw new Error('Unkonwn action');
     }

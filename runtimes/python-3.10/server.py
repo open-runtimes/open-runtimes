@@ -1,4 +1,5 @@
 from flask import Flask, request, Response as FlaskResponse
+from urllib.parse import urlparse
 from io import StringIO
 import traceback
 import pathlib
@@ -68,39 +69,43 @@ class Context:
     # TODO: Support for infinite parameters
     # TODO: Support for objects (stringify)
     def log(self, message):
-        self._logs.append(message)
+        self._logs.append(str(message))
 
     def error(self, message):
-        self._errors.append(message)
+        self._errors.append(str(message))
 
 HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
 
 @app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
 @app.route('/<path:u_path>', methods = HTTP_METHODS)
 def handler(u_path):
-    if (request.headers.get('X-Open-Runtimes-Secret') != os.getenv('OPEN_RUNTIMES_SECRET')):
+    if (request.headers.get('x-open-runtimes-secret') != os.getenv('OPEN_RUNTIMES_SECRET')):
         return 'Unauthorized. Provide correct "x-open-runtimes-secret" header.', 500
 
     context = Context()
 
+    url = urlparse(request.url)
+    path = url.path
+    query = url.query
+    if query:
+        path += '?' + query
+
     context.req.rawBody = request.get_data(as_text=True)
     context.req.body = context.req.rawBody
     context.req.method = request.method
-    context.req.url = request.url
+    context.req.url = path
     context.req.headers = {}
 
-    contentType = request.headers.get('Content-Type', 'text/plain')
+    contentType = request.headers.get('content-type', 'text/plain')
     if 'application/json' in contentType:
         context.req.body = request.get_json(force=True, silent=False)
 
     headers = dict(request.headers)
     for key in headers.keys():
-        if not key.startswith('x-open-runtimes-'):
-            context.req.headers[key] = headers[key]
+        if not key.lower().startswith('x-open-runtimes-'):
+            context.req.headers[key.lower()] = headers[key]
 
-    # TODO: If write, append static message to logs
-    sys.stdout = userout = StringIO()
-    sys.stderr = usererr = StringIO()
+    sys.stdout = sys.stderr = customstd = StringIO()
 
     output = None
     try:
@@ -131,10 +136,12 @@ def handler(u_path):
     resp = FlaskResponse(output['body'], output['statusCode'])
 
     for key in output['headers'].keys():
-        if not key.startswith('x-open-runtimes-'):
-            resp.headers[key] = output['headers'][key]
+        if not key.lower().startswith('x-open-runtimes-'):
+            resp.headers[key.lower()] = output['headers'][key]
 
-    # TODO: URL encode
+    if customstd.getvalue():
+        context.log('Unsupported log noticed. Use context.log() or context.error() for logging.')
+
     resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context._logs))
     resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context._errors))
 

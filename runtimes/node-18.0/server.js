@@ -26,8 +26,8 @@ const server = micro(async (req, res) => {
     }
 
     const headers = {};
-    Object.keys(req.headers).filter((header) => !header.startsWith('x-open-runtimes-')).forEach((header) => {
-        headers[header] = req.headers[header];
+    Object.keys(req.headers).filter((header) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header) => {
+        headers[header.toLowerCase()] = req.headers[header];
     });
 
     const context = {
@@ -51,14 +51,14 @@ const server = micro(async (req, res) => {
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
-                headers['Content-Type'] = 'application/json';
+                headers['content-type'] = 'application/json';
                 return this.send(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
                 return this.send('', 204, {});
             },
             redirect: function (url, statusCode = 301, headers = {}) {
-                headers['Location'] = url;
+                headers['location'] = url;
                 return this.send('', statusCode, headers);
             }
         },
@@ -122,11 +122,11 @@ const server = micro(async (req, res) => {
     output.headers = output.headers ?? {};
 
     for (const header in output.headers) {
-        if(header.startsWith('x-open-runtimes-')) {
+        if(header.toLowerCase().startsWith('x-open-runtimes-')) {
             continue;
         }
         
-        res.setHeader(header, output.headers[header]);
+        res.setHeader(header.toLowerCase(), output.headers[header]);
     }
 
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));

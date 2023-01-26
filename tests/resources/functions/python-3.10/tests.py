@@ -2,12 +2,12 @@ import requests
 import os
 
 def main(context):
-    action = context.req.headers.get('X-Action', None)
+    action = context.req.headers.get('x-action', None)
 
     if action == 'plaintextResponse':
         return context.res.send('Hello World 👋')
     elif action == 'jsonResponse':
-        return context.res.json({ 'json': true, 'message': 'Developers are awesome.' })
+        return context.res.json({ 'json': True, 'message': 'Developers are awesome.' })
     elif action == 'redirectResponse':
         return context.res.redirect('https://github.com/')
     elif action == 'emptyResponse':
@@ -34,9 +34,19 @@ def main(context):
     elif action == 'requestBodyPlaintext':
         return context.res.send(context.req.body)
     elif action == 'requestBodyJson':
+        key1 = None
+        key2 = None
+
+        if isinstance(context.req.body, str):
+            key1 = 'Missing key'
+            key2 = 'Missing key'
+        else:
+            key1 = context.req.body.get('key1', 'Missing key')
+            key2 = context.req.body.get('key2', 'Missing key')
+
         return context.res.json({
-            'key1': context.req.body.get('key1', 'Missing key'),
-            'key2': context.req.body.get('key2', 'Missing key'),
+            'key1': key1,
+            'key2': key2,
             'raw': context.req.rawBody
         })
     elif action == 'envVars':
@@ -53,6 +63,6 @@ def main(context):
         context.log(4.2)
         context.log(True)
 
-        return context.res.send()
+        return context.res.send('')
     else:
         raise Exception('Unkonwn action')
