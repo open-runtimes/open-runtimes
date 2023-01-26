@@ -63,6 +63,11 @@ abstract class BaseV3 extends TestCase
 
         \curl_close($ch);
 
+        if($code >= 400) {
+            var_dump($body);
+            var_dump($responseHeaders);
+        }
+
         return [
             'code' => $code,
             'body' => $body,
@@ -150,7 +155,7 @@ abstract class BaseV3 extends TestCase
     {
         $response = $this->execute(headers: ['x-open-runtimes-secret' => 'wrongSecret']);
         self::assertEquals(500, $response['code']);
-        self::assertEquals('Unauthorized', $response['body']);
+        self::assertEquals('Unauthorized. Provide "x-open-runtimes-secret" header.', $response['body']);
     }
 
     public function testRequestMethod(): void

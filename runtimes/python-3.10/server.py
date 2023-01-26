@@ -1,10 +1,12 @@
-from flask import Flask, request, jsonify, Response as FlaskResponse
+from flask import Flask, request, Response as FlaskResponse
 from io import StringIO
 import traceback
 import pathlib
 import os
 import importlib
 import sys
+import urllib.parse
+import json
 
 app = Flask(__name__)
 
@@ -12,6 +14,11 @@ class Response:
     _body = ''
     _statusCode = 200
     _headers = {}
+
+    def __init__(self):
+        self._body = ''
+        self._statusCode = 200
+        self._headers = {}
 
     def send(self, body, statusCode = 200, headers = {}):
         if body is not None:
@@ -29,7 +36,7 @@ class Response:
 
     def json(self, obj, statusCode = 200, headers = {}):
         headers['Content-Type'] = 'application/json'
-        return self.send(jsonify(obj), statusCode, headers)
+        return self.send(json.dumps(obj), statusCode, headers)
     
     def empty(self):
         return self.send('', 204, {})
@@ -52,6 +59,12 @@ class Context:
     _logs = []
     _errors = []
 
+    def __init__(self):
+        self._logs = []
+        self._errors = []
+        self.req = Request()
+        self.res = Response()
+
     # TODO: Support for infinite parameters
     # TODO: Support for objects (stringify)
     def log(self, message):
@@ -68,17 +81,15 @@ def handler(u_path):
     if (request.headers.get('x-open-runtimes-secret') != os.getenv('OPEN_RUNTIMES_SECRET')):
         return 'Unauthorized. Provide "x-open-runtimes-secret" header.', 500
 
-    requestData = request.get_json()
-
     context = Context()
 
-    context.req.rawBody = request.get_data()
+    context.req.rawBody = request.get_data(as_text=True)
     context.req.body = context.req.rawBody
     context.req.method = request.method
     context.req.url = request.base_url
     context.req.headers = {}
 
-    contentType = request.headers.get('x-open-runtimes-secret', 'text/plain')
+    contentType = request.headers.get('content-type', 'text/plain')
     if 'application/json' in contentType:
         context.req.body = request.get_json(force=True, silent=False)
 
@@ -93,25 +104,20 @@ def handler(u_path):
 
     output = None
     try:
-        userModule = None
-        try:
-            userPath = os.getenv('OPEN_RUNTIMES_ENTRYPOINT')
-            if userPath.endswith('.py'):
-                size = len(userPath)
-                userPath = userPath[:size - 3]
-            userPath = userPath.replace("/", ".")
-            userModule = importlib.import_module("userlib." + userPath)
-        except Exception as e:
-            raise Exception('User function is not valid.')
+        userPath = os.getenv('OPEN_RUNTIMES_ENTRYPOINT')
+        if userPath.endswith('.py'):
+            size = len(userPath)
+            userPath = userPath[:size - 3]
+        userPath = userPath.replace("/", ".")
+        userModule = importlib.import_module("userlib." + userPath)
 
         if userModule is None:
             raise Exception('Code file not found.')
 
         output = userModule.main(context)
     except Exception as e:
-        context.error('Whoopsie')
-        # TODO: Fix
-        # context.error(traceback.TracebackException.from_exception(e).format())
+        context.error(str(e))
+        # TODO: Get trace
         output = context.res.send('', 500, {})
 
     if output is None:
@@ -129,8 +135,8 @@ def handler(u_path):
             resp.headers[key] = output['headers'][key]
 
     # TODO: URL encode
-    resp.headers['x-open-runtimes-logs'] = '\n'.join(context._logs)
-    resp.headers['x-open-runtimes-errors'] = '\n'.join(context._errors)
+    resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context._logs))
+    resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context._errors))
 
     return resp
 
