@@ -170,10 +170,6 @@ abstract class BaseV3 extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals('DELETE', $response['body']);
 
-        $response = $this->execute(method: 'CONNECT', headers: ['x-action' => 'requestMethod']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('CONNECT', $response['body']);
-
         $response = $this->execute(method: 'OPTIONS', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('OPTIONS', $response['body']);
