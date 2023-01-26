@@ -170,6 +170,26 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(method: 'DELETE', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('DELETE', $response['body']);
+
+        $response = $this->execute(method: 'HEAD', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('HEAD', $response['body']);
+
+        $response = $this->execute(method: 'CONNECT', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('CONNECT', $response['body']);
+
+        $response = $this->execute(method: 'OPTIONS', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('OPTIONS', $response['body']);
+
+        $response = $this->execute(method: 'TRACE', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('TRACE', $response['body']);
+
+        $response = $this->execute(method: 'PATCH', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('PATCH', $response['body']);
     }
 
     public function testRequestUrl(): void

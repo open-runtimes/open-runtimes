@@ -66,7 +66,7 @@ env:
       SERVER_PROCESS=server.py
       IMAGE=openruntimes/python:${VERSION}-3.10
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
     - RUNTIME=python-3.9
       PHP_CLASS=Python39
       ENTRYPOINT=tests.py

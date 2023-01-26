@@ -1,18 +1,13 @@
+import json
 import requests
 
-#    'req' variable has:
-#        'headers' - object with request headers
-#        'payload' - object with request body data
-#        'variables' - object with function variables
-#    'res' variable has:
-#        'send(text, status)' - function to return text response. Status code defaults to 200
-#        'json(obj, status)' - function to return JSON response. Status code defaults to 200
-#    
-#    If an error is thrown, a response with code 500 will be returned.
+def main(context):
+    const payload = context.req.body
+    todo_id = str(payload.get('id', 1))
 
-def main(req, res):
-    todo = (requests.get('https://jsonplaceholder.typicode.com/todos/1', auth=('user', 'pass'))).json()
-    return res.json({
+    todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + todo_id)).json()
+
+    return context.res.json({
         'message': 'Hello Open Runtimes 👋',
         'todo': todo
     })

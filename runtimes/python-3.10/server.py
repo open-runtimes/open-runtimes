@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response as FlaskResponse
 from io import StringIO
 import traceback
 import pathlib
@@ -9,90 +9,130 @@ import sys
 app = Flask(__name__)
 
 class Response:
-    _response = None
-    _status = None
+    _body = ''
+    _statusCode = 200
+    _headers = {}
 
-    def __init__(self):
-        self._response = None
-        self._status = None
+    def send(self, body, statusCode = 200, headers = {}):
+        if body is not None:
+            self._body = body
+        if statusCode is not None:
+            self._statusCode = statusCode
+        if headers is not None:
+            self._headers = headers
 
-    def send(self, text, status = 200):
-        self._status = status
-        self._response = text
+        return {
+            'body': self._body,
+            'statusCode': self._statusCode,
+            'headers': self._headers,
+        }
 
-    def json(self, obj, status = 200):
-        self._status = status
-        self._response = obj
+    def json(self, obj, statusCode = 200, headers = {}):
+        headers['Content-Type'] = 'application/json'
+        return self.send(jsonify(obj), statusCode, headers)
+    
+    def empty(self):
+        return self.send('', 204, {})
+
+    def redirect(self, url, statusCode = 301, headers = {}):
+        headers['Location'] = url
+        return self.send('', statusCode, headers)
 
 class Request:
+    rawBody = None
+    body = None
+    headers = None
+    method = None
+    url = None
 
-    def __init__(self, request):
-        self.parsedRequest = request.get_json()
+class Context:
+    req = Request()
+    res = Response()
 
-        if 'variables' in self.parsedRequest:
-            self.variables = self.parsedRequest['variables']
-        else:
-            self.variables = {}
+    _logs = []
+    _errors = []
 
-        if 'headers' in self.parsedRequest:
-            self.headers = self.parsedRequest['headers']
-        else:
-            self.headers = {}
+    # TODO: Support for infinite parameters
+    # TODO: Support for objects (stringify)
+    def log(self, message):
+        self._logs.append(message)
 
-        if 'payload' in self.parsedRequest:
-            self.payload = self.parsedRequest['payload']
-        else:
-            self.payload = ''
+    def error(self, message):
+        self._errors.append(message)
 
+HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
 
-@app.route('/', defaults={'u_path': ''}, methods = ['POST'])
-@app.route('/<path:u_path>', methods = ['POST'])
+@app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
+@app.route('/<path:u_path>', methods = HTTP_METHODS)
 def handler(u_path):
-
-    if (request.headers.get('x-internal-challenge') != os.getenv('INTERNAL_RUNTIME_KEY')):
-        return 'Unauthorized', 500
+    if (request.headers.get('x-open-runtimes-secret') != os.getenv('OPEN_RUNTIMES_SECRET')):
+        return 'Unauthorized. Provide "x-open-runtimes-secret" header.', 500
 
     requestData = request.get_json()
 
-    if requestData is None:
-        return 'No data received', 500
+    context = Context()
 
-    # Create new request and response object
-    req = Request(request)
-    resp = Response()
+    context.req.rawBody = request.get_data()
+    context.req.body = context.req.rawBody
+    context.req.method = request.method
+    context.req.url = request.base_url
+    context.req.headers = {}
 
-    # Import function from request
-    userPath = os.getenv('INTERNAL_RUNTIME_ENTRYPOINT')
-    if userPath.endswith('.py'):
-        size = len(userPath)
-        userPath = userPath[:size - 3]
-    userPath = userPath.replace("/", ".")
-    userModule = importlib.import_module("userlib." + userPath)
+    contentType = request.headers.get('x-open-runtimes-secret', 'text/plain')
+    if 'application/json' in contentType:
+        context.req.body = request.get_json(force=True, silent=False)
 
-    # Check if function exists
-    if userModule is None:
-        return 'Function not found, Did you forget to name it `main`?', 500
+    headers = dict(request.headers)
+    for key in headers.keys():
+        if not key.startswith('x-open-runtimes-'):
+            context.req.headers[key] = headers[key]
 
+    # TODO: If write, append static message to logs
+    sys.stdout = userout = StringIO()
+    sys.stderr = usererr = StringIO()
+
+    output = None
     try:
-        sys.stdout = userout = StringIO()
-        sys.stderr = usererr = StringIO()
+        userModule = None
+        try:
+            userPath = os.getenv('OPEN_RUNTIMES_ENTRYPOINT')
+            if userPath.endswith('.py'):
+                size = len(userPath)
+                userPath = userPath[:size - 3]
+            userPath = userPath.replace("/", ".")
+            userModule = importlib.import_module("userlib." + userPath)
+        except Exception as e:
+            raise Exception('User function is not valid.')
 
-        userModule.main(req, resp)
+        if userModule is None:
+            raise Exception('Code file not found.')
 
-        output = {
-            "response": resp._response,
-            "stdout": userout.getvalue()
-        }
-        return jsonify(output), resp._status
+        output = userModule.main(context)
     except Exception as e:
-        output = {
-            "stdout": userout.getvalue(),
-            "stderr": usererr.getvalue() + "\n" + traceback.TracebackException.from_exception(e).format()
-        }
-        return jsonify(output), 500
-    finally:
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
+        context.error('Whoopsie')
+        # TODO: Fix
+        # context.error(traceback.TracebackException.from_exception(e).format())
+        output = context.res.send('', 500, {})
+
+    if output is None:
+        context.error('Return statement missing. return context.res.empty() if no response is expected.')
+        output = context.res.send('', 500, {})
+
+    output['body'] = output.get('body', '')
+    output['statusCode'] = output.get('statusCode', 200)
+    output['headers'] = output.get('headers', {})
+
+    resp = FlaskResponse(output['body'], output['statusCode'])
+
+    for key in output['headers'].keys():
+        if not key.startswith('x-open-runtimes-'):
+            resp.headers[key] = output['headers'][key]
+
+    # TODO: URL encode
+    resp.headers['x-open-runtimes-logs'] = '\n'.join(context._logs)
+    resp.headers['x-open-runtimes-errors'] = '\n'.join(context._errors)
+
+    return resp
 
 if __name__ == "__main__":
     from waitress import serve

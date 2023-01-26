@@ -2,7 +2,7 @@ FROM python:3.10-alpine3.15
 
 LABEL maintainer="team@appwrite.io"
 
-ENV INTERNAL_RUNTIME_ENTRYPOINT=main.py
+ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
 
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code

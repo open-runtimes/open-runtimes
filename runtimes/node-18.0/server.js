@@ -6,7 +6,7 @@ const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
     if (req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
-        return send(res, 500, 'Unauthorized');
+        return send(res, 500, 'Unauthorized. Provide "x-open-runtimes-secret" header.');
     }
 
     const logs = [];
@@ -109,12 +109,12 @@ const server = micro(async (req, res) => {
         }
     } catch (e) {
         context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
-        output = context.res.send('', 500);
+        output = context.res.send('', 500, {});
     }
 
     if(output === null || output === undefined) {
         context.error('Return statement missing. return context.res.empty() if no response is expected.');
-        output = context.res.send('', 500);
+        output = context.res.send('', 500, {});
     }
 
     output.body = output.body ?? '';

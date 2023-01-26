@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: Python310
 // Entrypoint: tests.py
 
-class Python310 extends Base
+class Python310 extends BaseV3
 {
 }
