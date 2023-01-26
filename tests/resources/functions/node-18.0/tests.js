@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
 module.exports = async (context) => {
-    const action = context.req.headers['X-Action'];
+    const action = context.req.headers['x-action'];
 
     switch (action) {
         case 'plaintextResponse':
@@ -21,7 +21,7 @@ module.exports = async (context) => {
         case 'headersResponse':
             return context.res.send('OK', 200, {
                 'first-header': 'first-value',
-                'second-header': context.req.headers['X-Open-Runtimes-Custom-In-Header'] ?? 'missing',
+                'second-header': context.req.headers['x-open-runtimes-custom-in-header'] ?? 'missing',
                 'x-open-runtimes-custom-out-header': 'third-value'
             });
         case 'statusResponse':
