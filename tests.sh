@@ -3,7 +3,7 @@ set -e
 cd runtimes/${RUNTIME}
 docker build -t open-runtimes/test-runtime .
 cd ../../
-cd tests/${RUNTIME}
+cd tests/resources/functions/${RUNTIME}
 echo "Building..."
 touch code.tar.gz
 tar --exclude code.tar.gz -czf code.tar.gz .
@@ -19,6 +19,6 @@ wait_count=0
 #     sleep $wait_interval
 # done
 sleep $wait_interval
-cd ../../
+cd ../../../../
 echo "Running tests..."
 INTERNAL_RUNTIME_KEY=test-secret-key vendor/bin/phpunit --configuration phpunit.xml tests/${PHP_CLASS}.php
