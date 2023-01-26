@@ -102,7 +102,6 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(headers: ['x-action' => 'emptyResponse']);
         self::assertEquals(204, $response['code']);
         self::assertEmpty($response['body']);
-        // self::assertEquals('0', $response['headers']['content-length']);
     }
 
     public function testNoResponse(): void
