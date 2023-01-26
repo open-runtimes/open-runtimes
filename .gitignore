@@ -2,8 +2,6 @@ vendor
 .phpunit.result.cache
 
 tests/**/code.tar.gz
-tests/**/resources
-!tests/resources
 
 # Node
 tests/**/node_modules
