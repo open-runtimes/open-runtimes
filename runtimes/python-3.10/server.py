@@ -36,14 +36,14 @@ class Response:
         }
 
     def json(self, obj, statusCode = 200, headers = {}):
-        headers['Content-Type'] = 'application/json'
+        headers['content-type'] = 'application/json'
         return self.send(json.dumps(obj), statusCode, headers)
     
     def empty(self):
         return self.send('', 204, {})
 
     def redirect(self, url, statusCode = 301, headers = {}):
-        headers['Location'] = url
+        headers['location'] = url
         return self.send('', statusCode, headers)
 
 class Request:
