@@ -9,5 +9,5 @@ def main(context):
 
     return context.res.json({
         'message': 'Hello Open Runtimes 👋',
-        'todo': todo
+        'headers': todo
     })

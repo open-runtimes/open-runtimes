@@ -6,7 +6,7 @@ const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
     if (req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
-        return send(res, 500, 'Unauthorized. Provide "x-open-runtimes-secret" header.');
+        return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
     const logs = [];

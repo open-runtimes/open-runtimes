@@ -78,6 +78,8 @@ def main(context):
 
 - The default entrypoint is `main.py`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.py`.
 
+- Flask title-cases all headers. If you provide header `my-key`, you can access it in context by doing `context.req.headers.get('My-Key')`. Doing it with key `my-key` will not provide the header value.
+
 ## Authors
 
 **Eldad Fux**

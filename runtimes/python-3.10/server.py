@@ -78,18 +78,18 @@ HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'T
 @app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
 @app.route('/<path:u_path>', methods = HTTP_METHODS)
 def handler(u_path):
-    if (request.headers.get('x-open-runtimes-secret') != os.getenv('OPEN_RUNTIMES_SECRET')):
-        return 'Unauthorized. Provide "x-open-runtimes-secret" header.', 500
+    if (request.headers.get('X-Open-Runtimes-Secret') != os.getenv('OPEN_RUNTIMES_SECRET')):
+        return 'Unauthorized. Provide correct "x-open-runtimes-secret" header.', 500
 
     context = Context()
 
     context.req.rawBody = request.get_data(as_text=True)
     context.req.body = context.req.rawBody
     context.req.method = request.method
-    context.req.url = request.base_url
+    context.req.url = request.url
     context.req.headers = {}
 
-    contentType = request.headers.get('content-type', 'text/plain')
+    contentType = request.headers.get('Content-Type', 'text/plain')
     if 'application/json' in contentType:
         context.req.body = request.get_json(force=True, silent=False)
 
