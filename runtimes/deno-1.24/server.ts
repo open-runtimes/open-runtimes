@@ -1,88 +1,140 @@
 import { Application } from "https://deno.land/x/oak@v10.6.0/mod.ts";
-import * as path from "https://deno.land/std@0.152.0/path/mod.ts";
 
 const USER_CODE_PATH = '/usr/code-start';
 
 const app = new Application();
 
 app.use(async (ctx) => {
-  const { value } = ctx.request.body({ type: 'json' });
-  const body = await value;
-
-  if (ctx.request.headers.get("x-internal-challenge") !== Deno.env.get("INTERNAL_RUNTIME_KEY")) {
+  if (ctx.request.headers.get("x-open-runtimes-secret") !== Deno.env.get("OPEN_RUNTIMES_SECRET")) {
     ctx.response.status = 500;
-    ctx.response.body = {stderr: "Unauthorized"};
+    ctx.response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.';
     return;
   }
-
-  const request = {
-    variables: body.variables ?? {},
-    headers: body.headers ?? {},
-    payload: body.payload ?? ''
+  const logs: string[] = [];
+  const errors: string[] = [];
+  const response: any = {
+      headers: {},
+      body: '',
+      statusCode: 200,
   };
 
-  const stdlog = console.log.bind(console);
-  const stderror = console.error.bind(console);
-  const stdinfo = console.info.bind(console);
-  const stddebug = console.debug.bind(console);
-  const stdwarn = console.warn.bind(console);
+  const contentType = ctx.request.headers.get('content-type') ?? 'text/plain';
+  const rawBody: string = await ctx.request.body({ type: 'text' }).value;
+  let body: any = rawBody;
 
-  const logs: any[] = [];
-  const errors: any[] = [];
-
-  console.log = console.info = console.debug = console.warn = function() {
-    const args:any[] = [];
-    Array.from(arguments).forEach(arg => {
-        if(arg instanceof Object || Array.isArray(arg)) {    
-            args.push(JSON.stringify(arg));
-        } else {
-            args.push(arg)
-        }
-    });
-    logs.push(args.join(" "));
+  if (contentType.includes('application/json')) {
+    body = await ctx.request.body({ type: 'json' }).value;
   }
 
-  console.error = function() {
-    const args:any[] = [];
-    Array.from(arguments).forEach(arg => {
-        if(arg instanceof Object || Array.isArray(arg)) {    
-            args.push(JSON.stringify(arg));
-        } else {
-            args.push(arg)
-        }
-    });
-    errors.push(args.join(" "));
+  const headers: any = {};
+  Array.from(ctx.request.headers.keys()).filter((header: any) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header: any) => {
+    headers[header.toLowerCase()] = ctx.request.headers.get(header);
+  });
+
+  let url = ctx.request.url.pathname;
+
+  if(ctx.request.url.href.includes('?')) {
+    url += `?${ctx.request.url.href.split('?')[1]}`;
   }
 
-  const response = {
-    send: (text: string, status = 200) => {
-      ctx.response.status = status;
-      ctx.response.body = {response: text, stdout: logs.join('\n'), stderr: errors.join('\n')};
+  const context: any = {
+    req: {
+      rawBody,
+      body,
+      headers,
+      method: ctx.request.method,
+      url
     },
-    json: (json: Record<string, unknown>, status = 200) => {
-      ctx.response.status = status;
-      ctx.response.body = {response: json, stdout: logs.join('\n'), stderr: errors.join('\n')};
-    }
+    res: {
+      send: function (body, statusCode = 200, headers = {}) {
+        if (body !== undefined) { response.body = body; }
+        if (statusCode !== undefined) { response.statusCode = statusCode; }
+        if (headers !== undefined) { response.headers = headers; }
+
+        return {
+          body: response.body,
+          statusCode: response.statusCode,
+          headers: response.headers
+        }
+      },
+      json: function (obj, statusCode = 200, headers = {}) {
+        headers['content-type'] = 'application/json';
+        return this.send(JSON.stringify(obj), statusCode, headers);
+      },
+      empty: function () {
+        return this.send('', 204, {});
+      },
+      redirect: function (url, statusCode = 301, headers = {}) {
+        headers['location'] = url;
+        return this.send('', statusCode, headers);
+      }
+    },
+    log: function () {
+      const args: string[] = [];
+      for (const arg of Array.from(arguments)) {
+        if (arg instanceof Object || Array.isArray(arg)) {
+          args.push(JSON.stringify(arg));
+        } else {
+          args.push(arg);
+        }
+      }
+      logs.push(args.join(" "));
+    },
+    error: function () {
+      const args: string[] = [];
+      for (const arg of Array.from(arguments)) {
+        if (arg instanceof Object || Array.isArray(arg)) {
+          args.push(JSON.stringify(arg));
+        } else {
+          args.push(arg);
+        }
+      }
+      errors.push(args.join(" "));
+    },
   };
 
+  console.log = console.info = console.debug = console.warn = console.error = function() {
+    logs.push('Unsupported log noticed. Use context.log() or context.error() for logging.');
+  }
+
+  let output: any = null;
   try {
-    const userFunction = (await import(USER_CODE_PATH + '/' + Deno.env.get("INTERNAL_RUNTIME_ENTRYPOINT"))).default;
+    const userFunction = (await import(USER_CODE_PATH + '/' + Deno.env.get("OPEN_RUNTIMES_ENTRYPOINT"))).default;
 
     if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
-      throw new Error("User function is not valid.")
+      throw new Error("User function is not valid.");
     }
 
-    await userFunction(request, response);
-  } catch (error) {
-    ctx.response.status = 500;
-    ctx.response.body = {stdout: logs.join('\n'), stderr: errors.join('\n') + "\n" + error.message.includes("Cannot resolve module") ? 'Code file not found.' : error.stack || error.message};
+    output = await userFunction(context);
+  } catch(e: any) {
+    context.error(e.message.includes("Cannot resolve module") ? "Code file not found." : e.stack || e);
+    output = context.res.send('', 500, {});
   }
 
-  console.log = stdlog;
-  console.error = stderror;
-  console.debug = stddebug;
-  console.warn = stdwarn;
-  console.info = stdinfo;
+  if(output === null || output === undefined) {
+    context.error('Return statement missing. return context.res.empty() if no response is expected.');
+    output = context.res.send('', 500, {});
+  }
+
+  output.body = output.body ?? '';
+  output.statusCode = output.statusCode ?? 200;
+  output.headers = output.headers ?? {};
+
+  for (const header in output.headers) {
+    if(header.toLowerCase().startsWith('x-open-runtimes-')) {
+      continue;
+    }
+    
+    ctx.response.headers.set(header.toLowerCase(), output.headers[header]);
+  }
+
+  ctx.response.headers.set('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
+  ctx.response.headers.set('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));	
+
+  ctx.response.status = output.statusCode;
+  if(output.statusCode !== 204) {
+    ctx.response.body = output.body;
+  }
 });
 
 await app.listen({ port: 3000 });

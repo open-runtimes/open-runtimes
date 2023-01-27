@@ -57,7 +57,7 @@ env:
       SERVER_PROCESS=server.ts
       IMAGE=openruntimes/deno:${VERSION}-1.24
       ARCH=linux/amd64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
     # Python
     - RUNTIME=python-3.10

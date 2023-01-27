@@ -1,6 +1,6 @@
 const fs = require("fs");
 const micro = require("micro");
-const { text: parseText, json: parseJson, buffer: parseBuffer, send } = require("micro");
+const { text: parseText, json: parseJson, send } = require("micro");
 
 const USER_CODE_PATH = '/usr/code-start';
 
