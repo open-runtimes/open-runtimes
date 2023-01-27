@@ -70,8 +70,8 @@ You can also make changes to the example code and apply the changes with the `do
 - When writing function for this runtime, ensure it is exported as default one. An example of this is:
 
 ```typescript
-export default async function(req: any, res: any) {
-    res.send('Hello Open Runtimes 👋');
+export default async function(context: any) {
+    return context.res.send('Hello Open Runtimes 👋');
 }
 ```
 
