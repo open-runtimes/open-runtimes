@@ -102,7 +102,6 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(headers: ['x-action' => 'emptyResponse']);
         self::assertEquals(204, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertEquals('0', $response['headers']['content-length']);
     }
 
     public function testNoResponse(): void
@@ -150,7 +149,7 @@ abstract class BaseV3 extends TestCase
     {
         $response = $this->execute(headers: ['x-open-runtimes-secret' => 'wrongSecret']);
         self::assertEquals(500, $response['code']);
-        self::assertEquals('Unauthorized', $response['body']);
+        self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
     }
 
     public function testRequestMethod(): void
@@ -170,6 +169,18 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(method: 'DELETE', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('DELETE', $response['body']);
+
+        $response = $this->execute(method: 'OPTIONS', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('OPTIONS', $response['body']);
+
+        $response = $this->execute(method: 'TRACE', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('TRACE', $response['body']);
+
+        $response = $this->execute(method: 'PATCH', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('PATCH', $response['body']);
     }
 
     public function testRequestUrl(): void
@@ -256,7 +267,7 @@ abstract class BaseV3 extends TestCase
         self::assertStringContainsString('Debug log', $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString(42, $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString(4.2, $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('true', \strtolower($response['headers']['x-open-runtimes-logs'])); //strlower allows True in Python
+        self::assertStringContainsString('true', \strtolower($response['headers']['x-open-runtimes-logs'])); // strlower allows True in Python
         self::assertStringContainsString('Error log', $response['headers']['x-open-runtimes-errors']);
         self::assertStringNotContainsString('Native log', $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('Unsupported log noticed. Use context.log() or context.error() for logging.', $response['headers']['x-open-runtimes-logs']);

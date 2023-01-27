@@ -19,7 +19,11 @@ module.exports = async (context) => {
             context.res.send('This should be ignored.');
             return context.res.send('This should be returned.');
         case 'headersResponse':
-            return context.res.send('OK', 200, { 'first-header': 'first-value', 'second-header': context.req.headers['x-open-runtimes-custom-in-header'] ?? 'missing', 'x-open-runtimes-custom-out-header': 'third-value' });
+            return context.res.send('OK', 200, {
+                'first-header': 'first-value',
+                'second-header': context.req.headers['x-open-runtimes-custom-in-header'] ?? 'missing',
+                'x-open-runtimes-custom-out-header': 'third-value'
+            });
         case 'statusResponse':
             return context.res.send('FAIL', 404);
         case 'requestMethod':
@@ -37,7 +41,10 @@ module.exports = async (context) => {
                 raw: context.req.rawBody
             })
         case 'envVars':
-            return context.res.json({ var: process.env.CUSTOM_ENV_VAR, emptyVar: process.env.NOT_DEFINED_VAR ?? null });
+            return context.res.json({
+                var: process.env.CUSTOM_ENV_VAR,
+                emptyVar: process.env.NOT_DEFINED_VAR ?? null
+            });
         case 'logs':
             console.log('Native log');
             context.log('Debug log');
@@ -47,7 +54,7 @@ module.exports = async (context) => {
             context.log(4.2);
             context.log(true);
 
-            return context.res.send();
+            return context.res.send('');
         default:
             throw new Error('Unkonwn action');
     }

@@ -6,7 +6,7 @@ const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
     if (req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
-        return send(res, 500, 'Unauthorized');
+        return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
     const logs = [];
@@ -26,8 +26,8 @@ const server = micro(async (req, res) => {
     }
 
     const headers = {};
-    Object.keys(req.headers).filter((header) => !header.startsWith('x-open-runtimes-')).forEach((header) => {
-        headers[header] = req.headers[header];
+    Object.keys(req.headers).filter((header) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header) => {
+        headers[header.toLowerCase()] = req.headers[header];
     });
 
     const context = {
@@ -51,14 +51,14 @@ const server = micro(async (req, res) => {
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
-                headers['Content-Type'] = 'application/json';
+                headers['content-type'] = 'application/json';
                 return this.send(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
                 return this.send('', 204, {});
             },
             redirect: function (url, statusCode = 301, headers = {}) {
-                headers['Location'] = url;
+                headers['location'] = url;
                 return this.send('', statusCode, headers);
             }
         },
@@ -109,12 +109,12 @@ const server = micro(async (req, res) => {
         }
     } catch (e) {
         context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
-        output = context.res.send('', 500);
+        output = context.res.send('', 500, {});
     }
 
     if(output === null || output === undefined) {
         context.error('Return statement missing. return context.res.empty() if no response is expected.');
-        output = context.res.send('', 500);
+        output = context.res.send('', 500, {});
     }
 
     output.body = output.body ?? '';
@@ -122,11 +122,11 @@ const server = micro(async (req, res) => {
     output.headers = output.headers ?? {};
 
     for (const header in output.headers) {
-        if(header.startsWith('x-open-runtimes-')) {
+        if(header.toLowerCase().startsWith('x-open-runtimes-')) {
             continue;
         }
         
-        res.setHeader(header, output.headers[header]);
+        res.setHeader(header.toLowerCase(), output.headers[header]);
     }
 
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
