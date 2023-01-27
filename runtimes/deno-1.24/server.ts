@@ -12,11 +12,6 @@ app.use(async (ctx) => {
   }
   const logs: string[] = [];
   const errors: string[] = [];
-  const response: any = {
-      headers: {},
-      body: '',
-      statusCode: 200,
-  };
 
   const contentType = ctx.request.headers.get('content-type') ?? 'text/plain';
   const rawBody: string = await ctx.request.body({ type: 'text' }).value;
@@ -47,14 +42,10 @@ app.use(async (ctx) => {
     },
     res: {
       send: function (body, statusCode = 200, headers = {}) {
-        if (body !== undefined) { response.body = body; }
-        if (statusCode !== undefined) { response.statusCode = statusCode; }
-        if (headers !== undefined) { response.headers = headers; }
-
         return {
-          body: response.body,
-          statusCode: response.statusCode,
-          headers: response.headers
+          body: body,
+          statusCode: statusCode,
+          headers: headers
         }
       },
       json: function (obj, statusCode = 200, headers = {}) {
