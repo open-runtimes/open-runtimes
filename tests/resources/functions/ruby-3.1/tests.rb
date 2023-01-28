@@ -15,6 +15,7 @@ def main(context)
         return context.res.empty()
     when 'noResponse'
         context.res.send('This should be ignored, as it is not returned.')
+        return nil
     when 'doubleResponse'
         context.res.send('This should be ignored.')
         return context.res.send('This should be returned.')

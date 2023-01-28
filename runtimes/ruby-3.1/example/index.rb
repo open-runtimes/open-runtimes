@@ -7,7 +7,7 @@ def main(context)
     todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + (payload['id'] || '1')).body)
 
     return context.res.json({
-        :message => 'Hello Open Runtimes 👋',
-        :todo => todo
+        'message' => 'Hello Open Runtimes 👋',
+        'todo' => todo
     })
 end

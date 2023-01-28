@@ -22,8 +22,8 @@ class Response
   end
 
   def redirect(url, statusCode = 301, headers = {})
-  headers['location'] = url
-  return self.send(obj.to_json, statusCode, headers)
+    headers['location'] = url
+    return self.send('', statusCode, headers)
   end
 end
 
@@ -125,11 +125,8 @@ def handle(request, response)
   contextRes = Response.new
   context = Context.new(contextReq, contextRes)
 
-  system_out = $customstd
-  system_err = $customstd
-  customstd = StringIO.new
-  $customstd = customstd
-
+  customstd = nil
+  
   output = nil
 
   begin
@@ -139,7 +136,15 @@ def handle(request, response)
       raise 'User function is not valid.'
     end
 
+
+    system_out = $stdout
+    system_err = $stderr
+    customstd = StringIO.new
+    $stdout = customstd
+    $stderr = customstd
+
     output = main(context)
+
     # TODO: Re-define system_out again. Same for all runtimes
   rescue Exception => e
     context.error(e)
@@ -164,7 +169,7 @@ def handle(request, response)
     output['headers'] = {}
   end
 
-  output['headers'] do |header, value|
+  output['headers'].each do |header, value|
     if !header.downcase.start_with?('x-open-runtimes-')
       response.headers[header.downcase] = value
     end
