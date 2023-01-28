@@ -1,36 +1,72 @@
 require 'httparty'
 require 'json'
 
-#    'req' variable has:
-#        'headers' - object with request headers
-#        'payload' - object with request body data
-#        'variables' - object with function variables
-#    'res' variable has:
-#        'send(text, status)' - function to return text response. Status code defaults to 200
-#        'json(obj, status)' - function to return JSON response. Status code defaults to 200
-#    
-#    If an error is thrown, a response with code 500 will be returned.
+def main(context)
+    action = context.req.headers['x-action'] || ''
 
-def main(req, res)
-    payload = JSON.parse(req.payload === '' ? '{}' : req.payload)
+    case action
+    when 'plaintextResponse'
+        return context.res.send('Hello World 👋')
+    when 'jsonResponse'
+        return context.res.json({ 'json': true, 'message': 'Developers are awesome.' })
+    when 'redirectResponse'
+        return context.res.redirect('https://github.com/')
+    when 'emptyResponse'
+        return context.res.empty()
+    when 'noResponse'
+        context.res.send('This should be ignored, as it is not returned.')
+    when 'doubleResponse'
+        context.res.send('This should be ignored.')
+        return context.res.send('This should be returned.')
+    when 'headersResponse'
+        return context.res.send('OK', 200, {
+            'first-header': 'first-value',
+            'second-header': context.req.headers['x-open-runtimes-custom-in-header'] || 'missing',
+            'x-open-runtimes-custom-out-header': 'third-value'
+        })
+    when 'statusResponse'
+        return context.res.send('FAIL', 404)
+    when 'requestMethod'
+        return context.res.send(context.req.method)
+    when 'requestUrl'
+        return context.res.send(context.req.url)
+    when 'requestHeaders'
+        return context.res.json(context.req.headers)
+    when 'requestBodyPlaintext'
+        return context.res.send(context.req.body)
+    when 'requestBodyJson'
+        key1 = nil
+        key2 = nil
 
-    todo = JSON.parse(HTTParty.get("https://jsonplaceholder.typicode.com/todos/" + (payload['id'] || '1')).body)
+        if context.req.body.instance_of?(String)
+            key1 = 'Missing key'
+            key2 = 'Missing key'
+        else
+            key1 = context.req.body['key1'] || 'Missing key'
+            key2 = context.req.body['key2'] || 'Missing key'
+        end
 
-    puts 'String1'
-    puts 42
-    puts 4.2
-    puts true
+        return context.res.json({
+            'key1': key1,
+            'key2': key2,
+            'raw': context.req.rawBody
+        })
+    when 'envVars'
+        return context.res.json({
+            'var': ENV['CUSTOM_ENV_VAR'] || nil,
+            'emptyVar': ENV['NOT_DEFINED_VAR'] || nil
+        })
+    when 'logs'
+        print('Native log')
+        context.log('Debug log')
+        context.error('Error log')
 
-    puts "String2"
-    puts "String3"
-    puts "String4"
-    puts "String5"
-    
-    return res.json({
-        'isTest': true,
-        'message': 'Hello Open Runtimes 👋',
-        'todo': todo,
-        'header': req.headers['x-test-header'],
-        'variable': req.variables['test-variable']
-    })
+        context.log(42)
+        context.log(4.2)
+        context.log(true)
+
+        return context.res.send('')
+    else
+        raise 'Unkonwn action'
+    end
 end
