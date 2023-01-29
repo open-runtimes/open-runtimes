@@ -18,7 +18,7 @@ void main() async {
     dynamic body = rawBody;
     String method = req.method;
     String url = '/' + req.url.path;
-    Map<String, dynamic> headers = {};
+    Map<String, String> headers = {};
 
     if(!req.url.query.isEmpty) {
       url += '?' + req.url.query;
