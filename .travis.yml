@@ -190,7 +190,7 @@ env:
       SERVER_PROCESS="java-runtime-1.0.0"
       IMAGE=openruntimes/java:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
     # C++
     - RUNTIME=cpp-17

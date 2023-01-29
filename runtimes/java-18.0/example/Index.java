@@ -8,12 +8,8 @@ import com.google.gson.Gson;
 
 final Gson gson = new Gson();
 
-public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exception {
-    String payloadString = req.getPayload() == null || req.getPayload().isEmpty() 
-        ? "{}" 
-        : req.getPayload();
-
-    Map<String, Object> payload = gson.fromJson(payloadString, Map.class);
+public RuntimeOutput main(RuntimeContext context) throws Exception {
+    Map<String, Object> payload = (Map<String, Object>) context.req.body;
 
     String id = "1";
     if (payload.containsKey("id") && payload.get("id") != null) {
@@ -40,5 +36,5 @@ public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exce
     data.put("message", "Hello Open Runtimes 👋");
     data.put("todo", todo);
 
-    return res.json(data);
+    return context.res.json(data);
 }

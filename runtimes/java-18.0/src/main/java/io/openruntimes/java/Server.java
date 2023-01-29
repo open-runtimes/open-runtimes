@@ -14,14 +14,18 @@ public class Server {
 
     public static void main(String[] args) {
         On.port(3000);
-        On.post("/").plain(Server::execute);
+        On.get("/*").plain(Server::execute);
+
+        // GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD, TRACE)
     }
 
     public static Resp execute(Req req, Resp resp) {
+        return resp.result("Works!");
+        /*
         if (!req.headers().containsKey("x-internal-challenge") || req.headers().get("x-internal-challenge").isEmpty()) {
             return resp.code(500).result("Unauthorized");
         }
-        if (!req.headers().get("x-internal-challenge").equals(System.getenv("INTERNAL_RUNTIME_KEY"))) {
+        if (!req.headers().get("x-internal-challenge").equals(System.getenv("OPEN_RUNTIMES_SECRET"))) {
             return resp.code(500).result("Unauthorized");
         }
 
@@ -57,5 +61,6 @@ public class Server {
             System.setOut(systemOut);
             System.setErr(systemErr);
         }
+        */
     }
 }

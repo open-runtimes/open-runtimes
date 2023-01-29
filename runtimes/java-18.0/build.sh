@@ -17,13 +17,13 @@ for filename in ./*.gradle*; do
 done
 
 # Read user code and collect imports
-CODE="$(cat "$INTERNAL_RUNTIME_ENTRYPOINT")"
+CODE="$(cat "$OPEN_RUNTIMES_ENTRYPOINT")"
 IMPORTS=""
 while read line; do
     case "${line}" in import*)
         IMPORTS="${IMPORTS}${line}\n"
     esac
-done < "$INTERNAL_RUNTIME_ENTRYPOINT"
+done < "$OPEN_RUNTIMES_ENTRYPOINT"
 CODE=$(echo "${CODE}" | sed /import*/d)
 
 # Wrap the user code in a class
@@ -34,7 +34,7 @@ ${CODE}
 }" > Wrapper.java
 
 # Remove the user code file (copy)
-rm "${INTERNAL_RUNTIME_ENTRYPOINT}"
+rm "${OPEN_RUNTIMES_ENTRYPOINT}"
 
 # Build the jar
 cd /usr/local/src
