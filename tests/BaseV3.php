@@ -196,6 +196,10 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(url: '/path?key=value', headers: ['x-action' => 'requestUrl']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('/path?key=value', $response['body']);
+
+        $response = $this->execute(url: '/path#segment', headers: ['x-action' => 'requestUrl']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('/path', $response['body']);
     }
 
     public function testRequestHeaders(): void

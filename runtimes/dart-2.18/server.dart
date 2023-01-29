@@ -10,56 +10,67 @@ import 'function_types.dart';
 
 void main() async {
   await shelf_io.serve((req) async {
-    List<String> userLogs = [];
-    if (req.method != 'POST') {
-      return shelf.Response(500, body: 'Invalid request');
+    if (req.headers['x-open-runtimes-secret'] != Platform.environment['OPEN_RUNTIMES_SECRET']) {
+      return shelf.Response(500, body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
-    if (req.headers['x-internal-challenge'] !=
-        Platform.environment['INTERNAL_RUNTIME_KEY']) {
-      return shelf.Response(500, body: 'Unauthorized');
-    }
-    final headers = {
-      'content-type': 'application/json'
-    };
-    
-    try {
-      final bodystring = await req.readAsString();
-      final body = jsonDecode(bodystring);
-      final request = Request(
-        variables: body['variables'] ?? {},
-        headers: body['headers'] ?? {},
-        payload: body['payload'] ?? '',
-      );
 
-      final response = Response();
-      await runZonedGuarded(
-        () async {
-          await user_code.start(request, response);
-        },
-        (e, stackTrace) => print('$e $stackTrace'),
-        zoneSpecification: ZoneSpecification(
-          print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-            userLogs.add(line);
-          },
-        ),
-      );
-      return shelf.Response.ok(
-          jsonEncode({
-            "response": response.body,
-            "stdout": userLogs.join('\n'),
-            "stderr": ""
-          }),
-          headers: headers);
-    } on FormatException catch (_) {
-      return shelf.Response(500, body: jsonEncode({
-        'stderr': 'Unable to properly load request body',
-        'stdout': userLogs.join('\n')
-      }), headers: headers);
-    } catch (e) {
-      return shelf.Response(500, body: jsonEncode({
-        'stderr': e.toString(),
-        'stdout': userLogs.join('\n'),
-      }), headers: headers);
+    String rawBody = await req.readAsString();
+    dynamic body = rawBody;
+    String method = req.method;
+    String url = '/' + req.url.path;
+    Map<String, dynamic> headers = {};
+
+    if(!req.url.query.isEmpty) {
+      url += '?' + req.url.query;
     }
+
+    for (MapEntry entry in req.headers.entries) {
+      String header = entry.key.toLowerCase();
+      if(!header.startsWith('x-open-runtimes-')) {
+        headers[header] = entry.value;
+      }
+    }
+
+    String contentType = req.headers['content-type'] ?? 'plain/text';
+    if(contentType.contains('application/json')) {
+      body = jsonDecode(rawBody);
+    }
+
+    Request contextReq = new Request(rawBody: rawBody, body: body, headers: headers, method: method, url: url);
+    Response contextRes = new Response();
+    Context context = new Context(contextReq, contextRes);
+
+    dynamic output = null;
+    try {
+      output = await user_code.start(context);
+    } catch (e) {
+      context.error(e.toString());
+      output = context.res.send('', 500, const {});
+    }
+
+    if(output == null) {
+      context.error('Return statement missing. return context.res.empty() if no response is expected.');
+      output = context.res.send('', 500, const {});
+    }
+
+    output['body'] = output['body'] ?? '';
+    output['statusCode'] = output['statusCode'] ?? 200;
+    output['headers'] = output['headers'] ?? {};
+
+    // TODO: If custom stdout, add log
+
+    Map<String, String> responseHeaders = {};
+
+    for (MapEntry entry in output['headers'].entries) {
+      String header = entry.key.toLowerCase();
+      if(!header.startsWith('x-open-runtimes-')) {
+        responseHeaders[header] = entry.value;
+      }
+    }
+
+    responseHeaders['x-open-runtimes-logs'] = Uri.encodeFull(context.logs.join('\n'));
+    responseHeaders['x-open-runtimes-errors'] = Uri.encodeFull(context.errors.join('\n'));
+
+    return shelf.Response(output['statusCode'], body: output['body'], headers: responseHeaders);
   }, '0.0.0.0', 3000);
 }

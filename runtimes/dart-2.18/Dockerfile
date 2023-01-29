@@ -2,7 +2,7 @@ FROM dart:2.18
 
 LABEL maintainer="team@appwrite.io"
 
-ENV INTERNAL_RUNTIME_ENTRYPOINT=lib/main.dart
+ENV OPEN_RUNTIMES_ENTRYPOINT=lib/main.dart
 
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/local/src/user_code

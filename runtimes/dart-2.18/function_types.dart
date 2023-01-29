@@ -1,33 +1,73 @@
 import 'dart:convert';
 
 class Request {
-  final Map<String, dynamic> variables;
-  final Map<String, dynamic> headers;
-  final String payload;
+  String rawBody;
+  dynamic body;
+  Map<String, dynamic> headers;
+  String method;
+  String url;
 
-  Request({
-    this.variables = const {},
-    this.headers = const {},
-    this.payload = '',
-  });
+  Request({ String rawBody = '', dynamic body = '', Map<String, dynamic> headers = const {}, String method = '', String url = '' })
+    : rawBody = rawBody, body = body, headers = headers, method = method, url = url {
+  }
 }
 
 class Response {
-  int _status = 200;
-  dynamic _text;
-
-  int get status => _status;
-  dynamic get body => _text;
-
-  Response send(String? text, {int status = 200}) {
-    _text = text;
-    _status = status;
-    return this;
+  dynamic send(String body, [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
+    return {
+      'body': body,
+      'statusCode': statusCode,
+      'headers': headers,
+    };
   }
 
-  Response json(Map<String, dynamic> json, {int status = 200}) {
-    _text = json;
-    _status = status;
-    return this;
+  dynamic json(Map<String, dynamic> json, [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
+    var headersMerged = {
+      ...headers,
+      'content-type': 'application/json'
+    };
+    return this.send(jsonEncode(json), statusCode, headersMerged);
+  }
+
+  dynamic empty() {
+    return this.send('', 204, const {});
+  }
+
+  dynamic redirect(String url, [int statusCode = 301, Map<String, dynamic> headers = const {}]) {
+    var headersMerged = {
+      ...headers,
+      'location': url
+    };
+    return this.send('', statusCode, headersMerged);
+  }
+}
+
+class Context {
+  Request req;
+  Response res;
+
+  List<String> _logs = [];
+  List<String> _errors = [];
+  	
+  List<String> get logs {
+    return _logs;
+  }
+
+  List<String> get errors {
+    return _errors;
+  }
+
+  Context(Request req, Response res)
+    : req = req, res = res {
+  }
+
+  // TODO: Support for infinite parameters
+  // TODO: Support for objects (stringify)
+  void log(dynamic message) {
+    this._logs.add(message.toString());
+  }
+
+  void error(dynamic message) {
+    this._errors.add(message.toString());
   }
 }
