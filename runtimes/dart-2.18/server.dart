@@ -40,9 +40,20 @@ void main() async {
     Response contextRes = new Response();
     Context context = new Context(contextReq, contextRes);
 
+    String customstd = "";
+
     dynamic output = null;
     try {
-      output = await user_code.start(context);
+      await runZoned(
+        () async {
+          output = await user_code.start(context);
+        },
+        zoneSpecification: ZoneSpecification(
+          print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+            customstd += line;
+          },
+        ),
+      );
     } catch (e) {
       context.error(e.toString());
       output = context.res.send('', 500, const {});
@@ -57,8 +68,6 @@ void main() async {
     output['statusCode'] = output['statusCode'] ?? 200;
     output['headers'] = output['headers'] ?? {};
 
-    // TODO: If custom stdout, add log
-
     Map<String, String> responseHeaders = {};
 
     for (MapEntry entry in output['headers'].entries) {
@@ -66,6 +75,10 @@ void main() async {
       if(!header.startsWith('x-open-runtimes-')) {
         responseHeaders[header] = entry.value;
       }
+    }
+
+    if(!customstd.isEmpty) {
+      context.log('Unsupported log noticed. Use context.log() or context.error() for logging.');
     }
 
     responseHeaders['x-open-runtimes-logs'] = Uri.encodeFull(context.logs.join('\n'));
