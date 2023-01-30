@@ -1,13 +1,12 @@
 package io.openruntimes.java;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.Gson;
 
 import java.util.Map;
 import java.util.HashMap;
 
 public class RuntimeResponse {
-    private static final Gson gson = new Gson();
-
     public RuntimeOutput send(String body, int statusCode, Map<String, String> headers) {
         return new RuntimeOutput(body, statusCode, headers);
     }
@@ -19,6 +18,8 @@ public class RuntimeResponse {
     }
 
     public RuntimeOutput json(Map<String, Object> json, int statusCode, Map<String, String> headers) {
+        Gson gson = new GsonBuilder().serializeNulls().create();
+
         headers.put("content-type", "application/json");
         return this.send(gson.toJson(json), statusCode, headers);
     }

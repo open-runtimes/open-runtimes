@@ -33,6 +33,7 @@ public RuntimeOutput main(RuntimeContext context) throws Exception {
     Map<String, Object> todo = gson.fromJson(todoBuffer.toString(), Map.class);
 
     Map<String, Object> data = new HashMap<>();
+    data.put("r", context.req.headers);
     data.put("message", "Hello Open Runtimes 👋");
     data.put("todo", todo);
 
