@@ -29,14 +29,14 @@ build() {
     done
 
 
-    case ${INTERNAL_RUNTIME_ENTRYPOINT##*.} in 
+    case ${OPEN_RUNTIMES_ENTRYPOINT##*.} in 
         cs) write_cs_wrapper ;;
         fs) write_fs_wrapper ;;
         vb) write_vb_wrapper ;;
     esac
 
     # Remove the user code file (copy)
-    rm "${INTERNAL_RUNTIME_ENTRYPOINT}"
+    rm "${OPEN_RUNTIMES_ENTRYPOINT}"
 
     # Build the executable
     cd /usr/local/src
@@ -55,8 +55,8 @@ write_cs_wrapper() {
             USINGS="${USINGS}${line}
             "
         esac
-    done < "$INTERNAL_RUNTIME_ENTRYPOINT"
-    CODE="$(sed /using*/d "$INTERNAL_RUNTIME_ENTRYPOINT")"
+    done < "$OPEN_RUNTIMES_ENTRYPOINT"
+    CODE="$(sed /using*/d "$OPEN_RUNTIMES_ENTRYPOINT")"
 
     # Wrap the user code in a class
     echo "${USINGS}
@@ -75,8 +75,8 @@ write_fs_wrapper() {
             OPENS="${OPENS}${line}
             "
         esac
-    done < "$INTERNAL_RUNTIME_ENTRYPOINT"
-    CODE="$(sed /open*/d "$INTERNAL_RUNTIME_ENTRYPOINT" | sed 's/^/        /')"
+    done < "$OPEN_RUNTIMES_ENTRYPOINT"
+    CODE="$(sed /open*/d "$OPEN_RUNTIMES_ENTRYPOINT" | sed 's/^/        /')"
     # Wrap the user code in a class
     echo "namespace DotNetRuntime
     ${OPENS}
@@ -95,8 +95,8 @@ write_vb_wrapper() {
             IMPORTS="${IMPORTS}${line}
             "
         esac
-    done < "$INTERNAL_RUNTIME_ENTRYPOINT"
-    CODE="$(sed /using*/d "$INTERNAL_RUNTIME_ENTRYPOINT")"
+    done < "$OPEN_RUNTIMES_ENTRYPOINT"
+    CODE="$(sed /using*/d "$OPEN_RUNTIMES_ENTRYPOINT")"
 
     # Wrap the user code in a class
     echo "${IMPORTS}

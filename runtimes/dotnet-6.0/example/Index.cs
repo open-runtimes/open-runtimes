@@ -2,21 +2,20 @@ using Newtonsoft.Json;
 
 static readonly HttpClient http = new();
 
-public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
+public async Task<RuntimeOutput> Main(RuntimeContext context)
 {
     string id = "1";
-    if (!string.IsNullOrEmpty(req.Payload))
+
+    if (!(context.req.body is String))
     {
-        var payload = JsonConvert.DeserializeObject<Dictionary<string, object>>(req.Payload, settings: null);
-        id = payload?.TryGetValue("id", out var value) == true
-            ? value.ToString()!
-            : "1";
+        Dictionary<string, object> body = (Dictionary<string, object>) context.req.body;
+        id = body.TryGetValue("id", out var value) ? (string) value : "1";
     }
 
     var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{id}");
     var todo = JsonConvert.DeserializeObject<Dictionary<string, object>>(response, settings: null);
 
-    return res.Json(new()
+    return context.res.json(new()
     {
         { "message", "Hello Open Runtimes 👋" },
         { "todo", todo }

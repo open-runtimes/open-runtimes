@@ -1,35 +1,40 @@
 namespace DotNetRuntime;
 
+using System.Text.Json;
+
 public class RuntimeResponse
 {
-    public object Data { get; set; }
-    public int StatusCode { get; set; }
-
-    public RuntimeResponse(
-        string data = "",
-        int statusCode = 200)
+    public RuntimeOutput send(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
     {
-        Data = data;
-        StatusCode = statusCode;
+        if(headers == null) {
+            headers = new Dictionary<string,string>();
+        }
+
+        return new RuntimeOutput(body, statusCode, headers);
     }
 
-    public RuntimeResponse Send(
-        string data,
-        int statusCode = 200)
+    public RuntimeOutput json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = null)
     {
-        Data = data;
-        StatusCode = statusCode;
-        return this;
+        if(headers == null) {
+            headers = new Dictionary<string,string>();
+        }
+
+        headers.Add("content-type", "application/json");
+        return this.send(JsonSerializer.Serialize(json), statusCode, headers);
     }
 
-    public RuntimeResponse Json(
-        Dictionary<string, object?> data,
-        int statusCode = 200)
+    public RuntimeOutput empty()
     {
-        Data = data;
-        StatusCode = statusCode;
-        return this;
+        return this.send("", 204, new Dictionary<string, string>());
+    }
+
+    public RuntimeOutput redirect(String url, int statusCode = 200, Dictionary<string, string>? headers = null)
+    {
+        if(headers == null) {
+            headers = new Dictionary<string,string>();
+        }
+
+        headers.Add("location", url);
+        return this.send("", statusCode, headers);
     }
 }
-
-

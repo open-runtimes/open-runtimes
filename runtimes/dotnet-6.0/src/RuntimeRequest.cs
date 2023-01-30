@@ -2,13 +2,20 @@ namespace DotNetRuntime
 {
 	public class RuntimeRequest
 	{
-		public string Payload { get; set; } = "";
+		public string rawBody { get; set; }
+		public object body { get; set; }
+		public Dictionary<string, string> headers { get; set; }
+		public string method { get; set; }
+		public string url { get; set; }
 
-		public Dictionary<string, string> Variables { get; set; } =
-			new Dictionary<string, string>();
-
-		public Dictionary<string, string> Headers { get; set; } =
-			new Dictionary<string, string>();
+		public RuntimeRequest(string rawBody, object body, Dictionary<string, string> headers, string method, string url)
+		{
+			this.rawBody = rawBody;
+			this.body = body;
+			this.headers = headers;
+			this.method = method;
+			this.url = url;
+		}
 	}
 }
 
