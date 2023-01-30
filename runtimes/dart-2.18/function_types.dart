@@ -3,17 +3,17 @@ import 'dart:convert';
 class Request {
   String rawBody;
   dynamic body;
-  Map<String, String> headers;
+  Map<String, dynamic> headers;
   String method;
   String url;
 
-  Request({ String rawBody = '', dynamic body = '', Map<String, String> headers = const {}, String method = '', String url = '' })
+  Request({ String rawBody = '', dynamic body = '', Map<String, dynamic> headers = const {}, String method = '', String url = '' })
     : rawBody = rawBody, body = body, headers = headers, method = method, url = url {
   }
 }
 
 class Response {
-  dynamic send(String body, [int statusCode = 200, Map<String, String> headers = const {}]) {
+  dynamic send(String body, [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
     return {
       'body': body,
       'statusCode': statusCode,
@@ -21,7 +21,7 @@ class Response {
     };
   }
 
-  dynamic json(Map<String, dynamic> json, [int statusCode = 200, Map<String, String> headers = const {}]) {
+  dynamic json(Map<String, dynamic> json, [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
     var headersMerged = {
       ...headers,
       'content-type': 'application/json'
@@ -33,7 +33,7 @@ class Response {
     return this.send('', 204, const {});
   }
 
-  dynamic redirect(String url, [int statusCode = 301, Map<String, String> headers = const {}]) {
+  dynamic redirect(String url, [int statusCode = 301, Map<String, dynamic> headers = const {}]) {
     var headersMerged = {
       ...headers,
       'location': url
