@@ -4,15 +4,11 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
-private val gson = Gson()
-
 @Throws(Exception::class)
-fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse {
+fun main(context: RuntimeContext): RuntimeOutput {
+    val gson = Gson()
 
-    val payload = gson.fromJson<Map<String, Any>>(
-        req.payload.ifEmpty { "{}" },
-        MutableMap::class.java
-    )
+    val payload = context.req.body as MutableMap<String, Any>
 
     val id = payload["id"] ?: "1"
 
@@ -35,7 +31,7 @@ fun main(req: RuntimeRequest, res: RuntimeResponse): RuntimeResponse {
         MutableMap::class.java
     )
 
-    return res.json(mapOf(
+    return context.res.json(mutableMapOf(
         "message" to "Hello Open Runtimes 👋",
         "todo" to todo
     ))

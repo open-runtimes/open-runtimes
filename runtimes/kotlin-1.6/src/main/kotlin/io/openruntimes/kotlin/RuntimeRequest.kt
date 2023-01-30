@@ -1,16 +1,17 @@
 package io.openruntimes.kotlin
 
-import io.javalin.http.Context
-
-class RuntimeRequest(ctx: Context) {
-    var payload = ""
-    var headers = mutableMapOf<String, String>()
-    var variables = mutableMapOf<String, String>()
+public class RuntimeRequest(rawBody: String, body: Any, headers: MutableMap<String, String>, method: String, url: String) {
+    var rawBody: String
+    var body: Any
+    var headers: MutableMap<String, String>
+    var method: String
+    var url: String
 
     init {
-        val data = ctx.bodyAsClass<Map<String, Any>>()
-        payload = data["payload"] as? String ?: ""
-        headers = data["headers"] as? MutableMap<String, String> ?: mutableMapOf()
-        variables = data["variables"] as? MutableMap<String, String> ?: mutableMapOf()
+        this.rawBody = rawBody
+        this.body = body
+        this.headers = headers
+        this.method = method
+        this.url = url
     }
 }
