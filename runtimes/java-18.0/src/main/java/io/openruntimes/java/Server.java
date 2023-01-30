@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import com.google.gson.GsonBuilder;
 import com.google.gson.Gson;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -50,7 +51,7 @@ public class Server {
 
         String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
         if(contentType.contains("application/json")) {
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder().serializeNulls().create();
             body = gson.fromJson(rawBody, Map.class);
         }
 
