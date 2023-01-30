@@ -86,8 +86,9 @@ const server = micro(async (req, res) => {
         },
     };
 
+    let customstd = "";
     console.log = console.info = console.debug = console.warn = console.error = function() {
-        logs.push('Unsupported log noticed. Use context.log() or context.error() for logging.');
+        customstd += "Native log";
     }
 
     let output = null;
@@ -127,6 +128,10 @@ const server = micro(async (req, res) => {
         }
         
         res.setHeader(header.toLowerCase(), output.headers[header]);
+    }
+
+    if(customstd) {
+        context.log('Unsupported log noticed. Use context.log() or context.error() for logging.');
     }
 
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));

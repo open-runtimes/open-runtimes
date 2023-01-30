@@ -84,8 +84,9 @@ app.use(async (ctx) => {
     },
   };
 
+  let customstd = "";
   console.log = console.info = console.debug = console.warn = console.error = function() {
-    logs.push('Unsupported log noticed. Use context.log() or context.error() for logging.');
+    customstd += "Native log";
   }
 
   let output: any = null;
@@ -117,6 +118,10 @@ app.use(async (ctx) => {
     }
     
     ctx.response.headers.set(header.toLowerCase(), output.headers[header]);
+  }
+
+  if(customstd) {
+    context.log('Unsupported log noticed. Use context.log() or context.error() for logging.');
   }
 
   ctx.response.headers.set('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
