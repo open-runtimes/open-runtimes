@@ -112,7 +112,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     }
 
     if($output == null) {
-        $context->error('Return statement missing. return context.res.empty() if no response is expected.');
+        $context->error('Return statement missing. return $context->res->empty() if no response is expected.');
         $output = $context->res->send('', 500, []);
     }
 
@@ -127,7 +127,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     }
 
     if(!empty($customstd)) {
-        $context->log('Unsupported log noticed. Use context.log() or context.error() for logging.');
+        $context->log('Unsupported log noticed. Use $context->log() or $context->error() for logging.');
     }
 
     $res->header('x-open-runtimes-logs', \urlencode(\implode('\n', $context->_logs)));
