@@ -47,7 +47,7 @@ class Response:
         return self.send('', statusCode, headers)
 
 class Request:
-    rawBody = None
+    raw_body = None
     body = None
     headers = None
     method = None
@@ -90,8 +90,8 @@ def handler(u_path):
     if query:
         path += '?' + query
 
-    context.req.rawBody = request.get_data(as_text=True)
-    context.req.body = context.req.rawBody
+    context.req.raw_body = request.get_data(as_text=True)
+    context.req.body = context.req.raw_body
     context.req.method = request.method
     context.req.url = path
     context.req.headers = {}

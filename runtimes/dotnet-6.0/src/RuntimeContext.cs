@@ -4,24 +4,26 @@ namespace DotNetRuntime
 {
 	public class RuntimeContext
 	{
-		public RuntimeRequest req { get; set; }
-		public RuntimeResponse res { get; set; }
+		public RuntimeRequest Req { get; set; }
+		public RuntimeResponse Res { get; set; }
 
-		public ArrayList _logs = new ArrayList();
-		public ArrayList _errors = new ArrayList();
+		public ArrayList _Logs = new ArrayList();
+		public ArrayList _Errors = new ArrayList();
 
-		public RuntimeContext(RuntimeRequest req, RuntimeResponse res)
+		public RuntimeContext(RuntimeRequest Req, RuntimeResponse Res)
 		{
-			this.req = req;
-			this.res = res;
+			this.Req = Req;
+			this.Res = Res;
 		}
 
-		public void log(object message) {
-			this._logs.Add(message.ToString());
+		public void Log(object Message)
+		{
+			this._Logs.Add(Message.ToString());
 		}
 
-		public void error(object message) {
-			this._errors.Add(message.ToString());
+		public void Error(object Message)
+		{
+			this._Errors.Add(Message.ToString());
 		}
 	}
 }

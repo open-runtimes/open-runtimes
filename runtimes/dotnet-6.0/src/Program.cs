@@ -11,80 +11,87 @@ app.Urls.Add("http://0.0.0.0:3000");
 app.MapMethods("/{*path}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE" }, Execute);
 app.Run();
 
-static async Task<IResult> Execute(HttpRequest request)
+static async Task<IResult> Execute(HttpRequest Request)
 {
-    string secret = request.Headers.TryGetValue("x-open-runtimes-secret", out var secretValue) ? (string) secretValue : "";
-    if(secret != Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET")) {
+    string Secret = Request.Headers.TryGetValue("x-open-runtimes-secret", out var SecretValue) ? (string) SecretValue : "";
+    if(Secret != Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET"))
+    {
         return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
     }
 
-    StreamReader reader = new StreamReader(request.Body);
-    string rawBody = await reader.ReadToEndAsync();
-    object body = rawBody;
-    Dictionary<string, string> headers = new Dictionary<string, string>();
-    string method = request.Method;
-    string url = request.Path + request.QueryString;
+    StreamReader Reader = new StreamReader(Request.Body);
+    string RawBody = await Reader.ReadToEndAsync();
+    object Body = RawBody;
+    Dictionary<string, string> Headers = new Dictionary<string, string>();
+    string Method = Request.Method;
+    string Url = Request.Path + Request.QueryString;
 
-    foreach (var entry in request.Headers) {
-        var header = entry.Key;
-        var value = entry.Value;
-        header = header.ToLower();
+    foreach (var Entry in Request.Headers)
+    {
+        var Header = Entry.Key;
+        var Value = Entry.Value;
+        Header = Header.ToLower();
 
-        if(!(header.StartsWith("x-open-runtimes-"))) {
-            headers.Add(header, value);
+        if(!(Header.StartsWith("x-open-runtimes-")))
+        {
+            Headers.Add(Header, Value);
         }
     }
 
-    string contentType = request.Headers.TryGetValue("content-type", out var contentTypeValue) ? (string) contentTypeValue : "";
-    if(contentType.Contains("application/json")) {
-        body = JsonConvert.DeserializeObject<Dictionary<string, object>>(rawBody);
+    string ContentType = Request.Headers.TryGetValue("content-type", out var ContentTypeValue) ? (string) ContentTypeValue : "";
+    if(ContentType.Contains("application/json"))
+    {
+        Body = JsonConvert.DeserializeObject<Dictionary<string, object>>(RawBody);
     }
 
-    RuntimeRequest contextRequest = new RuntimeRequest(rawBody, body, headers, method, url);
-    RuntimeResponse contextResponse = new RuntimeResponse();
-    RuntimeContext context = new RuntimeContext(contextRequest, contextResponse);
+    RuntimeRequest ContextRequest = new RuntimeRequest(RawBody, Body, Headers, Method, Url);
+    RuntimeResponse ContextResponse = new RuntimeResponse();
+    RuntimeContext Context = new RuntimeContext(ContextRequest, ContextResponse);
 
-    var customstd = new StringBuilder();
-    var customstdWriter = new StringWriter(customstd);
-    Console.SetOut(customstdWriter);
-    Console.SetError(customstdWriter);
+    var Customstd = new StringBuilder();
+    var CustomstdWriter = new StringWriter(Customstd);
+    Console.SetOut(CustomstdWriter);
+    Console.SetError(CustomstdWriter);
 
-    RuntimeOutput? output = null;
+    RuntimeOutput? Output = null;
 
     try
     {
-        var codeWrapper = new Wrapper();
-        output = await codeWrapper.Main(context);
+        var CodeWrapper = new Wrapper();
+        Output = await CodeWrapper.Main(Context);
     }
     catch (Exception e)
     {
-        context.error(e.ToString());
-        output = context.res.send("", 500, new Dictionary<string,string>());
+        Context.Error(e.ToString());
+        Output = Context.Res.Send("", 500, new Dictionary<string,string>());
     }
 
-    if(output == null) {
-        context.error("Return statement missing. return context.res.empty() if no response is expected.");
-        output = context.res.send("", 500, new Dictionary<string,string>());
+    if(Output == null)
+    {
+        Context.Error("Return statement missing. return Context.Res.Empty() if no response is expected.");
+        Output = Context.Res.Send("", 500, new Dictionary<string,string>());
     }
 
-    var outputHeaders = new Dictionary<string, string>();
+    var OutputHeaders = new Dictionary<string, string>();
 
-    foreach (var entry in output.headers) {
-        var header = entry.Key;
-        var value = entry.Value;
-        header = header.ToLower();
+    foreach (var Entry in Output.Headers)
+    {
+        var Header = Entry.Key;
+        var Value = Entry.Value;
+        Header = Header.ToLower();
 
-        if(!(header.StartsWith("x-open-runtimes-"))) {
-            outputHeaders.Add(header, value);
+        if(!(Header.StartsWith("x-open-runtimes-")))
+        {
+            OutputHeaders.Add(Header, Value);
         }
     }
 
-    if(String.IsNullOrEmpty(customstd.ToString())) {
-        context.log("Unsupported log noticed. Use context.log() or context.error() for logging.");
+    if(!String.IsNullOrEmpty(Customstd.ToString())) {
+        Context.Log("Unsupported log noticed. Use Context.Log() or Context.Error() for logging.");
     }
 
-    outputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(String.Join('\n', context._logs)));
-    outputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(String.Join('\n', context._errors)));
+    OutputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(String.Join("\n", Context._Logs.Cast<string>().ToArray())));
+    OutputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(String.Join("\n", Context._Errors.Cast<string>().ToArray())));
 
-    return new CustomResponse(output.body, output.statusCode, outputHeaders);
+    return new CustomResponse(Output.Body, Output.StatusCode, OutputHeaders);
 }

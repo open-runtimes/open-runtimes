@@ -109,7 +109,7 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(headers: ['x-action' => 'noResponse']);
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertStringContainsString('Return statement missing. return context.res.empty() if no response is expected.', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString('Return statement missing.', $response['headers']['x-open-runtimes-errors']);
     }
 
     public function testDoubleResponse(): void
@@ -270,6 +270,6 @@ abstract class BaseV3 extends TestCase
         self::assertStringContainsString('true', \strtolower($response['headers']['x-open-runtimes-logs'])); // strlower allows True in Python
         self::assertStringContainsString('Error log', $response['headers']['x-open-runtimes-errors']);
         self::assertStringNotContainsString('Native log', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Unsupported log noticed. Use context.log() or context.error() for logging.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Unsupported log noticed.', $response['headers']['x-open-runtimes-logs']);
     }
 }

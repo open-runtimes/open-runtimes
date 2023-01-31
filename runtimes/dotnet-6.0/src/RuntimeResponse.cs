@@ -4,37 +4,39 @@ using System.Text.Json;
 
 public class RuntimeResponse
 {
-    public RuntimeOutput send(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
+    public RuntimeOutput Send(string Body, int StatusCode = 200, Dictionary<string, string>? Headers = null)
     {
-        if(headers == null) {
-            headers = new Dictionary<string,string>();
+        if(Headers == null)
+        {
+            Headers = new Dictionary<string,string>();
         }
 
-        return new RuntimeOutput(body, statusCode, headers);
+        return new RuntimeOutput(Body, StatusCode, Headers);
     }
 
-    public RuntimeOutput json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = null)
+    public RuntimeOutput Json(Dictionary<string, object?> Json, int StatusCode = 200, Dictionary<string, string>? Headers = null)
     {
-        if(headers == null) {
-            headers = new Dictionary<string,string>();
+        if(Headers == null)
+        {
+            Headers = new Dictionary<string,string>();
         }
 
-        headers.Add("content-type", "application/json");
-        return this.send(JsonSerializer.Serialize(json), statusCode, headers);
+        Headers.Add("content-type", "application/json");
+        return this.Send(JsonSerializer.Serialize(Json), StatusCode, Headers);
     }
 
-    public RuntimeOutput empty()
+    public RuntimeOutput Empty()
     {
-        return this.send("", 204, new Dictionary<string, string>());
+        return this.Send("", 204, new Dictionary<string, string>());
     }
 
-    public RuntimeOutput redirect(String url, int statusCode = 200, Dictionary<string, string>? headers = null)
+    public RuntimeOutput Redirect(String Url, int StatusCode = 301, Dictionary<string, string>? Headers = null)
     {
-        if(headers == null) {
-            headers = new Dictionary<string,string>();
+        if(Headers == null) {
+            Headers = new Dictionary<string,string>();
         }
 
-        headers.Add("location", url);
-        return this.send("", statusCode, headers);
+        Headers.Add("location", Url);
+        return this.Send("", StatusCode, Headers);
     }
 }

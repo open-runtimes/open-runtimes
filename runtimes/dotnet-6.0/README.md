@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir dotnet-or && cd dotnet-or
-printf "public async Task<RuntimeOutput> Main(RuntimeContext context) => context.res.Json(new() {{ \"n\", new System.Random().NextDouble() }} );" > Index.cs
+printf "public async Task<RuntimeOutput> Main(RuntimeContext Context) => Context.Res.Json(new() {{ \"n\", new System.Random().NextDouble() }} );" > Index.cs
 ```
 
 2. Build the code:
@@ -70,8 +70,8 @@ You can also make changes to the example code and apply the changes with the `do
 - When writing function for this runtime, ensure it is named `Main`. An example of this is:
 
 ```cs
-public async Task<RuntimeOutput> Main(RuntimeContext context) => 
-    context.res.send("Hello Open Runtimes 👋");
+public async Task<RuntimeOutput> Main(RuntimeContext Context) => 
+    Context.Res.Send("Hello Open Runtimes 👋");
 ```
 
 - To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically cached and installed, so you don't need to include the `.nuget` folder in your function.

@@ -2,15 +2,15 @@ namespace DotNetRuntime
 {
 	public class RuntimeOutput
 	{
-		public string body { get; set; }
-		public int statusCode { get; set; }
-		public Dictionary<string, string> headers { get; set; }
+		public string Body { get; set; }
+		public int StatusCode { get; set; }
+		public Dictionary<string, string> Headers { get; set; }
 
-		public RuntimeOutput(string body, int statusCode, Dictionary<string, string> headers)
+		public RuntimeOutput(string Body, int StatusCode, Dictionary<string, string> Headers)
 		{
-			this.body = body;
-			this.statusCode = statusCode;
-			this.headers = headers;
+			this.Body = Body;
+			this.StatusCode = StatusCode;
+			this.Headers = Headers;
 		}
 	}
 }

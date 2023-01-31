@@ -47,7 +47,7 @@ def main(context):
         return context.res.json({
             'key1': key1,
             'key2': key2,
-            'raw': context.req.rawBody
+            'raw': context.req.raw_body
         })
     elif action == 'envVars':
         return context.res.json({
