@@ -18,14 +18,12 @@ class RuntimeContext(req: RuntimeRequest, res: RuntimeResponse) {
         this._errors = arrayListOf<String>()
     }
 
-    fun log(message: Any): Void? {
+    fun log(message: Any) {
         this._logs.add(message.toString())
-        return null
     }
 
-    fun error(message: Any): Void? {
+    fun error(message: Any) {
         this._errors.add(message.toString())
-        return null
     }
 }
 
