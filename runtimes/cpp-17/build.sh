@@ -18,8 +18,8 @@ while read -r line; do
         INCLUDES="${INCLUDES}${line}
         "
     esac
-done < "${INTERNAL_RUNTIME_ENTRYPOINT}"
-CODE="$(sed "/#include*/d" "${INTERNAL_RUNTIME_ENTRYPOINT}")"
+done < "${OPEN_RUNTIMES_ENTRYPOINT}"
+CODE="$(sed "/#include*/d" "${OPEN_RUNTIMES_ENTRYPOINT}")"
 
 # Wrap the user code in a class
 echo "
@@ -27,6 +27,8 @@ echo "
 #define CPP_RUNTIME_WRAPPER_H
 #include \"RuntimeResponse.h\"
 #include \"RuntimeRequest.h\"
+#include \"RuntimeOutput.h\"
+#include \"RuntimeContext.h\"
 ${INCLUDES}
 namespace runtime {
     class Wrapper {
@@ -38,7 +40,7 @@ namespace runtime {
 " > src/Wrapper.h
 
 # Remove the user code file
-rm "${INTERNAL_RUNTIME_ENTRYPOINT}"
+rm "${OPEN_RUNTIMES_ENTRYPOINT}"
 rm "CMakeCache.txt" >/dev/null || true
 
 # Build the executable

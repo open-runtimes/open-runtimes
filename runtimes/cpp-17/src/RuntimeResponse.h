@@ -3,29 +3,28 @@
 
 #include <string>
 #include <json/value.h>
-#include "RuntimeRequest.h"
+#include "RuntimeOutput.h"
 
 namespace runtime
 {
     struct RuntimeResponse
     {
-        std::string stringValue;
-        Json::Value jsonValue;
-        int statusCode{200};
-
-        RuntimeResponse &json(const Json::Value &json, int code = 200)
+        RuntimeOutput &send(const std::string &body, int statusCode = 200, Json::Value headers = {})
         {
-            jsonValue = json;
-            statusCode = code;
-            return *this;
+            RuntimeOutput* output;
+            output->body = body;
+            output->statusCode = statusCode;
+            output->headers = headers;
+            return output;
         }
 
-        RuntimeResponse &send(const std::string &string, int code = 200)
+        RuntimeOutput &json(const Json::Value &json, int statusCode = 200, Json::Value headers = {})
         {
-            stringValue = string;
-            statusCode = code;
-            return *this;
+            headers["content-type"] = "application/json";
+            return this->send(json.toStyledString(), statusCode, headers);
         }
+
+        // empty, redirect
     };
 }
 

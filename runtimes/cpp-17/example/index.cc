@@ -8,31 +8,13 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
     return size * nmemb;
 }
 
-static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res)
+static RuntimeOutput &main(const RuntimeContext &context)
 {
-    std::string headerData = req.headers["x-test-header"].asString();
-    std::string variableData = req.variables["test-variable"].asString();
-    std::string id;
+    Json::Value payload = context.req.body;
+    std::string id = payload["id"].asString();
 
     Json::CharReaderBuilder builder;
     Json::CharReader *reader = builder.newCharReader();
-    Json::Value payload;
-
-    bool parsingSuccessful = reader->parse(
-        req.payload.c_str(),
-        req.payload.c_str() + req.payload.size(),
-        &payload,
-        nullptr
-    );
-
-    if (parsingSuccessful)
-    {
-        id = payload["id"].asString();
-    }
-    if (id.empty())
-    {
-        id = "1";
-    }
 
     CURL *curl;
     CURLcode curlRes;
@@ -62,8 +44,6 @@ static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res)
     Json::Value response;
     response["message"] = "Hello Open Runtimes 👋";
     response["todo"] = todo;
-    response["header"] = headerData;
-    response["variable"] = variableData;
 
-    return res.json(response);
+    return context.res.json(response);
 }

@@ -1,6 +1,7 @@
 #include <drogon/drogon.h>
 #include "RuntimeResponse.h"
 #include "RuntimeRequest.h"
+#include "RuntimeOutput.h"
 #include "Wrapper.h"
 
 using namespace std;
@@ -17,8 +18,14 @@ int main()
                function<void(const HttpResponsePtr &)> &&callback, const RuntimeRequest &runtimeRequest)
             {
                 const std::shared_ptr<HttpResponse> res = HttpResponse::newHttpResponse();
+                res->setStatusCode(static_cast<HttpStatusCode>(201));
+                res->setBody("Heyyy");
+                callback(res);
 
-                if (req->getHeader("x-internal-challenge") != std::getenv("INTERNAL_RUNTIME_KEY"))
+                /*
+                const std::shared_ptr<HttpResponse> res = HttpResponse::newHttpResponse();
+
+                if (req->getHeader("x-internal-challenge") != std::getenv("OPEN_RUNTIMES_SECRET"))
                 {
                     res->setStatusCode(static_cast<HttpStatusCode>(500));
                     res->setBody("Unauthorized");
@@ -60,6 +67,7 @@ int main()
                 std::cerr.rdbuf(olderr);
 
                 callback(res);
+                */
             },
             {Post})
         .run();
