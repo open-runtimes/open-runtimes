@@ -3,7 +3,14 @@
 set -e
 
 build() {
-    cp -a /usr/code/. /usr/local/src/
+    mkdir -p /usr/builds
+    cp -a /usr/code/. /usr/builds/
+
+    if [[ ! -f "usr/builds/Function.csproj" ]]; then
+        mv /usr/local/src/Function.csproj.callback /usr/builds/Function.csproj
+    fi
+
+    cp -a /usr/builds/. /usr/local/src/
 
     cd /usr/local/src/
 
@@ -40,7 +47,12 @@ build() {
 
     # Build the executable
     cd /usr/local/src
-    dotnet publish DotNetRuntime.csproj -c Release
+
+    INSTALL_COMMAND=${1:-''}
+    BUILD_COMMAND=${2:-'dotnet publish DotNetRuntime.csproj -c Release'}
+
+    eval "$INSTALL_COMMAND"
+    eval "$BUILD_COMMAND"
 
     # Tar the executable
     cd /usr/local/src/bin/Release/net6.0/publish/

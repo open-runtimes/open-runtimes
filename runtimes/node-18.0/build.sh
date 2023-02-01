@@ -10,9 +10,8 @@ cp -R /usr/code/* /usr/builds
 cd /usr/builds
 
 # Ensure package.json exists
-if [ ! -f package.json ]
-  then
-    npm init --yes
+if [[ ! -f "package.json" ]]; then
+    mv /usr/local/src/package.json.fallback /usr/builds/package.json
 fi
 
 INSTALL_COMMAND=${1:-'npm install'}

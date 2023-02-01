@@ -6,6 +6,9 @@ mkdir -p /usr/local/src/src/main/kotlin/io/openruntimes/kotlin
 cp -a /usr/code/. /usr/local/src/src/main/kotlin/io/openruntimes/kotlin
 
 cd /usr/local/src/src/main/kotlin/io/openruntimes/kotlin
+if [[ ! -f "deps.gradle" ]]; then
+    mv /usr/local/src/deps.gradle.fallback /usr/local/src/src/main/kotlin/io/openruntimes/kotlin/deps.gradle
+fi
 
 # Apply all gradle files to the root project
 for filename in ./*.gradle*; do
@@ -38,7 +41,12 @@ rm "${INTERNAL_RUNTIME_ENTRYPOINT}"
 
 # Build the jar
 cd /usr/local/src
-sh gradlew buildJar
+
+INSTALL_COMMAND=${1:-''}
+BUILD_COMMAND=${2:-'sh gradlew buildJar'}
+
+eval "$INSTALL_COMMAND"
+eval "$BUILD_COMMAND"
 
 # Tar the jar
 cd /usr/local/src/build/libs/

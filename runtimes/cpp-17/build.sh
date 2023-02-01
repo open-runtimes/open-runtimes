@@ -3,10 +3,17 @@
 # Fail build if any command fails
 set -e
 
-if [ -f "/usr/code/CMakeLists.txt" ]; then
-    # Append User Function Dependencies"
-    cat "/usr/code/CMakeLists.txt" >> "CMakeLists.txt"
+mkdir -p /usr/builds
+cp -R /usr/code/* /usr/builds
+
+if [[ ! -f "usr/builds/CMakeLists.txt" ]]; then
+    mv /usr/local/src/CMakeLists.txt.fallback /usr/builds/CMakeLists.txt
 fi
+
+cd /usr/local/src
+
+# Append User Function Dependencies"
+cat "/usr/builds/CMakeLists.txt" >> "CMakeLists.txt"
 
 # Prepare separate directory to prevent changing user's files
 cp -R --no-clobber /usr/code/* /usr/local/src
@@ -43,8 +50,12 @@ rm "CMakeCache.txt" >/dev/null || true
 
 # Build the executable
 cd /usr/local/src/build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j"$(nproc)"
+
+INSTALL_COMMAND=${1:-'cmake -DCMAKE_BUILD_TYPE=Release ..'}
+BUILD_COMMAND=${2:-'make -j"$(nproc)"'}
+
+eval "$INSTALL_COMMAND"
+eval "$BUILD_COMMAND"
 
 # Finish build by preparing tar to use for starting the runtime
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .

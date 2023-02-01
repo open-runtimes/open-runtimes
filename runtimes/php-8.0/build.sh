@@ -10,13 +10,18 @@ cp -R /usr/code/* /usr/builds
 cd /usr/builds
 if [[ ! -f "composer.json" ]]; then
     mv /usr/local/src/composer.json.fallback /usr/builds/composer.json
-else
-    php /usr/local/src/prepare.php
 fi
 
-# Merge the vendor from the server into the user's vendor to be restored later.
+php /usr/local/src/prepare.php
+
 cd /usr/local/src/
-composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --no-scripts --prefer-dist --no-dev
+
+INSTALL_COMMAND=${1:-'composer install --no-interaction --ignore-platform-reqs --optimize-autoloader --no-scripts --prefer-dist --no-dev'}
+BUILD_COMMAND=${2:-''}
+
+eval "$INSTALL_COMMAND"
+eval "$BUILD_COMMAND"
+
 cp -r /usr/local/src/vendor /usr/builds/vendor
 
 # Finish build by preparing tar to use for starting the runtime

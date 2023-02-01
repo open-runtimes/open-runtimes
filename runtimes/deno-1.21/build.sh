@@ -18,7 +18,12 @@ deno cache server.ts
 
 # Cache user function depdenencies
 cd /usr/builds
-deno cache $INTERNAL_RUNTIME_ENTRYPOINT
+
+INSTALL_COMMAND=${1:-'deno cache $INTERNAL_RUNTIME_ENTRYPOINT'}
+BUILD_COMMAND=${2:-''}
+
+eval "$INSTALL_COMMAND"
+eval "$BUILD_COMMAND"
 
 # Finish build by preparing tar to use for starting the runtime
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .

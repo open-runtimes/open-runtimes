@@ -10,9 +10,16 @@ cp -R /usr/code/* /usr/builds
 cd /usr/builds
 python3 -m venv runtime-env
 source runtime-env/bin/activate
-if [ -f "requirements.txt" ]; then
-    pip install --no-cache-dir -r requirements.txt
+
+if [[ ! -f "requirements.txt" ]]; then
+    mv /usr/local/src/requirements.txt.fallback /usr/builds/requirements.txt
 fi
+
+INSTALL_COMMAND=${1:-'pip install --no-cache-dir -r requirements.txt'}
+BUILD_COMMAND=${2:-''}
+
+eval "$INSTALL_COMMAND"
+eval "$BUILD_COMMAND"
 
 # Merge the requirements from server and user code
 cd /usr/local/src/

@@ -3,7 +3,14 @@
 set -e
 
 build() {
-    cp -a /usr/code/. /usr/local/src/
+    mkdir -p /usr/builds
+    cp -a /usr/code/. /usr/builds/
+
+    if [[ ! -f "usr/builds/Function.csproj" ]]; then
+        mv /usr/local/src/Function.csproj.callback /usr/builds/Function.csproj
+    fi
+
+    cp -a /usr/builds/. /usr/local/src/
 
     cd /usr/local/src/
 

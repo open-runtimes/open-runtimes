@@ -17,6 +17,9 @@ if [ ! -f "pubspec.yaml" ]; then
     cp /usr/local/src/pubspec.yaml.fallback /usr/local/src/user_code/pubspec.yaml
 fi
 
+INSTALL_COMMAND=${1:-'dart pub get'}
+BUILD_COMMAND=${2:-'dart compile exe server.dart -o runtime'}
+
 # Move to prepare_package script directory
 cd /usr/local/src/prepare
 dart pub get
@@ -28,13 +31,14 @@ dart pub get
 
 cd /usr/local/src/user_code
 # Get user code dependencies
-dart pub get
+
+eval "$INSTALL_COMMAND"
 
 # Move back to server directory
 cd /usr/local/src
 
 # Compile the Code
-dart compile exe server.dart -o runtime
+eval "$BUILD_COMMAND"
 
 # Finish build by preparing tar to use for starting the runtime
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz runtime

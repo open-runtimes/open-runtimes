@@ -8,19 +8,25 @@ cp -R /usr/code/* /usr/builds
 
 # Append User Function Dependencies if Gemfile exists
 cd /usr/builds
-if [ -f "Gemfile" ]; then
-    EXISTING_GEMFILE=$(cat /usr/local/src/Gemfile)
-    echo "eval_gemfile '/usr/builds/Gemfile'" >> /usr/local/src/Gemfile
+
+if [[ ! -f "Gemfile" ]]; then
+    mv /usr/local/src/Gemfile.fallback /usr/builds/Gemfile
 fi
+
+EXISTING_GEMFILE=$(cat /usr/local/src/Gemfile)
+echo "eval_gemfile '/usr/builds/Gemfile'" >> /usr/local/src/Gemfile
 
 # Prepare dependencies
 cd /usr/local/src/
 bundle config set --local path 'vendor/bundle'
-bundle install
 
-if [ -f "Gemfile" ]; then
-    echo "${EXISTING_GEMFILE}" > Gemfile
-fi
+INSTALL_COMMAND=${1:-'bundle install'}
+BUILD_COMMAND=${2:-''}
+
+eval "$INSTALL_COMMAND"
+eval "$BUILD_COMMAND"
+
+echo "${EXISTING_GEMFILE}" > Gemfile
 
 # Finish build by preparing tar to use for starting the runtime
 cd /usr/builds
