@@ -5,6 +5,11 @@ mkdir -p userlib
 cd /usr/workspace
 tar -zxf /usr/workspace/code.tar.gz -C /usr/local/src/userlib
 rm /usr/workspace/code.tar.gz
+
+set -o allexport
+source /usr/local/src/userlib/.open-runtimes
+set +o allexport
+
 source /usr/local/src/userlib/runtime-env/bin/activate
 export VIRTUAL_ENV="/usr/local/src/userlib/runtime-env"
 export PATH="$VIRTUAL_ENV/bin:$PATH"
