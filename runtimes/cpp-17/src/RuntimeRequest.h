@@ -10,7 +10,7 @@ namespace runtime
     struct RuntimeRequest
     {
         std::string rawBody;
-        std::any body;
+        Json::Value body; // TODO: std::any
         Json::Value headers;
         std::string method;
         std::string url;
