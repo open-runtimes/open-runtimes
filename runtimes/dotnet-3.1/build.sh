@@ -43,6 +43,10 @@ build() {
 
     # Tar the executable
     cd /usr/local/src/bin/Release/netcoreapp3.1/publish/
+
+    touch .open-runtimes
+    echo "INTERNAL_RUNTIME_ENTRYPOINT=$INTERNAL_RUNTIME_ENTRYPOINT" > .open-runtimes
+    
     tar -czf /usr/code/code.tar.gz .
 }
 

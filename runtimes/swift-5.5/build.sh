@@ -15,4 +15,8 @@ rm "Sources/App/dependencies.swift"
 swift package resolve
 swift build --configuration release
 cp "$(swift build --configuration release --show-bin-path)/Run" /usr/workspace/
+
+touch .open-runtimes
+echo "INTERNAL_RUNTIME_ENTRYPOINT=$INTERNAL_RUNTIME_ENTRYPOINT" > .open-runtimes
+
 tar -zcf /usr/code/code.tar.gz -C /usr/workspace .

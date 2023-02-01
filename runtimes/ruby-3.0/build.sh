@@ -25,4 +25,8 @@ fi
 # Finish build by preparing tar to use for starting the runtime
 cd /usr/builds
 cp -R /usr/local/src/vendor .
+
+touch .open-runtimes
+echo "INTERNAL_RUNTIME_ENTRYPOINT=$INTERNAL_RUNTIME_ENTRYPOINT" > .open-runtimes
+
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .

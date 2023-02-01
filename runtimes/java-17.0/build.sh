@@ -42,4 +42,8 @@ sh gradlew buildJar
 
 # Tar the jar
 cd /usr/local/src/build/libs/
+
+touch .open-runtimes
+echo "INTERNAL_RUNTIME_ENTRYPOINT=$INTERNAL_RUNTIME_ENTRYPOINT" > .open-runtimes
+
 tar -zcvf /usr/code/code.tar.gz .

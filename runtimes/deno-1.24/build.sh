@@ -20,5 +20,8 @@ deno cache server.ts
 cd /usr/builds
 deno cache $INTERNAL_RUNTIME_ENTRYPOINT
 
+touch .open-runtimes
+echo "INTERNAL_RUNTIME_ENTRYPOINT=$INTERNAL_RUNTIME_ENTRYPOINT" > .open-runtimes
+
 # Finish build by preparing tar to use for starting the runtime
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz .

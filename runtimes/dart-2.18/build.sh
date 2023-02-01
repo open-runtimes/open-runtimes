@@ -36,5 +36,8 @@ cd /usr/local/src
 # Compile the Code
 dart compile exe server.dart -o runtime
 
+touch .open-runtimes
+echo "INTERNAL_RUNTIME_ENTRYPOINT=$INTERNAL_RUNTIME_ENTRYPOINT" > runtime/.open-runtimes
+
 # Finish build by preparing tar to use for starting the runtime
 tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz runtime
