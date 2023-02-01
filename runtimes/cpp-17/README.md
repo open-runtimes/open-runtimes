@@ -87,7 +87,7 @@ static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
 
 - To handle dependencies, you need to include a `CMakeLists.txt` file. Dependencies will be automatically cached and installed, so you don't need to include the `build` folder in your function.
 
-- The default entrypoint is `index.cc`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.cc`.
+- The default entrypoint is `index.cc`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable during build, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.cc`.
 
 
 ## Authors

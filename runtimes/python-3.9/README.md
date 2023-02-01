@@ -18,13 +18,13 @@ printf "import random\n\ndef main(req, res):\n    return res.json({'n': random.r
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/python:v2-3.9 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=main.py --rm --interactive --tty --volume $PWD:/usr/code openruntimes/python:v2-3.9 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=main.py --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/python:v2-3.9 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/python:v2-3.9 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -93,7 +93,7 @@ def main(req, res):
 
 - To handle dependencies, you need to have `requirements.txt` file. Dependencies will be automatically cached and installed, so you don't need to include `__pycache__` folder in your function.
 
-- The default entrypoint is `main.py`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.py`.
+- The default entrypoint is `main.py`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable during build, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.py`.
 
 ## Authors
 

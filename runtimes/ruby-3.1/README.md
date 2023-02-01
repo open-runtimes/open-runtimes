@@ -18,13 +18,13 @@ printf "def main(request, response)\n    return response.json({:n => rand()})\ne
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/ruby:v2-3.1 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=index.rb --rm --interactive --tty --volume $PWD:/usr/code openruntimes/ruby:v2-3.1 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=index.rb --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/ruby:v2-3.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/ruby:v2-3.1 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -95,7 +95,7 @@ end
 
 - To handle dependencies, you need to have `Gemfile` file. Dependencies will be automatically cached and installed, so you don't need to include any local denepdencies folder in your function.
 
-- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.rb`.
+- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable during build, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.rb`.
 
 
 ## Authors

@@ -99,7 +99,7 @@ Future<void> start(final req, final res) async {
 
 - To handle dependencies, you need to have `pubspec.yaml` file. Dependencies will be automatically cached and installed, so you don't need to include any dependencies folders in your function.
 
-- The default entrypoint is `lib/main.dart`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=lib/app.dart`.
+- The default entrypoint is `lib/main.dart`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable during build, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=lib/app.dart`.
 
 - Dart function is a Dart library package, which means, your code has to be inside `lib` folder. You can learn more in [Dart documentation](https://dart.dev/guides/libraries/create-library-packages).
 

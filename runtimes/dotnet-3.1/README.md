@@ -24,7 +24,7 @@ docker run -e INTERNAL_RUNTIME_ENTRYPOINT=Index.cs --rm --interactive --tty --vo
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/dotnet:v2-3.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/dotnet:v2-3.1 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -87,7 +87,7 @@ public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res)
 
 - To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically cached and installed, so you don't need to include the `.nuget` folder in your function.
 
-- The default entrypoint is `Index.cs`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/App.cs`.
+- The default entrypoint is `Index.cs`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable during build, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/App.cs`.
 
 ## Authors
 
