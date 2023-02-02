@@ -68,16 +68,10 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     $context = new Context();
 
-    $url = $req->server['path_info'];
-
-    if(!empty($req->server['query_string'])) {
-        $url .= '?' . $req->server['query_string'];
-    }
-
     $context->req->rawBody = $req->getContent();
     $context->req->body = $context->req->rawBody;
     $context->req->method = $req->getMethod();
-    $context->req->url = $url;
+    $context->req->url = $req->header['x-open-runtimes-original-url'] ?? '';
     $context->req->headers = [];
 
     $contentType = $req->header['content-type'] ?? 'text/plain';
