@@ -47,7 +47,7 @@ class Response:
         return self.send('', statusCode, headers)
 
 class Request:
-    rawBody = None
+    bodyString = None
     body = None
     headers = None
     method = None
@@ -94,15 +94,15 @@ def handler(u_path):
     if query:
         path += '?' + query
 
-    context.req.rawBody = request.get_data(as_text=True)
-    context.req.body = context.req.rawBody
+    context.req.bodyString = request.get_data(as_text=True)
+    context.req.body = context.req.bodyString
     context.req.method = request.method
     context.req.url = path
     context.req.headers = {}
 
     contentType = request.headers.get('content-type', 'text/plain')
     if 'application/json' in contentType:
-        if not context.req.rawBody:
+        if not context.req.bodyString:
             context.req.body = {}
         else:
             context.req.body = request.get_json(force=True, silent=False)

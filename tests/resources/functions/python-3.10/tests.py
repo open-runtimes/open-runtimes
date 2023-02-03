@@ -47,7 +47,7 @@ def main(context):
         return context.res.json({
             'key1': key1,
             'key2': key2,
-            'raw': context.req.rawBody
+            'raw': context.req.bodyString
         })
     elif action == 'envVars':
         return context.res.json({
@@ -68,7 +68,7 @@ def main(context):
 
         return context.res.send('')
     elif action == 'library':
-        todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + context.req.rawBody)).json()
+        todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyString)).json()
         return context.res.json({
             'todo': todo
         })

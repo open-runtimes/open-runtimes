@@ -38,7 +38,7 @@ module.exports = async (context) => {
             return context.res.json({
                 key1: context.req.body.key1 ?? 'Missing key',
                 key2: context.req.body.key2 ?? 'Missing key',
-                raw: context.req.rawBody
+                raw: context.req.bodyString
             })
         case 'envVars':
             return context.res.json({
@@ -59,7 +59,7 @@ module.exports = async (context) => {
 
             return context.res.send('');
         case 'library':
-            const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.rawBody}`).then(r => r.json());
+            const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyString}`).then(r => r.json());
             return context.res.json({ todo });
         default:
             throw new Error('Unkonwn action');
