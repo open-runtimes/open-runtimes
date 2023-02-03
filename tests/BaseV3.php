@@ -200,15 +200,42 @@ abstract class BaseV3 extends TestCase
     {
         $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('/', $response['body']);
 
-        $response = $this->execute(url: '/some/path', headers: ['x-action' => 'requestUrl']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('/some/path', $response['body']);
+        $body = \json_decode($response['body'], true);
 
-        $response = $this->execute(url: '/path?key=value', headers: ['x-action' => 'requestUrl']);
+        self::assertEquals(3000, $body['port']);
+        self::assertEquals('/', $body['path']);
+        self::assertIsArray($body['query']);
+        self::assertEmpty($body['query']);
+        self::assertEquals('', $body['queryString']);
+        self::assertEquals('http', $body['scheme']);
+        self::assertEquals('localhost', $body['host']);
+        self::assertEquals('http://localhost:3000/', $body['url']);
+
+        $response = $this->execute(url: '/a/b?c=d&e=f#something', headers: ['x-action' => 'requestUrl', 'x-forwarded-proto' => 'https', 'host' => 'www.mydomain.com:3001']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('/path?key=value', $response['body']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals(3001, $body['port']);
+        self::assertEquals('/a/b', $body['path']);
+        self::assertIsArray($body['query']);
+        self::assertCount(2, $body['query']);
+        self::assertEquals('d', $body['query']['c']);
+        self::assertEquals('f', $body['query']['e']);
+        self::assertEquals('c=d&e=f', $body['queryString']);
+        self::assertEquals('https', $body['scheme']);
+        self::assertEquals('www.mydomain.com', $body['host']);
+        self::assertEquals('https://www.mydomain.com:3001/a/b?c=d&e=f', $body['url']);
+
+        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'www.mydomain.com:80']);
+        self::assertEquals(200, $response['code']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals(80, $body['port']);
+        self::assertEquals('www.mydomain.com', $body['host']);
+        self::assertEquals('http://www.mydomain.com/', $body['url']);
     }
 
     public function testRequestHeaders(): void
