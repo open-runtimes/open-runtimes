@@ -223,7 +223,7 @@ notifications:
     - team@appwrite.io
 
 before_install:
-  - curl -fsSL https://get.docker.com | sh
+  - VERSION="20.10.23" curl -fsSL https://get.docker.com | sh
   - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
   - mkdir -p $HOME/.docker
   - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
