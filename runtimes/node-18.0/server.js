@@ -5,7 +5,7 @@ const { text: parseText, json: parseJson, buffer: parseBuffer, send } = require(
 const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
-    if (req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
+    if ((req.headers[`x-open-runtimes-secret`] ?? '') !== process.env['OPEN_RUNTIMES_SECRET']) {
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
@@ -22,7 +22,11 @@ const server = micro(async (req, res) => {
     let body = rawBody;
 
     if (contentType.includes('application/json')) {
-        body = await parseJson(req);
+        if(rawBody) {
+            body = await parseJson(req);
+        } else {
+            body = {};
+        }
     }
 
     const headers = {};
@@ -62,27 +66,19 @@ const server = micro(async (req, res) => {
                 return this.send('', statusCode, headers);
             }
         },
-        log: function () {
-            const args = [];
-            for (const arg of Array.from(arguments)) {
-                if (arg instanceof Object || Array.isArray(arg)) {
-                    args.push(JSON.stringify(arg));
-                } else {
-                    args.push(arg);
-                }
+        log: function (message) {
+            if (message instanceof Object || Array.isArray(message)) {
+                logs.push(JSON.stringify(message));
+            } else {
+                logs.push(message.toString());
             }
-            logs.push(args.join(" "));
         },
-        error: function () {
-            const args = [];
-            for (const arg of Array.from(arguments)) {
-                if (arg instanceof Object || Array.isArray(arg)) {
-                    args.push(JSON.stringify(arg));
-                } else {
-                    args.push(arg);
-                }
+        error: function (message) {
+            if (message instanceof Object || Array.isArray(message)) {
+                errors.push(JSON.stringify(message));
+            } else {
+                errors.push(message.toString());
             }
-            errors.push(args.join(" "));
         },
     };
 

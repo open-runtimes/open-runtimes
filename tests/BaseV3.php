@@ -293,9 +293,8 @@ abstract class BaseV3 extends TestCase
         self::assertStringContainsString('Error log', $response['headers']['x-open-runtimes-errors']);
         self::assertStringNotContainsString('Native log', $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('Unsupported log noticed. Use context.log() or context.error() for logging.', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('objectKey', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('objectValue', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('arrayValue', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('{"objectKey":"objectValue"}', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('["arrayValue"]', $response['headers']['x-open-runtimes-logs']);
     }
 
     public function testLibrary(): void
@@ -308,6 +307,6 @@ abstract class BaseV3 extends TestCase
         self::assertEquals('1', $body['todo']['userId']);
         self::assertEquals('5', $body['todo']['id']);
         self::assertEquals('laboriosam mollitia et enim quasi adipisci quia provident illum', $body['todo']['title']);
-        self::assertEquals(false, $body['completed']);
+        self::assertEquals(false, $body['todo']['completed']);
     }
 }

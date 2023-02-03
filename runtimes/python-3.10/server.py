@@ -37,7 +37,7 @@ class Response:
 
     def json(self, obj, statusCode = 200, headers = {}):
         headers['content-type'] = 'application/json'
-        return self.send(json.dumps(obj), statusCode, headers)
+        return self.send(json.dumps(obj, separators=(',', ':')), statusCode, headers)
     
     def empty(self):
         return self.send('', 204, {})
@@ -66,20 +66,24 @@ class Context:
         self.req = Request()
         self.res = Response()
 
-    # TODO: Support for infinite parameters
-    # TODO: Support for objects (stringify)
     def log(self, message):
-        self._logs.append(str(message))
+        if isinstance(message, (list, dict, tuple)):
+            self._logs.append(json.dumps(message, separators=(',', ':')))
+        else:
+            self._logs.append(str(message))
 
     def error(self, message):
-        self._errors.append(str(message))
+        if isinstance(message, (list, dict, tuple)):
+            self._errors.append(json.dumps(message, separators=(',', ':')))
+        else:
+            self._errors.append(str(message))
 
 HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
 
 @app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
 @app.route('/<path:u_path>', methods = HTTP_METHODS)
 def handler(u_path):
-    if (request.headers.get('x-open-runtimes-secret') != os.getenv('OPEN_RUNTIMES_SECRET')):
+    if (request.headers.get('x-open-runtimes-secret', '') != os.getenv('OPEN_RUNTIMES_SECRET')):
         return 'Unauthorized. Provide correct "x-open-runtimes-secret" header.', 500
 
     context = Context()
@@ -98,7 +102,10 @@ def handler(u_path):
 
     contentType = request.headers.get('content-type', 'text/plain')
     if 'application/json' in contentType:
-        context.req.body = request.get_json(force=True, silent=False)
+        if not context.req.rawBody:
+            context.req.body = {}
+        else:
+            context.req.body = request.get_json(force=True, silent=False)
 
     headers = dict(request.headers)
     for key in headers.keys():
@@ -121,8 +128,7 @@ def handler(u_path):
 
         output = userModule.main(context)
     except Exception as e:
-        context.error(str(e))
-        # TODO: Get trace
+        context.error(''.join(traceback.TracebackException.from_exception(e).format()))
         output = context.res.send('', 500, {})
 
     if output is None:

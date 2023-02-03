@@ -54,7 +54,13 @@ module.exports = async (context) => {
             context.log(4.2);
             context.log(true);
 
+            context.log({ objectKey: 'objectValue' });
+            context.log([ 'arrayValue' ]);
+
             return context.res.send('');
+        case 'library':
+            const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.rawBody}`).then(r => r.json());
+            return context.res.json({ todo });
         default:
             throw new Error('Unkonwn action');
     }

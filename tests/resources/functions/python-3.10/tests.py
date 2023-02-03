@@ -63,6 +63,14 @@ def main(context):
         context.log(4.2)
         context.log(True)
 
+        context.log({ 'objectKey': 'objectValue' })
+        context.log([ 'arrayValue' ])
+
         return context.res.send('')
+    elif action == 'library':
+        todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + context.req.rawBody)).json()
+        return context.res.json({
+            'todo': todo
+        })
     else:
         raise Exception('Unkonwn action')
