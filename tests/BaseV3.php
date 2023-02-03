@@ -32,7 +32,8 @@ abstract class BaseV3 extends TestCase
         }
 
         $responseHeaders = [];
-        $optArray = array(
+
+        $optArray = [
             CURLOPT_URL => 'http://localhost:3000' . $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$responseHeaders) {
@@ -54,12 +55,16 @@ abstract class BaseV3 extends TestCase
             CURLOPT_POSTFIELDS => \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body,
             CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
             CURLOPT_HTTPHEADER => $headersParsed
-        );
+        ];
         
         \curl_setopt_array($ch, $optArray);
 
         $body = curl_exec($ch);
         $code = curl_getinfo($ch, \CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            \var_dump(curl_error($ch));
+        }
 
         \curl_close($ch);
 
@@ -142,7 +147,7 @@ abstract class BaseV3 extends TestCase
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
         self::assertEmpty($response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Unkonwn action', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString('Unknown action', $response['headers']['x-open-runtimes-errors']);
     }
 
     public function testWrongSecret(): void
