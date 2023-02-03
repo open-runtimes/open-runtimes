@@ -224,6 +224,9 @@ notifications:
 
 before_install:
   - curl -fsSL https://get.docker.com | sh
+  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+  - mkdir -p $HOME/.docker
+  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
   - sudo service docker start
   - >
     if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
@@ -231,7 +234,7 @@ before_install:
     fi
   - docker version
   - docker run --rm --privileged linuxkit/binfmt:v0.8
-  - docker buildx use $(docker buildx create)
+  # - docker buildx use $(docker buildx create) # TEMPORARLY DISABLED DUE TO DOCKER 23.0.0 ISSUES
 
 install:
   - docker version
