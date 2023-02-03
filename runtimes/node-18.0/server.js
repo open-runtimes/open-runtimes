@@ -34,13 +34,35 @@ const server = micro(async (req, res) => {
         headers[header.toLowerCase()] = req.headers[header];
     });
 
+    const scheme = (req.headers['x-forwarded-proto'] ?? '') === 'https' ? 'https' : 'http';
+    const host = req.headers['host'].includes(':') ? req.headers['host'].split(':')[0] : req.headers['host'];
+    const port = +(req.headers['host'].includes(':') ? req.headers['host'].split(':')[1] : '80');
+    const path = req.url.includes('?') ? req.url.split('?')[0] : req.url;
+    const queryString = req.url.includes('?') ? req.url.split('?')[1] : '';
+    const query = {};
+    for(const param of queryString.split('&')) {
+        const [ key, value ] = param.split('=');
+
+        if(key) {
+            query[key] = value;
+        }
+    }
+
+    const url = `${scheme}://${host}${port === 80 ? '' : `:${port}`}${path}${queryString === '' ? '' : `?${queryString}`}`;
+
     const context = {
         req: {
             bodyString,
             body,
             headers,
             method: req.method,
-            url: req.url
+            host,
+            scheme,
+            query,
+            queryString,
+            port,
+            url,
+            path
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
@@ -70,14 +92,14 @@ const server = micro(async (req, res) => {
             if (message instanceof Object || Array.isArray(message)) {
                 logs.push(JSON.stringify(message));
             } else {
-                logs.push(message.toString());
+                logs.push(message + "");
             }
         },
         error: function (message) {
             if (message instanceof Object || Array.isArray(message)) {
                 errors.push(JSON.stringify(message));
             } else {
-                errors.push(message.toString());
+                errors.push(message + "");
             }
         },
     };

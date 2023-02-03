@@ -29,7 +29,15 @@ module.exports = async (context) => {
         case 'requestMethod':
             return context.res.send(context.req.method);
         case 'requestUrl':
-            return context.res.send(context.req.url);
+            return context.res.json({
+                url: context.req.url,
+                port: context.req.port,
+                path: context.req.path,
+                query: context.req.query,
+                queryString: context.req.queryString,
+                scheme: context.req.scheme,
+                host: context.req.host,
+            });
         case 'requestHeaders':
             return context.res.json(context.req.headers);
         case 'requestBodyPlaintext':
