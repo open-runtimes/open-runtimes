@@ -18,7 +18,7 @@ abstract class BaseV3 extends TestCase
     {
     }
 
-    private function execute($body = '', $url = '/', $method = 'POST', $headers = []) {
+    private function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000) {
         $ch = \curl_init();
 
         $headers = \array_merge([
@@ -33,7 +33,7 @@ abstract class BaseV3 extends TestCase
 
         $responseHeaders = [];
         $optArray = array(
-            CURLOPT_URL => 'http://localhost:3000' . $url,
+            CURLOPT_URL => 'http://localhost:' . $port . $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$responseHeaders) {
                 $len = strlen($header);
@@ -143,6 +143,7 @@ abstract class BaseV3 extends TestCase
         self::assertEmpty($response['body']);
         self::assertEmpty($response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('Unkonwn action', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString(\getenv('OPEN_RUNTIMES_ENTRYPOINT'), $response['headers']['x-open-runtimes-errors']);
     }
 
     public function testWrongSecret(): void
@@ -150,6 +151,18 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(headers: ['x-open-runtimes-secret' => 'wrongSecret']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
+    }
+
+
+    public function testEmptySecret(): void
+    {
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => '']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
+
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => ''], port: 3001);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Hello World 👋', $response['body']);
     }
 
     public function testRequestMethod(): void
@@ -245,6 +258,15 @@ abstract class BaseV3 extends TestCase
         self::assertEquals('Missing key', $body['key1']);
         self::assertEquals('Missing key', $body['key2']);
         self::assertEquals('{"data":"OK"}', $body['raw']);
+
+        $response = $this->execute(body: '', headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
+        self::assertEquals(200, $response['code']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals('Missing key', $body['key1']);
+        self::assertEquals('Missing key', $body['key2']);
+        self::assertEquals('', $body['raw']);
     }
 
     public function testEnvVars(): void
@@ -271,5 +293,21 @@ abstract class BaseV3 extends TestCase
         self::assertStringContainsString('Error log', $response['headers']['x-open-runtimes-errors']);
         self::assertStringNotContainsString('Native log', $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('Unsupported log noticed. Use context.log() or context.error() for logging.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('objectKey', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('objectValue', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('arrayValue', $response['headers']['x-open-runtimes-logs']);
+    }
+
+    public function testLibrary(): void
+    {
+        $response = $this->execute(headers: ['x-action' => 'library'], body: '5');
+        self::assertEquals(200, $response['code']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals('1', $body['todo']['userId']);
+        self::assertEquals('5', $body['todo']['id']);
+        self::assertEquals('laboriosam mollitia et enim quasi adipisci quia provident illum', $body['todo']['title']);
+        self::assertEquals(false, $body['completed']);
     }
 }
