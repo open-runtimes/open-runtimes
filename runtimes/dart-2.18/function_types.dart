@@ -1,14 +1,20 @@
 import 'dart:convert';
 
 class Request {
-  String rawBody;
+  String bodyString;
   dynamic body;
   Map<String, dynamic> headers;
   String method;
   String url;
+  String path;
+  int port;
+  String scheme;
+  String host;
+  String queryString;
+  Map<String, String> query;
 
-  Request({ String rawBody = '', dynamic body = '', Map<String, dynamic> headers = const {}, String method = '', String url = '' })
-    : rawBody = rawBody, body = body, headers = headers, method = method, url = url {
+  Request({ String bodyString = '', dynamic body = '', Map<String, dynamic> headers = const {}, String method = '', String url = '', String path = '', int port = 80, String scheme = '', String host = '', String queryString = '', Map<String, String> query = const {} })
+    : bodyString = bodyString, body = body, headers = headers, method = method, url = url, path = path, port = port, scheme = scheme, host = host, queryString = queryString, query = query {
   }
 }
 
@@ -61,13 +67,19 @@ class Context {
     : req = req, res = res {
   }
 
-  // TODO: Support for infinite parameters
-  // TODO: Support for objects (stringify)
   void log(dynamic message) {
-    this._logs.add(message.toString());
+    if (message is List || message is Map) { 
+      this._logs.add(jsonEncode(message));
+    } else {
+      this._logs.add(message.toString());
+    }
   }
 
   void error(dynamic message) {
-    this._errors.add(message.toString());
+    if (message is List || message is Map) { 
+      this._errors.add(jsonEncode(message));
+    } else {
+      this._errors.add(message.toString());
+    }
   }
 }

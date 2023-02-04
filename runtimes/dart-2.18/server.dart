@@ -10,12 +10,12 @@ import 'function_types.dart';
 
 void main() async {
   await shelf_io.serve((req) async {
-    if (req.headers['x-open-runtimes-secret'] != Platform.environment['OPEN_RUNTIMES_SECRET']) {
+    if ((req.headers['x-open-runtimes-secret'] ?? '') != (Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '')) {
       return shelf.Response(500, body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
-    String rawBody = await req.readAsString();
-    dynamic body = rawBody;
+    String bodyString = await req.readAsString();
+    dynamic body = bodyString;
     String method = req.method;
     String url = '/' + req.url.path;
     Map<String, dynamic> headers = {};
@@ -33,10 +33,28 @@ void main() async {
 
     String contentType = req.headers['content-type'] ?? 'plain/text';
     if(contentType.contains('application/json')) {
-      body = jsonDecode(rawBody);
+      if(!bodyString.isEmpty) {
+        body = jsonDecode(bodyString);
+      } else {
+        body = {};
+      }
     }
 
-    Request contextReq = new Request(rawBody: rawBody, body: body, headers: headers, method: method, url: url);
+    String path = request.url.path;
+    int port = request.url.port;
+    String scheme = request.url.scheme;
+    String host = request.url.host;
+    String queryString = request.url.query;
+    Map<String, String> query = {};
+
+    for(final param in queryString.spplit("&")) {
+      final pair = param.split("=");
+      if(pair[0]) {
+        query[pair[0]] = pair[1];
+      }
+    }
+
+    Request contextReq = new Request(bodyString: bodyString, body: body, headers: headers, method: method, url: url, path: path, port: port, scheme: scheme, host: host, queryString: queryString, query: query);
     Response contextRes = new Response();
     Context context = new Context(contextReq, contextRes);
 
