@@ -5,7 +5,7 @@ const USER_CODE_PATH = '/usr/code-start';
 const app = new Application();
 
 app.use(async (ctx) => {
-  if (ctx.request.headers.get("x-open-runtimes-secret") !== Deno.env.get("OPEN_RUNTIMES_SECRET")) {
+  if (ctx.request.headers.get("x-open-runtimes-secret", "") !== Deno.env.get("OPEN_RUNTIMES_SECRET", "")) {
     ctx.response.status = 500;
     ctx.response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.';
     return;
@@ -14,11 +14,15 @@ app.use(async (ctx) => {
   const errors: string[] = [];
 
   const contentType = ctx.request.headers.get('content-type') ?? 'text/plain';
-  const rawBody: string = await ctx.request.body({ type: 'text' }).value;
-  let body: any = rawBody;
+  const bodyString: string = await ctx.request.body({ type: 'text' }).value;
+  let body: any = bodyString;
 
   if (contentType.includes('application/json')) {
-    body = await ctx.request.body({ type: 'json' }).value;
+    if(bodyString) {
+      body = await ctx.request.body({ type: 'json' }).value;
+    } else {
+      body = {};
+    }
   }
 
   const headers: any = {};
@@ -26,19 +30,36 @@ app.use(async (ctx) => {
     headers[header.toLowerCase()] = ctx.request.headers.get(header);
   });
 
-  let url = ctx.request.url.pathname;
+  const scheme = ctx.request.headers.get('x-forwarded-proto', '') === 'https' ? 'https' : 'http';
+  const hostHeader = ctx.request.headers.get('host', '');
+  const host = hostHeader.includes(':') ? hostHeader.split(':')[0] : hostHeader;
+  const port = +(hostHeader.includes(':') ? hostHeader.split(':')[1] : '80');
+  const path = ctx.request.url.pathname;
+  const queryString = ctx.request.url.href.includes('?') ? ctx.request.url.href.split('?')[1] : '';
+  const query = {};
+  for(const param of queryString.split('&')) {
+      const [ key, value ] = param.split('=');
 
-  if(ctx.request.url.href.includes('?')) {
-    url += `?${ctx.request.url.href.split('?')[1]}`;
+      if(key) {
+          query[key] = value;
+      }
   }
+
+  const url = `${scheme}://${host}${port === 80 ? '' : `:${port}`}${path}${queryString === '' ? '' : `?${queryString}`}`;
 
   const context: any = {
     req: {
-      rawBody,
+      bodyString,
       body,
       headers,
       method: ctx.request.method,
-      url
+      url,
+      query,
+      queryString,
+      host,
+      port,
+      scheme,
+      path
     },
     res: {
       send: function (body, statusCode = 200, headers = {}) {
@@ -60,27 +81,19 @@ app.use(async (ctx) => {
         return this.send('', statusCode, headers);
       }
     },
-    log: function () {
-      const args: string[] = [];
-      for (const arg of Array.from(arguments)) {
-        if (arg instanceof Object || Array.isArray(arg)) {
-          args.push(JSON.stringify(arg));
-        } else {
-          args.push(arg);
-        }
+    log: function (message: any) {
+      if (message instanceof Object || Array.isArray(message)) {
+        logs.push(JSON.stringify(message));
+      } else {
+        logs.push(message + "");
       }
-      logs.push(args.join(" "));
     },
-    error: function () {
-      const args: string[] = [];
-      for (const arg of Array.from(arguments)) {
-        if (arg instanceof Object || Array.isArray(arg)) {
-          args.push(JSON.stringify(arg));
-        } else {
-          args.push(arg);
-        }
+    error: function (message: any) {
+      if (message instanceof Object || Array.isArray(message)) {
+        errors.push(JSON.stringify(message));
+      } else {
+        errors.push(message + "");
       }
-      errors.push(args.join(" "));
     },
   };
 
