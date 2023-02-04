@@ -40,16 +40,16 @@ void main() async {
       }
     }
 
-    String path = request.url.path;
-    int port = request.url.port;
-    String scheme = request.url.scheme;
-    String host = request.url.host;
-    String queryString = request.url.query;
+    String path = req.url.path;
+    int port = req.url.port;
+    String scheme = req.url.scheme;
+    String host = req.url.host;
+    String queryString = req.url.query;
     Map<String, String> query = {};
 
-    for(final param in queryString.spplit("&")) {
+    for(final param in queryString.split("&")) {
       final pair = param.split("=");
-      if(pair[0]) {
+      if(pair.length == 2 && !pair[0].isEmpty) {
         query[pair[0]] = pair[1];
       }
     }
