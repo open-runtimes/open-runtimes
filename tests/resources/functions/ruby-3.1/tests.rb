@@ -30,7 +30,15 @@ def main(context)
     when 'requestMethod'
         return context.res.send(context.req.method)
     when 'requestUrl'
-        return context.res.send(context.req.url)
+        return context.res.json({
+            'url': context.req.url,
+            'port': context.req.port,
+            'path': context.req.path,
+            'query': context.req.query,
+            'queryString': context.req.queryString,
+            'scheme': context.req.scheme,
+            'host': context.req.host,
+        })
     when 'requestHeaders'
         return context.res.json(context.req.headers)
     when 'requestBodyPlaintext'
@@ -66,7 +74,13 @@ def main(context)
         context.log(4.2)
         context.log(true)
 
+        context.log({ 'objectKey': 'objectValue' })
+        context.log([ 'arrayValue' ])
+
         return context.res.send('')
+    when 'library'
+        todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyString).body)
+        return context.res.json({ 'todo': todo })
     else
         raise 'Unkonwn action'
     end

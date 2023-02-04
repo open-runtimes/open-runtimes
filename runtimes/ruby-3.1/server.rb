@@ -69,11 +69,19 @@ class Context
   attr_accessor :_errors
 
   def log(message)
-    @_logs.push(message)
+    if(message.kind_of?(Array) || message.kind_of?(Hash))
+      @_logs.push(message.to_json)
+    else
+      @_logs.push(message.to_s)
+    end
   end
 
   def error(message)
-    @_errors.push(message)
+    if(message.kind_of?(Array) || message.kind_of?(Hash))
+      @_errors.push(message.to_json)
+    else
+      @_errors.push(message.to_s)
+    end
   end
 end
 
@@ -89,27 +97,22 @@ def handle(request, response)
 
   request.body.rewind
 
-  host = ""
-  port = 80
+  host = request.host
+  port = request.port
 
-  hostHeader = request.env['host'] || ''
-  if host.include? ":"
-    host = hostHeader.split(':')[0]
-    port = (hostHeader.split(':')[1]).to_i
-  else
-    host = hostHeader
-    port = 80
-  end
-
-  scheme = request.env['x-forwarded-proto'] || 'http'
+  scheme = request.scheme || 'http'
   path = request.path
   query = {}
-  queryString = request.url.split(request.path)[1]
+  queryString = request.url.split(request.path)[1] || ''
+
+  if(queryString.start_with?("?"))
+    queryString = queryString[1..-1]
+  end
 
   url = scheme + "://" + host
 
   if(port != 80)
-    url += port.to_s
+    url += ':' + port.to_s
   end
 
   url += path
@@ -118,9 +121,6 @@ def handle(request, response)
     url += "?" + queryString
   end
 
-  if(scheme.start_with?("?"))
-    queryString = queryString[1..-1]
-  end
 
   if(!(queryString.empty?))
     queryString.split('&') do |param|
