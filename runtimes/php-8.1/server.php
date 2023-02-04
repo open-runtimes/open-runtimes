@@ -81,6 +81,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     $path = $req->server['path_info'];
     $scheme = ($req->header['x-forwarded-proto'] ?? 'http');
+    $query = [];
 
     $hostHeader = ($req->header['host'] ?? '');
     if(\str_contains($hostHeader, ':')) {
@@ -158,6 +159,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         $customstd = ob_get_clean();
     } catch (\Throwable $e) {
         $context->error($e->getMessage()."\n".$e->getTraceAsString());
+        $context->error('At ' . $e->getFile() . ':' . $e->getLine());
         $output = $context->res->send('', 500, []);
     }
 
