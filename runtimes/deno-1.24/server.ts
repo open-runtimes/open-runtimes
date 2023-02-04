@@ -30,7 +30,7 @@ app.use(async (ctx) => {
     headers[header.toLowerCase()] = ctx.request.headers.get(header);
   });
 
-  const scheme = ctx.request.headers.get('x-forwarded-proto', '') === 'https' ? 'https' : 'http';
+  const scheme = ctx.request.headers.get('x-forwarded-proto') ?? 'http';
   const hostHeader = ctx.request.headers.get('host', '');
   const host = hostHeader.includes(':') ? hostHeader.split(':')[0] : hostHeader;
   const port = +(hostHeader.includes(':') ? hostHeader.split(':')[1] : '80');
