@@ -143,7 +143,15 @@ abstract class BaseV3 extends TestCase
         self::assertEmpty($response['body']);
         self::assertEmpty($response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('Unkonwn action', $response['headers']['x-open-runtimes-errors']);
-        self::assertStringContainsString(\getenv('OPEN_RUNTIMES_ENTRYPOINT'), $response['headers']['x-open-runtimes-errors']);
+
+        $entrypoint = \getenv('OPEN_RUNTIMES_ENTRYPOINT');
+
+        // Fix for dart (expected behaviour)
+        if(\str_starts_with($entrypoint, 'lib/')) {
+            $entrypoint = implode('', explode('lib', $entrypoint, 2));
+        }
+
+        self::assertStringContainsString($entrypoint, $response['headers']['x-open-runtimes-errors']);
     }
 
     public function testWrongSecret(): void

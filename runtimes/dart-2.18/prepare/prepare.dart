@@ -18,8 +18,10 @@ void main() async {
   print("added user package as dependency to server.");
 
   File server = File("../server.dart");
+  String fileName = Platform.environment['OPEN_RUNTIMES_ENTRYPOINT'] ?? 'lib/main.dart';
+  fileName = fileName.replaceFirst('lib/', '');
   String serv = server.readAsStringSync();
-  serv = serv.replaceAll('{entrypoint}', "package:$packageName/main.dart");
+  serv = serv.replaceAll('{entrypoint}', "package:$packageName/" + fileName);
 
   print("Updated server import of user code");
 

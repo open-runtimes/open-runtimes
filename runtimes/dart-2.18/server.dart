@@ -17,12 +17,7 @@ void main() async {
     String bodyString = await req.readAsString();
     dynamic body = bodyString;
     String method = req.method;
-    String url = '/' + req.url.path;
     Map<String, dynamic> headers = {};
-
-    if(!req.url.query.isEmpty) {
-      url += '?' + req.url.query;
-    }
 
     for (MapEntry entry in req.headers.entries) {
       String header = entry.key.toLowerCase();
@@ -40,18 +35,40 @@ void main() async {
       }
     }
 
-    String path = req.url.path;
-    int port = req.url.port;
-    String scheme = req.url.scheme;
-    String host = req.url.host;
+    String hostHeader = req.headers['host'] ?? '';
+
+    String path = '/' + req.url.path;
+    int port = 80;
+    String host = '';
+    String scheme = req.headers['x-forwarded-proto'] ?? 'http';
     String queryString = req.url.query;
     Map<String, String> query = {};
+
+    if(hostHeader.contains(':')) {
+      host = hostHeader.split(':')[0];
+      port = int.parse(hostHeader.split(':')[1]);
+    } else {
+      host = hostHeader;
+      port = 80;
+    }
 
     for(final param in queryString.split("&")) {
       final pair = param.split("=");
       if(pair.length == 2 && !pair[0].isEmpty) {
         query[pair[0]] = pair[1];
       }
+    }
+
+    String url = scheme + '://' + host;
+
+    if(port != 80) {
+      url += ':' + port.toString();
+    }
+
+    url += path;
+
+    if(!queryString.isEmpty) {
+      url += '?' + queryString;
     }
 
     Request contextReq = new Request(bodyString: bodyString, body: body, headers: headers, method: method, url: url, path: path, port: port, scheme: scheme, host: host, queryString: queryString, query: query);
@@ -72,8 +89,9 @@ void main() async {
           },
         ),
       );
-    } catch (e) {
+    } catch (e, s) {
       context.error(e.toString());
+      context.error(s.toString());
       output = context.res.send('', 500, const {});
     }
 
