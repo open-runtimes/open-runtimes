@@ -5,7 +5,7 @@ const USER_CODE_PATH = '/usr/code-start';
 const app = new Application();
 
 app.use(async (ctx) => {
-  if (ctx.request.headers.get("x-open-runtimes-secret", "") !== Deno.env.get("OPEN_RUNTIMES_SECRET", "")) {
+  if ((ctx.request.headers.get("x-open-runtimes-secret") ?? '') !== (Deno.env.get("OPEN_RUNTIMES_SECRET") ?? '')) {
     ctx.response.status = 500;
     ctx.response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.';
     return;
