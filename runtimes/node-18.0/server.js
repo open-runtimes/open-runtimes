@@ -34,7 +34,7 @@ const server = micro(async (req, res) => {
         headers[header.toLowerCase()] = req.headers[header];
     });
 
-    const scheme = (req.headers['x-forwarded-proto'] ?? '') === 'https' ? 'https' : 'http';
+    const scheme = (req.headers['x-forwarded-proto'] ?? 'http');
     const host = req.headers['host'].includes(':') ? req.headers['host'].split(':')[0] : req.headers['host'];
     const port = +(req.headers['host'].includes(':') ? req.headers['host'].split(':')[1] : '80');
     const path = req.url.includes('?') ? req.url.split('?')[0] : req.url;
