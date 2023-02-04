@@ -28,7 +28,15 @@ def main(context):
     elif action == 'requestMethod':
         return context.res.send(context.req.method)
     elif action == 'requestUrl':
-        return context.res.send(context.req.url)
+        return context.res.json({
+            'url': context.req.url,
+            'port': context.req.port,
+            'path': context.req.path,
+            'query': context.req.query,
+            'queryString': context.req.queryString,
+            'scheme': context.req.scheme,
+            'host': context.req.host,
+        })
     elif action == 'requestHeaders':
         return context.res.json(context.req.headers)
     elif action == 'requestBodyPlaintext':

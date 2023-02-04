@@ -52,6 +52,12 @@ class Request:
     headers = None
     method = None
     url = None
+    path = None
+    port = None
+    query = None
+    queryString = None
+    scheme = None
+    host = None
 
 class Context:
     req = Request()
@@ -88,17 +94,41 @@ def handler(u_path):
 
     context = Context()
 
-    url = urlparse(request.url)
-    path = url.path
-    query = url.query
-    if query:
-        path += '?' + query
-
     context.req.bodyString = request.get_data(as_text=True)
     context.req.body = context.req.bodyString
     context.req.method = request.method
-    context.req.url = path
     context.req.headers = {}
+
+    context.req.path = request.path
+    context.req.scheme = request.headers.get('x-forwarded-proto', 'http')
+
+    url = urlparse(request.url)
+    context.req.queryString = url.query or ''
+    context.req.query = {}
+
+    for param in context.req.queryString.split('&'):
+        pair = param.split('=')
+
+        if pair[0]:
+            context.req.query[pair[0]] = pair[1]
+
+    host = request.headers.get('host', '')
+    if ':' in host:
+        context.req.host = host.split(':')[0]
+        context.req.port = int(host.split(':')[1])
+    else:
+        context.req.host = host
+        context.req.port = 80
+
+    context.req.url = context.req.scheme + '://' + context.req.host
+
+    if(context.req.port != 80):
+        context.req.url += ':' + str(context.req.port)
+
+    context.req.url += context.req.path
+
+    if(context.req.queryString):
+        context.req.url += '?' + context.req.queryString
 
     contentType = request.headers.get('content-type', 'text/plain')
     if 'application/json' in contentType:
