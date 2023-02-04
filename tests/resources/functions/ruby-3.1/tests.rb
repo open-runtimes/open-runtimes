@@ -50,7 +50,7 @@ def main(context)
         return context.res.json({
             'key1': key1,
             'key2': key2,
-            'raw': context.req.rawBody
+            'raw': context.req.bodyString
         })
     when 'envVars'
         return context.res.json({

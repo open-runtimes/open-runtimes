@@ -28,19 +28,31 @@ class Response
 end
 
 class Request
-  def initialize(rawBody, body, headers, method, url)
-    @rawBody = rawBody
+  def initialize(bodyString, body, headers, method, url, path, port, scheme, host, query, queryString)
+    @bodyString = bodyString
     @body = body
     @headers = headers
     @method = method
     @url = url
+    @path = path
+    @port = port
+    @scheme = scheme
+    @host = host
+    @query = query
+    @queryString = queryString
   end
 
-  attr_accessor :rawBody
+  attr_accessor :bodyString
   attr_accessor :body
   attr_accessor :headers
   attr_accessor :method
   attr_accessor :url
+  attr_accessor :path
+  attr_accessor :port
+  attr_accessor :scheme
+  attr_accessor :host
+  attr_accessor :query
+  attr_accessor :queryString
 end
 
 class Context
@@ -56,8 +68,6 @@ class Context
   attr_accessor :_logs
   attr_accessor :_errors
 
-  # TODO: Support for infinite parameters
-  # TODO: Support for objects (stringify)
   def log(message)
     @_logs.push(message)
   end
@@ -68,12 +78,10 @@ class Context
 end
 
 def handle(request, response)
-  secret = request.env['HTTP_X_OPEN_RUNTIMES_SECRET']
-  if(secret == nil)
-    secret = ''
-  end
+  secret = request.env['HTTP_X_OPEN_RUNTIMES_SECRET'] || ''
+  serverSecret = ENV['OPEN_RUNTIMES_SECRET'] || ''
 
-  if(secret != ENV['OPEN_RUNTIMES_SECRET'])
+  if(secret != serverSecret)
     response.status = 500
     response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.'
     return
@@ -81,14 +89,50 @@ def handle(request, response)
 
   request.body.rewind
 
-  params = request.url.split(request.path)[1]
-  url = request.path
-  if(params != nil)
-    url += params
+  host = ""
+  port = 80
+
+  hostHeader = request.env['host'] || ''
+  if host.include? ":"
+    host = hostHeader.split(':')[0]
+    port = (hostHeader.split(':')[1]).to_i
+  else
+    host = hostHeader
+    port = 80
   end
 
-  rawBody = request.body.read
-  body = rawBody
+  scheme = request.env['x-forwarded-proto'] || 'http'
+  path = request.path
+  query = {}
+  queryString = request.url.split(request.path)[1]
+
+  url = scheme + "://" + host
+
+  if(port != 80)
+    url += port.to_s
+  end
+
+  url += path
+
+  if(!(queryString.empty?))
+    url += "?" + queryString
+  end
+
+  if(scheme.start_with?("?"))
+    queryString = queryString[1..-1]
+  end
+
+  if(!(queryString.empty?))
+    queryString.split('&') do |param|
+      pair = param.split('=')
+      if(!(pair[0].empty?))
+        query[pair[0]] = pair[1]
+      end
+    end
+  end
+
+  bodyString = request.body.read
+  body = bodyString
   method = request.request_method
   headers = {}
 
@@ -118,10 +162,12 @@ def handle(request, response)
   end
 
   if(contentType.include?('application/json'))
-    body = JSON.parse(rawBody)
+    if(!(bodyString.empty?))
+      body = JSON.parse(bodyString)
+    end
   end
 
-  contextReq = Request.new(rawBody, body, headers, method, url)
+  contextReq = Request.new(bodyString, body, headers, method, url, path, port, scheme, host, query, queryString)
   contextRes = Response.new
   context = Context.new(contextReq, contextRes)
 
@@ -144,8 +190,6 @@ def handle(request, response)
     $stderr = customstd
 
     output = main(context)
-
-    # TODO: Re-define system_out again. Same for all runtimes
   rescue Exception => e
     context.error(e)
     context.error(e.backtrace.join("\n"))
