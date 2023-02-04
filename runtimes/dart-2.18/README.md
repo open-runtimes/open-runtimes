@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir dart-or && cd dart-or && mkdir lib
-printf "import 'dart:async';\nimport 'dart:math';\nFuture<dynamic> start(final context) async {\n    return context.res.json({'n': new Random().nextDouble() });\n}" > lib/main.dart
+printf "import 'dart:async';\nimport 'dart:math';\nFuture<dynamic> handle(final context) async {\n    return context.res.json({'n': new Random().nextDouble() });\n}" > lib/main.dart
 ```
 
 2. Build the code:
@@ -72,7 +72,7 @@ You can also make changes to the example code and apply the changes with the `do
 ```dart
 import 'dart:async';
 
-Future<dynamic> start(final context) async {
+Future<dynamic> handle(final context) async {
   return res.send('Hello Open Runtimes 👋');
 }
 ```

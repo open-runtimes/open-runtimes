@@ -81,7 +81,7 @@ void main() async {
     try {
       await runZoned(
         () async {
-          output = await user_code.start(context);
+          output = await user_code.handle(context);
         },
         zoneSpecification: ZoneSpecification(
           print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
