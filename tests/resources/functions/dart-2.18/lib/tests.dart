@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart' hide Response;
 import 'dart:io' show Platform;
 
-Future<dynamic> start(final context) async {
+Future<dynamic> handle(final context) async {
   String action = context.req.headers['x-action'] ?? '';
 
   switch(action) { 
