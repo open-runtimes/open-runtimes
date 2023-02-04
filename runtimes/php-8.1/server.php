@@ -28,11 +28,17 @@ class Response {
 }
 
 class Request {
-    public string $rawBody = '';
+    public string $bodyString = '';
     public mixed $body = '';
     public array $headers = [];
     public string $method = '';
     public string $url = '';
+    public string $path = '';
+    public int $port = 80;
+    public string $host = '';
+    public string $scheme = '';
+    public string $queryString = '';
+    public array $query = [];
 }
 
 class Context {
@@ -47,36 +53,86 @@ class Context {
         $this->res = new Response();
     }
 
-    // TODO: Support many params
     function log(mixed $message) {
-        $this->_logs[] = \strval($message);
+        if(\is_array($message)) {
+            $this->_logs[] = \json_encode($message);
+        } else {
+            $this->_logs[] = \strval($message);
+        }
     }
 
     function error(mixed $message) {
-        $this->_errors[] = \strval($message);
+        if(\is_array($message)) {
+            $this->_errors[] = \json_encode($message);
+        } else {
+            $this->_errors[] = \strval($message);
+        }
     }
 }
 
 $userFunction = null;
 
 $server->on("Request", function($req, $res) use(&$userFunction) {
-    if (empty($req->header['x-open-runtimes-secret']) || $req->header['x-open-runtimes-secret'] !== getenv('OPEN_RUNTIMES_SECRET')) {
+    if (($req->header['x-open-runtimes-secret'] ?? '') !== (getenv('OPEN_RUNTIMES_SECRET') ?? '')) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
         return;
     }
 
+    $path = $req->server['path_info'];
+    $scheme = ($req->header['x-forwarded-proto'] ?? 'http');
+
+    $hostHeader = ($req->header['host'] ?? '');
+    if(\str_contains($hostHeader, ':')) {
+        $pair = \explode(':', $hostHeader);
+        $host = $pair[0];
+        $port = \intval($pair[1]);
+    } else {
+        $host = $hostHeader;
+        $port = 80;
+    }
+
+    $queryString = $req->server['query_string'] ?? '';
+    foreach (\explode('&', $queryString) as $param) {
+        $pair = \explode('=', $param);
+        if(!empty($pair[0])) {
+            $query[$pair[0]] = $pair[1];
+        }
+    }
+
+    $url = $scheme . '://' . $host;
+
+    if($port !== 80) {
+        $url .= ':' . \strval($port);
+    }
+
+    $url .= $path;
+
+    if(!empty($queryString)) {
+        $url .= '?' . $queryString;
+    }
+
     $context = new Context();
 
-    $context->req->rawBody = $req->getContent();
-    $context->req->body = $context->req->rawBody;
+    $context->req->bodyString = $req->getContent();
+    $context->req->body = $context->req->bodyString;
     $context->req->method = $req->getMethod();
-    $context->req->url = $req->header['x-open-runtimes-original-url'] ?? '';
+    $context->req->url = $url;
+    $context->req->path = $path;
+    $context->req->port = $port;
+    $context->req->host = $host;
+    $context->req->scheme = $scheme;
+    $context->req->query = $query;
+    $context->req->queryString = $queryString;
     $context->req->headers = [];
 
     $contentType = $req->header['content-type'] ?? 'text/plain';
     if(\str_contains($contentType, 'application/json')) {
-        $context->req->body = json_decode($context->req->rawBody, true);
+        if(!empty($context->req->bodyString)) {
+            $context->req->body = json_decode($context->req->bodyString, true);
+        } else {
+            $context->req->body = [];
+        }
     }
 
     foreach ($req->header as $header => $value) {
