@@ -63,26 +63,26 @@ class Context:
     req = Request()
     res = Response()
 
-    _logs = []
-    _errors = []
+    logs = []
+    errors = []
 
     def __init__(self):
-        self._logs = []
-        self._errors = []
+        self.logs = []
+        self.errors = []
         self.req = Request()
         self.res = Response()
 
     def log(self, message):
         if isinstance(message, (list, dict, tuple)):
-            self._logs.append(json.dumps(message, separators=(',', ':')))
+            self.logs.append(json.dumps(message, separators=(',', ':')))
         else:
-            self._logs.append(str(message))
+            self.logs.append(str(message))
 
     def error(self, message):
         if isinstance(message, (list, dict, tuple)):
-            self._errors.append(json.dumps(message, separators=(',', ':')))
+            self.errors.append(json.dumps(message, separators=(',', ':')))
         else:
-            self._errors.append(str(message))
+            self.errors.append(str(message))
 
 HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
 
@@ -178,8 +178,8 @@ def handler(u_path):
     if customstd.getvalue():
         context.log('Unsupported log noticed. Use context.log() or context.error() for logging.')
 
-    resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context._logs))
-    resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context._errors))
+    resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context.logs))
+    resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context.errors))
 
     return resp
 
