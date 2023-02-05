@@ -59,28 +59,28 @@ class Context
   def initialize(rq, rs)
     @req = rq
     @res = rs
-    @_logs = []
-    @_errors = []
+    @logs = []
+    @errors = []
   end
 
   attr_accessor :req
   attr_accessor :res
-  attr_accessor :_logs
-  attr_accessor :_errors
+  attr_accessor :logs
+  attr_accessor :errors
 
   def log(message)
     if(message.kind_of?(Array) || message.kind_of?(Hash))
-      @_logs.push(message.to_json)
+      @logs.push(message.to_json)
     else
-      @_logs.push(message.to_s)
+      @logs.push(message.to_s)
     end
   end
 
   def error(message)
     if(message.kind_of?(Array) || message.kind_of?(Hash))
-      @_errors.push(message.to_json)
+      @errors.push(message.to_json)
     else
-      @_errors.push(message.to_s)
+      @errors.push(message.to_s)
     end
   end
 end
@@ -223,8 +223,8 @@ def handle(request, response)
     context.log('Unsupported log noticed. Use context.log() or context.error() for logging.')
   end
 
-  response.headers['x-open-runtimes-logs'] = ERB::Util.url_encode(context._logs.join('\n'))
-  response.headers['x-open-runtimes-errors'] = ERB::Util.url_encode(context._errors.join('\n'))
+  response.headers['x-open-runtimes-logs'] = ERB::Util.url_encode(context.logs.join('\n'))
+  response.headers['x-open-runtimes-errors'] = ERB::Util.url_encode(context.errors.join('\n'))
 
   if output['headers']['content-type'] != nil
     response.content_type = output['headers']['content-type']
