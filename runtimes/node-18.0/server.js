@@ -104,6 +104,12 @@ const server = micro(async (req, res) => {
         },
     };
 
+    console.stdlog = console.log.bind(console);
+    console.stderror = console.error.bind(console);
+    console.stdinfo = console.info.bind(console);
+    console.stddebug = console.debug.bind(console);
+    console.stdwarn = console.warn.bind(console);
+
     console.log = console.info = console.debug = console.warn = console.error = function() {
         logs.push('Unsupported log noticed. Use context.log() or context.error() for logging.');
     }
@@ -128,6 +134,12 @@ const server = micro(async (req, res) => {
     } catch (e) {
         context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
         output = context.res.send('', 500, {});
+    } finally {
+        console.log = console.stdlog;
+        console.error = console.stderror;
+        console.debug = console.stddebug;
+        console.warn = console.stdwarn;
+        console.info = console.stdinfo;
     }
 
     if(output === null || output === undefined) {

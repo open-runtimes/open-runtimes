@@ -160,6 +160,9 @@ def handler(u_path):
     except Exception as e:
         context.error(''.join(traceback.TracebackException.from_exception(e).format()))
         output = context.res.send('', 500, {})
+    finally:
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
 
     if output is None:
         context.error('Return statement missing. return context.res.empty() if no response is expected.')
