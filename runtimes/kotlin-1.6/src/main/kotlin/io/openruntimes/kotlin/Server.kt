@@ -60,6 +60,9 @@ suspend fun execute(ctx: Context) {
     var runtimeResponse: RuntimeResponse = RuntimeResponse()
     var context: RuntimeContext = RuntimeContext(runtimeRequest, runtimeResponse)
 
+    var systemOut = System.out;
+    var systemErr = System.err;
+
     var customstdStream: ByteArrayOutputStream = ByteArrayOutputStream();
     var customstd: PrintStream = PrintStream(customstdStream);
     System.setOut(customstd);
@@ -77,6 +80,11 @@ suspend fun execute(ctx: Context) {
 
         context.error(sw.toString());
         output = context.res.send("", 500, mutableMapOf<String, String>());
+    } finally {
+        System.out.flush();
+        System.err.flush();
+        System.setOut(systemOut);
+        System.setErr(systemErr);
     }
 
     if(output == null) {
