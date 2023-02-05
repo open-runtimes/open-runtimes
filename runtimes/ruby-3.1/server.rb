@@ -182,7 +182,6 @@ def handle(request, response)
       raise 'User function is not valid.'
     end
 
-
     system_out = $stdout
     system_err = $stderr
     customstd = StringIO.new
@@ -194,6 +193,9 @@ def handle(request, response)
     context.error(e)
     context.error(e.backtrace.join("\n"))
     output = context.res.send('', 500, {})
+  ensure
+    $stdout = system_out
+    $stderr = system_err
   end
 
   if output == nil
