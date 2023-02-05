@@ -45,8 +45,8 @@ class Context {
     public Request $req;
     public Response $res;
 
-    public array $_logs = [];
-    public array $_errors = [];
+    public array $logs = [];
+    public array $errors = [];
 
     function __construct() {
         $this->req = new Request();
@@ -55,17 +55,17 @@ class Context {
 
     function log(mixed $message) {
         if(\is_array($message)) {
-            $this->_logs[] = \json_encode($message);
+            $this->logs[] = \json_encode($message);
         } else {
-            $this->_logs[] = \strval($message);
+            $this->logs[] = \strval($message);
         }
     }
 
     function error(mixed $message) {
         if(\is_array($message)) {
-            $this->_errors[] = \json_encode($message);
+            $this->errors[] = \json_encode($message);
         } else {
-            $this->_errors[] = \strval($message);
+            $this->errors[] = \strval($message);
         }
     }
 }
@@ -182,8 +182,8 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         $context->log('Unsupported log noticed. Use $context->log() or $context->error() for logging.');
     }
 
-    $res->header('x-open-runtimes-logs', \urlencode(\implode('\n', $context->_logs)));
-    $res->header('x-open-runtimes-errors', \urlencode(\implode('\n', $context->_errors)));
+    $res->header('x-open-runtimes-logs', \urlencode(\implode('\n', $context->logs)));
+    $res->header('x-open-runtimes-errors', \urlencode(\implode('\n', $context->errors)));
 
     $res->status($output['statusCode']);
     $res->end($output['body']);
