@@ -52,16 +52,8 @@ class Context {
   Request req;
   Response res;
 
-  List<String> _logs = [];
-  List<String> _errors = [];
-  	
-  List<String> get logs {
-    return _logs;
-  }
-
-  List<String> get errors {
-    return _errors;
-  }
+  List<String> logs = [];
+  List<String> errors = [];
 
   Context(Request req, Response res)
     : req = req, res = res {
@@ -69,17 +61,17 @@ class Context {
 
   void log(dynamic message) {
     if (message is List || message is Map) { 
-      this._logs.add(jsonEncode(message));
+      this.logs.add(jsonEncode(message));
     } else {
-      this._logs.add(message.toString());
+      this.logs.add(message.toString());
     }
   }
 
   void error(dynamic message) {
     if (message is List || message is Map) { 
-      this._errors.add(jsonEncode(message));
+      this.errors.add(jsonEncode(message));
     } else {
-      this._errors.add(message.toString());
+      this.errors.add(message.toString());
     }
   }
 }
