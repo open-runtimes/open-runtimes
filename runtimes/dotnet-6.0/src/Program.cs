@@ -90,8 +90,8 @@ static async Task<IResult> Execute(HttpRequest Request)
         Context.Log("Unsupported log noticed. Use Context.Log() or Context.Error() for logging.");
     }
 
-    OutputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(String.Join("\n", Context._Logs.Cast<string>().ToArray())));
-    OutputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(String.Join("\n", Context._Errors.Cast<string>().ToArray())));
+    OutputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(String.Join("\n", Context.Logs.Cast<string>().ToArray())));
+    OutputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(String.Join("\n", Context.Errors.Cast<string>().ToArray())));
 
     return new CustomResponse(Output.Body, Output.StatusCode, OutputHeaders);
 }

@@ -7,8 +7,8 @@ namespace DotNetRuntime
 		public RuntimeRequest Req { get; set; }
 		public RuntimeResponse Res { get; set; }
 
-		public ArrayList _Logs = new ArrayList();
-		public ArrayList _Errors = new ArrayList();
+		public ArrayList Logs = new ArrayList();
+		public ArrayList Errors = new ArrayList();
 
 		public RuntimeContext(RuntimeRequest Req, RuntimeResponse Res)
 		{
@@ -18,12 +18,12 @@ namespace DotNetRuntime
 
 		public void Log(object Message)
 		{
-			this._Logs.Add(Message.ToString());
+			this.Logs.Add(Message.ToString());
 		}
 
 		public void Error(object Message)
 		{
-			this._Errors.Add(Message.ToString());
+			this.Errors.Add(Message.ToString());
 		}
 	}
 }
