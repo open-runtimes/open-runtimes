@@ -95,8 +95,8 @@ public class Server {
         }
 
         try {
-            resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context._logs), StandardCharsets.UTF_8.toString()));
-            resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", context._errors), StandardCharsets.UTF_8.toString()));
+            resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context.logs), StandardCharsets.UTF_8.toString()));
+            resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", context.errors), StandardCharsets.UTF_8.toString()));
         } catch (UnsupportedEncodingException ex) {
             resp = resp.header("x-open-runtimes-logs", "Internal error while processing logs.");
             resp = resp.header("x-open-runtimes-errors", "Internal error while processing logs.");

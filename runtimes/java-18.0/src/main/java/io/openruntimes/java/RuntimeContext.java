@@ -9,8 +9,8 @@ public class RuntimeContext {
     public RuntimeRequest req;
     public RuntimeResponse res;
 
-    public ArrayList<String> _logs = new ArrayList<String>();
-    public ArrayList<String> _errors = new ArrayList<String>();
+    public ArrayList<String> logs = new ArrayList<String>();
+    public ArrayList<String> errors = new ArrayList<String>();
 
     public RuntimeContext(
             RuntimeRequest req,
@@ -21,11 +21,11 @@ public class RuntimeContext {
     }
 
     public void log(Object message) {
-        this._logs.add(message.toString());
+        this.logs.add(message.toString());
     }
 
     public void error(Object message) {
-        this._errors.add(message.toString());
+        this.errors.add(message.toString());
     }
 }
 
