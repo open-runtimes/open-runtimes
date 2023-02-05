@@ -48,6 +48,9 @@ static async Task<IResult> Execute(HttpRequest Request)
     RuntimeResponse ContextResponse = new RuntimeResponse();
     RuntimeContext Context = new RuntimeContext(ContextRequest, ContextResponse);
 
+    var originalOut = Console.Out;
+    var originalErr = Console.Error;
+
     var Customstd = new StringBuilder();
     var CustomstdWriter = new StringWriter(Customstd);
     Console.SetOut(CustomstdWriter);
@@ -64,6 +67,10 @@ static async Task<IResult> Execute(HttpRequest Request)
     {
         Context.Error(e.ToString());
         Output = Context.Res.Send("", 500, new Dictionary<string,string>());
+    }
+    finally {
+        Console.SetOut(originalOut);
+        Console.SetError(originalErr);
     }
 
     if(Output == null)
