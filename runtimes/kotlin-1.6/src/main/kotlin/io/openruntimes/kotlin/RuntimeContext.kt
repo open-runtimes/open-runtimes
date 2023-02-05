@@ -8,22 +8,22 @@ class RuntimeContext(req: RuntimeRequest, res: RuntimeResponse) {
     var req: RuntimeRequest
     var res: RuntimeResponse
 
-    var _logs: ArrayList<String>
-    var _errors: ArrayList<String>
+    var logs: ArrayList<String>
+    var errors: ArrayList<String>
 
     init {
         this.req = req;
         this.res = res;
-        this._logs = arrayListOf<String>()
-        this._errors = arrayListOf<String>()
+        this.logs = arrayListOf<String>()
+        this.errors = arrayListOf<String>()
     }
 
     fun log(message: Any) {
-        this._logs.add(message.toString())
+        this.logs.add(message.toString())
     }
 
     fun error(message: Any) {
-        this._errors.add(message.toString())
+        this.errors.add(message.toString())
     }
 }
 

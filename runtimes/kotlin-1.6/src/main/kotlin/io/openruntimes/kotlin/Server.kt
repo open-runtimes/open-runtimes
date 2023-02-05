@@ -96,8 +96,8 @@ suspend fun execute(ctx: Context) {
     }
 
     try {
-        ctx.header("x-open-runtimes-logs", URLEncoder.encode(context._logs.joinToString("\n"), StandardCharsets.UTF_8.toString()));
-        ctx.header("x-open-runtimes-errors", URLEncoder.encode(context._errors.joinToString("\n"), StandardCharsets.UTF_8.toString()));
+        ctx.header("x-open-runtimes-logs", URLEncoder.encode(context.logs.joinToString("\n"), StandardCharsets.UTF_8.toString()));
+        ctx.header("x-open-runtimes-errors", URLEncoder.encode(context.errors.joinToString("\n"), StandardCharsets.UTF_8.toString()));
     } catch (ex: UnsupportedEncodingException) {
         ctx.header("x-open-runtimes-logs", "Internal error while processing logs.");
         ctx.header("x-open-runtimes-errors", "Internal error while processing logs.");
