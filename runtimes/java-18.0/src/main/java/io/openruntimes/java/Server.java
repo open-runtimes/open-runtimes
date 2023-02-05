@@ -59,6 +59,9 @@ public class Server {
         RuntimeResponse runtimeResponse = new RuntimeResponse();
         RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse);
 
+        PrintStream systemOut = System.out;
+        PrintStream systemErr = System.err;
+        
         ByteArrayOutputStream customstdStream = new ByteArrayOutputStream();
         PrintStream customstd = new PrintStream(customstdStream);
         System.setOut(customstd);
@@ -76,6 +79,11 @@ public class Server {
 
             context.error(sw.toString());
             output = context.res.send("", 500, new HashMap<String, String>());
+        } finally {
+            System.out.flush();
+            System.err.flush();
+            System.setOut(systemOut);
+            System.setErr(systemErr);
         }
 
         if(output == null) {
