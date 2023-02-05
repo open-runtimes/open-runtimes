@@ -97,6 +97,12 @@ app.use(async (ctx) => {
     },
   };
 
+  const stdlog = console.log.bind(console);
+  const stderror = console.error.bind(console);
+  const stdinfo = console.info.bind(console);
+  const stddebug = console.debug.bind(console);
+  const stdwarn = console.warn.bind(console);
+
   let customstd = "";
   console.log = console.info = console.debug = console.warn = console.error = function() {
     customstd += "Native log";
@@ -114,6 +120,12 @@ app.use(async (ctx) => {
   } catch(e: any) {
     context.error(e.message.includes("Cannot resolve module") ? "Code file not found." : e.stack || e);
     output = context.res.send('', 500, {});
+  } finally {
+    console.log = stdlog;
+    console.error = stderror;
+    console.debug = stddebug;
+    console.warn = stdwarn;
+    console.info = stdinfo;
   }
 
   if(output === null || output === undefined) {
