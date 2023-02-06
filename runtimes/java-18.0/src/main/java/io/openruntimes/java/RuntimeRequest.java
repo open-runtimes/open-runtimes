@@ -5,20 +5,20 @@ import org.rapidoid.http.Req;
 import java.util.Map;
 
 public class RuntimeRequest {
-    public String rawBody;
+    public String bodyString;
     public Object body;
     public Map<String, String> headers;
     public String method;
     public String url;
 
     public RuntimeRequest(
-            String rawBody,
+            String bodyString,
             Object body,
             Map<String, String> headers,
             String method,
             String url
     ) {
-        this.rawBody = rawBody;
+        this.bodyString = bodyString;
         this.body = body;
         this.headers = headers;
         this.method = method;

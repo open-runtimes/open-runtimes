@@ -37,8 +37,8 @@ public class Server {
             return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
         }
 
-        String rawBody = req.body() == null ? "" : new String(req.body(), StandardCharsets.UTF_8);
-        Object body = rawBody;
+        String bodyString = req.body() == null ? "" : new String(req.body(), StandardCharsets.UTF_8);
+        Object body = bodyString;
         Map<String, String> headers = new HashMap<String, String>();
         String method = req.verb();
         String url = req.uri();
@@ -53,10 +53,10 @@ public class Server {
         String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
         if(contentType.contains("application/json")) {
             Gson gson = new GsonBuilder().serializeNulls().create();
-            body = gson.fromJson(rawBody, Map.class);
+            body = gson.fromJson(bodyString, Map.class);
         }
 
-        RuntimeRequest runtimeRequest = new RuntimeRequest(rawBody, body, headers, method, url);
+        RuntimeRequest runtimeRequest = new RuntimeRequest(bodyString, body, headers, method, url);
         RuntimeResponse runtimeResponse = new RuntimeResponse();
         RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse);
 

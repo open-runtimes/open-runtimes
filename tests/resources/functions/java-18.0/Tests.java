@@ -7,6 +7,8 @@ import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Tests {
     final Gson gson = new Gson();
@@ -72,7 +74,7 @@ public class Tests {
 
                 json.put("key1", key1);
                 json.put("key2", key2);
-                json.put("raw", context.req.rawBody);
+                json.put("raw", context.req.bodyString);
                 return context.res.json(json);
             case "envVars":
                 json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
@@ -87,7 +89,34 @@ public class Tests {
                 context.log(4.2);
                 context.log(true);
 
+                ArrayList<String> array = new ArrayList<String>();
+                array.add("arrayValue");
+                context.log(array);
+
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("objectKey", "objectValue");
+                context.log(map);
+
                 return context.res.send("");
+            case "library":
+                URL url = new URL("https://jsonplaceholder.typicode.com/todos/" + context.req.bodyString);
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("GET");
+                con.getResponseCode();
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuilder todoBuffer = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    todoBuffer.append(inputLine);
+                }
+                in.close();
+                con.disconnect();
+
+                Map<String, Object> todo = gson.fromJson(todoBuffer.toString(), Map.class);
+
+                json.put("todo", todo);
+                return context.res.json(json);
             default:
                 throw new Exception("Unkonwn action");
         }

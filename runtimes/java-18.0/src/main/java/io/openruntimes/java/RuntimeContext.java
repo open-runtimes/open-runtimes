@@ -2,8 +2,8 @@ package io.openruntimes.java;
 
 import org.rapidoid.http.Req;
 
+import java.util.Array;
 import java.util.Map;
-import java.util.ArrayList;
 
 public class RuntimeContext {
     public RuntimeRequest req;
@@ -21,6 +21,9 @@ public class RuntimeContext {
     }
 
     public void log(Object message) {
+        if(message instanceof Map || message instanceof Array) {
+
+        }
         this.logs.add(message.toString());
     }
 
