@@ -192,6 +192,14 @@ env:
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
 
+    # Elixir
+    - RUNTIME=elixir-1.14
+      PHP_CLASS=Elixir114
+      ENTRYPOINT=tests.ex
+      SERVER_PROCESS="elixir-1.14"
+      IMAGE=openruntimes/elixir:${VERSION}-1.14
+      ARCH=linux/amd64,linux/arm64
+
 
 notifications:
   email:
