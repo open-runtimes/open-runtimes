@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 
 public class Server {
 
@@ -70,8 +71,10 @@ public class Server {
         RuntimeOutput output = null;
 
         try {
-            Wrapper codeWrapper = new Wrapper();
-            output = codeWrapper.main(context);
+            Class classToLoad = Class.forName("io.openruntimes.java.Tests");
+            Method classMethod = classToLoad.getDeclaredMethod("main", RuntimeContext.class);
+            Object instance = classToLoad.newInstance();
+            output = (RuntimeOutput) classMethod.invoke(instance, context);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

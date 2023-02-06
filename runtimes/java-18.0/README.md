@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir java-or && cd java-or
-printf "import java.util.Collections;\n\npublic RuntimeOutput main(RuntimeContext context) throws Exception {\n    return context.res.json(Collections.singletonMap(\"n\", Math.random()));\n}" > Index.java
+printf "package io.openruntimes.java;\nimport java.util.Collections;\n\npublic class Index {\n    public RuntimeOutput main(RuntimeContext context) throws Exception {\n        return context.res.json(Collections.singletonMap(\"n\", Math.random()));\n    }\n}" > Index.java
 ```
 
 2. Build the code:
@@ -70,10 +70,16 @@ You can also make changes to the example code and apply the changes with the `do
 - When writing function for this runtime, ensure it is named `main`. An example of this is:
 
 ```java
-public RuntimeOutput main(RuntimeContext context) throws Exception {
-    return context.res.send("Hello Open Runtimes 👋");
+package io.openruntimes.java;
+
+public class Index {
+    public RuntimeOutput main(RuntimeContext context) throws Exception {
+        return context.res.send("Hello Open Runtimes 👋");
+    }
 }
 ```
+
+- Ensure your Java files starts with `package io.openruntimes.java;`
 
 - To handle dependencies, you need to have any `.gradle` file including a `dependencies` block. Dependencies will be automatically cached and installed, so you don't need to include the `build` folder in your function.
 

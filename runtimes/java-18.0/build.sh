@@ -16,26 +16,6 @@ for filename in ./*.gradle*; do
     echo "apply from: \"${filename}\"" >> /usr/local/src/build.gradle
 done
 
-# Read user code and collect imports
-CODE="$(cat "$OPEN_RUNTIMES_ENTRYPOINT")"
-IMPORTS=""
-while read line; do
-    case "${line}" in import*)
-        IMPORTS="${IMPORTS}${line}\n"
-    esac
-done < "$OPEN_RUNTIMES_ENTRYPOINT"
-CODE=$(echo "${CODE}" | sed /import*/d)
-
-# Wrap the user code in a class
-echo "package io.openruntimes.java;
-${IMPORTS}
-public class Wrapper {
-${CODE}
-}" > Wrapper.java
-
-# Remove the user code file (copy)
-rm "${OPEN_RUNTIMES_ENTRYPOINT}"
-
 # Build the jar
 cd /usr/local/src
 sh gradlew buildJar
