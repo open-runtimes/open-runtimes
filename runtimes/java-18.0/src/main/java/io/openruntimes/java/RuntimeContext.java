@@ -2,7 +2,11 @@ package io.openruntimes.java;
 
 import org.rapidoid.http.Req;
 
-import java.util.Array;
+import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class RuntimeContext {
@@ -21,14 +25,21 @@ public class RuntimeContext {
     }
 
     public void log(Object message) {
-        if(message instanceof Map || message instanceof Array) {
-
+        if(message instanceof Map || message instanceof List) {
+            Gson gson = new GsonBuilder().serializeNulls().create();
+            this.logs.add(gson.toJson(message));
+        } else {
+            this.logs.add(message.toString());
         }
-        this.logs.add(message.toString());
     }
 
     public void error(Object message) {
-        this.errors.add(message.toString());
+        if(message instanceof Map || message instanceof List) {
+            Gson gson = new GsonBuilder().serializeNulls().create();
+            this.errors.add(gson.toJson(message));
+        } else {
+            this.errors.add(message.toString());
+        }
     }
 }
 

@@ -33,7 +33,12 @@ public class Server {
     public static Resp execute(Req req, Resp resp) {
         Map<String, String> reqHeaders = req.headers();
 
-        if(!reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(System.getenv("OPEN_RUNTIMES_SECRET"))) {
+        String serverSecret = System.getenv("OPEN_RUNTIMES_SECRET");
+        if(serverSecret == null) {
+            serverSecret = "";
+        }
+
+        if(!reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(serverSecret)) {
             return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
         }
 
@@ -41,7 +46,6 @@ public class Server {
         Object body = bodyString;
         Map<String, String> headers = new HashMap<String, String>();
         String method = req.verb();
-        String url = req.uri();
 
         for (Map.Entry<String, String> entry : reqHeaders.entrySet()) {
             String header = entry.getKey().toLowerCase();
@@ -52,11 +56,53 @@ public class Server {
 
         String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
         if(contentType.contains("application/json")) {
-            Gson gson = new GsonBuilder().serializeNulls().create();
-            body = gson.fromJson(bodyString, Map.class);
+            if(!bodyString.isEmpty()) {
+                Gson gson = new GsonBuilder().serializeNulls().create();
+                body = gson.fromJson(bodyString, Map.class);
+            } else {
+                body = new HashMap<String, Object>();
+            }
         }
 
-        RuntimeRequest runtimeRequest = new RuntimeRequest(bodyString, body, headers, method, url);
+        String scheme = reqHeaders.getOrDefault("x-forwarded-proto", "http");
+
+        String hostHeader = reqHeaders.getOrDefault("host", "");
+        String host = "";
+        int port = 80;
+
+        if(hostHeader.contains(":")) {
+            host = hostHeader.split(":")[0];
+            port = Integer.parseInt(hostHeader.split(":")[1]);
+        } else {
+            host = hostHeader;
+            port = 80;
+        }
+
+        String path = req.path();
+        String queryString = req.query();
+        Map<String, String> query = new HashMap<String, String>();
+
+        for (String param : queryString.split("&")) {
+            String[] pair = param.split("=");
+
+            if(pair.length == 2 && pair[0] != null && !pair[0].isEmpty()) {
+                query.put(pair[0], pair[1]);
+            }
+        }
+
+        String url = scheme + "://" + host;
+
+        if(port != 80) {
+            url += ":" + String.valueOf(port);
+        }
+
+        url += path;
+
+        if(!queryString.isEmpty()) {
+            url += "?" + queryString;
+        }
+
+        RuntimeRequest runtimeRequest = new RuntimeRequest(bodyString, body, headers, method, url, scheme, host, path, port, queryString, query);
         RuntimeResponse runtimeResponse = new RuntimeResponse();
         RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse);
 

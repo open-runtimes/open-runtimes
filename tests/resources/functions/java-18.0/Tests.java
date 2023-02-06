@@ -49,7 +49,15 @@ public class Tests {
             case "requestMethod":
                 return context.res.send(context.req.method);
             case "requestUrl":
-                return context.res.send(context.req.url);
+                json.put("url", context.req.url);
+                json.put("port", context.req.port);
+                json.put("path", context.req.path);
+                json.put("query", context.req.query);
+                json.put("queryString", context.req.queryString);
+                json.put("scheme", context.req.scheme);
+                json.put("host", context.req.host);
+                return context.res.json(json);
+
             case "requestHeaders":
                 for (Map.Entry<String, String> entry : context.req.headers.entrySet()) {
                     json.put(entry.getKey(), entry.getValue());
