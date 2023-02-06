@@ -11,9 +11,6 @@
 defmodule HandlerTest do
 
   def main(_req, res) do
-    Application.ensure_all_started(:inets)
-
-    Application.ensure_all_started(:ssl)
 
     payload = Jason.decode!(Map.take(req, ["payload"]))
     {status, todo} = :httpc.request(
