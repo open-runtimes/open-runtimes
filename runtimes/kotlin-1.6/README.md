@@ -12,7 +12,8 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir kotlin-or && cd kotlin-or
-printf "fun main(context: RuntimeContext): RuntimeOutput = context.res.json(mutableMapOf(\"n\" to Math.random()))" > Index.kt
+printf "package io.openruntimes.kotlin\npublic class Index {\n 
+   fun main(context: RuntimeContext): RuntimeOutput = context.res.json(mutableMapOf(\"n\" to Math.random()))"\n} > Index.kt
 ```
 
 2. Build the code:
@@ -70,11 +71,17 @@ You can also make changes to the example code and apply the changes with the `do
 - When writing function for this runtime, ensure it is named `main`. An example of this is:
 
 ```kotlin
-@Throws(Exception::class)
-fun main(context: RuntimeContext): RuntimeOutput {
-    return context.res.send("Hello Open Runtimes 👋");
+package io.openruntimes.kotlin
+
+public class Index {
+    @Throws(Exception::class)
+    fun main(context: RuntimeContext): RuntimeOutput {
+        return context.res.send("Hello Open Runtimes 👋");
+    }
 }
 ```
+
+- Ensure your Java files starts with `package io.openruntimes.kotlin;`
 
 - To handle dependencies, you need to have any `.gradle` file including a `dependencies` block. Dependencies will be automatically cached and installed, so you don't need to include the `build` folder in your function.
 

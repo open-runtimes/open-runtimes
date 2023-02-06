@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets
 import java.io.UnsupportedEncodingException
 import com.google.gson.GsonBuilder
 import com.google.gson.Gson
+import java.lang.reflect.Method
 
 suspend fun main() {
     Javalin
@@ -71,8 +72,10 @@ suspend fun execute(ctx: Context) {
     var output: RuntimeOutput?
 
     try {
-        var codeWrapper: Wrapper = Wrapper();
-        output = codeWrapper.main(context)
+        var classToLoad = Class.forName("io.openruntimes.kotlin.Tests");
+        var classMethod = classToLoad.getDeclaredMethod("main", RuntimeContext::class.java);
+        var instance = classToLoad.newInstance();
+        output = classMethod.invoke(instance, context) as RuntimeOutput;
     } catch (e: Exception) {
         var sw: StringWriter = StringWriter();
         var pw: PrintWriter = PrintWriter(sw);
