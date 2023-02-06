@@ -34,8 +34,8 @@ suspend fun execute(ctx: Context) {
         return
     }
 
-    var rawBody: String = ctx.body()
-    var body: Any = rawBody
+    var bodyString: String = ctx.body()
+    var body: Any = bodyString
     var headers: MutableMap<String, String> = mutableMapOf<String, String>()
     var method: String = ctx.method()
     var url: String = ctx.path()
@@ -54,10 +54,10 @@ suspend fun execute(ctx: Context) {
     var contentType: String = ctx.header("content-type") ?: "text/plain"
     if(contentType.contains("application/json")) {
         var gson = GsonBuilder().serializeNulls().create();
-        body = gson.fromJson(rawBody, MutableMap::class.java)
+        body = gson.fromJson(bodyString, MutableMap::class.java)
     }
 
-    var runtimeRequest: RuntimeRequest = RuntimeRequest(rawBody, body, headers, method, url)
+    var runtimeRequest: RuntimeRequest = RuntimeRequest(bodyString, body, headers, method, url)
     var runtimeResponse: RuntimeResponse = RuntimeResponse()
     var context: RuntimeContext = RuntimeContext(runtimeRequest, runtimeResponse)
 

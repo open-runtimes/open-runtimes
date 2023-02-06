@@ -77,7 +77,7 @@ public class Tests {
                 return context.res.json(mutableMapOf(
                     "key1" to key1,
                     "key2" to key2,
-                    "raw" to context.req.rawBody
+                    "raw" to context.req.bodyString
                 ))
             }
             "envVars" -> {
@@ -95,7 +95,41 @@ public class Tests {
                 context.log(4.2);
                 context.log(true);
 
+                context.log(mutableListOf(
+                    "arrayValue"
+                ));
+                
+                context.log(mutableMapOf(
+                    "objectKey" to "objectValue"
+                ));
+
                 return context.res.send("");
+            }
+            "library" -> {
+                val gson = Gson()
+
+                val url = URL("https://jsonplaceholder.typicode.com/todos/" + context.req.bodyString)
+                val con = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    responseCode
+                }
+
+                val todoString = buildString {
+                    BufferedReader(InputStreamReader(con.inputStream)).useLines { lines ->
+                        lines.forEach { append(it) }
+                    }
+                }
+
+                con.disconnect()
+
+                val todo = gson.fromJson<Map<String, Any>>(
+                    todoString,
+                    MutableMap::class.java
+                )
+
+                return context.res.json(mutableMapOf(
+                    "todo" to todo
+                ))
             }
             else -> {
                 throw Exception("Unkonwn action")
