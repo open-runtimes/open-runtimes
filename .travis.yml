@@ -232,12 +232,12 @@ before_install:
     if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
       echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
     fi
-  - docker --version
+  - docker version
   - docker run --rm --privileged linuxkit/binfmt:v0.8
-  - docker buildx create --use
+  # - docker buildx use $(docker buildx create) # TEMPORARLY DISABLED DUE TO DOCKER 23.0.0 ISSUES
 
 install:
-  - docker --version
+  - docker version
   - composer install
 
 script:
