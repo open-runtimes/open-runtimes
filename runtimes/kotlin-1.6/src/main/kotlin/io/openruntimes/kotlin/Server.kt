@@ -29,7 +29,18 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
-    if (ctx.header("x-open-runtimes-secret").isNullOrBlank() || ctx.header("x-open-runtimes-secret") != System.getenv("OPEN_RUNTIMES_SECRET")) {
+    var secret = ctx.header("x-open-runtimes-secret");
+    var serverSecret = System.getenv("OPEN_RUNTIMES_SECRET");
+
+    if(secret == null) {
+        secret = "";
+    }
+
+    if(serverSecret == null) {
+        serverSecret = "";
+    }
+
+    if (secret != serverSecret) {
         ctx.status(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
         return
     }
@@ -53,8 +64,12 @@ suspend fun execute(ctx: Context) {
 
     var contentType: String = ctx.header("content-type") ?: "text/plain"
     if(contentType.contains("application/json")) {
-        var gson = GsonBuilder().serializeNulls().create();
-        body = gson.fromJson(bodyString, MutableMap::class.java)
+        if(!bodyString.isEmpty()) {
+            var gson = GsonBuilder().serializeNulls().create();
+            body = gson.fromJson(bodyString, MutableMap::class.java)
+        } else {
+            body = HashMap<String, Any>();
+        }
     }
 
     var runtimeRequest: RuntimeRequest = RuntimeRequest(bodyString, body, headers, method, url)
