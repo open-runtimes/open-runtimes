@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException
 import com.google.gson.GsonBuilder
 import com.google.gson.Gson
 import java.lang.reflect.Method
+import java.util.HashMap
 
 suspend fun main() {
     Javalin
@@ -49,11 +50,6 @@ suspend fun execute(ctx: Context) {
     var body: Any = bodyString
     var headers: MutableMap<String, String> = mutableMapOf<String, String>()
     var method: String = ctx.method()
-    var url: String = ctx.path()
-
-    if(!ctx.queryString().isNullOrEmpty()) {
-        url += "?" + ctx.queryString()
-    }
 
     for (entry in ctx.headerMap().entries.iterator()) {
         var header: String = entry.key.lowercase()
@@ -72,7 +68,54 @@ suspend fun execute(ctx: Context) {
         }
     }
 
-    var runtimeRequest: RuntimeRequest = RuntimeRequest(bodyString, body, headers, method, url)
+    var hostHeader = ctx.header("host");
+    var protoHeader = ctx.header("x-forwarded-proto");
+
+    if(hostHeader == null) {
+        hostHeader = "";
+    }
+
+    if(protoHeader == null) {
+        protoHeader = "http";
+    }
+
+    var host: String
+    var port: Int
+
+    if(hostHeader.contains(":")) {
+        host = hostHeader.split(":")[0]
+        port = hostHeader.split(":")[1].toInt()
+    } else {
+        host = hostHeader
+        port = 80
+    }
+
+    var path: String = ctx.path()
+    var scheme: String = protoHeader
+    var queryString: String = ctx.queryString() ?: ""
+    var query: MutableMap<String, String> = HashMap<String, String>()
+
+    for(param in queryString.split("&")) {
+        var pair = param.split("=")
+
+        if(pair.size == 2 && pair[0] != null && !pair[0].isEmpty()) {
+            query.put(pair[0], pair[1])
+        }
+    }
+
+    var url: String = scheme + "://" + host;
+
+    if(port != 80) {
+        url += ":" + port;
+    }
+
+    url += path;
+
+    if(!queryString.isEmpty()) {
+        url += "?" + queryString;
+    }
+
+    var runtimeRequest: RuntimeRequest = RuntimeRequest(bodyString, body, headers, method, url, path, host, scheme, port, queryString, query)
     var runtimeResponse: RuntimeResponse = RuntimeResponse()
     var context: RuntimeContext = RuntimeContext(runtimeRequest, runtimeResponse)
 

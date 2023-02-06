@@ -52,7 +52,15 @@ public class Tests {
                 return context.res.send(context.req.method)
             }
             "requestUrl" -> {
-                return context.res.send(context.req.url)
+                return context.res.json(mutableMapOf(
+                    "url" to context.req.url,
+                    "port" to context.req.port,
+                    "path" to context.req.path,
+                    "query" to context.req.query,
+                    "queryString" to context.req.queryString,
+                    "scheme" to context.req.scheme,
+                    "host" to context.req.host,
+                ))
             }
             "requestHeaders" -> {
                 return context.res.json(context.req.headers as MutableMap<String, Any>)
