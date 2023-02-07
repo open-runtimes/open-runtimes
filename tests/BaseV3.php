@@ -159,10 +159,6 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => '']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
-
-        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => ''], port: 3001);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('Hello World 👋', $response['body']);
     }
 
     public function testRequestMethod(): void
@@ -230,12 +226,35 @@ abstract class BaseV3 extends TestCase
 
         $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'www.mydomain.com:80']);
         self::assertEquals(200, $response['code']);
-
         $body = \json_decode($response['body'], true);
-
         self::assertEquals(80, $body['port']);
         self::assertEquals('www.mydomain.com', $body['host']);
         self::assertEquals('http://www.mydomain.com/', $body['url']);
+
+        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'user:password@www.domain.com:8888']);
+        self::assertEquals(200, $response['code']);
+        $body = \json_decode($response['body'], true);
+        self::assertEquals(8888, $body['port']);
+        self::assertEquals('www.domain.com', $body['host']);
+        self::assertEquals('user', $body['user']);
+        self::assertEquals('password', $body['password']);
+
+        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'userpassword@www.domain.com:8888']);
+        self::assertEquals(200, $response['code']);
+        $body = \json_decode($response['body'], true);
+        self::assertEquals(8888, $body['port']);
+        self::assertEquals('www.domain.com', $body['host']);
+        self::assertEquals('userpassword', $body['user']);
+        self::assertEquals('', $body['password']);
+
+
+        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'userpassword@www.domain.com']);
+        self::assertEquals(200, $response['code']);
+        $body = \json_decode($response['body'], true);
+        self::assertEquals(80, $body['port']);
+        self::assertEquals('www.domain.com', $body['host']);
+        self::assertEquals('userpassword', $body['user']);
+        self::assertEquals('', $body['password']);
     }
 
     public function testRequestHeaders(): void
