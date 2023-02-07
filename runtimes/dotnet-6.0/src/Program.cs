@@ -117,8 +117,8 @@ static async Task<IResult> Execute(HttpRequest Request)
 
     try
     {
-        var CodeWrapper = new Wrapper();
-        Output = await CodeWrapper.Main(Context);
+        var CodeHandler = new Handler();
+        Output = await CodeHandler.Main(Context);
     }
     catch (Exception e)
     {

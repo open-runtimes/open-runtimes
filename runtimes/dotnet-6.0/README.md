@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir dotnet-or && cd dotnet-or
-printf "public async Task<RuntimeOutput> Main(RuntimeContext Context) => Context.Res.Json(new() {{ \"n\", new System.Random().NextDouble() }} );" > Index.cs
+printf "namespace DotNetRuntime;\npublic class Handler {\n  public async Task<RuntimeOutput> Main(RuntimeContext Context) => Context.Res.Json(new() {{ \"n\", new System.Random().NextDouble() }} );\n}" > Index.cs
 ```
 
 2. Build the code:
@@ -67,16 +67,41 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing function for this runtime, ensure it is named `Main`. An example of this is:
+- When writing function for this runtime, ensure it is named `Main` and is inside `Handler` class. An example of this is:
 
 ```cs
-public async Task<RuntimeOutput> Main(RuntimeContext Context) => 
-    Context.Res.Send("Hello Open Runtimes 👋");
+namespace DotNetRuntime;
+
+public class Handler {
+    public async Task<RuntimeOutput> Main(RuntimeContext Context) => 
+        Context.Res.Send("Hello Open Runtimes 👋");
+}
 ```
+
+- Your entrypoint code must start with `namespace DotNetRuntime;`.
 
 - To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically cached and installed, so you don't need to include the `.nuget` folder in your function.
 
 - The default entrypoint is `Index.cs`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/App.cs`.
+
+- F# can be used in .NET runtime:
+
+```fs
+namespace DotNetRuntime
+
+type Handler()=
+  [YOUR_CODE]
+```
+
+- Visual Basic can be used in .NET runtime:
+
+```vb
+Namespace DotNetRuntime
+  Public Class Handler
+    [YOUR_CODE]
+  End Class
+End Namespace
+```
 
 ## Authors
 
