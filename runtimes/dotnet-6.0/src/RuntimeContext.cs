@@ -1,4 +1,5 @@
 using System.Collections; 
+using System.Text.Json;
 
 namespace DotNetRuntime
 {
@@ -18,12 +19,20 @@ namespace DotNetRuntime
 
 		public void Log(object Message)
 		{
-			this.Logs.Add(Message.ToString());
+			if (Message is IList || Message is IDictionary) {
+				this.Logs.Add(JsonSerializer.Serialize(Message));
+			} else {
+				this.Logs.Add(Message.ToString());
+			}
 		}
 
 		public void Error(object Message)
 		{
-			this.Errors.Add(Message.ToString());
+			if (Message is IList || Message is IDictionary) {
+				this.Errors.Add(JsonSerializer.Serialize(Message));
+			} else {
+				this.Errors.Add(Message.ToString());
+			}
 		}
 	}
 }

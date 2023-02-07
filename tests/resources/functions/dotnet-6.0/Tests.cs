@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using System.Collections;
 
 static readonly HttpClient http = new();
 
@@ -42,7 +43,16 @@ public async Task<RuntimeOutput> Main(RuntimeContext Context)
         case "requestMethod":
             return Context.Res.Send(Context.Req.Method);
         case "requestUrl":
-            return Context.Res.Send(Context.Req.Url);
+            return Context.Res.Json(new()
+            {
+                { "url", Context.Req.Url },
+                { "port", Context.Req.Port },
+                { "path", Context.Req.Path },
+                { "query", Context.Req.Query },
+                { "queryString", Context.Req.QueryString },
+                { "scheme", Context.Req.Scheme },
+                { "host", Context.Req.Host }
+            });
         case "requestHeaders":
             Dictionary<string, object> Json = new Dictionary<string, object>();
 
@@ -72,7 +82,7 @@ public async Task<RuntimeOutput> Main(RuntimeContext Context)
             {
                 { "key1", Key1 },
                 { "key2", Key2 },
-                { "raw", Context.Req.RawBody }
+                { "raw", Context.Req.BodyString }
             });
         case "envVars":
             return Context.Res.Json(new()
@@ -89,7 +99,25 @@ public async Task<RuntimeOutput> Main(RuntimeContext Context)
             Context.Log(4.2);
             Context.Log(true);
 
+            Dictionary<string, string> Obj = new Dictionary<string, string>();
+            Obj.Add("objectKey", "objectValue");
+
+            Context.Log(Obj);
+
+            ArrayList Arr = new ArrayList();
+            Arr.Add("arrayValue");
+
+            Context.Log(Arr);
+
             return Context.Res.Send("");
+        case "library":
+            var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/" + Context.Req.BodyString);
+            var todo = JsonConvert.DeserializeObject<Dictionary<string, object>>(response, settings: null);
+
+            return Context.Res.Json(new()
+            {
+                { "todo", todo }
+            });
         default:
             throw new Exception("Unkonwn action");
     }

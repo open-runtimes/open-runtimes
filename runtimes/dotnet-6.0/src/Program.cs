@@ -14,17 +14,16 @@ app.Run();
 static async Task<IResult> Execute(HttpRequest Request)
 {
     string Secret = Request.Headers.TryGetValue("x-open-runtimes-secret", out var SecretValue) ? (string) SecretValue : "";
-    if(Secret != Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET"))
+    if(Secret != (Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? ""))
     {
         return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
     }
 
     StreamReader Reader = new StreamReader(Request.Body);
-    string RawBody = await Reader.ReadToEndAsync();
-    object Body = RawBody;
+    string BodyString = await Reader.ReadToEndAsync();
+    object Body = BodyString;
     Dictionary<string, string> Headers = new Dictionary<string, string>();
     string Method = Request.Method;
-    string Url = Request.Path + Request.QueryString;
 
     foreach (var Entry in Request.Headers)
     {
@@ -41,10 +40,68 @@ static async Task<IResult> Execute(HttpRequest Request)
     string ContentType = Request.Headers.TryGetValue("content-type", out var ContentTypeValue) ? (string) ContentTypeValue : "";
     if(ContentType.Contains("application/json"))
     {
-        Body = JsonConvert.DeserializeObject<Dictionary<string, object>>(RawBody);
+        if(String.IsNullOrEmpty(BodyString))
+        {
+            Body = new Dictionary<string, object>();
+        } else
+        {
+            Body = JsonConvert.DeserializeObject<Dictionary<string, object>>(BodyString);
+        }
     }
 
-    RuntimeRequest ContextRequest = new RuntimeRequest(RawBody, Body, Headers, Method, Url);
+    if(Body == null)
+    {
+        Body = new Dictionary<string, object>();
+    }
+
+    String HostHeader = Request.Headers.TryGetValue("host", out var HostHeaderValue) ? (string) HostHeaderValue : "";
+
+    String Host = "";
+    int Port = 80;
+
+    if(HostHeader.Contains(":"))
+    {
+        Host = HostHeader.Split(":")[0];
+        Port = Int32.Parse(HostHeader.Split(":")[1]);
+    } else
+    {
+        Host = HostHeader;
+        Port = 80;
+    }
+
+    String Scheme = Request.Headers.TryGetValue("x-forwarded-proto", out var ProtoHeaderValue) ? (string) ProtoHeaderValue : "http";
+    String Path = Request.Path;
+
+    String QueryString = Request.QueryString.Value ?? "";
+    if(QueryString.StartsWith("?")) {
+        QueryString = QueryString.Remove(0,1);
+    }
+
+    Dictionary<string, string> Query = new Dictionary<string, string>();
+
+    foreach (String param in QueryString.Split("&"))
+    {
+        String[] pair = param.Split("=");
+
+        if(pair.Length == 2 && !String.IsNullOrEmpty(pair[0])) {
+            Query.Add(pair[0], pair[1]);
+        }
+    }
+
+    String Url = Scheme + "://" + Host;
+
+    if(Port != 80)
+    {
+        Url += ":" + Port.ToString();
+    }
+
+    Url += Path;
+
+    if(!String.IsNullOrEmpty(QueryString)) {
+        Url += "?" + QueryString;
+    }
+
+    RuntimeRequest ContextRequest = new RuntimeRequest(BodyString, Body, Headers, Method, Url, Host, Scheme, Path, QueryString, Query, Port);
     RuntimeResponse ContextResponse = new RuntimeResponse();
     RuntimeContext Context = new RuntimeContext(ContextRequest, ContextResponse);
 
@@ -93,7 +150,8 @@ static async Task<IResult> Execute(HttpRequest Request)
         }
     }
 
-    if(!String.IsNullOrEmpty(Customstd.ToString())) {
+    if(!String.IsNullOrEmpty(Customstd.ToString()))
+    {
         Context.Log("Unsupported log noticed. Use Context.Log() or Context.Error() for logging.");
     }
 
