@@ -34,33 +34,9 @@ const server = micro(async (req, res) => {
         headers[header.toLowerCase()] = req.headers[header];
     });
 
-    let host = "";
-    let port = 80;
-    let user = "";
-    let password = "";
-
-    const hostHeader = req.headers['host'] ?? '';
-
-    const authHeader = hostHeader.includes('@') ? hostHeader.split('@')[0] : '';
-    const hostnameHeader = hostHeader.includes('@') ? hostHeader.split('@')[1] : hostHeader;
-
-    if(authHeader.includes(':')) {
-        user = authHeader.split(':')[0];
-        password = authHeader.split(':')[1];
-    } else {
-        user = authHeader;
-        password = "";
-    }
-
-    if(hostnameHeader.includes(':')) {
-        host = hostnameHeader.split(':')[0];
-        port = +(hostnameHeader.split(':')[1]);
-    } else {
-        host = hostnameHeader;
-        port = 80;
-    }
-
     const scheme = (req.headers['x-forwarded-proto'] ?? 'http');
+    const host = req.headers['host'].includes(':') ? req.headers['host'].split(':')[0] : req.headers['host'];
+    const port = +(req.headers['host'].includes(':') ? req.headers['host'].split(':')[1] : '80');
     const path = req.url.includes('?') ? req.url.split('?')[0] : req.url;
     const queryString = req.url.includes('?') ? req.url.split('?')[1] : '';
     const query = {};
@@ -86,9 +62,7 @@ const server = micro(async (req, res) => {
             queryString,
             port,
             url,
-            path,
-            user,
-            password
+            path
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {

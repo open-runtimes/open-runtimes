@@ -36,9 +36,7 @@ module.exports = async (context) => {
                 query: context.req.query,
                 queryString: context.req.queryString,
                 scheme: context.req.scheme,
-                host: context.req.host,
-                user: context.req.user,
-                password: context.req.password,
+                host: context.req.host
             });
         case 'requestHeaders':
             return context.res.json(context.req.headers);
