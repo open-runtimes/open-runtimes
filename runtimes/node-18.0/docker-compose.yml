@@ -12,4 +12,4 @@ services:
       - OPEN_RUNTIMES_ENTRYPOINT
     volumes:
       - ./example/:/usr/code:rw
-    command: sh -c "sh /usr/local/src/build.sh && cp /usr/code/code.tar.gz /tmp/code.tar.gz && sh /usr/local/src/start.sh"
+    command: sh -c "cp -R /usr/code/* /usr/builds && cd /usr/builds && if [ -f package.json ]; then npm install; fi && mkdir -p node_modules && cp -R /usr/local/src/node_modules/* /usr/builds/node_modules && tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz . && cp /usr/code/code.tar.gz /tmp/code.tar.gz && cp /tmp/code.tar.gz /usr/workspace/code.tar.gz && cd /usr/workspace && tar -zxf /usr/workspace/code.tar.gz -C /usr/code-start && rm /usr/workspace/code.tar.gz && cp -R /usr/code-start/node_modules/* /usr/local/src/node_modules && cd /usr/local/src && npm start"

@@ -18,13 +18,13 @@ printf "module.exports = async (context) => {\n    return context.res.json({ n: 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/node:v3-18.0 sh /usr/local/src/build.sh
+docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/node:v3-18.0 sh -c "cp -R /usr/code/* /usr/builds && cd /usr/builds && if [ -f package.json ]; then npm install; fi && mkdir -p node_modules && cp -R /usr/local/src/node_modules/* /usr/builds/node_modules && tar --exclude code.tar.gz -zcf /usr/code/code.tar.gz ."
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=index.js --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/node:v3-18.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=index.js --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/node:v3-18.0 sh -c "cp /tmp/code.tar.gz /usr/workspace/code.tar.gz && cd /usr/workspace && tar -zxf /usr/workspace/code.tar.gz -C /usr/code-start && rm /usr/workspace/code.tar.gz && cp -R /usr/code-start/node_modules/* /usr/local/src/node_modules && cd /usr/local/src && npm start"
 ```
 
 4. In new terminal window, execute function:
