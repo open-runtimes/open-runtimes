@@ -3,7 +3,6 @@
 
 #include <string>
 #include <json/value.h>
-#include <drogon/HttpRequest.h>
 
 namespace runtime
 {

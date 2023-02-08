@@ -15,11 +15,23 @@ int main()
         .registerHandler(
             "/",
             [](const HttpRequestPtr &req,
-               function<void(const HttpResponsePtr &)> &&callback, const RuntimeRequest &runtimeRequest)
+               function<void(const HttpResponsePtr &)> &&callback)
             {
+                RuntimeRequest contextRequest;
+                contextRequest.rawBody = "Okay?!?!?";
+
+                RuntimeResponse contextResponse;
+
+                RuntimeContext context;
+                context.req = contextRequest;
+                context.res = contextResponse;
+
+                auto output = Wrapper::main(context);
+
                 const std::shared_ptr<HttpResponse> res = HttpResponse::newHttpResponse();
-                res->setStatusCode(static_cast<HttpStatusCode>(201));
-                res->setBody("Heyyy");
+                res->setStatusCode(static_cast<HttpStatusCode>(output.statusCode));
+
+                res->setBody(output.body);
                 callback(res);
 
                 /*
