@@ -22,11 +22,7 @@ const server = micro(async (req, res) => {
     let body = bodyString;
 
     if (contentType.includes('application/json')) {
-        if(bodyString) {
-            body = await parseJson(req);
-        } else {
-            body = {};
-        }
+        body = await parseJson(req);
     }
 
     const headers = {};
