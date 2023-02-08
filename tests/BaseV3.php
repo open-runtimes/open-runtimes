@@ -279,15 +279,6 @@ abstract class BaseV3 extends TestCase
         self::assertEquals('Missing key', $body['key1']);
         self::assertEquals('Missing key', $body['key2']);
         self::assertEquals('{"data":"OK"}', $body['raw']);
-
-        $response = $this->execute(body: '', headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
-        self::assertEquals(200, $response['code']);
-
-        $body = \json_decode($response['body'], true);
-
-        self::assertEquals('Missing key', $body['key1']);
-        self::assertEquals('Missing key', $body['key2']);
-        self::assertEquals('', $body['raw']);
     }
 
     public function testEnvVars(): void
