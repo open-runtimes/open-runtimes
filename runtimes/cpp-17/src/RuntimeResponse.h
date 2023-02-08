@@ -25,7 +25,16 @@ namespace runtime
                 return this->send(json.toStyledString(), statusCode, headers);
             }
 
-            // empty, redirect
+            RuntimeOutput empty()
+            {
+                return this->send("", 204, {});
+            }
+
+            RuntimeOutput redirect(std::string url, int statusCode = 301, Json::Value headers = {})
+            {
+                headers["location"] = url;
+                return this->send("", statusCode, headers);
+            }
     };
 }
 

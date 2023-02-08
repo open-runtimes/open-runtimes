@@ -12,13 +12,73 @@ int main()
 {
     app()
         .addListener("0.0.0.0", 3000)
-        .registerHandler(
-            "/",
+        .registerHandlerViaRegex(
+            "/.*",
             [](const HttpRequestPtr &req,
                function<void(const HttpResponsePtr &)> &&callback)
             {
+                const std::shared_ptr<HttpResponse> res = HttpResponse::newHttpResponse();
+
+                auto secret = req->getHeader("x-open-runtimes-secret");
+                if (secret.empty() || secret != std::getenv("OPEN_RUNTIMES_SECRET"))
+                {
+                    res->setStatusCode(static_cast<HttpStatusCode>(500));
+                    res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
+                    callback(res);
+                    return;
+                }
+
+                auto method = req->getMethodString();
+
                 RuntimeRequest contextRequest;
-                contextRequest.rawBody = "Okay?!?!?";
+                contextRequest.method = method;
+                contextRequest.queryString = req->getQuery();
+                contextRequest.bodyString = req->getBody();
+                contextRequest.body = contextRequest.bodyString;
+                contextRequest.path = req->getPath();
+
+                // TODO: scheme, host, port, url
+
+                Json::Value query;
+                // TODO: Fill query from queryString
+                /*
+                for(const param of queryString.split('&')) {
+                    const [ key, value ] = param.split('=');
+
+                    if(key) {
+                        query[key] = value;
+                    }
+                }
+                */
+                contextRequest.query = query;
+
+                Json::Value headers;
+                for(const auto header : req->getHeaders())
+                {
+                    auto headerValue = req->getHeader(header.first);
+                    std::transform(headerValue.begin(), headerValue.end(), headerValue.begin(), [](unsigned char c){ return std::tolower(c); });
+
+                    if (headerValue.rfind("x-open-runtimes-", 0) != 0)
+                    {
+                        headers[header.first] = headerValue;
+                    }
+                }
+
+                contextRequest.headers = headers;
+
+                auto contentType = req->getHeader("content-type");
+                if(contentType.empty())
+                {
+                    contentType = "text/plain";
+                }
+
+                if (contentType.find("application/json") != std::string::npos)
+                {
+                    Json::Value bodyRoot;   
+                    Json::Reader reader;
+                    reader.parse(contextRequest.bodyString.c_str(), bodyRoot); 
+                    contextRequest.body = bodyRoot;
+                }
 
                 RuntimeResponse contextResponse;
 
@@ -26,62 +86,44 @@ int main()
                 context.req = contextRequest;
                 context.res = contextResponse;
 
-                auto output = Wrapper::main(context);
-
-                const std::shared_ptr<HttpResponse> res = HttpResponse::newHttpResponse();
-                res->setStatusCode(static_cast<HttpStatusCode>(output.statusCode));
-
-                res->setBody(output.body);
-                callback(res);
-
-                /*
-                const std::shared_ptr<HttpResponse> res = HttpResponse::newHttpResponse();
-
-                if (req->getHeader("x-internal-challenge") != std::getenv("OPEN_RUNTIMES_SECRET"))
-                {
-                    res->setStatusCode(static_cast<HttpStatusCode>(500));
-                    res->setBody("Unauthorized");
-                    callback(res);
-                    return;
-                }
-
-                const std::shared_ptr<RuntimeResponse> runtimeResponse(new RuntimeResponse());
-
                 std::stringstream outbuffer;
                 std::stringstream errbuffer;
                 std::streambuf *oldout = std::cout.rdbuf(outbuffer.rdbuf());
                 std::streambuf *olderr = std::cerr.rdbuf(errbuffer.rdbuf());
 
+                RuntimeOutput output;
                 try {
-                    Wrapper::main(runtimeRequest, *runtimeResponse);
-                    res->setStatusCode(static_cast<HttpStatusCode>(runtimeResponse->statusCode));
+                    output = Wrapper::main(context);
+                } catch(const std::exception& e) {
+                    context.error(e.what());
+                    output = contextResponse.send("", 500, {});
+                }
 
-                    Json::Value output;
-                    if (runtimeResponse->stringValue.length() != 0)
-                    {
-                        output["response"] = runtimeResponse->stringValue;
-                    }
-                    else
-                    {
-                        output["response"] = runtimeResponse->jsonValue;
-                    }
-                    output["stdout"] = outbuffer.str();
-                    res->setBody(output.toStyledString());
-                } catch (const std::exception& e) {
-                    Json::Value output;
-                    output["stderr"] = errbuffer.str() + e.what();
-                    output["stdout"] = outbuffer.str();
-                    res->setStatusCode(static_cast<HttpStatusCode>(500));
-                    res->setBody(output.toStyledString());
+                /*
+                Should never be null. If somehow is, uncomment:
+                if(output == NULL) {
+                    context.error("Return statement missing. return context.res.empty() if no response is expected.");
+                    output = contextResponse.send("", 500, {});
+                }
+                */
+
+                if(!outbuffer.str().empty() || !errbuffer.str().empty()) {
+                    context.log("Unsupported log noticed. Use context.log() or context.error() for logging.");
                 }
 
                 std::cout.rdbuf(oldout);
                 std::cerr.rdbuf(olderr);
 
+                // TODO: set output.headers
+                // TODO: set x-open-runtimes-logs, x-open-runtimes-errors; urlencode
+                
+                // TODO: Set response headers
+
+                res->setStatusCode(static_cast<HttpStatusCode>(output.statusCode));
+                res->setBody(output.body);
                 callback(res);
-                */
             },
-            {Post})
+            {Post, Get, Put, Patch, Delete, Options})
         .run();
     return 0;
 }
