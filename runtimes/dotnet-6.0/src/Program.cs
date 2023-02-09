@@ -14,7 +14,7 @@ app.Run();
 static async Task<IResult> Execute(HttpRequest Request)
 {
     string Secret = Request.Headers.TryGetValue("x-open-runtimes-secret", out var SecretValue) ? (string) SecretValue : "";
-    if(Secret != (Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? ""))
+    if(Secret == "" || Secret != (Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? ""))
     {
         return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
     }
@@ -56,8 +56,11 @@ static async Task<IResult> Execute(HttpRequest Request)
 
     String HostHeader = Request.Headers.TryGetValue("host", out var HostHeaderValue) ? (string) HostHeaderValue : "";
 
+    String Scheme = Request.Headers.TryGetValue("x-forwarded-proto", out var ProtoHeaderValue) ? (string) ProtoHeaderValue : "http";
+    String DefaultPort = Scheme == "https" ? "443" : "80";
+
     String Host = "";
-    int Port = 80;
+    int Port = Int32.Parse(DefaultPort);
 
     if(HostHeader.Contains(":"))
     {
@@ -66,10 +69,9 @@ static async Task<IResult> Execute(HttpRequest Request)
     } else
     {
         Host = HostHeader;
-        Port = 80;
+        Port = Int32.Parse(DefaultPort);
     }
 
-    String Scheme = Request.Headers.TryGetValue("x-forwarded-proto", out var ProtoHeaderValue) ? (string) ProtoHeaderValue : "http";
     String Path = Request.Path;
 
     String QueryString = Request.QueryString.Value ?? "";
@@ -81,16 +83,17 @@ static async Task<IResult> Execute(HttpRequest Request)
 
     foreach (String param in QueryString.Split("&"))
     {
-        String[] pair = param.Split("=");
+        String[] pair = param.Split("=", 2);
 
-        if(pair.Length == 2 && !String.IsNullOrEmpty(pair[0])) {
-            Query.Add(pair[0], pair[1]);
+        if(pair.Length >= 1 && !String.IsNullOrEmpty(pair[0])) {
+            String Value = pair.Length == 2 ? pair[1] : "";
+            Query.Add(pair[0], Value);
         }
     }
 
     String Url = Scheme + "://" + Host;
 
-    if(Port != 80)
+    if(Port != Int32.Parse(DefaultPort))
     {
         Url += ":" + Port.ToString();
     }
