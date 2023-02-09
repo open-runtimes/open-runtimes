@@ -1,4 +1,5 @@
 #include <iostream>
+#include <any>
 #include <string>
 #include <curl/curl.h>
 
@@ -15,8 +16,7 @@ static RuntimeOutput main(RuntimeContext context)
 
     std::string headerData = req.headers["x-test-header"].asString();
 
-    // TODO: This fails because it's std::any
-    Json::Value payload = req.body;
+    Json::Value payload = std::any_cast<Json::Value>(req.body);
     std::string id = payload["id"].asString();
 
     Json::CharReaderBuilder builder;

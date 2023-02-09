@@ -3,6 +3,8 @@
 #include "RuntimeRequest.h"
 #include "RuntimeOutput.h"
 #include "Wrapper.h"
+#include <vector>
+#include <numeric>
 
 using namespace std;
 using namespace runtime;
@@ -55,12 +57,12 @@ int main()
                 Json::Value headers;
                 for(const auto header : req->getHeaders())
                 {
-                    auto headerValue = req->getHeader(header.first);
-                    std::transform(headerValue.begin(), headerValue.end(), headerValue.begin(), [](unsigned char c){ return std::tolower(c); });
+                    auto headerKey = header.first;
+                    std::transform(headerKey.begin(), headerKey.end(), headerKey.begin(), [](unsigned char c){ return std::tolower(c); });
 
-                    if (headerValue.rfind("x-open-runtimes-", 0) != 0)
+                    if (headerKey.rfind("x-open-runtimes-", 0) != 0)
                     {
-                        headers[header.first] = headerValue;
+                        headers[headerKey] = req->getHeader(header.first);
                     }
                 }
 
@@ -114,10 +116,36 @@ int main()
                 std::cout.rdbuf(oldout);
                 std::cerr.rdbuf(olderr);
 
-                // TODO: set output.headers
-                // TODO: set x-open-runtimes-logs, x-open-runtimes-errors; urlencode
-                
-                // TODO: Set response headers
+                // TODO: Set response headers from output.headers
+
+                CURL *curl = curl_easy_init();
+
+                if(context.logs.size() > 0) {
+                    auto logsString = std::accumulate(
+                        std::next(context.logs.begin()), 
+                        context.logs.end(), 
+                        context.logs[0], 
+                        [](std::string a, std::string b) {
+                            return a + "\n" + b;
+                        }
+                    );
+                    char *logsEncoded = curl_easy_escape(curl, logsString.c_str(), logsString.length());
+                    res->addHeader("x-open-runtimes-logs", logsEncoded);
+                }
+
+
+                if(context.errors.size() > 0) {
+                    auto errorsString = std::accumulate(
+                        std::next(context.errors.begin()), 
+                        context.errors.end(), 
+                        context.errors[0], 
+                        [](std::string a, std::string b) {
+                            return a + "\n" + b;
+                        }
+                    );
+                    char *errorsEncoded = curl_easy_escape(curl, errorsString.c_str(), errorsString.length());
+                    res->addHeader("x-open-runtimes-errors", errorsEncoded);
+                }
 
                 res->setStatusCode(static_cast<HttpStatusCode>(output.statusCode));
                 res->setBody(output.body);

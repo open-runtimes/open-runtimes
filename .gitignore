@@ -37,6 +37,8 @@ tests/**/Run
 **/CMakeFiles
 **/CMakeCache.txt
 **/cpp_runtime
+**/cmake_install.cmake
+**/Makefile
 
 # .NET
 tests/**/bin

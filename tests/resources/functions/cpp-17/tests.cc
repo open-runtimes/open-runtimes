@@ -1,77 +1,63 @@
+#include <stdexcept>
 #include <iostream>
+#include <any>
 #include <string>
 #include <curl/curl.h>
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
+    ((std::string *) userp)->append((char *) contents, size * nmemb);
     return size * nmemb;
 }
 
-static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
-    std::string headerData = req.headers["x-test-header"].asString();
-    std::string varData = req.variables["test-variable"].asString();
-    std::string id;
+static RuntimeOutput main(RuntimeContext context) {
+    auto req = context.req;
+    auto res = context.res;
 
-    Json::CharReaderBuilder builder;
-    Json::CharReader *reader = builder.newCharReader();
-    Json::Value payload;
-    
-    bool parsingSuccessful = reader->parse(
-        req.payload.c_str(),
-        req.payload.c_str() + req.payload.size(),
-        &payload,
-        nullptr
-    );
+    Json::Value json;
 
-    if (parsingSuccessful) {
-        id = payload["id"].asString();
+    auto action = req.headers["x-action"].asString();
+
+    if(action == "plaintextResponse") {
+        return res.send("Hello World 👋");
+    } else if(action == "jsonResponse") {
+        json["json"] = true;
+        json["message"] = "Developers are awesome.";
+        return res.json(json);
+    } else if(action == "redirectResponse") {
+        return res.redirect("https://github.com/");
+    } else if(action == "emptyResponse") {
+        return res.empty();
+    } else if(action == "noResponse") {
+        res.send("This should be ignored, as it is not returned.");
+        // Simulate test data. Return nessessary in C++
+        context.error("Return statement missing. return context.res.empty() if no response is expected.");
+        return res.send("", 500);
+    } else if(action == "doubleResponse") {
+        res.send("This should be ignored.");
+        return res.send("This should be returned.");
+    } else if(action == "headersResponse") {
+
+    } else if(action == "statusResponse") {
+        return res.send("FAIL", 404);
+    } else if(action == "requestMethod") {
+        return res.send(req.method);
+    } else if(action == "requestUrl") {
+        return res.send(req.url);
+    } else if(action == "requestHeaders") {
+        return res.json(req.headers);
+    } else if(action == "requestBodyPlaintext") {
+        std::string body = std::any_cast<std::string>(req.body);
+        return res.send(body);
+    } else if(action == "requestBodyJson") {
+
+    } else if(action == "envVars") {
+
+    } else if(action == "logs") {
+
+    } else if(action == "library") {
+
+    } else {
+        throw std::invalid_argument("Unkonwn action");
     }
-    if (id.empty()) {
-        id = "1";
-    }
-
-    CURL *curl;
-    CURLcode curlRes;
-    std::string todoBuffer;
-
-    curl = curl_easy_init();
-    if (curl) {
-        std::string url = "https://jsonplaceholder.typicode.com/todos/" + id;
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &todoBuffer);
-        curlRes = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-    }
-
-    Json::Value todo;
-    reader->parse(
-        todoBuffer.c_str(),
-        todoBuffer.c_str() + todoBuffer.size(),
-        &todo,
-        nullptr
-    );
-
-    delete reader;
-
-    Json::Value response;
-    response["isTest"] = true;
-    response["message"] = "Hello Open Runtimes 👋";
-    response["todo"] = todo;
-    response["header"] = headerData;
-    response["variable"] = varData;
-
-    std::cout << "String1" << std::endl;
-    std::cout << 42 << std::endl;
-    std::cout << 4.2 << std::endl;
-    std::cout << std::boolalpha; // This prevents true to be converted to 1
-    std::cout << true << std::endl;
-
-    std::cout << "String2" << std::endl;
-    std::cout << "String3" << std::endl;
-    std::cout << "String4" << std::endl;
-    std::cout << "String5" << std::endl;
-
-    return res.json(response);
 }
