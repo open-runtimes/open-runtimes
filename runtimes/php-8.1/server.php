@@ -73,7 +73,7 @@ class Context {
 $userFunction = null;
 
 $server->on("Request", function($req, $res) use(&$userFunction) {
-    if (($req->header['x-open-runtimes-secret'] ?? '') !== (getenv('OPEN_RUNTIMES_SECRET') ?? '')) {
+    if (($req->header['x-open-runtimes-secret'] ?? '') === '' || ($req->header['x-open-runtimes-secret'] ?? '') !== (getenv('OPEN_RUNTIMES_SECRET') ?? '')) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
         return;
@@ -81,6 +81,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     $path = $req->server['path_info'];
     $scheme = ($req->header['x-forwarded-proto'] ?? 'http');
+    $defaultPort = $scheme === 'https' ? '443' : '80';
     $query = [];
 
     $hostHeader = ($req->header['host'] ?? '');
@@ -90,12 +91,12 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         $port = \intval($pair[1]);
     } else {
         $host = $hostHeader;
-        $port = 80;
+        $port = \intval($defaultPort);
     }
 
     $queryString = $req->server['query_string'] ?? '';
     foreach (\explode('&', $queryString) as $param) {
-        $pair = \explode('=', $param);
+        $pair = \explode('=', $param, 2);
         if(!empty($pair[0])) {
             $query[$pair[0]] = $pair[1];
         }
@@ -103,7 +104,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     $url = $scheme . '://' . $host;
 
-    if($port !== 80) {
+    if($port !== \intval($defaultPort)) {
         $url .= ':' . \strval($port);
     }
 
