@@ -101,6 +101,8 @@ def handler(u_path):
 
     context.req.path = request.path
     context.req.scheme = request.headers.get('x-forwarded-proto', 'http')
+    
+    defaultPort = "443" if context.req.scheme == "https" else "80"
 
     url = urlparse(request.url)
     context.req.queryString = url.query or ''
@@ -118,11 +120,11 @@ def handler(u_path):
         context.req.port = int(host.split(':')[1])
     else:
         context.req.host = host
-        context.req.port = 80
+        context.req.port = int(defaultPort)
 
     context.req.url = context.req.scheme + '://' + context.req.host
 
-    if(context.req.port != 80):
+    if(context.req.port != int(defaultPort)):
         context.req.url += ':' + str(context.req.port)
 
     context.req.url += context.req.path

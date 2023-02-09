@@ -31,8 +31,9 @@ const server = micro(async (req, res) => {
     });
 
     const scheme = (req.headers['x-forwarded-proto'] ?? 'http');
+    const defaultPort = scheme === 'https' ? '443' : '80';
     const host = req.headers['host'].includes(':') ? req.headers['host'].split(':')[0] : req.headers['host'];
-    const port = +(req.headers['host'].includes(':') ? req.headers['host'].split(':')[1] : '80');
+    const port = +(req.headers['host'].includes(':') ? req.headers['host'].split(':')[1] : defaultPort);
     const path = req.url.includes('?') ? req.url.split('?')[0] : req.url;
     const queryString = req.url.includes('?') ? req.url.split('?')[1] : '';
     const query = {};
@@ -45,7 +46,7 @@ const server = micro(async (req, res) => {
         }
     }
 
-    const url = `${scheme}://${host}${port === 80 ? '' : `:${port}`}${path}${queryString === '' ? '' : `?${queryString}`}`;
+    const url = `${scheme}://${host}${port.toString() === defaultPort ? '' : `:${port}`}${path}${queryString === '' ? '' : `?${queryString}`}`;
 
     const context = {
         req: {

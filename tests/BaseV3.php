@@ -241,6 +241,33 @@ abstract class BaseV3 extends TestCase
         self::assertEquals('', $body['query']['k']);
         self::assertArrayNotHasKey('l', $body['query']);
 
+        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com', 'x-forwarded-proto' => 'https']);
+        self::assertEquals(200, $response['code']);
+        $body = \json_decode($response['body'], true);
+        self::assertEquals('myapp.com', $body['host']);
+        self::assertEquals(443, $body['port']);
+        self::assertEquals('https://myapp.com/', $body['url']);
+
+        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com:443', 'x-forwarded-proto' => 'https']);
+        self::assertEquals(200, $response['code']);
+        $body = \json_decode($response['body'], true);
+        self::assertEquals('myapp.com', $body['host']);
+        self::assertEquals(443, $body['port']);
+        self::assertEquals('https://myapp.com/', $body['url']);
+
+        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com:80', 'x-forwarded-proto' => 'https']);
+        self::assertEquals(200, $response['code']);
+        $body = \json_decode($response['body'], true);
+        self::assertEquals('myapp.com', $body['host']);
+        self::assertEquals(80, $body['port']);
+        self::assertEquals('https://myapp.com:80/', $body['url']);
+
+        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com:80', 'x-forwarded-proto' => 'http']);
+        self::assertEquals(200, $response['code']);
+        $body = \json_decode($response['body'], true);
+        self::assertEquals('myapp.com', $body['host']);
+        self::assertEquals(80, $body['port']);
+        self::assertEquals('http://myapp.com/', $body['url']);
     }
 
     public function testRequestHeaders(): void
