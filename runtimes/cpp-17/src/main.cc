@@ -96,7 +96,8 @@ int main()
                 RuntimeOutput output;
                 try {
                     output = Wrapper::main(context);
-                } catch(const std::exception& e) {
+                } catch(const std::exception& e)
+                {
                     context.error(e.what());
                     output = contextResponse.send("", 500, {});
                 }
@@ -109,18 +110,24 @@ int main()
                 }
                 */
 
-                if(!outbuffer.str().empty() || !errbuffer.str().empty()) {
+                if(!outbuffer.str().empty() || !errbuffer.str().empty())
+                {
                     context.log("Unsupported log noticed. Use context.log() or context.error() for logging.");
                 }
 
                 std::cout.rdbuf(oldout);
                 std::cerr.rdbuf(olderr);
 
-                // TODO: Set response headers from output.headers
+                for (auto key : output.headers.getMemberNames())
+                {
+                    // TODO: lower, if x-opr
+                    res->addHeader(key, output.headers[key].asString());
+                }
 
                 CURL *curl = curl_easy_init();
 
-                if(context.logs.size() > 0) {
+                if(context.logs.size() > 0)
+                {
                     auto logsString = std::accumulate(
                         std::next(context.logs.begin()), 
                         context.logs.end(), 
@@ -131,10 +138,12 @@ int main()
                     );
                     char *logsEncoded = curl_easy_escape(curl, logsString.c_str(), logsString.length());
                     res->addHeader("x-open-runtimes-logs", logsEncoded);
+                } else {
+                    res->addHeader("x-open-runtimes-logs", "");
                 }
 
-
-                if(context.errors.size() > 0) {
+                if(context.errors.size() > 0)
+                {
                     auto errorsString = std::accumulate(
                         std::next(context.errors.begin()), 
                         context.errors.end(), 
@@ -145,6 +154,8 @@ int main()
                     );
                     char *errorsEncoded = curl_easy_escape(curl, errorsString.c_str(), errorsString.length());
                     res->addHeader("x-open-runtimes-errors", errorsEncoded);
+                } else {
+                    res->addHeader("x-open-runtimes-errors", "");
                 }
 
                 res->setStatusCode(static_cast<HttpStatusCode>(output.statusCode));

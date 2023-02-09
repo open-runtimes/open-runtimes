@@ -19,14 +19,16 @@ namespace runtime
             std::vector<std::string> errors = {};
 
             // TODO: std::any, and check json type
-            void log(std::string message)
+            void log(std::any message)
             {
-                logs.push_back(message);
+                std::string msg = std::any_cast<std::string>(message);
+                logs.push_back(msg);
             }
 
-            void error(std::string message)
+            void error(std::any message)
             {
-                errors.push_back(message);
+                std::string msg = std::any_cast<std::string>(message);
+                logs.push_back(msg);
             }
     };
 }

@@ -37,7 +37,15 @@ static RuntimeOutput main(RuntimeContext context) {
         res.send("This should be ignored.");
         return res.send("This should be returned.");
     } else if(action == "headersResponse") {
+        auto secondHeader = req.headers["x-open-runtimes-custom-in-header"].asString();
+        if(secondHeader.empty()) {
+            secondHeader = "missing";
+        }
 
+        json["first-header"] = "first-value";
+        json["second-header"] = secondHeader;
+        json["x-open-runtimes-custom-out-header"] = "third-value";
+        return res.send("OK", 200, json);
     } else if(action == "statusResponse") {
         return res.send("FAIL", 404);
     } else if(action == "requestMethod") {
@@ -50,14 +58,61 @@ static RuntimeOutput main(RuntimeContext context) {
         std::string body = std::any_cast<std::string>(req.body);
         return res.send(body);
     } else if(action == "requestBodyJson") {
+        auto isJson = false;
 
+        try {
+            Json::Value body = std::any_cast<Json::Value>(req.body);
+            isJson = true;
+        } catch(const std::exception& e) {
+            isJson = false;
+        }
+
+        Json::String key1 = "";
+        Json::String key2 = "";
+
+        if(isJson == true) {
+            Json::Value body = std::any_cast<Json::Value>(req.body);
+            key1 = body["key1"].asString();
+            key2 = body["key2"].asString();
+
+            if(key1.empty()) {
+                key1 = "Missing key";
+            }
+
+            if(key2.empty()) {
+                key2 = "Missing key";
+            }
+        } else {
+            key1 = "Missing key";
+            key2 = "Missing key";
+        }
+
+        json["key1"] = key1;
+        json["key2"] = key2;
+        json["raw"] = req.bodyString;
+        return res.json(json);
     } else if(action == "envVars") {
+        auto custonEnvVar = std::getenv("CUSTOM_ENV_VAR");
+        auto notDefinedVar = std::getenv("NOT_DEFINED_VAR");
 
+        json["var"] = custonEnvVar;
+        json["emptyVar"] = notDefinedVar;
+        return res.json(json);
     } else if(action == "logs") {
+            std::cout << "Native log";
+            context.log("Debug log");
+            context.error("Error log");
+            
+            context.log(42);
+            context.log(4.2);
+            context.log(true);
 
+            return context.res.send("");
     } else if(action == "library") {
 
     } else {
         throw std::invalid_argument("Unkonwn action");
     }
+
+    return res.empty();
 }
