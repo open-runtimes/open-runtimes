@@ -41,7 +41,7 @@ suspend fun execute(ctx: Context) {
         serverSecret = "";
     }
 
-    if (secret != serverSecret) {
+    if (secret.equals("") || secret != serverSecret) {
         ctx.status(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
         return
     }
@@ -79,6 +79,9 @@ suspend fun execute(ctx: Context) {
         protoHeader = "http";
     }
 
+    var scheme: String = protoHeader
+    var defaultPort: String = if (scheme.equals("https")) "443" else "80"
+
     var host: String
     var port: Int
 
@@ -87,25 +90,25 @@ suspend fun execute(ctx: Context) {
         port = hostHeader.split(":")[1].toInt()
     } else {
         host = hostHeader
-        port = 80
+        port = Integer.parseInt(defaultPort)
     }
 
     var path: String = ctx.path()
-    var scheme: String = protoHeader
     var queryString: String = ctx.queryString() ?: ""
     var query: MutableMap<String, String> = HashMap<String, String>()
 
     for(param in queryString.split("&")) {
-        var pair = param.split("=")
+        var pair = param.split("=", limit = 2)
 
-        if(pair.size == 2 && pair[0] != null && !pair[0].isEmpty()) {
-            query.put(pair[0], pair[1])
+        if(pair.size >= 1 && !pair[0].isEmpty()) {
+            var value: String = if (pair.size == 2) pair[1] else ""
+            query.put(pair[0], value)
         }
     }
 
     var url: String = scheme + "://" + host;
 
-    if(port != 80) {
+    if(port != Integer.parseInt(defaultPort)) {
         url += ":" + port;
     }
 
