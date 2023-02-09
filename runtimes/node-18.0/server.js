@@ -5,7 +5,7 @@ const { text: parseText, json: parseJson, buffer: parseBuffer, send } = require(
 const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
-    if (req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
+    if (!req.headers[`x-open-runtimes-secret`] || req.headers[`x-open-runtimes-secret`] !== (process.env['OPEN_RUNTIMES_SECRET'] ?? '')) {
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
@@ -18,8 +18,8 @@ const server = micro(async (req, res) => {
     };
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
-    const rawBody = await parseText(req);
-    let body = rawBody;
+    const bodyString = await parseText(req);
+    let body = bodyString;
 
     if (contentType.includes('application/json')) {
         body = await parseJson(req);
@@ -30,13 +30,37 @@ const server = micro(async (req, res) => {
         headers[header.toLowerCase()] = req.headers[header];
     });
 
+    const scheme = (req.headers['x-forwarded-proto'] ?? 'http');
+    const defaultPort = scheme === 'https' ? '443' : '80';
+    const host = req.headers['host'].includes(':') ? req.headers['host'].split(':')[0] : req.headers['host'];
+    const port = +(req.headers['host'].includes(':') ? req.headers['host'].split(':')[1] : defaultPort);
+    const path = req.url.includes('?') ? req.url.split('?')[0] : req.url;
+    const queryString = req.url.includes('?') ? req.url.split('?')[1] : '';
+    const query = {};
+    for(const param of queryString.split('&')) {
+        let [key, ...valueArr] = param.split('=');
+        const value = valueArr.join('=');
+
+        if(key) {
+            query[key] = value ?? '';
+        }
+    }
+
+    const url = `${scheme}://${host}${port.toString() === defaultPort ? '' : `:${port}`}${path}${queryString === '' ? '' : `?${queryString}`}`;
+
     const context = {
         req: {
-            rawBody,
+            bodyString,
             body,
             headers,
             method: req.method,
-            url: req.url
+            host,
+            scheme,
+            query,
+            queryString,
+            port,
+            url,
+            path
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
@@ -62,29 +86,27 @@ const server = micro(async (req, res) => {
                 return this.send('', statusCode, headers);
             }
         },
-        log: function () {
-            const args = [];
-            for (const arg of Array.from(arguments)) {
-                if (arg instanceof Object || Array.isArray(arg)) {
-                    args.push(JSON.stringify(arg));
-                } else {
-                    args.push(arg);
-                }
+        log: function (message) {
+            if (message instanceof Object || Array.isArray(message)) {
+                logs.push(JSON.stringify(message));
+            } else {
+                logs.push(message + "");
             }
-            logs.push(args.join(" "));
         },
-        error: function () {
-            const args = [];
-            for (const arg of Array.from(arguments)) {
-                if (arg instanceof Object || Array.isArray(arg)) {
-                    args.push(JSON.stringify(arg));
-                } else {
-                    args.push(arg);
-                }
+        error: function (message) {
+            if (message instanceof Object || Array.isArray(message)) {
+                errors.push(JSON.stringify(message));
+            } else {
+                errors.push(message + "");
             }
-            errors.push(args.join(" "));
         },
     };
+
+    console.stdlog = console.log.bind(console);
+    console.stderror = console.error.bind(console);
+    console.stdinfo = console.info.bind(console);
+    console.stddebug = console.debug.bind(console);
+    console.stdwarn = console.warn.bind(console);
 
     console.log = console.info = console.debug = console.warn = console.error = function() {
         logs.push('Unsupported log noticed. Use context.log() or context.error() for logging.');
@@ -110,6 +132,12 @@ const server = micro(async (req, res) => {
     } catch (e) {
         context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
         output = context.res.send('', 500, {});
+    } finally {
+        console.log = console.stdlog;
+        console.error = console.stderror;
+        console.debug = console.stddebug;
+        console.warn = console.stdwarn;
+        console.info = console.stdinfo;
     }
 
     if(output === null || output === undefined) {
