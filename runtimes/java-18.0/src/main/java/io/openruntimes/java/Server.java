@@ -38,7 +38,7 @@ public class Server {
             serverSecret = "";
         }
 
-        if(!reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(serverSecret)) {
+        if(reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals("") || !reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(serverSecret)) {
             return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
         }
 
@@ -65,17 +65,18 @@ public class Server {
         }
 
         String scheme = reqHeaders.getOrDefault("x-forwarded-proto", "http");
+        String defaultPort = scheme.equals("https") ? "443" : "80";
 
         String hostHeader = reqHeaders.getOrDefault("host", "");
         String host = "";
-        int port = 80;
+        int port = Integer.parseInt(defaultPort);
 
         if(hostHeader.contains(":")) {
             host = hostHeader.split(":")[0];
             port = Integer.parseInt(hostHeader.split(":")[1]);
         } else {
             host = hostHeader;
-            port = 80;
+            port = Integer.parseInt(defaultPort);
         }
 
         String path = req.path();
@@ -83,16 +84,17 @@ public class Server {
         Map<String, String> query = new HashMap<String, String>();
 
         for (String param : queryString.split("&")) {
-            String[] pair = param.split("=");
-
-            if(pair.length == 2 && pair[0] != null && !pair[0].isEmpty()) {
-                query.put(pair[0], pair[1]);
+            String[] pair = param.split("=", 2);
+            
+            if(pair.length >= 1 && pair[0] != null && !pair[0].isEmpty()) {
+                String value = pair.length == 2 ? pair[1] : "";
+                query.put(pair[0], value);
             }
         }
 
         String url = scheme + "://" + host;
 
-        if(port != 80) {
+        if(port != Integer.parseInt(defaultPort)) {
             url += ":" + String.valueOf(port);
         }
 
