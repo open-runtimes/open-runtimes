@@ -89,7 +89,7 @@ def handle(request, response)
   secret = request.env['HTTP_X_OPEN_RUNTIMES_SECRET'] || ''
   serverSecret = ENV['OPEN_RUNTIMES_SECRET'] || ''
 
-  if(secret != serverSecret)
+  if(secret == '' || secret != serverSecret)
     response.status = 500
     response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.'
     return
@@ -98,12 +98,13 @@ def handle(request, response)
   request.body.rewind
 
   host = request.host
-  port = request.port
 
   scheme = request.scheme || 'http'
+  defaultPort = scheme === 'https' ? '443' : '80'
+  port = request.port || defaultPort.to_i
   path = request.path
   query = {}
-  queryString = request.url.split(request.path)[1] || ''
+  queryString = request.query_string || ''
 
   if(queryString.start_with?("?"))
     queryString = queryString[1..-1]
@@ -111,7 +112,7 @@ def handle(request, response)
 
   url = scheme + "://" + host
 
-  if(port != 80)
+  if(port != defaultPort.to_i)
     url += ':' + port.to_s
   end
 
@@ -124,8 +125,8 @@ def handle(request, response)
 
   if(!(queryString.empty?))
     queryString.split('&') do |param|
-      pair = param.split('=')
-      if(!(pair[0].empty?))
+      pair = param.split('=', 2)
+      if(pair[0] != nil && !(pair[0].empty?))
         query[pair[0]] = pair[1]
       end
     end
