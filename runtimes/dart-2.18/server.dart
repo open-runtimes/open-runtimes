@@ -10,7 +10,7 @@ import 'function_types.dart';
 
 void main() async {
   await shelf_io.serve((req) async {
-    if ((req.headers['x-open-runtimes-secret'] ?? '') != (Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '')) {
+    if ((req.headers['x-open-runtimes-secret'] ?? '') == '' || (req.headers['x-open-runtimes-secret'] ?? '') != (Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '')) {
       return shelf.Response(500, body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
@@ -38,9 +38,10 @@ void main() async {
     String hostHeader = req.headers['host'] ?? '';
 
     String path = '/' + req.url.path;
-    int port = 80;
     String host = '';
     String scheme = req.headers['x-forwarded-proto'] ?? 'http';
+    String defaultPort = scheme == 'https' ? '443' : '80';
+    int port = int.parse(defaultPort);
     String queryString = req.url.query;
     Map<String, String> query = {};
 
@@ -49,19 +50,23 @@ void main() async {
       port = int.parse(hostHeader.split(':')[1]);
     } else {
       host = hostHeader;
-      port = 80;
+      port = int.parse(defaultPort);
     }
 
     for(final param in queryString.split("&")) {
-      final pair = param.split("=");
-      if(pair.length == 2 && !pair[0].isEmpty) {
-        query[pair[0]] = pair[1];
+      final parts = param.split("=");
+
+      final key = parts[0];
+      final value = parts.sublist(1).join('=');
+
+      if(key != null && !key.isEmpty) {
+        query[key] = value;
       }
     }
 
     String url = scheme + '://' + host;
 
-    if(port != 80) {
+    if(port != int.parse(defaultPort)) {
       url += ':' + port.toString();
     }
 
