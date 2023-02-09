@@ -37,7 +37,7 @@ class Response:
 
     def json(self, obj, statusCode = 200, headers = {}):
         headers['content-type'] = 'application/json'
-        return self.send(json.dumps(obj), statusCode, headers)
+        return self.send(json.dumps(obj, separators=(',', ':')), statusCode, headers)
     
     def empty(self):
         return self.send('', 204, {})
@@ -47,58 +47,97 @@ class Response:
         return self.send('', statusCode, headers)
 
 class Request:
-    raw_body = None
+    body_string = None
     body = None
     headers = None
     method = None
     url = None
+    path = None
+    port = None
+    query = None
+    queryString = None
+    scheme = None
+    host = None
 
 class Context:
     req = Request()
     res = Response()
 
-    _logs = []
-    _errors = []
+    logs = []
+    errors = []
 
     def __init__(self):
-        self._logs = []
-        self._errors = []
+        self.logs = []
+        self.errors = []
         self.req = Request()
         self.res = Response()
 
-    # TODO: Support for infinite parameters
-    # TODO: Support for objects (stringify)
     def log(self, message):
-        self._logs.append(str(message))
+        if isinstance(message, (list, dict, tuple)):
+            self.logs.append(json.dumps(message, separators=(',', ':')))
+        else:
+            self.logs.append(str(message))
 
     def error(self, message):
-        self._errors.append(str(message))
+        if isinstance(message, (list, dict, tuple)):
+            self.errors.append(json.dumps(message, separators=(',', ':')))
+        else:
+            self.errors.append(str(message))
 
 HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
 
 @app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
 @app.route('/<path:u_path>', methods = HTTP_METHODS)
 def handler(u_path):
-    if (request.headers.get('x-open-runtimes-secret') != os.getenv('OPEN_RUNTIMES_SECRET')):
+    if (request.headers.get('x-open-runtimes-secret', '') == '' or request.headers.get('x-open-runtimes-secret', '') != os.getenv('OPEN_RUNTIMES_SECRET', '')):
         return 'Unauthorized. Provide correct "x-open-runtimes-secret" header.', 500
 
     context = Context()
 
-    url = urlparse(request.url)
-    path = url.path
-    query = url.query
-    if query:
-        path += '?' + query
-
-    context.req.raw_body = request.get_data(as_text=True)
-    context.req.body = context.req.raw_body
+    context.req.body_string = request.get_data(as_text=True)
+    context.req.body = context.req.body_string
     context.req.method = request.method
-    context.req.url = path
     context.req.headers = {}
+
+    context.req.path = request.path
+    context.req.scheme = request.headers.get('x-forwarded-proto', 'http')
+    
+    defaultPort = "443" if context.req.scheme == "https" else "80"
+
+    url = urlparse(request.url)
+    context.req.queryString = url.query or ''
+    context.req.query = {}
+
+    for param in context.req.queryString.split('&'):
+        pair = param.split('=', 1)
+
+        if pair[0]:
+            context.req.query[pair[0]] = pair[1] if len(pair) > 1 else ''
+
+    host = request.headers.get('host', '')
+    if ':' in host:
+        context.req.host = host.split(':')[0]
+        context.req.port = int(host.split(':')[1])
+    else:
+        context.req.host = host
+        context.req.port = int(defaultPort)
+
+    context.req.url = context.req.scheme + '://' + context.req.host
+
+    if(context.req.port != int(defaultPort)):
+        context.req.url += ':' + str(context.req.port)
+
+    context.req.url += context.req.path
+
+    if(context.req.queryString):
+        context.req.url += '?' + context.req.queryString
 
     contentType = request.headers.get('content-type', 'text/plain')
     if 'application/json' in contentType:
-        context.req.body = request.get_json(force=True, silent=False)
+        if not context.req.bodyString:
+            context.req.body = {}
+        else:
+            context.req.body = request.get_json(force=True, silent=False)
 
     headers = dict(request.headers)
     for key in headers.keys():
@@ -121,9 +160,11 @@ def handler(u_path):
 
         output = userModule.main(context)
     except Exception as e:
-        context.error(str(e))
-        # TODO: Get trace
+        context.error(''.join(traceback.TracebackException.from_exception(e).format()))
         output = context.res.send('', 500, {})
+    finally:
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
 
     if output is None:
         context.error('Return statement missing. return context.res.empty() if no response is expected.')
@@ -142,8 +183,8 @@ def handler(u_path):
     if customstd.getvalue():
         context.log('Unsupported log noticed. Use context.log() or context.error() for logging.')
 
-    resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context._logs))
-    resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context._errors))
+    resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context.logs))
+    resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context.errors))
 
     return resp
 
