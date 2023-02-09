@@ -89,7 +89,7 @@ HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'T
 @app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
 @app.route('/<path:u_path>', methods = HTTP_METHODS)
 def handler(u_path):
-    if (request.headers.get('x-open-runtimes-secret', '') != os.getenv('OPEN_RUNTIMES_SECRET', '')):
+    if (request.headers.get('x-open-runtimes-secret', '') == '' or request.headers.get('x-open-runtimes-secret', '') != os.getenv('OPEN_RUNTIMES_SECRET', '')):
         return 'Unauthorized. Provide correct "x-open-runtimes-secret" header.', 500
 
     context = Context()
