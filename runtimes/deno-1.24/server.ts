@@ -5,7 +5,7 @@ const USER_CODE_PATH = '/usr/code-start';
 const app = new Application();
 
 app.use(async (ctx) => {
-  if ((ctx.request.headers.get("x-open-runtimes-secret") ?? '') !== (Deno.env.get("OPEN_RUNTIMES_SECRET") ?? '')) {
+  if ((ctx.request.headers.get("x-open-runtimes-secret") ?? '')  === '' || (ctx.request.headers.get("x-open-runtimes-secret") ?? '') !== (Deno.env.get("OPEN_RUNTIMES_SECRET") ?? '')) {
     ctx.response.status = 500;
     ctx.response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.';
     return;
@@ -31,21 +31,23 @@ app.use(async (ctx) => {
   });
 
   const scheme = ctx.request.headers.get('x-forwarded-proto') ?? 'http';
+  const defaultPort = scheme === 'https' ? '443' : '80';
   const hostHeader = ctx.request.headers.get('host', '');
   const host = hostHeader.includes(':') ? hostHeader.split(':')[0] : hostHeader;
-  const port = +(hostHeader.includes(':') ? hostHeader.split(':')[1] : '80');
+  const port = +(hostHeader.includes(':') ? hostHeader.split(':')[1] : defaultPort);
   const path = ctx.request.url.pathname;
   const queryString = ctx.request.url.href.includes('?') ? ctx.request.url.href.split('?')[1] : '';
   const query = {};
   for(const param of queryString.split('&')) {
-      const [ key, value ] = param.split('=');
+    let [key, ...valueArr] = param.split('=');
+    const value = valueArr.join('=');
 
       if(key) {
           query[key] = value;
       }
   }
 
-  const url = `${scheme}://${host}${port === 80 ? '' : `:${port}`}${path}${queryString === '' ? '' : `?${queryString}`}`;
+  const url = `${scheme}://${host}${port.toString() === defaultPort ? '' : `:${port}`}${path}${queryString === '' ? '' : `?${queryString}`}`;
 
   const context: any = {
     req: {
