@@ -37,10 +37,11 @@ const server = micro(async (req, res) => {
     const queryString = req.url.includes('?') ? req.url.split('?')[1] : '';
     const query = {};
     for(const param of queryString.split('&')) {
-        const [ key, value ] = param.split('=');
+        let [key, ...valueArr] = param.split('=');
+        const value = valueArr.join('=');
 
         if(key) {
-            query[key] = value;
+            query[key] = value ?? '';
         }
     }
 

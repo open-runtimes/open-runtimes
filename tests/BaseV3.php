@@ -230,6 +230,17 @@ abstract class BaseV3 extends TestCase
         self::assertEquals(80, $body['port']);
         self::assertEquals('www.mydomain.com', $body['host']);
         self::assertEquals('http://www.mydomain.com/', $body['url']);
+
+        $response = $this->execute(url: '/?a=b&c==d&e=f=g=&h&i=j&&k', headers: ['x-action' => 'requestUrl']);
+        self::assertEquals(200, $response['code']);
+        $body = \json_decode($response['body'], true);
+        self::assertEquals('b', $body['query']['a']);
+        self::assertEquals('=d', $body['query']['c']);
+        self::assertEquals('', $body['query']['h']);
+        self::assertEquals('j', $body['query']['i']);
+        self::assertEquals('', $body['query']['k']);
+        self::assertArrayNotHasKey('l', $body['query']);
+
     }
 
     public function testRequestHeaders(): void

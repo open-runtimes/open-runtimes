@@ -107,10 +107,10 @@ def handler(u_path):
     context.req.query = {}
 
     for param in context.req.queryString.split('&'):
-        pair = param.split('=')
+        pair = param.split('=', 1)
 
         if pair[0]:
-            context.req.query[pair[0]] = pair[1]
+            context.req.query[pair[0]] = pair[1] if len(pair) > 1 else ''
 
     host = request.headers.get('host', '')
     if ':' in host:
