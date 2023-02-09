@@ -28,7 +28,15 @@ def main(context):
     elif action == 'requestMethod':
         return context.res.send(context.req.method)
     elif action == 'requestUrl':
-        return context.res.send(context.req.url)
+        return context.res.json({
+            'url': context.req.url,
+            'port': context.req.port,
+            'path': context.req.path,
+            'query': context.req.query,
+            'queryString': context.req.queryString,
+            'scheme': context.req.scheme,
+            'host': context.req.host,
+        })
     elif action == 'requestHeaders':
         return context.res.json(context.req.headers)
     elif action == 'requestBodyPlaintext':
@@ -47,7 +55,7 @@ def main(context):
         return context.res.json({
             'key1': key1,
             'key2': key2,
-            'raw': context.req.rawBody
+            'raw': context.req.bodyString
         })
     elif action == 'envVars':
         return context.res.json({
@@ -63,6 +71,14 @@ def main(context):
         context.log(4.2)
         context.log(True)
 
+        context.log({ 'objectKey': 'objectValue' })
+        context.log([ 'arrayValue' ])
+
         return context.res.send('')
+    elif action == 'library':
+        todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyString)).json()
+        return context.res.json({
+            'todo': todo
+        })
     else:
         raise Exception('Unkonwn action')
