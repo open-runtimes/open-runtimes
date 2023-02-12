@@ -1,4 +1,4 @@
-defmodule Handler do
+defmodule Index do
   def main(_req, res) do
     # IO.inspect "REQ: #{Jason.encode!(req)}"
     # IO.inspect res

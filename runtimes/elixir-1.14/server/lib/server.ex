@@ -18,7 +18,7 @@ defmodule Server do
   post _ do
     # IO.inspect conn.body_params # Prints JSON POST body
     # try do
-    #     Handler.main(conn.body_params, Server.Response)
+    #     Index.main(conn.body_params, Server.Response)
     # rescue
     #   e ->
     #   Logger.error(Exception.format(:error, e, __STACKTRACE__))
@@ -41,14 +41,14 @@ defmodule Server do
 
       output = try do
         req = Map.take(conn.body_params, ["variables", "headers", "payload"])
-        case Handler.main(req, Server.Response) do
+        case Index.main(req, Server.Response) do
           o when
               is_map(o) and
               is_map_key(o, :status) and
               is_map_key(o, :response) -> o
           o -> %{
             status: 500,
-            stderr: "Incorrect output from Handler.main\n```#{Kernel.inspect(o)}```"
+            stderr: "Incorrect output from Index.main\n```#{Kernel.inspect(o)}```"
           }
         end
       catch
