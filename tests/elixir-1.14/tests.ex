@@ -10,7 +10,10 @@
 
 defmodule HandlerTest do
 
-  def main(_req, res) do
+  def main(req, res) do
+    Application.ensure_all_started(:inets)
+
+    Application.ensure_all_started(:ssl)
 
     payload = Jason.decode!(Map.take(req, ["payload"]))
     {status, todo} = :httpc.request(
@@ -21,12 +24,12 @@ defmodule HandlerTest do
     IO.puts '{hello: world}'
     IO.puts '[hello, world]'
 
-    res.json({
-        'isTest': true,
-        'message': 'Hello Open Runtimes 👋',
-        'todo': todo,
-        'header': req.headers['x-test-header'],
-        'variable': req.variables['test-variable']
+    res.json(%{
+        isTest: true,
+        message: "Hello Open Runtimes 👋",
+        todo: todo,
+        header: req.headers['x-test-header'],
+        variable: req.variables['test-variable']
     })
   end
 
