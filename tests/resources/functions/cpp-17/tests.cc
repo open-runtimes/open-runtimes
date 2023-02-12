@@ -55,7 +55,15 @@ namespace runtime {
             } else if(action == "requestMethod") {
                 return res.send(req.method);
             } else if(action == "requestUrl") {
-                return res.send(req.url);
+                json["url"] = req.url;
+                json["port"] = req.port;
+                json["path"] = req.path;
+                json["query"] = req.query;
+                json["queryString"] = req.queryString;
+                json["scheme"] = req.scheme;
+                json["host"] = req.host;
+
+                return res.json(json);
             } else if(action == "requestHeaders") {
                 return res.json(req.headers);
             } else if(action == "requestBodyPlaintext") {

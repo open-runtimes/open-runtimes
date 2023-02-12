@@ -10,6 +10,18 @@ using namespace std;
 using namespace runtime;
 using namespace drogon;
 
+vector<string> split(const string &s, char delim) {
+    vector<string> result;
+    stringstream ss (s);
+    string item;
+
+    while (getline (ss, item, delim)) {
+        result.push_back (item);
+    }
+
+    return result;
+}
+
 int main()
 {
     app()
@@ -31,27 +43,91 @@ int main()
                 }
 
                 auto method = req->getMethodString();
+                auto path = req->getPath();
+                auto queryString = req->getQuery();
 
                 RuntimeRequest contextRequest;
                 contextRequest.method = method;
-                contextRequest.queryString = req->getQuery();
+                contextRequest.queryString = queryString;
                 contextRequest.bodyString = req->getBody();
                 contextRequest.body = contextRequest.bodyString;
-                contextRequest.path = req->getPath();
+                contextRequest.path = path;
 
-                // TODO: scheme, host, port, url
+                auto scheme = req->getHeader("x-forwarded-proto");
+                if (scheme.empty())
+                {
+                    scheme = "http";
+                }
+
+                auto defaultPort = "80";
+                if(scheme == "https") {
+                    defaultPort = "443";
+                }
+
+                auto host = req->getHeader("host");
+                auto port = std::stoi(defaultPort);
+
+                if(host.empty())
+                {
+                    host = "";
+                }
+
+                if (host.find(":") != std::string::npos) {
+                    vector<string> pair = split(host, ':');
+
+                    if(pair.size() >= 2) {
+                        host = pair[0];
+                        port = std::stoi(pair[1]);
+                    } else {
+                        host = host;
+                        port = std::stoi(defaultPort);
+                    }
+                } else {
+                }
+
+                contextRequest.scheme = scheme;
+                contextRequest.host = host;
+                contextRequest.port = port;
+
+                auto url = scheme + "://" + host;
+
+                if(port != std::stoi(defaultPort)) {
+                    url += ":" + std::to_string(port);
+                }
+
+                url += path;
+
+                if(!queryString.empty()) {
+                    url += "?" + queryString;
+                }
+
+                contextRequest.url = url;
 
                 Json::Value query;
-                // TODO: Fill query from queryString
-                /*
-                for(const param of queryString.split('&')) {
-                    const [ key, value ] = param.split('=', 2);
 
-                    if(key) {
-                        query[key] = value;
+                vector<string> params = split(queryString, '&');
+                for(auto param : params)
+                {
+                    vector<string> pairs = split(param, '=');
+                    if(pairs.size() <= 1) {
+                        query[pairs[0]] = "";
+                    } else {
+                        auto key = pairs[0];
+                        pairs.erase(pairs.begin());
+
+                         auto value = std::accumulate(
+                            std::next(pairs.begin()), 
+                            pairs.end(), 
+                            pairs[0], 
+                            [](std::string a, std::string b) {
+                                return a + "=" + b;
+                            }
+                        );
+                        
+                        query[key] = value.c_str();
                     }
                 }
-                */
+
                 contextRequest.query = query;
 
                 Json::Value headers;
@@ -103,8 +179,8 @@ int main()
                     output = contextResponse.send("", 500, {});
                 }
 
+                // Should never be null. If somehow is, uncomment:
                 /*
-                Should never be null. If somehow is, uncomment:
                 if(output == NULL) {
                     context.error("Return statement missing. return context.res.empty() if no response is expected.");
                     output = contextResponse.send("", 500, {});
