@@ -68,12 +68,21 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing function for this runtime, ensure it is named `main`. An example of this is:
-
+- When writing function for this runtime, ensure function named `main` exists in `Handler` class under `runtime` namespace. An example of this is:
 
 ```cpp
-static RuntimeOutput &main(const RuntimeContext &context) {
-    return context.res.send("Hello Open Runtimes 👋")
+#include "RuntimeOutput.h"
+#include "RuntimeContext.h"
+
+namespace runtime {
+    class Handler {
+    public:
+        static RuntimeOutput main(RuntimeContext &context)
+        {
+            auto res = context.res;
+            return res.send("Hello Open Runtimes 👋");
+        }
+    };
 }
 ```
 

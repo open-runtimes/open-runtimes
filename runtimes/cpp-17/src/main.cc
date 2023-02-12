@@ -2,7 +2,7 @@
 #include "RuntimeResponse.h"
 #include "RuntimeRequest.h"
 #include "RuntimeOutput.h"
-#include "Wrapper.h"
+#include "{entrypointFile}"
 #include <vector>
 #include <numeric>
 
@@ -45,7 +45,7 @@ int main()
                 // TODO: Fill query from queryString
                 /*
                 for(const param of queryString.split('&')) {
-                    const [ key, value ] = param.split('=');
+                    const [ key, value ] = param.split('=', 2);
 
                     if(key) {
                         query[key] = value;
@@ -95,9 +95,10 @@ int main()
 
                 RuntimeOutput output;
                 try {
-                    output = Wrapper::main(context);
+                    output = Handler::main(context);
                 } catch(const std::exception& e)
                 {
+                    // TODO: Send trace to context.error()
                     context.error(e.what());
                     output = contextResponse.send("", 500, {});
                 }
@@ -120,8 +121,13 @@ int main()
 
                 for (auto key : output.headers.getMemberNames())
                 {
-                    // TODO: lower, if x-opr
-                    res->addHeader(key, output.headers[key].asString());
+                    auto headerKey = key;
+                    std::transform(headerKey.begin(), headerKey.end(), headerKey.begin(), [](unsigned char c){ return std::tolower(c); });
+
+                    if (headerKey.rfind("x-open-runtimes-", 0) != 0)
+                    {
+                        res->addHeader(headerKey, output.headers[key].asString());
+                    }
                 }
 
                 CURL *curl = curl_easy_init();
