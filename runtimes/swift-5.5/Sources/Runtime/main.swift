@@ -31,12 +31,30 @@ func execute(req: Request) async throws -> Response {
         )
     }
 
-    let rawBody = req.body.string ?? ""
-    var body = rawBody as Any
+    let bodyString = req.body.string ?? ""
+    var body = bodyString as Any
     var headers = [String: String]()
     let method = req.method.string
-    let url = req.url.path + (req.url.query.map { "?\($0)" } ?? "")
-
+    let url = req.url.string
+    let scheme = req.url.scheme
+    let host = req.url.host ?? ""
+    let port = req.url.port
+    let path = req.url.path
+    let queryString = req.url.query
+    var query: [String: String]? = nil
+    
+    if let queryString = queryString {
+        query = [String: String]()
+        
+        for param in queryString.split(separator: "&") {
+            let pair = param.split(separator: "=", maxSplits: 1)
+            let key = String(pair[0])
+            let value = String(pair[1])
+            
+            query![key] = value
+        }
+    }
+    
     for header in req.headers {
         let key = header.name.lowercased()
         if !key.starts(with: "x-open-runtimes-") {
@@ -46,20 +64,26 @@ func execute(req: Request) async throws -> Response {
 
     let contentType = req.headers["content-type"].first ?? "text/plain"
     if contentType.starts(with: "application/json"),
-        !rawBody.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
-        rawBody != "\"\"" {
+        !bodyString.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
+        bodyString != "\"\"" {
             body = try JSONSerialization.jsonObject(
-                with: rawBody.data(using: .utf8)!,
+                with: bodyString.data(using: .utf8)!,
                 options: .allowFragments
             ) as Any
     }
 
     let request = RuntimeRequest(
-        rawBody: rawBody,
+        bodyString: bodyString,
         body: body,
         headers: headers,
         method: method,
-        url: url
+        url: url,
+        scheme: scheme,
+        host: host,
+        port: port,
+        path: path,
+        queryString: queryString,
+        query: query
     )
     
     let response = RuntimeResponse()
@@ -74,7 +98,7 @@ func execute(req: Request) async throws -> Response {
     do {
         output = try await main(context: context)
     } catch {
-        context.error(message: error.localizedDescription)
+        context.error(error.localizedDescription + "\n" + Thread.callStackSymbols.joined(separator: "\n"))
         output = context.res.send("", statusCode: 500)
     }
 

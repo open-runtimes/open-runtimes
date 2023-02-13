@@ -1,4 +1,5 @@
 import Foundation
+import AsyncHTTPClient
 
 func main(context: RuntimeContext) async throws -> RuntimeOutput {
     let action = context.req.headers["x-action"] ?? "default"
@@ -19,7 +20,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         context.res.send("This should be ignored, as it is not returned.")
 
         // Simulate test data. Return necessary in Swift
-        context.error(message: "Return statement missing. return context.res.empty() if no response is expected.")
+        context.error("Return statement missing. return context.res.empty() if no response is expected.")
         return context.res.send("", statusCode: 500)
     case "doubleResponse":
         context.res.send("This should be ignored.")
@@ -35,7 +36,15 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
     case "requestMethod":
         return context.res.send(context.req.method)
     case "requestUrl":
-        return context.res.send(context.req.url)
+        return try context.res.json([
+            "url": context.req.url,
+            "scheme": context.req.scheme,
+            "host": context.req.host,
+            "port": context.req.port,
+            "path": context.req.path,
+            "queryString": context.req.queryString,
+            "query": context.req.query
+        ])
     case "requestHeaders":
         return try context.res.json(context.req.headers)
     case "requestBodyPlaintext":
@@ -44,7 +53,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         var key1: String
         var key2: String
 
-        if let string = context.req.body as? String {
+        if context.req.body is String {
             key1 = "Missing key"
             key2 = "Missing key"
         } else {
@@ -57,7 +66,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return try context.res.json([
             "key1": key1,
             "key2": key2,
-            "raw": context.req.rawBody
+            "raw": context.req.bodyString
         ])
     case "envVars":
         return try context.res.json([
@@ -65,17 +74,29 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
             "emptyVar": ProcessInfo.processInfo.environment["NOT_DEFINED_VAR"]
         ])
     case "logs":
-        context.log(message: "Debug log")
-        context.error(message: "Error log")
+        context.log("Debug log")
+        context.error("Error log")
 
-        context.log(message: 42)
-        context.log(message: 4.2)
-        context.log(message: true)
+        context.log(42)
+        context.log(4.2)
+        context.log(true)
+        context.log(["objectKey": "objectValue"])
+        context.log(["arrayValue"])
 
         // Swift doesn't support native log capturing
-        context.log(message: "Unsupported log noticed. Use context.log() or context.error() for logging.")
+        context.log("Unsupported log noticed. Use context.log() or context.error() for logging.")
 
         return context.res.send("")
+    case "library":
+        let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+        let request = HTTPClientRequest(url: "https://jsonplaceholder.typicode.com/todos/\(context.req.bodyString)")
+        let response = try await httpClient.execute(request, timeout: .seconds(30))
+        let data = try await response.body.collect(upTo: 1024 * 1024)
+        let todo = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+
+        return try context.res.json([
+            "todo": todo
+        ])
     default:
         throw NSError(domain: "Unknown action", code: 500)
     }

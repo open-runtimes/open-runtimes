@@ -1,9 +1,9 @@
 import Foundation
 
 class RuntimeOutput {
-    var body: String
-    var statusCode: Int
-    var headers: [String: String]
+    let body: String
+    let statusCode: Int
+    let headers: [String: String]
 
     init(body: String, statusCode: Int, headers: [String: String]) {
         self.body = body
