@@ -33,7 +33,7 @@ def main(context):
             'port': context.req.port,
             'path': context.req.path,
             'query': context.req.query,
-            'queryString': context.req.queryString,
+            'queryString': context.req.quer_string,
             'scheme': context.req.scheme,
             'host': context.req.host,
         })
@@ -55,7 +55,7 @@ def main(context):
         return context.res.json({
             'key1': key1,
             'key2': key2,
-            'raw': context.req.bodyString
+            'raw': context.req.body_string
         })
     elif action == 'envVars':
         return context.res.json({
@@ -76,7 +76,7 @@ def main(context):
 
         return context.res.send('')
     elif action == 'library':
-        todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyString)).json()
+        todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_string)).json()
         return context.res.json({
             'todo': todo
         })
