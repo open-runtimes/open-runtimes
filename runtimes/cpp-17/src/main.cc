@@ -104,28 +104,51 @@ int main()
                 contextRequest.url = url;
 
                 Json::Value query;
+                vector<string> params;
 
-                vector<string> params = split(queryString, '&');
+                if(std::string::npos != queryString.find('&'))
+                {
+                    params = split(queryString, '&');
+                } else
+                {
+                    params.push_back(queryString);
+                }
+
                 for(auto param : params)
                 {
-                    vector<string> pairs = split(param, '=');
-                    if(pairs.size() <= 1) {
-                        query[pairs[0]] = "";
-                    } else {
-                        auto key = pairs[0];
-                        pairs.erase(pairs.begin());
+                    if(std::string::npos != param.find('='))
+                    {
+                        vector<string> pairs = split(param, '=');
+                        if(pairs.size() <= 1) {
+                            query[pairs[0]] = "";
+                        } else {
+                            auto key = pairs[0];
+                            pairs.erase(pairs.begin());
 
-                         auto value = std::accumulate(
-                            std::next(pairs.begin()), 
-                            pairs.end(), 
-                            pairs[0], 
-                            [](std::string a, std::string b) {
-                                return a + "=" + b;
-                            }
-                        );
-                        
-                        query[key] = value.c_str();
+                            auto value = std::accumulate(
+                                std::next(pairs.begin()), 
+                                pairs.end(), 
+                                pairs[0], 
+                                [](std::string a, std::string b) {
+                                    return a + "=" + b;
+                                }
+                            );
+                            
+                            query[key] = value.c_str();
+                        }
+                    } else
+                    {
+                        if(!param.empty()) {
+                            query[param] = "";
+                        }
                     }
+                }
+
+                if(query.empty()) {
+                    Json::Value root;
+                    Json::Reader reader;
+                    reader.parse("{}", root);
+                    query = root;
                 }
 
                 contextRequest.query = query;
