@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart' hide Response;
 
-Future<dynamic> handle(final context) async {
+Future<dynamic> main(final context) async {
 
   final payload = context.req.body;
 
