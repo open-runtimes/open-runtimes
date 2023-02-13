@@ -33,7 +33,7 @@ def main(context):
             'port': context.req.port,
             'path': context.req.path,
             'query': context.req.query,
-            'queryString': context.req.quer_string,
+            'queryString': context.req.query_string,
             'scheme': context.req.scheme,
             'host': context.req.host,
         })
