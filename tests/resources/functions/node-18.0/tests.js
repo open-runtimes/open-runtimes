@@ -29,7 +29,15 @@ module.exports = async (context) => {
         case 'requestMethod':
             return context.res.send(context.req.method);
         case 'requestUrl':
-            return context.res.send(context.req.url);
+            return context.res.json({
+                url: context.req.url,
+                port: context.req.port,
+                path: context.req.path,
+                query: context.req.query,
+                queryString: context.req.queryString,
+                scheme: context.req.scheme,
+                host: context.req.host
+            });
         case 'requestHeaders':
             return context.res.json(context.req.headers);
         case 'requestBodyPlaintext':
@@ -38,7 +46,7 @@ module.exports = async (context) => {
             return context.res.json({
                 key1: context.req.body.key1 ?? 'Missing key',
                 key2: context.req.body.key2 ?? 'Missing key',
-                raw: context.req.rawBody
+                raw: context.req.bodyString
             })
         case 'envVars':
             return context.res.json({
@@ -54,7 +62,13 @@ module.exports = async (context) => {
             context.log(4.2);
             context.log(true);
 
+            context.log({ objectKey: 'objectValue' });
+            context.log([ 'arrayValue' ]);
+
             return context.res.send('');
+        case 'library':
+            const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyString}`).then(r => r.json());
+            return context.res.json({ todo });
         default:
             throw new Error('Unkonwn action');
     }
