@@ -12,27 +12,11 @@ import json
 app = Flask(__name__)
 
 class Response:
-    _body = ''
-    _statusCode = 200
-    _headers = {}
-
-    def __init__(self):
-        self._body = ''
-        self._statusCode = 200
-        self._headers = {}
-
     def send(self, body, statusCode = 200, headers = {}):
-        if body is not None:
-            self._body = body
-        if statusCode is not None:
-            self._statusCode = statusCode
-        if headers is not None:
-            self._headers = headers
-
         return {
-            'body': self._body,
-            'statusCode': self._statusCode,
-            'headers': self._headers,
+            'body': body,
+            'statusCode': statusCode,
+            'headers': headers,
         }
 
     def json(self, obj, statusCode = 200, headers = {}):
