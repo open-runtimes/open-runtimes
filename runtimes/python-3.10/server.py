@@ -31,7 +31,7 @@ class Response:
         return self.send('', statusCode, headers)
 
 class Request:
-    bodyString = None
+    body_string = None
     body = None
     headers = None
     method = None
@@ -39,7 +39,7 @@ class Request:
     path = None
     port = None
     query = None
-    queryString = None
+    query_string = None
     scheme = None
     host = None
 
@@ -78,8 +78,8 @@ def handler(u_path):
 
     context = Context()
 
-    context.req.bodyString = request.get_data(as_text=True)
-    context.req.body = context.req.bodyString
+    context.req.body_string = request.get_data(as_text=True)
+    context.req.body = context.req.body_string
     context.req.method = request.method
     context.req.headers = {}
 
@@ -89,10 +89,10 @@ def handler(u_path):
     defaultPort = "443" if context.req.scheme == "https" else "80"
 
     url = urlparse(request.url)
-    context.req.queryString = url.query or ''
+    context.req.query_string = url.query or ''
     context.req.query = {}
 
-    for param in context.req.queryString.split('&'):
+    for param in context.req.query_string.split('&'):
         pair = param.split('=', 1)
 
         if pair[0]:
@@ -113,12 +113,12 @@ def handler(u_path):
 
     context.req.url += context.req.path
 
-    if(context.req.queryString):
-        context.req.url += '?' + context.req.queryString
+    if(context.req.query_string):
+        context.req.url += '?' + context.req.query_string
 
     contentType = request.headers.get('content-type', 'text/plain')
     if 'application/json' in contentType:
-        if not context.req.bodyString:
+        if not context.req.body_string:
             context.req.body = {}
         else:
             context.req.body = request.get_json(force=True, silent=False)
