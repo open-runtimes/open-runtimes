@@ -11,11 +11,6 @@ const server = micro(async (req, res) => {
 
     const logs = [];
     const errors = [];
-    const response = {
-        headers: {},
-        body: '',
-        statusCode: 200,
-    };
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
     const bodyString = await parseText(req);
@@ -64,14 +59,10 @@ const server = micro(async (req, res) => {
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
-                if (body !== undefined) { response.body = body; }
-                if (statusCode !== undefined) { response.statusCode = statusCode; }
-                if (headers !== undefined) { response.headers = headers; }
-
                 return {
-                    body: response.body,
-                    statusCode: response.statusCode,
-                    headers: response.headers
+                    body: body,
+                    statusCode: statusCode,
+                    headers: headers
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
