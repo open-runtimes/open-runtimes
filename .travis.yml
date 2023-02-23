@@ -3,9 +3,6 @@ dist: focal
 arch:
   - amd64
 
-services:
-  - docker
-
 os: linux
 
 language: php
