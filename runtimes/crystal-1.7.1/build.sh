@@ -3,13 +3,18 @@
 # Fail build if any command fails
 set -e
 
-echo "running build.sh"
+# Prepare separate directory to prevent changing user's files
+cp -R /usr/code/* /usr/builds
 
 # Go to user code directory
-cd /usr/code
+cd /usr/builds
 
 # Install dependencies
-shards install --without-development
+if [[ ! -f "composer.json" ]]; then
+    echo "No dependencies found."
+else
+    shards install --without-development
+fi
 
 # Move back to the server directory
 cd /usr/local/src
@@ -22,7 +27,7 @@ shards install --without-development
 
 # Copy user code to the lib directory
 mkdir -p /usr/local/src/lib/runtime_user_code
-cp -R /usr/code/* /usr/local/src/lib/runtime_user_code
+cp -R /usr/builds/* /usr/local/src/lib/runtime_user_code
 
 # Compile the code
 shards build --production

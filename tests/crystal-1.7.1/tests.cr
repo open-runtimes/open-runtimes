@@ -1,8 +1,8 @@
 require "http/client"
 require "json"
 
-module App
-  def self.exec(req, res)
+module Handler
+  def self.main(req, res)
     payload = JSON.parse(req.payload)
     id = payload.as_h.fetch("id", 1)
 

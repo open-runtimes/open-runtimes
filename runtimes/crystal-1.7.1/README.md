@@ -8,51 +8,43 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ## Usage
 
-1. Create a new Crystal project and enter the project directory.
+1. Create a folder and enter it:
 
-2. Rename the generated file in `/src` to `main.cr`.
+```bash
+mkdir crystal-or && cd crystal-or
+```
 
-3. Add the following code to `main.cr`:
+2. Add code into `main.cr` file:
 
 ```crystal
-require "http/client"
-require "json"
-
-module App
-  def self.exec(req, res)
-    payload = JSON.parse(req.payload)
-    id = payload.as_h.fetch("id", 1)
-
-    response = HTTP::Client.get("https://jsonplaceholder.typicode.com/todos/" + id.to_s)
-    todo = JSON.parse(response.body)
-
+module Handler
+  def self.main(req, res)
     return res.json({
-      "message" => "Hello Open Runtimes 👋",
-      "todo"    => todo,
+      "n" => rand(1.0),
     })
   end
 end
 ```
 
-4. Build the code:
+3. Build the code:
 
 ```bash
-docker run -e INTERNAL_RUNTIME_ENTRYPOINT=src/main.cr --rm --interactive --tty --volume $PWD:/usr/code openruntimes/crystal:1.7.1 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=main.cr --rm --interactive --tty --volume $PWD:/usr/code openruntimes/crystal:v2-1.7.1 sh /usr/local/src/build.sh
 ```
 
-5. Spin-up open-runtime:
+4. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/crystal:1.7.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/crystal:v2-1.7.1 sh /usr/local/src/start.sh
 ```
 
-6. In new terminal window, execute function:
+5. In new terminal window, execute function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload":"{}"}'
+curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
 ```
 
-Output `{"message":"Hello Open Runtimes 👋","todo":{"userId":1,"id":1,"title":"delectus aut autem","completed":false}}` will be displayed after the execution.
+Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
 
 ## Local development
 

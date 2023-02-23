@@ -1,17 +1,18 @@
 require "http/client"
 require "json"
 
-module App
-  # 'req' variable has:
-  #     'headers' - object with request headers
-  #     'payload' - object with request body data
-  #     'variables' - object with function variables
-  # 'res' variable has:
-  #     'send(text, status)' - function to return text response. Status code defaults to 200
-  #     'json(obj, status)' - function to return JSON response. Status code defaults to 200
-  #
-  # If an error is thrown, a response with code 500 will be returned.
-  def self.exec(req, res)
+# 'req' variable has:
+#     'headers' - object with request headers
+#     'payload' - object with request body data
+#     'variables' - object with function variables
+# 'res' variable has:
+#     'send(text, status)' - function to return text response. Status code defaults to 200
+#     'json(obj, status)' - function to return JSON response. Status code defaults to 200
+#
+# If an error is thrown, a response with code 500 will be returned.
+
+module Handler
+  def self.main(req, res)
     payload = JSON.parse(req.payload)
     id = payload.as_h.fetch("id", 1)
 

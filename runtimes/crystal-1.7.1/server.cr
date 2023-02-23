@@ -53,7 +53,7 @@ class RuntimeController < Grip::Controllers::Http
       STDERR.reopen(stderr_writer)
       STDOUT.reopen(stdout_writer)
 
-      user_response = App.exec(request_data, runtime_response)
+      user_response = Handler.main(request_data, runtime_response)
 
       stdout_writer.close
       stderr_writer.close

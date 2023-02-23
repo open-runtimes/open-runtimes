@@ -7,5 +7,4 @@ cd /usr/workspace
 tar -zxf /usr/workspace/code.tar.gz -C /usr/code-start
 rm /usr/workspace/code.tar.gz
 cd /usr/code-start
-ls -la
 /usr/code-start/server
