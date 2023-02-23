@@ -3,7 +3,7 @@ $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 
 const USER_CODE_PATH = '/usr/code-start';
 
-class Response {
+class RuntimeResponse {
     function send(string $body, int $statusCode = 200, array $headers = []): array {
         return [
             'body' => $body,
@@ -27,7 +27,7 @@ class Response {
     }
 }
 
-class Request {
+class RuntimeRequest {
     public string $bodyString = '';
     public mixed $body = '';
     public array $headers = [];
@@ -42,19 +42,19 @@ class Request {
 }
 
 class Context {
-    public Request $req;
-    public Response $res;
+    public RuntimeRequest $req;
+    public RuntimeResponse $res;
 
     public array $logs = [];
     public array $errors = [];
 
     function __construct() {
-        $this->req = new Request();
-        $this->res = new Response();
+        $this->req = new RuntimeRequest();
+        $this->res = new RuntimeResponse();
     }
 
     function log(mixed $message) {
-        if(\is_array($message)) {
+        if(\is_array($message) || \is_object($message)) {
             $this->logs[] = \json_encode($message);
         } else {
             $this->logs[] = \strval($message);
@@ -62,7 +62,7 @@ class Context {
     }
 
     function error(mixed $message) {
-        if(\is_array($message)) {
+        if(\is_array($message) || \is_object($message)) {
             $this->errors[] = \json_encode($message);
         } else {
             $this->errors[] = \strval($message);
