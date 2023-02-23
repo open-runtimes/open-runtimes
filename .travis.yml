@@ -195,8 +195,8 @@ notifications:
     - team@appwrite.io
 
 before_install:
+  - docker version
   - curl -fsSL https://get.docker.com | sh
-  - sudo service docker start
   - >
     if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
       echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
