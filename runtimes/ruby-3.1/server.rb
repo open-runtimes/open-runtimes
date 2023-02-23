@@ -3,33 +3,33 @@ require 'json'
 
 USER_CODE_PATH = '/usr/code-start';
 
-class Response
-  def send(body, statusCode = 200, headers = {})
+class RuntimeResponse
+  def send(body, status_code = 200, headers = {})
     return {
       'body' => body,
-      'statusCode' => statusCode,
+      'statusCode' => status_code,
       'headers' => headers
     }
   end
 
-  def json(obj, statusCode = 200, headers = {})
+  def json(obj, status_code = 200, headers = {})
     headers['content-type'] = 'application/json'
-    return self.send(obj.to_json, statusCode, headers)
+    return self.send(obj.to_json, status_code, headers)
   end
 
   def empty()
     return self.send('', 204, {})
   end
 
-  def redirect(url, statusCode = 301, headers = {})
+  def redirect(url, status_code = 301, headers = {})
     headers['location'] = url
-    return self.send('', statusCode, headers)
+    return self.send('', status_code, headers)
   end
 end
 
-class Request
-  def initialize(bodyString, body, headers, method, url, path, port, scheme, host, query, queryString)
-    @bodyString = bodyString
+class RuntimeRequest
+  def initialize(body_string, body, headers, method, url, path, port, scheme, host, query, query_string)
+    @body_string = body_string
     @body = body
     @headers = headers
     @method = method
@@ -39,10 +39,10 @@ class Request
     @scheme = scheme
     @host = host
     @query = query
-    @queryString = queryString
+    @query_string = query_string
   end
 
-  attr_accessor :bodyString
+  attr_accessor :body_string
   attr_accessor :body
   attr_accessor :headers
   attr_accessor :method
@@ -52,7 +52,7 @@ class Request
   attr_accessor :scheme
   attr_accessor :host
   attr_accessor :query
-  attr_accessor :queryString
+  attr_accessor :query_string
 end
 
 class Context
@@ -69,7 +69,7 @@ class Context
   attr_accessor :errors
 
   def log(message)
-    if(message.kind_of?(Array) || message.kind_of?(Hash))
+    if message.kind_of?(Array) || message.kind_of?(Hash)
       @logs.push(message.to_json)
     else
       @logs.push(message.to_s)
@@ -77,7 +77,7 @@ class Context
   end
 
   def error(message)
-    if(message.kind_of?(Array) || message.kind_of?(Hash))
+    if message.kind_of?(Array) || message.kind_of?(Hash)
       @errors.push(message.to_json)
     else
       @errors.push(message.to_s)
@@ -87,9 +87,9 @@ end
 
 def handle(request, response)
   secret = request.env['HTTP_X_OPEN_RUNTIMES_SECRET'] || ''
-  serverSecret = ENV['OPEN_RUNTIMES_SECRET'] || ''
+  server_secret = ENV['OPEN_RUNTIMES_SECRET'] || ''
 
-  if(secret == '' || secret != serverSecret)
+  if secret == '' || secret != server_secret
     response.status = 500
     response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.'
     return
@@ -100,77 +100,73 @@ def handle(request, response)
   host = request.host
 
   scheme = request.scheme || 'http'
-  defaultPort = scheme === 'https' ? '443' : '80'
-  port = request.port || defaultPort.to_i
+  default_port = scheme === 'https' ? '443' : '80'
+  port = request.port || default_port.to_i
   path = request.path
   query = {}
-  queryString = request.query_string || ''
+  query_string = request.query_string || ''
 
-  if(queryString.start_with?("?"))
-    queryString = queryString[1..-1]
+  if query_string.start_with?("?")
+    query_string = query_string[1..-1]
   end
 
   url = scheme + "://" + host
 
-  if(port != defaultPort.to_i)
+  if port != default_port.to_i
     url += ':' + port.to_s
   end
 
   url += path
 
-  if(!(queryString.empty?))
-    url += "?" + queryString
+  if !(query_string.empty?)
+    url += "?" + query_string
   end
 
 
-  if(!(queryString.empty?))
-    queryString.split('&') do |param|
+  if !(query_string.empty?)
+    query_string.split('&') do |param|
       pair = param.split('=', 2)
-      if(pair[0] != nil && !(pair[0].empty?))
+      if pair[0] != nil && !(pair[0].empty?)
         query[pair[0]] = pair[1]
       end
     end
   end
 
-  bodyString = request.body.read
-  body = bodyString
+  body_string = request.body.read
+  body = body_string
   method = request.request_method
   headers = {}
 
-  if(request.env['CONTENT_TYPE'] != nil)
+  if request.env['CONTENT_TYPE'] != nil
     headers['content-type'] = request.env['CONTENT_TYPE']
   end
 
-  if(request.env['CONTENT_LENGTH'] != nil)
+  if request.env['CONTENT_LENGTH'] != nil
     headers['content-length'] = request.env['CONTENT_LENGTH']
   end
 
   request.env.each do |header, value|
-    if(header.start_with?('HTTP_'))
-      header = header[5..-1]
-      header = header.gsub("_", "-")
-      header = header.downcase
+    if header.start_with?('HTTP_')
+      header = header[5..-1].gsub("_", "-").downcase
 
-      if(!header.start_with?('x-open-runtimes-'))
+      if !header.start_with?('x-open-runtimes-')
         headers[header] = value
       end
     end
   end
 
-  contentType = request.env['CONTENT_TYPE']
-  if(contentType == nil)
-    contentType = 'text/plain'
-  end
+  content_type = request.env['CONTENT_TYPE']
+  content_type = 'text/plain' if content_type.nil?
 
-  if(contentType.include?('application/json'))
-    if(!(bodyString.empty?))
-      body = JSON.parse(bodyString)
+  if content_type.include?('application/json')
+    if !(body_string.empty?)
+      body = JSON.parse(body_string)
     end
   end
 
-  contextReq = Request.new(bodyString, body, headers, method, url, path, port, scheme, host, query, queryString)
-  contextRes = Response.new
-  context = Context.new(contextReq, contextRes)
+  context_req = RuntimeRequest.new(body_string, body, headers, method, url, path, port, scheme, host, query, query_string)
+  context_res = RuntimeResponse.new
+  context = Context.new(context_req, context_res)
 
   customstd = nil
   
@@ -204,17 +200,10 @@ def handle(request, response)
     output = context.res.send('', 500, {})
   end
 
-  if(output['body'] == nil)
-    output['body'] = ''
-  end
 
-  if(output['statusCode'] == nil)
-    output['statusCode'] = 200
-  end
-
-  if(output['headers'] == nil)
-    output['headers'] = {}
-  end
+  output['body'] = '' if output['body'].nil?
+  output['statusCode'] = 200 if output['statusCode'].nil?
+  output['headers'] = {} if output['headers'].nil?
 
   output['headers'].each do |header, value|
     if !header.downcase.start_with?('x-open-runtimes-')
@@ -235,36 +224,31 @@ def handle(request, response)
 
   response.status = output['statusCode']
   response.body = output['body']
+  response
 end
 
 get '*' do
-  handle(request, response)
-  return response
+  return handle(request, response)
 end
 
 post '*' do
-  handle(request, response)
-  return response
+  return handle(request, response)
 end
 
 put '*' do
-  handle(request, response)
-  return response
+  return handle(request, response)
 end
 
 patch '*' do
-  handle(request, response)
-  return response
+  return handle(request, response)
 end
 
 delete '*' do
-  handle(request, response)
-  return response
+  return handle(request, response)
 end
 
 options '*' do
-  handle(request, response)
-  return response
+  return handle(request, response)
 end
 
 error do

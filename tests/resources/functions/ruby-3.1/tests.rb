@@ -35,7 +35,7 @@ def main(context)
             'port': context.req.port,
             'path': context.req.path,
             'query': context.req.query,
-            'queryString': context.req.queryString,
+            'queryString': context.req.query_string,
             'scheme': context.req.scheme,
             'host': context.req.host,
         })
@@ -58,7 +58,7 @@ def main(context)
         return context.res.json({
             'key1': key1,
             'key2': key2,
-            'raw': context.req.bodyString
+            'raw': context.req.body_string
         })
     when 'envVars'
         return context.res.json({
@@ -79,7 +79,7 @@ def main(context)
 
         return context.res.send('')
     when 'library'
-        todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyString).body)
+        todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_string).body)
         return context.res.json({ 'todo': todo })
     else
         raise 'Unkonwn action'
