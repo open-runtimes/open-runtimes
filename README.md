@@ -73,6 +73,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 | Ruby | 3.0 | [openruntimes/ruby:v2-3.0](https://hub.docker.com/r/openruntimes/ruby) | [Examples](/runtimes/ruby-3.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
 | Ruby | 3.1 | [openruntimes/ruby:v2-3.1](https://hub.docker.com/r/openruntimes/ruby) | [Examples](/runtimes/ruby-3.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
 | Swift | 5.5 | [openruntimes/swift:v2-5.5](https://hub.docker.com/r/openruntimes/swift) | [Examples](/runtimes/swift-5.5/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/swift?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/swift) |
+| Elixir | 1.14 | [openruntimes/elixir:v2-1.14](https://hub.docker.com/r/openruntimes/elixir) | [Examples](/runtimes/elixir-1.14/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/elixir?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/elixir) |
 
 ## Architecture
 

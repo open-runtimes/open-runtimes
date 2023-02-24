@@ -18,6 +18,9 @@ docker build -t openruntimes/deno:v2-1.21 ./runtimes/deno-1.21/
 echo 'Deno 1.24...'
 docker build -t openruntimes/deno:v2-1.24 ./runtimes/deno-1.24/
 
+echo 'Elixir 1.14...'
+docker build -t openruntimes/elixir:v2-1.14 ./runtimes/elixir-1.14/
+
 echo '.NET 3.1...'
 docker build -t openruntimes/dotnet:v2-3.1 ./runtimes/dotnet-3.1/
 
