@@ -3,12 +3,12 @@ dist: focal
 arch:
   - amd64
 
+services:
+  - docker
+
 os: linux
 
 language: php
-
-services:
-  - docker
 
 php:
   - 8.0
@@ -198,15 +198,24 @@ notifications:
     - team@appwrite.io
 
 before_install:
+  # Upgrade Docker
   - docker version
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
   - docker version
+  # Login to Docker Hub
+  - >
+    if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
+      echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
+    fi
+  # Install Docker buildx
   - mkdir -vp ~/.docker/cli-plugins/
   - curl --silent -L "https://github.com/docker/buildx/releases/download/v0.3.0/buildx-v0.3.0.linux-amd64" > ~/.docker/cli-plugins/docker-buildx
   - chmod a+x ~/.docker/cli-plugins/docker-buildx
+  # Activate Docker buildx
+  - docker run --rm --privileged linuxkit/binfmt:v0.8
   - docker buildx create --use
 
 install:
