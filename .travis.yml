@@ -7,6 +7,9 @@ os: linux
 
 language: php
 
+services:
+  - docker
+  
 php:
   - 8.0
 
@@ -195,15 +198,11 @@ notifications:
     - team@appwrite.io
 
 before_install:
-  - sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
-  - sudo rm -rf /var/lib/docker
-  - sudo rm -rf /var/lib/containerd
   - docker version
-  - curl -fsSL https://get.docker.com | sh
-  - >
-    if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
-      echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
-    fi
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
   - docker version
   - docker buildx create --use
 
