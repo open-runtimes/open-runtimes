@@ -41,12 +41,12 @@ void main() async {
 
     String hostHeader = req.headers['host'] ?? '';
 
-    String path = '/' + req.url.path;
+    String path = req.requestedUri.path;
     String host = '';
     String scheme = req.headers['x-forwarded-proto'] ?? 'http';
     String defaultPort = scheme == 'https' ? '443' : '80';
     int port = int.parse(defaultPort);
-    String queryString = req.url.query;
+    String queryString = req.requestedUri.query;
     Map<String, String> query = {};
 
     if (hostHeader.contains(':')) {
