@@ -104,7 +104,7 @@ public class Server {
             url += "?" + queryString;
         }
 
-        RuntimeRequest runtimeRequest = new RuntimeRequest(bodyString, body, headers, method, url, scheme, host, path, port, queryString, query);
+        RuntimeRequest runtimeRequest = new RuntimeRequest(url, method, scheme, host, port, path, query, queryString, headers, body, bodyString);
         RuntimeResponse runtimeResponse = new RuntimeResponse();
         RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse);
 

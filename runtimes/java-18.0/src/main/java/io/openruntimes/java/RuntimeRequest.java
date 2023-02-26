@@ -18,17 +18,17 @@ public class RuntimeRequest {
     public Map<String, String> query;
 
     public RuntimeRequest(
-            String bodyString,
-            Object body,
-            Map<String, String> headers,
-            String method,
             String url,
+            String method,
             String scheme,
             String host,
-            String path,
             int port,
+            String path,
+            Map<String, String> query,
             String queryString,
-            Map<String, String> query
+            Map<String, String> headers,
+            Object body,
+            String bodyString
     ) {
         this.bodyString = bodyString;
         this.body = body;
