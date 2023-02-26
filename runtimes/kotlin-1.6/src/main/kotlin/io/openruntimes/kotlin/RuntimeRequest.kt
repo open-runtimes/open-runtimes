@@ -1,6 +1,6 @@
 package io.openruntimes.kotlin
 
-public class RuntimeRequest(bodyString: String, body: Any, headers: MutableMap<String, String>, method: String, url: String, path: String, host: String, scheme: String, port: Int, queryString: String, query: MutableMap<String, String>) {
+public class RuntimeRequest(url: String, method: String, scheme: String, host: String, port: Int, path: String, query: MutableMap<String, String>, queryString: String, headers: MutableMap<String, String>, body: Any, bodyString: String) {
     var bodyString: String
     var body: Any
     var headers: MutableMap<String, String>
