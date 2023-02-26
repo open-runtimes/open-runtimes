@@ -28,7 +28,7 @@ class RuntimeResponse
 end
 
 class RuntimeRequest
-  def initialize(body_string, body, headers, method, url, path, port, scheme, host, query, query_string)
+  def initialize(url, method, scheme, host, port, path, query, query_string, headers, body, body_string)
     @body_string = body_string
     @body = body
     @headers = headers
@@ -164,7 +164,7 @@ def handle(request, response)
     end
   end
 
-  context_req = RuntimeRequest.new(body_string, body, headers, method, url, path, port, scheme, host, query, query_string)
+  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body, body_string)
   context_res = RuntimeResponse.new
   context = Context.new(context_req, context_res)
 
