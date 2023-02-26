@@ -14,7 +14,7 @@ namespace DotNetRuntime
 		public Dictionary<string, string> Query { get; set; }
 		public int Port { get; set; }
 
-		public RuntimeRequest(string BodyString, object Body, Dictionary<string, string> Headers, string Method, string Url, string Host, string Scheme, string Path, string QueryString, Dictionary<string, string> Query, int Port)
+		public RuntimeRequest(string Url, string Method, string Scheme, string Host, int Port, string Path, Dictionary<string, string> Query, string QueryString, Dictionary<string, string> Headers, object Body, string BodyString)
 		{
 			this.BodyString = BodyString;
 			this.Body = Body;

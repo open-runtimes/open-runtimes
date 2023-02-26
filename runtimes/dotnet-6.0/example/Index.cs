@@ -1,6 +1,6 @@
 namespace DotNetRuntime;
 
-using Newtonsoft.Json;
+using System.Text.Json;
 
 public class Handler {
     static readonly HttpClient http = new();
@@ -12,11 +12,11 @@ public class Handler {
         if (!(Context.Req.Body is String))
         {
             Dictionary<string, object> body = (Dictionary<string, object>) Context.Req.Body;
-            id = body.TryGetValue("id", out var value) ? (string) value : "1";
+            id = body.TryGetValue("id", out string value) ? value : "1";
         }
 
         var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{id}");
-        var todo = JsonConvert.DeserializeObject<Dictionary<string, object>>(response, settings: null);
+        var todo = JsonSerializer.Deserialize<Dictionary<string, object>>(response) ?? new Dictionary<string, object>();
 
         return Context.Res.Json(new()
         {

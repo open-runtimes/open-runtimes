@@ -8,8 +8,8 @@ namespace DotNetRuntime
 		public RuntimeRequest Req { get; set; }
 		public RuntimeResponse Res { get; set; }
 
-		public ArrayList Logs = new ArrayList();
-		public ArrayList Errors = new ArrayList();
+		public List<String> Logs = new List<String>();
+		public List<String> Errors = new List<String>();
 
 		public RuntimeContext(RuntimeRequest Req, RuntimeResponse Res)
 		{
@@ -22,7 +22,7 @@ namespace DotNetRuntime
 			if (Message is IList || Message is IDictionary) {
 				this.Logs.Add(JsonSerializer.Serialize(Message));
 			} else {
-				this.Logs.Add(Message.ToString());
+				this.Logs.Add(Message.ToString() ?? "");
 			}
 		}
 
@@ -31,7 +31,7 @@ namespace DotNetRuntime
 			if (Message is IList || Message is IDictionary) {
 				this.Errors.Add(JsonSerializer.Serialize(Message));
 			} else {
-				this.Errors.Add(Message.ToString());
+				this.Errors.Add(Message.ToString() ?? "");
 			}
 		}
 	}

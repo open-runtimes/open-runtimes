@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using System.Text;
 using System.Text.Json;
-using Newtonsoft.Json;
 using System.Web;
+using Microsoft.Extensions.Primitives;
 
 var app = WebApplication.Create(args);
 app.Urls.Add("http://0.0.0.0:3000");
@@ -13,17 +13,17 @@ app.Run();
 
 static async Task<IResult> Execute(HttpRequest Request)
 {
-    string Secret = Request.Headers.TryGetValue("x-open-runtimes-secret", out var SecretValue) ? (string) SecretValue : "";
+    var Secret = Request.Headers.TryGetValue("x-open-runtimes-secret", out StringValues SecretValue) ? SecretValue.ToString() : "";
     if(Secret == "" || Secret != (Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? ""))
     {
         return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
     }
 
-    StreamReader Reader = new StreamReader(Request.Body);
-    string BodyString = await Reader.ReadToEndAsync();
+    var Reader = new StreamReader(Request.Body);
+    var BodyString = await Reader.ReadToEndAsync();
     object Body = BodyString;
-    Dictionary<string, string> Headers = new Dictionary<string, string>();
-    string Method = Request.Method;
+    var Headers = new Dictionary<string, string>();
+    var Method = Request.Method;
 
     foreach (var Entry in Request.Headers)
     {
@@ -37,7 +37,7 @@ static async Task<IResult> Execute(HttpRequest Request)
         }
     }
 
-    string ContentType = Request.Headers.TryGetValue("content-type", out var ContentTypeValue) ? (string) ContentTypeValue : "";
+    var ContentType = Request.Headers.TryGetValue("content-type", out StringValues ContentTypeValue) ? ContentTypeValue.ToString() : "";
     if(ContentType.Contains("application/json"))
     {
         if(String.IsNullOrEmpty(BodyString))
@@ -45,7 +45,7 @@ static async Task<IResult> Execute(HttpRequest Request)
             Body = new Dictionary<string, object>();
         } else
         {
-            Body = JsonConvert.DeserializeObject<Dictionary<string, object>>(BodyString);
+            Body = JsonSerializer.Deserialize<Dictionary<string, object>>(BodyString) ?? new Dictionary<string, object>();
         }
     }
 
@@ -54,13 +54,13 @@ static async Task<IResult> Execute(HttpRequest Request)
         Body = new Dictionary<string, object>();
     }
 
-    String HostHeader = Request.Headers.TryGetValue("host", out var HostHeaderValue) ? (string) HostHeaderValue : "";
+    var HostHeader = Request.Headers.TryGetValue("host", out StringValues HostHeaderValue) ? HostHeaderValue.ToString() : "";
 
-    String Scheme = Request.Headers.TryGetValue("x-forwarded-proto", out var ProtoHeaderValue) ? (string) ProtoHeaderValue : "http";
-    String DefaultPort = Scheme == "https" ? "443" : "80";
+    var Scheme = Request.Headers.TryGetValue("x-forwarded-proto", out StringValues ProtoHeaderValue) ? ProtoHeaderValue.ToString() : "http";
+    var DefaultPort = Scheme == "https" ? "443" : "80";
 
-    String Host = "";
-    int Port = Int32.Parse(DefaultPort);
+    var Host = "";
+    var Port = Int32.Parse(DefaultPort);
 
     if(HostHeader.Contains(":"))
     {
@@ -72,26 +72,26 @@ static async Task<IResult> Execute(HttpRequest Request)
         Port = Int32.Parse(DefaultPort);
     }
 
-    String Path = Request.Path;
+    var Path = Request.Path;
 
-    String QueryString = Request.QueryString.Value ?? "";
+    var QueryString = Request.QueryString.Value ?? "";
     if(QueryString.StartsWith("?")) {
         QueryString = QueryString.Remove(0,1);
     }
 
-    Dictionary<string, string> Query = new Dictionary<string, string>();
+    var Query = new Dictionary<string, string>();
 
-    foreach (String param in QueryString.Split("&"))
+    foreach (var param in QueryString.Split("&"))
     {
-        String[] pair = param.Split("=", 2);
+        var pair = param.Split("=", 2);
 
         if(pair.Length >= 1 && !String.IsNullOrEmpty(pair[0])) {
-            String Value = pair.Length == 2 ? pair[1] : "";
+            var Value = pair.Length == 2 ? pair[1] : "";
             Query.Add(pair[0], Value);
         }
     }
 
-    String Url = Scheme + "://" + Host;
+    var Url = Scheme + "://" + Host;
 
     if(Port != Int32.Parse(DefaultPort))
     {
@@ -104,9 +104,10 @@ static async Task<IResult> Execute(HttpRequest Request)
         Url += "?" + QueryString;
     }
 
-    RuntimeRequest ContextRequest = new RuntimeRequest(BodyString, Body, Headers, Method, Url, Host, Scheme, Path, QueryString, Query, Port);
-    RuntimeResponse ContextResponse = new RuntimeResponse();
-    RuntimeContext Context = new RuntimeContext(ContextRequest, ContextResponse);
+
+    var ContextRequest = new RuntimeRequest(Url, Method, Scheme, Host, Port, Path, Query, QueryString, Headers, Body, BodyString);
+    var ContextResponse = new RuntimeResponse();
+    var Context = new RuntimeContext(ContextRequest, ContextResponse);
 
     var originalOut = Console.Out;
     var originalErr = Console.Error;

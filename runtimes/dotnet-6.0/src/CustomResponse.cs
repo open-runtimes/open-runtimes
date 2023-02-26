@@ -22,7 +22,7 @@ namespace DotNetRuntime
 
         public Task ExecuteAsync(HttpContext HttpContext)
         {
-            string contentType = _Headers.TryGetValue("content-type", out var contentTypeValue) ? (string) contentTypeValue : "plain/text";
+            var contentType = _Headers.TryGetValue("content-type", out string contentTypeValue) ? contentTypeValue : "plain/text";
 
             foreach (var Entry in _Headers)
             {
