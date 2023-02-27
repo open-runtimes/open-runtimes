@@ -118,7 +118,7 @@ suspend fun execute(ctx: Context) {
         url += "?" + queryString;
     }
 
-    var runtimeRequest: RuntimeRequest = RuntimeRequest(url, method, scheme, host, port, path, query, queryString, head, body, bodyString)
+    var runtimeRequest: RuntimeRequest = RuntimeRequest(url, method, scheme, host, port, path, query, queryString, headers, body, bodyString)
     var runtimeResponse: RuntimeResponse = RuntimeResponse()
     var context: RuntimeContext = RuntimeContext(runtimeRequest, runtimeResponse)
 
