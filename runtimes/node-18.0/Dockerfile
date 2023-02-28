@@ -22,9 +22,11 @@ RUN npm ci && npm cache clean --force
 
 COPY . .
 
-RUN chmod +x /usr/local/src/start.sh
-RUN chmod +x /usr/local/src/build.sh
+RUN chmod +x /usr/local/src/helpers/before_start.sh
+RUN chmod +x /usr/local/src/helpers/start.sh
+
+RUN chmod +x /usr/local/src/helpers/before_build.sh
+RUN chmod +x /usr/local/src/helpers/build.sh
+RUN chmod +x /usr/local/src/helpers/after_build.sh
 
 EXPOSE 3000
-
-CMD ["/usr/local/src/start.sh"]
