@@ -13,7 +13,9 @@ set +o allexport
 mkdir -p /usr/local/server/function/node_modules
 
 # Merge user's node_modules into server's node_modules
-cp -R /usr/local/server/function/node_modules/. /usr/local/server/node_modules
+setopt no_nomatch
+cp -R /usr/local/server/function/node_modules/* /usr/local/server/node_modules
+setopt nomatch
 
 # Enter server folder
 cd /usr/local/server
