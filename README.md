@@ -124,6 +124,7 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 └── (runtime-specific, like package.json)
 ```
 
+
 | Name               	| Description                                                                                                                                           	|
 |--------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------	|
 | src/           	    | Contains source code of HTTP server of the runtime server                                                                                               	|
@@ -132,6 +133,16 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 | docker-compose.yml 	| Configuration to easily run the example code with `docker-compose up`                                                                                 	|
 | Dockerfile         	| Instructions to build a runtime, install it's dependencies and setup the runtime server. These images are usually based on official alpine or ubuntu. 	|
 | README.md          	| Runtime specific documentation                                                                                                                        	|
+
+Structure of `helpers/` directory follows:
+
+| Name               	| Description                                                                                                                                           	|
+|--------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| before-build.sh       | Mirroring of function code from mount directory to build directiry. Do changes inside build directory if needed.                                          |
+| after-build.sh       	| Append .open-runtimes file, gzip file, and store into mount directory. Do post-build changes to build output if needed.                                  	|
+| build.sh           	| Shortcut combining `before-build.sh`, your custom build command (like `npm install`), and `after-build.sh`.                                          	    |
+| before-start.sh 	    | Extracting of function build from mount directory into server's directory. Do changes to server directory if needed.                                      |
+| start.sh         	    | Shortcut combining `before-start.sh` and your custom start command (like `npm start`)                                                                     |
 
 Every request sent to any of the runtimes must have the `x-open-runtimes-secret` header. The value of this header has to match the value of environment variable `OPEN_RUNTIMES_SECRET` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
 
