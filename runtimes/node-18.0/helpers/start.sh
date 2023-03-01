@@ -1,2 +1,2 @@
-source /usr/local/src/helpers/before_start.sh
+source /usr/local/server/helpers/before-start.sh
 sh -c "$1"

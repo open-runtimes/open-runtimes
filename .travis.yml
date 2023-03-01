@@ -27,7 +27,9 @@ env:
       SERVER_PROCESS=pm2
       IMAGE=openruntimes/node:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests-v3-commands.sh
+      BUILD_COMMAND="npm install"
+      START_COMMAND="npm start"
     - RUNTIME=node-16.0
       PHP_CLASS=Node160
       ENTRYPOINT=tests.js
