@@ -11,20 +11,25 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `index.js` file:
 
 ```bash
-mkdir node-or && cd node-or
-printf "module.exports = async (context) => {\n    return context.res.json({ n: Math.random() })\n}" > index.js
+mkdir node-function && cd node-function
+tee -a index.js << END
+module.exports = async (context) => {
+    return context.res.json({ n: Math.random() });
+};
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/node:v3-18.0 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.js --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/node:v3-18.0 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=index.js --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/node:v3-18.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-18.0 sh helpers/start.sh "npm start"
 ```
 
 4. In new terminal window, execute function:
@@ -78,22 +83,6 @@ module.exports = (context) => {
 - To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
 
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.js`.
-
-
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Bradley Schofield**
-
-+ [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
-
-**Matej Bačo**
-
-+ [https://github.com/Meldiron](https://github.com/Meldiron)
 
 ## Contributing
 

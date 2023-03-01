@@ -9,8 +9,11 @@ set -o allexport
 source /usr/local/server/function/.open-runtimes
 set +o allexport
 
+# Prepare empty node_modules to prevent errors with copying
+mkdir -p /usr/local/server/function/node_modules
+
 # Merge user's node_modules into server's node_modules
-cp -R /usr/local/server/function/node_modules/* /usr/local/server/node_modules
+cp -R /usr/local/server/function/node_modules/. /usr/local/server/node_modules
 
 # Enter server folder
 cd /usr/local/server
