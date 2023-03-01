@@ -7,7 +7,8 @@ ENV OPEN_RUNTIMES_ENTRYPOINT=index.js
 RUN mkdir -p /mnt/code
 RUN mkdir -p /usr/local/build
 RUN mkdir -p /usr/local/server
-RUN mkdir -p /usr/local/server/function
+RUN mkdir -p /usr/local/server/src
+RUN mkdir -p /usr/local/server/src/function
 
 WORKDIR /usr/local/server
 
