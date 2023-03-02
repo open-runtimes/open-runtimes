@@ -5,7 +5,20 @@ const { text: parseText, json: parseJson, send } = require("micro");
 const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
+    const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
+    let safeTimeout;
+    if(timeout) {
+        if(isNaN(timeout)) {
+            return send(res, 500, 'Header "x-open-runtimes-timeout" must be an integer.');
+        }
+
+        safeTimeout = setTimeout(() => {
+            return send(res, 500, 'Execution timed out.');
+        }, (+timeout) * 1000);
+    }
+
     if (!req.headers[`x-open-runtimes-secret`] || req.headers[`x-open-runtimes-secret`] !== (process.env['OPEN_RUNTIMES_SECRET'] ?? '')) {
+        safeTimeout && clearTimeout(safeTimeout);
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
@@ -156,7 +169,9 @@ const server = micro(async (req, res) => {
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
     res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
 
-    send(res, output.statusCode, output.body);
+    safeTimeout && clearTimeout(safeTimeout);
+
+    return send(res, output.statusCode, output.body);
 });
 
 server.listen(3000);

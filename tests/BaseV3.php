@@ -355,4 +355,16 @@ abstract class BaseV3 extends TestCase
         self::assertEquals('laboriosam mollitia et enim quasi adipisci quia provident illum', $body['todo']['title']);
         self::assertEquals(false, $body['todo']['completed']);
     }
+
+
+    public function testTimeout(): void
+    {
+        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '3']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('Execution timed out.', $response['body']);
+
+        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('Header "x-open-runtimes-timeout" must be an integer.', $response['body']);
+    }
 }
