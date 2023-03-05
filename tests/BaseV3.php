@@ -362,7 +362,10 @@ abstract class BaseV3 extends TestCase
     {
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '3']);
         self::assertEquals(500, $response['code']);
-        self::assertEquals('Execution timed out.', $response['body']);
+        self::assertEquals('', $response['body']);
+        self::assertStringContainsString('Execution timed out.', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString('Timeout start.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringNotContainsString('Timeout end.', $response['headers']['x-open-runtimes-logs']);
 
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
         self::assertEquals(500, $response['code']);

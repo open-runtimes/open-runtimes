@@ -6,15 +6,13 @@ const USER_CODE_PATH = '/usr/code-start';
 
 const server = micro(async (req, res) => {
     const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
-    let safeTimeout;
+    let safeTimeout = null;
     if(timeout) {
         if(isNaN(timeout)) {
             return send(res, 500, 'Header "x-open-runtimes-timeout" must be an integer.');
         }
-
-        safeTimeout = setTimeout(() => {
-            return send(res, 500, 'Execution timed out.');
-        }, (+timeout) * 1000);
+        
+        safeTimeout = +timeout;
     }
 
     if (!req.headers[`x-open-runtimes-secret`] || req.headers[`x-open-runtimes-secret`] !== (process.env['OPEN_RUNTIMES_SECRET'] ?? '')) {
@@ -125,15 +123,28 @@ const server = micro(async (req, res) => {
             throw new Error("User function is not valid.");
         }
 
+        let fx;
         if (userFunction.default) {
             if (!(userFunction.default.constructor || userFunction.default.call || userFunction.default.apply)) {
                 throw new Error("User function is not valid.");
             }
 
-            output = await userFunction.default(context);
+            fx = userFunction.default(context);
         } else {
-            output = await userFunction(context);
+            fx = userFunction(context);
         }
+
+        if(safeTimeout) {
+            output = await Promise.race([fx, new Promise((promiseRes, promiseRej) => {
+                setTimeout(() => {
+                    promiseRej('Execution timed out.');
+                }, safeTimeout * 1000);
+            })]);
+        } else {
+            output = await fx;
+        }
+
+        output = await fx;
     } catch (e) {
         context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
         output = context.res.send('', 500, {});

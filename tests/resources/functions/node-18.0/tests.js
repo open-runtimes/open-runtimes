@@ -70,12 +70,14 @@ module.exports = async (context) => {
             const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyString}`).then(r => r.json());
             return context.res.json({ todo });
         case 'timeout':
+            context.log('Timeout start.');
             await new Promise((promiseResponse) => {
                 setTimeout(() => {
                     promiseResponse(true);
                 }, 60000);
             });
 
+            context.log('Timeout end.');
             return context.res.send('Successful response.');
         default:
             throw new Error('Unkonwn action');
