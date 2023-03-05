@@ -16,7 +16,6 @@ const server = micro(async (req, res) => {
     }
 
     if (!req.headers[`x-open-runtimes-secret`] || req.headers[`x-open-runtimes-secret`] !== (process.env['OPEN_RUNTIMES_SECRET'] ?? '')) {
-        safeTimeout && clearTimeout(safeTimeout);
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
@@ -116,35 +115,42 @@ const server = micro(async (req, res) => {
     }
 
     let output = null;
-    try {
+
+    async function execute() {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
 
         if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
             throw new Error("User function is not valid.");
         }
 
-        let fx;
         if (userFunction.default) {
             if (!(userFunction.default.constructor || userFunction.default.call || userFunction.default.apply)) {
                 throw new Error("User function is not valid.");
             }
 
-            fx = userFunction.default(context);
+            output = await userFunction.default(context);
         } else {
-            fx = userFunction(context);
+            output = await userFunction(context);
         }
+    }
 
-        if(safeTimeout) {
-            output = await Promise.race([fx, new Promise((promiseRes, promiseRej) => {
+    try {
+        if(safeTimeout !== null) {
+            const executed = true;
+            await Promise.race([execute(), new Promise((promiseRes, promiseRej) => {
                 setTimeout(() => {
-                    promiseRej('Execution timed out.');
+                    executed = false;
+                    promiseRes();
                 }, safeTimeout * 1000);
             })]);
-        } else {
-            output = await fx;
-        }
 
-        output = await fx;
+            if(!executed) {
+                context.error(e.code === 'Execution timed out');
+                output = context.res.send('', 500, {});
+            }
+        } else {
+            await execute();
+        }
     } catch (e) {
         context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
         output = context.res.send('', 500, {});
@@ -179,8 +185,6 @@ const server = micro(async (req, res) => {
 
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
     res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
-
-    safeTimeout && clearTimeout(safeTimeout);
 
     return send(res, output.statusCode, output.body);
 });

@@ -81,7 +81,13 @@ return function($context) use ($client) {
         $response = $client->request('GET', '/todos/' . $context->req->bodyString);
         $todo = \json_decode($response->getBody()->getContents(), true);
         return $context->res->json([ 'todo' => $todo ]);
+      case 'timeout':
+        $context->log('Timeout start.');
+        \sleep(60);
+
+        $context->log('Timeout end.');
+        return $context->res->send('Successful response.');
       default:
-          throw new Exception('Unkonwn action');
+        throw new Exception('Unkonwn action');
   }
 };

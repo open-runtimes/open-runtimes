@@ -1,4 +1,7 @@
 <?php
+
+Swoole\Runtime::enableCoroutine($flags = SWOOLE_HOOK_ALL);
+
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 
 const USER_CODE_PATH = '/usr/code-start';
@@ -73,6 +76,19 @@ class Context {
 $userFunction = null;
 
 $server->on("Request", function($req, $res) use(&$userFunction) {
+    $timeout = $req->header['x-open-runtimes-timeout'] ?? '';
+    $safeTimeout = null;
+
+    if ($timeout) {
+        if (!(\is_numeric($timeout))) {
+            $res->status(500);
+            $res->end('Header "x-open-runtimes-timeout" must be an integer.');
+            return;
+        }
+
+        $safeTimeout = \intval($timeout);
+    }
+
     if (($req->header['x-open-runtimes-secret'] ?? '') === '' || ($req->header['x-open-runtimes-secret'] ?? '') !== (getenv('OPEN_RUNTIMES_SECRET') ?? '')) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
@@ -98,7 +114,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     foreach (\explode('&', $queryString) as $param) {
         $pair = \explode('=', $param, 2);
         if(!empty($pair[0])) {
-            $query[$pair[0]] = $pair[1];
+            $query[$pair[0]] = $pair[1] ?? '';
         }
     }
 
@@ -144,9 +160,9 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     }
 
     $customstd = null;
-
     $output = null;
-    try {
+
+    $execute = function() use ($userFunction, &$output, &$customstd, $context) {
         if($userFunction === null) {
             $userFunction = include(USER_CODE_PATH . '/' . getenv('OPEN_RUNTIMES_ENTRYPOINT'));
         }
@@ -158,6 +174,25 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         ob_start();
         $output = $userFunction($context);
         $customstd = ob_get_clean();
+    };
+
+    try {
+        if($safeTimeout !== null) {
+            $executed = false;
+            Swoole\Coroutine\batch([
+                function() use ($execute, &$executed) {
+                    \call_user_func($execute);
+                    $executed = true;
+                }
+            ], $safeTimeout);
+
+            if(!$executed) {
+                $context->error('Execution timed out.');
+                $output = $context->res->send('', 500, []);
+            }
+        } else {
+            \call_user_func($execute);
+        }
     } catch (\Throwable $e) {
         $context->error($e->getMessage()."\n".$e->getTraceAsString());
         $context->error('At ' . $e->getFile() . ':' . $e->getLine());
