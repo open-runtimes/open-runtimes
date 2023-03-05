@@ -1,4 +1,7 @@
 #!/bin/sh
+# Fail build if any command fails
+set -e
+
 echo "Preparing for start ..."
 
 # Extract gzipped code from mounted volume to function folder

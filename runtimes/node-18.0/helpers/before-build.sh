@@ -1,4 +1,7 @@
 #!/bin/sh
+# Fail build if any command fails
+set -e
+
 echo "Preparing for build ..."
 
 # Copy from mounted volume to temporary folder
