@@ -1,4 +1,4 @@
-FROM php:8.1.6-alpine as step0
+FROM php:8.1.6-alpine3.16 as step0
 
 ENV PHP_SWOOLE_VERSION=v4.8.7
 
@@ -26,7 +26,7 @@ RUN \
   make && make install && \
   cd ..
 
-FROM php:8.1.6-alpine as final
+FROM php:8.1.6-alpine3.16 as final
 
 LABEL maintainer="team@appwrite.io"
 
@@ -63,8 +63,6 @@ WORKDIR /usr/local/server
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20210902/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20210902/
-
-COPY composer* /usr/local/src/
 
 # Add Source Code
 COPY . .
