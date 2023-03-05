@@ -52,13 +52,13 @@ RUN \
   && apk del .deps \
   && rm -rf /var/cache/apk/*
 
-RUN mkdir -p /usr/local/src/
-RUN mkdir -p /usr/code
-RUN mkdir -p /usr/code-start
-RUN mkdir -p /usr/workspace
-RUN mkdir -p /usr/builds
+RUN mkdir -p /mnt/code
+RUN mkdir -p /usr/local/build
+RUN mkdir -p /usr/local/server
+RUN mkdir -p /usr/local/server/src
+RUN mkdir -p /usr/local/server/src/function
 
-WORKDIR /usr/local/src/
+WORKDIR /usr/local/server
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
@@ -67,17 +67,16 @@ COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20210902/swoole
 COPY composer* /usr/local/src/
 
 # Add Source Code
-COPY ./server.php /usr/local/src/
-COPY ./start.sh /usr/local/src/
-COPY ./build.sh /usr/local/src/
-COPY ./prepare.php /usr/local/src/
+COPY . .
 
-RUN chmod +x /usr/local/src/start.sh
-RUN chmod +x /usr/local/src/build.sh
+RUN chmod +x /usr/local/server/helpers/before-start.sh
+RUN chmod +x /usr/local/server/helpers/start.sh
+
+RUN chmod +x /usr/local/server/helpers/before-build.sh
+RUN chmod +x /usr/local/server/helpers/build.sh
+RUN chmod +x /usr/local/server/helpers/after-build.sh
 
 # Enable Extensions
 RUN echo extension=swoole.so >> /usr/local/etc/php/conf.d/swoole.ini
 
 EXPOSE 3000
-
-CMD [ "/usr/local/src/start.sh" ]

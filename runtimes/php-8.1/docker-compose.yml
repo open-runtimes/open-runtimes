@@ -10,6 +10,8 @@ services:
     environment:
       - INTERNAL_RUNTIME_KEY
       - INTERNAL_RUNTIME_ENTRYPOINT
+      - BUILD_COMMAND
+      - START_COMMAND
     volumes:
-      - ./example/:/usr/code:rw
-    command: sh -c "sh /usr/local/src/build.sh && cp /usr/code/code.tar.gz /tmp/code.tar.gz && sh /usr/local/src/start.sh"
+      - ./example/:/mnt/code:rw
+    command: sh -c "sh helpers/build.sh \"$BUILD_COMMAND\" && sh helpers/start.sh \"$START_COMMAND\""
