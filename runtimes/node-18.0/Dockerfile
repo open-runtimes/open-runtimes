@@ -1,4 +1,4 @@
-FROM node:18.0-alpine
+FROM node:18.14.2-alpine3.16
 
 LABEL maintainer="team@appwrite.io"
 
@@ -7,11 +7,10 @@ ENV OPEN_RUNTIMES_ENTRYPOINT=index.js
 RUN mkdir -p /mnt/code
 RUN mkdir -p /usr/local/build
 RUN mkdir -p /usr/local/server
-RUN mkdir -p /usr/local/server/function
+RUN mkdir -p /usr/local/server/src
+RUN mkdir -p /usr/local/server/src/function
 
 WORKDIR /usr/local/server
-
-RUN apk add --no-cache rsync
 
 COPY package* /usr/local/server/
 

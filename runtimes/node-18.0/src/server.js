@@ -2,7 +2,7 @@ const fs = require("fs");
 const micro = require("micro");
 const { text: parseText, json: parseJson, send } = require("micro");
 
-const USER_CODE_PATH = '/usr/local/server/function';
+const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const server = micro(async (req, res) => {
     if (!req.headers[`x-open-runtimes-secret`] || req.headers[`x-open-runtimes-secret`] !== (process.env['OPEN_RUNTIMES_SECRET'] ?? '')) {
