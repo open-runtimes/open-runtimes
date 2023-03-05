@@ -53,7 +53,8 @@ abstract class BaseV3 extends TestCase
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POSTFIELDS => \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body,
             CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
-            CURLOPT_HTTPHEADER => $headersParsed
+            CURLOPT_HTTPHEADER => $headersParsed,
+            CURLOPT_TIMEOUT => 5
         );
         
         \curl_setopt_array($ch, $optArray);
