@@ -8,8 +8,8 @@ services:
     ports: 
       - 3000:3000
     environment:
-      - INTERNAL_RUNTIME_KEY
-      - INTERNAL_RUNTIME_ENTRYPOINT
+      - OPEN_RUNTIMES_SECRET
+      - OPEN_RUNTIMES_ENTRYPOINT
       - BUILD_COMMAND
       - START_COMMAND
     volumes:
