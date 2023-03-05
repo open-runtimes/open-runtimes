@@ -12,9 +12,7 @@ cd /usr/local/server
 composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev
 
 # Add server dependencies
-setopt no_nomatch
-cp -R /usr/local/server/vendor/* /usr/local/build/vendor
-setopt nomatch
+cp -R /usr/local/server/vendor/. /usr/local/build/vendor
 
 # Store entrypoint into build. Will be used during start process
 touch /usr/local/build/.open-runtimes
