@@ -1,4 +1,7 @@
 #!/bin/sh
+# Fail build if any command fails
+set -e
+
 echo "Packing build ..."
 
 # Store entrypoint into build. Will be used during start process
