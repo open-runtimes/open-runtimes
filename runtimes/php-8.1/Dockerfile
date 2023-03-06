@@ -67,6 +67,9 @@ COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20210902/swoole
 # Add Source Code
 COPY . .
 
+RUN composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev
+RUN mv vendor vendor-server
+
 RUN chmod +x /usr/local/server/helpers/before-start.sh
 RUN chmod +x /usr/local/server/helpers/start.sh
 

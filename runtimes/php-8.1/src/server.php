@@ -1,6 +1,6 @@
 <?php
 
-require 'function/vendor-server/autoload.php';
+require 'vendor-server/autoload.php';
 
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 
