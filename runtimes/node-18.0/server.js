@@ -136,16 +136,25 @@ const server = micro(async (req, res) => {
 
     try {
         if(safeTimeout !== null) {
-            const executed = true;
-            await Promise.race([execute(), new Promise((promiseRes, promiseRej) => {
+            let executed = true;
+
+            console.log("Safe");
+            console.log(safeTimeout);
+
+            const timeoutPromise = new Promise((promiseRes) => {
                 setTimeout(() => {
+                    console.log("Now");
                     executed = false;
-                    promiseRes();
+                    promiseRes(true);
                 }, safeTimeout * 1000);
-            })]);
+            });
+
+            await Promise.race([execute(), timeoutPromise]);
+
+            console.log("ENded");
 
             if(!executed) {
-                context.error(e.code === 'Execution timed out');
+                context.error('Execution timed out.');
                 output = context.res.send('', 500, {});
             }
         } else {
