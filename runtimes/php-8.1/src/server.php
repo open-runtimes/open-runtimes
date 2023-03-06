@@ -1,7 +1,10 @@
 <?php
+
+require 'function/vendor-server/autoload.php';
+
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 
-const USER_CODE_PATH = '/usr/code-start';
+const USER_CODE_PATH = '/usr/local/server/src/function';
 
 class RuntimeResponse {
     function send(string $body, int $statusCode = 200, array $headers = []): array {

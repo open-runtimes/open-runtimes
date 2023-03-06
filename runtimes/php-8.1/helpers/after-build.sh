@@ -10,9 +10,8 @@ mkdir -p /usr/local/build/vendor
 # Install server dependencies
 cd /usr/local/server
 composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev
-
-# Add server dependencies
-cp -R /usr/local/server/vendor/. /usr/local/build/vendor
+mkdir -p /usr/local/build/vendor-server
+cp -R /usr/local/server/vendor/. /usr/local/build/vendor-server/
 
 # Store entrypoint into build. Will be used during start process
 touch /usr/local/build/.open-runtimes
