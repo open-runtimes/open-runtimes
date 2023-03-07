@@ -16,6 +16,8 @@ public class RuntimeContext {
     public ArrayList<String> logs = new ArrayList<String>();
     public ArrayList<String> errors = new ArrayList<String>();
 
+    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+
     public RuntimeContext(
             RuntimeRequest req,
             RuntimeResponse res
@@ -26,7 +28,6 @@ public class RuntimeContext {
 
     public void log(Object message) {
         if(message instanceof Map || message instanceof List) {
-            Gson gson = new GsonBuilder().serializeNulls().create();
             this.logs.add(gson.toJson(message));
         } else {
             this.logs.add(message.toString());
@@ -35,7 +36,6 @@ public class RuntimeContext {
 
     public void error(Object message) {
         if(message instanceof Map || message instanceof List) {
-            Gson gson = new GsonBuilder().serializeNulls().create();
             this.errors.add(gson.toJson(message));
         } else {
             this.errors.add(message.toString());

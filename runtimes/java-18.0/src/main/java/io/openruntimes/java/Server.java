@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 
 public class Server {
+    private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
     public static void main(String[] args) {
         On.port(3000);
@@ -57,7 +58,6 @@ public class Server {
         String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
         if(contentType.contains("application/json")) {
             if(!bodyString.isEmpty()) {
-                Gson gson = new GsonBuilder().serializeNulls().create();
                 body = gson.fromJson(bodyString, Map.class);
             } else {
                 body = new HashMap<String, Object>();
@@ -119,7 +119,11 @@ public class Server {
         RuntimeOutput output = null;
 
         try {
-            Class classToLoad = Class.forName("io.openruntimes.java.Tests");
+            String entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
+            entrypoint = entrypoint.substring(0, entrypoint.length() - 5); // Remove .java
+            entrypoint = entrypoint.replaceAll("/", ".");
+
+            Class classToLoad = Class.forName("io.openruntimes.java." + entrypoint);
             Method classMethod = classToLoad.getDeclaredMethod("main", RuntimeContext.class);
             Object instance = classToLoad.newInstance();
             output = (RuntimeOutput) classMethod.invoke(instance, context);
@@ -142,7 +146,7 @@ public class Server {
             output = context.res.send("", 500, new HashMap<String, String>());
         }
         
-        for (Map.Entry<String, String> entry : output.headers.entrySet()) {
+        for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
             String header = entry.getKey().toLowerCase();
             if(!(header.startsWith("x-open-runtimes-"))) {
                 resp = resp.header(header, entry.getValue());
@@ -161,6 +165,6 @@ public class Server {
             resp = resp.header("x-open-runtimes-errors", "Internal error while processing logs.");
         }
 
-        return resp.code(output.statusCode).result(output.body);
+        return resp.code(output.getStatusCode()).result(output.getBody());
     }
 }
