@@ -30,57 +30,41 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
-    var secret = ctx.header("x-open-runtimes-secret");
-    var serverSecret = System.getenv("OPEN_RUNTIMES_SECRET");
+    val secret = ctx.header("x-open-runtimes-secret") ?: ""
+    val serverSecret = System.getenv("OPEN_RUNTIMES_SECRET") ?: ""
 
-    if(secret == null) {
-        secret = "";
-    }
-
-    if(serverSecret == null) {
-        serverSecret = "";
-    }
-
-    if (secret.equals("") || secret != serverSecret) {
+    if (secret == "" || secret != serverSecret) {
         ctx.status(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
         return
     }
 
-    var bodyString: String = ctx.body()
-    var body: Any = bodyString
-    var headers: MutableMap<String, String> = mutableMapOf<String, String>()
-    var method: String = ctx.method()
+    val bodyString = ctx.body()
+    var body = bodyString as Any
+    val headers = mutableMapOf<String, String>()
+    val method = ctx.method()
 
     for (entry in ctx.headerMap().entries.iterator()) {
-        var header: String = entry.key.lowercase()
+        val header = entry.key.lowercase()
         if(!(header.startsWith("x-open-runtimes-"))) {
             headers.put(header, entry.value)
         }
     }
 
-    var contentType: String = ctx.header("content-type") ?: "text/plain"
+    val contentType = ctx.header("content-type") ?: "text/plain"
     if(contentType.contains("application/json")) {
         if(!bodyString.isEmpty()) {
-            var gson = GsonBuilder().serializeNulls().create();
+            val gson = GsonBuilder().serializeNulls().create()
             body = gson.fromJson(bodyString, MutableMap::class.java)
         } else {
-            body = HashMap<String, Any>();
+            body = HashMap<String, Any>()
         }
     }
 
-    var hostHeader = ctx.header("host");
-    var protoHeader = ctx.header("x-forwarded-proto");
+    val hostHeader = ctx.header("host") ?: ""
+    val protoHeader = ctx.header("x-forwarded-proto") ?: "http"
 
-    if(hostHeader == null) {
-        hostHeader = "";
-    }
-
-    if(protoHeader == null) {
-        protoHeader = "http";
-    }
-
-    var scheme: String = protoHeader
-    var defaultPort: String = if (scheme.equals("https")) "443" else "80"
+    val scheme = protoHeader
+    val defaultPort = if (scheme == "https") "443" else "80"
 
     var host: String
     var port: Int
@@ -90,91 +74,94 @@ suspend fun execute(ctx: Context) {
         port = hostHeader.split(":")[1].toInt()
     } else {
         host = hostHeader
-        port = Integer.parseInt(defaultPort)
+        port = defaultPort.toInt()
     }
 
-    var path: String = ctx.path()
-    var queryString: String = ctx.queryString() ?: ""
-    var query: MutableMap<String, String> = HashMap<String, String>()
+    val path = ctx.path()
+    val queryString = ctx.queryString() ?: ""
+    val query = HashMap<String, String>()
 
     for(param in queryString.split("&")) {
-        var pair = param.split("=", limit = 2)
+        val pair = param.split("=", limit = 2)
 
         if(pair.size >= 1 && !pair[0].isEmpty()) {
-            var value: String = if (pair.size == 2) pair[1] else ""
+            val value = if (pair.size == 2) pair[1] else ""
             query.put(pair[0], value)
         }
     }
 
-    var url: String = scheme + "://" + host;
+    var url = scheme + "://" + host
 
-    if(port != Integer.parseInt(defaultPort)) {
-        url += ":" + port;
+    if(port != defaultPort.toInt()) {
+        url += ":$port"
     }
 
-    url += path;
+    url += path
 
     if(!queryString.isEmpty()) {
-        url += "?" + queryString;
+        url += "?" + queryString
     }
 
-    var runtimeRequest: RuntimeRequest = RuntimeRequest(url, method, scheme, host, port, path, query, queryString, headers, body, bodyString)
-    var runtimeResponse: RuntimeResponse = RuntimeResponse()
-    var context: RuntimeContext = RuntimeContext(runtimeRequest, runtimeResponse)
+    val runtimeRequest = RuntimeRequest(url, method, scheme, host, port, path, query, queryString, headers, body, bodyString)
+    val runtimeResponse = RuntimeResponse()
+    val context = RuntimeContext(runtimeRequest, runtimeResponse)
 
-    var systemOut = System.out;
-    var systemErr = System.err;
+    val systemOut = System.out
+    val systemErr = System.err
 
-    var customstdStream: ByteArrayOutputStream = ByteArrayOutputStream();
-    var customstd: PrintStream = PrintStream(customstdStream);
-    System.setOut(customstd);
-    System.setErr(customstd);
+    val customstdStream = ByteArrayOutputStream()
+    val customstd = PrintStream(customstdStream)
+    System.setOut(customstd)
+    System.setErr(customstd)
 
     var output: RuntimeOutput?
 
     try {
-        var classToLoad = Class.forName("io.openruntimes.kotlin.Tests");
-        var classMethod = classToLoad.getDeclaredMethod("main", RuntimeContext::class.java);
-        var instance = classToLoad.newInstance();
-        output = classMethod.invoke(instance, context) as RuntimeOutput;
-    } catch (e: Exception) {
-        var sw: StringWriter = StringWriter();
-        var pw: PrintWriter = PrintWriter(sw);
-        e.printStackTrace(pw);
+        var entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT")
+        entrypoint = entrypoint.substring(0, entrypoint.length - 3); // Remove .kt
+        entrypoint = entrypoint.replace('/', '.')
 
-        context.error(sw.toString());
-        output = context.res.send("", 500, mutableMapOf<String, String>());
+        val classToLoad = Class.forName("io.openruntimes.kotlin." + entrypoint)
+        val classMethod = classToLoad.getDeclaredMethod("main", RuntimeContext::class.java)
+        val instance = classToLoad.newInstance()
+        output = classMethod.invoke(instance, context) as RuntimeOutput
+    } catch (e: Exception) {
+        val sw = StringWriter()
+        val pw = PrintWriter(sw)
+        e.printStackTrace(pw)
+
+        context.error(sw.toString())
+        output = context.res.send("", 500, mutableMapOf<String, String>())
     } finally {
-        System.out.flush();
-        System.err.flush();
-        System.setOut(systemOut);
-        System.setErr(systemErr);
+        System.out.flush()
+        System.err.flush()
+        System.setOut(systemOut)
+        System.setErr(systemErr)
     }
 
     if(output == null) {
-        context.error("Return statement missing. return context.res.empty() if no response is expected.");
-        output = context.res.send("", 500, mutableMapOf<String, String>());
+        context.error("Return statement missing. return context.res.empty() if no response is expected.")
+        output = context.res.send("", 500, mutableMapOf<String, String>())
     }
 
-    for (entry in output.headers.entries.iterator()) {
-        var header: String = entry.key.lowercase()
+    for ((key, value) in output.headers) {
+        val header = key.lowercase()
         if(!(header.startsWith("x-open-runtimes-"))) {
-            ctx.header(header, entry.value)
+            ctx.header(header, value)
         }
     }
 
     if(!customstdStream.toString().isEmpty()) {
-        context.log("Unsupported log noticed. Use context.log() or context.error() for logging.");
+        context.log("Unsupported log noticed. Use context.log() or context.error() for logging.")
     }
 
     try {
-        ctx.header("x-open-runtimes-logs", URLEncoder.encode(context.logs.joinToString("\n"), StandardCharsets.UTF_8.toString()));
-        ctx.header("x-open-runtimes-errors", URLEncoder.encode(context.errors.joinToString("\n"), StandardCharsets.UTF_8.toString()));
+        ctx.header("x-open-runtimes-logs", URLEncoder.encode(context.logs.joinToString("\n"), StandardCharsets.UTF_8.toString()))
+        ctx.header("x-open-runtimes-errors", URLEncoder.encode(context.errors.joinToString("\n"), StandardCharsets.UTF_8.toString()))
     } catch (ex: UnsupportedEncodingException) {
-        ctx.header("x-open-runtimes-logs", "Internal error while processing logs.");
-        ctx.header("x-open-runtimes-errors", "Internal error while processing logs.");
+        ctx.header("x-open-runtimes-logs", "Internal error while processing logs.")
+        ctx.header("x-open-runtimes-errors", "Internal error while processing logs.")
     }
 
     ctx.status(output.statusCode).result(output.body)
-    return
 }
