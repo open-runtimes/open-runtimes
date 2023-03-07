@@ -78,7 +78,11 @@ class Context {
 
   void log(dynamic message) {
     if (message is List || message is Map) {
-      this.logs.add(jsonEncode(message));
+      try {
+        this.logs.add(jsonEncode(message));
+      } catch (e, s) {
+        this.logs.add(message.toString());
+      }
     } else {
       this.logs.add(message.toString());
     }
@@ -86,7 +90,11 @@ class Context {
 
   void error(dynamic message) {
     if (message is List || message is Map) {
-      this.errors.add(jsonEncode(message));
+      try {
+        this.errors.add(jsonEncode(message));
+      } catch (e, s) {
+        this.errors.add(message.toString());
+      }
     } else {
       this.errors.add(message.toString());
     }
