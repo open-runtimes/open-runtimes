@@ -16,6 +16,8 @@ import com.google.gson.Gson
 import java.lang.reflect.Method
 import java.util.HashMap
 
+val gson = GsonBuilder().serializeNulls().create()
+
 suspend fun main() {
     Javalin
         .create()
@@ -53,7 +55,6 @@ suspend fun execute(ctx: Context) {
     val contentType = ctx.header("content-type") ?: "text/plain"
     if(contentType.contains("application/json")) {
         if(!bodyString.isEmpty()) {
-            val gson = GsonBuilder().serializeNulls().create()
             body = gson.fromJson(bodyString, MutableMap::class.java)
         } else {
             body = HashMap<String, Any>()
