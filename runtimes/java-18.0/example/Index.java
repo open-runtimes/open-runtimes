@@ -12,7 +12,7 @@ public class Index {
     final Gson gson = new Gson();
 
     public RuntimeOutput main(RuntimeContext context) throws Exception {
-        Map<String, Object> payload = (Map<String, Object>) context.req.body;
+        Map<String, Object> payload = (Map<String, Object>) context.getReq().getBody();
 
         String id = "1";
         if (payload.containsKey("id") && payload.get("id") != null) {
@@ -36,10 +36,10 @@ public class Index {
         Map<String, Object> todo = gson.fromJson(todoBuffer.toString(), Map.class);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("r", context.req.headers);
+        data.put("r", context.getReq().getHeaders());
         data.put("message", "Hello Open Runtimes 👋");
         data.put("todo", todo);
 
-        return context.res.json(data);
+        return context.getRes().json(data);
     }
 }

@@ -133,7 +133,7 @@ public class Server {
             e.printStackTrace(pw);
 
             context.error(sw.toString());
-            output = context.res.send("", 500, new HashMap<String, String>());
+            output = context.getRes().send("", 500, new HashMap<String, String>());
         } finally {
             System.out.flush();
             System.err.flush();
@@ -143,7 +143,7 @@ public class Server {
 
         if(output == null) {
             context.error("Return statement missing. return context.res.empty() if no response is expected.");
-            output = context.res.send("", 500, new HashMap<String, String>());
+            output = context.getRes().send("", 500, new HashMap<String, String>());
         }
         
         for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
@@ -158,8 +158,8 @@ public class Server {
         }
 
         try {
-            resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context.logs), StandardCharsets.UTF_8.toString()));
-            resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", context.errors), StandardCharsets.UTF_8.toString()));
+            resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context.getLogs()), StandardCharsets.UTF_8.toString()));
+            resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", context.getErrors()), StandardCharsets.UTF_8.toString()));
         } catch (UnsupportedEncodingException ex) {
             resp = resp.header("x-open-runtimes-logs", "Internal error while processing logs.");
             resp = resp.header("x-open-runtimes-errors", "Internal error while processing logs.");

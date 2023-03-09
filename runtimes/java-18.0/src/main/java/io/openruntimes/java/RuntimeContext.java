@@ -10,11 +10,27 @@ import java.util.List;
 import java.util.Map;
 
 public class RuntimeContext {
-    public RuntimeRequest req;
-    public RuntimeResponse res;
+    private RuntimeRequest req;
+    private RuntimeResponse res;
 
-    public ArrayList<String> logs = new ArrayList<String>();
-    public ArrayList<String> errors = new ArrayList<String>();
+    private ArrayList<String> logs = new ArrayList<String>();
+    private ArrayList<String> errors = new ArrayList<String>();
+
+    public RuntimeRequest getReq() {
+        return this.req;
+    }
+
+    public RuntimeResponse getRes() {
+        return this.res;
+    }
+
+    public ArrayList<String> getLogs() {
+        return this.logs;
+    }
+
+    public ArrayList<String> getErrors() {
+        return this.errors;
+    }
 
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
