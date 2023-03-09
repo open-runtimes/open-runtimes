@@ -66,7 +66,7 @@ def main(context)
             'emptyVar': ENV['NOT_DEFINED_VAR'] || nil
         })
     when 'logs'
-        print('Native log')
+        puts 'Native log'
         context.log('Debug log')
         context.error('Error log')
 
