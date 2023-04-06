@@ -48,6 +48,9 @@ docker build -t openruntimes/node:v2-16.0 ./runtimes/node-16.0/
 echo 'Node 18.0...'
 docker build -t openruntimes/node:v2-18.0 ./runtimes/node-18.0/
 
+echo 'Node 19.0...'
+docker build -t openruntimes/node:v2-19.0 ./runtimes/node-19.0/
+
 echo 'PHP 8.0...'
 docker build -t openruntimes/php:v2-8.0 ./runtimes/php-8.0/
 
