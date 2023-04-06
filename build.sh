@@ -27,6 +27,9 @@ docker build -t openruntimes/dotnet:v2-3.1 ./runtimes/dotnet-3.1/
 echo '.NET 6.0...'
 docker build -t openruntimes/dotnet:v2-6.0 ./runtimes/dotnet-6.0/
 
+echo 'Go 1.19...'
+docker build -t openruntimes/go:v2-1.19 ./runtimes/go-1.19/
+
 echo 'Java 8...'
 docker build -t openruntimes/java:v2-8.0 ./runtimes/java-8.0/
 

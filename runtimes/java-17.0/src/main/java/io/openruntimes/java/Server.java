@@ -44,7 +44,7 @@ public class Server {
             Map<String, Object> output = new HashMap<String, Object>();
             output.put("response", userResponse.data);
             output.put("stdout", outStream.toString());
-            return resp.result(RuntimeResponse.gson.toJson(output));
+            return resp.code(userResponse.statusCode).result(RuntimeResponse.gson.toJson(output));
         } catch (Exception e) {
             e.printStackTrace();
             Map<String, Object> output = new HashMap<String, Object>();

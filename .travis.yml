@@ -200,6 +200,13 @@ env:
       IMAGE=openruntimes/crystal:${VERSION}-1.7.1
       ARCH=linux/amd64,linux/arm64
 
+    # Go
+    - RUNTIME=go-1.19
+      PHP_CLASS=Go119
+      ENTRYPOINT=tests.go
+      SERVER_PROCESS="server"
+      IMAGE=openruntimes/go:${VERSION}-1.19
+      ARCH=linux/amd64,linux/arm64
 
 notifications:
   email:
