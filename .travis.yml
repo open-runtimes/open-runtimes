@@ -198,6 +198,14 @@ env:
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
 
+    # Crystal
+    - RUNTIME=crystal-1.7.1
+      PHP_CLASS=Crystal171
+      ENTRYPOINT=tests.cr
+      SERVER_PROCESS=/usr/code-start/tests
+      IMAGE=openruntimes/crystal:${VERSION}-1.7.1
+      ARCH=linux/amd64,linux/arm64
+
     # Go
     - RUNTIME=go-1.19
       PHP_CLASS=Go119
