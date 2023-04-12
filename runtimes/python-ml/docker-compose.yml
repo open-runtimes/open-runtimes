@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  open-runtimes-python:
+    container_name: open-runtimes-python
+    build:
+      context: .
+    ports: 
+      - 3000:3000
+    environment:
+      - OPEN_RUNTIMES_SECRET
+      - OPEN_RUNTIMES_ENTRYPOINT
+      - BUILD_COMMAND
+      - START_COMMAND
+    volumes:
+      - ./example/:/mnt/code:rw
+    command: sh -c "sh /usr/local/server/helpers/build.sh \"$BUILD_COMMAND\" && sh helpers/start.sh \"$START_COMMAND\""
