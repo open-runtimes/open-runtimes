@@ -1,6 +1,6 @@
 # Python Runtime ML
 
-This is the Open Runtime that builds and runs Python code based on a `3.10-slim-bullseye` base image and is extended with Anaconda 3.
+This is the Open Runtime that builds and runs Python code based on a `miniconda3:22.11.1` base image.
 
 The runtime itself uses [Flask](https://flask.palletsprojects.com/en/2.0.x) as the Web Server to process the execution requests.
 

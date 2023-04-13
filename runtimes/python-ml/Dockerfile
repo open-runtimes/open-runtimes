@@ -1,17 +1,10 @@
-FROM python:3.10-slim-bullseye
+FROM continuumio/miniconda3:22.11.1
 
 LABEL maintainer="team@appwrite.io"
 
-WORKDIR /tmp
-RUN apt-get update
-RUN apt-get install --yes curl
-RUN curl -o anaconda.sh https://repo.anaconda.com/archive/Anaconda3-2023.03-Linux-x86_64.sh
-RUN sha256sum anaconda.sh > hash.txt
-RUN sha256sum -c hash.txt
-RUN sh anaconda.sh -b -p $HOME/miniconda
-RUN rm anaconda.sh
-
 ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
+
+# Useful for example with tensoflow
 
 RUN mkdir -p /mnt/code
 RUN mkdir -p /usr/local/build
