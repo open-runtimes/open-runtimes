@@ -27,7 +27,7 @@ const server = micro(async (req, res) => {
     console.log = console.info = console.debug = function(){
         var args = [];
         Array.from(arguments).forEach(arg => {
-            if(arg instanceof Object || Array.isArray(arg)) {    
+            if(arg instanceof Object || Array.isArray(arg)) {
                 args.push(JSON.stringify(arg));
             } else {
                 args.push(arg)
@@ -39,7 +39,7 @@ const server = micro(async (req, res) => {
     console.error = console.warn = function(){
         var args = [];
         Array.from(arguments).forEach(arg => {
-            if(arg instanceof Object || Array.isArray(arg)) {    
+            if(arg instanceof Object || Array.isArray(arg)) {
                 args.push(JSON.stringify(arg));
             } else {
                 args.push(arg)
@@ -47,10 +47,12 @@ const server = micro(async (req, res) => {
         });
         errors.push(args.join(" "));
     }
+
     const response = {
         send: (text, status = 200) => send(res, status, {response: text, stdout: logs.join('\n'), stderr: errors.join('\n')}),
         json: (json, status = 200) => send(res, status, {response: json, stdout: logs.join('\n'), stderr: errors.join('\n')}),
     };
+
     try {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
 
@@ -62,7 +64,7 @@ const server = micro(async (req, res) => {
             if (!(userFunction.default.constructor || userFunction.default.call || userFunction.default.apply)) {
                 throw new Error("User function is not valid.")
             }
-            
+
             await userFunction.default(request, response);
         } else {
             await userFunction(request, response);

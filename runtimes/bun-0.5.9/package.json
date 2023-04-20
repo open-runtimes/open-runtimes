@@ -1,0 +1,20 @@
+{
+  "name"           : "open-runtimes-bun",
+  "version"        : "1.0.0",
+  "description"    : "",
+  "main"           : "server.ts",
+  "type"   : "module",
+  "scripts": {
+    "start": "export NODE_ENV=production && bun run server.ts",
+    "dev": "bun --watch server.ts",
+    "test" : "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords"       : [],
+  "author"         : "",
+  "license"        : "ISC",
+  "dependencies"   : {
+  },
+  "devDependencies": {
+    "bun-types": "^0.5.0"
+  }
+}
