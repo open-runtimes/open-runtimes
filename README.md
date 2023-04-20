@@ -49,6 +49,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 | Name | Version | Docker Hub | Examples | Pulls |
 | ------- | ------- | --------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bun     | 0.5.9   | [openruntimes/bun:v2-0.5.9](https://hub.docker.com/r/openruntimes/bun)      | [Examples](/runtimes/bun-0.5.9/example)   | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/bun?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/bun)       |
 | C++ | 2017 | [openruntimes/cpp:v2-17](https://hub.docker.com/r/openruntimes/cpp) | [Examples](/runtimes/cpp-17/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/cpp?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/cpp) |
 | Dart | 2.15 | [openruntimes/dart:v2-2.15](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.15/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
 | Dart | 2.16 | [openruntimes/dart:v2-2.16](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.16/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |

@@ -74,3 +74,6 @@ docker build -t openruntimes/ruby:v2-3.1 ./runtimes/ruby-3.1/
 
 echo 'Swift 5.5...'
 docker build -t openruntimes/swift:v2-5.5 ./runtimes/swift-5.5/
+
+echo 'Bun 0.5.9...'
+docker build -t openruntimes/bun:v2-0.5.9 ./runtimes/bun-0.5.9/

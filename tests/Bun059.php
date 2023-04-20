@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: Bun059
 // Entrypoint: tests.js
 
-class Bun059 extends BaseJS
+class Bun059 extends Base
 {
 }
