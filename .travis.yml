@@ -209,7 +209,7 @@ env:
     # Bun
     - RUNTIME=bun-0.5.9
       PHP_CLASS=Bun059
-      ENTRYPOINT=tests.js
+      ENTRYPOINT=tests.ts
       SERVER_PROCESS=bun
       IMAGE=openruntimes/bun:${VERSION}-0.5.9
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
