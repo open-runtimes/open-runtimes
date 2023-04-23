@@ -10,7 +10,7 @@
     If an error is thrown, a response with code 500 will be returned.
 */
 
-export default async function (req, res) {
+export default async function (req: any, res: any) {
     const payload = JSON.parse(req.payload === '' ? '{}' : req.payload);
 
     const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`).then(r => r.json());
@@ -24,9 +24,9 @@ export default async function (req, res) {
     console.log(['hello', 'world']);
 
     return res.json({
-        isTest: true,
-        message: 'Hello Open Runtimes 👋',
-        header: req.headers['x-test-header'],
+        isTest  : true,
+        message : 'Hello Open Runtimes 👋',
+        header  : req.headers['x-test-header'],
         variable: req.variables['test-variable'],
         todo
     });

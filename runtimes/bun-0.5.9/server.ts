@@ -68,7 +68,7 @@ async function server(req: Request) {
     }
 
     const response = {
-        send: (text: string, status = 200) => sendRaw(text, status),
+        send: (text: string, status = 200) => sendJson({response: text, stdout: logs.join('\n'), stderr: errors.join('\n')}, status),
         json: (json: any, status = 200) => sendJson({response: json, stdout: logs.join('\n'), stderr: errors.join('\n')}, status),
     };
 
