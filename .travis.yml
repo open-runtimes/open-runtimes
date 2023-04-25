@@ -175,6 +175,12 @@ env:
       SERVER_PROCESS="java-runtime-1.0.0"
       IMAGE=openruntimes/java:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm64
+    - RUNTIME=java-20.0
+      PHP_CLASS=Java20
+      ENTRYPOINT=Tests.java
+      SERVER_PROCESS="java-runtime-1.0.0"
+      IMAGE=openruntimes/java:${VERSION}-20.0
+      ARCH=linux/amd64,linux/arm64
 
     # C++
     - RUNTIME=cpp-17
