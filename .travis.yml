@@ -21,6 +21,12 @@ env:
     - VERSION=v2
   jobs:
     # Node
+    - RUNTIME=node-20.0
+      PHP_CLASS=Node200
+      ENTRYPOINT=tests.js
+      SERVER_PROCESS=pm2
+      IMAGE=openruntimes/node:${VERSION}-20.0
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
     - RUNTIME=node-19.0
       PHP_CLASS=Node190
       ENTRYPOINT=tests.js
