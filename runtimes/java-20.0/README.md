@@ -1,6 +1,6 @@
-# Java Runtime 18.0
+# Java Runtime 20.0
 
-This is the Open Runtime that builds and runs Java code based on a `openjdk:18-jdk-slim` base image. 
+This is the Open Runtime that builds and runs Java code based on a `openjdk:20-jdk-slim` base image. 
 
 The runtime itself uses [Rapidoid](https://github.com/rapidoid/rapidoid) as the Web Server to process the execution requests.
 
@@ -18,13 +18,13 @@ printf "import java.util.Collections;\n\npublic RuntimeResponse main(RuntimeRequ
 2. Build the code:
 
 ```bash
-docker run -e INTERNAL_RUNTIME_ENTRYPOINT=Index.java --rm --interactive --tty --volume $PWD:/usr/code openruntimes/java:v2-18.0 sh /usr/local/src/build.sh
+docker run -e INTERNAL_RUNTIME_ENTRYPOINT=Index.java --rm --interactive --tty --volume $PWD:/usr/code openruntimes/java:v2-20.0 sh /usr/local/src/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/java:v2-18.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/java:v2-20.0 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
@@ -46,7 +46,7 @@ git clone https://github.com/open-runtimes/open-runtimes.git
 2. Enter the Java runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/java-18.0
+cd open-runtimes/runtimes/java-20.0
 ```
 
 3. Run the included example cloud function:

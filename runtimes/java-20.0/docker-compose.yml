@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-java-18:
-    container_name: open-runtimes-java-19
+  open-runtimes-java-20:
+    container_name: open-runtimes-java-20
     build:
       context: .
     ports:
