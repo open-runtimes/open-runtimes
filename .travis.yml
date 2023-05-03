@@ -20,13 +20,6 @@ env:
   global:
     - VERSION=v2
   jobs:
-    # Node
-    - RUNTIME=node-19.0
-      PHP_CLASS=Node190
-      ENTRYPOINT=tests.js
-      SERVER_PROCESS=pm2
-      IMAGE=openruntimes/node:${VERSION}-19.0
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
     - RUNTIME=node-18.0
       PHP_CLASS=Node180
       ENTRYPOINT=tests.js
@@ -196,14 +189,6 @@ env:
       ENTRYPOINT=Tests.cs
       SERVER_PROCESS="DotNetRuntime.dll"
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
-      ARCH=linux/amd64,linux/arm64
-
-    # Go
-    - RUNTIME=go-1.19
-      PHP_CLASS=Go119
-      ENTRYPOINT=tests.go
-      SERVER_PROCESS="server"
-      IMAGE=openruntimes/go:${VERSION}-1.19
       ARCH=linux/amd64,linux/arm64
 
 notifications:
