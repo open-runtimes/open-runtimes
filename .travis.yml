@@ -210,6 +210,7 @@ before_install:
   - chmod a+x ~/.docker/cli-plugins/docker-buildx
   # Activate Docker buildx
   - docker buildx create --use
+  - docker run --privileged --rm tonistiigi/binfmt --install all
 
 install:
   - docker --version
