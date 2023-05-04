@@ -1,7 +1,8 @@
 #!/bin/sh
 set -e
 cd runtimes/${RUNTIME}
-docker build -t open-runtimes/test-runtime .
+docker buildx build -t open-runtimes/test-runtime --output type=docker .
+docker image ls
 cd ../../
 cd tests/${RUNTIME}
 echo "Building..."
