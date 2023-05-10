@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: Dart218
 // Entrypoint: lib/tests.dart
 
-class Dart218 extends Base
+class Dart218 extends BaseV3
 {
 }

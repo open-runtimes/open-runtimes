@@ -30,7 +30,7 @@ FROM php:8.1.6-alpine as final
 
 LABEL maintainer="team@appwrite.io"
 
-ENV INTERNAL_RUNTIME_ENTRYPOINT=index.php
+ENV OPEN_RUNTIMES_ENTRYPOINT=index.php
 
 RUN \
   apk update \

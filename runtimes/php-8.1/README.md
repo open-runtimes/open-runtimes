@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir php-or && cd php-or
-printf "<?\nreturn function(\$req, \$res) {\n    \$res->json([ 'n' => \mt_rand() / \mt_getrandmax() ]);\n};" > index.php
+printf "<?\nreturn function(\$context) {\n    return \$context->res->json([ 'n' => \mt_rand() / \mt_getrandmax() ]);\n};" > index.php
 ```
 
 2. Build the code:
@@ -24,13 +24,13 @@ docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/php:v3-
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=index.php --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/php:v3-8.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=index.php --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/php:v3-8.1 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
+curl -H "x-open-runtimes-secret: secret-key" -X GET http://localhost:3000/
 ```
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
@@ -58,10 +58,10 @@ docker-compose up -d
 4. Execute the function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
+curl -H "x-open-runtimes-secret: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"id": "4"}'
 ```
 
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":"{}" }`.
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-open-runtimes-secret: secret-key`.
 
 You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
 
@@ -72,26 +72,8 @@ You can also make changes to the example code and apply the changes with the `do
 ```php
 <?php
 
-return function($req, $res) {
-    $res->send('Hello Open Runtimes 👋');
-};
-```
-
-- The `res` parameter has two methods:
-
-    - `send()`: Send a string response to the client.
-    - `json()`: Send a JSON response to the client.
-
-You can respond with `json()` by providing object:
-
-```php
-return function($req, $res) {
-    $res->json([
-        'message' => 'Hello Open Runtimes 👋',
-        'variables' => $req['variables'],
-        'payload' => $req['payload'],
-        'headers' => $req['headers']
-    ]);
+return function($context) {
+    return $context->res->send('Hello Open Runtimes 👋');
 };
 ```
 
@@ -103,7 +85,7 @@ return function($req, $res) {
 require 'vendor/autoload.php';
 ```
 
-- The default entrypoint is `index.php`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.php`.
+- The default entrypoint is `index.php`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.php`.
 
 ## Authors
 
