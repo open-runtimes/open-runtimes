@@ -160,7 +160,7 @@ env:
       SERVER_PROCESS="kotlin-runtime-1.0.0"
       IMAGE=openruntimes/kotlin:${VERSION}-1.6
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
     # Java
     - RUNTIME=java-8.0
