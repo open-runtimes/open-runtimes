@@ -82,6 +82,6 @@ def main(context)
         todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_string).body)
         return context.res.json({ 'todo': todo })
     else
-        raise 'Unkonwn action'
+        raise 'Unknown action'
     end
 end

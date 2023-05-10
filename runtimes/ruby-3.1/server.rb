@@ -212,7 +212,7 @@ def handle(request, response)
   end
 
   if customstd.string != nil && !customstd.string.empty?
-    context.log('Unsupported log noticed. Use context.log() or context.error() for logging.')
+    context.log('Unsupported log detected. Use context.log() or context.error() for logging.')
   end
 
   response.headers['x-open-runtimes-logs'] = ERB::Util.url_encode(context.logs.join('\n'))
