@@ -5,6 +5,18 @@ const USER_CODE_PATH = '/usr/code-start';
 const app = new Application();
 
 app.use(async (ctx) => {
+  const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? '';
+  let safeTimeout: number | null = null;
+  if(timeout) {
+      if(isNaN(timeout)) {
+          ctx.response.status = 500;
+          ctx.response.body = 'Header "x-open-runtimes-timeout" must be an integer.';
+          return;
+      }
+
+      safeTimeout = +timeout;
+  }
+
   if ((ctx.request.headers.get("x-open-runtimes-secret") ?? '')  === '' || (ctx.request.headers.get("x-open-runtimes-secret") ?? '') !== (Deno.env.get("OPEN_RUNTIMES_SECRET") ?? '')) {
     ctx.response.status = 500;
     ctx.response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.';
@@ -111,7 +123,8 @@ app.use(async (ctx) => {
   }
 
   let output: any = null;
-  try {
+
+  async function execute() {
     const userFunction = (await import(USER_CODE_PATH + '/' + Deno.env.get("OPEN_RUNTIMES_ENTRYPOINT"))).default;
 
     if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
@@ -119,6 +132,29 @@ app.use(async (ctx) => {
     }
 
     output = await userFunction(context);
+  }
+
+  try {
+    if(safeTimeout !== null) {
+      const safeTimeoutConst: number = safeTimeout;
+      let executed = true;
+
+      const timeoutPromise = new Promise((promiseRes) => {
+        setTimeout(() => {
+          executed = false;
+          promiseRes(true);
+        }, safeTimeoutConst * 1000);
+      });
+
+      await Promise.race([execute(), timeoutPromise]);
+
+      if(!executed) {
+        context.error('Execution timed out.');
+        output = context.res.send('', 500, {});
+      }
+    } else {
+        await execute();
+    }
   } catch(e: any) {
     context.error(e.message.includes("Cannot resolve module") ? "Code file not found." : e.stack || e);
     output = context.res.send('', 500, {});
@@ -148,7 +184,7 @@ app.use(async (ctx) => {
   }
 
   if(customstd) {
-    context.log('Unsupported log noticed. Use context.log() or context.error() for logging.');
+    context.log('Unsupported log detected. Use context.log() or context.error() for logging.');
   }
 
   ctx.response.headers.set('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
