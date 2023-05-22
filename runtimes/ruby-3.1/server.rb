@@ -86,6 +86,18 @@ class Context
 end
 
 def handle(request, response)
+  timeout = request.env['HTTP_X_OPEN_RUNTIMES_TIMEOUT'] || ''
+  safeTimeout = nil
+  if timeout != ''
+    if !timeout.is_a? Integer:
+      response.status = 500
+      response.body = 'Header "x-open-runtimes-timeout" must be an integer.'
+      return
+    end
+
+    safeTimeout = timeout.to_i;
+  end
+
   secret = request.env['HTTP_X_OPEN_RUNTIMES_SECRET'] || ''
   server_secret = ENV['OPEN_RUNTIMES_SECRET'] || ''
 
@@ -185,7 +197,27 @@ def handle(request, response)
     $stdout = customstd
     $stderr = customstd
 
-    output = main(context)
+    if safeTimeout != nil
+      executed = true
+
+      timeoutPromise = Concurrent::Promises.future {
+        sleep(safeTimeout);
+        executed = false
+      }
+
+      executePromise = Concurrent::Promises.future {
+        output = main(context)
+      }
+
+      Concurrent::Promises.race(timeoutPromise, executePromise)
+
+      if executed === false
+        context.error('Execution timed out.')
+        output = context.res.send('', 500, {})
+      else
+        output = main(context)
+      end
+    end
   rescue Exception => e
     context.error(e)
     context.error(e.backtrace.join("\n"))
