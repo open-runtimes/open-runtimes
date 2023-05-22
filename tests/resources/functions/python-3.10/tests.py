@@ -87,4 +87,4 @@ async def main(context):
         context.log('Timeout end.')
         return context.res.send('Successful response.')
     else:
-        raise Exception('Unkonwn action')
+        raise Exception('Unknown action')

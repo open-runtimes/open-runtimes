@@ -88,6 +88,6 @@ return function($context) use ($client) {
         $context->log('Timeout end.');
         return $context->res->send('Successful response.');
       default:
-        throw new Exception('Unkonwn action');
+        throw new Exception('Unknown action');
   }
 };

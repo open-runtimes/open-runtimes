@@ -80,7 +80,7 @@ module.exports = async (context) => {
             context.log('Timeout end.');
             return context.res.send('Successful response.');
         default:
-            throw new Error('Unkonwn action');
+            throw new Error('Unknown action');
     }
 }
 

@@ -140,7 +140,7 @@ public class Tests {
                 ))
             }
             else -> {
-                throw Exception("Unkonwn action")
+                throw Exception("Unknown action")
             }
         }
     }

@@ -126,7 +126,7 @@ public class Tests {
                 json.put("todo", todo);
                 return context.getRes().json(json);
             default:
-                throw new Exception("Unkonwn action");
+                throw new Exception("Unknown action");
         }
     }
 }
