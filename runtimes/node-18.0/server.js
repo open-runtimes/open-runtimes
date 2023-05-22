@@ -155,7 +155,11 @@ const server = micro(async (req, res) => {
             await execute();
         }
     } catch (e) {
-        context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
+        if(e.code === 'MODULE_NOT_FOUND') {
+            context.error('Could not load code file.');
+        }
+
+        context.error(e.stack || e);
         output = context.res.send('', 500, {});
     } finally {
         console.log = console.stdlog;

@@ -12,7 +12,7 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ```bash
 mkdir ruby-or && cd ruby-or
-printf "def main(request, response)\n    return response.json({:n => rand()})\nend" > index.rb
+printf "def main(context)\n    return context.res.json({:n => rand()})\nend" > index.rb
 ```
 
 2. Build the code:
@@ -24,13 +24,13 @@ docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/ruby:v3
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=index.rb --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/ruby:v3-3.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=index.rb --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/ruby:v3-3.1 sh /usr/local/src/start.sh
 ```
 
 4. In new terminal window, execute function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
+curl -H "x-open-runtimes-secret: secret-key" -X GET http://localhost:3000/
 ```
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
@@ -58,10 +58,10 @@ docker-compose up -d
 4. Execute the function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
+curl -H "x-open-runtimes-secret: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"id": "4"}'
 ```
 
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":"{}" }`.
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-open-runtimes-secret: secret-key`.
 
 You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
 
@@ -70,32 +70,14 @@ You can also make changes to the example code and apply the changes with the `do
 - When writing function for this runtime, ensure it is named `main`. An example of this is:
 
 ```ruby
-def main(req, res)
-    return res.send('Hello Open Runtimes 👋')
-end
-```
-
-- The `res` parameter has two methods:
-
-    - `send()`: Send a string response to the client.
-    - `json()`: Send a JSON response to the client.
-
-You can respond with `json()` by providing object:
-
-```ruby
-def main(req, res)
-    return res.json({
-        :message => 'Hello Open Runtimes 👋',
-        :variables => req.variables,
-        :payload => req.payload,
-        :headers => req.headers,
-    })
+def main(context)
+    return context.res.send('Hello Open Runtimes 👋')
 end
 ```
 
 - To handle dependencies, you need to have `Gemfile` file. Dependencies will be automatically cached and installed, so you don't need to include any local denepdencies folder in your function.
 
-- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.rb`.
+- The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.rb`.
 
 
 ## Authors

@@ -2,7 +2,7 @@ FROM ruby:3.1-alpine3.15
 
 LABEL maintainer="team@appwrite.io"
 
-ENV INTERNAL_RUNTIME_ENTRYPOINT=index.rb
+ENV OPEN_RUNTIMES_ENTRYPOINT=index.rb
 
 RUN mkdir -p /usr/local/src/
 RUN mkdir -p /usr/code
