@@ -6,10 +6,6 @@ set -e
 # Copy User Code
 cp -R /usr/code/* /usr/local/src/user_code
 
-# Rename Main Function Dart
-mkdir -p /usr/local/src/user_code/lib
-mv -n /usr/code/$INTERNAL_RUNTIME_ENTRYPOINT /usr/local/src/user_code/lib/main.dart
-
 cd /usr/local/src/user_code/
 
 # Add a pubspec.yaml if one doesn't already exist.
