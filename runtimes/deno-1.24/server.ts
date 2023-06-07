@@ -8,9 +8,9 @@ app.use(async (ctx) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? '';
   let safeTimeout: number | null = null;
   if(timeout) {
-      if(isNaN(timeout)) {
+      if(isNaN(timeout) || timeout === 0) {
           ctx.response.status = 500;
-          ctx.response.body = 'Header "x-open-runtimes-timeout" must be an integer.';
+          ctx.response.body = 'Header "x-open-runtimes-timeout" must be an integer greater than 0.';
           return;
       }
 

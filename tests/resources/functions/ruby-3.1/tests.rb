@@ -81,6 +81,13 @@ def main(context)
     when 'library'
         todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_string).body)
         return context.res.json({ 'todo': todo })
+    when 'timeout'
+        context.log('Timeout start.')
+        Async do
+          sleep(2)
+        end.wait
+        context.log('Timeout end.');
+        return context.res.send('Successful response.');
     else
         raise 'Unknown action'
     end
