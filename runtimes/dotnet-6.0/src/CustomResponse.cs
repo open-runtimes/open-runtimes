@@ -4,34 +4,33 @@ namespace DotNetRuntime
 {
     class CustomResponse : IResult
     {
-        private readonly string _Body;
-        private readonly int _StatusCode;
-        private readonly Dictionary<string, string> _Headers;
+        private readonly string _body;
+        private readonly int _statusCode;
+        private readonly Dictionary<string, string> _headers;
 
-        public CustomResponse(string Body, int StatusCode, Dictionary<string, string>? Headers = null)
+        public CustomResponse(string body, int StatusCode, Dictionary<string, string>? headers = null)
         {
-            if(Headers == null)
-            {
-                Headers = new Dictionary<string,string>();
-            }
-
-            _Body = Body;
-            _StatusCode = StatusCode;
-            _Headers = Headers;
+            _body = body;
+            _statusCode = statusCode;
+            _headers = headers ?? new Dictionary<string, string>();
         }
 
-        public Task ExecuteAsync(HttpContext HttpContext)
+        public Task ExecuteAsync(HttpContext httpContext)
         {
-            var contentType = _Headers.TryGetValue("content-type", out string contentTypeValue) ? contentTypeValue : "plain/text";
+            var contentType = _headers.TryGetValue("content-type", out string contentTypeValue) 
+                ? contentTypeValue 
+                : "plain/text";
 
-            foreach (var Entry in _Headers)
+            foreach (var entry in _headers)
             {
-                HttpContext.Response.Headers.Add(Entry.Key, Entry.Value);
+                httpContext.Response.Headers.Add(entry.Key, entry.Value);
             }
-            HttpContext.Response.StatusCode = _StatusCode;
-            HttpContext.Response.ContentType = contentType;
-            HttpContext.Response.ContentLength = Encoding.UTF8.GetByteCount(_Body);
-            return HttpContext.Response.WriteAsync(_Body);
+
+            httpContext.Response.StatusCode = _statusCode;
+            httpContext.Response.ContentType = contentType;
+            httpContext.Response.ContentLength = Encoding.UTF8.GetByteCount(_body);
+
+            return httpContext.Response.WriteAsync(_body);
         }
     }
 }

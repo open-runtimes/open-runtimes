@@ -11,156 +11,155 @@ app.Urls.Add("http://0.0.0.0:3000");
 app.MapMethods("/{*path}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE" }, Execute);
 app.Run();
 
-static async Task<IResult> Execute(HttpRequest Request)
+static async Task<IResult> Execute(HttpRequest request)
 {
-    var Secret = Request.Headers.TryGetValue("x-open-runtimes-secret", out StringValues SecretValue) ? SecretValue.ToString() : "";
-    if(Secret == "" || Secret != (Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? ""))
+    var secret = request.Headers.TryGetValue("x-open-runtimes-secret", out stringValues secretValue) ? secretValue.ToString() : "";
+    if(secret == string.Empty || secret != (Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? ""))
     {
         return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
     }
 
-    var Reader = new StreamReader(Request.Body);
-    var BodyString = await Reader.ReadToEndAsync();
-    object Body = BodyString;
-    var Headers = new Dictionary<string, string>();
-    var Method = Request.Method;
+    var reader = new StreamReader(request.Body);
+    var bodystring = await reader.ReadToEndAsync();
+    object body = bodystring;
+    var headers = new Dictionary<string, string>();
+    var method = request.Method;
 
-    foreach (var Entry in Request.Headers)
+    foreach (var entry in Request.Headers)
     {
-        var Header = Entry.Key;
-        var Value = Entry.Value;
-        Header = Header.ToLower();
+        var header = entry.Key.ToLower();
+        var value = entry.Value;
 
         if(!(Header.StartsWith("x-open-runtimes-")))
         {
-            Headers.Add(Header, Value);
+            headers.Add(header, value);
         }
     }
 
-    var ContentType = Request.Headers.TryGetValue("content-type", out StringValues ContentTypeValue) ? ContentTypeValue.ToString() : "";
-    if(ContentType.Contains("application/json"))
+    var contentType = request.Headers.TryGetValue("content-type", out var contentTypeValue) ? contentTypeValue.ToString() : "";
+    if(contentType.Contains("application/json"))
     {
-        if(String.IsNullOrEmpty(BodyString))
+        if(string.IsNullOrEmpty(bodystring))
         {
-            Body = new Dictionary<string, object>();
-        } else
+            body = new Dictionary<string, object>();
+        } 
+        else
         {
-            Body = JsonSerializer.Deserialize<Dictionary<string, object>>(BodyString) ?? new Dictionary<string, object>();
+            body = JsonSerializer.Deserialize<Dictionary<string, object>>(bodystring) ?? new Dictionary<string, object>();
         }
     }
 
-    if(Body == null)
+    if(body == null)
     {
-        Body = new Dictionary<string, object>();
+        body = new Dictionary<string, object>();
     }
 
-    var HostHeader = Request.Headers.TryGetValue("host", out StringValues HostHeaderValue) ? HostHeaderValue.ToString() : "";
+    var hostHeader = Request.Headers.TryGetValue("host", out stringValues HostHeaderValue) ? HostHeaderValue.ToString() : "";
 
-    var Scheme = Request.Headers.TryGetValue("x-forwarded-proto", out StringValues ProtoHeaderValue) ? ProtoHeaderValue.ToString() : "http";
-    var DefaultPort = Scheme == "https" ? "443" : "80";
+    var scheme = Request.Headers.TryGetValue("x-forwarded-proto", out stringValues ProtoHeaderValue) ? ProtoHeaderValue.ToString() : "http";
+    var defaultPort = scheme == "https" ? "443" : "80";
 
-    var Host = "";
-    var Port = Int32.Parse(DefaultPort);
+    var host = "";
+    var port = Int32.Parse(defaultPort);
 
-    if(HostHeader.Contains(":"))
+    if(hostHeader.Contains(":"))
     {
-        Host = HostHeader.Split(":")[0];
-        Port = Int32.Parse(HostHeader.Split(":")[1]);
-    } else
+        host = hostHeader.Split(":")[0];
+        port = Int32.Parse(HostHeader.Split(":")[1]);
+    } 
+    else
     {
-        Host = HostHeader;
-        Port = Int32.Parse(DefaultPort);
+        host = HostHeader;
+        port = Int32.Parse(defaultPort);
     }
 
-    var Path = Request.Path;
+    var path = request.Path;
 
-    var QueryString = Request.QueryString.Value ?? "";
-    if(QueryString.StartsWith("?")) {
-        QueryString = QueryString.Remove(0,1);
+    var querystring = request.Querystring.Value ?? "";
+    if(querystring.StartsWith("?")) 
+    {
+        querystring = querystring.Remove(0, 1);
     }
 
-    var Query = new Dictionary<string, string>();
-
-    foreach (var param in QueryString.Split("&"))
+    var query = new Dictionary<string, string>();
+    foreach (var param in querystring.Split("&"))
     {
         var pair = param.Split("=", 2);
-
-        if(pair.Length >= 1 && !String.IsNullOrEmpty(pair[0])) {
-            var Value = pair.Length == 2 ? pair[1] : "";
-            Query.Add(pair[0], Value);
+        if(pair.Length >= 1 && !string.IsNullOrEmpty(pair[0])) 
+        {
+            var value = pair.Length == 2 ? pair[1] : "";
+            query.Add(pair[0], Value);
         }
     }
 
-    var Url = Scheme + "://" + Host;
+    var url = $"{scheme}://{host}";
 
-    if(Port != Int32.Parse(DefaultPort))
+    if(port != Int32.Parse(defaultPort))
     {
-        Url += ":" + Port.ToString();
+        url += $":{port.ToString()};
     }
 
-    Url += Path;
+    url += Path;
 
-    if(!String.IsNullOrEmpty(QueryString)) {
-        Url += "?" + QueryString;
+    if (!string.IsNullOrEmpty(Querystring)) 
+    {
+        url += $"?{querystring}";
     }
 
-
-    var ContextRequest = new RuntimeRequest(Url, Method, Scheme, Host, Port, Path, Query, QueryString, Headers, Body, BodyString);
-    var ContextResponse = new RuntimeResponse();
-    var Context = new RuntimeContext(ContextRequest, ContextResponse);
+    var contextRequest = new RuntimeRequest(Url, Method, scheme, Host, Port, Path, Query, Querystring, Headers, body, bodystring);
+    var contextResponse = new RuntimeResponse();
+    var context = new Runtimecontext(contextRequest, contextResponse);
 
     var originalOut = Console.Out;
     var originalErr = Console.Error;
 
-    var Customstd = new StringBuilder();
-    var CustomstdWriter = new StringWriter(Customstd);
-    Console.SetOut(CustomstdWriter);
-    Console.SetError(CustomstdWriter);
+    var customStd = new stringBuilder();
+    var customStdWriter = new stringWriter(customStd);
+    Console.SetOut(customStdWriter);
+    Console.SetError(customStdWriter);
 
-    RuntimeOutput? Output = null;
+    RuntimeOutput? output = null;
 
     try
     {
-        var CodeHandler = new Handler();
-        Output = await CodeHandler.Main(Context);
+        output = new Handler().Main(context));
     }
     catch (Exception e)
     {
-        Context.Error(e.ToString());
-        Output = Context.Res.Send("", 500, new Dictionary<string,string>());
+        context.Error(e.ToString());
+        output = context.Res.Send("", 500, new Dictionary<string,string>());
     }
-    finally {
+    finally
+    {
         Console.SetOut(originalOut);
         Console.SetError(originalErr);
     }
 
-    if(Output == null)
+    if(output == null)
     {
-        Context.Error("Return statement missing. return Context.Res.Empty() if no response is expected.");
-        Output = Context.Res.Send("", 500, new Dictionary<string,string>());
+        context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
+        output = context.Res.Send("", 500, new Dictionary<string,string>());
     }
 
-    var OutputHeaders = new Dictionary<string, string>();
-
-    foreach (var Entry in Output.Headers)
+    var outputHeaders = new Dictionary<string, string>();
+    foreach (var entry in output.Headers)
     {
-        var Header = Entry.Key;
-        var Value = Entry.Value;
-        Header = Header.ToLower();
+        var header = entry.Key.ToLower();
+        var value = entry.Value;
 
-        if(!(Header.StartsWith("x-open-runtimes-")))
+        if (!(Header.StartsWith("x-open-runtimes-")))
         {
-            OutputHeaders.Add(Header, Value);
+            outputHeaders.Add(header, value);
         }
     }
 
-    if(!String.IsNullOrEmpty(Customstd.ToString()))
+    if(!string.IsNullOrEmpty(customStd.ToString()))
     {
-        Context.Log("Unsupported log noticed. Use Context.Log() or Context.Error() for logging.");
+        context.Log("Unsupported log noticed. Use context.Log() or context.Error() for logging.");
     }
 
-    OutputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(String.Join("\n", Context.Logs.Cast<string>().ToArray())));
-    OutputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(String.Join("\n", Context.Errors.Cast<string>().ToArray())));
+    outputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(string.Join("\n", context.Logs)));
+    outputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(string.Join("\n", context.Errors)));
 
-    return new CustomResponse(Output.Body, Output.StatusCode, OutputHeaders);
+    return new CustomResponse(output.body, output.StatusCode, outputHeaders);
 }

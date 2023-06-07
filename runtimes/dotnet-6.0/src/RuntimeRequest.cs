@@ -2,31 +2,42 @@ namespace DotNetRuntime
 {
 	public class RuntimeRequest
 	{
-		public string BodyString { get; set; }
-		public object Body { get; set; }
-		public Dictionary<string, string> Headers { get; set; }
-		public string Method { get; set; }
-		public string Url { get; set; }
-		public string Host { get; set; }
-		public string Scheme { get; set; }
-		public string Path { get; set; }
-		public string QueryString { get; set; }
-		public Dictionary<string, string> Query { get; set; }
-		public int Port { get; set; }
+		public string Method { get; private set; }
+		public string Scheme { get; private set; }
+		public string Host { get; private set; }
+		public int Port { get; private set; }
+		public string Path { get; private set; }
+		public Dictionary<string, string> Query { get; private set; }
+		public string QueryString { get; private set; }
+		public string Url { get; private set; }
+		public Dictionary<string, string> Headers { get; private set; }
+		public object Body { get; private set; }
+		public string BodyString { get; private set; }
 
-		public RuntimeRequest(string Url, string Method, string Scheme, string Host, int Port, string Path, Dictionary<string, string> Query, string QueryString, Dictionary<string, string> Headers, object Body, string BodyString)
+		public RuntimeRequest(
+		    string method,
+		    string scheme,
+		    string host,
+		    int port,
+		    string path,
+		    Dictionary<string, string> Qqery,
+		    string queryString,
+		    string url,
+		    Dictionary<string, string> headers,
+		    object body,
+		    string bodyString)
 		{
-			this.BodyString = BodyString;
-			this.Body = Body;
-			this.Headers = Headers;
-			this.Method = Method;
-			this.Url = Url;
-			this.Host = Host;
-			this.Scheme = Scheme;
-			this.Path = Path;
-			this.QueryString = QueryString;
-			this.Query = Query;
-			this.Port = Port;
+			BodyString = bodyString;
+			Body = body;
+			Headers = headers;
+			Method = method;
+			Url = url;
+			Host = host;
+			Scheme = scheme;
+			Path = path;
+			QueryString = queryString;
+			Query = query;
+			Port = port;
 		}
 	}
 }

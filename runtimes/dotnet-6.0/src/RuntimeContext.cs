@@ -8,30 +8,30 @@ namespace DotNetRuntime
 		public RuntimeRequest Req { get; set; }
 		public RuntimeResponse Res { get; set; }
 
-		public List<String> Logs = new List<String>();
-		public List<String> Errors = new List<String>();
+		public List<string> Logs { get; private set; } = new List<string>();
+		public List<string> Errors { get; private set; } = new List<string>();
 
-		public RuntimeContext(RuntimeRequest Req, RuntimeResponse Res)
+		public RuntimeContext(RuntimeRequest req, RuntimeResponse ses)
 		{
-			this.Req = Req;
-			this.Res = Res;
+			Req = req;
+			Res = res;
 		}
 
-		public void Log(object Message)
+		public void Log(object message)
 		{
-			if (Message is IList || Message is IDictionary) {
-				this.Logs.Add(JsonSerializer.Serialize(Message));
+			if (message is IList || message is IDictionary) {
+				Logs.Add(JsonSerializer.Serialize(message));
 			} else {
-				this.Logs.Add(Message.ToString() ?? "");
+				Logs.Add(message.ToString() ?? "");
 			}
 		}
 
-		public void Error(object Message)
+		public void Error(object message)
 		{
-			if (Message is IList || Message is IDictionary) {
-				this.Errors.Add(JsonSerializer.Serialize(Message));
+			if (message is IList || message is IDictionary) {
+				Errors.Add(JsonSerializer.Serialize(message));
 			} else {
-				this.Errors.Add(Message.ToString() ?? "");
+				Errors.Add(message.ToString() ?? "");
 			}
 		}
 	}
