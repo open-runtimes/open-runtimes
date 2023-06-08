@@ -165,7 +165,7 @@ def handler(u_path):
             resp.headers[key.lower()] = output['headers'][key]
 
     if customstd.getvalue():
-        context.log('Unsupported log noticed. Use context.log() or context.error() for logging.')
+        context.log('Unsupported log detected. Use context.log() or context.error() for logging.')
 
     resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context.logs))
     resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context.errors))

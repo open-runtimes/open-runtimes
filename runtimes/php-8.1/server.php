@@ -180,7 +180,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     }
 
     if(!empty($customstd)) {
-        $context->log('Unsupported log noticed. Use $context->log() or $context->error() for logging.');
+        $context->log('Unsupported log detected. Use $context->log() or $context->error() for logging.');
     }
 
     $res->header('x-open-runtimes-logs', \urlencode(\implode('\n', $context->logs)));

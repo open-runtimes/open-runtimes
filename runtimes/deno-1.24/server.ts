@@ -148,7 +148,7 @@ app.use(async (ctx) => {
   }
 
   if(customstd) {
-    context.log('Unsupported log noticed. Use context.log() or context.error() for logging.');
+    context.log('Unsupported log detected. Use context.log() or context.error() for logging.');
   }
 
   ctx.response.headers.set('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));

@@ -70,7 +70,7 @@ module.exports = async (context) => {
             const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyString}`).then(r => r.json());
             return context.res.json({ todo });
         default:
-            throw new Error('Unkonwn action');
+            throw new Error('Unknown action');
     }
 }
 
