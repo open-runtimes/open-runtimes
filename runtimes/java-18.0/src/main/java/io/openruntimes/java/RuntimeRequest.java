@@ -5,60 +5,86 @@ import org.rapidoid.http.Req;
 import java.util.Map;
 
 public class RuntimeRequest {
-    private String payload;
+    private String bodyString;
+    private Object body;
     private Map<String, String> headers;
-    private Map<String, String> variables;
+    private String method;
+    private String url;
+    private String scheme;
+    private String host;
+    private String path;
+    private int port;
+    private String queryString;
+    private Map<String, String> query;
 
     public RuntimeRequest(
-            String payload,
+            String url,
+            String method,
+            String scheme,
+            String host,
+            int port,
+            String path,
+            Map<String, String> query,
+            String queryString,
             Map<String, String> headers,
-            Map<String, String> variables
+            Object body,
+            String bodyString
     ) {
-        this.payload = payload;
+        this.bodyString = bodyString;
+        this.body = body;
         this.headers = headers;
-        this.variables = variables;
+        this.method = method;
+        this.url = url;
+        this.scheme = scheme;
+        this.host = host;
+        this.path = path;
+        this.port = port;
+        this.queryString = queryString;
+        this.query = query;
     }
 
-    public RuntimeRequest(Req request) {
-        Map<String, Object> data = request.data();
-        if (data.containsKey("payload")) {
-            this.payload = (String) data.get("payload");
-        } else {
-            this.payload = "";
-        }
-        if (data.containsKey("headers")) {
-            this.headers = (Map<String, String>) data.get("headers");
-        }
-        if (data.containsKey("variables")) {
-            this.variables = (Map<String, String>) data.get("variables");
-        }
+    public String getBodyString() {
+        return this.bodyString;
     }
 
-    public RuntimeRequest() {
-    }
-
-    public String getPayload() {
-        return this.payload;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
+    public Object getBody() {
+        return this.body;
     }
 
     public Map<String, String> getHeaders() {
         return this.headers;
     }
 
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
+    public String getMethod() {
+        return this.method;
     }
 
-    public Map<String, String> getVariables() {
-        return this.variables;
+    public String getUrl() {
+        return this.url;
     }
 
-    public void setVariables(Map<String, String> variables) {
-        this.variables = variables;
+    public String getScheme() {
+        return this.scheme;
+    }
+
+    public String getHost() {
+        return this.host;
+    }
+
+    public String getPath() {
+        return this.path;
+    }
+
+    public int getPort() {
+        return this.port;
+    }
+
+    public String getQueryString() {
+        return this.queryString;
+    }
+
+    public Map<String, String> getQuery() {
+        return this.query;
     }
 }
 

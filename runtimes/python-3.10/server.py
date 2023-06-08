@@ -12,27 +12,11 @@ import json
 app = Flask(__name__)
 
 class Response:
-    _body = ''
-    _statusCode = 200
-    _headers = {}
-
-    def __init__(self):
-        self._body = ''
-        self._statusCode = 200
-        self._headers = {}
-
     def send(self, body, statusCode = 200, headers = {}):
-        if body is not None:
-            self._body = body
-        if statusCode is not None:
-            self._statusCode = statusCode
-        if headers is not None:
-            self._headers = headers
-
         return {
-            'body': self._body,
-            'statusCode': self._statusCode,
-            'headers': self._headers,
+            'body': body,
+            'statusCode': statusCode,
+            'headers': headers,
         }
 
     def json(self, obj, statusCode = 200, headers = {}):
@@ -47,7 +31,7 @@ class Response:
         return self.send('', statusCode, headers)
 
 class Request:
-    bodyString = None
+    body_string = None
     body = None
     headers = None
     method = None
@@ -55,7 +39,7 @@ class Request:
     path = None
     port = None
     query = None
-    queryString = None
+    query_string = None
     scheme = None
     host = None
 
@@ -94,8 +78,8 @@ def handler(u_path):
 
     context = Context()
 
-    context.req.bodyString = request.get_data(as_text=True)
-    context.req.body = context.req.bodyString
+    context.req.body_string = request.get_data(as_text=True)
+    context.req.body = context.req.body_string
     context.req.method = request.method
     context.req.headers = {}
 
@@ -105,10 +89,10 @@ def handler(u_path):
     defaultPort = "443" if context.req.scheme == "https" else "80"
 
     url = urlparse(request.url)
-    context.req.queryString = url.query or ''
+    context.req.query_string = url.query or ''
     context.req.query = {}
 
-    for param in context.req.queryString.split('&'):
+    for param in context.req.query_string.split('&'):
         pair = param.split('=', 1)
 
         if pair[0]:
@@ -129,12 +113,12 @@ def handler(u_path):
 
     context.req.url += context.req.path
 
-    if(context.req.queryString):
-        context.req.url += '?' + context.req.queryString
+    if(context.req.query_string):
+        context.req.url += '?' + context.req.query_string
 
     contentType = request.headers.get('content-type', 'text/plain')
     if 'application/json' in contentType:
-        if not context.req.bodyString:
+        if not context.req.body_string:
             context.req.body = {}
         else:
             context.req.body = request.get_json(force=True, silent=False)
@@ -181,7 +165,7 @@ def handler(u_path):
             resp.headers[key.lower()] = output['headers'][key]
 
     if customstd.getvalue():
-        context.log('Unsupported log noticed. Use context.log() or context.error() for logging.')
+        context.log('Unsupported log detected. Use context.log() or context.error() for logging.')
 
     resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context.logs))
     resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context.errors))

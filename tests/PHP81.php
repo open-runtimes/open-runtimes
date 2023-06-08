@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: PHP81
 // Entrypoint: tests.php
 
-class PHP81 extends Base
+class PHP81 extends BaseV3
 {
 }
