@@ -100,7 +100,7 @@ Future<dynamic> main(final context) async {
       return context.res.json({ 'todo': todo.data });
     }
     default: { 
-      throw new Exception('Unkonwn action');
+      throw new Exception('Unknown action');
     }
   } 
 }

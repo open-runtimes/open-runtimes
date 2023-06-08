@@ -81,4 +81,4 @@ def main(context):
             'todo': todo
         })
     else:
-        raise Exception('Unkonwn action')
+        raise Exception('Unknown action')

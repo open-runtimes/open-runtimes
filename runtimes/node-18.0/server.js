@@ -154,7 +154,7 @@ const server = micro(async (req, res) => {
     }
 
     if(customstd) {
-        context.log('Unsupported log noticed. Use context.log() or context.error() for logging.');
+        context.log('Unsupported log detected. Use context.log() or context.error() for logging.');
     }
 
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));

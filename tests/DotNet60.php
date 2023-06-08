@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: DotNet60
 // Entrypoint: Tests.cs
 
-class DotNet60 extends Base
+class DotNet60 extends BaseV3
 {
 }
