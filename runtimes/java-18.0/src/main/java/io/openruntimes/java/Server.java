@@ -154,7 +154,7 @@ public class Server {
 	    }
 
         if(!customstdStream.toString().isEmpty()) {
-            context.log("Unsupported log noticed. Use context.log() or context.error() for logging.");
+            context.log("Unsupported log detected. Use context.log() or context.error() for logging.");
         }
 
         try {

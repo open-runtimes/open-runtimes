@@ -70,6 +70,6 @@ export default async function(context: any) {
             const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyString}`)).data;
             return context.res.json({ todo });
         default:
-            throw new Error('Unkonwn action');
+            throw new Error('Unknown action');
     }
 }

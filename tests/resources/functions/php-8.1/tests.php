@@ -82,6 +82,6 @@ return function($context) use ($client) {
         $todo = \json_decode($response->getBody()->getContents(), true);
         return $context->res->json([ 'todo' => $todo ]);
       default:
-          throw new Exception('Unkonwn action');
+          throw new Exception('Unknown action');
   }
 };

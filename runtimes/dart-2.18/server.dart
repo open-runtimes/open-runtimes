@@ -136,7 +136,7 @@ void main() async {
 
     if (!customstd.isEmpty) {
       context.log(
-          'Unsupported log noticed. Use context.log() or context.error() for logging.');
+          'Unsupported log detected. Use context.log() or context.error() for logging.');
     }
 
     responseHeaders['x-open-runtimes-logs'] =
