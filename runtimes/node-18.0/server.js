@@ -1,6 +1,6 @@
 const fs = require("fs");
 const micro = require("micro");
-const { text: parseText, json: parseJson, buffer: parseBuffer, send } = require("micro");
+const { text: parseText, json: parseJson, send } = require("micro");
 
 const USER_CODE_PATH = '/usr/code-start';
 
@@ -11,11 +11,6 @@ const server = micro(async (req, res) => {
 
     const logs = [];
     const errors = [];
-    const response = {
-        headers: {},
-        body: '',
-        statusCode: 200,
-    };
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
     const bodyString = await parseText(req);
@@ -64,14 +59,10 @@ const server = micro(async (req, res) => {
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
-                if (body !== undefined) { response.body = body; }
-                if (statusCode !== undefined) { response.statusCode = statusCode; }
-                if (headers !== undefined) { response.headers = headers; }
-
                 return {
-                    body: response.body,
-                    statusCode: response.statusCode,
-                    headers: response.headers
+                    body: body,
+                    statusCode: statusCode,
+                    headers: headers
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
@@ -108,8 +99,9 @@ const server = micro(async (req, res) => {
     console.stddebug = console.debug.bind(console);
     console.stdwarn = console.warn.bind(console);
 
+    let customstd = "";
     console.log = console.info = console.debug = console.warn = console.error = function() {
-        logs.push('Unsupported log noticed. Use context.log() or context.error() for logging.');
+        customstd += "Native log";
     }
 
     let output = null;
@@ -130,7 +122,11 @@ const server = micro(async (req, res) => {
             output = await userFunction(context);
         }
     } catch (e) {
-        context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
+        if(e.code === 'MODULE_NOT_FOUND') {
+            context.error('Could not load code file.');
+        }
+
+        context.error(e.stack || e);
         output = context.res.send('', 500, {});
     } finally {
         console.log = console.stdlog;
@@ -155,6 +151,10 @@ const server = micro(async (req, res) => {
         }
         
         res.setHeader(header.toLowerCase(), output.headers[header]);
+    }
+
+    if(customstd) {
+        context.log('Unsupported log noticed. Use context.log() or context.error() for logging.');
     }
 
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));

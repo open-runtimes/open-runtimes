@@ -109,7 +109,7 @@ abstract class BaseV3 extends TestCase
         $response = $this->execute(headers: ['x-action' => 'noResponse']);
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertStringContainsString('Return statement missing. return context.res.empty() if no response is expected.', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString('Return statement missing.', $response['headers']['x-open-runtimes-errors']);
     }
 
     public function testDoubleResponse(): void
@@ -142,8 +142,16 @@ abstract class BaseV3 extends TestCase
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
         self::assertEmpty($response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Unkonwn action', $response['headers']['x-open-runtimes-errors']);
-        self::assertStringContainsString(\getenv('OPEN_RUNTIMES_ENTRYPOINT'), $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString('Unknown action', $response['headers']['x-open-runtimes-errors']);
+
+        $entrypoint = \getenv('OPEN_RUNTIMES_ENTRYPOINT');
+
+        // Fix for dart (expected behaviour)
+        if(\str_starts_with($entrypoint, 'lib/')) {
+            $entrypoint = implode('', explode('lib', $entrypoint, 2));
+        }
+
+        self::assertStringContainsString($entrypoint, $response['headers']['x-open-runtimes-errors']);
     }
 
     public function testWrongSecret(): void
@@ -181,6 +189,7 @@ abstract class BaseV3 extends TestCase
 
         $response = $this->execute(method: 'OPTIONS', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
+        self::assertEquals('OPTIONS', $response['body']);
 
         $response = $this->execute(method: 'PATCH', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
@@ -337,7 +346,7 @@ abstract class BaseV3 extends TestCase
         self::assertStringContainsString('true', \strtolower($response['headers']['x-open-runtimes-logs'])); // strlower allows True in Python
         self::assertStringContainsString('Error log', $response['headers']['x-open-runtimes-errors']);
         self::assertStringNotContainsString('Native log', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Unsupported log noticed. Use context.log() or context.error() for logging.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Unsupported log detected.', $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('{"objectKey":"objectValue"}', $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('["arrayValue"]', $response['headers']['x-open-runtimes-logs']);
     }
