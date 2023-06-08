@@ -11,7 +11,7 @@ namespace DotNetRuntime
 		public List<string> Logs { get; private set; } = new List<string>();
 		public List<string> Errors { get; private set; } = new List<string>();
 
-		public RuntimeContext(RuntimeRequest req, RuntimeResponse ses)
+		public RuntimeContext(RuntimeRequest req, RuntimeResponse res)
 		{
 			Req = req;
 			Res = res;

@@ -122,7 +122,7 @@ public class Handler {
                     { "todo", todo }
                 });
             default:
-                throw new Exception("Unkonwn action");
+                throw new Exception("Unknown action");
         }
     }
 }

@@ -34,7 +34,7 @@ public class RuntimeResponse
             headers = new Dictionary<string,string>();
         }
 
-        headers.Add("location", Url);
+        headers.Add("location", url);
 
         return Send("", statusCode, headers);
     }

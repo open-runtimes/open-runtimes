@@ -8,7 +8,7 @@ namespace DotNetRuntime
         private readonly int _statusCode;
         private readonly Dictionary<string, string> _headers;
 
-        public CustomResponse(string body, int StatusCode, Dictionary<string, string>? headers = null)
+        public CustomResponse(string body, int statusCode, Dictionary<string, string>? headers = null)
         {
             _body = body;
             _statusCode = statusCode;
@@ -17,7 +17,7 @@ namespace DotNetRuntime
 
         public Task ExecuteAsync(HttpContext httpContext)
         {
-            var contentType = _headers.TryGetValue("content-type", out string contentTypeValue) 
+            var contentType = _headers.TryGetValue("content-type", out var contentTypeValue)
                 ? contentTypeValue 
                 : "plain/text";
 

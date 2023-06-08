@@ -20,7 +20,7 @@ namespace DotNetRuntime
 		    string host,
 		    int port,
 		    string path,
-		    Dictionary<string, string> Qqery,
+		    Dictionary<string, string> query,
 		    string queryString,
 		    string url,
 		    Dictionary<string, string> headers,
