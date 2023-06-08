@@ -84,7 +84,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         context.log(["arrayValue"])
 
         // Swift doesn't support native log capturing
-        context.log("Unsupported log noticed. Use context.log() or context.error() for logging.")
+        context.log("Unsupported log detected. Use context.log() or context.error() for logging.")
 
         return context.res.send("")
     case "library":

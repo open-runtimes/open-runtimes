@@ -3,6 +3,9 @@ import PackageDescription
 
 let package = Package(
     name: "swift-runtime",
+    platforms: [
+        .macOS(.v10_15)
+    ],
     dependencies: [
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
