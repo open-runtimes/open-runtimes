@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <json/value.h>
 #include "RuntimeRequest.h"
 #include "RuntimeResponse.h"
 
@@ -18,13 +17,12 @@ namespace runtime
             std::vector<std::string> logs = {};
             std::vector<std::string> errors = {};
 
-            // TODO: Allow std::any
-            void log(std::string message)
+            void log(const std::string &message)
             {
                 logs.push_back(message);
             }
 
-            void error(std::string message)
+            void error(const std::string &message)
             {
                 errors.push_back(message);
             }

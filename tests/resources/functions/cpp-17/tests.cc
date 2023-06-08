@@ -52,7 +52,7 @@ namespace runtime {
                 return res.send("OK", 200, json);
             } else if(action == "statusResponse") {
                 return res.send("FAIL", 404);
-            } else if(action == "requestMethod") {
+            } else if (action == "requestMethod") {
                 return res.send(req.method);
             } else if(action == "requestUrl") {
                 json["url"] = req.url;
@@ -82,7 +82,7 @@ namespace runtime {
                 Json::String key1 = "";
                 Json::String key2 = "";
 
-                if(isJson == true) {
+                if (isJson) {
                     Json::Value body = std::any_cast<Json::Value>(req.body);
                     key1 = body["key1"].asString();
                     key2 = body["key2"].asString();
@@ -169,7 +169,7 @@ namespace runtime {
                 // C++ cannot get stack trace. Below makes test pass
                 context.error("tests.cc");
 
-                throw std::invalid_argument("Unkonwn action");
+                throw std::invalid_argument("Unknown action");
             }
 
             return res.empty();

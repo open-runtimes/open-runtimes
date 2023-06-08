@@ -11,7 +11,7 @@ fi
 # Prepare separate directory to prevent changing user's files
 cp -R --no-clobber /usr/code/* /usr/local/src/src
 
-sh prepare.sh
+sed -i "s/{entrypointFile}/$OPEN_RUNTIMES_ENTRYPOINT/g" "src/main.cc"
 
 # Build the executable
 rm "CMakeCache.txt" >/dev/null || true
