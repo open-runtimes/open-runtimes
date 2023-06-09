@@ -17,10 +17,6 @@ app.on(.DELETE, "", body: .stream, use: execute)
 app.on(.DELETE, "**", body: .stream, use: execute)
 app.on(.OPTIONS, "", body: .stream, use: execute)
 app.on(.OPTIONS, "**", body: .stream, use: execute)
-app.on(.HEAD, "", body: .stream, use: execute)
-app.on(.HEAD, "**", body: .stream, use: execute)
-app.on(.TRACE, "", body: .stream, use: execute)
-app.on(.TRACE, "**", body: .stream, use: execute)
 
 func execute(req: Request) async throws -> Response {
     if !req.headers.contains(name: "x-open-runtimes-secret")
@@ -37,21 +33,19 @@ func execute(req: Request) async throws -> Response {
     let method = req.method.string
     let url = req.url.string
     let scheme = req.url.scheme
-    let host = req.url.host ?? ""
-    let port = req.url.port
+    let host = app.http.server.configuration.hostname
+    let port = app.http.server.configuration.port
     let path = req.url.path
     let queryString = req.url.query
-    var query: [String: String]? = nil
+    var query = [String: String]()
     
     if let queryString = queryString {
-        query = [String: String]()
-        
         for param in queryString.split(separator: "&") {
             let pair = param.split(separator: "=", maxSplits: 1)
             let key = String(pair[0])
             let value = String(pair[1])
             
-            query![key] = value
+            query[key] = value
         }
     }
     
@@ -96,9 +90,9 @@ func execute(req: Request) async throws -> Response {
     var output: RuntimeOutput
 
     do {
-        output = try await main(context: context)
+        output = try await annotateError(try await main(context: context))
     } catch {
-        context.error(error.localizedDescription + "\n" + Thread.callStackSymbols.joined(separator: "\n"))
+        context.error(error)
         output = context.res.send("", statusCode: 500)
     }
 

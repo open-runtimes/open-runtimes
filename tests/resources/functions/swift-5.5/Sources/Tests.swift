@@ -21,6 +21,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
 
         // Simulate test data. Return necessary in Swift
         context.error("Return statement missing. return context.res.empty() if no response is expected.")
+
         return context.res.send("", statusCode: 500)
     case "doubleResponse":
         context.res.send("This should be ignored.")
@@ -98,6 +99,6 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
             "todo": todo
         ])
     default:
-        throw NSError(domain: "Unknown action", code: 500)
+        throw annotatedError(NSError(domain: "Unknown action", code: 500))
     }
 }
