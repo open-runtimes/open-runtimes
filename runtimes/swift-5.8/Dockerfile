@@ -1,4 +1,4 @@
-FROM swiftarm/swift:5.5.2-focal-multi-arch
+FROM swift:5.8.1
 
 LABEL maintainer="team@appwrite.io"
 
