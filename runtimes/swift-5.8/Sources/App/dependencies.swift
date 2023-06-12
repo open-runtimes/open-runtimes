@@ -20,25 +20,35 @@ var products = [String]()
 var packageBlacklist = ["vapor"]
 var productBlacklist = ["Vapor"]
 
+func getPackageString(location: String, requirementDict: [String: Any])->String?{
+    if let branch = (requirementDict["branch"] as? [String])?.first{
+        return ".package(url: \"\(location)\", branch: \"\(branch)\"),"
+    }
+    if let range = requirementDict["range"] as? [[String: Any]]{
+        if let lowerBound = range.first?["lowerBound"] as? String{
+            return ".package(url: \"\(location)\", from: \"\(lowerBound)\"),"
+        }
+    }
+    print("Could not build package dependency string for location \(location)! Unexpected requirements dictionary: \(requirementDict)")
+    return nil
+}
+
 func buildPackageStrings() {
     if let dependencies = json["dependencies"] as? [[String: Any]] {
         for dependency in dependencies {
-            if let scm = dependency["scm"] as? [[String: Any]] {
+            if let scm = dependency["sourceControl"] as? [[String: Any]] {
                 for data in scm {
-                    let identity = data["identity"] as? String
-                    let location = data["location"] as? String
-                    let lowerBound = ((data["requirement"] as? [String:Any])?["range"] as? [[String:Any]])?[0]["lowerBound"] as? String
-                    
-                    guard let identity = identity, let location = location, let lowerBound = lowerBound else {
+                    guard let identity = data["identity"] as? String,
+                    let locations = data["location"] as? [String: Any],
+                          let location = (locations["remote"] as? [String])?.first,
+                    let requirementsDict = data["requirement"] as? [String: Any],
+                    let packageString = getPackageString(location: location, requirementDict: requirementsDict) else{
                         continue
                     }
                     if packageBlacklist.contains(identity) {
                         continue
                     }
-
-                    let output = ".package(url: \"\(location)\", from: \"\(lowerBound)\"),"
-
-                    packages.append(output)
+                    packages.append(packageString)
                 }
             }
         }
