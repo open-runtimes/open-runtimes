@@ -141,6 +141,12 @@ env:
       SERVER_PROCESS="./Run serve"
       IMAGE=openruntimes/swift:${VERSION}-5.5
       ARCH=linux/amd64,linux/arm64
+    - RUNTIME=swift-5.8
+      PHP_CLASS=Swift58
+      ENTRYPOINT=Tests.swift
+      SERVER_PROCESS="./Run serve"
+      IMAGE=openruntimes/swift:${VERSION}-5.8
+      ARCH=linux/amd64,linux/arm64
 
     # Kotlin
     - RUNTIME=kotlin-1.6
