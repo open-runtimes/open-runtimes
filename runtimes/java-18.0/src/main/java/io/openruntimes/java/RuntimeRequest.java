@@ -1,24 +1,21 @@
 package io.openruntimes.java;
 
-import org.rapidoid.http.Req;
-
 import java.util.Map;
 
 public class RuntimeRequest {
-    private String bodyString;
-    private Object body;
-    private Map<String, String> headers;
-    private String method;
-    private String url;
-    private String scheme;
-    private String host;
-    private String path;
-    private int port;
-    private String queryString;
-    private Map<String, String> query;
+    private final String method;
+    private final String scheme;
+    private final String host;
+    private final int port;
+    private final String path;
+    private final Map<String, String> query;
+    private final String queryString;
+    private final Map<String, String> headers;
+    private final Object body;
+    private final String bodyString;
+    private final String url;
 
     public RuntimeRequest(
-            String url,
             String method,
             String scheme,
             String host,
@@ -28,63 +25,64 @@ public class RuntimeRequest {
             String queryString,
             Map<String, String> headers,
             Object body,
-            String bodyString
+            String bodyString,
+            String url
     ) {
-        this.bodyString = bodyString;
-        this.body = body;
-        this.headers = headers;
         this.method = method;
-        this.url = url;
         this.scheme = scheme;
         this.host = host;
-        this.path = path;
         this.port = port;
-        this.queryString = queryString;
+        this.path = path;
         this.query = query;
-    }
-
-    public String getBodyString() {
-        return this.bodyString;
-    }
-
-    public Object getBody() {
-        return this.body;
-    }
-
-    public Map<String, String> getHeaders() {
-        return this.headers;
+        this.queryString = queryString;
+        this.headers = headers;
+        this.body = body;
+        this.bodyString = bodyString;
+        this.url = url;
     }
 
     public String getMethod() {
-        return this.method;
-    }
-
-    public String getUrl() {
-        return this.url;
+        return method;
     }
 
     public String getScheme() {
-        return this.scheme;
+        return scheme;
     }
 
     public String getHost() {
-        return this.host;
-    }
-
-    public String getPath() {
-        return this.path;
+        return host;
     }
 
     public int getPort() {
-        return this.port;
+        return port;
     }
 
-    public String getQueryString() {
-        return this.queryString;
+    public String getPath() {
+        return path;
     }
 
     public Map<String, String> getQuery() {
-        return this.query;
+        return query;
+    }
+
+    public String getQueryString() {
+        return queryString;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public Object getBody() {
+        return body;
+    }
+
+    public String getBodyString() {
+        return bodyString;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }
 

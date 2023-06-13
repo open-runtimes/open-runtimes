@@ -35,17 +35,17 @@ int main()
                 std::string timeout_header = req->getHeader("x-open-runtimes-timeout");
                 if (!timeout_header.empty())
                 {
-                    bool threw = false;
+                    bool invalid = false;
 
                     try
                     {
                         timeout = std::stoi(timeout_header);
                     } catch (const std::invalid_argument& ia)
                     {
-                        threw = true;
+                        invalid = true;
                     }
 
-                    if (threw || timeout == 0)
+                    if (invalid || timeout == 0)
                     {
                         res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
                         res->setBody("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.");

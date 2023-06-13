@@ -3,9 +3,9 @@ package io.openruntimes.java;
 import java.util.Map;
 
 public class RuntimeOutput {
-    private String body;
-    private int statusCode;
-    private Map<String, String> headers;
+    private final String body;
+    private final int statusCode;
+    private final Map<String, String> headers;
 
     public RuntimeOutput(
             String body,

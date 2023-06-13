@@ -1,20 +1,19 @@
 package io.openruntimes.java;
 
-import org.rapidoid.http.Req;
-
-import com.google.gson.GsonBuilder;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class RuntimeContext {
-    private RuntimeRequest req;
-    private RuntimeResponse res;
+    private final RuntimeRequest req;
+    private final RuntimeResponse res;
 
-    private ArrayList<String> logs = new ArrayList<String>();
-    private ArrayList<String> errors = new ArrayList<String>();
+    private final List<String> logs = new ArrayList<>();
+    private final List<String> errors = new ArrayList<>();
 
     public RuntimeRequest getReq() {
         return this.req;
@@ -24,11 +23,11 @@ public class RuntimeContext {
         return this.res;
     }
 
-    public ArrayList<String> getLogs() {
+    public List<String> getLogs() {
         return this.logs;
     }
 
-    public ArrayList<String> getErrors() {
+    public List<String> getErrors() {
         return this.errors;
     }
 
@@ -43,7 +42,7 @@ public class RuntimeContext {
     }
 
     public void log(Object message) {
-        if(message instanceof Map || message instanceof List) {
+        if (message instanceof Map || message instanceof List || message instanceof Set) {
             this.logs.add(gson.toJson(message));
         } else {
             this.logs.add(message.toString());
@@ -51,7 +50,7 @@ public class RuntimeContext {
     }
 
     public void error(Object message) {
-        if(message instanceof Map || message instanceof List) {
+        if (message instanceof Map || message instanceof List || message instanceof Set) {
             this.errors.add(gson.toJson(message));
         } else {
             this.errors.add(message.toString());
