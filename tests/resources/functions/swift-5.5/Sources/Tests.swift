@@ -1,55 +1,104 @@
 import Foundation
 import AsyncHTTPClient
 
-//    'req' variable has:
-//        'headers' - object with request headers
-//        'payload' - object with request body data
-//        'variables' - object with function variables
-//    'res' variable has:
-//        'send(text, status)' - function to return text response. Status code defaults to 200
-//        'json(obj, status)' - function to return JSON response. Status code defaults to 200
-//    
-//    If an error is thrown, a response with code 500 will be returned.
+func main(context: RuntimeContext) async throws -> RuntimeOutput {
+    let action = context.req.headers["x-action"] ?? "default"
 
-func main(req: RequestValue, res: RequestResponse) async throws -> RequestResponse {
+    switch action {
+    case "plaintextResponse":
+        return context.res.send("Hello World 👋")
+    case "jsonResponse":
+        return try context.res.json([
+            "json": true,
+            "message": "Developers are awesome."
+        ])
+    case "redirectResponse":
+        return context.res.redirect("https://github.com/")
+    case "emptyResponse":
+        return context.res.empty()
+    case "noResponse":
+        context.res.send("This should be ignored, as it is not returned.")
 
-    let headerData = req.headers["x-test-header"]
-    let varData = req.variables["test-variable"]
+        // Simulate test data. Return necessary in Swift
+        context.error("Return statement missing. return context.res.empty() if no response is expected.")
 
-    var todoId: String = "1"
+        return context.res.send("", statusCode: 500)
+    case "doubleResponse":
+        context.res.send("This should be ignored.")
+        return context.res.send("This should be returned.")
+    case "headersResponse":
+        return context.res.send("OK", statusCode: 200, headers: [
+            "first-header": "first-value",
+            "second-header": context.req.headers["x-open-runtimes-custom-in-header"] ?? "missing",
+            "x-open-runtimes-custom-out-header": "third-value"
+        ])
+    case "statusResponse":
+        return context.res.send("FAIL", statusCode: 404)
+    case "requestMethod":
+        return context.res.send(context.req.method)
+    case "requestUrl":
+        return try context.res.json([
+            "url": context.req.url,
+            "scheme": context.req.scheme,
+            "host": context.req.host,
+            "port": context.req.port,
+            "path": context.req.path,
+            "queryString": context.req.queryString,
+            "query": context.req.query
+        ])
+    case "requestHeaders":
+        return try context.res.json(context.req.headers)
+    case "requestBodyPlaintext":
+        return context.res.send(context.req.body as! String)
+    case "requestBodyJson":
+        var key1: String
+        var key2: String
 
-    var reqPayload = req.payload as! String
-    if(reqPayload == "") {
-        reqPayload = "{}"
+        if context.req.body is String {
+            key1 = "Missing key"
+            key2 = "Missing key"
+        } else {
+            let body = context.req.body as! [String: Any?]
+
+            key1 = (body["key1"] as? String) ?? "Missing key"
+            key2 = (body["key2"] as? String) ?? "Missing key"
+        }
+
+        return try context.res.json([
+            "key1": key1,
+            "key2": key2,
+            "raw": context.req.bodyString
+        ])
+    case "envVars":
+        return try context.res.json([
+            "var": ProcessInfo.processInfo.environment["CUSTOM_ENV_VAR"],
+            "emptyVar": ProcessInfo.processInfo.environment["NOT_DEFINED_VAR"]
+        ])
+    case "logs":
+        context.log("Debug log")
+        context.error("Error log")
+
+        context.log(42)
+        context.log(4.2)
+        context.log(true)
+        context.log(["objectKey": "objectValue"])
+        context.log(["arrayValue"])
+
+        // Swift doesn't support native log capturing
+        context.log("Unsupported log detected. Use context.log() or context.error() for logging.")
+
+        return context.res.send("")
+    case "library":
+        let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+        let request = HTTPClientRequest(url: "https://jsonplaceholder.typicode.com/todos/\(context.req.bodyString)")
+        let response = try await httpClient.execute(request, timeout: .seconds(30))
+        let data = try await response.body.collect(upTo: 1024 * 1024)
+        let todo = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+
+        return try context.res.json([
+            "todo": todo
+        ])
+    default:
+        throw annotatedError(NSError(domain: "Unknown action", code: 500))
     }
-
-    if !reqPayload.isEmpty,
-        let data = reqPayload.data(using: .utf8),
-        let payload = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-            todoId = payload["id"] as? String ?? "1"
-    }
-
-    let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-    let request = HTTPClientRequest(url: "https://jsonplaceholder.typicode.com/todos/\(todoId)")
-    let response = try await httpClient.execute(request, timeout: .seconds(30))
-    let data = try await response.body.collect(upTo: 1024 * 1024)
-    let todo = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-
-    print("String1")
-    print(42)
-    print(4.2)
-    print(true)
-
-    print("String2")
-    print("String3")
-    print("String4")
-    print("String5")
-
-    return res.json(data: [
-        "isTest": true,
-        "message": "Hello Open Runtimes 👋",
-        "todo": todo,
-        "header": headerData,
-        "variable": varData
-    ])
 }

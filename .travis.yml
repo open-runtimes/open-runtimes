@@ -151,7 +151,7 @@ env:
       SERVER_PROCESS="./Run serve"
       IMAGE=openruntimes/swift:${VERSION}-5.5
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
     # Kotlin
     - RUNTIME=kotlin-1.6
