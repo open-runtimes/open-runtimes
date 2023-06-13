@@ -58,7 +58,7 @@ class RuntimeRequest
   end
 end
 
-class Context
+class RuntimeContext
   attr_accessor :req
   attr_accessor :res
   attr_accessor :logs
@@ -183,7 +183,7 @@ def handle(request, response)
 
   context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body, body_string)
   context_res = RuntimeResponse.new
-  context = Context.new(context_req, context_res)
+  context = RuntimeContext.new(context_req, context_res)
 
   custom_std = nil
   

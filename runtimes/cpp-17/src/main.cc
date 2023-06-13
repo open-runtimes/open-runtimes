@@ -8,14 +8,10 @@
 #include <vector>
 #include <numeric>
 
-using namespace std;
-using namespace runtime;
-using namespace drogon;
-
-vector<string> split(const string &s, const char delim) {
-    vector<string> result;
-    stringstream stream (s);
-    string item;
+std::vector<std::string> split(const std::string &s, const char delim) {
+    std::vector<std::string> result;
+    std::stringstream stream (s);
+    std::string item;
 
     while (getline(stream, item, delim)) {
         result.push_back(item);
@@ -26,37 +22,59 @@ vector<string> split(const string &s, const char delim) {
 
 int main()
 {
-    app()
+    drogon::app()
         .addListener("0.0.0.0", 3000)
         .registerHandlerViaRegex(
             "/.*",
-            [](const HttpRequestPtr &req,
-               function<void(const HttpResponsePtr &)> &&callback)
+            [](const drogon::HttpRequestPtr &req,
+               std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
-                const std::shared_ptr<HttpResponse> res = HttpResponse::newHttpResponse();
+                const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
 
-                string secret = req->getHeader("x-open-runtimes-secret");
+                int timeout = -1;
+                std::string timeout_header = req->getHeader("x-open-runtimes-timeout");
+                if (!timeout_header.empty())
+                {
+                    bool threw = false;
+
+                    try
+                    {
+                        timeout = std::stoi(timeout_header);
+                    } catch (const std::invalid_argument& ia)
+                    {
+                        threw = true;
+                    }
+
+                    if (threw || timeout == 0)
+                    {
+                        res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
+                        res->setBody("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.");
+                        callback(res);
+                        return;
+                    }
+                }
+
+                std::string secret = req->getHeader("x-open-runtimes-secret");
                 if (secret.empty() || secret != std::getenv("OPEN_RUNTIMES_SECRET"))
                 {
-                    res->setStatusCode(static_cast<HttpStatusCode>(500));
+                    res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
                     res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
                     callback(res);
                     return;
                 }
 
-                const char *method = req->getMethodString();
+                std::string method = req->getMethodString();
+                std::string path = req->getPath();
+                std::string queryString = req->getQuery();
 
-                string path = req->getPath();
-                string queryString = req->getQuery();
-
-                RuntimeRequest runtimeRequest;
+                runtime::RuntimeRequest runtimeRequest;
                 runtimeRequest.method = method;
                 runtimeRequest.queryString = queryString;
                 runtimeRequest.bodyString = req->getBody();
                 runtimeRequest.body = runtimeRequest.bodyString;
                 runtimeRequest.path = path;
 
-                string scheme = req->getHeader("x-forwarded-proto");
+                std::string scheme = req->getHeader("x-forwarded-proto");
                 if (scheme.empty())
                 {
                     scheme = "http";
@@ -67,7 +85,7 @@ int main()
                     defaultPort = "443";
                 }
 
-                string host = req->getHeader("host");
+                std::string host = req->getHeader("host");
                 int port = std::stoi(defaultPort);
 
                 if (host.empty())
@@ -76,7 +94,7 @@ int main()
                 }
 
                 if (host.find(':') != std::string::npos) {
-                    vector<string> pair = split(host, ':');
+                    std::vector<std::string> pair = split(host, ':');
 
                     if (pair.size() >= 2) {
                         host = pair[0];
@@ -91,7 +109,7 @@ int main()
                 runtimeRequest.host = host;
                 runtimeRequest.port = port;
 
-                string url = scheme + "://" + host;
+                std::string url = scheme + "://" + host;
 
                 if(port != std::stoi(defaultPort)) {
                     url += ":" + std::to_string(port);
@@ -106,7 +124,7 @@ int main()
                 runtimeRequest.url = url;
 
                 Json::Value query;
-                vector<string> params;
+                std::vector<std::string> params;
 
                 if(queryString.find('&') != std::string::npos)
                 {
@@ -116,18 +134,20 @@ int main()
                     params.push_back(queryString);
                 }
 
-                for (const string &param : params)
+                for (const std::string &param : params)
                 {
                     if(param.find('=') != std::string::npos)
                     {
-                        vector<string> pairs = split(param, '=');
-                        if(pairs.size() <= 1) {
+                        std::vector<std::string> pairs = split(param, '=');
+                        if(pairs.size() <= 1)
+                        {
                             query[pairs[0]] = "";
-                        } else {
-                            string key = pairs[0];
+                        } else
+                        {
+                            std::string key = pairs[0];
                             pairs.erase(pairs.begin());
 
-                            auto value = std::accumulate(
+                            std::string value = std::accumulate(
                                 std::next(pairs.begin()), 
                                 pairs.end(), 
                                 pairs[0], 
@@ -160,7 +180,7 @@ int main()
                 Json::Value headers;
                 for (const auto &header : req->getHeaders())
                 {
-                    string headerKey = header.first;
+                    std::string headerKey = header.first;
                     std::transform(
                         headerKey.begin(),
                         headerKey.end(),
@@ -176,7 +196,7 @@ int main()
 
                 runtimeRequest.headers = headers;
 
-                string contentType = req->getHeader("content-type");
+                std::string contentType = req->getHeader("content-type");
                 if(contentType.empty())
                 {
                     contentType = "text/plain";
@@ -190,9 +210,9 @@ int main()
                     runtimeRequest.body = bodyRoot;
                 }
 
-                RuntimeResponse contextResponse;
+                runtime::RuntimeResponse contextResponse;
+                runtime:: RuntimeContext context;
 
-                RuntimeContext context;
                 context.req = runtimeRequest;
                 context.res = contextResponse;
 
@@ -201,12 +221,36 @@ int main()
                 std::streambuf *oldOut = std::cout.rdbuf(outBuffer.rdbuf());
                 std::streambuf *oldErr = std::cerr.rdbuf(errBuffer.rdbuf());
 
-                RuntimeOutput output;
+                runtime::RuntimeOutput output;
+
                 try {
-                    output = Handler::main(context);
+                    if (timeout != -1)
+                    {
+                        std::promise<runtime::RuntimeOutput> promise;
+                        std::future<runtime::RuntimeOutput> future = promise.get_future();
+                        std::thread thread([&context](std::promise<runtime::RuntimeOutput> promise) {
+                            try {
+                                promise.set_value(runtime::Handler::main(context));
+                            } catch (...) {
+                                promise.set_exception(std::current_exception());
+                            }
+                        }, std::move(promise));
+
+                        std::future<void> waiter = std::async(std::launch::async, &std::thread::join, &thread);
+
+                        if (waiter.wait_for(std::chrono::seconds(timeout)) == std::future_status::timeout) {
+                            context.error("Execution timed out.");
+                            output = context.res.send("", 500, {});
+                            pthread_cancel(thread.native_handle());
+                        } else {
+                            output = future.get();
+                        }
+                    } else
+                    {
+                        output = runtime::Handler::main(context);
+                    }
                 } catch(const std::exception& e)
                 {
-                    // TODO: Send trace to context.error()
                     context.error(e.what());
                     output = contextResponse.send("", 500, {});
                 }
@@ -219,9 +263,9 @@ int main()
                 std::cout.rdbuf(oldOut);
                 std::cerr.rdbuf(oldErr);
 
-                for (const string &key : output.headers.getMemberNames())
+                for (const std::string &key : output.headers.getMemberNames())
                 {
-                    string headerKey = key;
+                    std::string headerKey = key;
                     std::transform(
                         headerKey.begin(),
                         headerKey.end(),
@@ -239,16 +283,16 @@ int main()
 
                 if(!context.logs.empty())
                 {
-                    string logsString = std::accumulate(
+                    std::string logsString = std::accumulate(
                         std::next(context.logs.begin()), 
                         context.logs.end(), 
                         context.logs[0], 
-                        [](const string &a, const string &b) {
+                        [](const std::string &a, const std::string &b) {
                             return a + "\n" + b;
                         }
                     );
 
-                    char *logsEncoded = curl_easy_escape(
+                    std::string logsEncoded = curl_easy_escape(
                         curl,
                         logsString.c_str(),
                         logsString.length()
@@ -261,16 +305,16 @@ int main()
 
                 if(!context.errors.empty())
                 {
-                    string errorsString = std::accumulate(
+                    std::string errorsString = std::accumulate(
                         std::next(context.errors.begin()), 
                         context.errors.end(), 
                         context.errors[0], 
-                        [](const string &a, const string &b) {
+                        [](const std::string &a, const std::string &b) {
                             return a + "\n" + b;
                         }
                     );
 
-                    char *errorsEncoded = curl_easy_escape(
+                    std::string errorsEncoded = curl_easy_escape(
                         curl,
                         errorsString.c_str(),
                         errorsString.length()
@@ -281,11 +325,18 @@ int main()
                     res->addHeader("x-open-runtimes-errors", "");
                 }
 
-                res->setStatusCode(static_cast<HttpStatusCode>(output.statusCode));
+                res->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
                 res->setBody(output.body);
                 callback(res);
             },
-            {Get, Post, Put, Patch, Delete, Options})
+            {
+                drogon::Get,
+                drogon::Post,
+                drogon::Put,
+                drogon::Patch,
+                drogon::Delete,
+                drogon::Options
+            })
         .run();
 
     return 0;

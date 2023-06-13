@@ -55,7 +55,7 @@ abstract class BaseV3 extends TestCase
             CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
             CURLOPT_HTTPHEADER => $headersParsed,
             CURLOPT_TIMEOUT => 5
-        );
+        ];
         
         \curl_setopt_array($ch, $optArray);
 
@@ -382,6 +382,12 @@ abstract class BaseV3 extends TestCase
         self::assertStringContainsString('Execution timed out.', $response['headers']['x-open-runtimes-errors']);
         self::assertStringContainsString('Timeout start.', $response['headers']['x-open-runtimes-logs']);
         self::assertStringNotContainsString('Timeout end.', $response['headers']['x-open-runtimes-logs']);
+
+        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '5']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Successful response.', $response['body']);
+        self::assertStringContainsString('Timeout start.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Timeout end.', $response['headers']['x-open-runtimes-logs']);
 
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
         self::assertEquals(500, $response['code']);
