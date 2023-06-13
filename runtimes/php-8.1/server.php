@@ -44,7 +44,7 @@ class RuntimeRequest {
     public array $query = [];
 }
 
-class Context {
+class RuntimeContext {
     public RuntimeRequest $req;
     public RuntimeResponse $res;
 
@@ -132,7 +132,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         $url .= '?' . $queryString;
     }
 
-    $context = new Context();
+    $context = new RuntimeContext();
 
     $context->req->bodyString = $req->getContent();
     $context->req->body = $context->req->bodyString;

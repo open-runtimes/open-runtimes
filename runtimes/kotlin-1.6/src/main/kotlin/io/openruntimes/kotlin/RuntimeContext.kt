@@ -1,11 +1,6 @@
 package io.openruntimes.kotlin
 
-import kotlin.Any
-import kotlin.collections.ArrayList
-import kotlin.collections.arrayListOf
-
 import com.google.gson.GsonBuilder
-import com.google.gson.Gson
 
 class RuntimeContext(val req: RuntimeRequest, val res: RuntimeResponse) {
     companion object {
@@ -16,7 +11,7 @@ class RuntimeContext(val req: RuntimeRequest, val res: RuntimeResponse) {
     val errors = mutableListOf<String>()
 
     fun log(message: Any) {
-        if(message is Map<*, *> || message is List<*>) {
+        if (message is Map<*, *> || message is List<*> || message is Set<*>) {
             this.logs.add(gson.toJson(message))
         } else {
             this.logs.add(message.toString())
@@ -24,7 +19,7 @@ class RuntimeContext(val req: RuntimeRequest, val res: RuntimeResponse) {
     }
 
     fun error(message: Any) {
-        if(message is Map<*, *> || message is List<*>) {
+        if (message is Map<*, *> || message is List<*> || message is Set<*>) {
             this.errors.add(gson.toJson(message))
         } else {
             this.errors.add(message.toString())
