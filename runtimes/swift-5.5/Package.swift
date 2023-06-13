@@ -15,10 +15,7 @@ let package = Package(
             name: "Runtime",
             dependencies: [
                 .product(name: "Vapor", package: "vapor")
-            ],
-            swiftSettings: [
-               .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release))
-           ]
+            ]
        )
     ]
 )

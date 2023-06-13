@@ -6,7 +6,7 @@ services:
     build:
       context: .
     ports: 
-      - 3000:3000
+      - "3000:3000"
     environment:
       - OPEN_RUNTIMES_SECRET
     volumes:

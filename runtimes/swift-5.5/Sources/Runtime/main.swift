@@ -31,22 +31,45 @@ func execute(req: Request) async throws -> Response {
     var body = bodyString as Any
     var headers = [String: String]()
     let method = req.method.string
-    let url = req.url.string
-    let scheme = req.url.scheme
-    let host = app.http.server.configuration.hostname
-    let port = app.http.server.configuration.port
-    let path = req.url.path
-    let queryString = req.url.query
+    let scheme = req.uri.scheme!
+    let host = req.uri.host!
+    let port = req.uri.port!
+    let path = req.uri.path
+    let queryString = req.uri.query
     var query = [String: String]()
     
     if let queryString = queryString {
         for param in queryString.split(separator: "&") {
-            let pair = param.split(separator: "=", maxSplits: 1)
-            let key = String(pair[0])
-            let value = String(pair[1])
+            let parts = param.split(separator: "=", maxSplits: 1)
             
-            query[key] = value
+            var key: String? = nil
+            var value: String? = nil
+            
+            if parts.isEmpty {
+                continue
+            }
+            if parts.count >= 1 {
+                key = String(parts[0])
+            }
+            if parts.count == 2 {
+                value = String(parts[1])
+            }
+            
+            query[key!] = value ?? ""
         }
+    }
+    
+    var url = "\(scheme)://\(host)"
+    
+    if (scheme == "http" && port != 80) || (scheme == "https" && port != 443) {
+        url += ":\(port)"
+    }
+    
+    url += path
+    
+    if !((queryString ?? "").isEmpty) {
+        url += "?"
+        url += queryString!
     }
     
     for header in req.headers {
@@ -112,11 +135,14 @@ func execute(req: Request) async throws -> Response {
 
     outputHeaders.add(name: "x-open-runtimes-logs", value: logs)
     outputHeaders.add(name: "x-open-runtimes-errors", value: errors)
-
+    
+    let code: HTTPResponseStatus = .custom(code: UInt(output.statusCode), reasonPhrase: "")
+    let resBody: Response.Body = .init(string: output.body)
+    
     return Response(
-        status: .custom(code: UInt(output.statusCode), reasonPhrase: ""),
+        status: code,
         headers: outputHeaders,
-        body: .init(string: output.body)
+        body: resBody
     )
 }
 
