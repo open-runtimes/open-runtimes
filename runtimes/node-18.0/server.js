@@ -8,8 +8,8 @@ const server = micro(async (req, res) => {
     const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
     let safeTimeout = null;
     if(timeout) {
-        if(isNaN(timeout)) {
-            return send(res, 500, 'Header "x-open-runtimes-timeout" must be an integer.');
+        if(isNaN(timeout) || timeout === 0) {
+            return send(res, 500, 'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
         }
         
         safeTimeout = +timeout;

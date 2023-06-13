@@ -209,7 +209,7 @@ def handle(request, response)
         task.with_timeout(safe_timeout) do
           output = main(context)
         rescue Async::TimeoutError
-            executed = false
+          executed = false
         end
       end.wait
 

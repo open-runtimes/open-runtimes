@@ -56,7 +56,8 @@ class Context {
         $this->res = new RuntimeResponse();
     }
 
-    function log(mixed $message) {
+    function log(mixed $message): void
+    {
         if(\is_array($message) || \is_object($message)) {
             $this->logs[] = \json_encode($message);
         } else {
@@ -64,7 +65,8 @@ class Context {
         }
     }
 
-    function error(mixed $message) {
+    function error(mixed $message): void
+    {
         if(\is_array($message) || \is_object($message)) {
             $this->errors[] = \json_encode($message);
         } else {
@@ -80,9 +82,9 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $safeTimeout = null;
 
     if ($timeout) {
-        if (!(\is_numeric($timeout))) {
+        if (!\is_numeric($timeout) || \intval($timeout) === 0) {
             $res->status(500);
-            $res->end('Header "x-open-runtimes-timeout" must be an integer.');
+            $res->end('Header "x-open-runtimes-timeout" must be an integer greather than 0.');
             return;
         }
 
@@ -159,10 +161,10 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         }
     }
 
-    $customstd = null;
+    $customStd = null;
     $output = null;
 
-    $execute = function() use ($userFunction, &$output, &$customstd, $context) {
+    $execute = function() use ($userFunction, &$output, &$customStd, $context) {
         if($userFunction === null) {
             $userFunction = include(USER_CODE_PATH . '/' . getenv('OPEN_RUNTIMES_ENTRYPOINT'));
         }
@@ -173,7 +175,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
         ob_start();
         $output = $userFunction($context);
-        $customstd = ob_get_clean();
+        $customStd = ob_get_clean();
     };
 
     try {
@@ -188,7 +190,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
             if(!$executed) {
                 $context->error('Execution timed out.');
-                $output = $context->res->send('', 500, []);
+                $output = $context->res->send('', 500);
             }
         } else {
             \call_user_func($execute);
@@ -196,12 +198,12 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     } catch (\Throwable $e) {
         $context->error($e->getMessage()."\n".$e->getTraceAsString());
         $context->error('At ' . $e->getFile() . ':' . $e->getLine());
-        $output = $context->res->send('', 500, []);
+        $output = $context->res->send('', 500);
     }
 
     if($output == null) {
         $context->error('Return statement missing. return $context->res->empty() if no response is expected.');
-        $output = $context->res->send('', 500, []);
+        $output = $context->res->send('', 500);
     }
 
     $output['body'] ??= '';
@@ -214,7 +216,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         }
     }
 
-    if(!empty($customstd)) {
+    if(!empty($customStd)) {
         $context->log('Unsupported log detected. Use $context->log() or $context->error() for logging.');
     }
 

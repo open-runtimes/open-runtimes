@@ -77,8 +77,8 @@ async def handler(u_path):
     timeout = request.headers.get('x-open-runtimes-timeout', '')
     safeTimeout = None
     if (timeout):
-        if not timeout.isdigit():
-            return 'Header "x-open-runtimes-timeout" must be an integer.', 500
+        if not timeout.isdigit() or int(timeout) == 0:
+            return 'Header "x-open-runtimes-timeout" must be an integer greater than 0.', 500
             
         safeTimeout = int(timeout)
 

@@ -71,10 +71,9 @@ module.exports = async (context) => {
             return context.res.json({ todo });
         case 'timeout':
             context.log('Timeout start.');
-            await new Promise((promiseResponse) => {
-                setTimeout(() => {
-                    promiseResponse(true);
-                }, 60000);
+
+            await new Promise((resolve) => {
+                setTimeout(resolve, 2000);
             });
 
             context.log('Timeout end.');
