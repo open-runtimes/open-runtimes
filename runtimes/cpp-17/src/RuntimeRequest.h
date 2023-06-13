@@ -9,30 +9,17 @@ namespace runtime
 {
     struct RuntimeRequest
     {
-        std::string payload;
-        Json::Value variables;
+        std::string bodyString;
+        std::any body;
         Json::Value headers;
+        std::string method;
+        std::string host;
+        std::string scheme;
+        std::string queryString;
+        Json::Value query;
+        std::string path;
+        int port;
+        std::string url;
     };
-}
-
-namespace drogon
-{
-    template<>
-    inline runtime::RuntimeRequest fromRequest(const drogon::HttpRequest &req)
-    {
-        const std::shared_ptr<Json::Value> &json = req.getJsonObject();
-        runtime::RuntimeRequest request;
-        if (json)
-        {
-            request.payload = (*json)["payload"].asString();
-            request.variables = (*json)["variables"];
-            request.headers = (*json)["headers"];
-        }
-        if (request.payload.empty())
-        {
-            request.payload = "";
-        }
-        return request;
-    }
 }
 #endif //CPP_RUNTIME_RUNTIMEREQUEST_H
