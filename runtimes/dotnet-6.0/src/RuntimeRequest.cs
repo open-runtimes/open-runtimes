@@ -2,13 +2,43 @@ namespace DotNetRuntime
 {
 	public class RuntimeRequest
 	{
-		public string Payload { get; set; } = "";
+		public string Method { get; private set; }
+		public string Scheme { get; private set; }
+		public string Host { get; private set; }
+		public int Port { get; private set; }
+		public string Path { get; private set; }
+		public Dictionary<string, string> Query { get; private set; }
+		public string QueryString { get; private set; }
+		public string Url { get; private set; }
+		public Dictionary<string, string> Headers { get; private set; }
+		public object Body { get; private set; }
+		public string BodyString { get; private set; }
 
-		public Dictionary<string, string> Variables { get; set; } =
-			new Dictionary<string, string>();
-
-		public Dictionary<string, string> Headers { get; set; } =
-			new Dictionary<string, string>();
+		public RuntimeRequest(
+		    string method,
+		    string scheme,
+		    string host,
+		    int port,
+		    string path,
+		    Dictionary<string, string> query,
+		    string queryString,
+		    string url,
+		    Dictionary<string, string> headers,
+		    object body,
+		    string bodyString)
+		{
+			BodyString = bodyString;
+			Body = body;
+			Headers = headers;
+			Method = method;
+			Url = url;
+			Host = host;
+			Scheme = scheme;
+			Path = path;
+			QueryString = queryString;
+			Query = query;
+			Port = port;
+		}
 	}
 }
 

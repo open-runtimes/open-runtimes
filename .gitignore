@@ -37,6 +37,8 @@ tests/**/Run
 **/CMakeFiles
 **/CMakeCache.txt
 **/cpp_runtime
+**/cmake_install.cmake
+**/Makefile
 
 # .NET
 tests/**/bin
@@ -46,3 +48,5 @@ tests/**/web.config
 
 **.idea
 **.DS_Store
+*.xcworkspacedata
+tests/resources/functions/swift-5.5/Runtime

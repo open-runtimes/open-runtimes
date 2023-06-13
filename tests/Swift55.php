@@ -6,9 +6,6 @@ namespace Tests;
 // PHP class: Swift55
 // Entrypoint: Tests.swift
 
-class Swift55 extends Base
+class Swift55 extends BaseV3
 {
-    public function testConsoleLogs(): void {
-        return; // Swift doesn't yet support console log.
-    }
 }
