@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-class Request {
+class RuntimeRequest {
   String bodyString;
   dynamic body;
   Map<String, dynamic> headers;
@@ -13,32 +13,32 @@ class Request {
   String queryString;
   Map<String, String> query;
 
-  Request(
-      {String bodyString = '',
-      dynamic body = '',
-      Map<String, dynamic> headers = const {},
-      String method = '',
-      String url = '',
-      String path = '',
-      int port = 80,
+  RuntimeRequest(
+      {String method = '',
       String scheme = '',
       String host = '',
+      int port = 80,
+      String path = '',
+      Map<String, String> query = const {},
       String queryString = '',
-      Map<String, String> query = const {}})
-      : bodyString = bodyString,
-        body = body,
-        headers = headers,
-        method = method,
-        url = url,
-        path = path,
-        port = port,
+      Map<String, dynamic> headers = const {},
+      dynamic body = '',
+      String bodyString = '',
+      String url = '',})
+      : method = method,
         scheme = scheme,
         host = host,
+        port = port,
+        path = path,
+        query = query,
         queryString = queryString,
-        query = query {}
+        headers = headers,
+        body = body,
+        bodyString = bodyString,
+        url = url {}
 }
 
-class Response {
+class RuntimeResponse {
   dynamic send(String body,
       [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
     return {
@@ -65,14 +65,14 @@ class Response {
   }
 }
 
-class Context {
-  Request req;
-  Response res;
+class RuntimeContext {
+  RuntimeRequest req;
+  RuntimeResponse res;
 
   List<String> logs = [];
   List<String> errors = [];
 
-  Context(Request req, Response res)
+  RuntimeContext(RuntimeRequest req, RuntimeResponse res)
       : req = req,
         res = res {}
 

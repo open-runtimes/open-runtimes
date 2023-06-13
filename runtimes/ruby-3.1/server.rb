@@ -94,8 +94,6 @@ def handle(request, response)
   if request.env.key?('HTTP_X_OPEN_RUNTIMES_TIMEOUT')
     timeout = request.env['HTTP_X_OPEN_RUNTIMES_TIMEOUT'].to_i
 
-    puts timeout
-
     if timeout == 0
       response.status = 500
       response.body = 'Header "x-open-runtimes-timeout" must be an integer greater than 0.'

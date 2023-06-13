@@ -10,6 +10,16 @@ import 'function_types.dart';
 
 void main() async {
   await shelf_io.serve((req) async {
+    int? safeTimeout = null;
+    String timeout = req.headers['x-open-runtimes-timeout'] ?? '';
+    if (timeout.isNotEmpty) {
+      safeTimeout = int.tryParse(timeout);
+      if (safeTimeout == null || safeTimeout == 0) {
+        return shelf.Response(500,
+            body: 'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
+      }
+    }
+
     if ((req.headers['x-open-runtimes-secret'] ?? '') == '' ||
         (req.headers['x-open-runtimes-secret'] ?? '') !=
             (Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '')) {
@@ -80,20 +90,20 @@ void main() async {
       url += '?' + queryString;
     }
 
-    Request contextReq = new Request(
-        bodyString: bodyString,
-        body: body,
-        headers: headers,
+    RuntimeRequest contextReq = new RuntimeRequest(
         method: method,
-        url: url,
-        path: path,
-        port: port,
         scheme: scheme,
         host: host,
+        port: port,
+        path: path,
+        query: query,
         queryString: queryString,
-        query: query);
-    Response contextRes = new Response();
-    Context context = new Context(contextReq, contextRes);
+        headers: headers,
+        body: body,
+        bodyString: bodyString,
+        url: url);
+    RuntimeResponse contextRes = new RuntimeResponse();
+    RuntimeContext context = new RuntimeContext(contextReq, contextRes);
 
     String customstd = "";
 
@@ -101,7 +111,21 @@ void main() async {
     try {
       await runZoned(
         () async {
-          output = await user_code.main(context);
+          if (safeTimeout != null) {
+            dynamic result = await Future.any(<Future<dynamic>>[
+              Future.delayed(Duration(seconds: safeTimeout)),
+              user_code.main(context)
+            ]);
+
+            if (result != null) {
+              output = result;
+            } else {
+              context.error('Execution timed out.');
+              output = context.res.send('', 500, const {});
+            }
+          } else {
+            output = await user_code.main(context);
+          }
         },
         zoneSpecification: ZoneSpecification(
           print: (Zone self, ZoneDelegate parent, Zone zone, String line) {

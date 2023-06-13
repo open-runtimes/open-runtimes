@@ -99,6 +99,14 @@ Future<dynamic> main(final context) async {
       final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyString);
       return context.res.json({ 'todo': todo.data });
     }
+    case 'timeout': {
+      context.log("Timeout start.");
+
+      await Future.delayed(Duration(seconds: 3));
+
+      context.log("Timeout end.");
+      return context.res.send("Successful response.");
+    }
     default: { 
       throw new Exception('Unknown action');
     }
