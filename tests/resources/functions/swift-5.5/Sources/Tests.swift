@@ -98,6 +98,14 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return try context.res.json([
             "todo": todo
         ])
+    case "timeout":
+        context.log("Timeout start.")
+
+        try await Task.sleep(nanoseconds: 3_000_000_000)
+        try Task.checkCancellation()
+
+        context.log("Timeout end.")
+        return context.res.send("Successful response.")
     default:
         throw annotatedError(NSError(domain: "Unknown action", code: 500))
     }

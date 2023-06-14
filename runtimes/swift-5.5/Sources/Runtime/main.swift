@@ -19,6 +19,20 @@ app.on(.OPTIONS, "", body: .stream, use: execute)
 app.on(.OPTIONS, "**", body: .stream, use: execute)
 
 func execute(req: Request) async throws -> Response {
+    var safeTimeout = -1
+    let timeout = req.headers["x-open-runtimes-timeout"]
+    if (!timeout.isEmpty) {
+        let timeoutInt = Int(timeout.first!) ?? 0
+        if timeoutInt == 0 {
+            return Response(
+                status: .internalServerError,
+                body: .init(string: "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.")
+            )
+        }
+
+        safeTimeout = timeoutInt
+    }
+
     if !req.headers.contains(name: "x-open-runtimes-secret")
         || req.headers["x-open-runtimes-secret"].first != ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] {
         return Response(
@@ -113,7 +127,34 @@ func execute(req: Request) async throws -> Response {
     var output: RuntimeOutput
 
     do {
-        output = try await annotateError(try await main(context: context))
+        if safeTimeout > 0 {
+            do {
+                output = try await withThrowingTaskGroup(of: RuntimeOutput.self) { group in
+                    let deadline = Date(timeIntervalSinceNow: Double(safeTimeout))
+                    
+                    group.addTask {
+                        return try await annotateError(try await main(context: context))
+                    }
+                    group.addTask {
+                        let interval = deadline.timeIntervalSinceNow
+                        try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+                        try Task.checkCancellation()
+                        throw CancellationError()
+                    }
+                    
+                    let result = try await group.next()!
+                    
+                    group.cancelAll()
+                    
+                    return result
+                }
+            } catch {
+                context.error("Execution timed out.")
+                output = context.res.send("", statusCode: 500)
+            }
+        } else {
+            output = try await annotateError(try await main(context: context))
+        }
     } catch {
         context.error(error)
         output = context.res.send("", statusCode: 500)
