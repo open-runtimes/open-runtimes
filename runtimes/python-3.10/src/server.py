@@ -147,7 +147,7 @@ async def handler(u_path):
             size = len(userPath)
             userPath = userPath[:size - 3]
         userPath = userPath.replace("/", ".")
-        userModule = importlib.import_module("userlib." + userPath)
+        userModule = importlib.import_module("function." + userPath)
 
         if userModule is None:
             raise Exception('Code file not found.')

@@ -27,7 +27,9 @@ env:
       SERVER_PROCESS=pm2
       IMAGE=openruntimes/node:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests-v3-commands.sh
+      BUILD_COMMAND="npm install"
+      START_COMMAND="npm start"
     - RUNTIME=node-16.0
       PHP_CLASS=Node160
       ENTRYPOINT=tests.js
@@ -66,7 +68,9 @@ env:
       SERVER_PROCESS=server.py
       IMAGE=openruntimes/python:${VERSION}-3.10
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests-v3-commands.sh
+      BUILD_COMMAND="pip install --no-cache-dir -r requirements.txt"
+      START_COMMAND="python3 src/server.py"
     - RUNTIME=python-3.9
       PHP_CLASS=Python39
       ENTRYPOINT=tests.py
@@ -142,7 +146,9 @@ env:
       SERVER_PROCESS=server.php
       IMAGE=openruntimes/php:${VERSION}-8.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests-v3-commands.sh
+      BUILD_COMMAND="composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
+      START_COMMAND="php src/server.php"
 
     # Swift
     - RUNTIME=swift-5.5

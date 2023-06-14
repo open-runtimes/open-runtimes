@@ -11,20 +11,26 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `main.py` file:    
 
 ```bash
-mkdir python-or && cd python-or
-printf "import random\n\ndef main(context):\n    return context.res.json({'n': random.random() })" > main.py
+mkdir python-function && cd python-function
+tee -a main.py << END
+import random
+
+def main(context):
+    return context.res.json({'n': random.random() })
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/python:v3-3.10 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=main.py --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/python:v3-3.10 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=main.py --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/python:v3-3.10 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/python:v3-3.10 sh helpers/start.sh "python3 src/server.py"
 ```
 
 4. In new terminal window, execute function:
@@ -77,25 +83,6 @@ def main(context):
 - To handle dependencies, you need to have `requirements.txt` file. Dependencies will be automatically cached and installed, so you don't need to include `__pycache__` folder in your function.
 
 - The default entrypoint is `main.py`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.py`.
-
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Bradley Schofield**
-
-+ [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
-
-**Matej Bačo**
-
-+ [https://github.com/Meldiron](https://github.com/Meldiron)
-
-**Jake Barnby**
-
-+ [https://github.com/abnegate](https://github.com/abnegate)
 
 ## Contributing
 

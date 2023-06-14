@@ -108,45 +108,43 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 
 ```
 .
-├── build.sh
+├── src
+│   ├── (runtime-specific, like index.js)
+├── example
+│   ├── (runtime-specific, like server.js)
+├── helpers
+│   ├── after-build.sh
+│   ├── before-build.sh
+│   ├── before-start.sh
+│   ├── build.sh
+│   └── start.sh
 ├── docker-compose.yml
 ├── Dockerfile
-├── example
-│   ├── (runtime-specific)
-├── start.sh
 ├── README.md
-└── server.X
+└── (runtime-specific, like package.json)
 ```
+
 
 | Name               	| Description                                                                                                                                           	|
 |--------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| src/           	    | Contains source code of HTTP server of the runtime server                                                                                               	|
 | example/           	| Contains a sample function to demonstrate the usage of the runtime server                                                                             	|
+| helpers/           	| Contains bash scripts that helps with simple build and start process. Can be ignored for more complex solution.                                          	|
 | docker-compose.yml 	| Configuration to easily run the example code with `docker-compose up`                                                                                 	|
 | Dockerfile         	| Instructions to build a runtime, install it's dependencies and setup the runtime server. These images are usually based on official alpine or ubuntu. 	|
-| server.X           	| A HTTP server implemented in the respective runtime's language. File extension depends on your runtime. For instance, Python is `server.py`           	|
-| build.sh           	| Script responsible for building user code. This can be package installations, or any specific build process the runtime requires.                     	|
-| start.sh          	| Script to launch the HTTP server on port `3000`. Additionally, it also copies the user supplied code to a directory accessible to the server.         	|
-| prepare.X          | (optional) If a runtime requires preparation before building (for instance PHP), this file holds the logic for mapping the files.                     	|
 | README.md          	| Runtime specific documentation                                                                                                                        	|
 
-Every request sent to any of the runtimes must have the `X-Internal-Challenge` header. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
+Structure of `helpers/` directory follows:
 
-All requests should also have JSON body with the following structure:
+| Name               	| Description                                                                                                                                           	|
+|--------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| before-build.sh       | Mirroring of function code from mount directory to build directiry. Do changes inside build directory if needed.                                          |
+| after-build.sh       	| Append .open-runtimes file, gzip file, and store into mount directory. Do post-build changes to build output if needed.                                  	|
+| build.sh           	| Shortcut combining `before-build.sh`, your custom build command (like `npm install`), and `after-build.sh`.                                          	    |
+| before-start.sh 	    | Extracting of function build from mount directory into server's directory. Do changes to server directory if needed.                                      |
+| start.sh         	    | Shortcut combining `before-start.sh` and your custom start command (like `npm start`)                                                                     |
 
-```json5
-{
-    // Following will be exposed to the function
-    "variables": {
-        // Function variables
-    },
-    "payload": "{}",
-    "headers": {
-        // Request headers
-    }
-}
-```
-
-All body parameters are optional. The values used in the example above are the default values.
+Every request sent to any of the runtimes must have the `x-open-runtimes-secret` header. The value of this header has to match the value of environment variable `OPEN_RUNTIMES_SECRET` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
 
 ## Testing
 
@@ -163,7 +161,7 @@ Once ready, you can test runtimes. First, you need to pick which runtime you wan
 To run tests, you execute `tests.sh` while providing information about runtime you want to test:
 
 ```bash
-RUNTIME='node-17.0' PHP_CLASS='Node170' ENTRYPOINT='tests.js' sh tests.sh
+RUNTIME='node-18.0' PHP_CLASS='Node180' ENTRYPOINT='tests.js' sh tests-v3.sh
 ```
 
 ## Contributing
