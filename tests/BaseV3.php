@@ -53,7 +53,8 @@ abstract class BaseV3 extends TestCase
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POSTFIELDS => \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body,
             CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
-            CURLOPT_HTTPHEADER => $headersParsed
+            CURLOPT_HTTPHEADER => $headersParsed,
+            CURLOPT_TIMEOUT => 5
         ];
         
         \curl_setopt_array($ch, $optArray);
@@ -371,5 +372,25 @@ abstract class BaseV3 extends TestCase
         self::assertEquals('5', $body['todo']['id']);
         self::assertEquals('laboriosam mollitia et enim quasi adipisci quia provident illum', $body['todo']['title']);
         self::assertEquals(false, $body['todo']['completed']);
+    }
+
+    public function testTimeout(): void
+    {
+        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $response['body']);
+        self::assertStringContainsString('Execution timed out.', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString('Timeout start.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringNotContainsString('Timeout end.', $response['headers']['x-open-runtimes-logs']);
+
+        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '5']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Successful response.', $response['body']);
+        self::assertStringContainsString('Timeout start.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Timeout end.', $response['headers']['x-open-runtimes-logs']);
+
+        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
     }
 }

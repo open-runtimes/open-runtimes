@@ -13,6 +13,19 @@ app.Run();
 
 static async Task<IResult> Execute(HttpRequest request)
 {
+    int safeTimout = -1;
+    var timeout = request.Headers.TryGetValue("x-open-runtimes-timeout", out var timeoutValue)
+        ? timeoutValue.ToString()
+        : string.Empty;
+
+    if(!string.IsNullOrEmpty(timeout))
+    {
+        if(!Int32.TryParse(timeout, out safeTimout) || safeTimout == 0)
+        {
+            return new CustomResponse("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.", 500);
+        }
+    }
+
     var secret = request.Headers.TryGetValue("x-open-runtimes-secret", out var secretValue)
         ? secretValue.ToString()
         : string.Empty;
@@ -145,7 +158,29 @@ static async Task<IResult> Execute(HttpRequest request)
 
     try
     {
-        output = await new Handler().Main(context);
+        if (safeTimout != -1)
+        {
+            var result = await await Task.WhenAny<RuntimeOutput?>(
+                Task.Run<RuntimeOutput?>(async () => {
+                    await Task.Delay(safeTimout * 1000);
+                    return null;
+                }),
+                new Handler().Main(context)
+            );
+
+            if (result is not null)
+            {
+                output = result;
+            }
+            else
+            {
+                context.Error("Execution timed out.");
+                output = context.Res.Send("", 500);
+            }
+        } else
+        {
+            output = await new Handler().Main(context);
+        }
     }
     catch (Exception e)
     {

@@ -69,6 +69,15 @@ export default async function(context: any) {
         case 'library':
             const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyString}`)).data;
             return context.res.json({ todo });
+        case 'timeout':
+            context.log('Timeout start.');
+
+            await new Promise((resolve) => {
+                setTimeout(resolve, 2000);
+            });
+
+            context.log('Timeout end.');
+            return context.res.send('Successful response.');
         default:
             throw new Error('Unknown action');
     }

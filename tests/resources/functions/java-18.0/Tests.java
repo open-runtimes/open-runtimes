@@ -9,46 +9,57 @@ import java.io.InputStreamReader;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 public class Tests {
     final Gson gson = new Gson();
-
     public RuntimeOutput main(RuntimeContext context) throws Exception {
         String action = context.getReq().getHeaders().getOrDefault("x-action", "");
 
-        Map<String, Object> json = new HashMap<String, Object>();
+        Map<String, Object> json = new HashMap<>();
 
         switch (action) {
-            case "plaintextResponse":
+            case "plaintextResponse" -> {
                 return context.getRes().send("Hello World 👋");
-            case "jsonResponse":
+            }
+            case "jsonResponse" -> {
                 json.put("json", true);
                 json.put("message", "Developers are awesome.");
                 return context.getRes().json(json);
-            case "redirectResponse":
+            }
+            case "redirectResponse" -> {
                 return context.getRes().redirect("https://github.com/");
-            case "emptyResponse":
+            }
+            case "emptyResponse" -> {
                 return context.getRes().empty();
-            case "noResponse":
+            }
+            case "noResponse" -> {
                 context.getRes().send("This should be ignored, as it is not returned.");
 
                 // Simulate test data. Return nessessary in Java
                 context.error("Return statement missing. return context.getRes().empty() if no response is expected.");
                 return context.getRes().send("", 500);
-            case "doubleResponse":
+            }
+            case "doubleResponse" -> {
                 context.getRes().send("This should be ignored.");
                 return context.getRes().send("This should be returned.");
-            case "headersResponse":
+            }
+            case "headersResponse" -> {
                 Map<String, String> headers = new HashMap<String, String>();
                 headers.put("first-header", "first-value");
                 headers.put("second-header", context.getReq().getHeaders().getOrDefault("x-open-runtimes-custom-in-header", "missing"));
                 headers.put("x-open-runtimes-custom-out-header", "third-value");
                 return context.getRes().send("OK", 200, headers);
-            case "statusResponse":
+            }
+            case "statusResponse" -> {
                 return context.getRes().send("FAIL", 404);
-            case "requestMethod":
+            }
+            case "requestMethod" -> {
                 return context.getRes().send(context.getReq().getMethod());
-            case "requestUrl":
+            }
+            case "requestUrl" -> {
                 json.put("url", context.getReq().getUrl());
                 json.put("port", context.getReq().getPort());
                 json.put("path", context.getReq().getPath());
@@ -57,20 +68,20 @@ public class Tests {
                 json.put("scheme", context.getReq().getScheme());
                 json.put("host", context.getReq().getHost());
                 return context.getRes().json(json);
-
-            case "requestHeaders":
+            }
+            case "requestHeaders" -> {
                 for (Map.Entry<String, String> entry : context.getReq().getHeaders().entrySet()) {
                     json.put(entry.getKey(), entry.getValue());
                 }
-
                 return context.getRes().json(json);
-            case "requestBodyPlaintext":
+            }
+            case "requestBodyPlaintext" -> {
                 return context.getRes().send((String) context.getReq().getBody());
-            case "requestBodyJson":
+            }
+            case "requestBodyJson" -> {
                 String key1 = "";
                 String key2 = "";
-
-                if(context.getReq().getBody() instanceof String) {
+                if (context.getReq().getBody() instanceof String) {
                     key1 = "Missing key";
                     key2 = "Missing key";
                 } else {
@@ -79,39 +90,36 @@ public class Tests {
                     key1 = body.getOrDefault("key1", "Missing key").toString();
                     key2 = body.getOrDefault("key2", "Missing key").toString();
                 }
-
                 json.put("key1", key1);
                 json.put("key2", key2);
                 json.put("raw", context.getReq().getBodyString());
                 return context.getRes().json(json);
-            case "envVars":
+            }
+            case "envVars" -> {
                 json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
                 json.put("emptyVar", System.getenv().getOrDefault("NOT_DEFINED_VAR", null));
                 return context.getRes().json(json);
-            case "logs":
+            }
+            case "logs" -> {
                 System.out.println("Native log");
                 context.log("Debug log");
                 context.error("Error log");
-                
                 context.log(42);
                 context.log(4.2);
                 context.log(true);
-
                 ArrayList<String> array = new ArrayList<String>();
                 array.add("arrayValue");
                 context.log(array);
-
                 HashMap<String, String> map = new HashMap<String, String>();
                 map.put("objectKey", "objectValue");
                 context.log(map);
-
                 return context.getRes().send("");
-            case "library":
+            }
+            case "library" -> {
                 URL url = new URL("https://jsonplaceholder.typicode.com/todos/" + context.getReq().getBodyString());
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
                 con.getResponseCode();
-
                 BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                 String inputLine;
                 StringBuilder todoBuffer = new StringBuilder();
@@ -120,13 +128,26 @@ public class Tests {
                 }
                 in.close();
                 con.disconnect();
-
                 Map<String, Object> todo = gson.fromJson(todoBuffer.toString(), Map.class);
-
                 json.put("todo", todo);
                 return context.getRes().json(json);
-            default:
-                throw new Exception("Unknown action");
+            }
+            case "timeout" -> {
+                context.log("Timeout start.");
+
+                Executors.newCachedThreadPool().submit(() -> {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).get();
+
+                context.log("Timeout end.");
+
+                return context.getRes().send("Successful response.");
+            }
+            default -> throw new Exception("Unknown action");
         }
     }
 }

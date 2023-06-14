@@ -11,11 +11,11 @@ repositories {
 }
 
 dependencies {
-	implementation "io.javalin:javalin:4.4.0"
+	implementation "io.javalin:javalin:4.6.8"
 	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"
 	implementation "com.google.code.gson:gson:2.9.0"
 	implementation "org.slf4j:slf4j-simple:1.8.0-beta4"
-	implementation "com.fasterxml.jackson.core:jackson-databind:2.12.4"
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
 	implementation "org.jetbrains.kotlin:kotlin-reflect:1.6.21"
 }
 

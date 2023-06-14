@@ -1,6 +1,9 @@
 package io.openruntimes.kotlin
 
 import com.google.gson.Gson
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -8,10 +11,8 @@ import java.net.URL
 
 public class Tests {
     @Throws(Exception::class)
-    fun main(context: RuntimeContext): RuntimeOutput {
-        var action: String = context.req.headers.getOrDefault("x-action", "")
-
-        when (action) {
+    suspend fun main(context: RuntimeContext): RuntimeOutput {
+        when (context.req.headers["x-action"]) {
             "plaintextResponse" -> {
                 return context.res.send("Hello World 👋")
             }
@@ -69,14 +70,14 @@ public class Tests {
                 return context.res.send(context.req.body as String)
             }
             "requestBodyJson" -> {
-                var key1: String
-                var key2: String
+                val key1: String
+                val key2: String
 
                 if(context.req.body is String) {
                     key1 = "Missing key"
                     key2 = "Missing key"
                 } else {
-                    var body: MutableMap<String, Any> = context.req.body as MutableMap<String, Any>
+                    val body: MutableMap<String, Any> = context.req.body as MutableMap<String, Any>
 
                     key1 = body.getOrDefault("key1", "Missing key").toString();
                     key2 = body.getOrDefault("key2", "Missing key").toString();
@@ -98,7 +99,7 @@ public class Tests {
                 System.out.println("Native log");
                 context.log("Debug log");
                 context.error("Error log");
-                
+
                 context.log(42);
                 context.log(4.2);
                 context.log(true);
@@ -106,7 +107,7 @@ public class Tests {
                 context.log(mutableListOf(
                     "arrayValue"
                 ));
-                
+
                 context.log(mutableMapOf(
                     "objectKey" to "objectValue"
                 ));
@@ -138,6 +139,16 @@ public class Tests {
                 return context.res.json(mutableMapOf(
                     "todo" to todo
                 ))
+            }
+            "timeout" -> {
+                context.log("Timeout start.")
+
+                coroutineScope {
+                    delay(3000)
+                }
+
+                context.log("Timeout end.")
+                return context.res.send("Successful response.")
             }
             else -> {
                 throw Exception("Unknown action")

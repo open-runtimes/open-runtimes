@@ -10,7 +10,7 @@ namespace runtime
     class RuntimeResponse
     {
         public:
-            RuntimeOutput send(std::string body, int statusCode = 200, Json::Value headers = {})
+            RuntimeOutput send(const std::string &body, const int statusCode = 200, const Json::Value &headers = {})
             {
                 RuntimeOutput output;
                 output.body = body;
@@ -19,7 +19,7 @@ namespace runtime
                 return output;
             }
 
-            RuntimeOutput json(Json::Value json, int statusCode = 200, Json::Value headers = {})
+            RuntimeOutput json(const Json::Value &json, const int statusCode = 200, Json::Value headers = {})
             {
                 headers["content-type"] = "application/json";
                 return this->send(json.toStyledString(), statusCode, headers);
@@ -30,7 +30,7 @@ namespace runtime
                 return this->send("", 204, {});
             }
 
-            RuntimeOutput redirect(std::string url, int statusCode = 301, Json::Value headers = {})
+            RuntimeOutput redirect(const std::string &url, const int statusCode = 301, Json::Value headers = {})
             {
                 headers["location"] = url;
                 return this->send("", statusCode, headers);

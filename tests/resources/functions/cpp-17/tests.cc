@@ -5,11 +5,10 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <future>
 #include <any>
 #include <string>
 #include <curl/curl.h>
-
-using namespace std;
 
 namespace runtime {
     class Handler {
@@ -20,29 +19,29 @@ namespace runtime {
 
             Json::Value json;
 
-            auto action = req.headers["x-action"].asString();
+            std::string action = req.headers["x-action"].asString();
 
-            if(action == "plaintextResponse") {
+            if (action == "plaintextResponse") {
                 return res.send("Hello World 👋");
-            } else if(action == "jsonResponse") {
+            } else if (action == "jsonResponse") {
                 json["json"] = true;
                 json["message"] = "Developers are awesome.";
                 return res.json(json);
-            } else if(action == "redirectResponse") {
+            } else if (action == "redirectResponse") {
                 return res.redirect("https://github.com/");
-            } else if(action == "emptyResponse") {
+            } else if (action == "emptyResponse") {
                 return res.empty();
-            } else if(action == "noResponse") {
+            } else if (action == "noResponse") {
                 res.send("This should be ignored, as it is not returned.");
-                // Simulate test data. Return nessessary in C++
+                // Simulate test data. Return necessary in C++
                 context.error("Return statement missing. return context.res.empty() if no response is expected.");
                 return res.send("", 500);
-            } else if(action == "doubleResponse") {
+            } else if (action == "doubleResponse") {
                 res.send("This should be ignored.");
                 return res.send("This should be returned.");
-            } else if(action == "headersResponse") {
+            } else if (action == "headersResponse") {
                 auto secondHeader = req.headers["x-open-runtimes-custom-in-header"].asString();
-                if(secondHeader.empty()) {
+                if (secondHeader.empty()) {
                     secondHeader = "missing";
                 }
 
@@ -50,11 +49,11 @@ namespace runtime {
                 json["second-header"] = secondHeader;
                 json["x-open-runtimes-custom-out-header"] = "third-value";
                 return res.send("OK", 200, json);
-            } else if(action == "statusResponse") {
+            } else if (action == "statusResponse") {
                 return res.send("FAIL", 404);
             } else if (action == "requestMethod") {
                 return res.send(req.method);
-            } else if(action == "requestUrl") {
+            } else if (action == "requestUrl") {
                 json["url"] = req.url;
                 json["port"] = req.port;
                 json["path"] = req.path;
@@ -64,18 +63,18 @@ namespace runtime {
                 json["host"] = req.host;
 
                 return res.json(json);
-            } else if(action == "requestHeaders") {
+            } else if (action == "requestHeaders") {
                 return res.json(req.headers);
-            } else if(action == "requestBodyPlaintext") {
+            } else if (action == "requestBodyPlaintext") {
                 std::string body = std::any_cast<std::string>(req.body);
                 return res.send(body);
-            } else if(action == "requestBodyJson") {
+            } else if (action == "requestBodyJson") {
                 auto isJson = false;
 
                 try {
                     Json::Value body = std::any_cast<Json::Value>(req.body);
                     isJson = true;
-                } catch(const std::exception& e) {
+                } catch (const std::exception &e) {
                     isJson = false;
                 }
 
@@ -87,11 +86,11 @@ namespace runtime {
                     key1 = body["key1"].asString();
                     key2 = body["key2"].asString();
 
-                    if(key1.empty()) {
+                    if (key1.empty()) {
                         key1 = "Missing key";
                     }
 
-                    if(key2.empty()) {
+                    if (key2.empty()) {
                         key2 = "Missing key";
                     }
                 } else {
@@ -103,61 +102,63 @@ namespace runtime {
                 json["key2"] = key2;
                 json["raw"] = req.bodyString;
                 return res.json(json);
-            } else if(action == "envVars") {
+            } else if (action == "envVars") {
                 auto customEnvVar = std::getenv("CUSTOM_ENV_VAR");
                 auto notDefinedVar = std::getenv("NOT_DEFINED_VAR");
 
-                if(customEnvVar == NULL) {
+                if (customEnvVar == NULL) {
                     json["var"] = Json::Value::null;
                 } else {
                     json["var"] = customEnvVar;
                 }
 
-                if(notDefinedVar == NULL) {
+                if (notDefinedVar == NULL) {
                     json["emptyVar"] = Json::Value::null;
                 } else {
                     json["emptyVar"] = notDefinedVar;
                 }
 
                 return res.json(json);
-            } else if(action == "logs") {
-                    std::cout << "Native log";
-                    context.log("Debug log");
-                    context.error("Error log");
-                    
-                    // TODO: Logging ::any support
-                    context.log("42");
-                    context.log("4.2");
-                    context.log("true");
-                    context.log("{\"objectKey\":\"objectValue\"}");
-                    context.log("[\"arrayValue\"]");
+            } else if (action == "logs") {
+                std::cout << "Native log";
+                context.log("Debug log");
+                context.error("Error log");
 
-                    return context.res.send("");
-            } else if(action == "library") {
+                context.log("42");
+                context.log("4.2");
+                context.log("true");
+                context.log("{\"objectKey\":\"objectValue\"}");
+                context.log("[\"arrayValue\"]");
+
+                return context.res.send("");
+            } else if (action == "library") {
                 Json::CharReaderBuilder builder;
                 Json::CharReader *reader = builder.newCharReader();
 
                 CURL *curl;
-                CURLcode curlRes;
+                CURLcode code;
                 std::string todoBuffer;
 
                 curl = curl_easy_init();
-                if (curl)
-                {
+                if (curl) {
                     std::string url = "https://jsonplaceholder.typicode.com/todos/" + req.bodyString;
                     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-                    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+                    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                                     +[](void *contents, size_t size, size_t nmemb, void *userp) {
+                                         ((std::string *) userp)->append((char *) contents, size * nmemb);
+                                         return size * nmemb;
+                                     });
                     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &todoBuffer);
-                    curlRes = curl_easy_perform(curl);
+                    code = curl_easy_perform(curl);
                     curl_easy_cleanup(curl);
                 }
 
                 Json::Value todo;
                 reader->parse(
-                    todoBuffer.c_str(),
-                    todoBuffer.c_str() + todoBuffer.size(),
-                    &todo,
-                    nullptr
+                        todoBuffer.c_str(),
+                        todoBuffer.c_str() + todoBuffer.size(),
+                        &todo,
+                        nullptr
                 );
 
                 delete reader;
@@ -165,6 +166,15 @@ namespace runtime {
                 Json::Value response;
                 json["todo"] = todo;
                 return res.json(json);
+            } else if (action == "timeout") {
+                context.log("Timeout start.");
+
+                std::async(std::launch::async, []() {
+                    std::this_thread::sleep_for(std::chrono::seconds(3));
+                }).wait();
+
+                context.log("Timeout end.");
+                return context.res.send("Successful response.");
             } else {
                 // C++ cannot get stack trace. Below makes test pass
                 context.error("tests.cc");
@@ -173,12 +183,6 @@ namespace runtime {
             }
 
             return res.empty();
-        }
-
-        static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
-        {
-            ((std::string *) userp)->append((char *) contents, size * nmemb);
-            return size * nmemb;
         }
     };
 }
