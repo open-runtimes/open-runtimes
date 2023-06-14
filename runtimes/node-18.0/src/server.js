@@ -5,6 +5,16 @@ const { text: parseText, json: parseJson, send } = require("micro");
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const server = micro(async (req, res) => {
+    const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
+    let safeTimeout = null;
+    if(timeout) {
+        if(isNaN(timeout) || timeout === 0) {
+            return send(res, 500, 'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
+        }
+        
+        safeTimeout = +timeout;
+    }
+
     if (!req.headers[`x-open-runtimes-secret`] || req.headers[`x-open-runtimes-secret`] !== (process.env['OPEN_RUNTIMES_SECRET'] ?? '')) {
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
@@ -105,7 +115,8 @@ const server = micro(async (req, res) => {
     }
 
     let output = null;
-    try {
+
+    async function execute() {
         let userFunction = require(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
 
         if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
@@ -121,8 +132,34 @@ const server = micro(async (req, res) => {
         } else {
             output = await userFunction(context);
         }
+    }
+
+    try {
+        if(safeTimeout !== null) {
+            let executed = true;
+
+            const timeoutPromise = new Promise((promiseRes) => {
+                setTimeout(() => {
+                    executed = false;
+                    promiseRes(true);
+                }, safeTimeout * 1000);
+            });
+
+            await Promise.race([execute(), timeoutPromise]);
+
+            if(!executed) {
+                context.error('Execution timed out.');
+                output = context.res.send('', 500, {});
+            }
+        } else {
+            await execute();
+        }
     } catch (e) {
-        context.error(e.code === 'MODULE_NOT_FOUND' ? "Code file not found." : e.stack || e);
+        if(e.code === 'MODULE_NOT_FOUND') {
+            context.error('Could not load code file.');
+        }
+
+        context.error(e.stack || e);
         output = context.res.send('', 500, {});
     } finally {
         console.log = console.stdlog;
@@ -150,13 +187,13 @@ const server = micro(async (req, res) => {
     }
 
     if(customstd) {
-        context.log('Unsupported log noticed. Use context.log() or context.error() for logging.');
+        context.log('Unsupported log detected. Use context.log() or context.error() for logging.');
     }
 
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
     res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
 
-    send(res, output.statusCode, output.body);
+    return send(res, output.statusCode, output.body);
 });
 
 server.listen(3000);

@@ -1,7 +1,8 @@
 import requests
 import os
+import asyncio
 
-def main(context):
+async def main(context):
     action = context.req.headers.get('x-action', None)
 
     if action == 'plaintextResponse':
@@ -80,5 +81,10 @@ def main(context):
         return context.res.json({
             'todo': todo
         })
+    elif action == 'timeout':
+        context.log('Timeout start.')
+        await asyncio.sleep(60)
+        context.log('Timeout end.')
+        return context.res.send('Successful response.')
     else:
-        raise Exception('Unkonwn action')
+        raise Exception('Unknown action')

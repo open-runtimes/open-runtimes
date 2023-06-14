@@ -13,7 +13,8 @@ RUN \
   zlib-dev \
   brotli-dev \
   yaml-dev \
-  libmaxminddb-dev
+  libmaxminddb-dev \
+  openssl-dev
 
 RUN docker-php-ext-install sockets
 
@@ -22,7 +23,7 @@ RUN \
   git clone --depth 1 --branch $PHP_SWOOLE_VERSION https://github.com/swoole/swoole-src.git && \
   cd swoole-src && \
   phpize && \
-  ./configure --enable-http2 && \
+  ./configure --enable-http2 --enable-openssl && \
   make && make install && \
   cd ..
 

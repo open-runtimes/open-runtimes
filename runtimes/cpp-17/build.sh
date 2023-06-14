@@ -9,39 +9,12 @@ if [ -f "/usr/code/CMakeLists.txt" ]; then
 fi
 
 # Prepare separate directory to prevent changing user's files
-cp -R --no-clobber /usr/code/* /usr/local/src
+cp -R --no-clobber /usr/code/* /usr/local/src/src
 
-# Read user code and collect includes and usings
-INCLUDES=""
-while read -r line; do
-    case "${line}" in "#"*|"using"*)
-        INCLUDES="${INCLUDES}${line}
-        "
-    esac
-done < "${INTERNAL_RUNTIME_ENTRYPOINT}"
-CODE="$(sed "/#include*/d" "${INTERNAL_RUNTIME_ENTRYPOINT}")"
-
-# Wrap the user code in a class
-echo "
-#ifndef CPP_RUNTIME_WRAPPER_H
-#define CPP_RUNTIME_WRAPPER_H
-#include \"RuntimeResponse.h\"
-#include \"RuntimeRequest.h\"
-${INCLUDES}
-namespace runtime {
-    class Wrapper {
-    public:
-        ${CODE}
-    };
-}
-#endif //CPP_RUNTIME_WRAPPER_H
-" > src/Wrapper.h
-
-# Remove the user code file
-rm "${INTERNAL_RUNTIME_ENTRYPOINT}"
-rm "CMakeCache.txt" >/dev/null || true
+sed -i "s/{entrypointFile}/$OPEN_RUNTIMES_ENTRYPOINT/g" "src/main.cc"
 
 # Build the executable
+rm "CMakeCache.txt" >/dev/null || true
 cd /usr/local/src/build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j"$(nproc)"

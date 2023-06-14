@@ -2,6 +2,8 @@
 
 require 'vendor-server/autoload.php';
 
+Swoole\Runtime::enableCoroutine($flags = SWOOLE_HOOK_ALL);
+
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
@@ -44,7 +46,7 @@ class RuntimeRequest {
     public array $query = [];
 }
 
-class Context {
+class RuntimeContext {
     public RuntimeRequest $req;
     public RuntimeResponse $res;
 
@@ -56,7 +58,8 @@ class Context {
         $this->res = new RuntimeResponse();
     }
 
-    function log(mixed $message) {
+    function log(mixed $message): void
+    {
         if(\is_array($message) || \is_object($message)) {
             $this->logs[] = \json_encode($message);
         } else {
@@ -64,7 +67,8 @@ class Context {
         }
     }
 
-    function error(mixed $message) {
+    function error(mixed $message): void
+    {
         if(\is_array($message) || \is_object($message)) {
             $this->errors[] = \json_encode($message);
         } else {
@@ -76,6 +80,19 @@ class Context {
 $userFunction = null;
 
 $server->on("Request", function($req, $res) use(&$userFunction) {
+    $timeout = $req->header['x-open-runtimes-timeout'] ?? '';
+    $safeTimeout = null;
+
+    if ($timeout) {
+        if (!\is_numeric($timeout) || \intval($timeout) === 0) {
+            $res->status(500);
+            $res->end('Header "x-open-runtimes-timeout" must be an integer greather than 0.');
+            return;
+        }
+
+        $safeTimeout = \intval($timeout);
+    }
+
     if (($req->header['x-open-runtimes-secret'] ?? '') === '' || ($req->header['x-open-runtimes-secret'] ?? '') !== (getenv('OPEN_RUNTIMES_SECRET') ?? '')) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
@@ -101,7 +118,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     foreach (\explode('&', $queryString) as $param) {
         $pair = \explode('=', $param, 2);
         if(!empty($pair[0])) {
-            $query[$pair[0]] = $pair[1];
+            $query[$pair[0]] = $pair[1] ?? '';
         }
     }
 
@@ -117,7 +134,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         $url .= '?' . $queryString;
     }
 
-    $context = new Context();
+    $context = new RuntimeContext();
 
     $context->req->bodyString = $req->getContent();
     $context->req->body = $context->req->bodyString;
@@ -146,10 +163,10 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         }
     }
 
-    $customstd = null;
-
+    $customStd = null;
     $output = null;
-    try {
+
+    $execute = function() use ($userFunction, &$output, &$customStd, $context) {
         if($userFunction === null) {
             $userFunction = include(USER_CODE_PATH . '/' . getenv('OPEN_RUNTIMES_ENTRYPOINT'));
         }
@@ -160,16 +177,35 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
         ob_start();
         $output = $userFunction($context);
-        $customstd = ob_get_clean();
+        $customStd = ob_get_clean();
+    };
+
+    try {
+        if($safeTimeout !== null) {
+            $executed = false;
+            Swoole\Coroutine\batch([
+                function() use ($execute, &$executed) {
+                    \call_user_func($execute);
+                    $executed = true;
+                }
+            ], $safeTimeout);
+
+            if(!$executed) {
+                $context->error('Execution timed out.');
+                $output = $context->res->send('', 500);
+            }
+        } else {
+            \call_user_func($execute);
+        }
     } catch (\Throwable $e) {
         $context->error($e->getMessage()."\n".$e->getTraceAsString());
         $context->error('At ' . $e->getFile() . ':' . $e->getLine());
-        $output = $context->res->send('', 500, []);
+        $output = $context->res->send('', 500);
     }
 
     if($output == null) {
         $context->error('Return statement missing. return $context->res->empty() if no response is expected.');
-        $output = $context->res->send('', 500, []);
+        $output = $context->res->send('', 500);
     }
 
     $output['body'] ??= '';
@@ -182,8 +218,8 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         }
     }
 
-    if(!empty($customstd)) {
-        $context->log('Unsupported log noticed. Use $context->log() or $context->error() for logging.');
+    if(!empty($customStd)) {
+        $context->log('Unsupported log detected. Use $context->log() or $context->error() for logging.');
     }
 
     $res->header('x-open-runtimes-logs', \urlencode(\implode('\n', $context->logs)));

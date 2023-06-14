@@ -1,37 +1,84 @@
 import axiod from "https://deno.land/x/axiod/mod.ts";
 
-/*
-    'req' variable has:
-        'headers' - object with request headers
-        'payload' - object with request body data
-        'variables' - object with function variables
-    'res' variable has:
-        'send(text, status)' - function to return text response. Status code defaults to 200
-        'json(obj, status)' - function to return JSON response. Status code defaults to 200
-    
-    If an error is thrown, a response with code 500 will be returned.
-*/
+export default async function(context: any) {
+    const action = context.req.headers['x-action'];
 
-export default async function(req: any, res: any) {
-    const payload = JSON.parse(req.payload  === '' ? '{}' : req.payload);
+    switch (action) {
+        case 'plaintextResponse':
+            return context.res.send('Hello World 👋');
+        case 'jsonResponse':
+            return context.res.json({ json: true, message: 'Developers are awesome.' });
+        case 'redirectResponse':
+            return context.res.redirect('https://github.com/');
+        case 'emptyResponse':
+            return context.res.empty();
+        case 'noResponse':
+            context.res.send('This should be ignored, as it is not returned.');
+            break;
+        case 'doubleResponse':
+            context.res.send('This should be ignored.');
+            return context.res.send('This should be returned.');
+        case 'headersResponse':
+            return context.res.send('OK', 200, {
+                'first-header': 'first-value',
+                'second-header': context.req.headers['x-open-runtimes-custom-in-header'] ?? 'missing',
+                'x-open-runtimes-custom-out-header': 'third-value'
+            });
+        case 'statusResponse':
+            return context.res.send('FAIL', 404);
+        case 'requestMethod':
+            return context.res.send(context.req.method);
+        case 'requestUrl':
+            return context.res.json({
+                url: context.req.url,
+                port: context.req.port,
+                path: context.req.path,
+                query: context.req.query,
+                queryString: context.req.queryString,
+                scheme: context.req.scheme,
+                host: context.req.host,
+            });
+        case 'requestHeaders':
+            return context.res.json(context.req.headers);
+        case 'requestBodyPlaintext':
+            return context.res.send(context.req.body);
+        case 'requestBodyJson':
+            return context.res.json({
+                key1: context.req.body.key1 ?? 'Missing key',
+                key2: context.req.body.key2 ?? 'Missing key',
+                raw: context.req.bodyString
+            })
+        case 'envVars':
+            return context.res.json({
+                var: Deno.env.get("CUSTOM_ENV_VAR") ?? null,
+                emptyVar: Deno.env.get("NOT_DEFINED_VAR") ?? null
+            });
+        case 'logs':
+            console.log('Native log');
+            context.log('Debug log');
+            context.error('Error log');
+            
+            context.log(42);
+            context.log(4.2);
+            context.log(true);
 
-    const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`)).data;
+            context.log({ objectKey: 'objectValue' });
+            context.log([ 'arrayValue' ]);
 
-    console.log('String');
-    console.log(42);
-    console.log(4.2);
-    console.log(true);
+            return context.res.send('');
+        case 'library':
+            const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyString}`)).data;
+            return context.res.json({ todo });
+        case 'timeout':
+            context.log('Timeout start.');
 
-    console.log('String2');
-    console.info('String3');
-    console.debug('String4');
-    console.warn('String5');
+            await new Promise((resolve) => {
+                setTimeout(resolve, 2000);
+            });
 
-    res.json({
-        isTest: true,
-        message: 'Hello Open Runtimes 👋',
-        header: req.headers['x-test-header'],
-        variable: req.variables['test-variable'],
-        todo
-    });
+            context.log('Timeout end.');
+            return context.res.send('Successful response.');
+        default:
+            throw new Error('Unknown action');
+    }
 }

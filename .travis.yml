@@ -59,7 +59,7 @@ env:
       SERVER_PROCESS=server.ts
       IMAGE=openruntimes/deno:${VERSION}-1.24
       ARCH=linux/amd64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
     # Python
     - RUNTIME=python-3.10
@@ -93,7 +93,7 @@ env:
       IMAGE=openruntimes/dart:${VERSION}-2.18
       SERVER_PROCESS=/usr/code-start/runtime
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
     - RUNTIME=dart-2.17
       PHP_CLASS=Dart217
       ENTRYPOINT=lib/tests.dart
@@ -123,7 +123,7 @@ env:
       SERVER_PROCESS=puma
       IMAGE=openruntimes/ruby:${VERSION}-3.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
     - RUNTIME=ruby-3.0
       PHP_CLASS=Ruby30
       ENTRYPOINT=tests.rb
@@ -157,7 +157,7 @@ env:
       SERVER_PROCESS="./Run serve"
       IMAGE=openruntimes/swift:${VERSION}-5.5
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
     # Kotlin
     - RUNTIME=kotlin-1.6
@@ -166,7 +166,7 @@ env:
       SERVER_PROCESS="kotlin-runtime-1.0.0"
       IMAGE=openruntimes/kotlin:${VERSION}-1.6
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
     # Java
     - RUNTIME=java-8.0
@@ -196,7 +196,7 @@ env:
       SERVER_PROCESS="java-runtime-1.0.0"
       IMAGE=openruntimes/java:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
     # C++
     - RUNTIME=cpp-17
@@ -205,7 +205,7 @@ env:
       SERVER_PROCESS="cpp_runtime"
       IMAGE=openruntimes/cpp:${VERSION}-17
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
     # DotNet
     - RUNTIME=dotnet-3.1
@@ -221,7 +221,7 @@ env:
       SERVER_PROCESS="DotNetRuntime.dll"
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
+      TEST_SCRIPT=tests-v3.sh
 
 
 notifications:

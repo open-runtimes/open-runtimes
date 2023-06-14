@@ -8,6 +8,7 @@ import importlib
 import sys
 import urllib.parse
 import json
+import asyncio
 
 app = Flask(__name__)
 
@@ -72,7 +73,15 @@ HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'T
 
 @app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
 @app.route('/<path:u_path>', methods = HTTP_METHODS)
-def handler(u_path):
+async def handler(u_path):
+    timeout = request.headers.get('x-open-runtimes-timeout', '')
+    safeTimeout = None
+    if (timeout):
+        if not timeout.isdigit() or int(timeout) == 0:
+            return 'Header "x-open-runtimes-timeout" must be an integer greater than 0.', 500
+            
+        safeTimeout = int(timeout)
+
     if (request.headers.get('x-open-runtimes-secret', '') == '' or request.headers.get('x-open-runtimes-secret', '') != os.getenv('OPEN_RUNTIMES_SECRET', '')):
         return 'Unauthorized. Provide correct "x-open-runtimes-secret" header.', 500
 
@@ -131,7 +140,8 @@ def handler(u_path):
     sys.stdout = sys.stderr = customstd = StringIO()
 
     output = None
-    try:
+
+    async def execute(context):
         userPath = os.getenv('OPEN_RUNTIMES_ENTRYPOINT')
         if userPath.endswith('.py'):
             size = len(userPath)
@@ -142,7 +152,22 @@ def handler(u_path):
         if userModule is None:
             raise Exception('Code file not found.')
 
-        output = userModule.main(context)
+        if asyncio.iscoroutinefunction(userModule.main):
+            output = await userModule.main(context)
+        else:
+            output = userModule.main(context)
+
+        return output
+
+    try:
+        if(safeTimeout is not None):
+            try:
+                output = await asyncio.wait_for(execute(context), timeout=safeTimeout)
+            except asyncio.TimeoutError:
+                context.error('Execution timed out.')
+                output = context.res.send('', 500, {})
+        else:
+            output = await execute(context)
     except Exception as e:
         context.error(''.join(traceback.TracebackException.from_exception(e).format()))
         output = context.res.send('', 500, {})
@@ -165,7 +190,7 @@ def handler(u_path):
             resp.headers[key.lower()] = output['headers'][key]
 
     if customstd.getvalue():
-        context.log('Unsupported log noticed. Use context.log() or context.error() for logging.')
+        context.log('Unsupported log detected. Use context.log() or context.error() for logging.')
 
     resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context.logs))
     resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context.errors))
