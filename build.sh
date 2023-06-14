@@ -24,6 +24,9 @@ docker build -t openruntimes/dotnet:v3-3.1 ./runtimes/dotnet-3.1/
 echo '.NET 6.0...'
 docker build -t openruntimes/dotnet:v3-6.0 ./runtimes/dotnet-6.0/
 
+echo 'Go 1.19...'
+docker build -t openruntimes/go:v2-1.19 ./runtimes/go-1.19/
+
 echo 'Java 8...'
 docker build -t openruntimes/java:v3-8.0 ./runtimes/java-8.0/
 
@@ -44,6 +47,9 @@ docker build -t openruntimes/node:v3-16.0 ./runtimes/node-16.0/
 
 echo 'Node 18.0...'
 docker build -t openruntimes/node:v3-18.0 ./runtimes/node-18.0/
+
+echo 'Node 19.0...'
+docker build -t openruntimes/node:v2-19.0 ./runtimes/node-19.0/
 
 echo 'PHP 8.0...'
 docker build -t openruntimes/php:v3-8.0 ./runtimes/php-8.0/

@@ -21,6 +21,12 @@ env:
     - VERSION=v3
   jobs:
     # Node
+    - RUNTIME=node-19.0
+      PHP_CLASS=Node190
+      ENTRYPOINT=tests.js
+      SERVER_PROCESS=pm2
+      IMAGE=openruntimes/node:${VERSION}-19.0
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
     - RUNTIME=node-18.0
       PHP_CLASS=Node180
       ENTRYPOINT=tests.js
@@ -223,24 +229,37 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests-v3.sh
 
+    # Go
+    - RUNTIME=go-1.19
+      PHP_CLASS=Go119
+      ENTRYPOINT=tests.go
+      SERVER_PROCESS="server"
+      IMAGE=openruntimes/go:${VERSION}-1.19
+      ARCH=linux/amd64,linux/arm64
 
 notifications:
   email:
     - team@appwrite.io
 
 before_install:
-  - curl -fsSL https://get.docker.com | sh
-  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
-  - mkdir -p $HOME/.docker
-  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
-  - sudo service docker start
+  # Upgrade Docker
+  - docker version
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  - docker version
+  # Login to Docker Hub
   - >
     if [ ! -z "${DOCKERHUB_PULL_USERNAME:-}" ]; then
       echo "${DOCKERHUB_PULL_PASSWORD}" | docker login --username "${DOCKERHUB_PULL_USERNAME}" --password-stdin
     fi
-  - docker version
-  - docker run --rm --privileged linuxkit/binfmt:v0.8
-  # - docker buildx use $(docker buildx create) # TEMPORARLY DISABLED DUE TO DOCKER 23.0.0 ISSUES
+  # Install Docker buildx
+  - mkdir -vp ~/.docker/cli-plugins/
+  - curl --silent -L "https://github.com/docker/buildx/releases/download/v0.3.0/buildx-v0.3.0.linux-amd64" > ~/.docker/cli-plugins/docker-buildx
+  - chmod a+x ~/.docker/cli-plugins/docker-buildx
+  # Activate Docker buildx
+  - docker buildx create --use
 
 install:
   - docker version
