@@ -4,6 +4,8 @@ const { json, send } = require("micro");
 
 const USER_CODE_PATH = '/usr/code-start';
 
+let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
+
 const server = micro(async (req, res) => {
     const body = await json(req);
 
@@ -56,7 +58,6 @@ const server = micro(async (req, res) => {
     };
 
     try {
-        let userFunction = require(USER_CODE_PATH + '/' + process.env.INTERNAL_RUNTIME_ENTRYPOINT);
 
         if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
             throw new Error("User function is not valid.")
