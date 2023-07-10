@@ -2,7 +2,7 @@
 set -e
 
 cd runtimes/"${RUNTIME}"
-docker build -t open-runtimes/test-runtime .
+docker build --load -t open-runtimes/test-runtime .
 cd ../../
 cd tests/resources/functions/"${RUNTIME}"
 

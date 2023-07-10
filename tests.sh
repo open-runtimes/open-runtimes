@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 cd runtimes/${RUNTIME}
-docker build --output type=docker -t open-runtimes/test-runtime .
+docker build --load -t open-runtimes/test-runtime .
 cd ../../
 cd tests/resources/functions/${RUNTIME}
 echo "Building..."
