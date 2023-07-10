@@ -19,6 +19,7 @@ vm:
 env:
   global:
     - VERSION=v3
+    - TRAVIS_NAME=${RUNTIME}
   jobs:
     # Node
     - RUNTIME=node-18.0
