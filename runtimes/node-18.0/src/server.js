@@ -117,7 +117,16 @@ const server = micro(async (req, res) => {
     let output = null;
 
     async function execute() {
-        let userFunction = require(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
+        let userFunction;
+        try {
+            userFunction = require(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
+        } catch(err) {
+            if(err.code === 'ERR_REQUIRE_ESM') {
+                userFunction = await import(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
+            } else {
+                throw err;
+            }
+        }
 
         if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
             throw new Error("User function is not valid.");

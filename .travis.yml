@@ -29,6 +29,14 @@ env:
       TEST_SCRIPT=tests-v3-commands.sh
       BUILD_COMMAND="npm install"
       START_COMMAND="npm start"
+    - RUNTIME=node-18.0
+      PHP_CLASS=Node180
+      ENTRYPOINT=tests.mjs
+      IMAGE=openruntimes/node:${VERSION}-18.0
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests-v3-commands.sh
+      BUILD_COMMAND="npm install"
+      START_COMMAND="npm start"
 
     # Deno
     - RUNTIME=deno-1.24
