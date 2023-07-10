@@ -24,7 +24,6 @@ env:
     - RUNTIME=node-18.0
       PHP_CLASS=Node180
       ENTRYPOINT=tests.js
-      SERVER_PROCESS=pm2
       IMAGE=openruntimes/node:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests-v3-commands.sh
@@ -35,7 +34,6 @@ env:
     - RUNTIME=deno-1.24
       PHP_CLASS=Deno124
       ENTRYPOINT=tests.ts
-      SERVER_PROCESS=server.ts
       IMAGE=openruntimes/deno:${VERSION}-1.24
       ARCH=linux/amd64
       TEST_SCRIPT=tests-v3.sh
@@ -44,7 +42,6 @@ env:
     - RUNTIME=python-3.10
       PHP_CLASS=Python310
       ENTRYPOINT=tests.py
-      SERVER_PROCESS=server.py
       IMAGE=openruntimes/python:${VERSION}-3.10
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests-v3-commands.sh
@@ -56,7 +53,6 @@ env:
       PHP_CLASS=Dart218
       ENTRYPOINT=lib/tests.dart
       IMAGE=openruntimes/dart:${VERSION}-2.18
-      SERVER_PROCESS=/usr/code-start/runtime
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests-v3.sh
 
@@ -64,7 +60,6 @@ env:
     - RUNTIME=ruby-3.1
       PHP_CLASS=Ruby31
       ENTRYPOINT=tests.rb
-      SERVER_PROCESS=puma
       IMAGE=openruntimes/ruby:${VERSION}-3.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests-v3.sh
@@ -73,7 +68,6 @@ env:
     - RUNTIME=php-8.1
       PHP_CLASS=PHP81
       ENTRYPOINT=tests.php
-      SERVER_PROCESS=server.php
       IMAGE=openruntimes/php:${VERSION}-8.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests-v3-commands.sh
@@ -84,7 +78,6 @@ env:
     - RUNTIME=swift-5.5
       PHP_CLASS=Swift55
       ENTRYPOINT=Tests.swift
-      SERVER_PROCESS="./Run serve"
       IMAGE=openruntimes/swift:${VERSION}-5.5
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests-v3.sh
@@ -93,7 +86,6 @@ env:
     - RUNTIME=kotlin-1.6
       PHP_CLASS=Kotlin16
       ENTRYPOINT=Tests.kt
-      SERVER_PROCESS="kotlin-runtime-1.0.0"
       IMAGE=openruntimes/kotlin:${VERSION}-1.6
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests-v3.sh
@@ -102,7 +94,6 @@ env:
     - RUNTIME=java-18.0
       PHP_CLASS=Java18
       ENTRYPOINT=Tests.java
-      SERVER_PROCESS="java-runtime-1.0.0"
       IMAGE=openruntimes/java:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests-v3.sh
@@ -111,7 +102,6 @@ env:
     - RUNTIME=cpp-17
       PHP_CLASS=Cpp17
       ENTRYPOINT=tests.cc
-      SERVER_PROCESS="cpp_runtime"
       IMAGE=openruntimes/cpp:${VERSION}-17
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests-v3.sh
@@ -120,7 +110,6 @@ env:
     - RUNTIME=dotnet-6.0
       PHP_CLASS=DotNet60
       ENTRYPOINT=Tests.cs
-      SERVER_PROCESS="DotNetRuntime.dll"
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests-v3.sh
@@ -129,9 +118,9 @@ env:
     - RUNTIME=go-1.19
       PHP_CLASS=Go119
       ENTRYPOINT=tests.go
-      SERVER_PROCESS="server"
       IMAGE=openruntimes/go:${VERSION}-1.19
       ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
 
 notifications:
   email:
@@ -162,7 +151,7 @@ install:
   - composer install
 
 script:
-  - export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh ${TEST_SCRIPT}
+  - export BUILD_COMMAND=${BUILD_COMMAND}; export START_COMMAND=${START_COMMAND}; export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh ${TEST_SCRIPT}
 
 deploy:
   - provider: script
