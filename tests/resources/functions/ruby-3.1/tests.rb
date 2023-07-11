@@ -84,7 +84,7 @@ def main(context)
     when 'timeout'
         context.log('Timeout start.')
         Async do
-          sleep(2)
+          sleep(3)
         end.wait
         context.log('Timeout end.');
         return context.res.send('Successful response.');

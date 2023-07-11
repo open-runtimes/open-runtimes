@@ -83,7 +83,7 @@ return function($context) use ($client) {
         return $context->res->json([ 'todo' => $todo ]);
       case 'timeout':
         $context->log('Timeout start.');
-        \sleep(60);
+        \sleep(3);
 
         $context->log('Timeout end.');
         return $context->res->send('Successful response.');

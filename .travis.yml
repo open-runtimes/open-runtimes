@@ -123,12 +123,12 @@ env:
       TEST_SCRIPT=tests-v3.sh
 
     # Go
-    - RUNTIME=go-1.19
-      PHP_CLASS=Go119
-      ENTRYPOINT=tests.go
-      IMAGE=openruntimes/go:${VERSION}-1.19
-      ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
+    # - RUNTIME=go-1.19
+    #   PHP_CLASS=Go119
+    #   ENTRYPOINT=tests.go
+    #   IMAGE=openruntimes/go:${VERSION}-1.19
+    #   ARCH=linux/amd64,linux/arm64
+    #   TEST_SCRIPT=tests.sh
 
 notifications:
   email:

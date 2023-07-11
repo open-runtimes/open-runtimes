@@ -83,7 +83,7 @@ async def main(context):
         })
     elif action == 'timeout':
         context.log('Timeout start.')
-        await asyncio.sleep(60)
+        await asyncio.sleep(3)
         context.log('Timeout end.')
         return context.res.send('Successful response.')
     else:

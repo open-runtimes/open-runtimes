@@ -73,7 +73,7 @@ module.exports = async (context) => {
             context.log('Timeout start.');
 
             await new Promise((resolve) => {
-                setTimeout(resolve, 2000);
+                setTimeout(resolve, 3000);
             });
 
             context.log('Timeout end.');
