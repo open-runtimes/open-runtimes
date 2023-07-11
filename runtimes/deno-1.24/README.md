@@ -11,20 +11,24 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `mod.ts` file:
 
 ```bash
-mkdir deno-or && cd deno-or
-printf "export default async function(context: any) {\n    return context.res.json({ n: Math.random() })\n}" > mod.ts
+mkdir deno-function && cd deno-function
+tee -a mod.ts << END
+export default async function(context: any) {
+    return context.res.json({ n: Math.random() });
+}
+END
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD:/usr/code openruntimes/deno:v3-1.24 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/deno:v3-1.24 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/deno:v3-1.24 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/deno:v3-1.24 sh helpers/start.sh "npm start"
 ```
 
 4. In new terminal window, execute function:
@@ -80,21 +84,6 @@ export default async function(context: any) {
 - The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.ts`.
 
 - Deno runtime currently doesn't support ARM, because there are no official ARM images.
-
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Bradley Schofield**
-
-+ [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
-
-**Matej Bačo**
-
-+ [https://github.com/Meldiron](https://github.com/Meldiron)
 
 ## Contributing
 

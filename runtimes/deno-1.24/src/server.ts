@@ -1,6 +1,6 @@
 import { Application } from "https://deno.land/x/oak@v10.6.0/mod.ts";
 
-const USER_CODE_PATH = '/usr/code-start';
+const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const app = new Application();
 

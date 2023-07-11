@@ -4,13 +4,13 @@ LABEL maintainer="team@appwrite.io"
 
 ENV OPEN_RUNTIMES_ENTRYPOINT=mod.ts
 
-RUN mkdir -p /usr/local/src/
-RUN mkdir -p /usr/code
-RUN mkdir -p /usr/code-start
-RUN mkdir -p /usr/workspace
-RUN mkdir -p /usr/builds
+RUN mkdir -p /mnt/code
+RUN mkdir -p /usr/local/build
+RUN mkdir -p /usr/local/server
+RUN mkdir -p /usr/local/server/src
+RUN mkdir -p /usr/local/server/src/function
 
-WORKDIR /usr/local/src
+WORKDIR /usr/local/server
 
 ENV DENO_DIR=/usr/builds/deno-cache
 
@@ -18,9 +18,11 @@ RUN deno install -qAf --unstable https://deno.land/x/denon@2.5.0/denon.ts
 
 COPY . .
 
-RUN chmod +x /usr/local/src/start.sh
-RUN chmod +x /usr/local/src/build.sh
+RUN chmod +x /usr/local/server/helpers/before-start.sh
+RUN chmod +x /usr/local/server/helpers/start.sh
+
+RUN chmod +x /usr/local/server/helpers/before-build.sh
+RUN chmod +x /usr/local/server/helpers/build.sh
+RUN chmod +x /usr/local/server/helpers/after-build.sh
 
 EXPOSE 3000
-
-CMD [ "/usr/local/src/start.sh" ]

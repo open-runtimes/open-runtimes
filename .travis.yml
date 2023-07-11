@@ -44,7 +44,9 @@ env:
       ENTRYPOINT=tests.ts
       IMAGE=openruntimes/deno:${VERSION}-1.24
       ARCH=linux/amd64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests-v3-commands.sh
+      BUILD_COMMAND="deno cache tests.ts"
+      START_COMMAND="denon run --allow-net --allow-write --allow-read --allow-env src/server.ts"
 
     # Python
     - RUNTIME=python-3.10
