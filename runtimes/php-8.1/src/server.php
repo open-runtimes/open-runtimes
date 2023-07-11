@@ -86,7 +86,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     if ($timeout) {
         if (!\is_numeric($timeout) || \intval($timeout) === 0) {
             $res->status(500);
-            $res->end('Header "x-open-runtimes-timeout" must be an integer greather than 0.');
+            $res->end('Header "x-open-runtimes-timeout" must be an integer greater than 0.');
             return;
         }
 
