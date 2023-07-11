@@ -2,21 +2,21 @@ import 'dart:io';
 import 'package:pubspec/pubspec.dart';
 
 void main() async {
-  var userPub = await PubSpec.loadFile('../user_code/pubspec.yaml');
+  var userPub = await PubSpec.loadFile('/usr/local/build/pubspec.yaml');
   String packageName = userPub.name ?? 'user_code';
 
   print("found user package $packageName");
 
   var serverPub = await PubSpec.loadFile('../pubspec.yaml');
   var dependencies = serverPub.dependencies;
-  dependencies[packageName] = PathReference('./user_code');
+  dependencies[packageName] = PathReference('/usr/local/build');
 
   final updatedPubspec = serverPub.copy(dependencies: dependencies);
   await updatedPubspec.save(Directory.current.parent);
 
   print("added user package as dependency to server.");
 
-  File server = File("../server.dart");
+  File server = File("../src/server.dart");
   String fileName =
       Platform.environment['OPEN_RUNTIMES_ENTRYPOINT'] ?? 'lib/main.dart';
   fileName = fileName.replaceFirst('lib/', '');

@@ -6,8 +6,6 @@ import '{entrypoint}' as user_code;
 import 'dart:io' show Platform;
 import 'function_types.dart';
 
-// const USER_CODE_PATH = '/usr/code-start';
-
 void main() async {
   await shelf_io.serve((req) async {
     int? safeTimeout = null;

@@ -64,7 +64,9 @@ env:
       ENTRYPOINT=lib/tests.dart
       IMAGE=openruntimes/dart:${VERSION}-2.18
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests-v3-commands.sh
+      BUILD_COMMAND="dart pub get"
+      START_COMMAND="/usr/local/server/src/function/server"
 
     # Ruby
     - RUNTIME=ruby-3.1
