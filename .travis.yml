@@ -29,7 +29,7 @@ env:
       TEST_SCRIPT=tests.sh
       BUILD_COMMAND="npm install"
       START_COMMAND="npm start"
-    - RUNTIME=node-18.0-esm
+    - RUNTIME=node-18.0
       TEST_CLASS=Base
       ENTRYPOINT=tests.mjs
       IMAGE=openruntimes/node:${VERSION}-18.0
