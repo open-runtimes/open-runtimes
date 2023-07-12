@@ -109,7 +109,9 @@ env:
       ENTRYPOINT=Tests.java
       IMAGE=openruntimes/java:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests.sh
+      BUILD_COMMAND="sh gradlew buildJar"
+      START_COMMAND="java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
 
     # C++
     - RUNTIME=cpp-17
