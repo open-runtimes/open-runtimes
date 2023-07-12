@@ -22,25 +22,24 @@ env:
   jobs:
     # Node
     - RUNTIME=node-18.0
-      PHP_CLASS=Node180
+      TEST_CLASS=Base
       ENTRYPOINT=tests.js
       IMAGE=openruntimes/node:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
       BUILD_COMMAND="npm install"
       START_COMMAND="npm start"
-    - RUNTIME=node-18.0
-      PHP_CLASS=Node180
+    - RUNTIME=node-18.0-esm
+      TEST_CLASS=Base
       ENTRYPOINT=tests.mjs
       IMAGE=openruntimes/node:${VERSION}-18.0
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
       BUILD_COMMAND="npm install"
       START_COMMAND="npm start"
 
     # Deno
     - RUNTIME=deno-1.24
-      PHP_CLASS=Deno124
+      TEST_CLASS=Base
       ENTRYPOINT=tests.ts
       IMAGE=openruntimes/deno:${VERSION}-1.24
       ARCH=linux/amd64
@@ -50,7 +49,7 @@ env:
 
     # Python
     - RUNTIME=python-3.10
-      PHP_CLASS=Python310
+      TEST_CLASS=Base
       ENTRYPOINT=tests.py
       IMAGE=openruntimes/python:${VERSION}-3.10
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
@@ -60,7 +59,7 @@ env:
 
     # Dart
     - RUNTIME=dart-2.18
-      PHP_CLASS=Dart218
+      TEST_CLASS=Base
       ENTRYPOINT=lib/tests.dart
       IMAGE=openruntimes/dart:${VERSION}-2.18
       ARCH=linux/amd64,linux/arm64
@@ -70,7 +69,7 @@ env:
 
     # Ruby
     - RUNTIME=ruby-3.1
-      PHP_CLASS=Ruby31
+      TEST_CLASS=Base
       ENTRYPOINT=tests.rb
       IMAGE=openruntimes/ruby:${VERSION}-3.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
@@ -80,7 +79,7 @@ env:
 
     # PHP
     - RUNTIME=php-8.1
-      PHP_CLASS=PHP81
+      TEST_CLASS=Base
       ENTRYPOINT=tests.php
       IMAGE=openruntimes/php:${VERSION}-8.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
@@ -90,7 +89,7 @@ env:
 
     # Swift
     - RUNTIME=swift-5.5
-      PHP_CLASS=Swift55
+      TEST_CLASS=Base
       ENTRYPOINT=Tests.swift
       IMAGE=openruntimes/swift:${VERSION}-5.5
       ARCH=linux/amd64,linux/arm64
@@ -98,7 +97,7 @@ env:
 
     # Kotlin
     - RUNTIME=kotlin-1.6
-      PHP_CLASS=Kotlin16
+      TEST_CLASS=Base
       ENTRYPOINT=Tests.kt
       IMAGE=openruntimes/kotlin:${VERSION}-1.6
       ARCH=linux/amd64,linux/arm64
@@ -106,7 +105,7 @@ env:
 
     # Java
     - RUNTIME=java-18.0
-      PHP_CLASS=Java18
+      TEST_CLASS=Base
       ENTRYPOINT=Tests.java
       IMAGE=openruntimes/java:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm64
@@ -114,7 +113,7 @@ env:
 
     # C++
     - RUNTIME=cpp-17
-      PHP_CLASS=Cpp17
+      TEST_CLASS=Base
       ENTRYPOINT=tests.cc
       IMAGE=openruntimes/cpp:${VERSION}-17
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
@@ -122,7 +121,7 @@ env:
 
     # DotNet
     - RUNTIME=dotnet-6.0
-      PHP_CLASS=DotNet60
+      TEST_CLASS=Base
       ENTRYPOINT=Tests.cs
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
@@ -130,7 +129,7 @@ env:
 
     # Go
     # - RUNTIME=go-1.19
-    #   PHP_CLASS=Go119
+    #   TEST_CLASS=Base
     #   ENTRYPOINT=tests.go
     #   IMAGE=openruntimes/go:${VERSION}-1.19
     #   ARCH=linux/amd64,linux/arm64
@@ -165,7 +164,7 @@ install:
   - composer install
 
 script:
-  - export BUILD_COMMAND=${BUILD_COMMAND}; export START_COMMAND=${START_COMMAND}; export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh ${TEST_SCRIPT}
+  - export BUILD_COMMAND=${BUILD_COMMAND}; export START_COMMAND=${START_COMMAND}; export RUNTIME=${RUNTIME}; export TEST_CLASS=${TEST_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh ${TEST_SCRIPT}
 
 deploy:
   - provider: script

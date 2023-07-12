@@ -231,7 +231,7 @@ Edit the `.travis.yml` file and add your runtime to the `env.jobs` section of it
 ```yaml
 # {{Language Name}}
 - RUNTIME={{full runtime name with version, e.g. dart-2.12}}
-  PHP_CLASS={{Name of the PHP Class you made earlier, e.g. Dart212}}
+  TEST_CLASS=Base
   ENTRYPOINT={{Name of your entrypoint file, e.g. test.dart}}
   IMAGE={{Full image name including the openruntime/ prefix and the version placeholder, e.g. openruntimes/dart:${VERSION}-2.12}}
   ARCH={{List of architecture supported by this runtime seperated by commas, e.g. linux/amd64,linux/arm64}}
@@ -244,7 +244,7 @@ You will have to create multiple of these for each version of the language you a
 To run your tests locally, go ahead and run the following command in your terminal:
 
 ```bash
-RUNTIME={{Your Runtime}} ENTRYPOINT={{ your entrypoint }} PHP_CLASS={{ your class }} ./tests.sh 
+RUNTIME={{Your Runtime}} ENTRYPOINT={{ your entrypoint }} TEST_CLASS=Base ./tests.sh 
 ```
 
 Replace the curly brackets with the values you set in `.travis.yml` and make sure to run the command in the root of the repository.
