@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: Ruby31
 // Entrypoint: tests.rb
 
-class Ruby31 extends BaseV3
+class Ruby31 extends Base
 {
 }

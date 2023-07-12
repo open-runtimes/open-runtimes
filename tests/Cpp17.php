@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: Cpp17
 // Entrypoint: tests.cc
 
-class Cpp17 extends BaseV3
+class Cpp17 extends Base
 {
 }

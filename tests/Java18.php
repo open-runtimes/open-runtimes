@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: Java18
 // Entrypoint: Tests.java
 
-class Java18 extends BaseV3
+class Java18 extends Base
 {
 }

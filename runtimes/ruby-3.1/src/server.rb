@@ -2,7 +2,7 @@ require 'sinatra'
 require 'json'
 require 'async'
 
-USER_CODE_PATH = '/usr/code-start';
+USER_CODE_PATH = '/usr/local/server/src/function';
 
 class RuntimeResponse
   def send(body, status_code = 200, headers = {})

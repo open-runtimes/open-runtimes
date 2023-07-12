@@ -6,6 +6,6 @@ namespace Tests;
 // PHP class: Kotlin16
 // Entrypoint: Tests.kt
 
-class Kotlin16 extends BaseV3
+class Kotlin16 extends Base
 {
 }
