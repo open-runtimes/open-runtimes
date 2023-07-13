@@ -2,6 +2,10 @@
 # Fail build if any command fails
 set -e
 
+# Install dependencies
+cd /usr/local/server
+bundle install
+
 echo "Packing build ..."
 
 # Prepare empty folder to prevent errors with copying

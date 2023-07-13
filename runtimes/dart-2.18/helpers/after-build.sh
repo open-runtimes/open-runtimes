@@ -2,6 +2,10 @@
 # Fail build if any command fails
 set -e
 
+# Get server dependencies
+cd /usr/local/server
+dart pub get
+
 echo "Compiling"
 
 # Prepare folder for compiled build

@@ -15,9 +15,9 @@ if [ -f "Gemfile" ]; then
     echo "eval_gemfile '/usr/local/build/Gemfile'" >> /usr/local/server/Gemfile
 fi
 
-# Enter server folder
-cd /usr/local/server
-
 bundle config set --local path 'vendor/bundle'
+
+# Enter build folder
+cd /usr/local/build
 
 echo 'Building ...'

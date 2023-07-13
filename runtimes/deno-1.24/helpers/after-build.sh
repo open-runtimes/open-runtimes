@@ -2,6 +2,10 @@
 # Fail build if any command fails
 set -e
 
+# Cache server dependencies
+cd /usr/local/server/src
+deno cache server.ts
+
 echo "Packing build ..."
 
 # Store entrypoint into build. Will be used during start process

@@ -15,9 +15,5 @@ export DENO_DIR="/usr/local/build/deno-cache"
 
 echo 'Building ...'
 
-# Cache server dependencies
-cd /usr/local/server/src
-deno cache server.ts
-
 # Enter build folder
 cd /usr/local/build

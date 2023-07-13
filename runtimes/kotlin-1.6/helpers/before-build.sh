@@ -8,11 +8,11 @@ echo "Preparing for build ..."
 cp -R /mnt/code/* /usr/local/build
 
 # Copy user code to server code
-mkdir -p /usr/local/server/src/main/kotlin/io/openruntimes/kotlin
-cp -a /usr/local/build/. /usr/local/server/src/main/kotlin/io/openruntimes/kotlin
+mkdir -p /usr/local/server/src/main/java/io/openruntimes/java
+cp -a /usr/local/build/. /usr/local/server/src/main/java/io/openruntimes/java
 
 # Link user's depenrencies
-cd /usr/local/server/src/main/kotlin/io/openruntimes/kotlin
+cd /usr/local/server/src/main/java/io/openruntimes/java
 for filename in ./*.gradle*; do
     if [ ! -f "${filename}" ]; then
         continue;
@@ -21,7 +21,7 @@ for filename in ./*.gradle*; do
     echo "apply from: \"${filename}\"" >> /usr/local/server/build.gradle
 done
 
-# Enter server folder
-cd /usr/local/server
-
 echo 'Building ...'
+
+# Enter build folder
+cd /usr/local/build

@@ -21,7 +21,7 @@ for filename in ./*.gradle*; do
     echo "apply from: \"${filename}\"" >> /usr/local/server/build.gradle
 done
 
-# Enter server folder
-cd /usr/local/server
-
 echo 'Building ...'
+
+# Enter build folder
+cd /usr/local/build

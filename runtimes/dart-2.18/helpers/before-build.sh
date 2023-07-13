@@ -18,10 +18,6 @@ cd /usr/local/server/prepare
 dart pub get
 dart prepare.dart
 
-# Get server dependencies
-cd /usr/local/server
-dart pub get
-
 # Enter build folder
 cd /usr/local/build
 

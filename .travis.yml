@@ -74,7 +74,7 @@ env:
       IMAGE=openruntimes/ruby:${VERSION}-3.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND="bundle install"
+      BUILD_COMMAND=""
       START_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 
     # PHP
@@ -102,7 +102,7 @@ env:
       IMAGE=openruntimes/kotlin:${VERSION}-1.6
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND="sh gradlew buildJar"
+      BUILD_COMMAND=""
       START_COMMAND="java -jar /usr/local/server/src/function/kotlin-runtime-1.0.0.jar"
 
     # Java
@@ -112,7 +112,7 @@ env:
       IMAGE=openruntimes/java:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND="sh gradlew buildJar"
+      BUILD_COMMAND=""
       START_COMMAND="java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
 
     # C++
