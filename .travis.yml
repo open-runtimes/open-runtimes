@@ -129,7 +129,9 @@ env:
       ENTRYPOINT=Tests.cs
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests.sh
+      BUILD_COMMAND=""
+      START_COMMAND="dotnet DotNetRuntime.dll"
 
     # Go
     # - RUNTIME=go-1.19
