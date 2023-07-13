@@ -101,7 +101,9 @@ env:
       ENTRYPOINT=Tests.kt
       IMAGE=openruntimes/kotlin:${VERSION}-1.6
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests.sh
+      BUILD_COMMAND="sh gradlew buildJar"
+      START_COMMAND="java -jar /usr/local/server/src/function/kotlin-runtime-1.0.0.jar"
 
     # Java
     - RUNTIME=java-18.0
