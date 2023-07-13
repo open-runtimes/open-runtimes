@@ -6,7 +6,7 @@ set -e
 mkdir /usr/local/build/compiled
 
 # Copy output files
-cp -R /usr/local/src/build/libs/* /usr/local/build/compiled
+cp -R /usr/local/server/build/libs/* /usr/local/build/compiled
 
 echo "Packing build ..."
 
