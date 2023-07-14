@@ -121,7 +121,9 @@ env:
       ENTRYPOINT=tests.cc
       IMAGE=openruntimes/cpp:${VERSION}-17
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests.sh
+      BUILD_COMMAND=""
+      START_COMMAND="/usr/local/server/src/function/cpp_runtime"
 
     # DotNet
     - RUNTIME=dotnet-6.0
