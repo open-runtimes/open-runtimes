@@ -1,6 +1,6 @@
 import Foundation
 
-let outpath = "/usr/local/src"
+let outpath = "/usr/local/server"
 let outfile = "Package.swift"
 let task = Process()
 let pipe = Pipe()

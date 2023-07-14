@@ -93,7 +93,9 @@ env:
       ENTRYPOINT=Tests.swift
       IMAGE=openruntimes/swift:${VERSION}-5.5
       ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests-v3.sh
+      TEST_SCRIPT=tests.sh
+      BUILD_COMMAND=""
+      START_COMMAND="/usr/local/server/src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
 
     # Kotlin
     - RUNTIME=kotlin-1.6
