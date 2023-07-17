@@ -11,26 +11,32 @@ To learn more about runtimes, visit [Runtimes introduction](https://github.com/o
 1. Create a folder and enter it. Add code into `index.swift` file:
 
 ```bash
-mkdir swift-test && cd swift-test
-printf "func main(context: RuntimeContext) -> RuntimeOutput {\n    return context.res.json(body: [\"n\": Double.random(in:0...1)])\n}" > index.swift
+mkdir swift-function && cd swift-function
+tee -a index.swift << END
+func main(context: RuntimeContext) async throws -> RuntimeOutput {
+    return try context.res.json(["n": Double.random(in:0...1)])
+}
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/swift:v3-5.5 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.swift --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/swift:v3-5.5 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/swift:v3-5.5 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/swift:v3-5.5 sh helpers/start.sh "/usr/local/server/src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
 ```
 
 4. In new terminal window, execute function:
 
-```
-curl -H "x-open-runtimes-secret: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
+```bash
+curl -H "x-open-runtimes-secret: secret-key" -X GET http://localhost:3000/
 ```
 
 Output `{ "n": 0.7232589496628183 }` with a random float will be displayed after the execution.
@@ -52,7 +58,7 @@ cd open-runtimes/runtimes/swift-5.5
 3. Run the included example cloud function:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 4. Execute the function:
@@ -63,7 +69,7 @@ curl -H "x-open-runtimes-secret: secret-key" -H "Content-Type: application/json"
 
 You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-open-runtimes-secret: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":{} }`.
 
-You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
+You can also make changes to the example code and apply the changes with the `docker compose restart` command.
 
 ## Notes
 
