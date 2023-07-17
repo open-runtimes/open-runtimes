@@ -11,20 +11,27 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `index.php` file:
 
 ```bash
-mkdir php-or && cd php-or
-printf "<?\nreturn function(\$context) {\n    return \$context->res->json([ 'n' => \mt_rand() / \mt_getrandmax() ]);\n};" > index.php
+mkdir php-function && cd php-function
+tee -a index.php << END
+<?
+return function(\$context) {
+    return \$context->res->json([ 'n' => mt_rand() / mt_getrandmax() ]);
+};
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/php:v3-8.1 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.php --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/php:v3-8.1 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=index.php --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/php:v3-8.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/php:v3-8.1 sh helpers/start.sh "php src/server.php"
 ```
 
 4. In new terminal window, execute function:

@@ -11,21 +11,42 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 1. Create a folder and enter it. Add code into `index.cc` file:
 
+
 ```bash
-mkdir cpp-or && cd cpp-or
-printf "static RuntimeOutput &main(const RuntimeContext &context) { Json::Value result; result[\"n\"] = rand() / (RAND_MAX + 1.); return context.res.json(result); }" > index.cc
+mkdir cpp-function && cd cpp-function
+tee -a index.cc << END
+#include "RuntimeResponse.h"
+#include "RuntimeRequest.h"
+#include "RuntimeOutput.h"
+#include "RuntimeContext.h"
+
+namespace runtime {
+    class Handler {
+    public:
+        static RuntimeOutput main(RuntimeContext &context)
+        {
+            Json::Value result;
+            result["n"] = rand() / (RAND_MAX + 1.);
+            
+            return context.res.json(result);
+        }
+    };
+}
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.cc --rm --interactive --tty --volume $PWD:/usr/code openruntimes/cpp:v3-17 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.cc --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/cpp:v3-17 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/cpp:v3-17 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/cpp:v3-17 sh helpers/start.sh "/usr/local/server/src/function/cpp_runtime"
 ```
 
 4. In new terminal window, execute function:

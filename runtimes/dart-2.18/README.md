@@ -8,23 +8,32 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 ## Usage
 
-1. Create a folder and enter it. Add code into `main.dart` file:
+1. Create a folder and enter it. Add code into `lib/main.dart` file:
 
 ```bash
-mkdir dart-or && cd dart-or && mkdir lib
-printf "import 'dart:async';\nimport 'dart:math';\nFuture<dynamic> main(final context) async {\n    return context.res.json({'n': new Random().nextDouble() });\n}" > lib/main.dart
+mkdir dart-function && cd dart-function && mkdir lib
+tee -a lib/main.dart << END
+import 'dart:async';
+import 'dart:math';
+
+Future<dynamic> main(final context) async {
+  return context.res.json({'n': new Random().nextDouble() });
+}
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=lib/main.dart --rm --interactive --tty --volume $PWD:/usr/code openruntimes/dart:v3-2.18 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=lib/main.dart --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dart:v3-2.18 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/dart:v3-2.18 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/dart:v3-2.18 sh helpers/start.sh "/usr/local/server/src/function/server"
 ```
 
 4. In new terminal window, execute function:

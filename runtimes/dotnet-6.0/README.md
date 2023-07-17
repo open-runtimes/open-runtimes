@@ -11,20 +11,30 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `Index.cs` file:
 
 ```bash
-mkdir dotnet-or && cd dotnet-or
-printf "namespace DotNetRuntime;\npublic class Handler {\n  public async Task<RuntimeOutput> Main(RuntimeContext Context) => Context.Res.Json(new() {{ \"n\", new System.Random().NextDouble() }} );\n}" > Index.cs
+mkdir dotnet-function && cd dotnet-function
+tee -a Index.cs << END
+namespace DotNetRuntime;
+
+public class Handler {
+  public async Task<RuntimeOutput> Main(RuntimeContext Context) {
+    return Context.Res.Json(new() {{ "n", new System.Random().NextDouble() }} );
+  }
+}
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD:/usr/code openruntimes/dotnet:v3-6.0 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=Indes.cs --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dotnet:v3-6.0 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/dotnet:v3-6.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/dotnet:v3-6.0 sh helpers/start.sh "dotnet /usr/local/server/src/function/DotNetRuntime.dll"
 ```
 
 4. In new terminal window, execute function:

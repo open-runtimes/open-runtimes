@@ -11,21 +11,28 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `Index.kt` file:
 
 ```bash
-mkdir kotlin-or && cd kotlin-or
-printf "package io.openruntimes.kotlin\npublic class Index {\n 
-   fun main(context: RuntimeContext): RuntimeOutput = context.res.json(mutableMapOf(\"n\" to Math.random()))"\n} > Index.kt
+mkdir kotlin-function && cd kotlin-function
+tee -a Index.kt << END
+package io.openruntimes.kotlin
+
+public class Index {
+    fun main(context: RuntimeContext): RuntimeOutput = context.res.json(mutableMapOf("n" to Math.random()))
+}
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=Index.kt --rm --interactive --tty --volume $PWD:/usr/code openruntimes/kotlin:v3-1.6 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=Index.kt --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/kotlin:v3-1.6 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/kotlin:v3-1.6 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/kotlin:v3-1.6 sh helpers/start.sh "java -jar /usr/local/server/src/function/kotlin-runtime-1.0.0.jar"
 ```
 
 4. In new terminal window, execute function:

@@ -17,6 +17,7 @@ import random
 
 def main(context):
     return context.res.json({'n': random.random() })
+
 END
 
 ```

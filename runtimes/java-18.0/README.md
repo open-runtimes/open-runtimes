@@ -11,20 +11,31 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `Index.java` file:
 
 ```bash
-mkdir java-or && cd java-or
-printf "package io.openruntimes.java;\nimport java.util.Collections;\n\npublic class Index {\n    public RuntimeOutput main(RuntimeContext context) throws Exception {\n        return context.res.json(Collections.singletonMap(\"n\", Math.random()));\n    }\n}" > Index.java
+mkdir java-function && cd java-function
+tee -a Index.java << END
+package io.openruntimes.java;
+import java.util.Collections;
+
+public class Index {
+    public RuntimeOutput main(RuntimeContext context) throws Exception {
+        return context.getRes().json(Collections.singletonMap("n", Math.random()));
+    }
+}
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=Index.java --rm --interactive --tty --volume $PWD:/usr/code openruntimes/java:v3-18.0 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=Index.java --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/java:v3-18.0 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/java:v3-18.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/java:v3-18.0 sh helpers/start.sh "java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
 ```
 
 4. In new terminal window, execute function:

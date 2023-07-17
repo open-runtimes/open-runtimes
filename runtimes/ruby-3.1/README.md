@@ -11,20 +11,26 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `index.rb` file:
 
 ```bash
-mkdir ruby-or && cd ruby-or
-printf "def main(context)\n    return context.res.json({:n => rand()})\nend" > index.rb
+mkdir ruby-function && cd ruby-function
+tee -a index.rb << END
+def main(context)
+    return context.res.json({:n => rand()})
+end
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/usr/code openruntimes/ruby:v3-3.1 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.rb --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/ruby:v3-3.1 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=index.rb --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/ruby:v3-3.1 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/ruby:v3-3.1 sh helpers/start.sh "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 ```
 
 4. In new terminal window, execute function:

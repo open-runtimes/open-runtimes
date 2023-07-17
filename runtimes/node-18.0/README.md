@@ -16,6 +16,7 @@ tee -a index.js << END
 module.exports = async (context) => {
     return context.res.json({ n: Math.random() });
 };
+
 END
 
 ```
@@ -29,7 +30,7 @@ docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.js --rm --interactive --tty --volum
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-18.0 sh helpers/start.sh "npm start"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-18.0 sh helpers/start.sh "pm2 start src/server.js --no-daemon"
 ```
 
 4. In new terminal window, execute function:

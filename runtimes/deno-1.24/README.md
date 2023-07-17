@@ -16,7 +16,9 @@ tee -a mod.ts << END
 export default async function(context: any) {
     return context.res.json({ n: Math.random() });
 }
+
 END
+
 ```
 
 2. Build the code:
@@ -28,7 +30,7 @@ docker run -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/deno:v3-1.24 sh helpers/start.sh "npm start"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/deno:v3-1.24 sh helpers/start.sh "denon run --allow-net --allow-write --allow-read --allow-env src/server.ts"
 ```
 
 4. In new terminal window, execute function:

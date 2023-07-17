@@ -47,3 +47,4 @@ target_include_directories(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
                PRIVATE ${SRC_DIR})
 
+target_link_libraries(${PROJECT_NAME} PUBLIC curl)
