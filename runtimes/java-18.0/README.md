@@ -52,7 +52,7 @@ cd open-runtimes/runtimes/java-18.0
 3. Run the included example cloud function:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 4. Execute the function:
@@ -63,7 +63,7 @@ curl -H "x-open-runtimes-secret: secret-key" -H "Content-Type: application/json"
 
 You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-open-runtimes-secret: secret-key`.
 
-You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
+You can also make changes to the example code and apply the changes with the `docker compose restart` command.
 
 ## Notes
 

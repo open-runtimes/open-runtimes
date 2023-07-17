@@ -16,8 +16,6 @@ namespace runtime {
             RuntimeRequest req = context.req;
             RuntimeResponse res = context.res;
 
-            std::string headerData = req.headers["x-test-header"].asString();
-
             Json::Value payload = std::any_cast<Json::Value>(req.body);
             std::string id = payload["id"].asString();
 
@@ -52,7 +50,6 @@ namespace runtime {
             Json::Value response;
             response["message"] = "Hello Open Runtimes 👋";
             response["todo"] = todo;
-            response["header"] = headerData;
 
             return res.json(response);
         }

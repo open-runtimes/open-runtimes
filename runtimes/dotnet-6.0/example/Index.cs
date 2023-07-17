@@ -11,8 +11,13 @@ public class Handler {
 
         if (!(Context.Req.Body is String))
         {
+            object? idObject;
             Dictionary<string, object> body = (Dictionary<string, object>) Context.Req.Body;
-            id = body.TryGetValue("id", out string value) ? value : "1";
+            body.TryGetValue("id", out idObject);
+
+            if(idObject != null) {
+                id = ((JsonElement) idObject).ToString();
+            }
         }
 
         var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{id}");

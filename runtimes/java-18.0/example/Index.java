@@ -36,7 +36,6 @@ public class Index {
         Map<String, Object> todo = gson.fromJson(todoBuffer.toString(), Map.class);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("r", context.getReq().getHeaders());
         data.put("message", "Hello Open Runtimes 👋");
         data.put("todo", todo);
 
