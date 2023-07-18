@@ -8,8 +8,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - INTERNAL_RUNTIME_KEY
-      - INTERNAL_RUNTIME_ENTRYPOINT
+      - OPEN_RUNTIMES_SECRET
+      - OPEN_RUNTIMES_ENTRYPOINT
+      - OPEN_RUNTIMES_BUILD_COMMAND
+      - OPEN_RUNTIMES_START_COMMAND
     volumes:
-      - ./example/:/usr/code:rw
-    command: sh -c "sh /usr/local/src/build.sh && cp /usr/code/code.tar.gz /tmp/code.tar.gz && sh /usr/local/src/start.sh"
+      - ./example/:/mnt/code:rw
+    command: sh -c "sh helpers/build.sh \"$OPEN_RUNTIMES_BUILD_COMMAND\" && sh helpers/start.sh \"$OPEN_RUNTIMES_START_COMMAND\""

@@ -49,32 +49,32 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 | Name | Version | Docker Hub | Examples | Pulls |
 | ------- | ------- | --------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| C++ | 2017 | [openruntimes/cpp:v2-17](https://hub.docker.com/r/openruntimes/cpp) | [Examples](/runtimes/cpp-17/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/cpp?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/cpp) |
-| Dart | 2.15 | [openruntimes/dart:v2-2.15](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.15/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
-| Dart | 2.16 | [openruntimes/dart:v2-2.16](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.16/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
-| Dart | 2.17 | [openruntimes/dart:v2-2.17](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.17/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
-| Deno | 1.21 | [openruntimes/deno:v2-1.21](https://hub.docker.com/r/openruntimes/deno) | [Examples](/runtimes/deno-1.21/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/deno) |
-| Deno | 1.24 | [openruntimes/deno:v2-1.24](https://hub.docker.com/r/openruntimes/deno) | [Examples](/runtimes/deno-1.24/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/deno) |
-| .NET | 3.1 | [openruntimes/dotnet:v2-3.1](https://hub.docker.com/r/openruntimes/dotnet) | [Examples](/runtimes/dotnet-3.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dotnet?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dotnet) |
-| .NET | 6.0 | [openruntimes/dotnet:v2-6.0](https://hub.docker.com/r/openruntimes/dotnet) | [Examples](/runtimes/dotnet-6.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dotnet?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dotnet) |
+| C++ | 2017 | [openruntimes/cpp:v3-17](https://hub.docker.com/r/openruntimes/cpp) | [Examples](/runtimes/cpp-17/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/cpp?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/cpp) |
+| Dart | 2.15 | [openruntimes/dart:v3-2.15](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.15/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
+| Dart | 2.16 | [openruntimes/dart:v3-2.16](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.16/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
+| Dart | 2.17 | [openruntimes/dart:v3-2.17](https://hub.docker.com/r/openruntimes/dart) | [Examples](/runtimes/dart-2.17/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
+| Deno | 1.21 | [openruntimes/deno:v3-1.21](https://hub.docker.com/r/openruntimes/deno) | [Examples](/runtimes/deno-1.21/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/deno) |
+| Deno | 1.24 | [openruntimes/deno:v3-1.24](https://hub.docker.com/r/openruntimes/deno) | [Examples](/runtimes/deno-1.24/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/deno) |
+| .NET | 3.1 | [openruntimes/dotnet:v3-3.1](https://hub.docker.com/r/openruntimes/dotnet) | [Examples](/runtimes/dotnet-3.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dotnet?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dotnet) |
+| .NET | 6.0 | [openruntimes/dotnet:v3-6.0](https://hub.docker.com/r/openruntimes/dotnet) | [Examples](/runtimes/dotnet-6.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dotnet?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dotnet) |
 | Go | 1.19 | [openruntimes/go:v2-1.19](https://hub.docker.com/r/openruntimes/go) | [Examples](/runtimes/go-1.19/example/) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/go?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/go) |
-| Java | 8 | [openruntimes/java:v2-8.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-8.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
-| Java | 11 | [openruntimes/java:v2-11.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-11.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
-| Java | 17 | [openruntimes/java:v2-17.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-17.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
-| Java | 18 | [openruntimes/java:v2-18.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-18.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
-| Kotlin | 1.6 | [openruntimes/kotlin:v2-1.6](https://hub.docker.com/r/openruntimes/kotlin) | [Examples](/runtimes/kotlin-1.6/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/kotlin?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/kotlin) |
-| Node.js | 14.5 | [openruntimes/node:v2-14.5](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-14.5/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
-| Node.js | 16.0 | [openruntimes/node:v2-16.0](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-16.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
-| Node.js | 18.0 | [openruntimes/node:v2-18.0](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-18.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
+| Java | 8 | [openruntimes/java:v3-8.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-8.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
+| Java | 11 | [openruntimes/java:v3-11.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-11.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
+| Java | 17 | [openruntimes/java:v3-17.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-17.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
+| Java | 18 | [openruntimes/java:v3-18.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-18.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
+| Kotlin | 1.6 | [openruntimes/kotlin:v3-1.6](https://hub.docker.com/r/openruntimes/kotlin) | [Examples](/runtimes/kotlin-1.6/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/kotlin?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/kotlin) |
+| Node.js | 14.5 | [openruntimes/node:v3-14.5](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-14.5/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
+| Node.js | 16.0 | [openruntimes/node:v3-16.0](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-16.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
+| Node.js | 18.0 | [openruntimes/node:v3-18.0](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-18.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
 | Node.js | 19.0 | [openruntimes/node:v2-19.0](https://hub.docker.com/r/openruntimes/node) | [Examples](/runtimes/node-19.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/node?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/node) |
-| PHP | 8.0 | [openruntimes/php:v2-8.0](https://hub.docker.com/r/openruntimes/php) | [Examples](/runtimes/php-8.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/php) |
-| PHP | 8.1 | [openruntimes/php:v2-8.1](https://hub.docker.com/r/openruntimes/php) | [Examples](/runtimes/php-8.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/php) |
-| Python | 3.8 | [openruntimes/python:v2-3.8](https://hub.docker.com/r/openruntimes/python) | [Examples](/runtimes/python-3.8/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
-| Python | 3.9 | [openruntimes/python:v2-3.9](https://hub.docker.com/r/openruntimes/python) | [Examples](/runtimes/python-3.9/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
-| Python | 3.10 | [openruntimes/python:v2-3.10](https://hub.docker.com/r/openruntimes/python) | [Examples](/runtimes/python-3.10/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
-| Ruby | 3.0 | [openruntimes/ruby:v2-3.0](https://hub.docker.com/r/openruntimes/ruby) | [Examples](/runtimes/ruby-3.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
-| Ruby | 3.1 | [openruntimes/ruby:v2-3.1](https://hub.docker.com/r/openruntimes/ruby) | [Examples](/runtimes/ruby-3.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
-| Swift | 5.5 | [openruntimes/swift:v2-5.5](https://hub.docker.com/r/openruntimes/swift) | [Examples](/runtimes/swift-5.5/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/swift?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/swift) |
+| PHP | 8.0 | [openruntimes/php:v3-8.0](https://hub.docker.com/r/openruntimes/php) | [Examples](/runtimes/php-8.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/php) |
+| PHP | 8.1 | [openruntimes/php:v3-8.1](https://hub.docker.com/r/openruntimes/php) | [Examples](/runtimes/php-8.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/php?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/php) |
+| Python | 3.8 | [openruntimes/python:v3-3.8](https://hub.docker.com/r/openruntimes/python) | [Examples](/runtimes/python-3.8/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
+| Python | 3.9 | [openruntimes/python:v3-3.9](https://hub.docker.com/r/openruntimes/python) | [Examples](/runtimes/python-3.9/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
+| Python | 3.10 | [openruntimes/python:v3-3.10](https://hub.docker.com/r/openruntimes/python) | [Examples](/runtimes/python-3.10/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python) |
+| Ruby | 3.0 | [openruntimes/ruby:v3-3.0](https://hub.docker.com/r/openruntimes/ruby) | [Examples](/runtimes/ruby-3.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
+| Ruby | 3.1 | [openruntimes/ruby:v3-3.1](https://hub.docker.com/r/openruntimes/ruby) | [Examples](/runtimes/ruby-3.1/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
+| Swift | 5.5 | [openruntimes/swift:v3-5.5](https://hub.docker.com/r/openruntimes/swift) | [Examples](/runtimes/swift-5.5/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/swift?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/swift) |
 
 ## Architecture
 
@@ -110,45 +110,43 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 
 ```
 .
-├── build.sh
+├── src
+│   ├── (runtime-specific, like index.js)
+├── example
+│   ├── (runtime-specific, like server.js)
+├── helpers
+│   ├── after-build.sh
+│   ├── before-build.sh
+│   ├── before-start.sh
+│   ├── build.sh
+│   └── start.sh
 ├── docker-compose.yml
 ├── Dockerfile
-├── example
-│   ├── (runtime-specific)
-├── start.sh
 ├── README.md
-└── server.X
+└── (runtime-specific, like package.json)
 ```
+
 
 | Name               	| Description                                                                                                                                           	|
 |--------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| src/           	    | Contains source code of HTTP server of the runtime server                                                                                               	|
 | example/           	| Contains a sample function to demonstrate the usage of the runtime server                                                                             	|
+| helpers/           	| Contains bash scripts that helps with simple build and start process. Can be ignored for more complex solution.                                          	|
 | docker-compose.yml 	| Configuration to easily run the example code with `docker-compose up`                                                                                 	|
 | Dockerfile         	| Instructions to build a runtime, install it's dependencies and setup the runtime server. These images are usually based on official alpine or ubuntu. 	|
-| server.X           	| A HTTP server implemented in the respective runtime's language. File extension depends on your runtime. For instance, Python is `server.py`           	|
-| build.sh           	| Script responsible for building user code. This can be package installations, or any specific build process the runtime requires.                     	|
-| start.sh          	| Script to launch the HTTP server on port `3000`. Additionally, it also copies the user supplied code to a directory accessible to the server.         	|
-| prepare.X          | (optional) If a runtime requires preparation before building (for instance PHP), this file holds the logic for mapping the files.                     	|
 | README.md          	| Runtime specific documentation                                                                                                                        	|
 
-Every request sent to any of the runtimes must have the `X-Internal-Challenge` header. The value of this header has to match the value of environment variable `INTERNAL_RUNTIME_KEY` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
+Structure of `helpers/` directory follows:
 
-All requests should also have JSON body with the following structure:
+| Name               	| Description                                                                                                                                           	|
+|--------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| before-build.sh       | Mirroring of function code from mount directory to build directiry. Do changes inside build directory if needed.                                          |
+| after-build.sh       	| Append .open-runtimes file, gzip file, and store into mount directory. Do post-build changes to build output if needed.                                  	|
+| build.sh           	| Shortcut combining `before-build.sh`, your custom build command (like `npm install`), and `after-build.sh`.                                          	    |
+| before-start.sh 	    | Extracting of function build from mount directory into server's directory. Do changes to server directory if needed.                                      |
+| start.sh         	    | Shortcut combining `before-start.sh` and your custom start command (like `npm start`)                                                                     |
 
-```json5
-{
-    // Following will be exposed to the function
-    "variables": {
-        // Function variables
-    },
-    "payload": "{}",
-    "headers": {
-        // Request headers
-    }
-}
-```
-
-All body parameters are optional. The values used in the example above are the default values.
+Every request sent to any of the runtimes must have the `x-open-runtimes-secret` header. The value of this header has to match the value of environment variable `OPEN_RUNTIMES_SECRET` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
 
 ## Testing
 
@@ -165,7 +163,7 @@ Once ready, you can test runtimes. First, you need to pick which runtime you wan
 To run tests, you execute `tests.sh` while providing information about runtime you want to test:
 
 ```bash
-RUNTIME='node-17.0' PHP_CLASS='Node170' ENTRYPOINT='tests.js' sh tests.sh
+RUNTIME='node-18.0' TEST_CLASS='Base' ENTRYPOINT='tests.js' sh tests-v3.sh
 ```
 
 ## Contributing

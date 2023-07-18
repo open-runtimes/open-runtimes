@@ -1,4 +1,4 @@
-FROM php:8.1.6-alpine as step0
+FROM php:8.1.6-alpine3.16 as step0
 
 ENV PHP_SWOOLE_VERSION=v4.8.7
 
@@ -13,7 +13,8 @@ RUN \
   zlib-dev \
   brotli-dev \
   yaml-dev \
-  libmaxminddb-dev
+  libmaxminddb-dev \
+  openssl-dev
 
 RUN docker-php-ext-install sockets
 
@@ -22,15 +23,15 @@ RUN \
   git clone --depth 1 --branch $PHP_SWOOLE_VERSION https://github.com/swoole/swoole-src.git && \
   cd swoole-src && \
   phpize && \
-  ./configure --enable-http2 && \
+  ./configure --enable-http2 --enable-openssl && \
   make && make install && \
   cd ..
 
-FROM php:8.1.6-alpine as final
+FROM php:8.1.6-alpine3.16 as final
 
 LABEL maintainer="team@appwrite.io"
 
-ENV INTERNAL_RUNTIME_ENTRYPOINT=index.php
+ENV OPEN_RUNTIMES_ENTRYPOINT=index.php
 
 RUN \
   apk update \
@@ -52,32 +53,32 @@ RUN \
   && apk del .deps \
   && rm -rf /var/cache/apk/*
 
-RUN mkdir -p /usr/local/src/
-RUN mkdir -p /usr/code
-RUN mkdir -p /usr/code-start
-RUN mkdir -p /usr/workspace
-RUN mkdir -p /usr/builds
+RUN mkdir -p /mnt/code
+RUN mkdir -p /usr/local/build
+RUN mkdir -p /usr/local/server
+RUN mkdir -p /usr/local/server/src
+RUN mkdir -p /usr/local/server/src/function
 
-WORKDIR /usr/local/src/
+WORKDIR /usr/local/server
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20210902/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20210902/
 
-COPY composer* /usr/local/src/
-
 # Add Source Code
-COPY ./server.php /usr/local/src/
-COPY ./start.sh /usr/local/src/
-COPY ./build.sh /usr/local/src/
-COPY ./prepare.php /usr/local/src/
+COPY . .
 
-RUN chmod +x /usr/local/src/start.sh
-RUN chmod +x /usr/local/src/build.sh
+RUN composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev
+RUN mv vendor vendor-server
+
+RUN chmod +x /usr/local/server/helpers/before-start.sh
+RUN chmod +x /usr/local/server/helpers/start.sh
+
+RUN chmod +x /usr/local/server/helpers/before-build.sh
+RUN chmod +x /usr/local/server/helpers/build.sh
+RUN chmod +x /usr/local/server/helpers/after-build.sh
 
 # Enable Extensions
 RUN echo extension=swoole.so >> /usr/local/etc/php/conf.d/swoole.ini
 
 EXPOSE 3000
-
-CMD [ "/usr/local/src/start.sh" ]

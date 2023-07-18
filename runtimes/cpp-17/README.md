@@ -11,27 +11,48 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 
 1. Create a folder and enter it. Add code into `index.cc` file:
 
+
 ```bash
-mkdir cpp-or && cd cpp-or
-printf "static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) { Json::Value result; result[\"n\"] = rand() / (RAND_MAX + 1.); return res.json(result); }" > index.cc
+mkdir cpp-function && cd cpp-function
+tee -a index.cc << END
+#include "RuntimeResponse.h"
+#include "RuntimeRequest.h"
+#include "RuntimeOutput.h"
+#include "RuntimeContext.h"
+
+namespace runtime {
+    class Handler {
+    public:
+        static RuntimeOutput main(RuntimeContext &context)
+        {
+            Json::Value result;
+            result["n"] = rand() / (RAND_MAX + 1.);
+            
+            return context.res.json(result);
+        }
+    };
+}
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e INTERNAL_RUNTIME_ENTRYPOINT=index.cc --rm --interactive --tty --volume $PWD:/usr/code openruntimes/cpp:v2-17 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.cc --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/cpp:v3-17 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/cpp:v2-17 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/cpp:v3-17 sh helpers/start.sh "/usr/local/server/src/function/cpp_runtime"
 ```
 
 4. In new terminal window, execute function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
+curl -H "x-open-runtimes-secret: secret-key" -X GET http://localhost:3000/
 ```
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
@@ -53,53 +74,42 @@ cd open-runtimes/runtimes/cpp-17
 3. Run the included example cloud function:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 4. Execute the function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
+curl -H "x-open-runtimes-secret: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"id": "4"}'
 ```
 
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":"{}" }`.
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-open-runtimes-secret: secret-key`.
 
-You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
+You can also make changes to the example code and apply the changes with the `docker compose restart` command.
 
 ## Notes
 
-- The `res` parameter has two methods:
-
-    - `send()`: Send a string response to the client.
-    - `json()`: Send a JSON response to the client.
-
-You can respond with `json()` by providing object:
+- When writing function for this runtime, ensure function named `main` exists in `Handler` class under `runtime` namespace. An example of this is:
 
 ```cpp
-static RuntimeResponse &main(const RuntimeRequest &req, RuntimeResponse &res) {
-    Json::Value result;
-    result["message"] = "Hello Open Runtimes 👋";
-    result["variables"] = req.variables;
-    result["headers"] = req.headers;
-    return res.json(result)
+#include "RuntimeOutput.h"
+#include "RuntimeContext.h"
+
+namespace runtime {
+    class Handler {
+    public:
+        static RuntimeOutput main(RuntimeContext &context)
+        {
+            auto res = context.res;
+            return res.send("Hello Open Runtimes 👋");
+        }
+    };
 }
 ```
 
 - To handle dependencies, you need to include a `CMakeLists.txt` file. Dependencies will be automatically cached and installed, so you don't need to include the `build` folder in your function.
 
-- The default entrypoint is `index.cc`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.cc`.
-
-
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Jake Barnby**
-
-+ [https://github.com/abnegate](https://github.com/abnegate)
+- The default entrypoint is `index.cc`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.cc`.
 
 ## Contributing
 

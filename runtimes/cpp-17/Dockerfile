@@ -1,4 +1,4 @@
-FROM alpine:3.15
+FROM alpine:3.16
 
 LABEL maintainer="team@appwrite.io"
 
@@ -30,17 +30,21 @@ RUN git clone --depth 1 --branch $DROGON_VERSION https://github.com/drogonframew
     && cd / \
     && rm -rf /drogon
 
-RUN mkdir -p /usr/local/src/build \
-    && mkdir -p /usr/code \
-    && mkdir -p /usr/workspace
+RUN mkdir -p /mnt/code
+RUN mkdir -p /usr/local/build
+RUN mkdir -p /usr/local/server
+RUN mkdir -p /usr/local/server/src
+RUN mkdir -p /usr/local/server/src/function
 
-WORKDIR /usr/local/src
+WORKDIR /usr/local/server
 
 COPY . .
 
-RUN chmod +x /usr/local/src/start.sh \
-    && chmod +x /usr/local/src/build.sh
+RUN chmod +x /usr/local/server/helpers/before-start.sh
+RUN chmod +x /usr/local/server/helpers/start.sh
+
+RUN chmod +x /usr/local/server/helpers/before-build.sh
+RUN chmod +x /usr/local/server/helpers/build.sh
+RUN chmod +x /usr/local/server/helpers/after-build.sh
 
 EXPOSE 3000
-
-CMD ["/usr/local/src/start.sh"]

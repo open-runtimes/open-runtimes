@@ -11,26 +11,36 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 1. Create a folder and enter it. Add code into `Index.cs` file:
 
 ```bash
-mkdir dotnet-or && cd dotnet-or
-printf "public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res) => res.Json(new() {{ \"n\", new System.Random().NextDouble() }} );" > Index.cs
+mkdir dotnet-function && cd dotnet-function
+tee -a Index.cs << END
+namespace DotNetRuntime;
+
+public class Handler {
+  public async Task<RuntimeOutput> Main(RuntimeContext Context) {
+    return Context.Res.Json(new() {{ "n", new System.Random().NextDouble() }} );
+  }
+}
+
+END
+
 ```
 
 2. Build the code:
 
 ```bash
-docker run -e INTERNAL_RUNTIME_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD:/usr/code openruntimes/dotnet:v2-6.0 sh /usr/local/src/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=Indes.cs --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dotnet:v3-6.0 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e INTERNAL_RUNTIME_KEY=secret-key -e INTERNAL_RUNTIME_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD/code.tar.gz:/tmp/code.tar.gz:ro openruntimes/dotnet:v2-6.0 sh /usr/local/src/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/dotnet:v3-6.0 sh helpers/start.sh "dotnet /usr/local/server/src/function/DotNetRuntime.dll"
 ```
 
 4. In new terminal window, execute function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
+curl -H "x-open-runtimes-secret: secret-key" -X GET http://localhost:3000/
 ```
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
@@ -52,53 +62,56 @@ cd open-runtimes/runtimes/dotnet-6.0
 3. Run the included example cloud function:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 4. Execute the function:
 
 ```bash
-curl -H "X-Internal-Challenge: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"payload": "{}"}'
+curl -H "x-open-runtimes-secret: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"id": "4"}'
 ```
 
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-internal-challenge: secret-key`. If your function expects any parameters, you can pass an optional JSON body like so: `{ "payload":"{}" }`.
+You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-open-runtimes-secret: secret-key`.
 
-You can also make changes to the example code and apply the changes with the `docker-compose restart` command.
+You can also make changes to the example code and apply the changes with the `docker compose restart` command.
 
 ## Notes
 
-- The `res` parameter has two methods:
-
-    - `Send()`: Send a string response to the client.
-    - `Json()`: Send a JSON response to the client.
-
-You can respond with `Json()` by providing object:
+- When writing function for this runtime, ensure it is named `Main` and is inside `Handler` class. An example of this is:
 
 ```cs
-public async Task<RuntimeResponse> Main(RuntimeRequest req, RuntimeResponse res) => 
-    res.Json(new() 
-    {
-        { "message" , "Hello Open Runtimes 👋" },
-        { "variables", req.Variables },
-        { "headers", req.Headers },
-        { "payload", req.Payload }
-    });
+namespace DotNetRuntime;
+
+public class Handler {
+    public async Task<RuntimeOutput> Main(RuntimeContext Context) => 
+        Context.Res.Send("Hello Open Runtimes 👋");
+}
 ```
+
+- Your entrypoint code must start with `namespace DotNetRuntime;`.
 
 - To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically cached and installed, so you don't need to include the `.nuget` folder in your function.
 
-- The default entrypoint is `Index.cs`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/App.cs`.
+- The default entrypoint is `Index.cs`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/App.cs`.
 
-## Authors
+- F# can be used in .NET runtime:
 
-**Eldad Fux**
+```fs
+namespace DotNetRuntime
 
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
+type Handler()=
+  [YOUR_CODE]
+```
 
-**Jake Barnby**
+- Visual Basic can be used in .NET runtime:
 
-+ [https://github.com/abnegate](https://github.com/abnegate)
+```vb
+Namespace DotNetRuntime
+  Public Class Handler
+    [YOUR_CODE]
+  End Class
+End Namespace
+```
 
 ## Contributing
 

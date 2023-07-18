@@ -24,7 +24,7 @@ add_executable(${PROJECT_NAME}
         src/main.cc
         src/RuntimeResponse.h
         src/RuntimeRequest.h
-        src/Wrapper.h)
+        src/$ENV{OPEN_RUNTIMES_ENTRYPOINT})
 
 find_package(Drogon CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} 
@@ -47,3 +47,4 @@ target_include_directories(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
                PRIVATE ${SRC_DIR})
 
+target_link_libraries(${PROJECT_NAME} PUBLIC curl)

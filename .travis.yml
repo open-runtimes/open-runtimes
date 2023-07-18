@@ -18,193 +18,132 @@ vm:
 
 env:
   global:
-    - VERSION=v2
+    - VERSION=v3
   jobs:
     # Node
-    - RUNTIME=node-19.0
-      PHP_CLASS=Node190
-      ENTRYPOINT=tests.js
-      SERVER_PROCESS=pm2
-      IMAGE=openruntimes/node:${VERSION}-19.0
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
     - RUNTIME=node-18.0
-      PHP_CLASS=Node180
+      TEST_CLASS=Base
       ENTRYPOINT=tests.js
-      SERVER_PROCESS=pm2
       IMAGE=openruntimes/node:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-    - RUNTIME=node-16.0
-      PHP_CLASS=Node160
-      ENTRYPOINT=tests.js
-      SERVER_PROCESS=pm2
-      IMAGE=openruntimes/node:${VERSION}-16.0
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-    - RUNTIME=node-14.5
-      PHP_CLASS=Node145
-      ENTRYPOINT=tests.js
-      SERVER_PROCESS=pm2
-      IMAGE=openruntimes/node:${VERSION}-14.5
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="npm install"
+      OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
+    - RUNTIME=node-18.0
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.mjs
+      IMAGE=openruntimes/node:${VERSION}-18.0
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="npm install"
+      OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
 
     # Deno
-    - RUNTIME=deno-1.21
-      PHP_CLASS=Deno121
-      ENTRYPOINT=tests.ts
-      SERVER_PROCESS=server.ts
-      IMAGE=openruntimes/deno:${VERSION}-1.21
-      ARCH=linux/amd64
     - RUNTIME=deno-1.24
-      PHP_CLASS=Deno124
+      TEST_CLASS=Base
       ENTRYPOINT=tests.ts
-      SERVER_PROCESS=server.ts
       IMAGE=openruntimes/deno:${VERSION}-1.24
       ARCH=linux/amd64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="deno cache tests.ts"
+      OPEN_RUNTIMES_START_COMMAND="denon start"
 
     # Python
     - RUNTIME=python-3.10
-      PHP_CLASS=Python310
+      TEST_CLASS=Base
       ENTRYPOINT=tests.py
-      SERVER_PROCESS=server.py
       IMAGE=openruntimes/python:${VERSION}-3.10
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-    - RUNTIME=python-3.9
-      PHP_CLASS=Python39
-      ENTRYPOINT=tests.py
-      SERVER_PROCESS=server.py
-      IMAGE=openruntimes/python:${VERSION}-3.9
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-    - RUNTIME=python-3.8
-      PHP_CLASS=Python38
-      ENTRYPOINT=tests.py
-      SERVER_PROCESS=server.py
-      IMAGE=openruntimes/python:${VERSION}-3.8
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="pip install --no-cache-dir -r requirements.txt"
+      OPEN_RUNTIMES_START_COMMAND="python3 src/server.py"
 
     # Dart
     - RUNTIME=dart-2.18
-      PHP_CLASS=Dart218
+      TEST_CLASS=Base
       ENTRYPOINT=lib/tests.dart
       IMAGE=openruntimes/dart:${VERSION}-2.18
-      SERVER_PROCESS=/usr/code-start/runtime
       ARCH=linux/amd64,linux/arm64
-    - RUNTIME=dart-2.17
-      PHP_CLASS=Dart217
-      ENTRYPOINT=lib/tests.dart
-      IMAGE=openruntimes/dart:${VERSION}-2.17
-      SERVER_PROCESS=/usr/code-start/runtime
-      ARCH=linux/amd64,linux/arm64
-    - RUNTIME=dart-2.16
-      PHP_CLASS=Dart216
-      ENTRYPOINT=lib/tests.dart
-      IMAGE=openruntimes/dart:${VERSION}-2.16
-      SERVER_PROCESS=/usr/code-start/runtime
-      ARCH=linux/amd64,linux/arm64
-    - RUNTIME=dart-2.15
-      PHP_CLASS=Dart215
-      ENTRYPOINT=lib/tests.dart
-      IMAGE=openruntimes/dart:${VERSION}-2.15
-      SERVER_PROCESS=/usr/code-start/runtime
-      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
 
     # Ruby
     - RUNTIME=ruby-3.1
-      PHP_CLASS=Ruby31
+      TEST_CLASS=Base
       ENTRYPOINT=tests.rb
-      SERVER_PROCESS=puma
       IMAGE=openruntimes/ruby:${VERSION}-3.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-    - RUNTIME=ruby-3.0
-      PHP_CLASS=Ruby30
-      ENTRYPOINT=tests.rb
-      SERVER_PROCESS=puma
-      IMAGE=openruntimes/ruby:${VERSION}-3.0
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 
     # PHP
-    - RUNTIME=php-8.0
-      PHP_CLASS=PHP80
-      ENTRYPOINT=tests.php
-      SERVER_PROCESS=server.php
-      IMAGE=openruntimes/php:${VERSION}-8.0
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
     - RUNTIME=php-8.1
-      PHP_CLASS=PHP81
+      TEST_CLASS=Base
       ENTRYPOINT=tests.php
-      SERVER_PROCESS=server.php
       IMAGE=openruntimes/php:${VERSION}-8.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
+      OPEN_RUNTIMES_START_COMMAND="php src/server.php"
 
     # Swift
     - RUNTIME=swift-5.5
-      PHP_CLASS=Swift55
+      TEST_CLASS=Base
       ENTRYPOINT=Tests.swift
-      SERVER_PROCESS="./Run serve"
       IMAGE=openruntimes/swift:${VERSION}-5.5
       ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
 
     # Kotlin
     - RUNTIME=kotlin-1.6
-      PHP_CLASS=Kotlin16
+      TEST_CLASS=Base
       ENTRYPOINT=Tests.kt
-      SERVER_PROCESS="kotlin-runtime-1.0.0"
       IMAGE=openruntimes/kotlin:${VERSION}-1.6
       ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="java -jar /usr/local/server/src/function/kotlin-runtime-1.0.0.jar"
 
     # Java
-    - RUNTIME=java-8.0
-      PHP_CLASS=Java8
-      ENTRYPOINT=Tests.java
-      SERVER_PROCESS="java-runtime-1.0.0"
-      IMAGE=openruntimes/java:${VERSION}-8.0
-      ARCH=linux/amd64,linux/arm64
-    - RUNTIME=java-11.0
-      PHP_CLASS=Java11
-      ENTRYPOINT=Tests.java
-      SERVER_PROCESS="java-runtime-1.0.0"
-      IMAGE=openruntimes/java:${VERSION}-11.0
-      ARCH=linux/amd64,linux/arm64
-    - RUNTIME=java-17.0
-      PHP_CLASS=Java17
-      ENTRYPOINT=Tests.java
-      SERVER_PROCESS="java-runtime-1.0.0"
-      IMAGE=openruntimes/java:${VERSION}-17.0
-      ARCH=linux/amd64,linux/arm64
     - RUNTIME=java-18.0
-      PHP_CLASS=Java18
+      TEST_CLASS=Base
       ENTRYPOINT=Tests.java
-      SERVER_PROCESS="java-runtime-1.0.0"
       IMAGE=openruntimes/java:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
 
     # C++
     - RUNTIME=cpp-17
-      PHP_CLASS=Cpp17
+      TEST_CLASS=Base
       ENTRYPOINT=tests.cc
-      SERVER_PROCESS="cpp_runtime"
       IMAGE=openruntimes/cpp:${VERSION}-17
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/cpp_runtime"
 
     # DotNet
-    - RUNTIME=dotnet-3.1
-      PHP_CLASS=DotNet31
-      ENTRYPOINT=Tests.cs
-      SERVER_PROCESS="DotNetRuntime.dll"
-      IMAGE=openruntimes/dotnet:${VERSION}-3.1
-      ARCH=linux/amd64,linux/arm64
     - RUNTIME=dotnet-6.0
-      PHP_CLASS=DotNet60
+      TEST_CLASS=Base
       ENTRYPOINT=Tests.cs
-      SERVER_PROCESS="DotNetRuntime.dll"
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="dotnet /usr/local/server/src/function/DotNetRuntime.dll"
 
     # Go
-    - RUNTIME=go-1.19
-      PHP_CLASS=Go119
-      ENTRYPOINT=tests.go
-      SERVER_PROCESS="server"
-      IMAGE=openruntimes/go:${VERSION}-1.19
-      ARCH=linux/amd64,linux/arm64
+    # - RUNTIME=go-1.19
+    #   TEST_CLASS=Base
+    #   ENTRYPOINT=tests.go
+    #   IMAGE=openruntimes/go:${VERSION}-1.19
+    #   ARCH=linux/amd64,linux/arm64
+    #   TEST_SCRIPT=tests.sh
 
 notifications:
   email:
@@ -231,11 +170,11 @@ before_install:
   - docker buildx create --use
 
 install:
-  - docker --version
+  - docker version
   - composer install
 
 script:
-  - export RUNTIME=${RUNTIME}; export PHP_CLASS=${PHP_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh tests.sh
+  - export OPEN_RUNTIMES_BUILD_COMMAND=${OPEN_RUNTIMES_BUILD_COMMAND}; export OPEN_RUNTIMES_START_COMMAND=${OPEN_RUNTIMES_START_COMMAND}; export RUNTIME=${RUNTIME}; export TEST_CLASS=${TEST_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh ${TEST_SCRIPT}
 
 deploy:
   - provider: script
