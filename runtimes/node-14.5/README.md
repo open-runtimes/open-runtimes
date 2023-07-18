@@ -97,22 +97,6 @@ module.exports = (req, res) => {
 
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.js`.
 
-
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Bradley Schofield**
-
-+ [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
-
-**Matej Bačo**
-
-+ [https://github.com/Meldiron](https://github.com/Meldiron)
-
 ## Contributing
 
 For security issues, please email security@appwrite.io instead of posting a public issue in GitHub.

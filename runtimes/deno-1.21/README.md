@@ -99,21 +99,6 @@ export default async function(req: any, res: any) {
 
 - Deno runtime currently doesn't support ARM, because there are no official ARM images.
 
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Bradley Schofield**
-
-+ [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
-
-**Matej Bačo**
-
-+ [https://github.com/Meldiron](https://github.com/Meldiron)
-
 ## Contributing
 
 For security issues, please email security@appwrite.io instead of posting a public issue in GitHub.

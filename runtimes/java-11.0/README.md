@@ -92,17 +92,6 @@ public RuntimeResponse main(RuntimeRequest req, RuntimeResponse res) throws Exce
 
 - The default entrypoint is `Index.java`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/App.java`.
 
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Jake Barnby**
-
-+ [https://github.com/abnegate](https://github.com/abnegate)
-
 ## Contributing
 
 For security issues, please email security@appwrite.io instead of posting a public issue in GitHub.

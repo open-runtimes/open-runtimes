@@ -92,21 +92,6 @@ Future<dynamic> main(final context) async {
 
 - Dart function is a Dart library package, which means, your code has to be inside `lib` folder. You can learn more in [Dart documentation](https://dart.dev/guides/libraries/create-library-packages).
 
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Bradley Schofield**
-
-+ [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
-
-**Matej Bačo**
-
-+ [https://github.com/Meldiron](https://github.com/Meldiron)
-
 ## Contributing
 
 For security issues, please email security@appwrite.io instead of posting a public issue in GitHub.

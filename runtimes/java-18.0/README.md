@@ -96,17 +96,6 @@ public class Index {
 
 - The default entrypoint is `Index.java`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/App.java`.
 
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Jake Barnby**
-
-+ [https://github.com/abnegate](https://github.com/abnegate)
-
 ## Contributing
 
 For security issues, please email security@appwrite.io instead of posting a public issue in GitHub.

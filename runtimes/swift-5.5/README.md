@@ -99,21 +99,6 @@ func main(req: RequestValue, res: RequestResponse) -> RequestResponse {
 
 - Swift runtime currently doesn't support ARM, because there are no official ARM images.
 
-## Authors
-
-**Eldad Fux**
-
-+ [https://twitter.com/eldadfux](https://twitter.com/eldadfux)
-+ [https://github.com/eldadfux](https://github.com/eldadfux)
-
-**Bradley Schofield**
-
-+ [https://github.com/PineappleIOnic](https://github.com/PineappleIOnic)
-
-**Jake Barnby**
-
-+ [https://github.com/abnegate](https://github.com/abnegate)
-
 ## Contributing
 
 For security issues, please email security@appwrite.io instead of posting a public issue in GitHub.
