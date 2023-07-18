@@ -9,8 +9,8 @@ services:
       - "3000:3000"
     environment:
       - OPEN_RUNTIMES_SECRET
-      - BUILD_COMMAND
-      - START_COMMAND
+      - OPEN_RUNTIMES_BUILD_COMMAND
+      - OPEN_RUNTIMES_START_COMMAND
     volumes:
       - ./example/:/mnt/code:rw
-    command: sh -c "sh helpers/build.sh \"$BUILD_COMMAND\" && sh helpers/start.sh \"$START_COMMAND\""
+    command: sh -c "sh helpers/build.sh \"$OPEN_RUNTIMES_BUILD_COMMAND\" && sh helpers/start.sh \"$OPEN_RUNTIMES_START_COMMAND\""

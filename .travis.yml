@@ -27,15 +27,15 @@ env:
       IMAGE=openruntimes/node:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND="npm install"
-      START_COMMAND="pm2 start src/server.js --no-daemon"
+      OPEN_RUNTIMES_BUILD_COMMAND="npm install"
+      OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
     - RUNTIME=node-18.0
       TEST_CLASS=Base
       ENTRYPOINT=tests.mjs
       IMAGE=openruntimes/node:${VERSION}-18.0
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND="npm install"
-      START_COMMAND="pm2 start src/server.js --no-daemon"
+      OPEN_RUNTIMES_BUILD_COMMAND="npm install"
+      OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
 
     # Deno
     - RUNTIME=deno-1.24
@@ -44,8 +44,8 @@ env:
       IMAGE=openruntimes/deno:${VERSION}-1.24
       ARCH=linux/amd64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND="deno cache tests.ts"
-      START_COMMAND="denon start"
+      OPEN_RUNTIMES_BUILD_COMMAND="deno cache tests.ts"
+      OPEN_RUNTIMES_START_COMMAND="denon start"
 
     # Python
     - RUNTIME=python-3.10
@@ -54,8 +54,8 @@ env:
       IMAGE=openruntimes/python:${VERSION}-3.10
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND="pip install --no-cache-dir -r requirements.txt"
-      START_COMMAND="python3 src/server.py"
+      OPEN_RUNTIMES_BUILD_COMMAND="pip install --no-cache-dir -r requirements.txt"
+      OPEN_RUNTIMES_START_COMMAND="python3 src/server.py"
 
     # Dart
     - RUNTIME=dart-2.18
@@ -64,8 +64,8 @@ env:
       IMAGE=openruntimes/dart:${VERSION}-2.18
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND="dart pub get"
-      START_COMMAND="/usr/local/server/src/function/server"
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
 
     # Ruby
     - RUNTIME=ruby-3.1
@@ -74,8 +74,8 @@ env:
       IMAGE=openruntimes/ruby:${VERSION}-3.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND=""
-      START_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production"
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 
     # PHP
     - RUNTIME=php-8.1
@@ -84,8 +84,8 @@ env:
       IMAGE=openruntimes/php:${VERSION}-8.1
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND="composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
-      START_COMMAND="php src/server.php"
+      OPEN_RUNTIMES_BUILD_COMMAND="composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
+      OPEN_RUNTIMES_START_COMMAND="php src/server.php"
 
     # Swift
     - RUNTIME=swift-5.5
@@ -94,8 +94,8 @@ env:
       IMAGE=openruntimes/swift:${VERSION}-5.5
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND=""
-      START_COMMAND="/usr/local/server/src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
 
     # Kotlin
     - RUNTIME=kotlin-1.6
@@ -104,8 +104,8 @@ env:
       IMAGE=openruntimes/kotlin:${VERSION}-1.6
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND=""
-      START_COMMAND="java -jar /usr/local/server/src/function/kotlin-runtime-1.0.0.jar"
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="java -jar /usr/local/server/src/function/kotlin-runtime-1.0.0.jar"
 
     # Java
     - RUNTIME=java-18.0
@@ -114,8 +114,8 @@ env:
       IMAGE=openruntimes/java:${VERSION}-18.0
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND=""
-      START_COMMAND="java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
 
     # C++
     - RUNTIME=cpp-17
@@ -124,8 +124,8 @@ env:
       IMAGE=openruntimes/cpp:${VERSION}-17
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND=""
-      START_COMMAND="/usr/local/server/src/function/cpp_runtime"
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/cpp_runtime"
 
     # DotNet
     - RUNTIME=dotnet-6.0
@@ -134,8 +134,8 @@ env:
       IMAGE=openruntimes/dotnet:${VERSION}-6.0
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
-      BUILD_COMMAND=""
-      START_COMMAND="dotnet /usr/local/server/src/function/DotNetRuntime.dll"
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="dotnet /usr/local/server/src/function/DotNetRuntime.dll"
 
     # Go
     # - RUNTIME=go-1.19
@@ -174,7 +174,7 @@ install:
   - composer install
 
 script:
-  - export BUILD_COMMAND=${BUILD_COMMAND}; export START_COMMAND=${START_COMMAND}; export RUNTIME=${RUNTIME}; export TEST_CLASS=${TEST_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh ${TEST_SCRIPT}
+  - export OPEN_RUNTIMES_BUILD_COMMAND=${OPEN_RUNTIMES_BUILD_COMMAND}; export OPEN_RUNTIMES_START_COMMAND=${OPEN_RUNTIMES_START_COMMAND}; export RUNTIME=${RUNTIME}; export TEST_CLASS=${TEST_CLASS}; export ENTRYPOINT=${ENTRYPOINT}; sh ${TEST_SCRIPT}
 
 deploy:
   - provider: script
