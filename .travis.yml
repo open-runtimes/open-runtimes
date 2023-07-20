@@ -137,6 +137,14 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
       OPEN_RUNTIMES_START_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production"
+    - RUNTIME=ruby-3.0
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.rb
+      IMAGE=openruntimes/ruby:${VERSION}-3.0
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 
     # PHP
     - RUNTIME=php-8.1
