@@ -101,6 +101,22 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="pip install --no-cache-dir -r requirements.txt"
       OPEN_RUNTIMES_START_COMMAND="python3 src/server.py"
+    - RUNTIME=python-3.9
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.py
+      IMAGE=openruntimes/python:${VERSION}-3.9
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="pip install --no-cache-dir -r requirements.txt"
+      OPEN_RUNTIMES_START_COMMAND="python3 src/server.py"
+    - RUNTIME=python-3.8
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.py
+      IMAGE=openruntimes/python:${VERSION}-3.8
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="pip install --no-cache-dir -r requirements.txt"
+      OPEN_RUNTIMES_START_COMMAND="python3 src/server.py"
 
     # Dart
     - RUNTIME=dart-2.18

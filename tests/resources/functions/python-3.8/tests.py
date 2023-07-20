@@ -1,39 +1,90 @@
-import json
 import requests
+import os
+import asyncio
 
-#    'req' variable has:
-#        'headers' - object with request headers
-#        'payload' - object with request body data
-#        'variables' - object with function variables
-#    'res' variable has:
-#        'send(text, status)' - function to return text response. Status code defaults to 200
-#        'json(obj, status)' - function to return JSON response. Status code defaults to 200
-#    
-#    If an error is thrown, a response with code 500 will be returned.
+async def main(context):
+    action = context.req.headers.get('x-action', None)
 
-def main(req, res):
-    payload = json.loads('{}' if not req.payload else req.payload)
-    todo_id = payload.get('id', 1)
+    if action == 'plaintextResponse':
+        return context.res.send('Hello World 👋')
+    elif action == 'jsonResponse':
+        return context.res.json({ 'json': True, 'message': 'Developers are awesome.' })
+    elif action == 'redirectResponse':
+        return context.res.redirect('https://github.com/')
+    elif action == 'emptyResponse':
+        return context.res.empty()
+    elif action == 'noResponse':
+        context.res.send('This should be ignored, as it is not returned.')
+    elif action == 'doubleResponse':
+        context.res.send('This should be ignored.')
+        return context.res.send('This should be returned.')
+    elif action == 'headersResponse':
+        return context.res.send('OK', 200, {
+            'first-header': 'first-value',
+            'second-header': context.req.headers.get('x-open-runtimes-custom-in-header', 'missing'),
+            'x-open-runtimes-custom-out-header': 'third-value'
+        })
+    elif action == 'statusResponse':
+        return context.res.send('FAIL', 404)
+    elif action == 'requestMethod':
+        return context.res.send(context.req.method)
+    elif action == 'requestUrl':
+        return context.res.json({
+            'url': context.req.url,
+            'port': context.req.port,
+            'path': context.req.path,
+            'query': context.req.query,
+            'queryString': context.req.query_string,
+            'scheme': context.req.scheme,
+            'host': context.req.host,
+        })
+    elif action == 'requestHeaders':
+        return context.res.json(context.req.headers)
+    elif action == 'requestBodyPlaintext':
+        return context.res.send(context.req.body)
+    elif action == 'requestBodyJson':
+        key1 = None
+        key2 = None
 
-    header_data = req.headers.get('x-test-header', None)
-    var_data = req.variables.get('test-variable', None)
+        if isinstance(context.req.body, str):
+            key1 = 'Missing key'
+            key2 = 'Missing key'
+        else:
+            key1 = context.req.body.get('key1', 'Missing key')
+            key2 = context.req.body.get('key2', 'Missing key')
 
-    todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + str(todo_id))).json()
+        return context.res.json({
+            'key1': key1,
+            'key2': key2,
+            'raw': context.req.body_string
+        })
+    elif action == 'envVars':
+        return context.res.json({
+            'var': os.environ.get('CUSTOM_ENV_VAR', None),
+            'emptyVar': os.environ.get('NOT_DEFINED_VAR', None)
+        })
+    elif action == 'logs':
+        print('Native log')
+        context.log('Debug log')
+        context.error('Error log')
 
-    print('String')
-    print(42)
-    print(4.2)
-    print(True)
+        context.log(42)
+        context.log(4.2)
+        context.log(True)
 
-    print("String2")
-    print("String3")
-    print("String4")
-    print("String5")
+        context.log({ 'objectKey': 'objectValue' })
+        context.log([ 'arrayValue' ])
 
-    return res.json({
-        'isTest': True,
-        'message': 'Hello Open Runtimes 👋',
-        'todo': todo,
-        'header': header_data,
-        'variable': var_data
-    })
+        return context.res.send('')
+    elif action == 'library':
+        todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_string)).json()
+        return context.res.json({
+            'todo': todo
+        })
+    elif action == 'timeout':
+        context.log('Timeout start.')
+        await asyncio.sleep(3)
+        context.log('Timeout end.')
+        return context.res.send('Successful response.')
+    else:
+        raise Exception('Unknown action')
