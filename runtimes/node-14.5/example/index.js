@@ -1,23 +1,11 @@
 const fetch = require("node-fetch");
 
-/*
-    'req' variable has:
-        'headers' - object with request headers
-        'payload' - object with request body data
-        'variables' - object with function variables
-    'res' variable has:
-        'send(text, status)' - function to return text response. Status code defaults to 200
-        'json(obj, status)' - function to return JSON response. Status code defaults to 200
-    
-    If an error is thrown, a response with code 500 will be returned.
-*/
-
-module.exports = async (req, res) => {
-    const payload = JSON.parse(req.payload);
+module.exports = async (context) => {
+    const payload = context.req.body;
 
     const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${payload.id ?? 1}`).then(r => r.json());
 
-    res.json({
+    return context.res.json({
         message: 'Hello Open Runtimes 👋',
         todo
     });

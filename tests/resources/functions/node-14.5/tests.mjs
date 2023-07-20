@@ -1,6 +1,6 @@
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
 
-module.exports = async (context) => {
+export default async (context) => {
     const action = context.req.headers['x-action'];
 
     switch (action) {
@@ -82,4 +82,3 @@ module.exports = async (context) => {
             throw new Error('Unknown action');
     }
 }
-

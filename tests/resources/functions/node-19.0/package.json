@@ -1,8 +1,8 @@
 {
-  "name": "open-runtimes-node",
+  "name": "code",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "micro": "^9.3.4"
+    "node-fetch": "^2.6.1"
   }
 }
