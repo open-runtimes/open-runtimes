@@ -155,6 +155,14 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
       OPEN_RUNTIMES_START_COMMAND="php src/server.php"
+    - RUNTIME=php-8.0
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.php
+      IMAGE=openruntimes/php:${VERSION}-8.0
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
+      OPEN_RUNTIMES_START_COMMAND="php src/server.php"
 
     # Swift
     - RUNTIME=swift-5.5

@@ -3,17 +3,6 @@
     "description": "End to end backend server for frontend and mobile apps.",
     "type": "project",
     "license": "BSD-3-Clause",
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/usr/builds/",
-            "options": {
-                "versions": {
-                    "user/function": "1.0"
-                }
-            }
-        }
-    ],
     "authors": [
         {
             "name": "Appwrite Team",
@@ -22,8 +11,7 @@
     ],
     "require": {
         "php": ">=8.0.0",
-        "ext-swoole": "*",
-        "user/function": "1.0"
+        "ext-swoole": "*"
     },
     "require-dev": {
         "swoole/ide-helper": "4.6.7",
