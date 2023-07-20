@@ -66,6 +66,14 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
       OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
+    - RUNTIME=dart-2.19
+      TEST_CLASS=Base
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.19
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
     - RUNTIME=dart-2.18
       TEST_CLASS=Base
       ENTRYPOINT=lib/tests.dart

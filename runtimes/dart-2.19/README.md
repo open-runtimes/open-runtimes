@@ -1,6 +1,6 @@
-# Dart Runtime 3.0
+# Dart Runtime 2.19
 
-This is the Open Runtime that builds and runs Dart code based on a `dart:3.0.6` base image. 
+This is the Open Runtime that builds and runs Dart code based on a `dart:2.19` base image. 
 
 The runtime itself uses [Shelf](https://pub.dev/documentation/shelf/latest/shelf_io/shelf_io-library.html) as the Web Server to process the execution requests.
 
@@ -27,13 +27,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=lib/main.dart --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dart:v3-3.0 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=lib/main.dart --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dart:v3-2.19 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/dart:v3-3.0 sh helpers/start.sh "/usr/local/server/src/function/server"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/dart:v3-2.19 sh helpers/start.sh "/usr/local/server/src/function/server"
 ```
 
 4. In new terminal window, execute function:
@@ -55,7 +55,7 @@ git clone https://github.com/open-runtimes/open-runtimes.git
 2. Enter the Dart runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/dart-3.0
+cd open-runtimes/runtimes/dart-2.19
 ```
 
 3. Run the included example cloud function:
