@@ -1,5 +1,6 @@
 require 'sinatra'
 require 'json'
+require 'timeout'
 
 USER_CODE_PATH = '/usr/local/server/src/function';
 
@@ -203,18 +204,15 @@ def handle(request, response)
       executed = true
 
       task_thread = Thread.new do
-        begin
-          output = main(context)
-        rescue => e
-          puts "An error occurred during task execution: #{e.message}"
-        end
+        output = main(context)
       end
-      
-      task_thread.join(safe_timeout)
-      
-      if task_thread.alive?
+
+      begin
+        Timeout.timeout(safe_timeout) do
+          task_thread.join
+        end
+      rescue Timeout::Error
         executed = false
-        task_thread.kill
       end
 
       unless executed
