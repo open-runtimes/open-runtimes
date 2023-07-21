@@ -83,9 +83,10 @@ def main(context)
         return context.res.json({ 'todo': todo })
     when 'timeout'
         context.log('Timeout start.')
-        Async do
-          sleep(3)
-        end.wait
+        thread = Thread.new do
+            sleep(3)
+        end
+        thread.join
         context.log('Timeout end.');
         return context.res.send('Successful response.');
     else
