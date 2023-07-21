@@ -1,6 +1,5 @@
 require 'sinatra'
 require 'json'
-require 'async'
 
 USER_CODE_PATH = '/usr/local/server/src/function';
 
@@ -203,13 +202,20 @@ def handle(request, response)
     unless safe_timeout.nil?
       executed = true
 
-      Async do |task|
-        task.with_timeout(safe_timeout) do
+      task_thread = Thread.new do
+        begin
           output = main(context)
-        rescue Async::TimeoutError
-          executed = false
+        rescue => e
+          puts "An error occurred during task execution: #{e.message}"
         end
-      end.wait
+      end
+      
+      task_thread.join(safe_timeout)
+      
+      if task_thread.alive?
+        executed = false
+        task_thread.kill
+      end
 
       unless executed
         context.error('Execution timed out.')
