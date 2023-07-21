@@ -1,35 +1,41 @@
-using System.Collections.Generic;
+namespace DotNetRuntime;
 
-namespace DotNetRuntime
-{   public class RuntimeResponse
+using System.Text.Json;
+
+public class RuntimeResponse
+{
+    public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
     {
-        public object Data { get; set; }
-        public int StatusCode { get; set; }
+        return new RuntimeOutput(
+            body,
+            statusCode,
+            headers ?? new Dictionary<string,string>());
+    }
 
-        public RuntimeResponse(
-            string data = "",
-            int statusCode = 200)
+    public RuntimeOutput Json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = null)
+    {
+        if(headers == null)
         {
-            Data = data;
-            StatusCode = statusCode;
+            headers = new Dictionary<string,string>();
         }
 
-        public RuntimeResponse Send(
-            string data,
-            int statusCode = 200)
-        {
-            Data = data;
-            StatusCode = statusCode;
-            return this;
+        headers.Add("content-type", "application/json");
+        return Send(JsonSerializer.Serialize(json), statusCode, headers);
+    }
+
+    public RuntimeOutput Empty()
+    {
+        return Send("", 204, new Dictionary<string, string>());
+    }
+
+    public RuntimeOutput Redirect(String url, int statusCode = 301, Dictionary<string, string>? headers = null)
+    {
+        if(headers == null) {
+            headers = new Dictionary<string,string>();
         }
 
-        public RuntimeResponse Json(
-            Dictionary<string, object?> data,
-            int statusCode = 200)
-        {
-            Data = data;
-            StatusCode = statusCode;
-            return this;
-        }
+        headers.Add("location", url);
+
+        return Send("", statusCode, headers);
     }
 }
