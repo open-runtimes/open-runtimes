@@ -277,6 +277,14 @@ env:
       OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/cpp_runtime"
 
     # DotNet
+    - RUNTIME=dotnet-7.0
+      TEST_CLASS=Base
+      ENTRYPOINT=Tests.cs
+      IMAGE=openruntimes/dotnet:${VERSION}-7.0
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="dotnet /usr/local/server/src/function/DotNetRuntime.dll"
     - RUNTIME=dotnet-6.0
       TEST_CLASS=Base
       ENTRYPOINT=Tests.cs
