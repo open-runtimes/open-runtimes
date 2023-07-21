@@ -6,6 +6,7 @@ import org.rapidoid.http.Req;
 import org.rapidoid.http.Resp;
 import org.rapidoid.setup.On;
 
+import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -214,9 +215,12 @@ public class Server {
             context.log("Unsupported log detected. Use context.log() or context.error() for logging.");
         }
 
-        resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context.getLogs()), StandardCharsets.UTF_8.toString()));
-        resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", context.getErrors()), StandardCharsets.UTF_8.toString()));
-
+        try {
+            resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context.getLogs()), StandardCharsets.UTF_8.toString()));
+            resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", context.getErrors()), StandardCharsets.UTF_8.toString()));
+        } catch (UnsupportedEncodingException e) {
+            context.log("Unsupported encoding detected.");
+        }
         return resp
                 .code(output.getStatusCode())
                 .result(output.getBody());
