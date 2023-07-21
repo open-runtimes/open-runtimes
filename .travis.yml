@@ -293,14 +293,6 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
       OPEN_RUNTIMES_START_COMMAND="dotnet /usr/local/server/src/function/DotNetRuntime.dll"
-    - RUNTIME=dotnet-3.1
-      TEST_CLASS=Base
-      ENTRYPOINT=Tests.cs
-      IMAGE=openruntimes/dotnet:${VERSION}-3.1
-      ARCH=linux/amd64,linux/arm64
-      TEST_SCRIPT=tests.sh
-      OPEN_RUNTIMES_BUILD_COMMAND=""
-      OPEN_RUNTIMES_START_COMMAND="dotnet /usr/local/server/src/function/DotNetRuntime.dll"
 
     # Go
     # - RUNTIME=go-1.19
