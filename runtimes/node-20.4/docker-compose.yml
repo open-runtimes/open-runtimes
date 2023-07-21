@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-node-20.40:
-    container_name: open-runtimes-node-20.40
+  open-runtimes-node-20.4:
+    container_name: open-runtimes-node-20.4
     build:
       context: .
     ports: 
