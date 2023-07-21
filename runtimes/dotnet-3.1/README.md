@@ -13,11 +13,11 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 ```bash
 mkdir dotnet-function && cd dotnet-function
 tee -a Index.cs << END
-namespace DotNetRuntime;
-
-public class Handler {
-  public async Task<RuntimeOutput> Main(RuntimeContext Context) {
-    return Context.Res.Json(new() {{ "n", new System.Random().NextDouble() }} );
+namespace DotNetRuntime {
+  public class Handler {
+    public async Task<RuntimeOutput> Main(RuntimeContext Context) {
+      return Context.Res.Json(new Dictionary<string, object?>() {{ "n", new System.Random().NextDouble() }} );
+    }
   }
 }
 
@@ -80,15 +80,15 @@ You can also make changes to the example code and apply the changes with the `do
 - When writing function for this runtime, ensure it is named `Main` and is inside `Handler` class. An example of this is:
 
 ```cs
-namespace DotNetRuntime;
-
-public class Handler {
-    public async Task<RuntimeOutput> Main(RuntimeContext Context) => 
-        Context.Res.Send("Hello Open Runtimes 👋");
+namespace DotNetRuntime {
+  public class Handler {
+      public async Task<RuntimeOutput> Main(RuntimeContext Context) => 
+          Context.Res.Send("Hello Open Runtimes 👋");
+  }
 }
 ```
 
-- Your entrypoint code must start with `namespace DotNetRuntime;`.
+- Your entrypoint code must wrap `public class Handler {}` with `namespace DotNetRuntime {}`.
 
 - To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically cached and installed, so you don't need to include the `.nuget` folder in your function.
 

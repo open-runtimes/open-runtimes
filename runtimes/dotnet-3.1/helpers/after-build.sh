@@ -36,7 +36,7 @@ cd /usr/local/server
 dotnet publish DotNetRuntime.csproj -c Release
 
 # Copy output files
-cp -R /usr/local/server/bin/Release/net3.1/publish/* /usr/local/build/compiled
+cp -R /usr/local/server/bin/Release/netcoreapp3.1/publish/* /usr/local/build/compiled
 
 echo "Packing build ..."
 
