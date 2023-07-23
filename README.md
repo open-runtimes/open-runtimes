@@ -163,7 +163,7 @@ Once ready, you can test runtimes. First, you need to pick which runtime you wan
 To run tests, you execute `tests.sh` while providing information about runtime you want to test:
 
 ```bash
-RUNTIME='node-18.0' TEST_CLASS='Base' ENTRYPOINT='tests.js' sh tests-v3.sh
+RUNTIME='node-18.0' TEST_CLASS='Base' ENTRYPOINT='tests.js' sh tests.sh
 ```
 
 ## Contributing
