@@ -5,6 +5,7 @@ ENV PHP_SWOOLE_VERSION=v4.8.7
 RUN \
   apk add --no-cache --virtual .deps \
   make \
+  linux-headers \
   automake \
   autoconf \
   gcc \
