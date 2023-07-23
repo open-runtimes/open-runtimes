@@ -1,3 +1,5 @@
+using System.Collections.Generic; 
+
 namespace DotNetRuntime
 {
 	public class RuntimeOutput

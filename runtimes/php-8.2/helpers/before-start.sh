@@ -9,7 +9,7 @@ tar -zxf /mnt/code/code.tar.gz -C /usr/local/server/src/function
 
 # Apply env vars from build step
 set -o allexport
-source /usr/local/server/src/function/.open-runtimes
+. /usr/local/server/src/function/.open-runtimes
 set +o allexport
 
 # Enter server folder
