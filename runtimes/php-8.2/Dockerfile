@@ -1,6 +1,6 @@
 FROM php:8.2-alpine3.16 as step0
 
-ENV PHP_SWOOLE_VERSION=v4.8.7
+ENV PHP_SWOOLE_VERSION=v5.0.3
 
 RUN \
   apk add --no-cache --virtual .deps \
@@ -64,7 +64,7 @@ WORKDIR /usr/local/server
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20210902/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20210902/
+COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20220829/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20220829/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20220829/
 
 # Add Source Code
 COPY . .
