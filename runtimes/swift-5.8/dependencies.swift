@@ -124,7 +124,7 @@ func writeProductStrings() {
         if last.last != "," {
             last += ","
         }
-        let replacement = last + "\n\t\t\t\t" + products.joined(separator: ",\n\t\t\t\t")
+        let replacement = last + "\n\t\t\t\t" + products.joined(separator: "\n\t\t\t\t")
         
         text = text.replacingOccurrences(of: lastMatch, with: replacement)
         
