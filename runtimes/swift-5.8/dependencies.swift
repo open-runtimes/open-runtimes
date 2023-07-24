@@ -23,10 +23,10 @@ var productBlacklist = ["Vapor"]
 func buildPackageStrings() {
     if let dependencies = json["dependencies"] as? [[String: Any]] {
         for dependency in dependencies {
-            if let scm = dependency["scm"] as? [[String: Any]] {
+            if let scm = dependency["sourceControl"] as? [[String: Any]] {
                 for data in scm {
                     let identity = data["identity"] as? String
-                    let location = data["location"] as? String
+                    let location = ((data["location"] as? [String:Any])?["remote"] as? [Any])?[0] as? String
                     let lowerBound = ((data["requirement"] as? [String:Any])?["range"] as? [[String:Any]])?[0]["lowerBound"] as? String
                     
                     guard let identity = identity, let location = location, let lowerBound = lowerBound else {

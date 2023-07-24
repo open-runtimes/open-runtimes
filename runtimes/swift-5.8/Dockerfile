@@ -1,4 +1,4 @@
-FROM swift:5.8-jammy-slim
+FROM swiftarm/swift:5.8-ubuntu-jammy
 
 LABEL maintainer="team@appwrite.io"
 
