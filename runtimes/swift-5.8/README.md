@@ -1,6 +1,6 @@
 # Swift Runtime 5.8
 
-This is the Open Runtime that builds and runs NodeJS code based on a `swift:5.8.-jammy-slim` base image. 
+This is the Open Runtime that builds and runs NodeJS code based on a `swift:5.8.jammy-slim` base image. 
 
 The runtime itself uses [Vapor](https://vapor.codes) as the Web Server to process the execution requests.
 

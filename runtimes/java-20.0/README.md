@@ -1,6 +1,6 @@
 # Java Runtime 20.0
 
-This is the Open Runtime that builds and runs Java code based on a `openjdk:18-jdk-slim` base image. 
+This is the Open Runtime that builds and runs Java code based on a `openjdk:20-jdk-slim` base image. 
 
 The runtime itself uses [Rapidoid](https://github.com/rapidoid/rapidoid) as the Web Server to process the execution requests.
 
