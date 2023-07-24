@@ -322,6 +322,14 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
       OPEN_RUNTIMES_START_COMMAND="src/function/cpp_runtime"
+    - RUNTIME=cpp-20
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.cc
+      IMAGE=openruntimes/cpp:${VERSION}-20
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="src/function/cpp_runtime"
 
     # DotNet
     - RUNTIME=dotnet-7.0
