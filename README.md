@@ -78,7 +78,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 
 ## Architecture
 
-![Architecture](architecture.v2.drawio.svg)
+![Architecture](architecture.v3.drawio.svg)
 
 ### Load Balancer
 
