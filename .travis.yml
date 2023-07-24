@@ -91,6 +91,14 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="deno cache tests.ts"
       OPEN_RUNTIMES_START_COMMAND="denon start"
+    - RUNTIME=deno-1.21
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.ts
+      IMAGE=openruntimes/deno:${VERSION}-1.21
+      ARCH=linux/amd64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="deno cache tests.ts"
+      OPEN_RUNTIMES_START_COMMAND="denon start"
 
     # Python
     - RUNTIME=python-3.10
@@ -139,6 +147,30 @@ env:
       TEST_CLASS=Base
       ENTRYPOINT=lib/tests.dart
       IMAGE=openruntimes/dart:${VERSION}-2.18
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
+    - RUNTIME=dart-2.17
+      TEST_CLASS=Base
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.17
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
+    - RUNTIME=dart-2.16
+      TEST_CLASS=Base
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.16
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
+    - RUNTIME=dart-2.15
+      TEST_CLASS=Base
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.15
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
