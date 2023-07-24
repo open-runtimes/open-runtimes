@@ -2,24 +2,25 @@ FROM dart:2.16
 
 LABEL maintainer="team@appwrite.io"
 
-ENV INTERNAL_RUNTIME_ENTRYPOINT=lib/main.dart
+ENV OPEN_RUNTIMES_ENTRYPOINT=lib/main.dart
 
-RUN mkdir -p /usr/local/src/
-RUN mkdir -p /usr/local/src/user_code
-RUN mkdir -p /usr/code
-RUN mkdir -p /usr/code-start
-RUN mkdir -p /usr/workspace
-RUN mkdir -p /usr/builds
+RUN mkdir -p /mnt/code
+RUN mkdir -p /usr/local/build
+RUN mkdir -p /usr/local/server
+RUN mkdir -p /usr/local/server/src
+RUN mkdir -p /usr/local/server/src/function
 
-WORKDIR /usr/local/src
+WORKDIR /usr/local/server
 
 COPY . .
 
-RUN chmod +x /usr/local/src/start.sh
-RUN chmod +x /usr/local/src/build.sh
+RUN chmod +x /usr/local/server/helpers/before-start.sh
+RUN chmod +x /usr/local/server/helpers/start.sh
+
+RUN chmod +x /usr/local/server/helpers/before-build.sh
+RUN chmod +x /usr/local/server/helpers/build.sh
+RUN chmod +x /usr/local/server/helpers/after-build.sh
 
 RUN dart --disable-analytics
 
 EXPOSE 3000
-
-CMD ["/usr/local/src/start.sh"]

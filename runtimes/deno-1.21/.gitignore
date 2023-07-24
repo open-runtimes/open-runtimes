@@ -1,6 +1,6 @@
 # Open-runtime related
-examples/code.tar.gz
-examples/deno-cache
+example/code.tar.gz
+example/deno-cache
 
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node

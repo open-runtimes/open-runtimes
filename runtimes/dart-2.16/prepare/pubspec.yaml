@@ -8,5 +8,5 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies: 
-  pubspec: ^2.0.1
+  pubspec: ^2.3.0
   
