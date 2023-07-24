@@ -8,7 +8,7 @@ app.use(async (ctx) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? '';
   let safeTimeout: number | null = null;
   if(timeout) {
-      if(isNaN(timeout) || timeout === 0) {
+      if(isNaN(+timeout) || timeout === '0') {
           ctx.response.status = 500;
           ctx.response.body = 'Header "x-open-runtimes-timeout" must be an integer greater than 0.';
           return;
@@ -44,12 +44,12 @@ app.use(async (ctx) => {
 
   const scheme = ctx.request.headers.get('x-forwarded-proto') ?? 'http';
   const defaultPort = scheme === 'https' ? '443' : '80';
-  const hostHeader = ctx.request.headers.get('host', '');
+  const hostHeader = ctx.request.headers.get('host') ?? '';
   const host = hostHeader.includes(':') ? hostHeader.split(':')[0] : hostHeader;
   const port = +(hostHeader.includes(':') ? hostHeader.split(':')[1] : defaultPort);
   const path = ctx.request.url.pathname;
   const queryString = ctx.request.url.href.includes('?') ? ctx.request.url.href.split('?')[1] : '';
-  const query = {};
+  const query: any = {};
   for(const param of queryString.split('&')) {
     let [key, ...valueArr] = param.split('=');
     const value = valueArr.join('=');
@@ -76,21 +76,21 @@ app.use(async (ctx) => {
       path
     },
     res: {
-      send: function (body, statusCode = 200, headers = {}) {
+      send: function (body: any, statusCode = 200, headers: any = {}) {
         return {
           body: body,
           statusCode: statusCode,
           headers: headers
         }
       },
-      json: function (obj, statusCode = 200, headers = {}) {
+      json: function (obj: any, statusCode = 200, headers: any = {}) {
         headers['content-type'] = 'application/json';
         return this.send(JSON.stringify(obj), statusCode, headers);
       },
       empty: function () {
         return this.send('', 204, {});
       },
-      redirect: function (url, statusCode = 301, headers = {}) {
+      redirect: function (url: string, statusCode = 301, headers: any = {}) {
         headers['location'] = url;
         return this.send('', statusCode, headers);
       }
