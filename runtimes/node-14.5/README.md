@@ -1,6 +1,6 @@
-# Node Runtime 18.0
+# Node Runtime 14.5
 
-This is the Open Runtime that builds and runs NodeJS code based on a `node:18.14.2-alpine3.16` base image. 
+This is the Open Runtime that builds and runs NodeJS code based on a `node:14.5-alpine3.16` base image. 
 
 The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
 
@@ -24,13 +24,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.js --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/node:v3-18.0 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.js --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/node:v3-14.5 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-18.0 sh helpers/start.sh "pm2 start src/server.js --no-daemon"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-14.5 sh helpers/start.sh "pm2 start src/server.js --no-daemon"
 ```
 
 4. In new terminal window, execute function:
@@ -52,7 +52,7 @@ git clone https://github.com/open-runtimes/open-runtimes.git
 2. Enter the Node runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/node-18.0
+cd open-runtimes/runtimes/node-14.5
 ```
 
 3. Run the included example cloud function:

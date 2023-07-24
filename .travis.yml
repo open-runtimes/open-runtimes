@@ -99,6 +99,14 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="deno cache tests.ts"
       OPEN_RUNTIMES_START_COMMAND="denon start"
+    - RUNTIME=deno-1.21
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.ts
+      IMAGE=openruntimes/deno:${VERSION}-1.21
+      ARCH=linux/amd64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="deno cache tests.ts"
+      OPEN_RUNTIMES_START_COMMAND="denon start"
 
     # Python
     - RUNTIME=python-3.11
@@ -142,7 +150,7 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
-      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
+      OPEN_RUNTIMES_START_COMMAND="src/function/server"
     - RUNTIME=dart-2.19
       TEST_CLASS=Base
       ENTRYPOINT=lib/tests.dart
@@ -150,7 +158,7 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
-      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
+      OPEN_RUNTIMES_START_COMMAND="src/function/server"
     - RUNTIME=dart-2.18
       TEST_CLASS=Base
       ENTRYPOINT=lib/tests.dart
@@ -158,7 +166,31 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
-      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/server"
+      OPEN_RUNTIMES_START_COMMAND="src/function/server"
+    - RUNTIME=dart-2.17
+      TEST_CLASS=Base
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.17
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="src/function/server"
+    - RUNTIME=dart-2.16
+      TEST_CLASS=Base
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.16
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="src/function/server"
+    - RUNTIME=dart-2.15
+      TEST_CLASS=Base
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-2.15
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="src/function/server"
 
     # Ruby
     - RUNTIME=ruby-3.2
@@ -228,7 +260,7 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
-      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
+      OPEN_RUNTIMES_START_COMMAND="src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
 
     # Kotlin
     - RUNTIME=kotlin-1.6
@@ -238,7 +270,7 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
-      OPEN_RUNTIMES_START_COMMAND="java -jar /usr/local/server/src/function/kotlin-runtime-1.0.0.jar"
+      OPEN_RUNTIMES_START_COMMAND="java -jar src/function/kotlin-runtime-1.0.0.jar"
 
     # Java
     # - RUNTIME=java-20.0
@@ -256,7 +288,7 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
-      OPEN_RUNTIMES_START_COMMAND="java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
+      OPEN_RUNTIMES_START_COMMAND="java -jar src/function/java-runtime-1.0.0.jar"
     - RUNTIME=java-17.0
       TEST_CLASS=Base
       ENTRYPOINT=Tests.java
@@ -264,7 +296,7 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
-      OPEN_RUNTIMES_START_COMMAND="java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
+      OPEN_RUNTIMES_START_COMMAND="java -jar src/function/java-runtime-1.0.0.jar"
     - RUNTIME=java-11.0
       TEST_CLASS=Base
       ENTRYPOINT=Tests.java
@@ -272,7 +304,7 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
-      OPEN_RUNTIMES_START_COMMAND="java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
+      OPEN_RUNTIMES_START_COMMAND="java -jar src/function/java-runtime-1.0.0.jar"
     - RUNTIME=java-8.0
       TEST_CLASS=Base
       ENTRYPOINT=Tests.java
@@ -280,7 +312,7 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
-      OPEN_RUNTIMES_START_COMMAND="java -jar /usr/local/server/src/function/java-runtime-1.0.0.jar"
+      OPEN_RUNTIMES_START_COMMAND="java -jar src/function/java-runtime-1.0.0.jar"
 
     # C++
     - RUNTIME=cpp-17
@@ -290,7 +322,7 @@ env:
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
-      OPEN_RUNTIMES_START_COMMAND="/usr/local/server/src/function/cpp_runtime"
+      OPEN_RUNTIMES_START_COMMAND="src/function/cpp_runtime"
 
     # DotNet
     - RUNTIME=dotnet-7.0
@@ -308,7 +340,7 @@ env:
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
-      OPEN_RUNTIMES_START_COMMAND="dotnet /usr/local/server/src/function/DotNetRuntime.dll"
+      OPEN_RUNTIMES_START_COMMAND="dotnet src/function/DotNetRuntime.dll"
 
     # Go
     # - RUNTIME=go-1.19
