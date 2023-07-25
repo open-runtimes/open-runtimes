@@ -1,6 +1,6 @@
-# .NET Runtime 7.0
+# .NET Runtime 7
 
-This is the Open Runtime that builds and runs .NET code based on a `mcr.microsoft.com/dotnet/sdk:7.0-alpine` base image. 
+This is the Open Runtime that builds and runs .NET code based on a `mcr.microsoft.com/dotnet/sdk:7-alpine` base image. 
 
 The runtime itself uses [ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-7.0) as the Web Server to process the execution requests.
 
@@ -28,13 +28,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dotnet:v3-7.0 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dotnet:v3-7 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/dotnet:v3-7.0 sh helpers/start.sh "dotnet /usr/local/server/src/function/DotNetRuntime.dll"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/dotnet:v3-7 sh helpers/start.sh "dotnet /usr/local/server/src/function/DotNetRuntime.dll"
 ```
 
 4. In new terminal window, execute function:
@@ -56,7 +56,7 @@ git clone https://github.com/open-runtimes/open-runtimes.git
 2. Enter the .NET runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/dotnet-7.0
+cd open-runtimes/runtimes/dotnet-7
 ```
 
 3. Run the included example cloud function:

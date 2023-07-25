@@ -1,4 +1,4 @@
-FROM node:19.0-alpine
+FROM node:19-alpine
 
 LABEL maintainer="team@appwrite.io"
 

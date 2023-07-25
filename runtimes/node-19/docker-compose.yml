@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-dotnet-7.0:
-    container_name: open-runtimes-dotnet-7.0
+  open-runtimes-node-19:
+    container_name: open-runtimes-node-19
     build:
       context: .
     ports: 

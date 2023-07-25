@@ -21,33 +21,33 @@ env:
     - VERSION=v3
   jobs:
     # Node
-    - RUNTIME=node-20.4
+    - RUNTIME=node-20
       TEST_CLASS=Base
       ENTRYPOINT=tests.js
-      IMAGE=openruntimes/node:${VERSION}-20.4
+      IMAGE=openruntimes/node:${VERSION}-20
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="npm install"
       OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
-    - RUNTIME=node-20.4
+    - RUNTIME=node-20
       TEST_CLASS=Base
       ENTRYPOINT=tests.mjs
-      IMAGE=openruntimes/node:${VERSION}-20.4
+      IMAGE=openruntimes/node:${VERSION}-20
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="npm install"
       OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
-    - RUNTIME=node-19.0
+    - RUNTIME=node-19
       TEST_CLASS=Base
       ENTRYPOINT=tests.js
-      IMAGE=openruntimes/node:${VERSION}-19.0
+      IMAGE=openruntimes/node:${VERSION}-19
       ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="npm install"
       OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
-    - RUNTIME=node-19.0
+    - RUNTIME=node-19
       TEST_CLASS=Base
       ENTRYPOINT=tests.mjs
-      IMAGE=openruntimes/node:${VERSION}-19.0
+      IMAGE=openruntimes/node:${VERSION}-19
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="npm install"
       OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
@@ -348,10 +348,10 @@ env:
       OPEN_RUNTIMES_START_COMMAND="src/function/cpp_runtime"
 
     # DotNet
-    - RUNTIME=dotnet-7.0
+    - RUNTIME=dotnet-7
       TEST_CLASS=Base
       ENTRYPOINT=Tests.cs
-      IMAGE=openruntimes/dotnet:${VERSION}-7.0
+      IMAGE=openruntimes/dotnet:${VERSION}-7
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
