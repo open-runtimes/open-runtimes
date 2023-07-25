@@ -402,6 +402,9 @@ jobs:
           run: php -v
         - name: Install Dependencies
           run: composer install
+          if: matrix.RUNTIME == 'node-19.0' 
+        - name: Setup Node.js
+          uses: actions/setup-node@v2 
         - name: Run Tests
           run : |
            RUNTIME="${{matrix.RUNTIME}}" ENTRYPOINT="${{ matrix.ENTRYPOINT }}" TEST_CLASS="${{ matrix.TEST_CLASS }}" OPEN_RUNTIMES_BUILD_COMMAND="${{ matrix.OPEN_RUNTIMES_BUILD_COMMAND }}" OPEN_RUNTIMES_START_COMMAND="${{ matrix.OPEN_RUNTIMES_START_COMMAND }}" sh ./tests.sh
