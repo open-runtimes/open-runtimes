@@ -1,6 +1,6 @@
 # Dart Runtime 3.0
 
-This is the Open Runtime that builds and runs Dart code based on a `dart:3.0.6` base image. 
+This is the Open Runtime that builds and runs Dart code based on a `dart:3.0` base image. 
 
 The runtime itself uses [Shelf](https://pub.dev/documentation/shelf/latest/shelf_io/shelf_io-library.html) as the Web Server to process the execution requests.
 

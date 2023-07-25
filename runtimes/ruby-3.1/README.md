@@ -1,6 +1,6 @@
 # Ruby Runtime 3.1
 
-This is the Open Runtime that builds and runs Ruby code based on a `ruby:3.1-alpine` base image. 
+This is the Open Runtime that builds and runs Ruby code based on a `ruby:3.1-alpine3.16` base image. 
 
 The runtime itself uses [Sinatra](https://github.com/sinatra/sinatra) as the Web Server to process the execution requests.
 

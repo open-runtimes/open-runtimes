@@ -1,6 +1,6 @@
 # .NET Runtime 7.0
 
-This is the Open Runtime that builds and runs .NET code based on a `mcr.microsoft.com/dotnet/sdk:7.0-alpine` base image. 
+This is the Open Runtime that builds and runs .NET code based on a `mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17` base image. 
 
 The runtime itself uses [ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-7.0) as the Web Server to process the execution requests.
 

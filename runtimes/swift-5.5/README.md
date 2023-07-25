@@ -1,6 +1,6 @@
 # Swift Runtime 5.5
 
-This is the Open Runtime that builds and runs NodeJS code based on a `swiftarm/5.5.2-focal-multi-arch` base image. 
+This is the Open Runtime that builds and runs NodeJS code based on a `swiftarm/swift:5.5.3-ubuntu-jammy` base image. 
 
 The runtime itself uses [Vapor](https://vapor.codes) as the Web Server to process the execution requests.
 

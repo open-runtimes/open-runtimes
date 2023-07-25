@@ -1,7 +1,7 @@
 
 # C++ Runtime 20
 
-This is the Open Runtime that builds and runs C++ code based on a `alpine-3.15` base image. 
+This is the Open Runtime that builds and runs C++ code based on a `alpine-3.16` base image. 
 
 The runtime itself uses [Drogon](https://github.com/drogonframework/drogon) as the Web Server to process the execution requests.
 
