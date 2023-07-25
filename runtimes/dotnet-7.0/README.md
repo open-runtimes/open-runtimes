@@ -90,7 +90,7 @@ namespace DotNetRuntime {
 
 - Your entrypoint code must wrap `public class Handler {}` with `namespace DotNetRuntime {}`.
 
-- To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically cached and installed, so you don't need to include the `.nuget` folder in your function.
+- To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically installed.
 
 - The default entrypoint is `Index.cs`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/App.cs`.
 

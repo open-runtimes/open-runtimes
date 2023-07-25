@@ -86,7 +86,7 @@ Future<dynamic> main(final context) async {
 }
 ```
 
-- To handle dependencies, you need to have `pubspec.yaml` file. Dependencies will be automatically cached and installed, so you don't need to include any dependencies folders in your function.
+- To handle dependencies, you need to have `pubspec.yaml` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"` during build.
 
 - The default entrypoint is `lib/main.dart`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=lib/app.dart`.
 

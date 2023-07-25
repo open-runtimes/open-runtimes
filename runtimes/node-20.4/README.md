@@ -93,7 +93,7 @@ module.exports = (req, res) => {
 }
 ```
 
-- To handle dependencies, you need to have `package.json` file. Dependencies will be automatically cached and installed, so you don't need to include `node_modules` folder in your function.
+- To handle dependencies, you need to have `package.json` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="npm install"` during build.
 
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.js`.
 

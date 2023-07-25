@@ -92,7 +92,7 @@ public class Index {
 
 - Ensure your Java files starts with `package io.openruntimes.java;`
 
-- To handle dependencies, you need to have any `.gradle` file including a `dependencies` block. Dependencies will be automatically cached and installed, so you don't need to include the `build` folder in your function.
+- To handle dependencies, you need to have any `.gradle` file including a `dependencies` block. Dependencies will be automatically and installed.
 
 - The default entrypoint is `Index.java`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/App.java`.
 

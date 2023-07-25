@@ -81,7 +81,7 @@ def main(context)
 end
 ```
 
-- To handle dependencies, you need to have `Gemfile` file. Dependencies will be automatically cached and installed, so you don't need to include any local denepdencies folder in your function.
+- To handle dependencies, you need to have `Gemfile` file. Dependencies will be automatically installed.
 
 - The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.rb`.
 

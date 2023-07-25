@@ -81,7 +81,7 @@ def main(context):
     return context.res.send('Hello Open Runtimes 👋')
 ```
 
-- To handle dependencies, you need to have `requirements.txt` file. Dependencies will be automatically cached and installed, so you don't need to include `__pycache__` folder in your function.
+- To handle dependencies, you need to have `requirements.txt` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="pip install -r requirements.txt"` during build.
 
 - The default entrypoint is `main.py`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.py`.
 

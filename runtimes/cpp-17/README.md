@@ -65,7 +65,7 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 git clone https://github.com/open-runtimes/open-runtimes.git
 ```
 
-2. Enter the Node runtime folder:
+2. Enter the C++ runtime folder:
 
 ```bash
 cd open-runtimes/runtimes/cpp-17
@@ -107,7 +107,7 @@ namespace runtime {
 }
 ```
 
-- To handle dependencies, you need to include a `CMakeLists.txt` file. Dependencies will be automatically cached and installed, so you don't need to include the `build` folder in your function.
+- To handle dependencies, you need to include a `CMakeLists.txt` file. Dependencies will be automatically installed.
 
 - The default entrypoint is `index.cc`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.cc`.
 

@@ -91,7 +91,7 @@ func main(req: RequestValue, res: RequestResponse) -> RequestResponse {
 }
 ```
 
-- To handle dependencies, you need to have `Package.swift` file. Dependencies will be automatically cached and installed, so you don't need to include `.build` folder in your function.
+- To handle dependencies, you need to have `Package.swift` file. Dependencies will be automatically installed.
 
 - The default entrypoint is `Sources/index.swift`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{ "file": "app.swift" }`.
 
