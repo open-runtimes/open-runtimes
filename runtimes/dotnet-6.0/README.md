@@ -28,7 +28,7 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=Indes.cs --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dotnet:v3-6.0 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=Index.cs --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dotnet:v3-6.0 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
@@ -90,7 +90,7 @@ public class Handler {
 
 - Your entrypoint code must start with `namespace DotNetRuntime;`.
 
-- To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically cached and installed, so you don't need to include the `.nuget` folder in your function.
+- To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically installed.
 
 - The default entrypoint is `Index.cs`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/App.cs`.
 

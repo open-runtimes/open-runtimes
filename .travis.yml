@@ -21,6 +21,21 @@ env:
     - VERSION=v3
   jobs:
     # Node
+    - RUNTIME=node-20.4
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.js
+      IMAGE=openruntimes/node:${VERSION}-20.4
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="npm install"
+      OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
+    - RUNTIME=node-20.4
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.mjs
+      IMAGE=openruntimes/node:${VERSION}-20.4
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="npm install"
+      OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
     - RUNTIME=node-19.0
       TEST_CLASS=Base
       ENTRYPOINT=tests.js
@@ -101,6 +116,14 @@ env:
       OPEN_RUNTIMES_START_COMMAND="denon start"
 
     # Python
+    - RUNTIME=python-3.11
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.py
+      IMAGE=openruntimes/python:${VERSION}-3.11
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="pip install --no-cache-dir -r requirements.txt"
+      OPEN_RUNTIMES_START_COMMAND="python3 src/server.py"
     - RUNTIME=python-3.10
       TEST_CLASS=Base
       ENTRYPOINT=tests.py
@@ -177,6 +200,14 @@ env:
       OPEN_RUNTIMES_START_COMMAND="src/function/server"
 
     # Ruby
+    - RUNTIME=ruby-3.2
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.rb
+      IMAGE=openruntimes/ruby:${VERSION}-3.2
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production"
     - RUNTIME=ruby-3.1
       TEST_CLASS=Base
       ENTRYPOINT=tests.rb
@@ -195,6 +226,14 @@ env:
       OPEN_RUNTIMES_START_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 
     # PHP
+    - RUNTIME=php-8.2
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.php
+      IMAGE=openruntimes/php:${VERSION}-8.2
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
+      OPEN_RUNTIMES_START_COMMAND="php src/server.php"
     - RUNTIME=php-8.1
       TEST_CLASS=Base
       ENTRYPOINT=tests.php
@@ -213,6 +252,14 @@ env:
       OPEN_RUNTIMES_START_COMMAND="php src/server.php"
 
     # Swift
+    - RUNTIME=swift-5.8
+      TEST_CLASS=Base
+      ENTRYPOINT=Tests.swift
+      IMAGE=openruntimes/swift:${VERSION}-5.8
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
     - RUNTIME=swift-5.5
       TEST_CLASS=Base
       ENTRYPOINT=Tests.swift
@@ -227,6 +274,14 @@ env:
       TEST_CLASS=Base
       ENTRYPOINT=Tests.kt
       IMAGE=openruntimes/kotlin:${VERSION}-1.6
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="java -jar src/function/kotlin-runtime-1.0.0.jar"
+    - RUNTIME=kotlin-1.8
+      TEST_CLASS=Base
+      ENTRYPOINT=Tests.kt
+      IMAGE=openruntimes/kotlin:${VERSION}-1.8
       ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
@@ -275,8 +330,24 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
       OPEN_RUNTIMES_START_COMMAND="src/function/cpp_runtime"
+    - RUNTIME=cpp-20
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.cc
+      IMAGE=openruntimes/cpp:${VERSION}-20
+      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="src/function/cpp_runtime"
 
     # DotNet
+    - RUNTIME=dotnet-7.0
+      TEST_CLASS=Base
+      ENTRYPOINT=Tests.cs
+      IMAGE=openruntimes/dotnet:${VERSION}-7.0
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="dotnet src/function/DotNetRuntime.dll"
     - RUNTIME=dotnet-6.0
       TEST_CLASS=Base
       ENTRYPOINT=Tests.cs

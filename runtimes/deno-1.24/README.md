@@ -81,7 +81,7 @@ export default async function(context: any) {
 }
 ```
 
-- Dependencies are handeled automatically. Open Runtimes automatically cache and install them during build process.
+- Dependencies are handeled automatically. To install those dependencies during build, pass `OPEN_RUNTIMES_BUILD_COMMAND="deno cache YOUR_ENTRYPOINT"` during build.
 
 - The default entrypoint is `mod.ts`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.ts`.
 

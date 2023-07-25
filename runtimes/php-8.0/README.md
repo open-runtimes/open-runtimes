@@ -84,7 +84,7 @@ return function($context) {
 };
 ```
 
-- To handle dependencies, you need to have `composer.json` file. Dependencies will be automatically cached and installed, so you don't need to include `vendor` folder in your function.
+- To handle dependencies, you need to have `composer.json` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="composer install"` during build.
 
 - If you plan to use libraries in your PHP code, make sure to include follwing like at the top of your code:
 
