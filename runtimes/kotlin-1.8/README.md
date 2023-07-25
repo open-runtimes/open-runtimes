@@ -88,7 +88,7 @@ public class Index {
 }
 ```
 
-- Ensure your Java files starts with `package io.openruntimes.kotlin;`
+- Ensure your Kotlin files starts with `package io.openruntimes.kotlin;`
 
 - To handle dependencies, you need to have any `.gradle` file including a `dependencies` block. Dependencies will be automatically cached and installed, so you don't need to include the `build` folder in your function.
 
