@@ -1,4 +1,8 @@
-FROM node:20.0-alpine3.16
+FROM --platform=$BUILDPLATFORM node:16.14.2-alpine3.15 as node
+
+RUN npm install pm2 -g
+
+FROM node:20.0-alpine3.16 as final
 
 LABEL maintainer="team@appwrite.io"
 
@@ -14,7 +18,7 @@ WORKDIR /usr/local/server
 
 COPY package* /usr/local/server/
 
-RUN npm install pm2 -g
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 RUN npm ci && npm cache clean --force
 
