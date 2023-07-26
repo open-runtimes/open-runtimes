@@ -402,9 +402,6 @@ jobs:
           run: php -v
         - name: Install Dependencies
           run: composer install
-        - if: matrix.runtimes == 'node-20.4.js' || matrix.runtimes == 'node-20.4.mjs' || matrix.runtimes == 'node-19.0.js' || matrix.runtimes == 'node-19.0.mjs' || matrix.runtimes == 'node-18.0.js' || matrix.runtimes == 'node-18.0.mjs' || matrix.runtimes == 'node-16.0.js' || matrix.runtimes == 'node-16.0.mjs' || matrix.runtimes == 'node-14.5.js' || matrix.runtimes == 'node-14.5.mjs' 
-          name: Setup Node.js
-          uses: actions/setup-node@v2 
         - name: Run Tests
           run : |
            RUNTIME="${{matrix.RUNTIME}}" ENTRYPOINT="${{ matrix.ENTRYPOINT }}" TEST_CLASS="${{ matrix.TEST_CLASS }}" OPEN_RUNTIMES_BUILD_COMMAND="${{ matrix.OPEN_RUNTIMES_BUILD_COMMAND }}" OPEN_RUNTIMES_START_COMMAND="${{ matrix.OPEN_RUNTIMES_START_COMMAND }}" sh ./tests.sh
