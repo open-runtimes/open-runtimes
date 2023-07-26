@@ -26,7 +26,7 @@ for filename in *.*proj; do
     break
 done
 
-echo "Compiling"
+echo "Compiling ..."
 
 # Prepare folder for compiled build
 mkdir /usr/local/build/compiled

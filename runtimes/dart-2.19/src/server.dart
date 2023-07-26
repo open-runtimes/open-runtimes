@@ -38,7 +38,7 @@ void main() async {
       }
     }
 
-    String contentType = req.headers['content-type'] ?? 'plain/text';
+    String contentType = req.headers['content-type'] ?? 'text/plain';
     if (contentType.contains('application/json')) {
       if (!bodyString.isEmpty) {
         body = jsonDecode(bodyString);

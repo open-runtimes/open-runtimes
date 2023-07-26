@@ -19,7 +19,7 @@ namespace DotNetRuntime
         {
             var contentType = _headers.TryGetValue("content-type", out var contentTypeValue)
                 ? contentTypeValue 
-                : "plain/text";
+                : "text/plain";
 
             foreach (var entry in _headers)
             {

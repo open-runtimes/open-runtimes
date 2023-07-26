@@ -11,9 +11,10 @@ fi
 cp -R --no-clobber /usr/local/build/* /usr/local/server/src
 
 # Update dynamic placeholder to import user code
-sed -i "s/{entrypointFile}/$OPEN_RUNTIMES_ENTRYPOINT/g" "/usr/local/server/src/main.cc"
+ESCAPED_OPEN_RUNTIMES_ENTRYPOINT="$(echo "$OPEN_RUNTIMES_ENTRYPOINT" | sed -e 's/[\/&]/\\&/g')"
+sed -i "s/{entrypointFile}/$ESCAPED_OPEN_RUNTIMES_ENTRYPOINT/g" "/usr/local/server/src/main.cc"
 
-echo "Compiling"
+echo "Compiling ..."
 
 # Prepare folder for compiled build
 mkdir /usr/local/build/compiled
