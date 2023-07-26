@@ -21,7 +21,7 @@ env:
     - VERSION=v3
   jobs:
     # Node
-    - RUNTIME=node-200
+    - RUNTIME=node-20.0
       TEST_CLASS=Base
       ENTRYPOINT=tests.js
       IMAGE=openruntimes/node:${VERSION}-20.0
