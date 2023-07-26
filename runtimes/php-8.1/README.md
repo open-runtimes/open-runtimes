@@ -1,6 +1,6 @@
 # PHP Runtime 8.1
 
-This is the Open Runtime that builds and runs PHP code based on a `php:8.1.6-alpine` base image. 
+This is the Open Runtime that builds and runs PHP code based on a `php:8.1-cli-alpine3.16` base image. 
 
 The runtime itself uses [Swoole](https://github.com/swoole/swoole-src) as the Web Server to process the execution requests.
 
