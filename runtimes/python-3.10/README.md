@@ -1,6 +1,6 @@
 # Python Runtime 3.10
 
-This is the Open Runtime that builds and runs Python code based on a `python:3.10-alpine` base image. 
+This is the Open Runtime that builds and runs Python code based on a `python:3.10-alpine3.16` base image. 
 
 The runtime itself uses [Flask](https://flask.palletsprojects.com/en/2.0.x) as the Web Server to process the execution requests.
 

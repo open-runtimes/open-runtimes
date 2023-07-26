@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-java-8:
-    container_name: open-runtimes-java-8
+  open-runtimes-java-8.0:
+    container_name: open-runtimes-java-8.0
     build:
       context: .
     ports:

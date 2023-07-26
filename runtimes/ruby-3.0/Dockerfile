@@ -1,4 +1,4 @@
-FROM ruby:3.0-alpine3.15
+FROM ruby:3.0-alpine3.16
 
 LABEL maintainer="team@appwrite.io"
 
