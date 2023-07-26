@@ -156,6 +156,10 @@ void main() async {
       }
     }
 
+    if (responseHeaders['content-type'] == null) {
+      responseHeaders['content-type'] = 'text/plain';
+    }
+
     if (!customstd.isEmpty) {
       context.log(
           'Unsupported log detected. Use context.log() or context.error() for logging.');
