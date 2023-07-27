@@ -100,7 +100,7 @@ namespace runtime {
 
                 json["key1"] = key1;
                 json["key2"] = key2;
-                json["raw"] = req.bodyString;
+                json["raw"] = req.bodyRaw;
                 return res.json(json);
             } else if (action == "envVars") {
                 auto customEnvVar = std::getenv("CUSTOM_ENV_VAR");
@@ -141,7 +141,7 @@ namespace runtime {
 
                 curl = curl_easy_init();
                 if (curl) {
-                    std::string url = "https://jsonplaceholder.typicode.com/todos/" + req.bodyString;
+                    std::string url = "https://jsonplaceholder.typicode.com/todos/" + req.bodyRaw;
                     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
                     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
                                      +[](void *contents, size_t size, size_t nmemb, void *userp) {

@@ -46,7 +46,7 @@ export default async function(context: any) {
             return context.res.json({
                 key1: context.req.body.key1 ?? 'Missing key',
                 key2: context.req.body.key2 ?? 'Missing key',
-                raw: context.req.bodyString
+                raw: context.req.bodyRaw
             })
         case 'envVars':
             return context.res.json({
@@ -67,7 +67,7 @@ export default async function(context: any) {
 
             return context.res.send('');
         case 'library':
-            const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyString}`)).data;
+            const todo = (await axiod.get(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyRaw}`)).data;
             return context.res.json({ todo });
         case 'timeout':
             context.log('Timeout start.');

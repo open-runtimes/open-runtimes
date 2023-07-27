@@ -86,7 +86,7 @@ public class Tests {
                 return context.res.json(mutableMapOf(
                     "key1" to key1,
                     "key2" to key2,
-                    "raw" to context.req.bodyString
+                    "raw" to context.req.bodyRaw
                 ))
             }
             "envVars" -> {
@@ -117,7 +117,7 @@ public class Tests {
             "library" -> {
                 val gson = Gson()
 
-                val url = URL("https://jsonplaceholder.typicode.com/todos/" + context.req.bodyString)
+                val url = URL("https://jsonplaceholder.typicode.com/todos/" + context.req.bodyRaw)
                 val con = (url.openConnection() as HttpURLConnection).apply {
                     requestMethod = "GET"
                     responseCode

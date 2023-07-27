@@ -80,7 +80,7 @@ public class Tests {
                 }
                 json.put("key1", key1);
                 json.put("key2", key2);
-                json.put("raw", context.getReq().getBodyString());
+                json.put("raw", context.getReq().getBodyRaw());
                 return context.getRes().json(json);
             case "envVars":
                 json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
@@ -101,7 +101,7 @@ public class Tests {
                 context.log(map);
                 return context.getRes().send("");
             case "library":
-                URL url = new URL("https://jsonplaceholder.typicode.com/todos/" + context.getReq().getBodyString());
+                URL url = new URL("https://jsonplaceholder.typicode.com/todos/" + context.getReq().getBodyRaw());
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
                 con.getResponseCode();

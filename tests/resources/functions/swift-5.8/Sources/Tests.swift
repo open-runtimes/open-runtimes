@@ -67,7 +67,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return try context.res.json([
             "key1": key1,
             "key2": key2,
-            "raw": context.req.bodyString
+            "raw": context.req.bodyRaw
         ])
     case "envVars":
         return try context.res.json([
@@ -90,7 +90,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return context.res.send("")
     case "library":
         let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-        let request = HTTPClientRequest(url: "https://jsonplaceholder.typicode.com/todos/\(context.req.bodyString)")
+        let request = HTTPClientRequest(url: "https://jsonplaceholder.typicode.com/todos/\(context.req.bodyRaw)")
         let response = try await httpClient.execute(request, timeout: .seconds(30))
         let data = try await response.body.collect(upTo: 1024 * 1024)
         let todo = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
