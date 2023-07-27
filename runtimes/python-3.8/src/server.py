@@ -32,7 +32,7 @@ class Response:
         return self.send('', statusCode, headers)
 
 class Request:
-    body_string = None
+    body_raw = None
     body = None
     headers = None
     method = None
@@ -87,8 +87,8 @@ async def handler(u_path):
 
     context = Context()
 
-    context.req.body_string = request.get_data(as_text=True)
-    context.req.body = context.req.body_string
+    context.req.body_raw = request.get_data(as_text=True)
+    context.req.body = context.req.body_raw
     context.req.method = request.method
     context.req.headers = {}
 
@@ -127,7 +127,7 @@ async def handler(u_path):
 
     contentType = request.headers.get('content-type', 'text/plain')
     if 'application/json' in contentType:
-        if not context.req.body_string:
+        if not context.req.body_raw:
             context.req.body = {}
         else:
             context.req.body = request.get_json(force=True, silent=False)
