@@ -382,11 +382,15 @@ jobs:
     steps: 
         - name: Clone Repository
           uses: actions/checkout@v3.5.3
+        - name: Update Docker 
+          run: |
+             sudo apt-get update
+             sudo apt-get install docker-ce docker-ce-cli containerd.io
         - name: Check Docker Version
           run: |
              docker version
         - name: Install PHP
-          uses: shivammathur/setup-php@v2
+          uses: shivammathur/setup-php@v3
           with:
             php-version: '8.0'
         - name: Check PHP Version
