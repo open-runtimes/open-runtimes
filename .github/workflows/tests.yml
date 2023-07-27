@@ -381,9 +381,13 @@ jobs:
     steps: 
         - name: Clone Repository
           uses: actions/checkout@v3.5.3
-        - name: Check Docker Version
+        - name: Install Docker BuildX
           run: |
-             docker version
+            mkdir -vp ~/.docker/cli-plugins/
+            curl --silent -L "https://github.com/docker/buildx/releases/download/v0.3.0/buildx-v0.3.0.linux-amd64" > ~/.docker/cli-plugins/docker-buildx
+            chmod a+x ~/.docker/cli-plugins/docker-buildx
+        - name: Check Docker Buildx
+          run: docker buildx version
         - name: Install PHP
           uses: shivammathur/setup-php@2.25.4
           with:
