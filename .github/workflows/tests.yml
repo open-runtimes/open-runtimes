@@ -377,7 +377,7 @@ jobs:
             #   TEST_SCRIPT: tests.sh
             #   OPEN_RUNTIMES_BUILD_COMMAND: ""
             #   OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: ${{ matrix.runtimes }}
     steps: 
         - name: Clone Repository
