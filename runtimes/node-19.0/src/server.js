@@ -23,8 +23,8 @@ const server = micro(async (req, res) => {
     const errors = [];
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
-    const bodyString = await parseText(req);
-    let body = bodyString;
+    const bodyRaw = await parseText(req);
+    let body = bodyRaw;
 
     if (contentType.includes('application/json')) {
         body = await parseJson(req);
@@ -55,7 +55,7 @@ const server = micro(async (req, res) => {
 
     const context = {
         req: {
-            bodyString,
+            bodyRaw,
             body,
             headers,
             method: req.method,

@@ -41,8 +41,8 @@ func execute(req: Request) async throws -> Response {
         )
     }
 
-    let bodyString = req.body.string ?? ""
-    var body = bodyString as Any
+    let bodyRaw = req.body.string ?? ""
+    var body = bodyRaw as Any
     var headers = [String: String]()
     let method = req.method.string
     let scheme = req.uri.scheme!
@@ -95,16 +95,16 @@ func execute(req: Request) async throws -> Response {
 
     let contentType = req.headers["content-type"].first ?? "text/plain"
     if contentType.starts(with: "application/json"),
-        !bodyString.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
-        bodyString != "\"\"" {
+        !bodyRaw.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
+        bodyRaw != "\"\"" {
             body = try JSONSerialization.jsonObject(
-                with: bodyString.data(using: .utf8)!,
+                with: bodyRaw.data(using: .utf8)!,
                 options: .allowFragments
             ) as Any
     }
 
     let request = RuntimeRequest(
-        bodyString: bodyString,
+        bodyRaw: bodyRaw,
         body: body,
         headers: headers,
         method: method,

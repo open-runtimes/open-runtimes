@@ -26,11 +26,11 @@ app.use(async (ctx) => {
   const errors: string[] = [];
 
   const contentType = ctx.request.headers.get('content-type') ?? 'text/plain';
-  const bodyString: string = await ctx.request.body({ type: 'text' }).value;
-  let body: any = bodyString;
+  const bodyRaw: string = await ctx.request.body({ type: 'text' }).value;
+  let body: any = bodyRaw;
 
   if (contentType.includes('application/json')) {
-    if(bodyString) {
+    if(bodyRaw) {
       body = await ctx.request.body({ type: 'json' }).value;
     } else {
       body = {};
@@ -63,7 +63,7 @@ app.use(async (ctx) => {
 
   const context: any = {
     req: {
-      bodyString,
+      bodyRaw,
       body,
       headers,
       method: ctx.request.method,

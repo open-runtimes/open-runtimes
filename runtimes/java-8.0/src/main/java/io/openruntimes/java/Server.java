@@ -62,8 +62,8 @@ public class Server {
             return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
         }
 
-        String bodyString = req.body() == null ? "" : new String(req.body(), StandardCharsets.UTF_8);
-        Object body = bodyString;
+        String bodyRaw = req.body() == null ? "" : new String(req.body(), StandardCharsets.UTF_8);
+        Object body = bodyRaw;
         Map<String, String> headers = new HashMap<>();
         String method = req.verb();
 
@@ -76,8 +76,8 @@ public class Server {
 
         String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
         if (contentType.contains("application/json")) {
-            if (!bodyString.isEmpty()) {
-                body = gson.fromJson(bodyString, Map.class);
+            if (!bodyRaw.isEmpty()) {
+                body = gson.fromJson(bodyRaw, Map.class);
             } else {
                 body = new HashMap<String, Object>();
             }
@@ -133,7 +133,7 @@ public class Server {
                 queryString,
                 headers,
                 body,
-                bodyString,
+                bodyRaw,
                 url
         );
         RuntimeResponse runtimeResponse = new RuntimeResponse();
