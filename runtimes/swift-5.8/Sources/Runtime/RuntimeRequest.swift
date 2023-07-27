@@ -1,7 +1,7 @@
 import Foundation
 
 class RuntimeRequest {
-    let bodyString: String
+    let bodyRaw: String
     let body: Any
     let headers: [String: String]
     let method: String
@@ -14,7 +14,7 @@ class RuntimeRequest {
     let query: [String: String]?
 
     init(
-        bodyString: String,
+        bodyRaw: String,
         body: Any,
         headers: [String: String],
         method: String,
@@ -26,7 +26,7 @@ class RuntimeRequest {
         queryString: String?,
         query: [String: String]?
     ) {
-        self.bodyString = bodyString
+        self.bodyRaw = bodyRaw
         self.body = body
         self.headers = headers
         self.method = method

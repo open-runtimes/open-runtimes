@@ -72,7 +72,7 @@ Future<dynamic> main(final context) async {
       return context.res.json({
         'key1': key1,
         'key2': key2,
-        'raw': context.req.bodyString
+        'raw': context.req.bodyRaw
       });
     }
     case 'envVars': {
@@ -96,7 +96,7 @@ Future<dynamic> main(final context) async {
       return context.res.send('');
     }
     case 'library': {
-      final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyString);
+      final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyRaw);
       return context.res.json({ 'todo': todo.data });
     }
     case 'timeout': {

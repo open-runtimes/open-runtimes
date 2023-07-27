@@ -58,7 +58,7 @@ def main(context)
         return context.res.json({
             'key1': key1,
             'key2': key2,
-            'raw': context.req.body_string
+            'raw': context.req.body_raw
         })
     when 'envVars'
         return context.res.json({
@@ -79,7 +79,7 @@ def main(context)
 
         return context.res.send('')
     when 'library'
-        todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_string).body)
+        todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_raw).body)
         return context.res.json({ 'todo': todo })
     when 'timeout'
         context.log('Timeout start.')

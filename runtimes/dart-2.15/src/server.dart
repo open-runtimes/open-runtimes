@@ -26,8 +26,8 @@ void main() async {
               'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
-    String bodyString = await req.readAsString();
-    dynamic body = bodyString;
+    String bodyRaw = await req.readAsString();
+    dynamic body = bodyRaw;
     String method = req.method;
     Map<String, dynamic> headers = {};
 
@@ -40,8 +40,8 @@ void main() async {
 
     String contentType = req.headers['content-type'] ?? 'text/plain';
     if (contentType.contains('application/json')) {
-      if (!bodyString.isEmpty) {
-        body = jsonDecode(bodyString);
+      if (!bodyRaw.isEmpty) {
+        body = jsonDecode(bodyRaw);
       } else {
         body = {};
       }
@@ -98,7 +98,7 @@ void main() async {
         queryString: queryString,
         headers: headers,
         body: body,
-        bodyString: bodyString,
+        bodyRaw: bodyRaw,
         url: url);
     RuntimeResponse contextRes = new RuntimeResponse();
     RuntimeContext context = new RuntimeContext(contextReq, contextRes);

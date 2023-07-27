@@ -36,8 +36,8 @@ static async Task<IResult> Execute(HttpRequest request)
     }
 
     var reader = new StreamReader(request.Body);
-    var bodyString = await reader.ReadToEndAsync();
-    object body = bodyString;
+    var bodyRaw = await reader.ReadToEndAsync();
+    object body = bodyRaw;
     var headers = new Dictionary<string, string>();
     var method = request.Method;
 
@@ -55,13 +55,13 @@ static async Task<IResult> Execute(HttpRequest request)
     var contentType = request.Headers.TryGetValue("content-type", out var contentTypeValue) ? contentTypeValue.ToString() : "";
     if(contentType.Contains("application/json"))
     {
-        if(string.IsNullOrEmpty(bodyString))
+        if(string.IsNullOrEmpty(bodyRaw))
         {
             body = new Dictionary<string, object>();
         } 
         else
         {
-            body = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyString) ?? new Dictionary<string, object>();
+            body = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyRaw) ?? new Dictionary<string, object>();
         }
     }
 
@@ -140,7 +140,7 @@ static async Task<IResult> Execute(HttpRequest request)
         url,
         headers,
         body,
-        bodyString);
+        bodyRaw);
 
     var contextResponse = new RuntimeResponse();
 

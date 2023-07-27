@@ -55,8 +55,8 @@ suspend fun execute(ctx: Context) {
         return
     }
 
-    val bodyString = ctx.body()
-    var body = bodyString as Any
+    val bodyRaw = ctx.body()
+    var body = bodyRaw as Any
     val headers = mutableMapOf<String, String>()
     val method = ctx.method()
 
@@ -69,8 +69,8 @@ suspend fun execute(ctx: Context) {
 
     val contentType = ctx.header("content-type") ?: "text/plain"
     if (contentType.contains("application/json")) {
-        body = if (bodyString.isNotEmpty()) {
-            gson.fromJson(bodyString, MutableMap::class.java)
+        body = if (bodyRaw.isNotEmpty()) {
+            gson.fromJson(bodyRaw, MutableMap::class.java)
         } else {
             mutableMapOf<String, Any>()
         }
@@ -127,7 +127,7 @@ suspend fun execute(ctx: Context) {
         queryString,
         headers,
         body,
-        bodyString,
+        bodyRaw,
         url,
     )
     val runtimeResponse = RuntimeResponse()
