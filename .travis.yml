@@ -25,7 +25,7 @@ env:
       TEST_CLASS=Base
       ENTRYPOINT=tests.js
       IMAGE=openruntimes/node:${VERSION}-20.0
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="npm install"
       OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
@@ -40,7 +40,7 @@ env:
       TEST_CLASS=Base
       ENTRYPOINT=tests.js
       IMAGE=openruntimes/node:${VERSION}-19.0
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="npm install"
       OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
