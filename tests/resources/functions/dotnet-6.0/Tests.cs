@@ -85,7 +85,7 @@ public class Handler {
                 {
                     { "key1", key1 },
                     { "key2", key2 },
-                    { "raw", context.req.bodyRaw }
+                    { "raw", context.Req.BodyRaw }
                 });
             case "envVars":
                 return context.Res.Json(new()
@@ -114,7 +114,7 @@ public class Handler {
 
                 return context.Res.Send("");
             case "library":
-                var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{context.req.bodyRaw}");
+                var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{context.Req.BodyRaw}");
                 var todo = JsonSerializer.Deserialize<Dictionary<string, object>>(response) ?? new Dictionary<string, object>();
 
                 return context.Res.Json(new()
