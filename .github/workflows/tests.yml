@@ -390,7 +390,7 @@ jobs:
           run: |
              docker version
         - name: Install PHP
-          uses: shivammathur/setup-php@v2.25.4
+          uses: shivammathur/setup-php@2.25.4
           with:
             php-version: '8.0'
         - name: Check PHP Version
