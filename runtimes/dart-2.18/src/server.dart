@@ -38,7 +38,7 @@ void main() async {
       }
     }
 
-    String contentType = req.headers['content-type'] ?? 'plain/text';
+    String contentType = req.headers['content-type'] ?? 'text/plain';
     if (contentType.contains('application/json')) {
       if (!bodyString.isEmpty) {
         body = jsonDecode(bodyString);
@@ -154,6 +154,10 @@ void main() async {
       if (!header.startsWith('x-open-runtimes-')) {
         responseHeaders[header] = entry.value;
       }
+    }
+
+    if (responseHeaders['content-type'] == null) {
+      responseHeaders['content-type'] = 'text/plain';
     }
 
     if (!customstd.isEmpty) {

@@ -13,7 +13,7 @@ if [ -f "./Sources/Runtime/Package.swift" ]; then
 fi
 rm "dependencies.swift"
 
-echo "Compiling"
+echo "Compiling ..."
 
 # Prepare folder for compiled build
 mkdir /usr/local/build/compiled
