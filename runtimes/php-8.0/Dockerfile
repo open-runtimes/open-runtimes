@@ -1,4 +1,4 @@
-FROM php:8.0.14-cli-alpine3.15 as step0
+FROM php:8.0-cli-alpine3.16 as step0
 
 ENV PHP_SWOOLE_VERSION=v4.7.0
 
@@ -27,7 +27,7 @@ RUN \
   make && make install && \
   cd ..
 
-FROM php:8.0.14-cli-alpine3.15 as final
+FROM php:8.0-cli-alpine3.16 as final
 
 LABEL maintainer="team@appwrite.io"
 

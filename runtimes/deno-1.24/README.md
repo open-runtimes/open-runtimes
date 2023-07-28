@@ -1,6 +1,6 @@
 # Deno Runtime 1.24
 
-This is the Open Runtime that builds and runs Deno code based on a `deno:alpine-1.24.3` base image. 
+This is the Open Runtime that builds and runs Deno code based on a `denoland/deno:alpine-1.24.3` base image. 
 
 The runtime itself uses [oak](https://deno.land/x/oak@v10.6.0) as the Web Server to process the execution requests.
 

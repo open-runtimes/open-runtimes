@@ -33,7 +33,7 @@ class RuntimeResponse {
 }
 
 class RuntimeRequest {
-    public string $bodyString = '';
+    public string $bodyRaw = '';
     public mixed $body = '';
     public array $headers = [];
     public string $method = '';
@@ -136,8 +136,8 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     $context = new RuntimeContext();
 
-    $context->req->bodyString = $req->getContent();
-    $context->req->body = $context->req->bodyString;
+    $context->req->bodyRaw = $req->getContent();
+    $context->req->body = $context->req->bodyRaw;
     $context->req->method = $req->getMethod();
     $context->req->url = $url;
     $context->req->path = $path;
@@ -150,8 +150,8 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     $contentType = $req->header['content-type'] ?? 'text/plain';
     if(\str_contains($contentType, 'application/json')) {
-        if(!empty($context->req->bodyString)) {
-            $context->req->body = json_decode($context->req->bodyString, true);
+        if(!empty($context->req->bodyRaw)) {
+            $context->req->body = json_decode($context->req->bodyRaw, true);
         } else {
             $context->req->body = [];
         }

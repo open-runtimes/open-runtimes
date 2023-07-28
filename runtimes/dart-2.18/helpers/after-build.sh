@@ -6,7 +6,7 @@ set -e
 cd /usr/local/server
 dart pub get
 
-echo "Compiling"
+echo "Compiling ..."
 
 # Prepare folder for compiled build
 mkdir /usr/local/build/compiled

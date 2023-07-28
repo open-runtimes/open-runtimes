@@ -55,7 +55,7 @@ return function($context) use ($client) {
           return $context->res->json([
               'key1' => $context->req->body['key1'] ?? 'Missing key',
               'key2' => $context->req->body['key2'] ?? 'Missing key',
-              'raw' => $context->req->bodyString
+              'raw' => $context->req->bodyRaw
           ]);
       case 'envVars':
           $var = getenv('CUSTOM_ENV_VAR');
@@ -78,7 +78,7 @@ return function($context) use ($client) {
 
           return $context->res->send('');
       case 'library':
-        $response = $client->request('GET', '/todos/' . $context->req->bodyString);
+        $response = $client->request('GET', '/todos/' . $context->req->bodyRaw);
         $todo = \json_decode($response->getBody()->getContents(), true);
         return $context->res->json([ 'todo' => $todo ]);
       case 'timeout':

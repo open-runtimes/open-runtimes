@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.18
 
 LABEL maintainer="team@appwrite.io"
 

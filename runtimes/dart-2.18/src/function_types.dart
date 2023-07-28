@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class RuntimeRequest {
-  String bodyString;
+  String bodyRaw;
   dynamic body;
   Map<String, dynamic> headers;
   String method;
@@ -23,7 +23,7 @@ class RuntimeRequest {
       String queryString = '',
       Map<String, dynamic> headers = const {},
       dynamic body = '',
-      String bodyString = '',
+      String bodyRaw = '',
       String url = '',})
       : method = method,
         scheme = scheme,
@@ -34,7 +34,7 @@ class RuntimeRequest {
         queryString = queryString,
         headers = headers,
         body = body,
-        bodyString = bodyString,
+        bodyRaw = bodyRaw,
         url = url {}
 }
 

@@ -2,7 +2,7 @@
 # Fail build if any command fails
 set -e
 
-echo "Compiling"
+echo "Compiling ..."
 
 # Prepare folder for compiled build
 mkdir /usr/local/build/compiled

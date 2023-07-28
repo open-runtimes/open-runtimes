@@ -70,8 +70,8 @@ int main()
                 runtime::RuntimeRequest runtimeRequest;
                 runtimeRequest.method = method;
                 runtimeRequest.queryString = queryString;
-                runtimeRequest.bodyString = req->getBody();
-                runtimeRequest.body = runtimeRequest.bodyString;
+                runtimeRequest.bodyRaw = req->getBody();
+                runtimeRequest.body = runtimeRequest.bodyRaw;
                 runtimeRequest.path = path;
 
                 std::string scheme = req->getHeader("x-forwarded-proto");
@@ -206,7 +206,7 @@ int main()
                 {
                     Json::Value bodyRoot;   
                     Json::Reader reader;
-                    reader.parse(runtimeRequest.bodyString, bodyRoot); 
+                    reader.parse(runtimeRequest.bodyRaw, bodyRoot); 
                     runtimeRequest.body = bodyRoot;
                 }
 

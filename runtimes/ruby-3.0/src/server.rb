@@ -31,7 +31,7 @@ class RuntimeResponse
 end
 
 class RuntimeRequest
-  attr_accessor :body_string
+  attr_accessor :body_raw
   attr_accessor :body
   attr_accessor :headers
   attr_accessor :method
@@ -43,8 +43,8 @@ class RuntimeRequest
   attr_accessor :query
   attr_accessor :query_string
 
-  def initialize(url, method, scheme, host, port, path, query, query_string, headers, body, body_string)
-    @body_string = body_string
+  def initialize(url, method, scheme, host, port, path, query, query_string, headers, body, body_raw)
+    @body_raw = body_raw
     @body = body
     @headers = headers
     @method = method
@@ -147,8 +147,8 @@ def handle(request, response)
     end
   end
 
-  body_string = request.body.read
-  body = body_string
+  body_raw = request.body.read
+  body = body_raw
   method = request.request_method
   headers = {}
 
@@ -174,12 +174,12 @@ def handle(request, response)
   content_type = 'text/plain' if content_type.nil?
 
   if content_type.include?('application/json')
-    unless body_string.empty?
-      body = JSON.parse(body_string)
+    unless body_raw.empty?
+      body = JSON.parse(body_raw)
     end
   end
 
-  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body, body_string)
+  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body, body_raw)
   context_res = RuntimeResponse.new
   context = RuntimeContext.new(context_req, context_res)
 
