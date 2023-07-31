@@ -375,10 +375,6 @@ jobs:
     runs-on: ubuntu-20.04
     name: ${{ matrix.runtimes }}
     steps: 
-        - name: Setup Node.js environment
-          uses: actions/setup-node@v3.7.0
-        - name: Install pm2
-          run: npm install pm2 -g
         - name: Clone Repository
           uses: actions/checkout@v3.5.3
         - name: Setup Docker Buildx
