@@ -12,7 +12,7 @@ jobs:
               RUNTIME:  node-20.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.js
-              IMAGE: burnerjhon/node:v3-20.0
+              IMAGE: openruntimes/node:v3-20.0
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
@@ -21,7 +21,7 @@ jobs:
               RUNTIME: node-20.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.mjs
-              IMAGE: burnerjhon/node:v3-20.0
+              IMAGE: openruntimes/node:v3-20.0
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
               OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
@@ -29,7 +29,7 @@ jobs:
               RUNTIME: node-19.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.js
-              IMAGE: burnerjhon/node:v3-19.0
+              IMAGE: openruntimes/node:v3-19.0
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
@@ -38,7 +38,7 @@ jobs:
               RUNTIME: node-19.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.mjs
-              IMAGE: burnerjhon/node:v3-19.0
+              IMAGE: openruntimes/node:v3-19.0
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
               OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
@@ -46,7 +46,7 @@ jobs:
               RUNTIME: node-18.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.js
-              IMAGE: burnerjhon/node:v3-18.0
+              IMAGE: openruntimes/node:v3-18.0
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
@@ -55,7 +55,7 @@ jobs:
               RUNTIME: node-18.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.mjs
-              IMAGE: burnerjhon/node:v3-18.0
+              IMAGE: openruntimes/node:v3-18.0
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
               OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
@@ -63,7 +63,7 @@ jobs:
               RUNTIME: node-16.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.js
-              IMAGE: burnerjhon/node:v3-16.0
+              IMAGE: openruntimes/node:v3-16.0
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
@@ -72,7 +72,7 @@ jobs:
               RUNTIME: node-16.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.mjs
-              IMAGE: burnerjhon/node:v3-16.0
+              IMAGE: openruntimes/node:v3-16.0
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
               OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
@@ -80,7 +80,7 @@ jobs:
               RUNTIME: node-14.5
               TEST_CLASS: Base
               ENTRYPOINT: tests.js
-              IMAGE: burnerjhon/node:v3-14.5
+              IMAGE: openruntimes/node:v3-14.5
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
@@ -89,7 +89,7 @@ jobs:
               RUNTIME: node-14.5
               TEST_CLASS: Base
               ENTRYPOINT: tests.mjs
-              IMAGE: burnerjhon/node:v3-14.5
+              IMAGE: openruntimes/node:v3-14.5
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
               OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
@@ -97,7 +97,7 @@ jobs:
               RUNTIME: deno-1.35
               TEST_CLASS: Base
               ENTRYPOINT: tests.ts
-              IMAGE: burnerjhon/deno:v3-1.35
+              IMAGE: openruntimes/deno:v3-1.35
               ARCH: linux/amd64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
@@ -106,7 +106,7 @@ jobs:
               RUNTIME: deno-1.24
               TEST_CLASS: Base
               ENTRYPOINT: tests.ts
-              IMAGE: burnerjhon/deno:v3-1.24
+              IMAGE: openruntimes/deno:v3-1.24
               ARCH: linux/amd64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
@@ -115,7 +115,7 @@ jobs:
               RUNTIME: deno-1.21
               TEST_CLASS: Base
               ENTRYPOINT: tests.ts
-              IMAGE: burnerjhon/deno:v3-1.21
+              IMAGE: openruntimes/deno:v3-1.21
               ARCH: linux/amd64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
@@ -124,7 +124,7 @@ jobs:
               RUNTIME: python-3.11
               TEST_CLASS: Base
               ENTRYPOINT: tests.py
-              IMAGE: burnerjhon/python:v3-3.11
+              IMAGE: openruntimes/python:v3-3.11
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -133,7 +133,7 @@ jobs:
               RUNTIME: python-3.10
               TEST_CLASS: Base
               ENTRYPOINT: tests.py
-              IMAGE: burnerjhon/python:v3-3.10
+              IMAGE: openruntimes/python:v3-3.10
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -142,7 +142,7 @@ jobs:
               RUNTIME: python-3.9
               TEST_CLASS: Base
               ENTRYPOINT: tests.py
-              IMAGE: burnerjhon/python:v3-3.9
+              IMAGE: openruntimes/python:v3-3.9
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -151,7 +151,7 @@ jobs:
               RUNTIME: python-3.8
               TEST_CLASS: Base
               ENTRYPOINT: tests.py
-              IMAGE: burnerjhon/python:v3-3.8
+              IMAGE: openruntimes/python:v3-3.8
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -160,7 +160,7 @@ jobs:
               RUNTIME: dart-3.0
               TEST_CLASS: Base
               ENTRYPOINT: lib/tests.dart
-              IMAGE: burnerjhon/dart:v3-3.0
+              IMAGE: openruntimes/dart:v3-3.0
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -169,7 +169,7 @@ jobs:
               RUNTIME: dart-2.19
               TEST_CLASS: Base
               ENTRYPOINT: lib/tests.dart
-              IMAGE: burnerjhon/dart:v3-2.19
+              IMAGE: openruntimes/dart:v3-2.19
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -178,7 +178,7 @@ jobs:
               RUNTIME: dart-2.18
               TEST_CLASS: Base
               ENTRYPOINT: lib/tests.dart
-              IMAGE: burnerjhon/dart:v3-2.18
+              IMAGE: openruntimes/dart:v3-2.18
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -187,7 +187,7 @@ jobs:
               RUNTIME: dart-2.17
               TEST_CLASS: Base
               ENTRYPOINT: lib/tests.dart
-              IMAGE: burnerjhon/dart:v3-2.17
+              IMAGE: openruntimes/dart:v3-2.17
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -196,7 +196,7 @@ jobs:
               RUNTIME: dart-2.16
               TEST_CLASS: Base
               ENTRYPOINT: lib/tests.dart
-              IMAGE: burnerjhon/dart:v3-2.16
+              IMAGE: openruntimes/dart:v3-2.16
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -205,7 +205,7 @@ jobs:
               RUNTIME: dart-2.15
               TEST_CLASS: Base
               ENTRYPOINT: lib/tests.dart
-              IMAGE: burnerjhon/dart:v3-2.15
+              IMAGE: openruntimes/dart:v3-2.15
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -214,7 +214,7 @@ jobs:
               RUNTIME: ruby-3.2
               TEST_CLASS: Base
               ENTRYPOINT: tests.rb
-              IMAGE: burnerjhon/ruby:v3-3.2
+              IMAGE: openruntimes/ruby:v3-3.2
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -223,7 +223,7 @@ jobs:
               RUNTIME: ruby-3.1
               TEST_CLASS: Base
               ENTRYPOINT: tests.rb
-              IMAGE: burnerjhon/ruby:v3-3.1
+              IMAGE: openruntimes/ruby:v3-3.1
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -232,7 +232,7 @@ jobs:
               RUNTIME: ruby-3.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.rb
-              IMAGE: burnerjhon/ruby:v3-3.0
+              IMAGE: openruntimes/ruby:v3-3.0
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -241,7 +241,7 @@ jobs:
               RUNTIME: php-8.2
               TEST_CLASS: Base
               ENTRYPOINT: tests.php
-              IMAGE: burnerjhon/php:v3-8.2
+              IMAGE: openruntimes/php:v3-8.2
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
@@ -250,7 +250,7 @@ jobs:
               RUNTIME: php-8.1
               TEST_CLASS: Base
               ENTRYPOINT: tests.php
-              IMAGE: burnerjhon/php:v3-8.1
+              IMAGE: openruntimes/php:v3-8.1
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
@@ -259,7 +259,7 @@ jobs:
               RUNTIME: php-8.0
               TEST_CLASS: Base
               ENTRYPOINT: tests.php
-              IMAGE: burnerjhon/php:v3-8.0
+              IMAGE: openruntimes/php:v3-8.0
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
@@ -268,7 +268,7 @@ jobs:
               RUNTIME: swift-5.8
               TEST_CLASS: Base
               ENTRYPOINT: Tests.swift
-              IMAGE: burnerjhon/swift:v3-5.8
+              IMAGE: openruntimes/swift:v3-5.8
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -277,7 +277,7 @@ jobs:
               RUNTIME: swift-5.5
               TEST_CLASS: Base
               ENTRYPOINT: Tests.swift
-              IMAGE: burnerjhon/swift:v3-5.5
+              IMAGE: openruntimes/swift:v3-5.5
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -286,7 +286,7 @@ jobs:
               RUNTIME: kotlin-1.6
               TEST_CLASS: Base
               ENTRYPOINT: Tests.kt
-              IMAGE: burnerjhon/kotlin:v3-1.6
+              IMAGE: openruntimes/kotlin:v3-1.6
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -295,7 +295,7 @@ jobs:
               RUNTIME: kotlin-1.8
               TEST_CLASS: Base
               ENTRYPOINT: Tests.kt
-              IMAGE: burnerjhon/kotlin:v3-1.8
+              IMAGE: openruntimes/kotlin:v3-1.8
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -304,7 +304,7 @@ jobs:
               RUNTIME: java-18.0
               TEST_CLASS: Base
               ENTRYPOINT: Tests.java
-              IMAGE: burnerjhon/java:v3-18.0
+              IMAGE: openruntimes/java:v3-18.0
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -313,7 +313,7 @@ jobs:
               RUNTIME: java-17.0
               TEST_CLASS: Base
               ENTRYPOINT: Tests.java
-              IMAGE: burnerjhon/java:v3-17.0
+              IMAGE: openruntimes/java:v3-17.0
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -322,7 +322,7 @@ jobs:
               RUNTIME: java-11.0
               TEST_CLASS: Base
               ENTRYPOINT: Tests.java
-              IMAGE: burnerjhon/java:v3-11.0
+              IMAGE: openruntimes/java:v3-11.0
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -331,7 +331,7 @@ jobs:
               RUNTIME: java-8.0
               TEST_CLASS: Base
               ENTRYPOINT: Tests.java
-              IMAGE: burnerjhon/java:v3-8.0
+              IMAGE: openruntimes/java:v3-8.0
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -340,7 +340,7 @@ jobs:
               RUNTIME: cpp-17
               TEST_CLASS: Base
               ENTRYPOINT: tests.cc
-              IMAGE: burnerjhon/cpp:v3-17
+              IMAGE: openruntimes/cpp:v3-17
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -349,7 +349,7 @@ jobs:
               RUNTIME: cpp-20
               TEST_CLASS: Base
               ENTRYPOINT: tests.cc
-              IMAGE: burnerjhon/cpp:v3-20
+              IMAGE: openruntimes/cpp:v3-20
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -358,7 +358,7 @@ jobs:
               RUNTIME: dotnet-7.0
               TEST_CLASS: Base
               ENTRYPOINT: Tests.cs
-              IMAGE: burnerjhon/dotnet:v3-7.0
+              IMAGE: openruntimes/dotnet:v3-7.0
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -367,7 +367,7 @@ jobs:
               RUNTIME: dotnet-6.0
               TEST_CLASS: Base
               ENTRYPOINT: Tests.cs
-              IMAGE: burnerjhon/dotnet:v3-6.0
+              IMAGE: openruntimes/dotnet:v3-6.0
               ARCH: linux/amd64,linux/arm64
               TEST_SCRIPT: tests.sh
               OPEN_RUNTIMES_BUILD_COMMAND: ""
