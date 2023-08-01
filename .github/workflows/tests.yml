@@ -449,7 +449,6 @@ jobs:
         - if: startsWith(github.ref, 'refs/tags/')
           name: Deploy to DockerHub
           run: |
-           RUNTIME="${{matrix.RUNTIME}}" ENTRYPOINT="${{ matrix.ENTRYPOINT }}" TEST_CLASS="${{ matrix.TEST_CLASS }}" OPEN_RUNTIMES_BUILD_COMMAND="${{ matrix.OPEN_RUNTIMES_BUILD_COMMAND }}" OPEN_RUNTIMES_START_COMMAND="${{ matrix.OPEN_RUNTIMES_START_COMMAND }}" sh ./tests.sh &&
            ARCH="${{ matrix.ARCH }}" IMAGE="${{ matrix.IMAGE }}" RUNTIME="${{ matrix.RUNTIME }}" sh ./deploy.sh
 
             
