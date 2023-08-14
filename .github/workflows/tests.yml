@@ -16,6 +16,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
               OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+
             # Node 20.0
             - runtimes: node-20.0.mjs
               RUNTIME: node-20.0
@@ -23,6 +24,7 @@ jobs:
               IMAGE: openruntimes/node:v3-20.0
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
               OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+              
             # Node 19.0
             - runtimes: node-19.0.js
               RUNTIME: node-19.0
@@ -31,6 +33,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
               OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+            
             # Node 19.0
             - runtimes: node-19.0.mjs
               RUNTIME: node-19.0
@@ -38,6 +41,7 @@ jobs:
               IMAGE: openruntimes/node:v3-19.0
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
               OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+
             # Node 18.0  
             - runtimes: node-18.0.js
               RUNTIME: node-18.0
@@ -46,6 +50,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
               OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+
             # Node 18.0
             - runtimes: node-18.0.mjs
               RUNTIME: node-18.0
@@ -53,6 +58,7 @@ jobs:
               IMAGE: openruntimes/node:v3-18.0
               OPEN_RUNTIMES_BUILD_COMMAND: npm install
               OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+
             # Node 16.0
             - runtimes: node-16.0.js
               RUNTIME: node-16.0
@@ -61,6 +67,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
               OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
+
             # Node 16.0
             - runtimes: node-16.0.mjs
               RUNTIME: node-16.0
@@ -68,6 +75,7 @@ jobs:
               IMAGE: openruntimes/node:v3-16.0
               OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
               OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
+
             # Node 14.5
             - runtimes: node-14.5.js
               RUNTIME: node-14.5
@@ -76,6 +84,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
               OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
+
             # Node 14.5
             - runtimes: node-14.5.mjs
               RUNTIME: node-14.5
@@ -83,6 +92,7 @@ jobs:
               IMAGE: openruntimes/node:v3-14.5
               OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
               OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
+
             # Deno 1.35
             - runtimes: deno-1.35
               RUNTIME: deno-1.35
@@ -91,6 +101,7 @@ jobs:
               ARCH: linux/amd64
               OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
               OPEN_RUNTIMES_START_COMMAND: "denon start"
+
             # Deno 1.24
             - runtimes: deno-1.24
               RUNTIME: deno-1.24
@@ -99,6 +110,7 @@ jobs:
               ARCH: linux/amd64
               OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
               OPEN_RUNTIMES_START_COMMAND: "denon start"
+
             # Deno 1.21
             - runtimes: deno-1.21
               RUNTIME: deno-1.21
@@ -107,6 +119,7 @@ jobs:
               ARCH: linux/amd64
               OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
               OPEN_RUNTIMES_START_COMMAND: "denon start"
+
             # Python 3.11
             - runtimes: python-3.11
               RUNTIME: python-3.11
@@ -115,6 +128,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
               OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
+
             # Python 3.10
             - runtimes: python-3.10
               RUNTIME: python-3.10
@@ -123,6 +137,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
               OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
+
             # Python 3.9
             - runtimes: python-3.9
               RUNTIME: python-3.9
@@ -131,6 +146,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
               OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
+
             # Python 3.8
             - runtimes: python-3.8
               RUNTIME: python-3.8
@@ -139,6 +155,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
               OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
+
             # Dart 3.0
             - runtimes: dart-3.0
               RUNTIME: dart-3.0
@@ -147,6 +164,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
               OPEN_RUNTIMES_START_COMMAND: "src/function/server"
+
             # Dart 2.19
             - runtimes: dart-2.19
               RUNTIME: dart-2.19
@@ -155,6 +173,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
               OPEN_RUNTIMES_START_COMMAND: "src/function/server"
+
             # Dart 2.18
             - runtimes: dart-2.18
               RUNTIME: dart-2.18
@@ -163,6 +182,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
               OPEN_RUNTIMES_START_COMMAND: "src/function/server"
+
             # Dart 2.17
             - runtimes: dart-2.17
               RUNTIME: dart-2.17
@@ -171,6 +191,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
               OPEN_RUNTIMES_START_COMMAND: "src/function/server"
+
             # Dart 2.16
             - runtimes: dart-2.16
               RUNTIME: dart-2.16
@@ -179,6 +200,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
               OPEN_RUNTIMES_START_COMMAND: "src/function/server"
+
             # Dart 2.15
             - runtimes: dart-2.15
               RUNTIME: dart-2.15
@@ -187,6 +209,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
               OPEN_RUNTIMES_START_COMMAND: "src/function/server"
+
             # Ruby 3.2
             - runtimes: ruby-3.2
               RUNTIME: ruby-3.2
@@ -195,6 +218,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
+
             # Ruby 3.1
             - runtimes: ruby-3.1
               RUNTIME: ruby-3.1
@@ -203,6 +227,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
+
             # Ruby 3.0
             - runtimes: ruby-3.0
               RUNTIME: ruby-3.0
@@ -211,6 +236,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
+
             # Php 8.2 
             - runtimes: php-8.2
               RUNTIME: php-8.2
@@ -219,6 +245,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
               OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
+
             # Php 8.1
             - runtimes: php-8.1
               RUNTIME: php-8.1
@@ -227,6 +254,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
               OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
+
             # Php 8.0
             - runtimes: php-8.0
               RUNTIME: php-8.0
@@ -235,6 +263,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
               OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
+
             # Swift 5.8
             - runtimes: swift-5.8
               RUNTIME: swift-5.8
@@ -243,6 +272,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
+
             # Swift 5.5
             - runtimes: swift-5.5
               RUNTIME: swift-5.5
@@ -251,6 +281,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
+              
             # Kotlin 1.6
             - runtimes: kotlin-1.6
               RUNTIME: kotlin-1.6
@@ -259,6 +290,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
+
             # Kotlin 1.8
             - runtimes: kotlin-1.8
               RUNTIME: kotlin-1.8
@@ -267,6 +299,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
+
             # Java 18.0
             - runtimes: java-18.0
               RUNTIME: java-18.0
@@ -275,6 +308,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
+
             # Java 17.0
             - runtimes: java-17.0
               RUNTIME: java-17.0
@@ -283,6 +317,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
+
             # Java 11.0
             - runtimes: java-11.0
               RUNTIME: java-11.0
@@ -291,6 +326,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
+
             # Java 8.0
             - runtimes: java-8.0
               RUNTIME: java-8.0
@@ -299,6 +335,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
+
             # C++ 17
             - runtimes: cpp-17
               RUNTIME: cpp-17
@@ -307,6 +344,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "src/function/cpp_runtime"
+
             # C++ 20
             - runtimes: cpp-20
               RUNTIME: cpp-20
@@ -315,6 +353,7 @@ jobs:
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "src/function/cpp_runtime"
+
             # Dotnet 7.0
             - runtimes: dotnet-7.0
               RUNTIME: dotnet-7.0
@@ -323,6 +362,7 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
+
             # Dotnet 6.0
             - runtimes: dotnet-6.0
               RUNTIME: dotnet-6.0
@@ -331,32 +371,42 @@ jobs:
               ARCH: linux/amd64,linux/arm64
               OPEN_RUNTIMES_BUILD_COMMAND: ""
               OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
+
     runs-on: ubuntu-20.04
     name: ${{ matrix.runtimes }}
+
     steps: 
         - name: Clone Repository
           uses: actions/checkout@v3.5.3
+
         - name: Setup Docker Buildx
           uses: docker/setup-buildx-action@v2.9.1
+
         - name: Check Docker Buildx
           run: docker buildx version
+
         - name: Install PHP
           uses: shivammathur/setup-php@2.25.4
           with:
             php-version: '8.0'
+
         - name: Check PHP Version
           run: php -v
+
         - name: Install Dependencies
           run: composer install
+          
         - name: Run Tests
           run : |
            RUNTIME="${{matrix.RUNTIME}}" ENTRYPOINT="${{ matrix.ENTRYPOINT }}" TEST_CLASS="Base" OPEN_RUNTIMES_BUILD_COMMAND="${{ matrix.OPEN_RUNTIMES_BUILD_COMMAND }}" OPEN_RUNTIMES_START_COMMAND="${{ matrix.OPEN_RUNTIMES_START_COMMAND }}" sh ./tests.sh
+
         - if: startsWith(github.ref, 'refs/tags/')
           name: Login to DockerHub
           uses: docker/login-action@v2.2.0
           with:
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
+            
         - if: startsWith(github.ref, 'refs/tags/')
           name: Deploy to DockerHub
           run: |
