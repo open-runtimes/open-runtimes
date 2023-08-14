@@ -14,16 +14,16 @@ jobs:
               ENTRYPOINT: tests.js
               IMAGE: openruntimes/node:v3-20.0
               ARCH: linux/amd64,linux/arm64
-              OPEN_RUNTIMES_BUILD_COMMAND: npm install
-              OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+              OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
+              OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
 
             # Node 20.0
             - runtimes: node-20.0.mjs
               RUNTIME: node-20.0
               ENTRYPOINT: tests.mjs
               IMAGE: openruntimes/node:v3-20.0
-              OPEN_RUNTIMES_BUILD_COMMAND: npm install
-              OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+              OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
+              OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
               
             # Node 19.0
             - runtimes: node-19.0.js
@@ -31,16 +31,16 @@ jobs:
               ENTRYPOINT: tests.js
               IMAGE: openruntimes/node:v3-19.0
               ARCH: linux/amd64,linux/arm64
-              OPEN_RUNTIMES_BUILD_COMMAND: npm install
-              OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+              OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
+              OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
             
             # Node 19.0
             - runtimes: node-19.0.mjs
               RUNTIME: node-19.0
               ENTRYPOINT: tests.mjs
               IMAGE: openruntimes/node:v3-19.0
-              OPEN_RUNTIMES_BUILD_COMMAND: npm install
-              OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+              OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
+              OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
 
             # Node 18.0  
             - runtimes: node-18.0.js
@@ -48,16 +48,16 @@ jobs:
               ENTRYPOINT: tests.js
               IMAGE: openruntimes/node:v3-18.0
               ARCH: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-              OPEN_RUNTIMES_BUILD_COMMAND: npm install
-              OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+              OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
+              OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
 
             # Node 18.0
             - runtimes: node-18.0.mjs
               RUNTIME: node-18.0
               ENTRYPOINT: tests.mjs
               IMAGE: openruntimes/node:v3-18.0
-              OPEN_RUNTIMES_BUILD_COMMAND: npm install
-              OPEN_RUNTIMES_START_COMMAND: pm2 start src/server.js --no-daemon
+              OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
+              OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
 
             # Node 16.0
             - runtimes: node-16.0.js
