@@ -219,8 +219,8 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     if (
         $output['headers']['content-type'] &&
-        !str_starts_with($output['headers']['content-type'], 'multipart/') &&
-        !str_contains($output['headers']['content-type'], 'charset=')
+        !(\str_starts_with($output['headers']['content-type'], 'multipart/')) &&
+        !(\str_contains($output['headers']['content-type'], 'charset='))
     ) {
         $output['headers']['content-type'] .= '; charset=utf-8';
     }
