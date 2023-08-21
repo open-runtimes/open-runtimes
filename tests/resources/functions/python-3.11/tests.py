@@ -9,7 +9,7 @@ async def main(context):
         return context.res.send('Hello World 👋')
     elif action == 'jsonResponse':
         return context.res.json({ 'json': True, 'message': 'Developers are awesome.' })
-    elif action == 'plaintestCustomCharsetResponse':
+    elif action == 'plaintextCustomCharsetResponse':
         return context.res.send('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
     elif action == 'jsonCustomCharsetResponse':
         return context.res.json({ 'json': True, 'message': 'ÅÆ' }, 200, { 'content-type': 'application/json; charset=iso-8859-1' })

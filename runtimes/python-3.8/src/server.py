@@ -187,9 +187,9 @@ async def handler(u_path):
     output['headers'] = output.get('headers', {})
 
     if (
-        output['headers'].get('content-type') and
-        not output['headers']['content-type'].startswith('multipart') and
-        'charset=' not in output['headers']['content-type']
+        output['headers'].get('content-type') 
+        and not output['headers']['content-type'].startswith('multipart')
+        and not 'charset=' in output['headers']['content-type']
     ):
         output['headers']['content-type'] += '; charset=utf-8'
 
