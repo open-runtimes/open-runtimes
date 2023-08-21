@@ -16,6 +16,10 @@ return function($context) use ($client) {
           return $context->res->send('Hello World 👋');
       case 'jsonResponse':
           return $context->res->json([ 'json' => true, 'message' => 'Developers are awesome.' ]);
+      case 'plaintextCustomCharsetResponse':
+          return $context->res->send('Hello World 👋', 200, [ 'content-type' => 'text/plain; charset=iso-8859-1' ]);
+      case 'jsonCustomCharsetResponse':
+          return $context->res->json([ 'json' => true, 'message' => 'Developers are awesome.' ], 200, [ 'content-type' => 'application/json; charset=iso-8859-1' ]);
       case 'redirectResponse':
           return $context->res->redirect('https://github.com/');
       case 'emptyResponse':

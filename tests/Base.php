@@ -86,12 +86,23 @@ class Base extends TestCase
     {
         $response = $this->execute(headers: ['x-action' => 'jsonResponse']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('application/json', $response['headers']['content-type']);
+        self::assertEquals('application/json; charset=utf-8', $response['headers']['content-type']);
 
         $body = \json_decode($response['body'], true);
 
         self::assertEquals(true, $body['json']);
         self::assertEquals('Developers are awesome.', $body['message']);
+    }
+
+    public function testCustomCharsetResponse(): void 
+    {
+        $response = $this->execute(headers: ['x-action' => 'plaintextCustomCharsetResponse']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('text/plain; charset=iso-8859-1', $response['headers']['content-type']);
+
+        $response = $this->execute(headers: ['x-action' => 'jsonCustomCharsetResponse']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('application/json; charset=iso-8859-1', $response['headers']['content-type']);
     }
 
     public function testRedirectResponse(): void
@@ -288,7 +299,7 @@ class Base extends TestCase
     {
         $response = $this->execute(headers: ['x-action' => 'requestHeaders', 'x-first-header' => 'first-value', 'x-open-runtimes-custom-header' => 'should-be-hidden']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('application/json', $response['headers']['content-type']);
+        self::assertEquals('application/json; charset=utf-8', $response['headers']['content-type']);
 
         $body = \json_decode($response['body'], true);
 
@@ -337,7 +348,7 @@ class Base extends TestCase
     {
         $response = $this->execute(headers: ['x-action' => 'envVars']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('application/json', $response['headers']['content-type']);
+        self::assertEquals('application/json; charset=utf-8', $response['headers']['content-type']);
 
         $body = \json_decode($response['body'], true);
 

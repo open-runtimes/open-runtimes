@@ -10,6 +10,12 @@ const USER_CODE_PATH = '/usr/local/server/src/function';
 
 class RuntimeResponse {
     function send(string $body, int $statusCode = 200, array $headers = []): array {
+        if (!$headers['content-type']) {
+            $headers['content-type'] = 'text/plain';
+        }
+        if (!preg_match('/charset=([^;]*)/i', $headers['content-type'])) {
+            $headers['content-type'] .= '; charset=utf-8';
+        }
         return [
             'body' => $body,
             'statusCode' => $statusCode,
@@ -18,7 +24,12 @@ class RuntimeResponse {
     }
 
     function json(array $obj, int $statusCode = 200, array $headers = []) {
-        $headers['content-type'] = 'application/json';
+        if (!$headers['content-type']) {
+            $headers['content-type'] = 'application/json';
+        }
+        if (!preg_match('/charset=([^;]*)/i', $headers['content-type'])) {
+            $headers['content-type'] .= '; charset=utf-8';
+        }
         return $this->send(\json_encode($obj), $statusCode, $headers);
     }
 

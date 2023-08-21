@@ -69,6 +69,12 @@ const server = micro(async (req, res) => {
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
+                if (!headers['content-type']) {
+                    headers['content-type'] = 'text/plain';
+                }
+                if (!/charset=([^;]*)/i.test(headers['content-type'])) {
+                    headers['content-type'] += '; charset=utf-8';
+                }
                 return {
                     body: body,
                     statusCode: statusCode,
@@ -76,7 +82,12 @@ const server = micro(async (req, res) => {
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
-                headers['content-type'] = 'application/json';
+                if (!headers['content-type']) {
+                    headers['content-type'] = 'application/json';
+                }
+                if (!/charset=([^;]*)/i.test(headers['content-type'])) {
+                    headers['content-type'] += '; charset=utf-8';
+                }
                 return this.send(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
