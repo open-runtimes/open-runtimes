@@ -21,9 +21,12 @@ namespace DotNetRuntime
 
         public Task ExecuteAsync(HttpContext httpContext)
         {
-            var contentType = _headers.TryGetValue("content-type", out var contentTypeValue)
-                ? contentTypeValue 
-                : "text/plain";
+            if (_headers.TryGetValue('content-type', out string contentType) &&
+                !contentType.StartsWith("multipart/") &&
+                !contentType.Contains("charset="))
+            {
+                _headers["content-type"] = contentType + "; charset=utf-8";
+            }
 
             foreach (var entry in _headers)
             {

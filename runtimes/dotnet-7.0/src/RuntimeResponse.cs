@@ -5,22 +5,26 @@ using System.Text.Json;
 namespace DotNetRuntime {
     public class RuntimeResponse
     {
-        public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
+        public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = new Dictionary<string,string>())
         {
+            if (!headers.TryGetValue("content-type"))
+            {
+                headers.Add("content-type", "text/plain");
+            }
+
             return new RuntimeOutput(
                 body,
                 statusCode,
                 headers ?? new Dictionary<string,string>());
         }
 
-        public RuntimeOutput Json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = null)
+        public RuntimeOutput Json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = new Dictionary<string,string>())
         {
-            if(headers == null)
+            if (!headers.TryGetValue("content-type"))
             {
-                headers = new Dictionary<string,string>();
+                headers.Add("content-type", "application/json");
             }
 
-            headers.Add("content-type", "application/json");
             return Send(JsonSerializer.Serialize(json), statusCode, headers);
         }
 

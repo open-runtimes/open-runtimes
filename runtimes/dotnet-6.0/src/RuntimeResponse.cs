@@ -4,19 +4,24 @@ using System.Text.Json;
 
 public class RuntimeResponse
 {
-    public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
+    public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = new Dictionary<string,string>())
     {
+        if (!headers.TryGetValue("content-type"))
+        {
+            headers.Add("content-type", "text/plain");
+        }
+
         return new RuntimeOutput(
             body,
             statusCode,
-            headers ?? new Dictionary<string,string>());
+            headers);
     }
 
-    public RuntimeOutput Json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = null)
+    public RuntimeOutput Json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = new Dictionary<string,string>())
     {
-        if(headers == null)
+        if (!headers.TryGetValue("content-type"))
         {
-            headers = new Dictionary<string,string>();
+            headers.Add("content-type", "application/json");
         }
 
         headers.Add("content-type", "application/json");
