@@ -13,9 +13,6 @@ class RuntimeResponse {
         if (!$headers['content-type']) {
             $headers['content-type'] = 'text/plain';
         }
-        if (!preg_match('/charset=([^;]*)/i', $headers['content-type'])) {
-            $headers['content-type'] .= '; charset=utf-8';
-        }
         return [
             'body' => $body,
             'statusCode' => $statusCode,
@@ -26,9 +23,6 @@ class RuntimeResponse {
     function json(array $obj, int $statusCode = 200, array $headers = []) {
         if (!$headers['content-type']) {
             $headers['content-type'] = 'application/json';
-        }
-        if (!preg_match('/charset=([^;]*)/i', $headers['content-type'])) {
-            $headers['content-type'] .= '; charset=utf-8';
         }
         return $this->send(\json_encode($obj), $statusCode, $headers);
     }
@@ -222,6 +216,10 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $output['body'] ??= '';
     $output['statusCode'] ??= 200;
     $output['headers'] ??= [];
+
+    if ($output['headers']['content-type'] && !preg_match('/charset=([^;]*)/i', $output['headers']['content-type'])) {
+        $output['headers']['content-type'] .= '; charset=utf-8';
+    }
 
     foreach ($output['headers'] as $header => $value) {
         if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
