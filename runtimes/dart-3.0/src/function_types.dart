@@ -13,19 +13,19 @@ class RuntimeRequest {
   String queryString;
   Map<String, String> query;
 
-  RuntimeRequest(
-      {String method = '',
-      String scheme = '',
-      String host = '',
-      int port = 80,
-      String path = '',
-      Map<String, String> query = const {},
-      String queryString = '',
-      Map<String, dynamic> headers = const {},
-      dynamic body = '',
-      String bodyRaw = '',
-      String url = '',})
-      : method = method,
+  RuntimeRequest({
+    String method = '',
+    String scheme = '',
+    String host = '',
+    int port = 80,
+    String path = '',
+    Map<String, String> query = const {},
+    String queryString = '',
+    Map<String, dynamic> headers = const {},
+    dynamic body = '',
+    String bodyRaw = '',
+    String url = '',
+  })  : method = method,
         scheme = scheme,
         host = host,
         port = port,
@@ -41,6 +41,9 @@ class RuntimeRequest {
 class RuntimeResponse {
   dynamic send(String body,
       [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
+    if (!headers.containsKey('content-type')) {
+      headers['content-type'] = 'text/plain';
+    }
     return {
       'body': body,
       'statusCode': statusCode,
@@ -50,8 +53,10 @@ class RuntimeResponse {
 
   dynamic json(Map<String, dynamic> json,
       [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
-    var headersMerged = {...headers, 'content-type': 'application/json'};
-    return this.send(jsonEncode(json), statusCode, headersMerged);
+    if (!headers.containsKey('content-type')) {
+      headers['content-type'] = 'application/json';
+    }
+    return this.send(jsonEncode(json), statusCode, headers);
   }
 
   dynamic empty() {

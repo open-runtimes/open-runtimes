@@ -14,7 +14,8 @@ void main() async {
       safeTimeout = int.tryParse(timeout);
       if (safeTimeout == null || safeTimeout == 0) {
         return shelf.Response(500,
-            body: 'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
+            body:
+                'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
       }
     }
 
@@ -147,6 +148,12 @@ void main() async {
     output['statusCode'] = output['statusCode'] ?? 200;
     output['headers'] = output['headers'] ?? {};
 
+    if (output['headers']['content-type'] != null &&
+        !output['headers']['content-type'].contains('charset') &&
+        !output['headers']['content-type'].startsWith('multipart/')) {
+      output['headers']['content-type'] += '; charset=utf-8';
+    }
+
     Map<String, String> responseHeaders = {};
 
     for (MapEntry entry in output['headers'].entries) {
@@ -154,10 +161,6 @@ void main() async {
       if (!header.startsWith('x-open-runtimes-')) {
         responseHeaders[header] = entry.value;
       }
-    }
-
-    if (responseHeaders['content-type'] == null) {
-      responseHeaders['content-type'] = 'text/plain';
     }
 
     if (!customstd.isEmpty) {
