@@ -192,8 +192,12 @@ const server = micro(async (req, res) => {
     output.statusCode = output.statusCode ?? 200;
     output.headers = output.headers ?? {};
 
-    if (output.headers['content-type'] && !/charset=([^;]*)/i.test(output.headers['content-type'])) {
-        output.headers['content-type'] += '; charset=utf-8';
+    if (
+      output.headers["content-type"] &&
+      !output.headers["content-type"].startsWith("multipart/") &&
+      !output.headers["content-type"].contains("charset=")
+    ) {
+      output.headers["content-type"] += "; charset=utf-8";
     }
 
     for (const header in output.headers) {
