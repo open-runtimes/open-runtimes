@@ -69,6 +69,9 @@ const server = micro(async (req, res) => {
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
+                if (!headers['content-type']) {
+                    headers['content-type'] = 'text/plain';
+                }
                 return {
                     body: body,
                     statusCode: statusCode,
@@ -76,7 +79,9 @@ const server = micro(async (req, res) => {
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
-                headers['content-type'] = 'application/json';
+                if (!headers['content-type']) {
+                    headers['content-type'] = 'application/json';
+                }
                 return this.send(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
@@ -186,6 +191,14 @@ const server = micro(async (req, res) => {
     output.body = output.body ?? '';
     output.statusCode = output.statusCode ?? 200;
     output.headers = output.headers ?? {};
+
+    if (
+        output.headers["content-type"] &&
+        !output.headers["content-type"].startsWith("multipart/") &&
+        !output.headers["content-type"].contains("charset=")
+    ) {
+        output.headers["content-type"] += "; charset=utf-8";
+    }
 
     for (const header in output.headers) {
         if(header.toLowerCase().startsWith('x-open-runtimes-')) {
