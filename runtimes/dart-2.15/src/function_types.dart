@@ -40,23 +40,29 @@ class RuntimeRequest {
 
 class RuntimeResponse {
   dynamic send(String body,
-      [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
-    if (!headers.containsKey('content-type')) {
-      headers['content-type'] = 'text/plain';
-    }
+      [int statusCode = 200, Map<String, String?> headers = const {}]) {
+    var headersMerged = {
+      ...headers,
+      'content-type': headers.containsKey('content-type')
+          ? headers['content-type']
+          : 'text/plain'
+    };
     return {
       'body': body,
       'statusCode': statusCode,
-      'headers': headers,
+      'headers': headersMerged,
     };
   }
 
   dynamic json(Map<String, dynamic> json,
-      [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
-    if (!headers.containsKey('content-type')) {
-      headers['content-type'] = 'application/json';
-    }
-    return this.send(jsonEncode(json), statusCode, headers);
+      [int statusCode = 200, Map<String, String> headers = const {}]) {
+    var headersMerged = {
+      ...headers,
+      'content-type': headers.containsKey('content-type')
+          ? headers['content-type']
+          : 'text/plain'
+    };
+    return this.send(jsonEncode(json), statusCode, headersMerged);
   }
 
   dynamic empty() {
@@ -64,7 +70,7 @@ class RuntimeResponse {
   }
 
   dynamic redirect(String url,
-      [int statusCode = 301, Map<String, dynamic> headers = const {}]) {
+      [int statusCode = 301, Map<String, String> headers = const {}]) {
     var headersMerged = {...headers, 'location': url};
     return this.send('', statusCode, headersMerged);
   }
