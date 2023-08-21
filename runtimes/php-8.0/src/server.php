@@ -10,6 +10,9 @@ const USER_CODE_PATH = '/usr/local/server/src/function';
 
 class RuntimeResponse {
     function send(string $body, int $statusCode = 200, array $headers = []): array {
+        if (!$headers['content-type']) {
+            $headers['content-type'] = 'text/plain';
+        }
         return [
             'body' => $body,
             'statusCode' => $statusCode,
@@ -18,6 +21,9 @@ class RuntimeResponse {
     }
 
     function json(array $obj, int $statusCode = 200, array $headers = []) {
+        if (!$headers['content-type']) {
+            $headers['content-type'] = 'application/json';
+        }
         $headers['content-type'] = 'application/json';
         return $this->send(\json_encode($obj), $statusCode, $headers);
     }
@@ -211,6 +217,14 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $output['body'] ??= '';
     $output['statusCode'] ??= 200;
     $output['headers'] ??= [];
+
+    if (
+        $output['headers']['content-type'] &&
+        !(\str_starts_with($output['headers']['content-type'], 'multipart/')) &&
+        !(\str_contains($output['headers']['content-type'], 'charset='))
+    ) {
+        $output['headers']['content-type'] .= '; charset=utf-8';
+    }
 
     foreach ($output['headers'] as $header => $value) {
         if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
