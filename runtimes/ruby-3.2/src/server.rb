@@ -6,6 +6,7 @@ USER_CODE_PATH = '/usr/local/server/src/function';
 
 class RuntimeResponse
   def send(body, status_code = 200, headers = {})
+    headers['content-type'] = 'text/plain' if headers['content-type'].nil?
     {
       'body' => body,
       'statusCode' => status_code,
@@ -14,7 +15,7 @@ class RuntimeResponse
   end
 
   def json(obj, status_code = 200, headers = {})
-    headers['content-type'] = 'application/json'
+    headers['content-type'] = 'application/json' if headers['content-type'].nil?
 
     self.send(obj.to_json, status_code, headers)
   end
@@ -235,6 +236,12 @@ def handle(request, response)
   output['body'] = '' if output['body'].nil?
   output['statusCode'] = 200 if output['statusCode'].nil?
   output['headers'] = {} if output['headers'].nil?
+
+  if (output["headers"]["content-type"] &&
+      !output["headers"]["content-type"].start_with?("multipart/") &&
+      !output["headers"]["content-type"].include?("charset="))
+    output["headers"]["content-type"] += "; charset=utf-8"
+  end
 
   output['headers'].each do |header, value|
     unless header.downcase.start_with?('x-open-runtimes-')
