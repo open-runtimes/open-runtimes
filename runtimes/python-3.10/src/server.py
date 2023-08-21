@@ -14,6 +14,8 @@ app = Flask(__name__)
 
 class Response:
     def send(self, body, statusCode = 200, headers = {}):
+        if 'content-type' not in headers:
+            headers['content-type'] = 'text/plain'
         return {
             'body': body,
             'statusCode': statusCode,
@@ -21,7 +23,8 @@ class Response:
         }
 
     def json(self, obj, statusCode = 200, headers = {}):
-        headers['content-type'] = 'application/json'
+        if 'content-type' not in headers:
+            headers['content-type'] = 'application/json'
         return self.send(json.dumps(obj, separators=(',', ':')), statusCode, headers)
     
     def empty(self):
@@ -182,6 +185,13 @@ async def handler(u_path):
     output['body'] = output.get('body', '')
     output['statusCode'] = output.get('statusCode', 200)
     output['headers'] = output.get('headers', {})
+
+    if (
+        output['headers'].get('content-type') and
+        not output['headers']['content-type'].startswith('multipart') and
+        'charset=' not in output['headers']['content-type']
+    ):
+        output['headers']['content-type'] += '; charset=utf-8'
 
     resp = FlaskResponse(output['body'], output['statusCode'])
 
