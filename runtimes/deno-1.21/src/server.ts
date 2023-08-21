@@ -183,7 +183,7 @@ app.use(async (ctx) => {
   if (
     output.headers["content-type"] &&
     !output.headers["content-type"].startsWith("multipart/") &&
-    !output.headers["content-type"].contains("charset=")
+    !output.headers["content-type"].includes("charset=")
   ) {
     output.headers["content-type"] += "; charset=utf-8";
   }
