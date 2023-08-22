@@ -7,6 +7,12 @@ class RuntimeResponse {
         statusCode: Int = 200,
         headers: [String: String] = [:]
     ) -> RuntimeOutput {
+        var outputHeaders = headers
+
+        if outputHeaders["content-type"] == nil {
+            outputHeaders["content-type"] = "text/plain"
+        }
+
         return RuntimeOutput(
             body: body,
             statusCode: statusCode,
@@ -21,8 +27,10 @@ class RuntimeResponse {
     ) throws -> RuntimeOutput {
         var outputHeaders = headers
         
-        outputHeaders["content-type"] = "application/json"
-
+        if outputHeaders["content-type"] == nil {
+            outputHeaders["content-type"] = "application/json"
+        }
+        
         let data = try JSONSerialization.data(
           withJSONObject: json,
           options: .prettyPrinted

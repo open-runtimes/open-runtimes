@@ -160,6 +160,12 @@ func execute(req: Request) async throws -> Response {
         output = context.res.send("", statusCode: 500)
     }
 
+    if !(output.headers["content-type"] ?? "").isEmpty 
+        && !output.headers["content-type"].starts(with: "multipart/"
+        && !output.headers["content-type"].contains("charset=")) {
+        output.headers["content-type"] = "text/plain"
+    }
+
     var outputHeaders = HTTPHeaders()
     for header in output.headers {
         let key = header.key.lowercased()
