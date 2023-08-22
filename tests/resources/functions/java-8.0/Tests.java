@@ -29,7 +29,7 @@ public class Tests {
                 return context.getRes().json(json);
             case "plaintextCustomCharsetResponse":
                 Map<String, String> headers = new HashMap<String, String>();
-                headers.put("content-type", "application/json; charset=iso-8859-1");
+                headers.put("content-type", "text/plain; charset=iso-8859-1");
                 return context.getRes().send("ÅÆ", 200, headers);
             case "jsonCustomCharsetResponse":
                 json.put("json", true);

@@ -2,6 +2,8 @@ package io.openruntimes.java;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.http.Resp;
 import org.rapidoid.setup.On;
@@ -203,18 +205,25 @@ public class Server {
             output = context.getRes().send("", 500);
         }
 
-        Map<String, String> outputHeaders = output.getHeaders();
-        if (outputHeaders.containsKey("content-type")
-                && !outputHeaders.get("content-type").startsWith("multipart/")
-                && !outputHeaders.get("content-type").contains("charset=")) {
-            outputHeaders.put("content-type", outputHeaders.get("content-type") + "; charset=utf-8");
-        }
-
-        for (Map.Entry<String, String> entry : outputHeaders.entrySet()) {
+        for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
             String header = entry.getKey().toLowerCase();
-            if (!(header.startsWith("x-open-runtimes-"))) {
-                resp = resp.header(header, entry.getValue());
+
+            if (header.startsWith("x-open-runtimes-")) {
+                continue;
             }
+
+            if (header.equals("content-type")) {
+                String respContentType = entry.getValue();
+
+                if (!respContentType.startsWith("multipart/") && !respContentType.contains("charset=")) {
+                    respContentType = respContentType + "; charset=utf-8";
+                }
+
+                resp = resp.contentType(MediaType.of(respContentType));
+                continue;
+            }
+
+            resp = resp.header(header, entry.getValue());
         }
 
         if (!customStdStream.toString().isEmpty()) {
