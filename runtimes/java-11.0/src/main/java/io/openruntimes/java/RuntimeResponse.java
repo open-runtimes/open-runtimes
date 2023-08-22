@@ -10,6 +10,9 @@ public class RuntimeResponse {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
     public RuntimeOutput send(String body, int statusCode, Map<String, String> headers) {
+        if (!headers.containsKey("content-type")) {
+            headers.put("content-type", "text/plain");
+        }
         return new RuntimeOutput(body, statusCode, headers);
     }
 
@@ -22,7 +25,9 @@ public class RuntimeResponse {
     }
 
     public RuntimeOutput json(Map<String, Object> json, int statusCode, Map<String, String> headers) {
-        headers.put("content-type", "application/json");
+        if (!headers.containsKey("content-type")) {
+            headers.put("content-type", "application/json");
+        }
         return this.send(gson.toJson(json), statusCode, headers);
     }
 

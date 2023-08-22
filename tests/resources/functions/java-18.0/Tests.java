@@ -29,6 +29,18 @@ public class Tests {
                 json.put("message", "Developers are awesome.");
                 return context.getRes().json(json);
             }
+            case "plaintextCustomCharsetResponse" -> {
+                Map<String, String> headers = new HashMap<String, String>();
+                headers.put("content-type", "application/json; charset=iso-8859-1");
+                return context.getRes().send("ÅÆ", 200, headers);
+            }
+            case "jsonCustomCharsetResponse" -> {
+                json.put("json", true);
+                json.put("message", "ÅÆ");
+                Map<String, String> headers = new HashMap<String, String>();
+                headers.put("content-type", "application/json; charset=iso-8859-1");
+                return context.getRes().json(json, 200, headers);
+            }
             case "redirectResponse" -> {
                 return context.getRes().redirect("https://github.com/");
             }
