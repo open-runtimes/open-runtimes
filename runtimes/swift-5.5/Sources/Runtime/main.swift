@@ -160,18 +160,22 @@ func execute(req: Request) async throws -> Response {
         output = context.res.send("", statusCode: 500)
     }
 
-    if !(output.headers["content-type"] ?? "").isEmpty 
-        && !output.headers["content-type"].starts(with: "multipart/"
-        && !output.headers["content-type"].contains("charset=")) {
-        output.headers["content-type"] = "text/plain"
-    }
-
     var outputHeaders = HTTPHeaders()
     for header in output.headers {
         let key = header.key.lowercased()
-        if !key.starts(with: "x-open-runtimes-") {
-            outputHeaders.add(name: key, value: header.value)
+
+        if key.starts(with: "x-open-runtimes-") {
+            continue
         }
+        
+        if key == "content-type" 
+            && !header.value.starts(with: "multipart/") 
+            && !header.value.contains("charset=") {
+            outputHeaders.add(name: key, value: header.value + "; charset=utf-8")
+            continue
+        }
+
+        outputHeaders.add(name: key, value: header.value)
     }
 
     var logs = context.logs.joined(separator: "\n")
