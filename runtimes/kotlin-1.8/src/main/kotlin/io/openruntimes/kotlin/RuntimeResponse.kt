@@ -13,7 +13,7 @@ public class RuntimeResponse {
         headers: MutableMap<String, String> = mutableMapOf()
     ): RuntimeOutput {
         if (!headers.containsKey("content-type")) {
-            headers["content-type"] = "text/plain"
+            headers.put("content-type", "text/plain")
         }
         return RuntimeOutput(body, statusCode, headers)
     }
@@ -24,7 +24,7 @@ public class RuntimeResponse {
         headers: MutableMap<String, String> = mutableMapOf()
     ): RuntimeOutput {
         if (!headers.containsKey("content-type")) {
-            headers["content-type"] = "application/json"
+            headers.put("content-type", "application/json")
         }
         return this.send(gson.toJson(json), statusCode, headers)
     }
