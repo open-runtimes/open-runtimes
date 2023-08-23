@@ -217,18 +217,20 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $output['statusCode'] ??= 200;
     $output['headers'] ??= [];
 
-    if (
-        $output['headers']['content-type'] &&
-        !(\str_starts_with($output['headers']['content-type'], 'multipart/')) &&
-        !(\str_contains($output['headers']['content-type'], 'charset='))
-    ) {
-        $output['headers']['content-type'] .= '; charset=utf-8';
-    }
+    foreach ($output['headers'] as $header => $headerValue) {
+        $header = \strtolower($header);
 
-    foreach ($output['headers'] as $header => $value) {
-        if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
-            $res->header(\strtolower($header), $value);
+        if(\str_starts_with($header, 'x-open-runtimes-')) {
+            continue;
         }
+
+        if (
+            $header === 'content-type' && !\str_starts_with($headerValue, 'multipart/') && !\str_contains($headerValue, 'charset=')
+        ) {
+            $headerValue .= '; charset=utf-8';
+        }
+
+        $res->header($header, $headerValue);
     }
 
     if(!empty($customStd)) {
