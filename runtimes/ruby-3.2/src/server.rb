@@ -154,7 +154,7 @@ def handle(request, response)
   headers = {}
 
   unless request.env['CONTENT_TYPE'].nil?
-    headers['content-type'] = request.env['CONTENT_TYPE']
+    headers[:'content-type'] = request.env['CONTENT_TYPE']
   end
 
   unless request.env['CONTENT_LENGTH'].nil?
@@ -253,7 +253,7 @@ def handle(request, response)
   unless response.headers[:'content-type'].nil?
     res_content_type = response.headers[:'content-type']
 
-    if !res_content_type.include?('multipart') && !res_content_type.include?('charset')
+    unless res_content_type.start_with?('multipart/') || res_content_type.include?('charset=') 
       res_content_type += '; charset=utf-8'
     end
 

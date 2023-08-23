@@ -6,7 +6,7 @@ USER_CODE_PATH = '/usr/local/server/src/function';
 
 class RuntimeResponse
   def send(body, status_code = 200, headers = {})
-    headers['content-type'] = 'text/plain' if headers['content-type'].nil?
+    headers[:'content-type'] = 'text/plain' if headers[:'content-type'].nil?
     {
       'body' => body,
       'statusCode' => status_code,
@@ -15,7 +15,7 @@ class RuntimeResponse
   end
 
   def json(obj, status_code = 200, headers = {})
-    headers['content-type'] = 'application/json' if headers['content-type'].nil?
+    headers[:'content-type'] = 'application/json' if headers[:'content-type'].nil?
 
     self.send(obj.to_json, status_code, headers)
   end
@@ -154,7 +154,7 @@ def handle(request, response)
   headers = {}
 
   unless request.env['CONTENT_TYPE'].nil?
-    headers['content-type'] = request.env['CONTENT_TYPE']
+    headers[:'content-type'] = request.env['CONTENT_TYPE']
   end
 
   unless request.env['CONTENT_LENGTH'].nil?
@@ -250,8 +250,8 @@ def handle(request, response)
   response.headers['x-open-runtimes-logs'] = ERB::Util.url_encode(context.logs.join('\n'))
   response.headers['x-open-runtimes-errors'] = ERB::Util.url_encode(context.errors.join('\n'))
 
-  unless response.headers['content-type'].nil?
-    res_content_type = response.headers['content-type']
+  unless response.headers[:'content-type'].nil?
+    res_content_type = response.headers[:'content-type']
 
     unless res_content_type.start_with?('multipart/') || res_content_type.include?('charset=') 
       res_content_type += '; charset=utf-8'
