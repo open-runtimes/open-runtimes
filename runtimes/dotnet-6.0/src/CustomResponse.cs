@@ -17,7 +17,7 @@ namespace DotNetRuntime
 
         public Task ExecuteAsync(HttpContext httpContext)
         {
-            if (_headers.TryGetValue('content-type', out string contentType) &&
+            if (_headers.TryGetValue("content-type", out string contentType) &&
                 !contentType.StartsWith("multipart/") &&
                 !contentType.Contains("charset="))
             {

@@ -214,10 +214,17 @@ namespace DotNetRuntime
                 var header = entry.Key.ToLower();
                 var value = entry.Value;
 
-                if (!(header.StartsWith("x-open-runtimes-")))
+                if (header.StartsWith("x-open-runtimes-"))
                 {
-                    outputHeaders.Add(header, value);
+                    continue;
                 }
+
+                if (header == "content-type" && !value.StartsWith("multipart/") && !value.Contains("charset="))
+                {
+                    value += "; charset=utf-8";
+                }
+
+                outputHeaders.Add(header, value);
             }
 
             if(!string.IsNullOrEmpty(customStd.ToString()))
