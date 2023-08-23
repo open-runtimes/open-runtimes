@@ -2,6 +2,8 @@ package io.openruntimes.java;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.http.Resp;
 import org.rapidoid.setup.On;
