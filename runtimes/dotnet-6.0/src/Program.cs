@@ -185,7 +185,7 @@ static async Task<IResult> Execute(HttpRequest request)
     catch (Exception e)
     {
         context.Error(e.ToString());
-        output = context.Res.Send("", 500, new Dictionary<string,string>());
+        output = context.Res.Send("", 500, new Dictionary<string, string>());
     }
     finally
     {
@@ -196,26 +196,26 @@ static async Task<IResult> Execute(HttpRequest request)
     if(output == null)
     {
         context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-        output = context.Res.Send("", 500, new Dictionary<string,string>());
+        output = context.Res.Send("", 500, new Dictionary<string, string>());
     }
 
     var outputHeaders = new Dictionary<string, string>();
     foreach (var entry in output.Headers)
     {
         var header = entry.Key.ToLower();
-        var value = entry.Value;
+        var headerValue = entry.Value;
 
         if (header.StartsWith("x-open-runtimes-"))
         {
             continue;
         }
 
-        if (header == "content-type" && !value.StartsWith("multipart/") && !value.Contains("charset="))
+        if (header == "content-type" && !headerValue.StartsWith("multipart/") && !headerValue.Contains("charset="))
         {
-            value += "; charset=utf-8";
+            headerValue += "; charset=utf-8";
         }
 
-        outputHeaders.Add(header, value);
+        outputHeaders.Add(header, headerValue);
     }
 
     if(!string.IsNullOrEmpty(customStd.ToString()))
