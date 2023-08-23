@@ -136,9 +136,9 @@ async def handler(u_path):
             context.req.body = request.get_json(force=True, silent=False)
 
     headers = dict(request.headers)
-    for key in headers.keys():
-        if not key.lower().startswith('x-open-runtimes-'):
-            context.req.headers[key.lower()] = headers[key]
+    for header in headers.keys():
+        if not header.lower().startswith('x-open-runtimes-'):
+            context.req.headers[header.lower()] = headers[header]
 
     sys.stdout = sys.stderr = customstd = StringIO()
 
@@ -186,18 +186,19 @@ async def handler(u_path):
     output['statusCode'] = output.get('statusCode', 200)
     output['headers'] = output.get('headers', {})
 
-    if (
-        output['headers'].get('content-type') 
-        and not output['headers']['content-type'].startswith('multipart')
-        and not 'charset=' in output['headers']['content-type']
-    ):
-        output['headers']['content-type'] += '; charset=utf-8'
-
     resp = FlaskResponse(output['body'], output['statusCode'])
 
-    for key in output['headers'].keys():
-        if not key.lower().startswith('x-open-runtimes-'):
-            resp.headers[key.lower()] = output['headers'][key]
+    for header in output['headers'].keys():
+        header = header.lower()
+        headerValue = output['headers'][header]
+
+        if header.startswith('x-open-runtimes-'):
+            continue
+
+        if (header == 'content-type' and not headerValue.startswith('multipart/') and not 'charset=' in headerValue):
+            headerValue += '; charset=utf-8'
+
+        resp.headers[header] = headerValue
 
     if customstd.getvalue():
         context.log('Unsupported log detected. Use context.log() or context.error() for logging.')
