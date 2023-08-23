@@ -282,7 +282,7 @@ int main()
                     if (headerKey == "content-type" &&
                         headerValue.find("multipart/") != 0 &&
                         headerValue.find("charset=") == std::string::npos) {
-                        headerValue += "; charset=utf-8";
+                        headerValue += ";charset=utf-8";
                     }
 
                     res->addHeader(headerKey, headerValue);

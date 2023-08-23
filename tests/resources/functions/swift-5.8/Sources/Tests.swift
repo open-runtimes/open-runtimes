@@ -14,14 +14,14 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         ])
     case "plaintextCustomCharsetResponse":
         return context.res.send("ÅÆ", headers: [
-            "content-type": "text/plain; charset=iso-8859-1"
+            "content-type": "text/plain;charset=iso-8859-1"
         ])
     case "jsonCustomCharsetResponse":
         return try context.res.json([
             "json": true,
             "message": "ÅÆ"
         ], headers: [
-            "content-type": "application/json; charset=iso-8859-1"
+            "content-type": "application/json;charset=iso-8859-1"
         ])
     case "redirectResponse":
         return context.res.redirect("https://github.com/")

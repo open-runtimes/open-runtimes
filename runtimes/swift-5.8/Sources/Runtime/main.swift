@@ -171,7 +171,7 @@ func execute(req: Request) async throws -> Response {
         if key == "content-type" 
             && !header.value.starts(with: "multipart/") 
             && !header.value.contains("charset=") {
-            outputHeaders.add(name: key, value: header.value + "; charset=utf-8")
+            outputHeaders.add(name: key, value: header.value + ";charset=utf-8")
             continue
         }
 

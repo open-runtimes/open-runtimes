@@ -193,7 +193,7 @@ app.use(async (ctx) => {
       !headerValue.startsWith("multipart/") &&
       !headerValue.includes("charset=")
     ) {
-      headerValue += "; charset=utf-8";
+      headerValue += ";charset=utf-8";
     }
 
     ctx.response.headers.set(header, headerValue);

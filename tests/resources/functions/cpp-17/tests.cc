@@ -29,12 +29,12 @@ namespace runtime {
                 json["message"] = "Developers are awesome.";
                 return res.json(json);
             } else if (action == "plaintextCustomCharsetResponse") {
-                headers["content-type"] = "text/plain; charset=iso-8859-1";
+                headers["content-type"] = "text/plain;charset=iso-8859-1";
                 return res.send("ÅÆ", 200, headers);
             } else if (action == "jsonCustomCharsetResponse") {
                 json["json"] = true;
                 json["message"] = "ÅÆ";
-                headers["content-type"] = "application/json; charset=iso-8859-1";
+                headers["content-type"] = "application/json;charset=iso-8859-1";
                 return res.json(json, 200, headers);
             } else if (action == "redirectResponse") {
                 return res.redirect("https://github.com/");

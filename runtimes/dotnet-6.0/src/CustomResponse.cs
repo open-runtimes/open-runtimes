@@ -21,7 +21,7 @@ namespace DotNetRuntime
                 !contentType.StartsWith("multipart/") &&
                 !contentType.Contains("charset="))
             {
-                _headers["content-type"] = contentType + "; charset=utf-8";
+                _headers["content-type"] = contentType + ";charset=utf-8";
             }
 
             foreach (var entry in _headers)

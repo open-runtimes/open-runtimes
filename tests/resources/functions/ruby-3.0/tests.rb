@@ -10,9 +10,9 @@ def main(context)
     when 'jsonResponse'
         return context.res.json({ 'json': true, 'message': 'Developers are awesome.' })
     when 'plaintextCustomCharsetResponse'
-        return context.res.send('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
+        return context.res.send('ÅÆ', 200, { 'content-type': 'text/plain;charset=iso-8859-1' })
     when 'jsonCustomCharsetResponse'
-        return context.res.json({ 'json': true, 'message': 'ÅÆ' }, 200, { 'content-type': 'application/json; charset=iso-8859-1' })
+        return context.res.json({ 'json': true, 'message': 'ÅÆ' }, 200, { 'content-type': 'application/json;charset=iso-8859-1' })
     when 'redirectResponse'
         return context.res.redirect('https://github.com/')
     when 'emptyResponse'
