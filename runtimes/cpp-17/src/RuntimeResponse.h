@@ -10,11 +10,12 @@ namespace runtime
     class RuntimeResponse
     {
         public:
-            RuntimeOutput send(const std::string &body, const int statusCode = 200, const Json::Value headers = {})
+            RuntimeOutput send(const std::string &body, const int statusCode = 200, Json::Value headers = {})
             {
                 if (headers["content-type"].asString().empty()) {
                     headers["content-type"] = "text/plain";
                 }
+
                 RuntimeOutput output;
                 output.body = body;
                 output.statusCode = statusCode;
