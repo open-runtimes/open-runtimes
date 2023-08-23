@@ -28,7 +28,11 @@ class RuntimeResponse {
     }
 
     function empty() {
-        return $this->send('', 204, []);
+        return [
+            'body' => '',
+            'statusCode' => 204,
+            'headers' => [],
+        ];
     }
 
     function redirect(string $url, int $statusCode = 301, array $headers = []) {

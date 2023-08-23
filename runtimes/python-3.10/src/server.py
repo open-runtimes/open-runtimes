@@ -28,7 +28,11 @@ class Response:
         return self.send(json.dumps(obj, separators=(',', ':')), statusCode, headers)
     
     def empty(self):
-        return self.send('', 204, {})
+        return {
+            'body': '',
+            'statusCode': 204,
+            'headers': {},
+        }
 
     def redirect(self, url, statusCode = 301, headers = {}):
         headers['location'] = url

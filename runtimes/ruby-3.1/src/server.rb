@@ -21,7 +21,11 @@ class RuntimeResponse
   end
 
   def empty()
-    self.send('', 204, {})
+    {
+      'body' => '',
+      'statusCode' => 204,
+      'headers' => {}
+    }
   end
 
   def redirect(url, status_code = 301, headers = {})
