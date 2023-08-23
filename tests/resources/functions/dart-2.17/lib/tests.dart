@@ -18,8 +18,8 @@ Future<dynamic> main(final context) async {
       }
     case 'plaintextCustomCharsetResponse':
       {
-        return context.res
-            .send('ÅÆ', 200, {'content-type': 'text/plain;charset=iso-8859-1'});
+        return context.res.send(
+            'ÅÆ', 200, {'content-type': 'text/plain; charset=iso-8859-1'});
       }
     case 'jsonCustomCharsetResponse':
       {
@@ -29,7 +29,7 @@ Future<dynamic> main(final context) async {
               'message': 'ÅÆ',
             },
             200,
-            {'content-type': 'application/json;charset=iso-8859-1'});
+            {'content-type': 'application/json; charset=iso-8859-1'});
       }
     case 'redirectResponse':
       {

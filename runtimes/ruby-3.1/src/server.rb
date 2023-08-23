@@ -254,7 +254,7 @@ def handle(request, response)
     res_content_type = response.headers[:'content-type']
 
     unless res_content_type.start_with?('multipart/') || res_content_type.include?('charset=') 
-      res_content_type += ';charset=utf-8'
+      res_content_type += '; charset=utf-8'
     end
 
     response.content_type = res_content_type

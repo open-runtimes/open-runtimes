@@ -196,7 +196,7 @@ async def handler(u_path):
             continue
 
         if (header == 'content-type' and not headerValue.startswith('multipart/') and not 'charset=' in headerValue):
-            headerValue += ';charset=utf-8'
+            headerValue += '; charset=utf-8'
 
         resp.headers[header] = headerValue
 

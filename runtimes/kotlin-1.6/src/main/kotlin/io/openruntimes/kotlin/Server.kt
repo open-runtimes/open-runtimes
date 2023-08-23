@@ -201,7 +201,7 @@ suspend fun execute(ctx: Context) {
         }
 
         if (header == "content-type" && !entry.value.startsWith("multipart/") && !entry.value.contains("charset=")) {
-            headerValue += ";charset=utf-8"
+            headerValue += "; charset=utf-8"
         }
 
         ctx.header(header, headerValue)

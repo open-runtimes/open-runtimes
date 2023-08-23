@@ -24,7 +24,7 @@ public class Tests {
             }
             "plaintextCustomCharsetResponse" -> {
                 return context.res.send("ÅÆ", 200, mutableMapOf(
-                    "Content-Type" to "text/plain;charset=iso-8859-1"
+                    "content-cype" to "text/plain; charset=iso-8859-1"
                 ))
             }
             "jsonCustomCharsetResponse" -> {
@@ -32,7 +32,7 @@ public class Tests {
                     "json" to true,
                     "message" to "ÅÆ"
                 ), 200, mutableMapOf(
-                    "Content-Type" to "application/json;charset=iso-8859-1"
+                    "content-type" to "application/json; charset=iso-8859-1"
                 ))
             }
             "redirectResponse" -> {

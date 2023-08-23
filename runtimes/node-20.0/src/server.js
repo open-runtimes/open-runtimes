@@ -205,7 +205,7 @@ const server = micro(async (req, res) => {
             !headerValue.startsWith("multipart/") &&
             !headerValue.includes("charset=")
         ) {
-            headerValue += ";charset=utf-8";
+            headerValue += "; charset=utf-8";
         }
 
         res.setHeader(header, headerValue);

@@ -221,7 +221,7 @@ namespace DotNetRuntime
 
                 if (header == "content-type" && !headerValue.StartsWith("multipart/") && !headerValue.Contains("charset="))
                 {
-                    headerValue += ";charset=utf-8";
+                    headerValue += "; charset=utf-8";
                 }
 
                 outputHeaders.Add(header, headerValue);

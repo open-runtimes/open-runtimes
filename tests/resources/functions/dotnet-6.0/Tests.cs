@@ -24,7 +24,7 @@ public class Handler {
             case "plaintextCustomCharsetResponse":
                 return context.Res.Send("ÅÆ", 200, new Dictionary<string, string>()
                 {
-                    { "content-type", "text/plain;charset=iso-8859-1" }
+                    { "content-type", "text/plain; charset=iso-8859-1" }
                 });
             case "jsonCustomCharsetResponse":
                 return context.Res.Json(new Dictionary<string, object?>()
@@ -33,7 +33,7 @@ public class Handler {
                     { "message", "ÅÆ" }
                 }, 200, new Dictionary<string, string>()
                 {
-                    { "content-type", "application/json;charset=iso-8859-1" }
+                    { "content-type", "application/json; charset=iso-8859-1" }
                 });
             case "redirectResponse":
                 return context.Res.Redirect("https://github.com/");

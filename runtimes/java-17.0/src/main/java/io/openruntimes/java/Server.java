@@ -214,7 +214,7 @@ public class Server {
             }
 
             if (header.equals("content-type") && !headerValue.startsWith("multipart/") && !headerValue.contains("charset=")) {
-                headerValue += ";charset=utf-8";
+                headerValue += "; charset=utf-8";
             }
 
             resp = resp.header(header, headerValue);

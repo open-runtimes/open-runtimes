@@ -227,7 +227,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         if (
             $header === 'content-type' && !\str_starts_with($headerValue, 'multipart/') && !\str_contains($headerValue, 'charset=')
         ) {
-            $headerValue .= ';charset=utf-8';
+            $headerValue .= '; charset=utf-8';
         }
 
         $res->header($header, $headerValue);
