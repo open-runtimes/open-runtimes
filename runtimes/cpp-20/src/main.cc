@@ -273,10 +273,19 @@ int main()
                         [](unsigned char c){ return std::tolower(c); }
                     );
 
-                    if (headerKey.rfind("x-open-runtimes-", 0) != 0)
+                    if (headerKey.rfind("x-open-runtimes-", 0) == 0)
                     {
-                        res->addHeader(headerKey, output.headers[key].asString());
+                        continue;
                     }
+
+                    std::string headerValue = output.headers[key].asString();
+                    if (headerKey == "content-type" &&
+                        headerValue.find("multipart/") != 0 &&
+                        headerValue.find("charset=") == std::string::npos) {
+                        headerValue += "; charset=utf-8";
+                    }
+
+                    res->addHeader(headerKey, headerValue);
                 }
 
                 CURL *curl = curl_easy_init();
