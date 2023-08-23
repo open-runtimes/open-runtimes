@@ -85,7 +85,11 @@ const server = micro(async (req, res) => {
                 return this.send(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
-                return this.send('', 204, {});
+                return { 
+          body: '',
+          statusCode: 204,
+          headers: {}
+        }
             },
             redirect: function (url, statusCode = 301, headers = {}) {
                 headers['location'] = url;

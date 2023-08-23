@@ -93,7 +93,11 @@ app.use(async (ctx) => {
         return this.send(JSON.stringify(obj), statusCode, headers);
       },
       empty: function () {
-        return this.send('', 204, {});
+        return { 
+          body: '',
+          statusCode: 204,
+          headers: {}
+        }
       },
       redirect: function (url: string, statusCode = 301, headers: any = {}) {
         headers['location'] = url;
