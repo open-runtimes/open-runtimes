@@ -208,23 +208,17 @@ public class Server {
 
         for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
             String header = entry.getKey().toLowerCase();
+            String headerValue = entry.getValue();
 
             if (header.startsWith("x-open-runtimes-")) {
                 continue;
             }
 
-            if (header.equals("content-type")) {
-                String respContentType = entry.getValue();
-
-                if (!respContentType.startsWith("multipart/") && !respContentType.contains("charset=")) {
-                    respContentType = respContentType + "; charset=utf-8";
-                }
-
-                resp = resp.contentType(MediaType.of(respContentType));
-                continue;
+            if (header.equals("content-type") && !headerValue.startsWith("multipart/") && !headerValue.contains("charset=")) {
+                headerValue += "; charset=utf-8";
             }
 
-            resp = resp.header(header, entry.getValue());
+            resp = resp.header(header, headerValue);
         }
 
         if (!customStdStream.toString().isEmpty()) {
