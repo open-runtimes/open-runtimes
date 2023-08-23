@@ -4,9 +4,13 @@ using System.Text.Json;
 
 public class RuntimeResponse
 {
-    public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = new Dictionary<string,string>())
+    public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
     {
-        if (!headers.TryGetValue("content-type"))
+        if(headers == null) {
+            headers = new Dictionary<string, string>();
+        }
+
+        if (!headers.ContainsKey("content-type"))
         {
             headers.Add("content-type", "text/plain");
         }
@@ -17,9 +21,13 @@ public class RuntimeResponse
             headers);
     }
 
-    public RuntimeOutput Json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = new Dictionary<string,string>())
+    public RuntimeOutput Json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = null)
     {
-        if (!headers.TryGetValue("content-type"))
+        if(headers == null) {
+            headers = new Dictionary<string, string>();
+        }
+
+        if (!headers.ContainsKey("content-type"))
         {
             headers.Add("content-type", "application/json");
         }
@@ -30,13 +38,13 @@ public class RuntimeResponse
 
     public RuntimeOutput Empty()
     {
-        return Send("", 204, new Dictionary<string, string>());
+        return new RuntimeOutput("", 204, new Dictionary<string, string>());
     }
 
     public RuntimeOutput Redirect(String url, int statusCode = 301, Dictionary<string, string>? headers = null)
     {
         if(headers == null) {
-            headers = new Dictionary<string,string>();
+            headers = new Dictionary<string, string>();
         }
 
         headers.Add("location", url);
