@@ -22,6 +22,19 @@ public class Tests {
                     "message" to "Developers are awesome."
                 ))
             }
+            "plaintextCustomCharsetResponse" -> {
+                return context.res.send("ÅÆ", 200, mutableMapOf(
+                    "Content-Type" to "text/plain; charset=iso-8859-1"
+                ))
+            }
+            "jsonCustomCharsetResponse" -> {
+                return context.res.json(mutableMapOf(
+                    "json" to true,
+                    "message" to "ÅÆ"
+                ), 200, mutableMapOf(
+                    "Content-Type" to "application/json; charset=iso-8859-1"
+                ))
+            }
             "redirectResponse" -> {
                 return context.res.redirect("https://github.com/")
             }

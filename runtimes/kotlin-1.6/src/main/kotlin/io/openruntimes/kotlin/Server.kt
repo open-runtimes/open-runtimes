@@ -194,9 +194,17 @@ suspend fun execute(ctx: Context) {
 
     for ((key, value) in output.headers) {
         val header = key.lowercase()
-        if (!(header.startsWith("x-open-runtimes-"))) {
-            ctx.header(header, value)
+
+        if (header.startsWith("x-open-runtimes-")) {
+            continue
         }
+
+        if (header == "content-type" && !value.startsWith("multipart/") && !value.contains("charset=")) {
+            ctx.contentType("$value; charset=utf-8")
+            continue
+        }
+
+        ctx.header(header, value)
     }
 
     if (customStdStream.toString().isNotEmpty()) {

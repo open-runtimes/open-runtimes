@@ -10,8 +10,11 @@ public class RuntimeResponse {
     fun send(
         body: String,
         statusCode: Int = 200,
-        headers: Map<String, String> = mapOf()
+        headers: MutableMap<String, String> = mutableMapOf()
     ): RuntimeOutput {
+        if (!headers.containsKey("content-type")) {
+            headers["content-type"] = "text/plain"
+        }
         return RuntimeOutput(body, statusCode, headers)
     }
 
@@ -20,12 +23,14 @@ public class RuntimeResponse {
         statusCode: Int = 200,
         headers: MutableMap<String, String> = mutableMapOf()
     ): RuntimeOutput {
-        headers["content-type"] = "application/json"
+        if (!headers.containsKey("content-type")) {
+            headers["content-type"] = "application/json"
+        }
         return this.send(gson.toJson(json), statusCode, headers)
     }
 
     fun empty(): RuntimeOutput {
-        return this.send("", 204, mutableMapOf<String, String>())
+        return RuntimeOutput("", 204, mutableMapOf<String, String>())
     }
 
     fun redirect(
