@@ -19,7 +19,7 @@ namespace runtime
                 RuntimeOutput output;
                 output.body = body;
                 output.statusCode = statusCode;
-                output.headers = &headers;
+                output.headers = headers;
                 return output;
             }
 
@@ -33,7 +33,12 @@ namespace runtime
 
             RuntimeOutput empty()
             {
-                return this->send("", 204, {});
+                Json::Value headers = {};
+                RuntimeOutput output;
+                output.body = "";
+                output.statusCode = 204;
+                output.headers = headers;
+                return output;
             }
 
             RuntimeOutput redirect(const std::string &url, const int statusCode = 301, Json::Value headers = {})

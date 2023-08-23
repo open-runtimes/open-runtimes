@@ -57,7 +57,7 @@ namespace runtime {
                 headers["first-header"] = "first-value";
                 headers["second-header"] = secondHeader;
                 headers["x-open-runtimes-custom-out-header"] = "third-value";
-                return res.send("OK", 200, json);
+                return res.send("OK", 200, headers);
             } else if (action == "statusResponse") {
                 return res.send("FAIL", 404);
             } else if (action == "requestMethod") {
