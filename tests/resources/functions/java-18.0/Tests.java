@@ -19,6 +19,7 @@ public class Tests {
         String action = context.getReq().getHeaders().getOrDefault("x-action", "");
 
         Map<String, Object> json = new HashMap<>();
+        Map<String, String> headers = new HashMap<String, String>();
 
         switch (action) {
             case "plaintextResponse" -> {
@@ -30,14 +31,12 @@ public class Tests {
                 return context.getRes().json(json);
             }
             case "plaintextCustomCharsetResponse" -> {
-                Map<String, String> headers = new HashMap<String, String>();
                 headers.put("content-type", "text/plain; charset=iso-8859-1");
                 return context.getRes().send("ÅÆ", 200, headers);
             }
             case "jsonCustomCharsetResponse" -> {
                 json.put("json", true);
                 json.put("message", "ÅÆ");
-                Map<String, String> headers = new HashMap<String, String>();
                 headers.put("content-type", "application/json; charset=iso-8859-1");
                 return context.getRes().json(json, 200, headers);
             }
@@ -59,7 +58,6 @@ public class Tests {
                 return context.getRes().send("This should be returned.");
             }
             case "headersResponse" -> {
-                Map<String, String> headers = new HashMap<String, String>();
                 headers.put("first-header", "first-value");
                 headers.put("second-header", context.getReq().getHeaders().getOrDefault("x-open-runtimes-custom-in-header", "missing"));
                 headers.put("x-open-runtimes-custom-out-header", "third-value");
