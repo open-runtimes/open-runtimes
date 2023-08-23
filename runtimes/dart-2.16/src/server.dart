@@ -149,18 +149,22 @@ void main() async {
     output['headers'] = output['headers'] ?? {};
 
     Map<String, String> responseHeaders = {};
+    String encoding = 'utf-8';
 
     for (MapEntry entry in output['headers'].entries) {
       String header = entry.key.toLowerCase();
-      if (!header.startsWith('x-open-runtimes-')) {
-        responseHeaders[header] = entry.value;
-      }
-    }
+      String headerValue = entry.value;
 
-    final resContentType = responseHeaders['content-type'] ?? '';
-    final encodingName = resContentType.contains('charset=')
-        ? resContentType.split('charset=')[1].split(';')[0]
-        : 'utf-8';
+      if (header.startsWith('x-open-runtimes-')) {
+        continue;
+      }
+
+      if (header == 'content-type' && headerValue.contains('charset=')) {
+        encoding = headerValue.split('charset=')[1].split(';')[0];
+      }
+
+      responseHeaders[header] = entry.value;
+    }
 
     if (!customstd.isEmpty) {
       context.log(
@@ -173,7 +177,7 @@ void main() async {
         Uri.encodeFull(context.errors.join('\n'));
 
     return shelf.Response(output['statusCode'],
-        encoding: Encoding.getByName(encodingName),
+        encoding: Encoding.getByName(encoding),
         body: output['body'],
         headers: responseHeaders);
   }, '0.0.0.0', 3000);
