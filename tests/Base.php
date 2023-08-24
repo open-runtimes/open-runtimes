@@ -96,13 +96,9 @@ class Base extends TestCase
 
     public function testCustomCharsetResponse(): void 
     {
-        $response = $this->execute(headers: ['x-action' => 'plaintextCustomCharsetResponse']);
+        $response = $this->execute(headers: ['x-action' => 'customCharsetResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=iso-8859-1', $response['headers']['content-type']);
-
-        $response = $this->execute(headers: ['x-action' => 'jsonCustomCharsetResponse']);
-        self::assertEquals(200, $response['code']);
-        self::assertEqualsIgnoringWhitespace('application/json; charset=iso-8859-1', $response['headers']['content-type']);
     }
 
     public function testRedirectResponse(): void

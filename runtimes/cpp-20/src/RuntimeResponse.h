@@ -1,6 +1,7 @@
 #ifndef CPP_RUNTIME_RUNTIMERESPONSE_H
 #define CPP_RUNTIME_RUNTIMERESPONSE_H
 
+#include <fstream>
 #include <string>
 #include <json/value.h>
 #include "RuntimeOutput.h"

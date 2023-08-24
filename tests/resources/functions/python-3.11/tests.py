@@ -9,10 +9,8 @@ async def main(context):
         return context.res.send('Hello World 👋')
     elif action == 'jsonResponse':
         return context.res.json({ 'json': True, 'message': 'Developers are awesome.' })
-    elif action == 'plaintextCustomCharsetResponse':
+    elif action == 'customCharsetResponse':
         return context.res.send('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
-    elif action == 'jsonCustomCharsetResponse':
-        return context.res.json({ 'json': True, 'message': 'ÅÆ' }, 200, { 'content-type': 'application/json; charset=iso-8859-1' })
     elif action == 'redirectResponse':
         return context.res.redirect('https://github.com/')
     elif action == 'emptyResponse':

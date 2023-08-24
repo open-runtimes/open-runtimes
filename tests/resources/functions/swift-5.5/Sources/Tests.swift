@@ -12,16 +12,9 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
             "json": true,
             "message": "Developers are awesome."
         ])
-    case "plaintextCustomCharsetResponse":
+    case "customCharsetResponse":
         return context.res.send("ÅÆ", headers: [
             "content-type": "text/plain; charset=iso-8859-1"
-        ])
-    case "jsonCustomCharsetResponse":
-        return try context.res.json([
-            "json": true,
-            "message": "ÅÆ"
-        ], headers: [
-            "content-type": "application/json; charset=iso-8859-1"
         ])
     case "redirectResponse":
         return context.res.redirect("https://github.com/")

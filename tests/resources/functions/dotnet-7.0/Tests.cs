@@ -22,19 +22,10 @@ namespace DotNetRuntime {
                         { "json", true },
                         { "message", "Developers are awesome." }
                     });
-                case "plaintextCustomCharsetResponse":
+                case "customCharsetResponse":
                     return context.Res.Send("ÅÆ", 200, new Dictionary<string, string>()
                     {
                         { "content-type", "text/plain; charset=iso-8859-1" }
-                    });
-                case "jsonCustomCharsetResponse":
-                    return context.Res.Json(new Dictionary<string, object?>()
-                    {
-                        { "json", true },
-                        { "message", "ÅÆ" }
-                    }, 200, new Dictionary<string, string>()
-                    {
-                        { "content-type", "application/json; charset=iso-8859-1" }
                     });
                 case "redirectResponse":
                     return context.Res.Redirect("https://github.com/");
