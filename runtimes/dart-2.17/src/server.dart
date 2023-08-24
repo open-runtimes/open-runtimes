@@ -14,8 +14,7 @@ void main() async {
       safeTimeout = int.tryParse(timeout);
       if (safeTimeout == null || safeTimeout == 0) {
         return shelf.Response(500,
-            body:
-                'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
+            body: 'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
       }
     }
 

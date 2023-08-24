@@ -22,7 +22,7 @@ public class RuntimeResponse {
     }
 
     public RuntimeOutput json(Map<String, Object> json, int statusCode, Map<String, String> headers) {
-            headers.put("content-type", "application/json");
+        headers.put("content-type", "application/json");
         return this.send(gson.toJson(json), statusCode, headers);
     }
 

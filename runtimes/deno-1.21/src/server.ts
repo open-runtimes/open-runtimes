@@ -84,7 +84,7 @@ app.use(async (ctx) => {
         }
       },
       json: function (obj: any, statusCode = 200, headers: any = {}) {
-          headers['content-type'] = 'application/json';
+        headers['content-type'] = 'application/json';
         return this.send(JSON.stringify(obj), statusCode, headers);
       },
       empty: function () {
