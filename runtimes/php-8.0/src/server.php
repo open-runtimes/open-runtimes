@@ -212,22 +212,17 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $output['statusCode'] ??= 200;
     $output['headers'] ??= [];
 
-    foreach ($output['headers'] as $header => $headerValue) {
-        $header = \strtolower($header);
-
-        if(\str_starts_with($header, 'x-open-runtimes-')) {
-            continue;
+    foreach ($output['headers'] as $header => $value) {
+        if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
+            $res->header(\strtolower($header), $value);
         }
-
-        if (
-            $header === 'content-type' && !\str_starts_with($headerValue, 'multipart/') && !\str_contains($headerValue, 'charset=')
-        ) {
-            $headerValue .= '; charset=utf-8';
-        }
-
-        $res->header($header, $headerValue);
     }
 
+    $contentTypeValue = $res->header['content-type'] ?? 'text/plain';
+    if (\str_starts_with($contentTypeValue, 'text/') && !\str_contains($contentTypeValue, 'charset=')) {
+        $res->header('content-type', $contentTypeValue . '; charset=utf-8');
+    }
+ 
     if(!empty($customStd)) {
         $context->log('Unsupported log detected. Use $context->log() or $context->error() for logging.');
     }

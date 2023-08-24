@@ -175,23 +175,24 @@ app.use(async (ctx) => {
   output.statusCode = output.statusCode ?? 200;
   output.headers = output.headers ?? {};
 
-  for (let header in output.headers) {
-    header = header.toLowerCase();
-    let headerValue = output.headers[header];
-
-    if (header.startsWith("x-open-runtimes-")) {
+  for (const header in output.headers) {
+    if(header.toLowerCase().startsWith('x-open-runtimes-')) {
       continue;
     }
+    
+    ctx.response.headers.set(header.toLowerCase(), output.headers[header]);
+  }
 
-    if (
-      header === "content-type" &&
-      !headerValue.startsWith("multipart/") &&
-      !headerValue.includes("charset=")
-    ) {
-      headerValue += "; charset=utf-8";
-    }
-
-    ctx.response.headers.set(header, headerValue);
+  const contentTypeValue =
+    ctx.response.headers.get("content-type") ?? "text/plain";
+  if (
+    !contentTypeValue.startsWith("multipart/") &&
+    !contentTypeValue.contains("charset=")
+  ) {
+    ctx.response.headers.set(
+      "content-type",
+      contentTypeValue + "; charset=utf-8"
+    );
   }
 
   if(customstd) {

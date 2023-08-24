@@ -163,19 +163,14 @@ func execute(req: Request) async throws -> Response {
     var outputHeaders = HTTPHeaders()
     for header in output.headers {
         let key = header.key.lowercased()
-
-        if key.starts(with: "x-open-runtimes-") {
-            continue
+        if !key.starts(with: "x-open-runtimes-") {
+            outputHeaders.add(name: key, value: header.value)
         }
-        
-        if key == "content-type" 
-            && !header.value.starts(with: "multipart/") 
-            && !header.value.contains("charset=") {
-            outputHeaders.add(name: key, value: header.value + "; charset=utf-8")
-            continue
-        }
+    }
 
-        outputHeaders.add(name: key, value: header.value)
+    let contentTypeValue = outputHeaders.first(name: "content-type") ?? "text/plain"
+    if !contentTypeValue.starts(with: "multipart/") && !header.value.contains("charset=") {
+        outputHeaders.replaceOrAdd(name: "content-type", value: contentTypeValue + "; charset=utf-8")
     }
 
     var logs = context.logs.joined(separator: "\n")

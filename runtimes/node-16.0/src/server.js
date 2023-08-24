@@ -187,24 +187,25 @@ const server = micro(async (req, res) => {
     output.statusCode = output.statusCode ?? 200;
     output.headers = output.headers ?? {};
 
-    for (let header in output.headers) {
-        header = header.toLowerCase();
-        let headerValue = output.headers[header];
-
-        if (header.startsWith("x-open-runtimes-")) {
+    for (const header in output.headers) {
+        if(header.toLowerCase().startsWith('x-open-runtimes-')) {
             continue;
         }
-
-        if (
-            header === "content-type" &&
-            !headerValue.startsWith("multipart/") &&
-            !headerValue.includes("charset=")
-        ) {
-            headerValue += "; charset=utf-8";
-        }
-
-        res.setHeader(header, headerValue);
+        
+        res.setHeader(header.toLowerCase(), output.headers[header]);
     }
+
+    const contentTypeValue = res.getHeader("content-type") ?? "text/plain";
+    if (
+        !contentTypeValue.startsWith("multipart/") &&
+        !contentTypeValue.contains("charset=")
+    ) {
+        res.setHeader(
+        "content-type",
+        contentTypeValue + "; charset=utf-8"
+        );
+    }
+    
 
     if(customstd) {
         context.log('Unsupported log detected. Use context.log() or context.error() for logging.');

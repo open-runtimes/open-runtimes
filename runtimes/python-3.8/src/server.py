@@ -185,17 +185,14 @@ async def handler(u_path):
 
     resp = FlaskResponse(output['body'], output['statusCode'])
 
-    for header in output['headers'].keys():
-        header = header.lower()
-        headerValue = output['headers'][header]
+    for key in output['headers'].keys():
+        if not key.lower().startswith('x-open-runtimes-'):
+            resp.headers[key.lower()] = output['headers'][key]
 
-        if header.startswith('x-open-runtimes-'):
-            continue
+    content_type_value = resp.headers.get('content-type', 'text/plain')
+    if not content_type_value.startswith('multipart/') and not 'charset=' in content_type_value:
+        resp.headers['content-type'] = content_type_value + '; charset=utf-8'
 
-        if (header == 'content-type' and not headerValue.startswith('multipart/') and not 'charset=' in headerValue):
-            headerValue += '; charset=utf-8'
-
-        resp.headers[header] = headerValue
 
     if customstd.getvalue():
         context.log('Unsupported log detected. Use context.log() or context.error() for logging.')
