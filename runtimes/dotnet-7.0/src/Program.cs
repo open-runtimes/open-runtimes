@@ -194,7 +194,7 @@ namespace DotNetRuntime
             catch (Exception e)
             {
                 context.Error(e.ToString());
-                output = context.Res.Send("", 500, new Dictionary<string, string>());
+                output = context.Res.Send("", 500, new Dictionary<string,string>());
             }
             finally
             {
@@ -205,26 +205,19 @@ namespace DotNetRuntime
             if(output == null)
             {
                 context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-                output = context.Res.Send("", 500, new Dictionary<string, string>());
+                output = context.Res.Send("", 500, new Dictionary<string,string>());
             }
 
             var outputHeaders = new Dictionary<string, string>();
             foreach (var entry in output.Headers)
             {
                 var header = entry.Key.ToLower();
-                var headerValue = entry.Value;
+                var value = entry.Value;
 
-                if (header.StartsWith("x-open-runtimes-"))
+                if (!(header.StartsWith("x-open-runtimes-")))
                 {
-                    continue;
+                    outputHeaders.Add(header, value);
                 }
-
-                if (header == "content-type" && !headerValue.StartsWith("multipart/") && !headerValue.Contains("charset="))
-                {
-                    headerValue += "; charset=utf-8";
-                }
-
-                outputHeaders.Add(header, headerValue);
             }
 
             if(!string.IsNullOrEmpty(customStd.ToString()))

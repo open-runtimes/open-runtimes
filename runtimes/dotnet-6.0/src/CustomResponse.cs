@@ -17,11 +17,16 @@ namespace DotNetRuntime
 
         public Task ExecuteAsync(HttpContext httpContext)
         {
-            if (_headers.TryGetValue("content-type", out string contentType) &&
-                !contentType.StartsWith("multipart/") &&
-                !contentType.Contains("charset="))
+            string contentTypeValue = "text/plain";
+            
+            if (_headers.TryGetValue("content-type", out string contentType)) {
+                 contentTypeValue = contentType;
+            } 
+
+            if (!contentTypeValue.StartsWith("multipart/") &&
+                !contentTypeValue.Contains("charset="))
             {
-                _headers["content-type"] = contentType + "; charset=utf-8";
+                contentTypeValue = contentTypeValue + "; charset=utf-8";
             }
 
             foreach (var entry in _headers)
@@ -30,7 +35,7 @@ namespace DotNetRuntime
             }
 
             httpContext.Response.StatusCode = _statusCode;
-            httpContext.Response.ContentType = contentType;
+            httpContext.Response.ContentType = contentTypeValue;
             httpContext.Response.ContentLength = Encoding.UTF8.GetByteCount(_body);
 
             return httpContext.Response.WriteAsync(_body);
