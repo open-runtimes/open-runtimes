@@ -21,8 +21,7 @@ class Response:
         }
 
     def json(self, obj, statusCode = 200, headers = {}):
-        if 'content-type' not in headers:
-            headers['content-type'] = 'application/json'
+        headers['content-type'] = 'application/json'
         return self.send(json.dumps(obj, separators=(',', ':')), statusCode, headers)
     
     def empty(self):

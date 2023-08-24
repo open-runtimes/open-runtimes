@@ -18,9 +18,7 @@ class RuntimeResponse {
     }
 
     function json(array $obj, int $statusCode = 200, array $headers = []) {
-        if (!$headers['content-type']) {
             $headers['content-type'] = 'application/json';
-        }
         return $this->send(\json_encode($obj), $statusCode, $headers);
     }
 

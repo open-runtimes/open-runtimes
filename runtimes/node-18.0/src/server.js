@@ -76,9 +76,7 @@ const server = micro(async (req, res) => {
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
-                if (!headers['content-type']) {
                   headers['content-type'] = 'application/json';
-                }
                 return this.send(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {

@@ -21,9 +21,7 @@ class RuntimeResponse {
     ) throws -> RuntimeOutput {
         var outputHeaders = headers
         
-        if outputHeaders["content-type"] == nil {
             outputHeaders["content-type"] = "application/json"
-        }
         
         let data = try JSONSerialization.data(
           withJSONObject: json,

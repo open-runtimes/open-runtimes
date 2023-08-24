@@ -14,15 +14,12 @@ public class RuntimeResponse
 
         public RuntimeOutput Json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = null)
         {
-            if(headers == null) {
-                headers = new Dictionary<string, string>();
-            }
-
-            if (!headers.ContainsKey("content-type"))
+        if(headers == null)
             {
-                headers.Add("content-type", "application/json");
+            headers = new Dictionary<string,string>();
             }
 
+        headers.Add("content-type", "application/json");
             return Send(JsonSerializer.Serialize(json), statusCode, headers);
         }
 

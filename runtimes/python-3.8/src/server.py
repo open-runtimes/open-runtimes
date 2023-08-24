@@ -134,9 +134,9 @@ async def handler(u_path):
             context.req.body = request.get_json(force=True, silent=False)
 
     headers = dict(request.headers)
-    for header in headers.keys():
-        if not header.lower().startswith('x-open-runtimes-'):
-            context.req.headers[header.lower()] = headers[header]
+    for key in headers.keys():
+        if not key.lower().startswith('x-open-runtimes-'):
+            context.req.headers[key.lower()] = headers[key]
 
     sys.stdout = sys.stderr = customstd = StringIO()
 

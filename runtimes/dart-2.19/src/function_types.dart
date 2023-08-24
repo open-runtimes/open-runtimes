@@ -50,10 +50,7 @@ class RuntimeResponse {
 
   dynamic json(Map<String, dynamic> json,
       [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
-    var headersMerged = {...headers};
-    if (!headersMerged.containsKey('content-type')) {
-      headersMerged['content-type'] = 'application/json';
-    }
+    var headersMerged = {...headers, 'content-type': 'application/json'};
     return this.send(jsonEncode(json), statusCode, headersMerged);
   }
 

@@ -21,9 +21,7 @@ namespace runtime
 
             RuntimeOutput json(const Json::Value &json, const int statusCode = 200, Json::Value headers = {})
             {
-                if (headers["content-type"].asString().empty()) {
                     headers["content-type"] = "application/json";
-                }
                 return this->send(json.toStyledString(), statusCode, headers);
             }
 

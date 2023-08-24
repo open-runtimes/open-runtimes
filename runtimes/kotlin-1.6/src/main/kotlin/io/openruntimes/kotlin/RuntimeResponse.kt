@@ -20,9 +20,7 @@ public class RuntimeResponse {
         statusCode: Int = 200,
         headers: MutableMap<String, String> = mutableMapOf()
     ): RuntimeOutput {
-        if (!headers.containsKey("content-type")) {
-            headers.put("content-type", "application/json")
-        }
+        headers["content-type"] = "application/json"
         return this.send(gson.toJson(json), statusCode, headers)
     }
 

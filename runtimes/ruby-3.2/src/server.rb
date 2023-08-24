@@ -14,7 +14,7 @@ class RuntimeResponse
   end
 
   def json(obj, status_code = 200, headers = {})
-    headers[:'content-type'] = 'application/json' if headers[:'content-type'].nil?
+    headers['content-type'] = 'application/json'
 
     self.send(obj.to_json, status_code, headers)
   end
