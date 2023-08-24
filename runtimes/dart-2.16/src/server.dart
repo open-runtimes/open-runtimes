@@ -148,22 +148,23 @@ void main() async {
     output['headers'] = output['headers'] ?? {};
 
     Map<String, String> responseHeaders = {};
-    String encoding = 'utf-8';
 
     for (MapEntry entry in output['headers'].entries) {
       String header = entry.key.toLowerCase();
-      String headerValue = entry.value;
-
-      if (header.startsWith('x-open-runtimes-')) {
-        continue;
+      if (!header.startsWith('x-open-runtimes-')) {
+        responseHeaders[header] = entry.value;
       }
-
-      if (header == 'content-type' && headerValue.contains('charset=')) {
-        encoding = headerValue.split('charset=')[1].split(';')[0];
-      }
-
-      responseHeaders[header] = entry.value;
     }
+
+    String contentTypeValue = responseHeaders['content-type'] ?? 'text/plain';
+
+    if (!contentTypeValue.startsWith('multipart/') &&
+        !contentTypeValue.contains('charset=')) {
+      contentTypeValue += '; charset=utf-8';
+    }
+
+    String encoding = contentTypeValue.split('charset=')[1].split(';')[0];
+    responseHeaders['content-type'] = contentTypeValue;
 
     if (!customstd.isEmpty) {
       context.log(
