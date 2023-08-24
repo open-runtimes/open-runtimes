@@ -7,12 +7,6 @@ class RuntimeResponse {
         statusCode: Int = 200,
         headers: [String: String] = [:]
     ) -> RuntimeOutput {
-        var outputHeaders = headers
-
-        if outputHeaders["content-type"] == nil {
-            outputHeaders["content-type"] = "text/plain"
-        }
-
         return RuntimeOutput(
             body: body,
             statusCode: statusCode,

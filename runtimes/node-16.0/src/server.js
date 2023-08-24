@@ -69,9 +69,6 @@ const server = micro(async (req, res) => {
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
-                if (!headers['content-type']) {
-                    headers['content-type'] = 'text/plain';
-                }
                 return {
                     body: body,
                     statusCode: statusCode,
@@ -85,11 +82,7 @@ const server = micro(async (req, res) => {
                 return this.send(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
-                return { 
-          body: '',
-          statusCode: 204,
-          headers: {}
-        }
+                return this.send('', 204, {});
             },
             redirect: function (url, statusCode = 301, headers = {}) {
                 headers['location'] = url;

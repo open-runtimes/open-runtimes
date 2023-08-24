@@ -14,8 +14,6 @@ app = Flask(__name__)
 
 class Response:
     def send(self, body, statusCode = 200, headers = {}):
-        if 'content-type' not in headers:
-            headers['content-type'] = 'text/plain'
         return {
             'body': body,
             'statusCode': statusCode,
@@ -28,11 +26,7 @@ class Response:
         return self.send(json.dumps(obj, separators=(',', ':')), statusCode, headers)
     
     def empty(self):
-        return {
-            'body': '',
-            'statusCode': 204,
-            'headers': {},
-        }
+        return self.send('', 204, {})
 
     def redirect(self, url, statusCode = 301, headers = {}):
         headers['location'] = url

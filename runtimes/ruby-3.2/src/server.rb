@@ -6,7 +6,6 @@ USER_CODE_PATH = '/usr/local/server/src/function';
 
 class RuntimeResponse
   def send(body, status_code = 200, headers = {})
-    headers[:'content-type'] = 'text/plain' if headers[:'content-type'].nil?
     {
       'body' => body,
       'statusCode' => status_code,
@@ -21,11 +20,7 @@ class RuntimeResponse
   end
 
   def empty()
-    {
-      'body' => '',
-      'statusCode' => 204,
-      'headers' => {}
-    }
+    self.send('', 204, {})
   end
 
   def redirect(url, status_code = 301, headers = {})
@@ -158,7 +153,7 @@ def handle(request, response)
   headers = {}
 
   unless request.env['CONTENT_TYPE'].nil?
-    headers[:'content-type'] = request.env['CONTENT_TYPE']
+    headers['content-type'] = request.env['CONTENT_TYPE']
   end
 
   unless request.env['CONTENT_LENGTH'].nil?

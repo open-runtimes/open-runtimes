@@ -10,9 +10,6 @@ public class RuntimeResponse {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
     public RuntimeOutput send(String body, int statusCode, Map<String, String> headers) {
-        if (!headers.containsKey("content-type")) {
-            headers.put("content-type", "text/plain");
-        }
         return new RuntimeOutput(body, statusCode, headers);
     }
 

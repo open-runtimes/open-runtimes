@@ -41,14 +41,10 @@ class RuntimeRequest {
 class RuntimeResponse {
   dynamic send(String body,
       [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
-    var headersMerged = {...headers};
-    if (!headersMerged.containsKey('content-type')) {
-      headersMerged['content-type'] = 'text/plain';
-    }
     return {
       'body': body,
       'statusCode': statusCode,
-      'headers': headersMerged,
+      'headers': headers,
     };
   }
 
@@ -62,11 +58,7 @@ class RuntimeResponse {
   }
 
   dynamic empty() {
-    return {
-      'body': '',
-      'statusCode': 204,
-      'headers': const {},
-    };
+    return this.send('', 204, const {});
   }
 
   dynamic redirect(String url,

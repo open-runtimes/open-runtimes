@@ -10,9 +10,6 @@ const USER_CODE_PATH = '/usr/local/server/src/function';
 
 class RuntimeResponse {
     function send(string $body, int $statusCode = 200, array $headers = []): array {
-        if (!$headers['content-type']) {
-            $headers['content-type'] = 'text/plain';
-        }
         return [
             'body' => $body,
             'statusCode' => $statusCode,
@@ -28,11 +25,7 @@ class RuntimeResponse {
     }
 
     function empty() {
-        return [
-            'body' => '',
-            'statusCode' => 204,
-            'headers' => [],
-        ];
+        return $this->send('', 204, []);
     }
 
     function redirect(string $url, int $statusCode = 301, array $headers = []) {

@@ -10,11 +10,8 @@ public class RuntimeResponse {
     fun send(
         body: String,
         statusCode: Int = 200,
-        headers: MutableMap<String, String> = mutableMapOf()
+        headers: Map<String, String> = mapOf()
     ): RuntimeOutput {
-        if (!headers.containsKey("content-type")) {
-            headers.put("content-type", "text/plain")
-        }
         return RuntimeOutput(body, statusCode, headers)
     }
 
@@ -30,7 +27,7 @@ public class RuntimeResponse {
     }
 
     fun empty(): RuntimeOutput {
-        return RuntimeOutput("", 204, mutableMapOf<String, String>())
+        return this.send("", 204, mutableMapOf<String, String>())
     }
 
     fun redirect(

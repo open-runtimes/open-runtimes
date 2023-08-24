@@ -12,10 +12,6 @@ namespace runtime
         public:
             RuntimeOutput send(const std::string &body, const int statusCode = 200, Json::Value headers = {})
             {
-                if (headers["content-type"].asString().empty()) {
-                    headers["content-type"] = "text/plain";
-                }
-
                 RuntimeOutput output;
                 output.body = body;
                 output.statusCode = statusCode;
@@ -33,12 +29,7 @@ namespace runtime
 
             RuntimeOutput empty()
             {
-                Json::Value headers = {};
-                RuntimeOutput output;
-                output.body = "";
-                output.statusCode = 204;
-                output.headers = headers;
-                return output;
+                return this->send("", 204, {});
             }
 
             RuntimeOutput redirect(const std::string &url, const int statusCode = 301, Json::Value headers = {})
