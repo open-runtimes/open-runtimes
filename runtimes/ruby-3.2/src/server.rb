@@ -237,8 +237,10 @@ def handle(request, response)
   output['headers'] = {} if output['headers'].nil?
 
   output['headers'].each do |header, value|
-    unless header.downcase.start_with?('x-open-runtimes-')
-      response.headers[header.downcase] = value
+    header_str = header.to_s.downcase
+
+    unless header_str.start_with?('x-open-runtimes-')
+      response.headers[header_str] = value
     end
   end
 
@@ -249,8 +251,8 @@ def handle(request, response)
   response.headers['x-open-runtimes-logs'] = ERB::Util.url_encode(context.logs.join('\n'))
   response.headers['x-open-runtimes-errors'] = ERB::Util.url_encode(context.errors.join('\n'))
 
-  unless response.headers[:'content-type'].nil?
-    res_content_type = response.headers[:'content-type']
+  unless response.headers['content-type'].nil?
+    res_content_type = response.headers['content-type']
 
     unless res_content_type.start_with?('multipart/') || res_content_type.include?('charset=') 
       res_content_type += '; charset=utf-8'
