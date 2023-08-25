@@ -198,7 +198,7 @@ const server = micro(async (req, res) => {
     const contentTypeValue = res.getHeader("content-type") ?? "text/plain";
     if (
         !contentTypeValue.startsWith("multipart/") &&
-        !contentTypeValue.contains("charset=")
+        !contentTypeValue.includes("charset=")
     ) {
         res.setHeader(
         "content-type",

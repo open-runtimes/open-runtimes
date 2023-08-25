@@ -187,7 +187,7 @@ app.use(async (ctx) => {
     ctx.response.headers.get("content-type") ?? "text/plain";
   if (
     !contentTypeValue.startsWith("multipart/") &&
-    !contentTypeValue.contains("charset=")
+    !contentTypeValue.includes("charset=")
   ) {
     ctx.response.headers.set(
       "content-type",
