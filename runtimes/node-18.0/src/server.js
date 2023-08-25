@@ -1,5 +1,6 @@
 const fs = require("fs");
 const micro = require("micro");
+const util = require("util");
 const { text: parseText, json: parseJson, send } = require("micro");
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
@@ -111,7 +112,7 @@ const server = micro(async (req, res) => {
 
     let customstd = "";
     console.log = console.info = console.debug = console.warn = console.error = function() {
-        customstd += "Native log";
+        customstd += util.format.apply(null, arguments) + '\n';
     }
 
     let output = null;
@@ -191,13 +192,17 @@ const server = micro(async (req, res) => {
         if(header.toLowerCase().startsWith('x-open-runtimes-')) {
             continue;
         }
-        
         res.setHeader(header.toLowerCase(), output.headers[header]);
     }
 
-    if(customstd) {
-        context.log('Unsupported log detected. Use context.log() or context.error() for logging.');
-    }
+    if (customstd) {
+        context.log('');
+        context.log('----------------------------------------------------------------------------');
+        context.log('Unsupported logs detected. Use context.log() or context.error() for logging.');
+        context.log('----------------------------------------------------------------------------');
+        context.log(customstd);
+        context.log('----------------------------------------------------------------------------');
+      }
 
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
     res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));

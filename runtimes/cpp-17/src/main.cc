@@ -257,7 +257,13 @@ int main()
 
                 if(!outBuffer.str().empty() || !errBuffer.str().empty())
                 {
-                    context.log("Unsupported log detected. Use context.log() or context.error() for logging.");
+                    context.log('');
+                    context.log('----------------------------------------------------------------------------');
+                    context.log('Unsupported logs detected. Use context.log() or context.error() for logging.');
+                    context.log('----------------------------------------------------------------------------');
+                    context.log(outBuffer.str());
+                    context.log(errBuffer.str());
+                    context.log('----------------------------------------------------------------------------');
                 }
 
                 std::cout.rdbuf(oldOut);
