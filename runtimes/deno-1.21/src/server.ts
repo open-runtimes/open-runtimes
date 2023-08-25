@@ -1,5 +1,4 @@
 import { Application } from "https://deno.land/x/oak@v10.6.0/mod.ts";
-import { type } from "os";
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
