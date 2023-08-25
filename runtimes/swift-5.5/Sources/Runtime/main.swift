@@ -169,7 +169,7 @@ func execute(req: Request) async throws -> Response {
     }
 
     let contentTypeValue = outputHeaders.first(name: "content-type") ?? "text/plain"
-    if !contentTypeValue.starts(with: "multipart/") && !header.value.contains("charset=") {
+    if !contentTypeValue.starts(with: "multipart/") && !contentTypeValue.contains("charset=") {
         outputHeaders.replaceOrAdd(name: "content-type", value: contentTypeValue + "; charset=utf-8")
     }
 
