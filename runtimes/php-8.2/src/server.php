@@ -213,14 +213,14 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $output['headers'] ??= [];
 
     foreach ($output['headers'] as $header => $value) {
-        if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
-            $res->header(\strtolower($header), $value);
+        $header = \strtolower($header);
+        if ($header === 'content-type' && !\str_starts_with($value, 'multipart/') && !\str_contains($value, 'charset=')) {
+            $value .= '; charset=utf-8';
         }
-    }
 
-    $contentTypeValue = $res->header['content-type'] ?? 'text/plain';
-    if (\str_starts_with($contentTypeValue, 'text/') && !\str_contains($contentTypeValue, 'charset=')) {
-        $res->header('content-type', $contentTypeValue . '; charset=utf-8');
+        if(!(\str_starts_with($header, 'x-open-runtimes-'))) {
+            $res->header($header, $value);
+        }
     }
 
     if(!empty($customStd)) {
