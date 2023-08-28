@@ -189,12 +189,10 @@ async def handler(u_path):
         if not key.lower().startswith('x-open-runtimes-'):
             resp.headers[key.lower()] = output['headers'][key]
 
-    content_type_value = resp.headers.get('content-type', 'text/plain')
-    if not content_type_value.startswith('multipart/') and not 'charset=' in content_type_value:
-        content_type_value += '; charset=utf-8'
+    resp.headers['content-type'] = output['headers'].get('content-type', 'text/plain')
+    if not resp.headers['content-type'].startswith('multipart/') and not 'charset=' in resp.headers['content-type']:
+        resp.headers['content-type'] += '; charset=utf-8'
     
-    resp.headers['content-type'] = content_type_value
-
     if customstd.getvalue():
         context.log('Unsupported log detected. Use context.log() or context.error() for logging.')
 
