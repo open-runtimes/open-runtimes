@@ -32,7 +32,7 @@ namespace runtime {
                 headers["content-type"] = "text/plain; charset=iso-8859-1";
                 return res.send("ÅÆ", 200, headers);
             } else if (action == "multipartResponse") {
-                headers["content-type"] = "multipart/form-data; boundary=12345"
+                headers["content-type"] = "multipart/form-data; boundary=12345";
                 return res.send("--12345\n"
 "Content-Disposition: form-data; name=\"partOne\"\n"
 "\n"

@@ -199,7 +199,7 @@ suspend fun execute(ctx: Context) {
     }
 
     if (!resHeaders["content-type"]!!.startsWith("multipart/") && !resHeaders["content-type"]!!.contains("charset=")) {
-        resHeaders["content-type"] += " charset=utf-8"
+        resHeaders["content-type"] += "; charset=utf-8"
     }
 
     resHeaders.forEach { (key, value) ->
