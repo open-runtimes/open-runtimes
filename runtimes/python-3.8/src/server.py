@@ -191,8 +191,9 @@ async def handler(u_path):
 
     content_type_value = resp.headers.get('content-type', 'text/plain')
     if not content_type_value.startswith('multipart/') and not 'charset=' in content_type_value:
-        resp.headers['content-type'] = content_type_value + '; charset=utf-8'
-
+        content_type_value += '; charset=utf-8'
+    
+    resp.headers['content-type'] = content_type_value
 
     if customstd.getvalue():
         context.log('Unsupported log detected. Use context.log() or context.error() for logging.')

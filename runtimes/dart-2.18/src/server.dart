@@ -157,13 +157,14 @@ void main() async {
     }
 
     String contentTypeValue = responseHeaders['content-type'] ?? 'text/plain';
+    Encoding? encoding = null;
 
-    if (!contentTypeValue.startsWith('multipart/') &&
-        !contentTypeValue.contains('charset=')) {
+    if (contentTypeValue.contains('charset=')) {
+      encoding = Encoding.getByName(contentTypeValue.split('charset=')[1]);
+    } else if (!contentTypeValue.startsWith('multipart/')) {
       contentTypeValue += '; charset=utf-8';
-    }
-
-    String encoding = contentTypeValue.split('charset=')[1].split(';')[0];
+      encoding = Encoding.getByName('utf-8');
+    } 
     responseHeaders['content-type'] = contentTypeValue;
 
     if (!customstd.isEmpty) {
@@ -177,7 +178,7 @@ void main() async {
         Uri.encodeFull(context.errors.join('\n'));
 
     return shelf.Response(output['statusCode'],
-        encoding: Encoding.getByName(encoding),
+        encoding: encoding,
         body: output['body'],
         headers: responseHeaders);
   }, '0.0.0.0', 3000);
