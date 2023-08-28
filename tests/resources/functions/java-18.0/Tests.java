@@ -34,6 +34,18 @@ public class Tests {
                 headers.put("content-type", "text/plain; charset=iso-8859-1");
                 return context.getRes().send("ÅÆ", 200, headers);
             }
+            case "multipartResponse" -> {
+                headers.put("content-type", "multipart/form-data; boundary=12345");
+                return context.getRes().send("""--12345
+Content-Disposition: form-data; name=\"partOne\"
+
+Why just have one part?
+--12345
+Content-Disposition: form-data; name=\"partTwo\"
+
+When you can have two!
+--12345--""", 200, headers);
+            } 
             case "redirectResponse" -> {
                 return context.getRes().redirect("https://github.com/");
             }

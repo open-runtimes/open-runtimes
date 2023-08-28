@@ -27,6 +27,19 @@ public class Tests {
                     "content-type" to "text/plain; charset=iso-8859-1"
                 ))
             }
+            "multipartResponse" -> {
+                return context.res.send("""--12345
+Content-Disposition: form-data; name=\"partOne\"
+
+Why just have one part?
+--12345
+Content-Disposition: form-data; name=\"partTwo\"
+
+When you can have two!
+--12345--""", 200, mutableMapOf(
+                    "content-type" to "multipart/form-data; boundary=12345"
+                ))
+            }
             "redirectResponse" -> {
                 return context.res.redirect("https://github.com/")
             }

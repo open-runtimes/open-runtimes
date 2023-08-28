@@ -27,6 +27,19 @@ namespace DotNetRuntime {
                     {
                         { "content-type", "text/plain; charset=iso-8859-1" }
                     });
+                case "multipartResponse":
+                    return context.Res.Send(@"--12345
+Content-Disposition: form-data; name=""partOne""
+
+Why just have one part?
+--12345
+Content-Disposition: form-data; name=""partTwo""
+
+When you can have two!
+--12345--", 200, new Dictionary<string, string>()
+                {
+                    { "content-type", "multipart/form-data; boundary=12345" }
+                });
                 case "redirectResponse":
                     return context.Res.Redirect("https://github.com/");
                 case "emptyResponse":

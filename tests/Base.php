@@ -80,6 +80,7 @@ class Base extends TestCase
         $response = $this->execute(headers: ['x-action' => 'plaintextResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('Hello World 👋', $response['body']);
+        self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
     }
 
     public function testJsonResponse(): void
@@ -94,11 +95,15 @@ class Base extends TestCase
         self::assertEquals('Developers are awesome.', $body['message']);
     }
 
-    public function testCustomCharsetResponse(): void 
+    public function testContentTypeResponse(): void 
     {
         $response = $this->execute(headers: ['x-action' => 'customCharsetResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=iso-8859-1', $response['headers']['content-type']);
+
+        $response = $this->execute(headers: ['x-action' => 'multipartResponse']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('multipart/form-data; boundary=12345', $response['headers']['content-type']);
     }
 
     public function testRedirectResponse(): void

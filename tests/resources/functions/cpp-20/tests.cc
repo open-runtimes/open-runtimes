@@ -31,6 +31,17 @@ namespace runtime {
             } else if (action == "customCharsetResponse") {
                 headers["content-type"] = "text/plain; charset=iso-8859-1";
                 return res.send("ÅÆ", 200, headers);
+            } else if (action == "multipartResponse") {
+                headers["content-type"] = "multipart/form-data; boundary=12345"
+                return res.send("""--12345
+Content-Disposition: form-data; name=\"partOne\"
+
+Why just have one part?
+--12345
+Content-Disposition: form-data; name=\"partTwo\"
+
+When you can have two!
+--12345--""", 200, headers);
             } else if (action == "redirectResponse") {
                 return res.redirect("https://github.com/");
             } else if (action == "emptyResponse") {
