@@ -195,7 +195,7 @@ suspend fun execute(ctx: Context) {
     val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap();
 
     if (resHeaders["content-type"] == null) {
-        resHeaders["content-type"] = "text/plain;"
+        resHeaders["content-type"] = "text/plain"
     }
 
     if (!resHeaders["content-type"]!!.startsWith("multipart/") && !resHeaders["content-type"]!!.contains("charset=")) {
