@@ -36,15 +36,15 @@ public class Tests {
             }
             case "multipartResponse" -> {
                 headers.put("content-type", "multipart/form-data; boundary=12345");
-                return context.getRes().send("--12345
-Content-Disposition: form-data; name=\"partOne\"
-
-Why just have one part?
---12345
-Content-Disposition: form-data; name=\"partTwo\"
-
-When you can have two!
---12345--", 200, headers);
+                return context.getRes().send("--12345\n" +
+                        "Content-Disposition: form-data; name=\"partOne\"\n" +
+                        "\n" +
+                        "Why just have one part?\n" +
+                        "--12345\n" +
+                        "Content-Disposition: form-data; name=\"partTwo\"\n" +
+                        "\n" +
+                        "When you can have two!\n" +
+                        "--12345--", 200, headers);
             }  
             case "redirectResponse" -> {
                 return context.getRes().redirect("https://github.com/");
