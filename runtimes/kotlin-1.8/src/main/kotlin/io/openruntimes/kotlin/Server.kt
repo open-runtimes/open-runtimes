@@ -192,19 +192,20 @@ suspend fun execute(ctx: Context) {
         output = context.res.send("", 500, mutableMapOf())
     }
 
-    for (entry in output.headers) {
-        val header = entry.key.lowercase()
-        var headerValue = entry.value
+    val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap();
 
-        if (header.startsWith("x-open-runtimes-")) {
-            continue
+    if (resHeaders["content-type"] == null) {
+        resHeaders["content-type"] = "text/plain;"
+    }
+
+    if (!resHeaders["content-type"]!!.startsWith("multipart/") && !resHeaders["content-type"]!!.contains("charset=")) {
+        resHeaders["content-type"] += " charset=utf-8"
+    }
+
+    resHeaders.forEach { (key, value) ->
+        if (!key.startsWith("x-open-runtimes-")) {
+            ctx.header(key, value)
         }
-
-        if (header == "content-type" && !entry.value.startsWith("multipart/") && !entry.value.contains("charset=")) {
-            headerValue += "; charset=utf-8"
-        }
-
-        ctx.header(header, headerValue)
     }
 
     if (customStdStream.toString().isNotEmpty()) {

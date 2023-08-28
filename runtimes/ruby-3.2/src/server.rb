@@ -251,14 +251,10 @@ def handle(request, response)
   response.headers['x-open-runtimes-logs'] = ERB::Util.url_encode(context.logs.join('\n'))
   response.headers['x-open-runtimes-errors'] = ERB::Util.url_encode(context.errors.join('\n'))
 
-  unless response.headers['content-type'].nil?
-    res_content_type = response.headers['content-type']
+  response.headers['content-type'] = 'text/plain' if response.headers['content-type'].nil?
 
-    unless res_content_type.start_with?('multipart/') || res_content_type.include?('charset=') 
-      res_content_type += '; charset=utf-8'
-    end
-
-    response.content_type = res_content_type
+  unless response.headers['content-type'].start_with?('multipart/') || response.headers['content-type'].include?('charset=') 
+    response.headers['content-type'] += '; charset=utf-8'
   end
 
   response.status = output['statusCode']

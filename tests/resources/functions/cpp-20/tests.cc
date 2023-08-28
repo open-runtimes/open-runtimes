@@ -33,15 +33,15 @@ namespace runtime {
                 return res.send("ÅÆ", 200, headers);
             } else if (action == "multipartResponse") {
                 headers["content-type"] = "multipart/form-data; boundary=12345"
-                return res.send("""--12345
-Content-Disposition: form-data; name=\"partOne\"
+                return res.send("--12345\n"
+"Content-Disposition: form-data; name=\"partOne\"\n"
+"\n"
+"Why just have one part?\n"
+"--12345\n"
+"Content-Disposition: form-data; name=\"partTwo\"\n"
 
-Why just have one part?
---12345
-Content-Disposition: form-data; name=\"partTwo\"
-
-When you can have two!
---12345--""", 200, headers);
+"When you can have two!\n"
+"--12345--", 200, headers);
             } else if (action == "redirectResponse") {
                 return res.redirect("https://github.com/");
             } else if (action == "emptyResponse") {
