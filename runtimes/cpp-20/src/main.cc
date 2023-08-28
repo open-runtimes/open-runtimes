@@ -280,13 +280,18 @@ int main()
                 }
                 
                 std::string contentTypeHeader = res->getHeader("content-type");
-                if (!contentTypeHeader.empty() && 
-                    contentTypeHeader.find("multipart/") == std::string::npos &&
+                if (contentTypeHeader.empty())
+                {
+                    contentTypeHeader = "text/plain";
+                }
+
+                if (contentTypeHeader.find("multipart/") == std::string::npos &&
                     contentTypeHeader.find("charset=") == std::string::npos)
                 {
                     contentTypeHeader.append("; charset=utf-8");
-                    res->addHeader("content-type", contentTypeHeader);
                 }
+
+                res->addHeader("content-type", contentTypeHeader);
 
                 CURL *curl = curl_easy_init();
 
