@@ -80,18 +80,30 @@ class Base extends TestCase
         $response = $this->execute(headers: ['x-action' => 'plaintextResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('Hello World 👋', $response['body']);
+        self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
     }
 
     public function testJsonResponse(): void
     {
         $response = $this->execute(headers: ['x-action' => 'jsonResponse']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('application/json', $response['headers']['content-type']);
+        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
 
         $body = \json_decode($response['body'], true);
 
         self::assertEquals(true, $body['json']);
         self::assertEquals('Developers are awesome.', $body['message']);
+    }
+
+    public function testContentTypeResponse(): void 
+    {
+        $response = $this->execute(headers: ['x-action' => 'customCharsetResponse']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('text/plain; charset=iso-8859-1', $response['headers']['content-type']);
+
+        $response = $this->execute(headers: ['x-action' => 'multipartResponse']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('multipart/form-data; boundary=12345', $response['headers']['content-type']);
     }
 
     public function testRedirectResponse(): void
@@ -288,7 +300,7 @@ class Base extends TestCase
     {
         $response = $this->execute(headers: ['x-action' => 'requestHeaders', 'x-first-header' => 'first-value', 'x-open-runtimes-custom-header' => 'should-be-hidden']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('application/json', $response['headers']['content-type']);
+        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
 
         $body = \json_decode($response['body'], true);
 
@@ -337,7 +349,7 @@ class Base extends TestCase
     {
         $response = $this->execute(headers: ['x-action' => 'envVars']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('application/json', $response['headers']['content-type']);
+        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
 
         $body = \json_decode($response['body'], true);
 
@@ -392,5 +404,11 @@ class Base extends TestCase
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
+    }
+
+    function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
+        $expected = preg_replace('/\s+/', '', $expected);
+        $actual = preg_replace('/\s+/', '', $actual);
+        self::assertEquals($expected, $actual, $message);
     }
 }

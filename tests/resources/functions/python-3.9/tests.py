@@ -9,6 +9,18 @@ async def main(context):
         return context.res.send('Hello World 👋')
     elif action == 'jsonResponse':
         return context.res.json({ 'json': True, 'message': 'Developers are awesome.' })
+    elif action == 'customCharsetResponse':
+        return context.res.send('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
+    elif action == 'multipartResponse':
+        return context.res.send("""--12345
+Content-Disposition: form-data; name=\"partOne\"
+
+Why just have one part?
+--12345
+Content-Disposition: form-data; name=\"partTwo\"
+
+When you can have two!
+--12345--""", 200, { 'content-type': 'multipart/form-data; boundary=12345' })
     elif action == 'redirectResponse':
         return context.res.redirect('https://github.com/')
     elif action == 'emptyResponse':

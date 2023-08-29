@@ -184,7 +184,19 @@ app.use(async (ctx) => {
     ctx.response.headers.set(header.toLowerCase(), output.headers[header]);
   }
 
-  if (customstd) {
+  const contentTypeValue =
+    ctx.response.headers.get("content-type") ?? "text/plain";
+  if (
+    !contentTypeValue.startsWith("multipart/") &&
+    !contentTypeValue.includes("charset=")
+  ) {
+    ctx.response.headers.set(
+      "content-type",
+      contentTypeValue + "; charset=utf-8"
+    );
+  }
+
+  if(customstd) {
     context.log('');
     context.log('----------------------------------------------------------------------------');
     context.log('Unsupported logs detected. Use context.log() or context.error() for logging.');

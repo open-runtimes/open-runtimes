@@ -16,6 +16,18 @@ return function($context) use ($client) {
           return $context->res->send('Hello World 👋');
       case 'jsonResponse':
           return $context->res->json([ 'json' => true, 'message' => 'Developers are awesome.' ]);
+      case 'customCharsetResponse':
+          return $context->res->send('ÅÆ', 200, [ 'content-type' => 'text/plain; charset=iso-8859-1' ]);
+    case 'multipartResponse':
+          return $context->res->send("--12345
+Content-Disposition: form-data; name=\"partOne\"
+
+Why just have one part?
+--12345
+Content-Disposition: form-data; name=\"partTwo\"
+
+When you can have two!
+--12345--", 200, [ 'content-type' => 'multipart/form-data; boundary=12345' ]);
       case 'redirectResponse':
           return $context->res->redirect('https://github.com/');
       case 'emptyResponse':

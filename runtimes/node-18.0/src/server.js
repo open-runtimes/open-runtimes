@@ -195,14 +195,25 @@ const server = micro(async (req, res) => {
         res.setHeader(header.toLowerCase(), output.headers[header]);
     }
 
-    if (customstd) {
+    const contentTypeValue = res.getHeader("content-type") ?? "text/plain";
+    if (
+        !contentTypeValue.startsWith("multipart/") &&
+        !contentTypeValue.includes("charset=")
+    ) {
+        res.setHeader(
+        "content-type",
+        contentTypeValue + "; charset=utf-8"
+        );
+    }
+    
+    if(customstd) {
         context.log('');
         context.log('----------------------------------------------------------------------------');
         context.log('Unsupported logs detected. Use context.log() or context.error() for logging.');
         context.log('----------------------------------------------------------------------------');
         context.log(customstd);
         context.log('----------------------------------------------------------------------------');
-      }
+    }
 
     res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
     res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));

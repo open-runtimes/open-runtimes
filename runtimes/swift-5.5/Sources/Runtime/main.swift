@@ -168,6 +168,11 @@ func execute(req: Request) async throws -> Response {
         }
     }
 
+    let contentTypeValue = outputHeaders.first(name: "content-type") ?? "text/plain"
+    if !contentTypeValue.starts(with: "multipart/") && !contentTypeValue.contains("charset=") {
+        outputHeaders.replaceOrAdd(name: "content-type", value: contentTypeValue + "; charset=utf-8")
+    }
+
     var logs = context.logs.joined(separator: "\n")
     logs = logs.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? logs
 

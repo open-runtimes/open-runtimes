@@ -18,6 +18,7 @@ namespace runtime {
             RuntimeResponse res = context.res;
 
             Json::Value json;
+            Json::Value headers;
 
             std::string action = req.headers["x-action"].asString();
 
@@ -27,6 +28,20 @@ namespace runtime {
                 json["json"] = true;
                 json["message"] = "Developers are awesome.";
                 return res.json(json);
+            } else if (action == "customCharsetResponse") {
+                headers["content-type"] = "text/plain; charset=iso-8859-1";
+                return res.send("ÅÆ", 200, headers);
+            } else if (action == "multipartResponse") {
+                headers["content-type"] = "multipart/form-data; boundary=12345";
+                return res.send("--12345\n"
+"Content-Disposition: form-data; name=\"partOne\"\n"
+"\n"
+"Why just have one part?\n"
+"--12345\n"
+"Content-Disposition: form-data; name=\"partTwo\"\n"
+
+"When you can have two!\n"
+"--12345--", 200, headers);
             } else if (action == "redirectResponse") {
                 return res.redirect("https://github.com/");
             } else if (action == "emptyResponse") {
@@ -45,10 +60,10 @@ namespace runtime {
                     secondHeader = "missing";
                 }
 
-                json["first-header"] = "first-value";
-                json["second-header"] = secondHeader;
-                json["x-open-runtimes-custom-out-header"] = "third-value";
-                return res.send("OK", 200, json);
+                headers["first-header"] = "first-value";
+                headers["second-header"] = secondHeader;
+                headers["x-open-runtimes-custom-out-header"] = "third-value";
+                return res.send("OK", 200, headers);
             } else if (action == "statusResponse") {
                 return res.send("FAIL", 404);
             } else if (action == "requestMethod") {

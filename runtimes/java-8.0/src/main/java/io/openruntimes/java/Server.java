@@ -206,9 +206,17 @@ public class Server {
 
         for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
             String header = entry.getKey().toLowerCase();
-            if (!(header.startsWith("x-open-runtimes-"))) {
-                resp = resp.header(header, entry.getValue());
+            String headerValue = entry.getValue();
+
+            if (header.startsWith("x-open-runtimes-")) {
+                continue;
             }
+
+            if (header.equals("content-type") && !headerValue.startsWith("multipart/") && !headerValue.contains("charset=")) {
+                headerValue += "; charset=utf-8";
+            }
+
+            resp = resp.header(header, headerValue);
         }
 
         if (!customStdStream.toString().isEmpty()) {
