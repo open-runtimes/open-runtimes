@@ -118,8 +118,9 @@ app.use(async (ctx) => {
   const stdwarn = console.warn.bind(console);
 
   let customstd = "";
-  console.log = console.info = console.debug = console.warn = console.error = function() {
-    customstd += "Native log";
+  console.log = console.info = console.debug = console.warn = console.error = function(...args: any[]) {
+    const formattedArgs = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg);
+    customstd += formattedArgs.join(' ') + '\n';
   }
 
   let output: any = null;
@@ -196,7 +197,12 @@ app.use(async (ctx) => {
   }
 
   if(customstd) {
-    context.log('Unsupported log detected. Use context.log() or context.error() for logging.');
+    context.log('');
+    context.log('----------------------------------------------------------------------------');
+    context.log('Unsupported logs detected. Use context.log() or context.error() for logging.');
+    context.log('----------------------------------------------------------------------------');
+    context.log(customstd);
+    context.log('----------------------------------------------------------------------------');
   }
 
   ctx.response.headers.set('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));

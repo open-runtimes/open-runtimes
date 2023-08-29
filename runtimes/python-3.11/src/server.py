@@ -194,7 +194,11 @@ async def handler(u_path):
         resp.headers['content-type'] += '; charset=utf-8'
 
     if customstd.getvalue():
-        context.log('Unsupported log detected. Use context.log() or context.error() for logging.')
+        context.log('----------------------------------------------------------------------------')
+        context.log('Unsupported logs detected. Use context.log() or context.error() for logging.')
+        context.log('----------------------------------------------------------------------------')
+        context.log(customstd.getvalue())
+        context.log('----------------------------------------------------------------------------')
 
     resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context.logs))
     resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context.errors))

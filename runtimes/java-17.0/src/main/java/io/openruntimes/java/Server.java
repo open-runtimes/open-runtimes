@@ -219,7 +219,12 @@ public class Server {
         }
 
         if (!customStdStream.toString().isEmpty()) {
-            context.log("Unsupported log detected. Use context.log() or context.error() for logging.");
+            context.log("");
+            context.log("----------------------------------------------------------------------------");
+            context.log("Unsupported logs detected. Use context.log() or context.error() for logging.");
+            context.log("----------------------------------------------------------------------------");
+            context.log(customStdStream.toString());
+            context.log("----------------------------------------------------------------------------");
         }
 
         resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context.getLogs()), StandardCharsets.UTF_8));

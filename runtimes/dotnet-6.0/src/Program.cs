@@ -213,7 +213,12 @@ static async Task<IResult> Execute(HttpRequest request)
 
     if(!string.IsNullOrEmpty(customStd.ToString()))
     {
-        context.Log("Unsupported log detected. Use context.Log() or context.Error() for logging.");
+        context.Log("");
+        context.Log("----------------------------------------------------------------------------");
+        context.Log("Unsupported logs detected. Use context.Log() or context.Error() for logging.");
+        context.Log("----------------------------------------------------------------------------");
+        context.Log(customStd.ToString());
+        context.Log("----------------------------------------------------------------------------");
     }
 
     outputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(string.Join("\n", context.Logs)));

@@ -229,7 +229,12 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     }
  
     if(!empty($customStd)) {
-        $context->log('Unsupported log detected. Use $context->log() or $context->error() for logging.');
+        $context->log("");
+        $context->log("----------------------------------------------------------------------------");
+        $context->log("Unsupported logs detected. Use \$context->log() or \$context->error() for logging.");
+        $context->log("----------------------------------------------------------------------------");
+        $context->log($customStd);
+        $context->log("----------------------------------------------------------------------------");
     }
 
     $res->header('x-open-runtimes-logs', \urlencode(\implode('\n', $context->logs)));

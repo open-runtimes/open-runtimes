@@ -103,7 +103,8 @@ When you can have two!
         context.log(["arrayValue"])
 
         // Swift doesn't support native log capturing
-        context.log("Unsupported log detected. Use context.log() or context.error() for logging.")
+        context.log("Native log")
+        context.log("Unsupported logs detected. Use context.log() or context.error() for logging.")
 
         return context.res.send("")
     case "library":

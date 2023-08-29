@@ -168,8 +168,17 @@ void main() async {
     responseHeaders['content-type'] = contentTypeValue;
 
     if (!customstd.isEmpty) {
+      context.log('');
       context.log(
-          'Unsupported log detected. Use context.log() or context.error() for logging.');
+          '----------------------------------------------------------------------------');
+      context.log(
+          'Unsupported logs detected. Use context.log() or context.error() for logging.');
+      
+      context.log(
+          '----------------------------------------------------------------------------');
+      context.log(customstd);
+      context.log(
+          '----------------------------------------------------------------------------');
     }
 
     responseHeaders['x-open-runtimes-logs'] =
