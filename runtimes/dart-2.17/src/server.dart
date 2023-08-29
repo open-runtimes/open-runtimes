@@ -156,9 +156,16 @@ void main() async {
       }
     }
 
-    if (responseHeaders['content-type'] == null) {
-      responseHeaders['content-type'] = 'text/plain';
-    }
+    String contentTypeValue = responseHeaders['content-type'] ?? 'text/plain';
+    Encoding? encoding = null;
+
+    if (contentTypeValue.contains('charset=')) {
+      encoding = Encoding.getByName(contentTypeValue.split('charset=')[1]);
+    } else if (!contentTypeValue.startsWith('multipart/')) {
+      contentTypeValue += '; charset=utf-8';
+      encoding = Encoding.getByName('utf-8');
+    } 
+    responseHeaders['content-type'] = contentTypeValue;
 
     if (!customstd.isEmpty) {
       context.log(
@@ -171,6 +178,8 @@ void main() async {
         Uri.encodeFull(context.errors.join('\n'));
 
     return shelf.Response(output['statusCode'],
-        body: output['body'], headers: responseHeaders);
+        encoding: encoding,
+        body: output['body'],
+        headers: responseHeaders);
   }, '0.0.0.0', 3000);
 }

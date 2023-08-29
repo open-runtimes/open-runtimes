@@ -212,9 +212,19 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $output['statusCode'] ??= 200;
     $output['headers'] ??= [];
 
-    foreach ($output['headers'] as $header => $value) {
-        if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
-            $res->header(\strtolower($header), $value);
+    $headers = \array_change_key_case($output['headers']);
+
+    if (!isset($headers['content-type'])) {
+        $headers['content-type'] = 'text/plain; charset=utf-8';
+    }
+
+    if (!\str_starts_with($headers['content-type'], 'multipart/') && !\str_contains($headers['content-type'], 'charset=')) {
+        $headers['content-type'] .= '; charset=utf-8';
+    }
+
+    foreach ($headers as $header => $value) {
+        if(!(\str_starts_with($header, 'x-open-runtimes-'))) {
+            $res->header($header, $value);
         }
     }
 
