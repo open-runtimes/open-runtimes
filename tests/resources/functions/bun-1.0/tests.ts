@@ -1,3 +1,5 @@
+const fetch = require("node-fetch");
+
 export default async function(context: any) {
     const action = context.req.headers['x-action'];
 
@@ -77,8 +79,7 @@ When you can have two!
 
             return context.res.send('');
         case 'library':
-            const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyRaw}`);
-            const todo = await response.json();
+            const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyRaw}`).then(r => r.json());
             return context.res.json({ todo });
         case 'timeout':
             context.log('Timeout start.');
