@@ -365,6 +365,16 @@ env:
       OPEN_RUNTIMES_BUILD_COMMAND=""
       OPEN_RUNTIMES_START_COMMAND="dotnet src/function/DotNetRuntime.dll"
 
+    # Bun
+    - RUNTIME=bun-1.0
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.ts
+      IMAGE=openruntimes/bun:${VERSION}-1.0
+      ARCH=linux/amd64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="bun install"
+      OPEN_RUNTIMES_START_COMMAND="bun src/server.ts"
+
     # Go
     # - RUNTIME=go-1.19
     #   TEST_CLASS=Base
