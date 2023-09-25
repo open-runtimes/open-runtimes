@@ -158,6 +158,14 @@ env:
       OPEN_RUNTIMES_START_COMMAND="python3 src/server.py"
 
     # Dart
+    - RUNTIME=dart-3.1
+      TEST_CLASS=Base
+      ENTRYPOINT=lib/tests.dart
+      IMAGE=openruntimes/dart:${VERSION}-3.0
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"
+      OPEN_RUNTIMES_START_COMMAND="src/function/server"
     - RUNTIME=dart-3.0
       TEST_CLASS=Base
       ENTRYPOINT=lib/tests.dart
