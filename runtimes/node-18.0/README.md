@@ -18,22 +18,27 @@ module.exports = async (context) => {
 };
 
 END
-
 ```
 
-2. Build the code:
+2. Generate your `package.json` file:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.js --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/node:v3-18.0 sh helpers/build.sh
+npm init --yes
 ```
 
-3. Spin-up open-runtime:
+3. Build the code:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-18.0 sh helpers/start.sh "pm2 start src/server.js --no-daemon"
+docker run --rm --interactive --tty -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT=index.js openruntimes/node:v3-18.0 sh helpers/build.sh "npm install"
 ```
 
-4. In new terminal window, execute function:
+4. Spin-up open-runtime:
+
+```bash
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-18.0 sh helpers/start.sh "pm2 start src/server.js --no-daemon"
+```
+
+5. In new terminal window, execute function:
 
 ```bash
 curl -H "x-open-runtimes-secret: secret-key" -X GET http://localhost:3000/
