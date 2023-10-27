@@ -48,6 +48,7 @@ When you can have two!
         return context.res.send("OK", statusCode: 200, headers: [
             "first-header": "first-value",
             "second-header": context.req.headers["x-open-runtimes-custom-in-header"] ?? "missing",
+            "cookie": context.req.headers["cookie"] ?? "missing",
             "x-open-runtimes-custom-out-header": "third-value"
         ])
     case "statusResponse":

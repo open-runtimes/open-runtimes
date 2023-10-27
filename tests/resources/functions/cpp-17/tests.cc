@@ -60,8 +60,14 @@ namespace runtime {
                     secondHeader = "missing";
                 }
 
+                auto cookieHeader = req.headers["cookie"].asString();
+                if (cookieHeader.empty()) {
+                    cookieHeader = "missing";
+                }
+
                 headers["first-header"] = "first-value";
                 headers["second-header"] = secondHeader;
+                headers["cookie"] = cookieHeader;
                 headers["x-open-runtimes-custom-out-header"] = "third-value";
                 return res.send("OK", 200, headers);
             } else if (action == "statusResponse") {

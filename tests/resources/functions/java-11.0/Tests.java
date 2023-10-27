@@ -58,6 +58,7 @@ public class Tests {
             case "headersResponse":
                 headers.put("first-header", "first-value");
                 headers.put("second-header", context.getReq().getHeaders().getOrDefault("x-open-runtimes-custom-in-header", "missing"));
+                headers.put("cookie", context.getReq().getHeaders().getOrDefault("cookie", "missing"));
                 headers.put("x-open-runtimes-custom-out-header", "third-value");
                 return context.getRes().send("OK", 200, headers);
             case "statusResponse":

@@ -61,6 +61,7 @@ When you can have two!
                 return context.res.send("OK", 200, mutableMapOf(
                     "first-header" to "first-value",
                     "second-header" to context.req.headers.getOrDefault("x-open-runtimes-custom-in-header", "missing"),
+                    "cookie" to context.req.headers.getOrDefault("cookie", "missing"),
                     "x-open-runtimes-custom-out-header" to "third-value"
                 ))
             }

@@ -138,11 +138,12 @@ class Base extends TestCase
 
     public function testHeadersResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'headersResponse', 'x-open-runtimes-custom-in-header' => 'notMissing']);
+        $response = $this->execute(headers: ['x-action' => 'headersResponse', 'x-open-runtimes-custom-in-header' => 'notMissing', 'cookie' => 'cookieName=cookieValue; cookie2=value2; cookie3=value=3; cookie4=val:ue4; cookie5=value5']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('OK', $response['body']);
         self::assertEquals('first-value', $response['headers']['first-header']);
         self::assertEquals('missing', $response['headers']['second-header']);
+        self::assertEquals('cookieName=cookieValue; cookie2=value2; cookie3=value=3; cookie4=val:ue4; cookie5=value5', $response['headers']['cookie']);
         self::assertArrayNotHasKey('x-open-runtimes-custom-out-header', $response['headers']);
     }
 

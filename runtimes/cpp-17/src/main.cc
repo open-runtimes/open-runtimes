@@ -194,6 +194,29 @@ int main()
                     }
                 }
 
+                std::vector<std::string> cookieHeaders;
+                for (const auto &cookie : req->getCookies())
+                {
+                    cookieHeaders.push_back(cookie.first + "=" + req->getCookie(cookie.first));
+                }
+
+                // Reverse because it's coming in exact opposide order from HTTP library
+                std::reverse(cookieHeaders.begin(), cookieHeaders.end());
+
+                if(!(cookieHeaders.empty()))
+                {
+                    std::string cookieHeadersString = std::accumulate(
+                        std::next(cookieHeaders.begin()), 
+                        cookieHeaders.end(), 
+                        cookieHeaders[0], 
+                        [](const std::string &a, const std::string &b) {
+                            return a + "; " + b;
+                        }
+                    );
+
+                    headers["cookie"] = cookieHeadersString;
+                }
+
                 runtimeRequest.headers = headers;
 
                 std::string contentType = req->getHeader("content-type");
