@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.ArrayList;
 
 public class Server {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
@@ -35,6 +36,18 @@ public class Server {
 
     public static Resp execute(Req req, Resp resp) {
         Map<String, String> reqHeaders = req.headers();
+
+        ArrayList<String> cookieHeaders = new ArrayList<String>();
+
+        for (Map.Entry<String, String> entry : req.cookies().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            cookieHeaders.add(key + "=" + value);
+        }
+
+        if (!(cookieHeaders.isEmpty())) {
+            reqHeaders.put("cookie", String.join("; ", cookieHeaders));
+        }
 
         int safeTimeout = -1;
         String timeout = reqHeaders.get("x-open-runtimes-timeout");
