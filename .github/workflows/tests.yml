@@ -1,6 +1,6 @@
 name: Open Runtimes Tests
 
-on: [push, pull_request, release]
+on: [pull_request]
 
 jobs:
   OPEN_RUNTIMES:
