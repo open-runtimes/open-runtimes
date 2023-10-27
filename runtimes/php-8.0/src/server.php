@@ -168,7 +168,7 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         }
     }
 
-    foreach ($req->header as $header => $value) {
+    foreach ($requestHeaders as $header => $value) {
         if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
             $context->req->headers[\strtolower($header)] = $value;
         }
