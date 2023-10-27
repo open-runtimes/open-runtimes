@@ -58,6 +58,8 @@ When you can have two!
                     headers.Add("first-header", "first-value");
                     var SecondHeader = context.Req.Headers.TryGetValue("x-open-runtimes-custom-in-header", out string secondHeaderValue) ? secondHeaderValue : "missing";
                     headers.Add("second-header", SecondHeader);
+                    var cookieHeader = context.Req.Headers.TryGetValue("cookie", out string cookieHeaderValue) ? cookieHeaderValue : "missing";
+                    headers.Add("cookie", cookieHeader);
                     headers.Add("x-open-runtimes-custom-out-header", "third-value");
                     return context.Res.Send("OK", 200, headers);
                 case "statusResponse":

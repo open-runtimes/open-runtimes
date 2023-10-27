@@ -34,6 +34,7 @@ When you can have two!
         return context.res.send('OK', 200, {
             'first-header': 'first-value',
             'second-header': context.req.headers.get('x-open-runtimes-custom-in-header', 'missing'),
+            'cookie': context.req.headers.get('cookie', 'missing'),
             'x-open-runtimes-custom-out-header': 'third-value'
         })
     elif action == 'statusResponse':

@@ -42,7 +42,8 @@ When you can have two!
           return $context->res->send('OK', 200, [
               'first-header' => 'first-value',
               'second-header' => $context->req->headers['x-open-runtimes-custom-in-header'] ?? 'missing',
-              'x-open-runtimes-custom-out-header' => 'third-value'
+              'cookie' => $context->req->headers['cookie'] ?? 'missing',
+              'x-open-runtimes-custom-out-header' => 'third-value',
           ]);
       case 'statusResponse':
           return $context->res->send('FAIL', 404);
