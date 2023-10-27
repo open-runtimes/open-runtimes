@@ -29,13 +29,13 @@ npm init --yes
 3. Build the code:
 
 ```bash
-docker run --rm --interactive --tty -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT=index.js openruntimes/node:v3-14.5 sh helpers/build.sh "npm install"
+docker run --rm --interactive --tty --volume $PWD:/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT=index.js openruntimes/node:v3-14.5 sh helpers/build.sh "npm install"
 ```
 
 4. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-14.5 sh helpers/start.sh "pm2 start src/server.js --no-daemon"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-14.5 sh helpers/start.sh "pm2 start src/server.js --no-daemon"
 ```
 
 5. In new terminal window, execute function:
