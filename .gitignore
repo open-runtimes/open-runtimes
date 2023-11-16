@@ -41,6 +41,9 @@ tests/**/Run
 **/Makefile
 
 # .NET
+runtimes/**/bin
+runtimes/**/obj
+runtimes/**/.vs
 tests/**/bin
 tests/**/obj
 tests/**/DotNetRuntime*
@@ -50,5 +53,3 @@ tests/**/web.config
 **.DS_Store
 *.xcworkspacedata
 tests/resources/functions/swift-5.5/Runtime
-runtimes/dotnet-6.0/obj
-runtimes/dotnet-6.0/.vs
