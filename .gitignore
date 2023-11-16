@@ -41,8 +41,8 @@ tests/**/Run
 **/Makefile
 
 # .NET
-runtimes/**/bin
-runtimes/**/obj
+runtimes/dotnet-*/**/bin
+runtimes/dotnet-*/**/obj
 runtimes/**/.vs
 tests/**/bin
 tests/**/obj

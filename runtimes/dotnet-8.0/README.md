@@ -15,8 +15,8 @@ mkdir dotnet-function && cd dotnet-function
 tee -a Index.cs << END
 namespace DotNetRuntime {
   public class Handler {
-    public async Task<RuntimeOutput> Main(RuntimeContext Context) {
-      return Context.Res.Json(new Dictionary<string, object?>() {{ "n", new System.Random().NextDouble() }} );
+    public async Task<RuntimeOutput> Main(RuntimeContext context) {
+      return context.Res.Json(new Dictionary<string, object?>() {{ "n", new System.Random().NextDouble() }} );
     }
   }
 }
@@ -82,8 +82,8 @@ You can also make changes to the example code and apply the changes with the `do
 ```cs
 namespace DotNetRuntime {
   public class Handler {
-      public async Task<RuntimeOutput> Main(RuntimeContext Context) => 
-          Context.Res.Send("Hello Open Runtimes 👋");
+      public async Task<RuntimeOutput> Main(RuntimeContext context) => 
+          context.Res.Send("Hello Open Runtimes 👋");
   }
 }
 ```
