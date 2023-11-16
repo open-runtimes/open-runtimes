@@ -356,6 +356,14 @@ env:
       OPEN_RUNTIMES_START_COMMAND="src/function/cpp_runtime"
 
     # DotNet
+    - RUNTIME=dotnet-8.0
+      TEST_CLASS=Base
+      ENTRYPOINT=Tests.cs
+      IMAGE=openruntimes/dotnet:${VERSION}-8.0
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="dotnet src/function/DotNetRuntime.dll"
     - RUNTIME=dotnet-7.0
       TEST_CLASS=Base
       ENTRYPOINT=Tests.cs
