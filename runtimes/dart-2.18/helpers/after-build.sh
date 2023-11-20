@@ -16,6 +16,11 @@ cd /usr/local/server
 dart compile exe src/server.dart -o server
 mv /usr/local/server/server /usr/local/build/compiled/server
 
+# If static folder exists, move it to compiled folder
+if [ -d "/usr/local/build/static" ]; then
+    mv /usr/local/build/static /usr/local/build/compiled/static
+fi
+
 echo "Packing build ..."
 
 # Store entrypoint into build. Will be used during start process
