@@ -76,7 +76,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 ## Notes
 
-- When writing function for this runtime, ensure it is named `start`. An example of this is:
+- When writing function for this runtime, ensure it is named `main`. An example of this is:
 
 ```dart
 import 'dart:async';

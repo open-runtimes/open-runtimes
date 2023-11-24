@@ -387,6 +387,16 @@ class Base extends TestCase
         self::assertEquals(false, $body['todo']['completed']);
     }
 
+    public function testResposeAsPDF(): void
+    {
+        $response = $this->execute(headers: ['x-action' => 'resposeAsPDF']);
+        self::assertEquals(200, $response['code']);
+        $this->assertEqualsIgnoringWhitespace('application/pdf', $response['headers']['content-type']);
+        $this->assertNotEmpty($response['body']);
+        $pdfHeader = "%PDF-1.";
+        $this->assertStringStartsWith($pdfHeader, $response['body']);
+    }
+
     public function testTimeout(): void
     {
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
