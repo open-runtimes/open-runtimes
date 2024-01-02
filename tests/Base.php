@@ -387,6 +387,21 @@ class Base extends TestCase
         self::assertEquals(false, $body['todo']['completed']);
     }
 
+    public function testInvalidJson(): void
+    {
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
+
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $response['body']);
+        self::assertStringContainsString('JSON', $response['headers']['x-open-runtimes-errors']);
+
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '');
+
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $response['body']);
+        self::assertStringContainsString('JSON', $response['headers']['x-open-runtimes-errors']);
+    }
+
     public function testTimeout(): void
     {
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
