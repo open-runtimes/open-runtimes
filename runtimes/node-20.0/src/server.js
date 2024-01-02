@@ -40,7 +40,11 @@ const action = async (req, res) => {
     let body = bodyRaw;
 
     if (contentType.includes('application/json')) {
-        body = await parseJson(req);
+        if(bodyRaw) {
+            body = await parseJson(req);
+        } else {
+            body = {};
+        }
     }
 
     const headers = {};

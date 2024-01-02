@@ -6,6 +6,18 @@ const { text: parseText, json: parseJson, send } = require("micro");
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const server = micro(async (req, res) => {
+    try {
+        await action(req, res);
+    } catch(e) {
+        const logs = [];
+        const errors = [e.stack || e];
+        res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
+        res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
+        return send(res, 500, '');
+    }
+});
+
+const action = async (req, res) => {
     const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
     let safeTimeout = null;
     if(timeout) {
@@ -28,7 +40,11 @@ const server = micro(async (req, res) => {
     let body = bodyRaw;
 
     if (contentType.includes('application/json')) {
-        body = await parseJson(req);
+        if(bodyRaw) {
+            body = await parseJson(req);
+        } else {
+            body = {};
+        }
     }
 
     const headers = {};
@@ -219,6 +235,6 @@ const server = micro(async (req, res) => {
     res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
 
     return send(res, output.statusCode, output.body);
-});
+};
 
 server.listen(3000);

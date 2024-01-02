@@ -71,9 +71,7 @@ class Context:
 
 HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
 
-@app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
-@app.route('/<path:u_path>', methods = HTTP_METHODS)
-async def handler(u_path):
+async def action(request):
     timeout = request.headers.get('x-open-runtimes-timeout', '')
     safeTimeout = None
     if (timeout):
@@ -202,6 +200,23 @@ async def handler(u_path):
 
     resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context.logs))
     resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context.errors))
+
+    return resp
+
+@app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
+@app.route('/<path:u_path>', methods = HTTP_METHODS)
+async def handler(u_path):
+    try:
+       return await action(request)
+    except Exception as e:
+        logs = []
+        errors = [
+            ''.join(traceback.TracebackException.from_exception(e).format())
+        ]
+
+    resp = FlaskResponse('', 500)
+    resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(logs))
+    resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(errors))
 
     return resp
 

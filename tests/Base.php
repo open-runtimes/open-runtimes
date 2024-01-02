@@ -390,16 +390,15 @@ class Base extends TestCase
     public function testInvalidJson(): void
     {
         $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
-
+        
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
-        self::assertStringContainsString('JSON', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsStringIgnoringCase('json', $response['headers']['x-open-runtimes-errors']);
 
         $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '');
 
-        self::assertEquals(500, $response['code']);
-        self::assertEquals('', $response['body']);
-        self::assertStringContainsString('JSON', $response['headers']['x-open-runtimes-errors']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Hello World 👋', $response['body']);
     }
 
     public function testTimeout(): void
