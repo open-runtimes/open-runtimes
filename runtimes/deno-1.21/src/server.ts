@@ -4,12 +4,12 @@ const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const app = new Application();
 
-app.use(async (ctx) => {
+app.use(async (ctx: any) => {
   try {
     await action(ctx);
   } catch(e) {
-      const logs = [];
-      const errors = [e.stack || e];
+      const logs: any[] = [];
+      const errors: any[] = [e.stack || e];
 
       ctx.response.headers.set('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
       ctx.response.headers.set('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));	
@@ -19,7 +19,7 @@ app.use(async (ctx) => {
   }
 });
 
-const action = async (ctx) => {
+const action = async (ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? '';
   let safeTimeout: number | null = null;
   if(timeout) {
