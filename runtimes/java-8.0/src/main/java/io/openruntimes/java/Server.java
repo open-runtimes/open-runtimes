@@ -49,8 +49,12 @@ public class Server {
 
             errors.add(sw.toString());
 
-            resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", logs), StandardCharsets.UTF_8.toString()));
-            resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", errors), StandardCharsets.UTF_8.toString()));
+            try {
+                resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", logs), StandardCharsets.UTF_8.toString()));
+                resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", errors), StandardCharsets.UTF_8.toString()));
+            } catch (UnsupportedEncodingException e2) {
+                resp = resp.header("x-open-runtimes-errors", "Unsupported encoding detected.");
+            }
 
             return resp
                 .code(500)
@@ -268,7 +272,7 @@ public class Server {
             resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context.getLogs()), StandardCharsets.UTF_8.toString()));
             resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", context.getErrors()), StandardCharsets.UTF_8.toString()));
         } catch (UnsupportedEncodingException e) {
-            context.log("Unsupported encoding detected.");
+            resp = resp.header("x-open-runtimes-errors", "Unsupported encoding detected.");
         }
         return resp
                 .code(output.getStatusCode())
