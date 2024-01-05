@@ -393,7 +393,12 @@ class Base extends TestCase
         
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
-        self::assertStringContainsStringIgnoringCase('json', $response['headers']['x-open-runtimes-errors']);
+        self::assertThat($response['headers']['x-open-runtimes-errors'], self::callback(function($value) {
+            $value = \strtolower($value);
+
+            // Code=3840 is Swift code for JSON error
+            return \str_contains($value, 'json') || \str_contains($value, 'code=3840');
+        }), 'Contains refference to JSON validation problem');
 
         $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '');
 
