@@ -22,6 +22,7 @@ const server = micro(async (req, res) => {
 
     const logs = [];
     const errors = [];
+    let isChunkedResponse = false;
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
     const bodyRaw = await parseText(req);
@@ -73,7 +74,8 @@ const server = micro(async (req, res) => {
                 return {
                     body: body,
                     statusCode: statusCode,
-                    headers: headers
+                    headers: headers,
+                    streamed: false
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
@@ -86,7 +88,35 @@ const server = micro(async (req, res) => {
             redirect: function (url, statusCode = 301, headers = {}) {
                 headers['location'] = url;
                 return this.send('', statusCode, headers);
-            }
+            },
+            streamStart: function (statusCode = 200, headers = {}) {
+                if(isChunkedResponse) {
+                    throw new Error('Only run res.streamStart() once');
+                }
+                
+                headers['cache-control'] = headers['content-type'] ?? 'no-store';
+                headers['content-type'] = headers['content-type'] ?? 'text/event-stream';
+                headers['connection'] = headers['connection'] ?? 'keep-alive';
+                headers['transfer-encoding'] = headers['transfer-encoding'] ?? 'chunked';
+
+                isChunkedResponse = true;
+                res.writeHead(statusCode, headers);
+            },
+            streamWrite: function (body) {
+                if(!isChunkedResponse) {
+                    throw new Error('Run res.streamStart() first');
+                }
+                res.write(body);
+            },
+            streamEnd: function (headers = {}) {
+                if(!isChunkedResponse) {
+                    throw new Error('Run res.streamStart() and res.streamWrite() first');
+                }
+                return {
+                    headers: headers,
+                    streamed: true
+                }
+            },
         },
         log: function (message) {
             if (message instanceof Object || Array.isArray(message)) {
@@ -159,7 +189,12 @@ const server = micro(async (req, res) => {
 
             if(!executed) {
                 context.error('Execution timed out.');
-                output = context.res.send('', 500, {});
+
+                if(isChunkedResponse) {
+                    output = context.res.streamEnd({});
+                } else {
+                    output = context.res.send('', 500, {});
+                }
             }
         } else {
             await execute();
@@ -170,7 +205,12 @@ const server = micro(async (req, res) => {
         }
 
         context.error(e.stack || e);
-        output = context.res.send('', 500, {});
+
+        if(isChunkedResponse) {
+            output = context.res.streamEnd({});
+        } else {
+            output = context.res.send('', 500, {});
+        }
     } finally {
         console.log = console.stdlog;
         console.error = console.stderror;
@@ -181,30 +221,35 @@ const server = micro(async (req, res) => {
 
     if(output === null || output === undefined) {
         context.error('Return statement missing. return context.res.empty() if no response is expected.');
-        output = context.res.send('', 500, {});
+
+        if(isChunkedResponse) {
+            output = context.res.streamEnd({});
+        } else {
+            output = context.res.send('', 500, {});
+        }
     }
 
+    output.streamed = output.streamed;
     output.body = output.body ?? '';
     output.statusCode = output.statusCode ?? 200;
     output.headers = output.headers ?? {};
+
+    const responseHeaders = {};
 
     for (const header in output.headers) {
         if(header.toLowerCase().startsWith('x-open-runtimes-')) {
             continue;
         }
 
-        res.setHeader(header.toLowerCase(), output.headers[header]);
+        responseHeaders[header.toLowerCase()] = output.headers[header];
     }
 
-    const contentTypeValue = res.getHeader("content-type") ?? "text/plain";
+    const contentTypeValue = responseHeaders["content-type"] ?? "text/plain";
     if (
         !contentTypeValue.startsWith("multipart/") &&
         !contentTypeValue.includes("charset=")
     ) {
-        res.setHeader(
-        "content-type",
-        contentTypeValue + "; charset=utf-8"
-        );
+        responseHeaders["content-type"] = contentTypeValue + "; charset=utf-8";
     }
 
     if(customstd) {
@@ -216,10 +261,19 @@ const server = micro(async (req, res) => {
         context.log('----------------------------------------------------------------------------');
     }
 
-    res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
-    res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
+    responseHeaders['x-open-runtimes-logs'] = encodeURIComponent(logs.join('\n'));
+    responseHeaders['x-open-runtimes-errors'] = encodeURIComponent(errors.join('\n'));
 
-    return send(res, output.statusCode, output.body);
+    if(output.streamed) {
+        res.addTrailers(responseHeaders);
+        res.end();
+        return;
+    } else {
+        for(const headerName in responseHeaders) {
+            res.setHeader(headerName, responseHeaders[headerName]);
+        }
+        return send(res, output.statusCode, output.body);
+    }
 });
 
 server.listen(3000);
