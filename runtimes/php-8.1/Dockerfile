@@ -66,10 +66,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20210902/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20210902/
 
 # Add Source Code
-COPY . .
-
-RUN composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev
-RUN mv vendor vendor-server
+COPY ./helpers ./helpers
 
 RUN chmod +x /usr/local/server/helpers/before-start.sh
 RUN chmod +x /usr/local/server/helpers/start.sh
@@ -77,6 +74,11 @@ RUN chmod +x /usr/local/server/helpers/start.sh
 RUN chmod +x /usr/local/server/helpers/before-build.sh
 RUN chmod +x /usr/local/server/helpers/build.sh
 RUN chmod +x /usr/local/server/helpers/after-build.sh
+
+COPY . .
+
+RUN composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev
+RUN mv vendor vendor-server
 
 # Enable Extensions
 RUN echo extension=swoole.so >> /usr/local/etc/php/conf.d/swoole.ini

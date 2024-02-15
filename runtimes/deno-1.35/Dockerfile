@@ -16,7 +16,7 @@ ENV DENO_DIR=/usr/builds/deno-cache
 
 RUN deno install -qAf --unstable https://deno.land/x/denon@2.5.0/denon.ts
 
-COPY . .
+COPY ./helpers ./helpers
 
 RUN chmod +x /usr/local/server/helpers/before-start.sh
 RUN chmod +x /usr/local/server/helpers/start.sh
@@ -24,5 +24,7 @@ RUN chmod +x /usr/local/server/helpers/start.sh
 RUN chmod +x /usr/local/server/helpers/before-build.sh
 RUN chmod +x /usr/local/server/helpers/build.sh
 RUN chmod +x /usr/local/server/helpers/after-build.sh
+
+COPY . .
 
 EXPOSE 3000

@@ -16,7 +16,7 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY ./helpers ./helpers
 
 RUN chmod +x /usr/local/server/helpers/before-start.sh
 RUN chmod +x /usr/local/server/helpers/start.sh
@@ -24,6 +24,8 @@ RUN chmod +x /usr/local/server/helpers/start.sh
 RUN chmod +x /usr/local/server/helpers/before-build.sh
 RUN chmod +x /usr/local/server/helpers/build.sh
 RUN chmod +x /usr/local/server/helpers/after-build.sh
+
+COPY . .
 
 ENV FLASK_APP="/usr/local/server/src/server.py"
 
