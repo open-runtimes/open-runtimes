@@ -1,15 +1,9 @@
 package handler
 
-/*
 import (
-    tinytime "github.com/wagslane/go-tinytime"
+	"openruntimes/types"
 )
-*/
 
-func Main() {
-	/*
-		tt := tinytime.New(1585750374)
-	    tt = tt.Add(time.Hour * 48)
-	    fmt.Println(tt)
-	*/
+func Main(Context types.Context) types.ResponseOutput {
+	return Context.Res.Send("Workssssss", 200, nil)
 }
