@@ -399,6 +399,8 @@ env:
       OPEN_RUNTIMES_BUILD_COMMAND="bun install"
       OPEN_RUNTIMES_START_COMMAND="bun src/server.ts"
 
+    # TODO: Add tests for Go
+
 notifications:
   email:
     - team@appwrite.io

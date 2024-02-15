@@ -1,3 +1,4 @@
+// TODO: Remove this and implement it in main.go
 export default async function(context: any) {
     const payload = context.req.body;
 
