@@ -50,7 +50,7 @@ func action(w http.ResponseWriter, r *http.Request) error {
 
 	bodyRaw := string(bodyBytes)
 
-	var body interface{} = bodyRaw
+	var body any = bodyRaw
 
 	if contentType == "application/json" {
 		if bodyRaw == "" {

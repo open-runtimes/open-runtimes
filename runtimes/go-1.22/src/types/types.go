@@ -20,7 +20,7 @@ func (l Log) String() string {
 	return l.Message
 }
 
-func (c Context) Log(message interface{}) {
+func (c Context) Log(message any) {
 	switch message.(type) {
 	case string:
 		c.Logs = append(c.Logs, message.(string))
@@ -32,7 +32,7 @@ func (c Context) Log(message interface{}) {
 	}
 }
 
-func (c Context) Error(message interface{}) {
+func (c Context) Error(message any) {
 	switch message.(type) {
 	case string:
 		c.Errors = append(c.Errors, message.(string))
@@ -46,7 +46,7 @@ func (c Context) Error(message interface{}) {
 
 type Request struct {
 	BodyRaw     string
-	Body        interface{} // map[string]interface{} or string
+	Body        any
 	Headers     map[string]string
 	Method      string
 	Url         string
@@ -82,7 +82,7 @@ func (r Response) Send(body string, statusCode int, headers map[string]string) R
 	}
 }
 
-func (r Response) Json(bodyStruct struct{}, statusCode int, headers map[string]string) (ResponseOutput, error) {
+func (r Response) Json(bodyStruct any, statusCode int, headers map[string]string) (ResponseOutput, error) {
 	if headers == nil {
 		headers = map[string]string{}
 	}
