@@ -1,6 +1,6 @@
 # Bun Runtime 1.0
 
-This is the Open Runtime that builds and runs Bun code based on a `oven/bun:1.0.0` base image. 
+This is the Open Runtime that builds and runs Bun code based on a `oven/bun:1.0.29` base image. 
 
 The runtime itself uses Bun's built-in Web Server to process the execution requests.
 

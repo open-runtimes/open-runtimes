@@ -1,4 +1,4 @@
-FROM oven/bun:1.0.0
+FROM oven/bun:1.0.29
 
 LABEL maintainer="team@appwrite.io"
 
