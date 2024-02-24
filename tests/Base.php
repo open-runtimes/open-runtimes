@@ -387,6 +387,25 @@ class Base extends TestCase
         self::assertEquals(false, $body['todo']['completed']);
     }
 
+    public function testInvalidJson(): void
+    {
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
+        
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $response['body']);
+        self::assertThat($response['headers']['x-open-runtimes-errors'], self::callback(function($value) {
+            $value = \strtolower($value);
+
+            // Code=3840 is Swift code for JSON error
+            return \str_contains($value, 'json') || \str_contains($value, 'code=3840');
+        }), 'Contains refference to JSON validation problem');
+
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '');
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Hello World 👋', $response['body']);
+    }
+
     public function testTimeout(): void
     {
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);

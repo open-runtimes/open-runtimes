@@ -15,6 +15,27 @@ namespace DotNetRuntime
 
         static async Task<IResult> Execute(HttpRequest request)
         {
+            try
+            {
+                return await Action(request);
+            } catch (Exception e)
+            {
+                List<string> Logs = new List<string>();
+                List<string> Errors = new List<string>();
+
+                Errors.Add(e.ToString());
+
+                var outputHeaders = new Dictionary<string, string>();
+
+                outputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(string.Join("\n", Logs)));
+                outputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(string.Join("\n", Errors)));
+
+                return new CustomResponse("", 500, outputHeaders);
+            }
+        }
+
+        static async Task<IResult> Action(HttpRequest request)
+        {
             int safeTimout = -1;
             var timeout = request.Headers.TryGetValue("x-open-runtimes-timeout", out var timeoutValue)
                 ? timeoutValue.ToString()

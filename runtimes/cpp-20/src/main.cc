@@ -29,348 +29,398 @@ int main()
             [](const drogon::HttpRequestPtr &req,
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
-                const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
+                try {
+                    const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
 
-                int timeout = -1;
-                std::string timeout_header = req->getHeader("x-open-runtimes-timeout");
-                if (!timeout_header.empty())
-                {
-                    bool invalid = false;
+                    int timeout = -1;
+                    std::string timeout_header = req->getHeader("x-open-runtimes-timeout");
+                    if (!timeout_header.empty())
+                    {
+                        bool invalid = false;
 
-                    try
-                    {
-                        timeout = std::stoi(timeout_header);
-                    } catch (const std::invalid_argument& ia)
-                    {
-                        invalid = true;
+                        try
+                        {
+                            timeout = std::stoi(timeout_header);
+                        } catch (const std::invalid_argument& ia)
+                        {
+                            invalid = true;
+                        }
+
+                        if (invalid || timeout == 0)
+                        {
+                            res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
+                            res->setBody("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.");
+                            callback(res);
+                            return;
+                        }
                     }
 
-                    if (invalid || timeout == 0)
+                    std::string secret = req->getHeader("x-open-runtimes-secret");
+                    if (secret.empty() || secret != std::getenv("OPEN_RUNTIMES_SECRET"))
                     {
                         res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
-                        res->setBody("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.");
+                        res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
                         callback(res);
                         return;
                     }
-                }
 
-                std::string secret = req->getHeader("x-open-runtimes-secret");
-                if (secret.empty() || secret != std::getenv("OPEN_RUNTIMES_SECRET"))
-                {
-                    res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
-                    res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
-                    callback(res);
-                    return;
-                }
+                    std::string method = req->getMethodString();
+                    std::string path = req->getPath();
+                    std::string queryString = req->getQuery();
 
-                std::string method = req->getMethodString();
-                std::string path = req->getPath();
-                std::string queryString = req->getQuery();
+                    runtime::RuntimeRequest runtimeRequest;
+                    runtimeRequest.method = method;
+                    runtimeRequest.queryString = queryString;
+                    runtimeRequest.bodyRaw = req->getBody();
+                    runtimeRequest.body = runtimeRequest.bodyRaw;
+                    runtimeRequest.path = path;
 
-                runtime::RuntimeRequest runtimeRequest;
-                runtimeRequest.method = method;
-                runtimeRequest.queryString = queryString;
-                runtimeRequest.bodyRaw = req->getBody();
-                runtimeRequest.body = runtimeRequest.bodyRaw;
-                runtimeRequest.path = path;
-
-                std::string scheme = req->getHeader("x-forwarded-proto");
-                if (scheme.empty())
-                {
-                    scheme = "http";
-                }
-
-                const char *defaultPort = "80";
-                if (scheme == "https") {
-                    defaultPort = "443";
-                }
-
-                std::string host = req->getHeader("host");
-                int port = std::stoi(defaultPort);
-
-                if (host.empty())
-                {
-                    host = "";
-                }
-
-                if (host.find(':') != std::string::npos) {
-                    std::vector<std::string> pair = split(host, ':');
-
-                    if (pair.size() >= 2) {
-                        host = pair[0];
-                        port = std::stoi(pair[1]);
-                    } else {
-                        host = host;
-                        port = std::stoi(defaultPort);
-                    }
-                }
-
-                runtimeRequest.scheme = scheme;
-                runtimeRequest.host = host;
-                runtimeRequest.port = port;
-
-                std::string url = scheme + "://" + host;
-
-                if(port != std::stoi(defaultPort)) {
-                    url += ":" + std::to_string(port);
-                }
-
-                url += path;
-
-                if(!queryString.empty()) {
-                    url += "?" + queryString;
-                }
-
-                runtimeRequest.url = url;
-
-                Json::Value query;
-                std::vector<std::string> params;
-
-                if(queryString.find('&') != std::string::npos)
-                {
-                    params = split(queryString, '&');
-                } else
-                {
-                    params.push_back(queryString);
-                }
-
-                for (const std::string &param : params)
-                {
-                    if(param.find('=') != std::string::npos)
+                    std::string scheme = req->getHeader("x-forwarded-proto");
+                    if (scheme.empty())
                     {
-                        std::vector<std::string> pairs = split(param, '=');
-                        if(pairs.size() <= 1)
+                        scheme = "http";
+                    }
+
+                    const char *defaultPort = "80";
+                    if (scheme == "https") {
+                        defaultPort = "443";
+                    }
+
+                    std::string host = req->getHeader("host");
+                    int port = std::stoi(defaultPort);
+
+                    if (host.empty())
+                    {
+                        host = "";
+                    }
+
+                    if (host.find(':') != std::string::npos) {
+                        std::vector<std::string> pair = split(host, ':');
+
+                        if (pair.size() >= 2) {
+                            host = pair[0];
+                            port = std::stoi(pair[1]);
+                        } else {
+                            host = host;
+                            port = std::stoi(defaultPort);
+                        }
+                    }
+
+                    runtimeRequest.scheme = scheme;
+                    runtimeRequest.host = host;
+                    runtimeRequest.port = port;
+
+                    std::string url = scheme + "://" + host;
+
+                    if(port != std::stoi(defaultPort)) {
+                        url += ":" + std::to_string(port);
+                    }
+
+                    url += path;
+
+                    if(!queryString.empty()) {
+                        url += "?" + queryString;
+                    }
+
+                    runtimeRequest.url = url;
+
+                    Json::Value query;
+                    std::vector<std::string> params;
+
+                    if(queryString.find('&') != std::string::npos)
+                    {
+                        params = split(queryString, '&');
+                    } else
+                    {
+                        params.push_back(queryString);
+                    }
+
+                    for (const std::string &param : params)
+                    {
+                        if(param.find('=') != std::string::npos)
                         {
-                            query[pairs[0]] = "";
+                            std::vector<std::string> pairs = split(param, '=');
+                            if(pairs.size() <= 1)
+                            {
+                                query[pairs[0]] = "";
+                            } else
+                            {
+                                std::string key = pairs[0];
+                                pairs.erase(pairs.begin());
+
+                                std::string value = std::accumulate(
+                                    std::next(pairs.begin()), 
+                                    pairs.end(), 
+                                    pairs[0], 
+                                    [](const std::string &a, const std::string &b) {
+                                        return a + "=" + b;
+                                    }
+                                );
+                                
+                                query[key] = value.c_str();
+                            }
                         } else
                         {
-                            std::string key = pairs[0];
-                            pairs.erase(pairs.begin());
-
-                            std::string value = std::accumulate(
-                                std::next(pairs.begin()), 
-                                pairs.end(), 
-                                pairs[0], 
-                                [](const std::string &a, const std::string &b) {
-                                    return a + "=" + b;
-                                }
-                            );
-                            
-                            query[key] = value.c_str();
-                        }
-                    } else
-                    {
-                        if(!param.empty()) 
-                        {
-                            query[param] = "";
-                        }
-                    }
-                }
-
-                if (query.empty()) 
-                {
-                    Json::Value root;
-                    Json::Reader reader;
-                    reader.parse("{}", root);
-                    query = root;
-                }
-
-                runtimeRequest.query = query;
-
-                Json::Value headers;
-                for (const auto &header : req->getHeaders())
-                {
-                    std::string headerKey = header.first;
-                    std::transform(
-                        headerKey.begin(),
-                        headerKey.end(),
-                        headerKey.begin(),
-                        [](unsigned char c){ return std::tolower(c); }
-                    );
-
-                    if (headerKey.rfind("x-open-runtimes-", 0) != 0)
-                    {
-                        headers[headerKey] = req->getHeader(header.first);
-                    }
-                }
-
-                std::vector<std::string> cookieHeaders;
-                for (const auto &cookie : req->getCookies())
-                {
-                    cookieHeaders.push_back(cookie.first + "=" + req->getCookie(cookie.first));
-                }
-
-                // Reverse because it's coming in exact opposide order from HTTP library
-                std::reverse(cookieHeaders.begin(), cookieHeaders.end());
-
-                if(!(cookieHeaders.empty()))
-                {
-                    std::string cookieHeadersString = std::accumulate(
-                        std::next(cookieHeaders.begin()), 
-                        cookieHeaders.end(), 
-                        cookieHeaders[0], 
-                        [](const std::string &a, const std::string &b) {
-                            return a + "; " + b;
-                        }
-                    );
-
-                    headers["cookie"] = cookieHeadersString;
-                }
-
-                runtimeRequest.headers = headers;
-
-                std::string contentType = req->getHeader("content-type");
-                if(contentType.empty())
-                {
-                    contentType = "text/plain";
-                }
-
-                if (contentType.find("application/json") != std::string::npos)
-                {
-                    Json::Value bodyRoot;   
-                    Json::Reader reader;
-                    reader.parse(runtimeRequest.bodyRaw, bodyRoot); 
-                    runtimeRequest.body = bodyRoot;
-                }
-
-                runtime::RuntimeResponse contextResponse;
-                runtime:: RuntimeContext context;
-
-                context.req = runtimeRequest;
-                context.res = contextResponse;
-
-                std::stringstream outBuffer;
-                std::stringstream errBuffer;
-                std::streambuf *oldOut = std::cout.rdbuf(outBuffer.rdbuf());
-                std::streambuf *oldErr = std::cerr.rdbuf(errBuffer.rdbuf());
-
-                runtime::RuntimeOutput output;
-
-                try {
-                    if (timeout != -1)
-                    {
-                        std::promise<runtime::RuntimeOutput> promise;
-                        std::future<runtime::RuntimeOutput> future = promise.get_future();
-                        std::thread thread([&context](std::promise<runtime::RuntimeOutput> promise) {
-                            try {
-                                promise.set_value(runtime::Handler::main(context));
-                            } catch (...) {
-                                promise.set_exception(std::current_exception());
+                            if(!param.empty()) 
+                            {
+                                query[param] = "";
                             }
-                        }, std::move(promise));
-
-                        std::future<void> waiter = std::async(std::launch::async, &std::thread::join, &thread);
-
-                        if (waiter.wait_for(std::chrono::seconds(timeout)) == std::future_status::timeout) {
-                            context.error("Execution timed out.");
-                            output = context.res.send("", 500, {});
-                            pthread_cancel(thread.native_handle());
-                        } else {
-                            output = future.get();
                         }
-                    } else
-                    {
-                        output = runtime::Handler::main(context);
                     }
+
+                    if (query.empty()) 
+                    {
+                        Json::Value root;
+                        Json::Reader reader;
+                        reader.parse("{}", root);
+                        query = root;
+                    }
+
+                    runtimeRequest.query = query;
+
+                    Json::Value headers;
+                    for (const auto &header : req->getHeaders())
+                    {
+                        std::string headerKey = header.first;
+                        std::transform(
+                            headerKey.begin(),
+                            headerKey.end(),
+                            headerKey.begin(),
+                            [](unsigned char c){ return std::tolower(c); }
+                        );
+
+                        if (headerKey.rfind("x-open-runtimes-", 0) != 0)
+                        {
+                            headers[headerKey] = req->getHeader(header.first);
+                        }
+                    }
+
+                    std::vector<std::string> cookieHeaders;
+                    for (const auto &cookie : req->getCookies())
+                    {
+                        cookieHeaders.push_back(cookie.first + "=" + req->getCookie(cookie.first));
+                    }
+
+                    // Reverse because it's coming in exact opposide order from HTTP library
+                    std::reverse(cookieHeaders.begin(), cookieHeaders.end());
+
+                    if(!(cookieHeaders.empty()))
+                    {
+                        std::string cookieHeadersString = std::accumulate(
+                            std::next(cookieHeaders.begin()), 
+                            cookieHeaders.end(), 
+                            cookieHeaders[0], 
+                            [](const std::string &a, const std::string &b) {
+                                return a + "; " + b;
+                            }
+                        );
+
+                        headers["cookie"] = cookieHeadersString;
+                    }
+
+                    runtimeRequest.headers = headers;
+
+                    std::string contentType = req->getHeader("content-type");
+                    if(contentType.empty())
+                    {
+                        contentType = "text/plain";
+                    }
+
+                    if (contentType.find("application/json") != std::string::npos)
+                    {
+                        if(runtimeRequest.bodyRaw.empty())
+                        {
+                            Json::Value bodyRoot;
+                            runtimeRequest.body = bodyRoot;
+                        } else {
+                            Json::Value bodyRoot;   
+                            Json::Reader reader;
+                            bool parsingResult = reader.parse(runtimeRequest.bodyRaw, bodyRoot);
+
+                            if(!parsingResult)
+                            {
+                                throw std::runtime_error("Invalid JSON body.");
+                            }
+
+                            runtimeRequest.body = bodyRoot;
+                        }
+                    }
+
+                    runtime::RuntimeResponse contextResponse;
+                    runtime:: RuntimeContext context;
+
+                    context.req = runtimeRequest;
+                    context.res = contextResponse;
+
+                    std::stringstream outBuffer;
+                    std::stringstream errBuffer;
+                    std::streambuf *oldOut = std::cout.rdbuf(outBuffer.rdbuf());
+                    std::streambuf *oldErr = std::cerr.rdbuf(errBuffer.rdbuf());
+
+                    runtime::RuntimeOutput output;
+
+                    try {
+                        if (timeout != -1)
+                        {
+                            std::promise<runtime::RuntimeOutput> promise;
+                            std::future<runtime::RuntimeOutput> future = promise.get_future();
+                            std::thread thread([&context](std::promise<runtime::RuntimeOutput> promise) {
+                                try {
+                                    promise.set_value(runtime::Handler::main(context));
+                                } catch (...) {
+                                    promise.set_exception(std::current_exception());
+                                }
+                            }, std::move(promise));
+
+                            std::future<void> waiter = std::async(std::launch::async, &std::thread::join, &thread);
+
+                            if (waiter.wait_for(std::chrono::seconds(timeout)) == std::future_status::timeout) {
+                                context.error("Execution timed out.");
+                                output = context.res.send("", 500, {});
+                                pthread_cancel(thread.native_handle());
+                            } else {
+                                output = future.get();
+                            }
+                        } else
+                        {
+                            output = runtime::Handler::main(context);
+                        }
+                    } catch(const std::exception& e)
+                    {
+                        context.error(e.what());
+                        output = contextResponse.send("", 500, {});
+                    }
+
+                    if(!outBuffer.str().empty() || !errBuffer.str().empty())
+                    {
+                        context.log("");
+                        context.log("----------------------------------------------------------------------------");
+                        context.log("Unsupported logs detected. Use context.log() or context.error() for logging.");
+                        context.log("----------------------------------------------------------------------------");
+                        context.log(outBuffer.str());
+                        context.log(errBuffer.str());
+                        context.log("----------------------------------------------------------------------------");
+                    }
+
+                    std::cout.rdbuf(oldOut);
+                    std::cerr.rdbuf(oldErr);
+
+                    for (const std::string &key : output.headers.getMemberNames())
+                    {
+                        std::string headerKey = key;
+                        std::transform(
+                            headerKey.begin(),
+                            headerKey.end(),
+                            headerKey.begin(),
+                            [](unsigned char c){ return std::tolower(c); }
+                        );
+
+                        if (headerKey.rfind("x-open-runtimes-", 0) != 0)
+                        {
+                            res->addHeader(headerKey, output.headers[key].asString());
+                        }
+                    }
+                    
+                    std::string contentTypeHeader = res->getHeader("content-type");
+                    if (contentTypeHeader.empty())
+                    {
+                        contentTypeHeader = "text/plain";
+                    }
+
+                    if (contentTypeHeader.find("multipart/") == std::string::npos &&
+                        contentTypeHeader.find("charset=") == std::string::npos)
+                    {
+                        contentTypeHeader.append("; charset=utf-8");
+                    }
+
+                    res->addHeader("content-type", contentTypeHeader);
+
+                    CURL *curl = curl_easy_init();
+
+                    if(!context.logs.empty())
+                    {
+                        std::string logsString = std::accumulate(
+                            std::next(context.logs.begin()), 
+                            context.logs.end(), 
+                            context.logs[0], 
+                            [](const std::string &a, const std::string &b) {
+                                return a + "\n" + b;
+                            }
+                        );
+
+                        std::string logsEncoded = curl_easy_escape(
+                            curl,
+                            logsString.c_str(),
+                            logsString.length()
+                        );
+
+                        res->addHeader("x-open-runtimes-logs", logsEncoded);
+                    } else {
+                        res->addHeader("x-open-runtimes-logs", "");
+                    }
+
+                    if(!context.errors.empty())
+                    {
+                        std::string errorsString = std::accumulate(
+                            std::next(context.errors.begin()), 
+                            context.errors.end(), 
+                            context.errors[0], 
+                            [](const std::string &a, const std::string &b) {
+                                return a + "\n" + b;
+                            }
+                        );
+
+                        std::string errorsEncoded = curl_easy_escape(
+                            curl,
+                            errorsString.c_str(),
+                            errorsString.length()
+                        );
+
+                        res->addHeader("x-open-runtimes-errors", errorsEncoded);
+                    } else {
+                        res->addHeader("x-open-runtimes-errors", "");
+                    }
+
+                    res->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
+                    res->setBody(output.body);
+                    callback(res);
                 } catch(const std::exception& e)
                 {
-                    context.error(e.what());
-                    output = contextResponse.send("", 500, {});
-                }
+                    const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
 
-                if(!outBuffer.str().empty() || !errBuffer.str().empty())
-                {
-                    context.log("");
-                    context.log("----------------------------------------------------------------------------");
-                    context.log("Unsupported logs detected. Use context.log() or context.error() for logging.");
-                    context.log("----------------------------------------------------------------------------");
-                    context.log(outBuffer.str());
-                    context.log(errBuffer.str());
-                    context.log("----------------------------------------------------------------------------");
-                }
+                    std::vector<std::string> errors = {};
+                    errors.push_back(e.what());
 
-                std::cout.rdbuf(oldOut);
-                std::cerr.rdbuf(oldErr);
+                    CURL *curl = curl_easy_init();
 
-                for (const std::string &key : output.headers.getMemberNames())
-                {
-                    std::string headerKey = key;
-                    std::transform(
-                        headerKey.begin(),
-                        headerKey.end(),
-                        headerKey.begin(),
-                        [](unsigned char c){ return std::tolower(c); }
-                    );
-
-                    if (headerKey.rfind("x-open-runtimes-", 0) != 0)
-                    {
-                        res->addHeader(headerKey, output.headers[key].asString());
-                    }
-                }
-                
-                std::string contentTypeHeader = res->getHeader("content-type");
-                if (contentTypeHeader.empty())
-                {
-                    contentTypeHeader = "text/plain";
-                }
-
-                if (contentTypeHeader.find("multipart/") == std::string::npos &&
-                    contentTypeHeader.find("charset=") == std::string::npos)
-                {
-                    contentTypeHeader.append("; charset=utf-8");
-                }
-
-                res->addHeader("content-type", contentTypeHeader);
-
-                CURL *curl = curl_easy_init();
-
-                if(!context.logs.empty())
-                {
-                    std::string logsString = std::accumulate(
-                        std::next(context.logs.begin()), 
-                        context.logs.end(), 
-                        context.logs[0], 
-                        [](const std::string &a, const std::string &b) {
-                            return a + "\n" + b;
-                        }
-                    );
-
-                    std::string logsEncoded = curl_easy_escape(
-                        curl,
-                        logsString.c_str(),
-                        logsString.length()
-                    );
-
-                    res->addHeader("x-open-runtimes-logs", logsEncoded);
-                } else {
                     res->addHeader("x-open-runtimes-logs", "");
+
+                    if(!errors.empty())
+                    {
+                        std::string errorsString = std::accumulate(
+                            std::next(errors.begin()), 
+                            errors.end(), 
+                            errors[0], 
+                            [](const std::string &a, const std::string &b) {
+                                return a + "\n" + b;
+                            }
+                        );
+
+                        std::string errorsEncoded = curl_easy_escape(
+                            curl,
+                            errorsString.c_str(),
+                            errorsString.length()
+                        );
+
+                        res->addHeader("x-open-runtimes-errors", errorsEncoded);
+                    } else {
+                        res->addHeader("x-open-runtimes-errors", "");
+                    }
+
+                    res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
+                    res->setBody("");
+                    callback(res);
                 }
-
-                if(!context.errors.empty())
-                {
-                    std::string errorsString = std::accumulate(
-                        std::next(context.errors.begin()), 
-                        context.errors.end(), 
-                        context.errors[0], 
-                        [](const std::string &a, const std::string &b) {
-                            return a + "\n" + b;
-                        }
-                    );
-
-                    std::string errorsEncoded = curl_easy_escape(
-                        curl,
-                        errorsString.c_str(),
-                        errorsString.length()
-                    );
-
-                    res->addHeader("x-open-runtimes-errors", errorsEncoded);
-                } else {
-                    res->addHeader("x-open-runtimes-errors", "");
-                }
-
-                res->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
-                res->setBody(output.body);
-                callback(res);
             },
             {
                 drogon::Get,
