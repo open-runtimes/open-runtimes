@@ -98,6 +98,14 @@ env:
       OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
 
     # Deno
+    - RUNTIME=deno-1.40
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.ts
+      IMAGE=openruntimes/deno:${VERSION}-1.40
+      ARCH=linux/amd64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="deno cache tests.ts"
+      OPEN_RUNTIMES_START_COMMAND="denon start"
     - RUNTIME=deno-1.35
       TEST_CLASS=Base
       ENTRYPOINT=tests.ts
