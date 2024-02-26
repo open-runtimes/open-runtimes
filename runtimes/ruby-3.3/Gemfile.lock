@@ -1,0 +1,40 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    async (2.0.0)
+      console (~> 1.10)
+      io-event (~> 1.0.0)
+      timers (~> 4.1)
+    console (1.17.2)
+      fiber-annotation
+      fiber-local
+    fiber-annotation (0.2.0)
+    fiber-local (1.0.0)
+    io-event (1.0.9)
+    mustermann (3.0.0)
+      ruby2_keywords (~> 0.0.1)
+    nio4r (2.5.9)
+    puma (6.3.0)
+      nio4r (~> 2.0)
+    rack (2.2.7)
+    rack-protection (3.0.6)
+      rack
+    ruby2_keywords (0.0.5)
+    sinatra (3.0.6)
+      mustermann (~> 3.0)
+      rack (~> 2.2, >= 2.2.4)
+      rack-protection (= 3.0.6)
+      tilt (~> 2.0)
+    tilt (2.2.0)
+    timers (4.3.5)
+
+PLATFORMS
+  arm64-darwin-21
+
+DEPENDENCIES
+  async (~> 2.0)
+  puma (~> 6.3)
+  sinatra (~> 3.0)
+
+BUNDLED WITH
+   2.3.7
