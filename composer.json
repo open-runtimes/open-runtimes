@@ -3,12 +3,6 @@
     "description": "Open Runtimes PHP project for testing. PHPUnit tests can test all runtimes automatically.",
     "type": "library",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Eldad Fux",
-            "email": "eldad@appwrite.io"
-        }
-    ],
     "autoload": {
         "psr-4": {}
     },
