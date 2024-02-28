@@ -33,7 +33,7 @@ class RuntimeResponse {
 }
 
 class RuntimeRequest {
-    public string $bodybodyRawString = '';
+    public string $bodyRaw = '';
     public mixed $body = '';
     public array $headers = [];
     public string $method = '';
@@ -79,8 +79,19 @@ class RuntimeContext {
 
 $userFunction = null;
 
-$server->on("Request", function($req, $res) use(&$userFunction) {
-    $timeout = $req->header['x-open-runtimes-timeout'] ?? '';
+$action = function($req, $res) use (&$userFunction) {
+    $requestHeaders = $req->header;
+
+    $cookieHeaders = [];
+    foreach ($req->cookie as $key => $value) {
+        $cookieHeaders[] = "{$key}={$value}";
+    }
+
+    if (!empty($cookieHeaders)) {
+        $requestHeaders['cookie'] = \implode('; ', $cookieHeaders);
+    }
+
+    $timeout = $requestHeaders['x-open-runtimes-timeout'] ?? '';
     $safeTimeout = null;
 
     if ($timeout) {
@@ -93,18 +104,18 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
         $safeTimeout = \intval($timeout);
     }
 
-    if (($req->header['x-open-runtimes-secret'] ?? '') === '' || ($req->header['x-open-runtimes-secret'] ?? '') !== (getenv('OPEN_RUNTIMES_SECRET') ?? '')) {
+    if (($requestHeaders['x-open-runtimes-secret'] ?? '') === '' || ($requestHeaders['x-open-runtimes-secret'] ?? '') !== (getenv('OPEN_RUNTIMES_SECRET') ?? '')) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
         return;
     }
 
     $path = $req->server['path_info'];
-    $scheme = ($req->header['x-forwarded-proto'] ?? 'http');
+    $scheme = ($requestHeaders['x-forwarded-proto'] ?? 'http');
     $defaultPort = $scheme === 'https' ? '443' : '80';
     $query = [];
 
-    $hostHeader = ($req->header['host'] ?? '');
+    $hostHeader = ($requestHeaders['host'] ?? '');
     if(\str_contains($hostHeader, ':')) {
         $pair = \explode(':', $hostHeader);
         $host = $pair[0];
@@ -148,16 +159,20 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     $context->req->queryString = $queryString;
     $context->req->headers = [];
 
-    $contentType = $req->header['content-type'] ?? 'text/plain';
+    $contentType = $requestHeaders['content-type'] ?? 'text/plain';
     if(\str_contains($contentType, 'application/json')) {
         if(!empty($context->req->bodyRaw)) {
             $context->req->body = json_decode($context->req->bodyRaw, true);
+
+            if($context->req->body === null) {
+                throw new \Exception('Invalid JSON body.');
+            }
         } else {
             $context->req->body = [];
         }
     }
 
-    foreach ($req->header as $header => $value) {
+    foreach ($requestHeaders as $header => $value) {
         if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
             $context->req->headers[\strtolower($header)] = $value;
         }
@@ -242,6 +257,24 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     $res->status($output['statusCode']);
     $res->end($output['body']);
+};
+
+$server->on("Request", function($req, $res) use($action) {
+    try {
+        $action($req, $res);
+    } catch (\Throwable $e) {
+        $logs = [];
+        $errors = [
+            $e->getMessage()."\n".$e->getTraceAsString(),
+            'At ' . $e->getFile() . ':' . $e->getLine()
+        ];
+
+        $res->header('x-open-runtimes-logs', \urlencode(\implode('\n', $logs)));
+        $res->header('x-open-runtimes-errors', \urlencode(\implode('\n', $errors)));
+    
+        $res->status(500);
+        $res->end('');
+    }
 });
 
 $server->start();

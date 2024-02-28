@@ -19,6 +19,45 @@ app.on(.OPTIONS, "", body: .stream, use: execute)
 app.on(.OPTIONS, "**", body: .stream, use: execute)
 
 func execute(req: Request) async throws -> Response {
+    do {
+        return try await action(req: req)
+    } catch {
+        var logsArr = [] as [String]
+        var errorsArr = [] as [String]
+
+        if error is CollectionType {
+            if let data = try? JSONSerialization.data(withJSONObject: error),
+               let string = String(data: data, encoding: .utf8) {
+                errorsArr.append(string)
+            }
+        } else {
+            errorsArr.append(String(describing: error))
+        }
+
+        var outputHeaders = HTTPHeaders()
+
+        var logs = logsArr.joined(separator: "\n")
+        logs = logs.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? logs
+
+        var errors = errorsArr.joined(separator: "\n")
+        errors = errors.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? errors
+
+        outputHeaders.add(name: "x-open-runtimes-logs", value: logs)
+        outputHeaders.add(name: "x-open-runtimes-errors", value: errors)
+
+        let code: HTTPResponseStatus = .custom(code: UInt(500), reasonPhrase: "")
+        let resBody: Response.Body = .init(string: "")
+        
+        return Response(
+            status: code,
+            headers: outputHeaders,
+            body: resBody
+        )
+    }
+
+}
+
+func action(req: Request) async throws -> Response {
     var safeTimeout = -1
     let timeout = req.headers["x-open-runtimes-timeout"]
     if (!timeout.isEmpty) {

@@ -138,11 +138,12 @@ class Base extends TestCase
 
     public function testHeadersResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'headersResponse', 'x-open-runtimes-custom-in-header' => 'notMissing']);
+        $response = $this->execute(headers: ['x-action' => 'headersResponse', 'x-open-runtimes-custom-in-header' => 'notMissing', 'cookie' => 'cookieName=cookieValue; cookie2=value2; cookie3=value=3; cookie4=val:ue4; cookie5=value5']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('OK', $response['body']);
         self::assertEquals('first-value', $response['headers']['first-header']);
         self::assertEquals('missing', $response['headers']['second-header']);
+        self::assertEquals('cookieName=cookieValue; cookie2=value2; cookie3=value=3; cookie4=val:ue4; cookie5=value5', $response['headers']['cookie']);
         self::assertArrayNotHasKey('x-open-runtimes-custom-out-header', $response['headers']);
     }
 
@@ -384,6 +385,25 @@ class Base extends TestCase
         self::assertEquals('5', $body['todo']['id']);
         self::assertEquals('laboriosam mollitia et enim quasi adipisci quia provident illum', $body['todo']['title']);
         self::assertEquals(false, $body['todo']['completed']);
+    }
+
+    public function testInvalidJson(): void
+    {
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
+        
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $response['body']);
+        self::assertThat($response['headers']['x-open-runtimes-errors'], self::callback(function($value) {
+            $value = \strtolower($value);
+
+            // Code=3840 is Swift code for JSON error
+            return \str_contains($value, 'json') || \str_contains($value, 'code=3840');
+        }), 'Contains refference to JSON validation problem');
+
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '');
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Hello World 👋', $response['body']);
     }
 
     public function testTimeout(): void

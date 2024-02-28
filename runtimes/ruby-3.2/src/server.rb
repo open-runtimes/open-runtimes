@@ -88,7 +88,7 @@ class RuntimeContext
   end
 end
 
-def handle(request, response)
+def action(request, response)
   safe_timeout = nil
 
   if request.env.key?('HTTP_X_OPEN_RUNTIMES_TIMEOUT')
@@ -264,6 +264,26 @@ def handle(request, response)
   response.status = output['statusCode']
   response.body = output['body']
   response
+end
+
+def handle(request, response)
+  begin
+    action(request, response)
+    response
+  rescue Exception => e
+    logs = []
+    errors = [
+      e,
+      e.backtrace.join("\n")
+    ]
+
+    response.headers['x-open-runtimes-logs'] = ERB::Util.url_encode(logs.join('\n'))
+    response.headers['x-open-runtimes-errors'] = ERB::Util.url_encode(errors.join('\n'))
+    response.headers['content-type'] = 'text/plain'
+    response.status = 500
+    response.body = ''
+    response
+  end
 end
 
 get '*' do

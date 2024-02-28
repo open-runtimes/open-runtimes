@@ -16,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
@@ -34,7 +36,41 @@ public class Server {
     }
 
     public static Resp execute(Req req, Resp resp) {
+        try {
+            return Server.action(req, resp);
+        } catch (Exception e) {
+            List<String> logs = new ArrayList<>();
+            List<String> errors = new ArrayList<>();
+
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+
+            errors.add(sw.toString());
+
+            resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", logs), StandardCharsets.UTF_8));
+            resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", errors), StandardCharsets.UTF_8));
+
+            return resp
+                .code(500)
+                .result("");
+        }
+    }
+
+    public static Resp action(Req req, Resp resp) {
         Map<String, String> reqHeaders = req.headers();
+
+        ArrayList<String> cookieHeaders = new ArrayList<String>();
+
+        for (Map.Entry<String, String> entry : req.cookies().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            cookieHeaders.add(key + "=" + value);
+        }
+
+        if (!(cookieHeaders.isEmpty())) {
+            reqHeaders.put("cookie", String.join("; ", cookieHeaders));
+        }
 
         int safeTimeout = -1;
         String timeout = reqHeaders.get("x-open-runtimes-timeout");

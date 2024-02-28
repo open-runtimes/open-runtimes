@@ -31,6 +31,37 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
+    try {
+        action(ctx)
+    } catch (e: Exception) {
+        val logs = mutableListOf<String>()
+        val errors = mutableListOf<String>()
+
+        val sw = StringWriter()
+        val pw = PrintWriter(sw)
+        e.printStackTrace(pw)
+
+        errors.add(sw.toString())
+
+        try {
+            ctx.header(
+                "x-open-runtimes-logs",
+                URLEncoder.encode(logs.joinToString("\n"), StandardCharsets.UTF_8.toString())
+            )
+            ctx.header(
+                "x-open-runtimes-errors",
+                URLEncoder.encode(errors.joinToString("\n"), StandardCharsets.UTF_8.toString())
+            )
+        } catch (ex: UnsupportedEncodingException) {
+            ctx.header("x-open-runtimes-logs", "Internal error while processing logs.")
+            ctx.header("x-open-runtimes-errors", "Internal error while processing logs.")
+        }
+    
+        ctx.status(500).result("")
+    }
+}
+
+suspend fun action(ctx: Context) {
     var safeTimeout = -1;
     val timeout = ctx.header("x-open-runtimes-timeout") ?: ""
     if (timeout.isNotEmpty()) {
