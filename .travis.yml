@@ -21,6 +21,21 @@ env:
     - VERSION=v3
   jobs:
     # Node
+    - RUNTIME=node-21.0
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.js
+      IMAGE=openruntimes/node:${VERSION}-21.0
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="npm install"
+      OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
+    - RUNTIME=node-21.0
+      TEST_CLASS=Base
+      ENTRYPOINT=tests.mjs
+      IMAGE=openruntimes/node:${VERSION}-21.0
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND="npm install"
+      OPEN_RUNTIMES_START_COMMAND="pm2 start src/server.js --no-daemon"
     - RUNTIME=node-20.0
       TEST_CLASS=Base
       ENTRYPOINT=tests.js
