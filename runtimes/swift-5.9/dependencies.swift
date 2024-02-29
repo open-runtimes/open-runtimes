@@ -26,7 +26,7 @@ func buildPackageStrings() {
             if let scm = dependency["sourceControl"] as? [[String: Any]] {
                 for data in scm {
                     let identity = data["identity"] as? String
-                    let location = ((data["location"] as? [String:Any])?["remote"] as? [Any])?[0] as? String
+                    let location = ((data["location"] as? [String:Any])?["remote"] as? [[String:Any]])?.first?["urlString"] as? String
                     let lowerBound = ((data["requirement"] as? [String:Any])?["range"] as? [[String:Any]])?[0]["lowerBound"] as? String
                     
                     guard let identity = identity, let location = location, let lowerBound = lowerBound else {
