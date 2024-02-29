@@ -323,6 +323,14 @@ env:
       OPEN_RUNTIMES_START_COMMAND="php src/server.php"
 
     # Swift
+    - RUNTIME=swift-5.9
+      TEST_CLASS=Base
+      ENTRYPOINT=Tests.swift
+      IMAGE=openruntimes/swift:${VERSION}-5.9
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
     - RUNTIME=swift-5.8
       TEST_CLASS=Base
       ENTRYPOINT=Tests.swift
