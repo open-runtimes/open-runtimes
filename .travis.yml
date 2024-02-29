@@ -349,6 +349,14 @@ env:
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND=""
       OPEN_RUNTIMES_START_COMMAND="java -jar src/function/kotlin-runtime-1.0.0.jar"
+    - RUNTIME=kotlin-1.9
+      TEST_CLASS=Base
+      ENTRYPOINT=Tests.kt
+      IMAGE=openruntimes/kotlin:${VERSION}-1.9
+      ARCH=linux/amd64,linux/arm64
+      TEST_SCRIPT=tests.sh
+      OPEN_RUNTIMES_BUILD_COMMAND=""
+      OPEN_RUNTIMES_START_COMMAND="java -jar src/function/kotlin-runtime-1.0.0.jar"
 
     # Java
     - RUNTIME=java-18.0
