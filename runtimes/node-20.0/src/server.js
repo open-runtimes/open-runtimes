@@ -96,8 +96,8 @@ const server = micro(async (req, res) => {
             }
         },
         error: function (message) {
-            if (err instanceof Error) {
-                errors.push(err.stack ?? err.message);
+            if (message instanceof Error) {
+                errors.push(message.stack ?? message.message);
             } else if (message instanceof Object || Array.isArray(message)) {
                 errors.push(JSON.stringify(message));
             } else {
