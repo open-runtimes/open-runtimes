@@ -1,4 +1,7 @@
-FROM eclipse-temurin:8-jdk-alpine
+FROM eclipse-temurin:8-jdk-jammy
+
+# ECDHE Cipher "hack", See https://github.com/adoptium/temurin-build/issues/3002
+RUN apk add libgcc
 
 LABEL maintainer="team@appwrite.io"
 

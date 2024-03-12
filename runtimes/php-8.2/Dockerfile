@@ -28,7 +28,7 @@ RUN \
   make && make install && \
   cd ..
 
-FROM php:8.2-cli-alpine3.16 as final
+FROM php:8.2-cli-alpine3.19 as final
 
 LABEL maintainer="team@appwrite.io"
 

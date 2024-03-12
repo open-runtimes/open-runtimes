@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jdk-alpine
+FROM eclipse-temurin:11-jdk-jammy
 
 LABEL maintainer="team@appwrite.io"
 
