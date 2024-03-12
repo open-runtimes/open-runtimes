@@ -1,6 +1,6 @@
 # Node Runtime 21.0
 
-This is the Open Runtime that builds and runs NodeJS code based on a `node:21.0.0-alpine3.18` base image. 
+This is the Open Runtime that builds and runs NodeJS code based on a `node:21.0.0-alpine3.18` base image.
 
 The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
 

@@ -1,4 +1,4 @@
-FROM dart:3.0
+FROM dart:3.0.7
 
 LABEL maintainer="team@appwrite.io"
 

@@ -1,4 +1,4 @@
-FROM swiftarm/swift:5.8-ubuntu-jammy
+FROM swiftarm/swift:5.8.1-ubuntu-22.04
 
 LABEL maintainer="team@appwrite.io"
 
