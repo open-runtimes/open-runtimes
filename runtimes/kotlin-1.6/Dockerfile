@@ -1,4 +1,4 @@
-FROM openjdk:18-jdk-slim
+FROM eclipse-temurin:18-jdk-alpine
 
 LABEL maintainer="team@appwrite.io"
 

@@ -1,4 +1,4 @@
-FROM python:3.11-alpine3.16
+FROM python:3.11-alpine3.19
 
 LABEL maintainer="team@appwrite.io"
 

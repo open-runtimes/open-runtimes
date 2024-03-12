@@ -1,4 +1,4 @@
-FROM swiftarm/swift:5.5.3-ubuntu-jammy
+FROM swiftarm/swift:5.5.3-ubuntu-focal
 
 LABEL maintainer="team@appwrite.io"
 
