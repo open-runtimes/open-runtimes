@@ -1,9 +1,9 @@
-FROM alpine:3.19.1
+FROM alpine:3.16
 
 LABEL maintainer="team@appwrite.io"
 
 ARG DEBIAN_FRONTEND=noninteractive
-ENV DROGON_VERSION=v1.9.3
+ENV DROGON_VERSION=v1.7.5
 
 RUN apk add --no-cache \
     git \
