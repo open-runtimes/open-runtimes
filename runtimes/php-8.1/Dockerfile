@@ -1,6 +1,6 @@
 FROM php:8.1-cli-alpine3.19 as step0
 
-ENV PHP_SWOOLE_VERSION=v4.8.7
+ENV PHP_SWOOLE_VERSION=v5.1.2
 
 RUN \
   apk add --no-cache --virtual .deps \
