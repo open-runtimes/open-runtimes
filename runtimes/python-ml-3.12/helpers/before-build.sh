@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Fail build if any command fails
 set -e
 
@@ -10,7 +10,7 @@ cp -R /mnt/code/* /usr/local/build
 # Create virtual env
 cd /usr/local/build
 python3 -m venv runtime-env
-source runtime-env/bin/activate
+. runtime-env/bin/activate
 
 # Enter build folder
 cd /usr/local/build

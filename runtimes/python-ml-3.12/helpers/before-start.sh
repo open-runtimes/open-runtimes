@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Fail build if any command fails
 set -e
 
@@ -9,11 +9,11 @@ tar -zxf /mnt/code/code.tar.gz -C /usr/local/server/src/function
 
 # Apply env vars from build step
 set -o allexport
-source /usr/local/server/src/function/.open-runtimes
+. /usr/local/server/src/function/.open-runtimes
 set +o allexport
 
 # Activate virtual env
-source /usr/local/server/src/function/runtime-env/bin/activate
+. /usr/local/server/src/function/runtime-env/bin/activate
 export VIRTUAL_ENV="/usr/local/server/src/function/runtime-env"
 export PATH="$VIRTUAL_ENV/bin:$PATH"
 
