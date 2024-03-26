@@ -21,6 +21,8 @@ RUN apt-get update -q && \
 
 ENV PATH /opt/conda/bin:$PATH
 
+CMD [ "/bin/bash" ]
+
 ARG CONDA_VERSION=py312_24.1.2-0
 
 RUN set -x && \
