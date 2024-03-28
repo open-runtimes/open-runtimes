@@ -193,7 +193,7 @@ env:
       TEST_CLASS=Base
       ENTRYPOINT=tests.py
       IMAGE=openruntimes/python-ml:${VERSION}-3.11
-      ARCH=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+      ARCH=linux/amd64,linux/arm64
       TEST_SCRIPT=tests.sh
       OPEN_RUNTIMES_BUILD_COMMAND="pip install --no-cache-dir -r requirements.txt"
       OPEN_RUNTIMES_START_COMMAND="python3 src/server.py"
