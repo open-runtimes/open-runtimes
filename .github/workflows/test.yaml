@@ -2,13 +2,6 @@ name: "Testing OpenRuntimes"
 
 on: [ pull_request ]
 
-env:
-  VERSION: ${{ vars.OPR_VERSION || 'v3' }}
-  ARCH_64_ALL: "linux/amd64,linux/arm64"
-  ARCH_ALL: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-  TEST_CLASS: "Base"
-  ARCH_64: "linux/amd64"
-
 jobs:
   open-runtimes:
     strategy:
@@ -19,91 +12,91 @@ jobs:
           - runtimes: node-21.js
             RUNTIME: node-21.0
             ENTRYPOINT: tests.js
-            IMAGE: openruntimes/node:${{ env.VERSION }}-21.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-21.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-21.mjs
             RUNTIME: node-21.0
             ENTRYPOINT: tests.mjs
-            IMAGE: openruntimes/node:${{ env.VERSION }}-21.0
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-21.0
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-20.js
             RUNTIME: node-20.0
             ENTRYPOINT: tests.js
-            IMAGE: openruntimes/node:${{ env.VERSION }}-20.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-20.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-20.mjs
             RUNTIME: node-20.0
             ENTRYPOINT: tests.mjs
-            IMAGE: openruntimes/node:${{ env.VERSION }}-20.0
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-20.0
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-19.js
             RUNTIME: node-19.0
             ENTRYPOINT: tests.js
-            IMAGE: openruntimes/node:${{ env.VERSION }}-19.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-19.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-19.mjs
             RUNTIME: node-19.0
             ENTRYPOINT: tests.mjs
-            IMAGE: openruntimes/node:${{ env.VERSION }}-19.0
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-19.0
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-18.js
             RUNTIME: node-18.0
             ENTRYPOINT: tests.js
-            IMAGE: openruntimes/node:${{ env.VERSION }}-18.0
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-18.0
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-18.mjs
             RUNTIME: node-18.0
             ENTRYPOINT: tests.mjs
-            IMAGE: openruntimes/node:${{ env.VERSION }}-18.0
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-18.0
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-16.js
             RUNTIME: node-16.0
             ENTRYPOINT: tests.js
-            IMAGE: openruntimes/node:${{ env.VERSION }}-16.0
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-16.0
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-16.mjs
             RUNTIME: node-16.0
             ENTRYPOINT: tests.mjs
-            IMAGE: openruntimes/node:${{ env.VERSION }}-16.0
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-16.0
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-14.5.js
             RUNTIME: node-14.5
             ENTRYPOINT: tests.js
-            IMAGE: openruntimes/node:${{ env.VERSION }}-14.5
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-14.5
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
           - runtimes: node-14.5.mjs
             RUNTIME: node-14.5
             ENTRYPOINT: tests.mjs
-            IMAGE: openruntimes/node:${{ env.VERSION }}-14.5
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/node:v3-14.5
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
             OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
 
@@ -111,33 +104,33 @@ jobs:
           - runtimes: deno-1.40
             RUNTIME: deno-1.40
             ENTRYPOINT: tests.ts
-            IMAGE: openruntimes/deno:${{ env.VERSION }}-1.40
-            ARCH: ${{ ARCH_64 }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/deno:v3-1.40
+            ARCH: "linux/amd64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
             OPEN_RUNTIMES_START_COMMAND: "denon start"
           - runtimes: deno-1.35
             RUNTIME: deno-1.35
             ENTRYPOINT: tests.ts
-            IMAGE: openruntimes/deno:${{ env.VERSION }}-1.35
-            ARCH: ${{ ARCH_64 }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/deno:v3-1.35
+            ARCH: "linux/amd64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
             OPEN_RUNTIMES_START_COMMAND: "denon start"
           - runtimes: deno-1.24
             RUNTIME: deno-1.24
             ENTRYPOINT: tests.ts
-            IMAGE: openruntimes/deno:${{ env.VERSION }}-1.24
-            ARCH: ${{ ARCH_64 }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/deno:v3-1.24
+            ARCH: "linux/amd64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
             OPEN_RUNTIMES_START_COMMAND: "denon start"
           - runtimes: deno-1.21
             RUNTIME: deno-1.21
             ENTRYPOINT: tests.ts
-            IMAGE: openruntimes/deno:${{ env.VERSION }}-1.21
-            ARCH: ${{ ARCH_64 }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/deno:v3-1.21
+            ARCH: "linux/amd64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
             OPEN_RUNTIMES_START_COMMAND: "denon start"
 
@@ -145,41 +138,41 @@ jobs:
           - runtimes: python-3.12
             RUNTIME: python-3.12
             ENTRYPOINT: tests.py
-            IMAGE: openruntimes/python:${{ env.VERSION }}-3.11
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/python:v3-3.11
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
             OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
           - runtimes: python-3.11
             RUNTIME: python-3.11
             ENTRYPOINT: tests.py
-            IMAGE: openruntimes/python:${{ env.VERSION }}-3.11
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/python:v3-3.11
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
             OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
           - runtimes: python-3.10
             RUNTIME: python-3.10
             ENTRYPOINT: tests.py
-            IMAGE: openruntimes/python:${{ env.VERSION }}-3.10
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/python:v3-3.10
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
             OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
           - runtimes: python-3.9
             RUNTIME: python-3.9
             ENTRYPOINT: tests.py
-            IMAGE: openruntimes/python:${{ env.VERSION }}-3.9
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/python:v3-3.9
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
             OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
           - runtimes: python-3.8
             RUNTIME: python-3.8
             ENTRYPOINT: tests.py
-            IMAGE: openruntimes/python:${{ env.VERSION }}-3.8
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/python:v3-3.8
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
             OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
 
@@ -187,9 +180,9 @@ jobs:
           - runtimes: python-ml-3.11
             RUNTIME: python-ml-3.11
             ENTRYPOINT: tests.py
-            IMAGE: openruntimes/python:${{ env.VERSION }}-3.11
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/python:v3-3.11
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
             OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
 
@@ -197,65 +190,65 @@ jobs:
           - runtimes: dart-3.3
             RUNTIME: dart-3.3
             ENTRYPOINT: lib/tests.dart
-            IMAGE: openruntimes/dart:${{ env.VERSION }}-3.3
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dart:v3-3.3
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
           - runtimes: dart-3.1
             RUNTIME: dart-3.1
             ENTRYPOINT: lib/tests.dart
-            IMAGE: openruntimes/dart:${{ env.VERSION }}-3.1
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dart:v3-3.1
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
           - runtimes: dart-3.0
             RUNTIME: dart-3.0
             ENTRYPOINT: lib/tests.dart
-            IMAGE: openruntimes/dart:${{ env.VERSION }}-3.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dart:v3-3.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
           - runtimes: dart-2.19
             RUNTIME: dart-2.19
             ENTRYPOINT: lib/tests.dart
-            IMAGE: openruntimes/dart:${{ env.VERSION }}-2.19
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dart:v3-2.19
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
           - runtimes: dart-2.18
             RUNTIME: dart-2.18
             ENTRYPOINT: lib/tests.dart
-            IMAGE: openruntimes/dart:${{ env.VERSION }}-2.18
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dart:v3-2.18
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
           - runtimes: dart-2.17
             RUNTIME: dart-2.17
             ENTRYPOINT: lib/tests.dart
-            IMAGE: openruntimes/dart:${{ env.VERSION }}-2.17
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dart:v3-2.17
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
           - runtimes: dart-2.16
             RUNTIME: dart-2.16
             ENTRYPOINT: lib/tests.dart
-            IMAGE: openruntimes/dart:${{ env.VERSION }}-2.16
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dart:v3-2.16
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
           - runtimes: dart-2.15
             RUNTIME: dart-2.15
             ENTRYPOINT: lib/tests.dart
-            IMAGE: openruntimes/dart:${{ env.VERSION }}-2.15
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dart:v3-2.15
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
 
@@ -263,33 +256,33 @@ jobs:
           - runtimes: ruby-3.3
             RUNTIME: ruby-3.3
             ENTRYPOINT: tests.rb
-            IMAGE: openruntimes/ruby:${{ env.VERSION }}-3.3
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/ruby:v3-3.3
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
           - runtimes: ruby-3.2
             RUNTIME: ruby-3.2
             ENTRYPOINT: tests.rb
-            IMAGE: openruntimes/ruby:${{ env.VERSION }}-3.2
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/ruby:v3-3.2
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
           - runtimes: ruby-3.1
             RUNTIME: ruby-3.1
             ENTRYPOINT: tests.rb
-            IMAGE: openruntimes/ruby:${{ env.VERSION }}-3.1
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/ruby:v3-3.1
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
           - runtimes: ruby-3.0
             RUNTIME: ruby-3.0
             ENTRYPOINT: tests.rb
-            IMAGE: openruntimes/ruby:${{ env.VERSION }}-3.0
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/ruby:v3-3.0
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 
@@ -297,33 +290,33 @@ jobs:
           - runtimes: php-8.3
             RUNTIME: php-8.3
             ENTRYPOINT: tests.php
-            IMAGE: openruntimes/php:${{ env.VERSION }}-8.3
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/php:v3-8.3
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
             OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
           - runtimes: php-8.2
             RUNTIME: php-8.2
             ENTRYPOINT: tests.php
-            IMAGE: openruntimes/php:${{ env.VERSION }}-8.2
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/php:v3-8.2
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
             OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
           - runtimes: php-8.1
             RUNTIME: php-8.1
             ENTRYPOINT: tests.php
-            IMAGE: openruntimes/php:${{ env.VERSION }}-8.1
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/php:v3-8.1
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
             OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
           - runtimes: php-8.0
             RUNTIME: php-8.0
             ENTRYPOINT: tests.php
-            IMAGE: openruntimes/php:${{ env.VERSION }}-8.0
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/php:v3-8.0
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
             OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
 
@@ -331,25 +324,25 @@ jobs:
           - runtimes: swift-5.9
             RUNTIME: swift-5.9
             ENTRYPOINT: Tests.swift
-            IMAGE: openruntimes/swift:${{ env.VERSION }}-5.9
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/swift:v3-5.9
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
           - runtimes: swift-5.8
             RUNTIME: swift-5.8
             ENTRYPOINT: Tests.swift
-            IMAGE: openruntimes/swift:${{ env.VERSION }}-5.8
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/swift:v3-5.8
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
           - runtimes: swift-5.5
             RUNTIME: swift-5.5
             ENTRYPOINT: Tests.swift
-            IMAGE: openruntimes/swift:${{ env.VERSION }}-5.5
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/swift:v3-5.5
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
 
@@ -357,25 +350,25 @@ jobs:
           - runtimes: kotlin-1.9
             RUNTIME: kotlin-1.9
             ENTRYPOINT: Tests.kt
-            IMAGE: openruntimes/kotlin:${{ env.VERSION }}-1.9
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/kotlin:v3-1.9
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
           - runtimes: kotlin-1.8
             RUNTIME: kotlin-1.8
             ENTRYPOINT: Tests.kt
-            IMAGE: openruntimes/kotlin:${{ env.VERSION }}-1.8
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/kotlin:v3-1.8
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
           - runtimes: kotlin-1.6
             RUNTIME: kotlin-1.6
             ENTRYPOINT: Tests.kt
-            IMAGE: openruntimes/kotlin:${{ env.VERSION }}-1.6
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/kotlin:v3-1.6
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
 
@@ -383,41 +376,41 @@ jobs:
           - runtimes: java-21.0
             RUNTIME: java-21.0
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:${{ env.VERSION }}-21.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/java:v3-21.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
           - runtimes: java-18.0
             RUNTIME: java-18.0
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:${{ env.VERSION }}-18.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/java:v3-18.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
           - runtimes: java-17.0
             RUNTIME: java-17.0
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:${{ env.VERSION }}-17.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/java:v3-17.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
           - runtimes: java-11.0
             RUNTIME: java-11.0
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:${{ env.VERSION }}-11.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/java:v3-11.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
           - runtimes: java-8.0
             RUNTIME: java-8.0
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:${{ env.VERSION }}-8.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/java:v3-8.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
 
@@ -425,17 +418,17 @@ jobs:
           - runtimes: cpp-20
             RUNTIME: cpp-20
             ENTRYPOINT: tests.cc
-            IMAGE: openruntimes/cpp:${{ env.VERSION }}-20
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/cpp:v3-20
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "src/function/cpp_runtime"
           - runtimes: cpp-17
             RUNTIME: cpp-17
             ENTRYPOINT: tests.cc
-            IMAGE: openruntimes/cpp:${{ env.VERSION }}-17
-            ARCH: ${{ env.ARCH_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/cpp:v3-17
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "src/function/cpp_runtime"
 
@@ -443,25 +436,25 @@ jobs:
           - runtimes: dotnet-8.0
             RUNTIME: dotnet-8.0
             ENTRYPOINT: Tests.cs
-            IMAGE: openruntimes/dotnet:${{ env.VERSION }}-8.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dotnet:v3-8.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
           - runtimes: dotnet-7.0
             RUNTIME: dotnet-7.0
             ENTRYPOINT: Tests.cs
-            IMAGE: openruntimes/dotnet:${{ env.VERSION }}-7.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dotnet:v3-7.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
           - runtimes: dotnet-6.0
             RUNTIME: dotnet-6.0
             ENTRYPOINT: Tests.cs
-            IMAGE: openruntimes/dotnet:${{ env.VERSION }}-6.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/dotnet:v3-6.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
 
@@ -469,9 +462,9 @@ jobs:
           - runtimes: bun-1.0
             RUNTIME: bun-1.0
             ENTRYPOINT: tests.ts
-            IMAGE: openruntimes/bun:${VERSION}-1.0
-            ARCH: ${{ env.ARCH_64_ALL }}
-            TEST_CLASS: ${{ env.TEST_CLASS }}
+            IMAGE: openruntimes/bun:v3-1.0
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "bun install"
             OPEN_RUNTIMES_START_COMMAND: "bun src/server.ts"
 
@@ -480,8 +473,8 @@ jobs:
           #   RUNTIME: go-1.19
           #   ENTRYPOINT: tests.go
           #   IMAGE: openruntimes/go:${VERSION}-1.19
-          #   ARCH: ${{ env.ARCH_64_ALL }}
-          #   TEST_CLASS: ${{ env.TEST_CLASS }}
+          #   ARCH: "linux/amd64,linux/arm64"
+          #   TEST_CLASS: "Base"
     name: ${{ matrix.runtimes }}
     runs-on: ubuntu-latest
 
