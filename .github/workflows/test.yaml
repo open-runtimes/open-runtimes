@@ -4,10 +4,10 @@ on: [ pull_request ]
 
 env:
   VERSION: ${{ vars.OPR_VERSION || 'v3' }}
-  ARCH_64_ALL: linux/amd64,linux/arm64
-  ARCH_ALL: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-  TEST_CLASS: Base
-  ARCH_64: linux/amd64
+  ARCH_64_ALL: "linux/amd64,linux/arm64"
+  ARCH_ALL: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
+  TEST_CLASS: "Base"
+  ARCH_64: "linux/amd64"
 
 jobs:
   open-runtimes:
