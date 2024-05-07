@@ -15,6 +15,8 @@ WORKDIR /usr/local/server
 
 COPY requirements.txt .
 
+RUN conda create -n base_env anaconda
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
