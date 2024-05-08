@@ -1,10 +1,11 @@
-name: "Build and Deploy OpenRuntimes Images."
+name: "Build and Deploy OpenRuntimes Images"
 
 on:
   workflow_dispatch:
   push:
-    tags:
-      - '*'
+    branches:
+      - cicd-travis-to-github-actions
+
 jobs:
   deploy:
     strategy:
