@@ -1,9 +1,8 @@
 name: "Build and Deploy OpenRuntimes Images"
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 jobs:
   deploy:
