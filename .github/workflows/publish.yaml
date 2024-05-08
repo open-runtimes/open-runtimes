@@ -2,8 +2,8 @@ name: "Build and Deploy OpenRuntimes Images"
 
 on:
   push:
-    branches:
-      - cicd-travis-to-github-actions
+    tags:
+      - '*'
 
 jobs:
   deploy:
@@ -15,7 +15,7 @@ jobs:
           - runtimes: node-21.js
             RUNTIME: node-21.0
             ENTRYPOINT: tests.js
-            IMAGE: byawitz/node:v3-21.0
+            IMAGE: openruntimes/node:v3-21.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
@@ -23,7 +23,7 @@ jobs:
           - runtimes: node-20.js
             RUNTIME: node-20.0
             ENTRYPOINT: tests.js
-            IMAGE: byawitz/node:v3-20.0
+            IMAGE: openruntimes/node:v3-20.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
@@ -31,7 +31,7 @@ jobs:
           - runtimes: node-19.js
             RUNTIME: node-19.0
             ENTRYPOINT: tests.js
-            IMAGE: byawitz/node:v3-19.0
+            IMAGE: openruntimes/node:v3-19.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
@@ -39,7 +39,7 @@ jobs:
           - runtimes: node-18.js
             RUNTIME: node-18.0
             ENTRYPOINT: tests.js
-            IMAGE: byawitz/node:v3-18.0
+            IMAGE: openruntimes/node:v3-18.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
@@ -47,7 +47,7 @@ jobs:
           - runtimes: node-16.js
             RUNTIME: node-16.0
             ENTRYPOINT: tests.js
-            IMAGE: byawitz/node:v3-16.0
+            IMAGE: openruntimes/node:v3-16.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
@@ -55,7 +55,7 @@ jobs:
           - runtimes: node-14.5.js
             RUNTIME: node-14.5
             ENTRYPOINT: tests.js
-            IMAGE: byawitz/node:v3-14.5
+            IMAGE: openruntimes/node:v3-14.5
             ARCH: "linux/amd64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
@@ -65,7 +65,7 @@ jobs:
           - runtimes: deno-1.40
             RUNTIME: deno-1.40
             ENTRYPOINT: tests.ts
-            IMAGE: byawitz/deno:v3-1.40
+            IMAGE: openruntimes/deno:v3-1.40
             ARCH: "linux/amd64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
@@ -73,7 +73,7 @@ jobs:
           - runtimes: deno-1.35
             RUNTIME: deno-1.35
             ENTRYPOINT: tests.ts
-            IMAGE: byawitz/deno:v3-1.35
+            IMAGE: openruntimes/deno:v3-1.35
             ARCH: "linux/amd64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
@@ -81,7 +81,7 @@ jobs:
           - runtimes: deno-1.24
             RUNTIME: deno-1.24
             ENTRYPOINT: tests.ts
-            IMAGE: byawitz/deno:v3-1.24
+            IMAGE: openruntimes/deno:v3-1.24
             ARCH: "linux/amd64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
@@ -89,7 +89,7 @@ jobs:
           - runtimes: deno-1.21
             RUNTIME: deno-1.21
             ENTRYPOINT: tests.ts
-            IMAGE: byawitz/deno:v3-1.21
+            IMAGE: openruntimes/deno:v3-1.21
             ARCH: "linux/amd64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "deno cache tests.ts"
@@ -99,7 +99,7 @@ jobs:
           - runtimes: python-3.12
             RUNTIME: python-3.12
             ENTRYPOINT: tests.py
-            IMAGE: byawitz/python:v3-3.11
+            IMAGE: openruntimes/python:v3-3.11
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -107,7 +107,7 @@ jobs:
           - runtimes: python-3.11
             RUNTIME: python-3.11
             ENTRYPOINT: tests.py
-            IMAGE: byawitz/python:v3-3.11
+            IMAGE: openruntimes/python:v3-3.11
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -115,7 +115,7 @@ jobs:
           - runtimes: python-3.10
             RUNTIME: python-3.10
             ENTRYPOINT: tests.py
-            IMAGE: byawitz/python:v3-3.10
+            IMAGE: openruntimes/python:v3-3.10
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -123,7 +123,7 @@ jobs:
           - runtimes: python-3.9
             RUNTIME: python-3.9
             ENTRYPOINT: tests.py
-            IMAGE: byawitz/python:v3-3.9
+            IMAGE: openruntimes/python:v3-3.9
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -131,7 +131,7 @@ jobs:
           - runtimes: python-3.8
             RUNTIME: python-3.8
             ENTRYPOINT: tests.py
-            IMAGE: byawitz/python:v3-3.8
+            IMAGE: openruntimes/python:v3-3.8
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -141,7 +141,7 @@ jobs:
           - runtimes: python-ml-3.11
             RUNTIME: python-ml-3.11
             ENTRYPOINT: tests.py
-            IMAGE: byawitz/python:v3-3.11
+            IMAGE: openruntimes/python:v3-3.11
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
@@ -151,7 +151,7 @@ jobs:
           - runtimes: dart-3.3
             RUNTIME: dart-3.3
             ENTRYPOINT: lib/tests.dart
-            IMAGE: byawitz/dart:v3-3.3
+            IMAGE: openruntimes/dart:v3-3.3
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -159,7 +159,7 @@ jobs:
           - runtimes: dart-3.1
             RUNTIME: dart-3.1
             ENTRYPOINT: lib/tests.dart
-            IMAGE: byawitz/dart:v3-3.1
+            IMAGE: openruntimes/dart:v3-3.1
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -167,7 +167,7 @@ jobs:
           - runtimes: dart-3.0
             RUNTIME: dart-3.0
             ENTRYPOINT: lib/tests.dart
-            IMAGE: byawitz/dart:v3-3.0
+            IMAGE: openruntimes/dart:v3-3.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -175,7 +175,7 @@ jobs:
           - runtimes: dart-2.19
             RUNTIME: dart-2.19
             ENTRYPOINT: lib/tests.dart
-            IMAGE: byawitz/dart:v3-2.19
+            IMAGE: openruntimes/dart:v3-2.19
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -183,7 +183,7 @@ jobs:
           - runtimes: dart-2.18
             RUNTIME: dart-2.18
             ENTRYPOINT: lib/tests.dart
-            IMAGE: byawitz/dart:v3-2.18
+            IMAGE: openruntimes/dart:v3-2.18
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -191,7 +191,7 @@ jobs:
           - runtimes: dart-2.17
             RUNTIME: dart-2.17
             ENTRYPOINT: lib/tests.dart
-            IMAGE: byawitz/dart:v3-2.17
+            IMAGE: openruntimes/dart:v3-2.17
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -199,7 +199,7 @@ jobs:
           - runtimes: dart-2.16
             RUNTIME: dart-2.16
             ENTRYPOINT: lib/tests.dart
-            IMAGE: byawitz/dart:v3-2.16
+            IMAGE: openruntimes/dart:v3-2.16
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -207,7 +207,7 @@ jobs:
           - runtimes: dart-2.15
             RUNTIME: dart-2.15
             ENTRYPOINT: lib/tests.dart
-            IMAGE: byawitz/dart:v3-2.15
+            IMAGE: openruntimes/dart:v3-2.15
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "dart pub get"
@@ -217,7 +217,7 @@ jobs:
           - runtimes: ruby-3.3
             RUNTIME: ruby-3.3
             ENTRYPOINT: tests.rb
-            IMAGE: byawitz/ruby:v3-3.3
+            IMAGE: openruntimes/ruby:v3-3.3
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -225,7 +225,7 @@ jobs:
           - runtimes: ruby-3.2
             RUNTIME: ruby-3.2
             ENTRYPOINT: tests.rb
-            IMAGE: byawitz/ruby:v3-3.2
+            IMAGE: openruntimes/ruby:v3-3.2
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -233,7 +233,7 @@ jobs:
           - runtimes: ruby-3.1
             RUNTIME: ruby-3.1
             ENTRYPOINT: tests.rb
-            IMAGE: byawitz/ruby:v3-3.1
+            IMAGE: openruntimes/ruby:v3-3.1
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -241,7 +241,7 @@ jobs:
           - runtimes: ruby-3.0
             RUNTIME: ruby-3.0
             ENTRYPOINT: tests.rb
-            IMAGE: byawitz/ruby:v3-3.0
+            IMAGE: openruntimes/ruby:v3-3.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -251,7 +251,7 @@ jobs:
           - runtimes: php-8.3
             RUNTIME: php-8.3
             ENTRYPOINT: tests.php
-            IMAGE: byawitz/php:v3-8.3
+            IMAGE: openruntimes/php:v3-8.3
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
@@ -259,7 +259,7 @@ jobs:
           - runtimes: php-8.2
             RUNTIME: php-8.2
             ENTRYPOINT: tests.php
-            IMAGE: byawitz/php:v3-8.2
+            IMAGE: openruntimes/php:v3-8.2
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
@@ -267,7 +267,7 @@ jobs:
           - runtimes: php-8.1
             RUNTIME: php-8.1
             ENTRYPOINT: tests.php
-            IMAGE: byawitz/php:v3-8.1
+            IMAGE: openruntimes/php:v3-8.1
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
@@ -275,7 +275,7 @@ jobs:
           - runtimes: php-8.0
             RUNTIME: php-8.0
             ENTRYPOINT: tests.php
-            IMAGE: byawitz/php:v3-8.0
+            IMAGE: openruntimes/php:v3-8.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
@@ -285,7 +285,7 @@ jobs:
           - runtimes: swift-5.9
             RUNTIME: swift-5.9
             ENTRYPOINT: Tests.swift
-            IMAGE: byawitz/swift:v3-5.9
+            IMAGE: openruntimes/swift:v3-5.9
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -293,7 +293,7 @@ jobs:
           - runtimes: swift-5.8
             RUNTIME: swift-5.8
             ENTRYPOINT: Tests.swift
-            IMAGE: byawitz/swift:v3-5.8
+            IMAGE: openruntimes/swift:v3-5.8
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -301,7 +301,7 @@ jobs:
           - runtimes: swift-5.5
             RUNTIME: swift-5.5
             ENTRYPOINT: Tests.swift
-            IMAGE: byawitz/swift:v3-5.5
+            IMAGE: openruntimes/swift:v3-5.5
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -311,7 +311,7 @@ jobs:
           - runtimes: kotlin-1.9
             RUNTIME: kotlin-1.9
             ENTRYPOINT: Tests.kt
-            IMAGE: byawitz/kotlin:v3-1.9
+            IMAGE: openruntimes/kotlin:v3-1.9
             ARCH: "linux/amd64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -319,7 +319,7 @@ jobs:
           - runtimes: kotlin-1.8
             RUNTIME: kotlin-1.8
             ENTRYPOINT: Tests.kt
-            IMAGE: byawitz/kotlin:v3-1.8
+            IMAGE: openruntimes/kotlin:v3-1.8
             ARCH: "linux/amd64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -327,7 +327,7 @@ jobs:
           - runtimes: kotlin-1.6
             RUNTIME: kotlin-1.6
             ENTRYPOINT: Tests.kt
-            IMAGE: byawitz/kotlin:v3-1.6
+            IMAGE: openruntimes/kotlin:v3-1.6
             ARCH: "linux/amd64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -337,7 +337,7 @@ jobs:
           - runtimes: java-21.0
             RUNTIME: java-21.0
             ENTRYPOINT: Tests.java
-            IMAGE: byawitz/java:v3-21.0
+            IMAGE: openruntimes/java:v3-21.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -345,7 +345,7 @@ jobs:
           - runtimes: java-18.0
             RUNTIME: java-18.0
             ENTRYPOINT: Tests.java
-            IMAGE: byawitz/java:v3-18.0
+            IMAGE: openruntimes/java:v3-18.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -353,7 +353,7 @@ jobs:
           - runtimes: java-17.0
             RUNTIME: java-17.0
             ENTRYPOINT: Tests.java
-            IMAGE: byawitz/java:v3-17.0
+            IMAGE: openruntimes/java:v3-17.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -361,7 +361,7 @@ jobs:
           - runtimes: java-11.0
             RUNTIME: java-11.0
             ENTRYPOINT: Tests.java
-            IMAGE: byawitz/java:v3-11.0
+            IMAGE: openruntimes/java:v3-11.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -369,7 +369,7 @@ jobs:
           - runtimes: java-8.0
             RUNTIME: java-8.0
             ENTRYPOINT: Tests.java
-            IMAGE: byawitz/java:v3-8.0
+            IMAGE: openruntimes/java:v3-8.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -379,7 +379,7 @@ jobs:
           - runtimes: cpp-20
             RUNTIME: cpp-20
             ENTRYPOINT: tests.cc
-            IMAGE: byawitz/cpp:v3-20
+            IMAGE: openruntimes/cpp:v3-20
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -387,7 +387,7 @@ jobs:
           - runtimes: cpp-17
             RUNTIME: cpp-17
             ENTRYPOINT: tests.cc
-            IMAGE: byawitz/cpp:v3-17
+            IMAGE: openruntimes/cpp:v3-17
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -397,7 +397,7 @@ jobs:
           - runtimes: dotnet-8.0
             RUNTIME: dotnet-8.0
             ENTRYPOINT: Tests.cs
-            IMAGE: byawitz/dotnet:v3-8.0
+            IMAGE: openruntimes/dotnet:v3-8.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -405,7 +405,7 @@ jobs:
           - runtimes: dotnet-7.0
             RUNTIME: dotnet-7.0
             ENTRYPOINT: Tests.cs
-            IMAGE: byawitz/dotnet:v3-7.0
+            IMAGE: openruntimes/dotnet:v3-7.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -413,7 +413,7 @@ jobs:
           - runtimes: dotnet-6.0
             RUNTIME: dotnet-6.0
             ENTRYPOINT: Tests.cs
-            IMAGE: byawitz/dotnet:v3-6.0
+            IMAGE: openruntimes/dotnet:v3-6.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
@@ -423,7 +423,7 @@ jobs:
           - runtimes: bun-1.0
             RUNTIME: bun-1.0
             ENTRYPOINT: tests.ts
-            IMAGE: byawitz/bun:v3-1.0
+            IMAGE: openruntimes/bun:v3-1.0
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "bun install"
