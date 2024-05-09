@@ -140,7 +140,7 @@ jobs:
           - runtimes: python-ml-3.11
             RUNTIME: python-ml-3.11
             ENTRYPOINT: tests.py
-            IMAGE: openruntimes/python:v3-3.11
+            IMAGE: openruntimes/python-ml:v3-3.11
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
