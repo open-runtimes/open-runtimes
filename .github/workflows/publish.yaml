@@ -98,7 +98,7 @@ jobs:
           - runtimes: python-3.12
             RUNTIME: python-3.12
             ENTRYPOINT: tests.py
-            IMAGE: openruntimes/python:v3-3.11
+            IMAGE: openruntimes/python:v3-3.12
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
