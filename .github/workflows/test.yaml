@@ -500,6 +500,7 @@ jobs:
           push: false
           tags: open-runtimes/test-runtime
           load: true
+          shm-size: 3g
       - name: Prevent Docker mount from creating directory
         working-directory: ./tests/resources/functions/${{ matrix.RUNTIME }}
         run: |

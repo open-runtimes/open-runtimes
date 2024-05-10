@@ -13,11 +13,12 @@ RUN mkdir -p /usr/local/server/src/function
 
 WORKDIR /usr/local/server
 
-COPY requirements.txt .
-
 RUN conda config --append channels conda-forge
 RUN conda update -y --all
+
 RUN conda create -y -n base_env anaconda
+
+COPY requirements.txt .
 RUN conda install -y --name base_env --file requirements.txt
 
 COPY . .
