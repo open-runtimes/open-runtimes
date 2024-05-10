@@ -15,7 +15,8 @@ WORKDIR /usr/local/server
 
 COPY requirements.txt .
 
-RUN conda config --append channels conda-forge
+RUN conda config -y --append channels conda-forge
+RUN conda update -y --all
 RUN conda create -y -n base_env anaconda
 RUN conda install -y --name base_env --file requirements.txt
 
