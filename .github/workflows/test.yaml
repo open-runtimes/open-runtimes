@@ -184,7 +184,7 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "conda install -y -n base --file requirements.txt"
-            OPEN_RUNTIMES_START_COMMAND: "conda run -n base python src/server.py"
+            OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
 
           # Dart
           - runtimes: dart-3.3
