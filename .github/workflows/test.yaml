@@ -491,6 +491,11 @@ jobs:
           mv composer.phar /usr/local/bin/composer
       - name: Install dependencies
         run: composer install
+      - name: Free space
+        if: ${{ matrix.RUNTIME == 'python-ml-3.11' }}
+        uses: AdityaGarg8/remove-unwanted-software@v3
+        with:
+            remove-android: 'true'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build runtime Docker image
