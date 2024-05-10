@@ -17,10 +17,7 @@ COPY requirements.txt .
 
 RUN conda config --append channels conda-forge
 
-RUN conda create -y -n base_env
-
-RUN conda install -y --name base_env --file requirements.txt
-RUN conda install -y --name base_env anaconda python=3.11
+RUN conda install -y --name base --file requirements.txt
 
 COPY . .
 
