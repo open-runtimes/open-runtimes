@@ -183,8 +183,8 @@ jobs:
             IMAGE: openruntimes/python-ml:v3-3.11
             ARCH: "linux/amd64,linux/arm64"
             TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
-            OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
+            OPEN_RUNTIMES_BUILD_COMMAND: "conda install -y -n base_env -file requirements.txt"
+            OPEN_RUNTIMES_START_COMMAND: "conda run -n base_env python src/server.py"
 
           # Dart
           - runtimes: dart-3.3

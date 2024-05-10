@@ -16,9 +16,7 @@ WORKDIR /usr/local/server
 COPY requirements.txt .
 
 RUN conda create -y -n base_env anaconda
-RUN python -c "import tensorflow as tf; print(tf.__version__)"
-
-RUN pip install --no-cache-dir -r requirements.txt
+RUN conda install -y --name base_env --file requirements.txt
 
 COPY . .
 
