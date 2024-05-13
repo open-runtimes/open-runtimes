@@ -133,8 +133,8 @@ public class Server {
         if (contentType.contains("application/json")) {
             String jsonBody = (String) bodyRaw;
             
-            if (!bodyRaw.isEmpty()) {
-                body = gson.fromJson(bodyRaw, Map.class);
+            if (!jsonBody.isEmpty()) {
+                body = gson.fromJson(jsonBody, Map.class);
             } else {
                 body = new HashMap<String, Object>();
             }
