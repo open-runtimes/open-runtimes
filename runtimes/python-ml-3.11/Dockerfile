@@ -2,6 +2,7 @@ FROM continuumio/miniconda3:24.1.2-0
 
 LABEL maintainer="team@appwrite.io"
 
+RUN apt-get update && apt-get install -y gcc pkg-config libhdf5-dev
 
 ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
 
@@ -16,9 +17,12 @@ WORKDIR /usr/local/server
 COPY requirements.txt .
 
 RUN conda config --append channels conda-forge
-RUN conda install -y --name base --file requirements.txt
+
 RUN conda install -y --name base pip
-RUN conda init --all
+
+SHELL ["conda", "run", "-n", "base", "/bin/bash", "-c"]
+
+RUN pip install -r requirements.txt
 
 COPY . .
 
