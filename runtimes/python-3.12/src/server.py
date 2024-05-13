@@ -85,7 +85,14 @@ async def action(request):
 
     context = Context()
 
-    context.req.body_raw = request.get_data(as_text=True)
+    body_raw = request.get_data()
+    try:
+        body_raw = body_raw.decode("utf-8")
+    except Exception as e:
+        # Not valid string, likely binary file like image
+        pass
+
+    context.req.body_raw = body_raw
     context.req.body = context.req.body_raw
     context.req.method = request.method
     context.req.headers = {}

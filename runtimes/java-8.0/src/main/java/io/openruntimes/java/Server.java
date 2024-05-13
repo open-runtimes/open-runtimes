@@ -14,6 +14,10 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.CharBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -102,7 +106,23 @@ public class Server {
             return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
         }
 
-        String bodyRaw = req.body() == null ? "" : new String(req.body(), StandardCharsets.UTF_8);
+        Object bodyRaw = "";
+        if(req.body() != null) {
+            bodyRaw = req.body();
+
+            CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+            decoder.onMalformedInput(CodingErrorAction.REPORT);
+            decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+            ByteBuffer buffer = ByteBuffer.wrap((byte[]) bodyRaw);
+            
+            try {
+                decoder.decode(buffer);
+                bodyRaw = new String((byte[]) bodyRaw, "UTF-8");
+            } catch (Exception e) {
+                // Not valid string, likely binary file like image
+            }
+        }
+
         Object body = bodyRaw;
         Map<String, String> headers = new HashMap<>();
         String method = req.verb();

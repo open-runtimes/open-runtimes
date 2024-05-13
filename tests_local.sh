@@ -19,6 +19,21 @@ ENTRYPOINT="lib/tests.dart" # Test file file
 INSTALL_COMMAND="dart pub get" # Build script
 START_COMMAND="src/function/server" # Run script
 
+RUNTIME="python-3.8" # Folder name
+ENTRYPOINT="tests.py" # Test file file
+INSTALL_COMMAND="pip install --no-cache-dir -r requirements.txt" # Build script
+START_COMMAND="python3 src/server.py" # Run script
+
+RUNTIME="ruby-3.3" # Folder name
+ENTRYPOINT="tests.rb" # Test file file
+INSTALL_COMMAND="" # Build script
+START_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production" # Run script
+
+RUNTIME="java-18.0" # Folder name
+ENTRYPOINT="Tests.java" # Test file file
+INSTALL_COMMAND="" # Build script
+START_COMMAND="java -jar src/function/java-runtime-1.0.0.jar" # Run script
+
 # Cleanup
 docker rm --force $(docker ps -aq)
 

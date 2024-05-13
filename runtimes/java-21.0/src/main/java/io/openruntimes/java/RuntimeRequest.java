@@ -12,7 +12,7 @@ public class RuntimeRequest {
     private final String queryString;
     private final Map<String, String> headers;
     private final Object body;
-    private final String bodyRaw;
+    private final Object bodyRaw;
     private final String url;
 
     public RuntimeRequest(
@@ -25,7 +25,7 @@ public class RuntimeRequest {
             String queryString,
             Map<String, String> headers,
             Object body,
-            String bodyRaw,
+            Object bodyRaw,
             String url
     ) {
         this.method = method;
@@ -77,7 +77,7 @@ public class RuntimeRequest {
         return body;
     }
 
-    public String getBodyRaw() {
+    public Object getBodyRaw() {
         return bodyRaw;
     }
 

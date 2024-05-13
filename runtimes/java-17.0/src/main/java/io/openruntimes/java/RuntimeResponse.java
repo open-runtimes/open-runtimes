@@ -9,15 +9,15 @@ import java.util.Map;
 public class RuntimeResponse {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
-    public RuntimeOutput send(String body, int statusCode, Map<String, String> headers) {
+    public RuntimeOutput send(Object body, int statusCode, Map<String, String> headers) {
         return new RuntimeOutput(body, statusCode, headers);
     }
 
-    public RuntimeOutput send(String body, int statusCode) {
+    public RuntimeOutput send(Object body, int statusCode) {
         return this.send(body, statusCode, new HashMap<>());
     }
 
-    public RuntimeOutput send(String body) {
+    public RuntimeOutput send(Object body) {
         return this.send(body, 200, new HashMap<>());
     }
 

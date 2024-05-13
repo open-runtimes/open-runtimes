@@ -95,7 +95,7 @@ When you can have two!
         todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_raw).body)
         return context.res.json({ 'todo': todo })
     when 'binary'
-        return context.res.send(context.req.body_raw, 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
+        return context.res.send(context.req.body_raw, 200, { 'content-type': 'image/png' })
     when 'timeout'
         context.log('Timeout start.')
         Async do
