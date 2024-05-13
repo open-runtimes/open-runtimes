@@ -431,4 +431,18 @@ class Base extends TestCase
         $actual = preg_replace('/\s+/', '', $actual);
         self::assertEquals($expected, $actual, $message);
     }
+
+    public function testBinary(): void
+    {
+        $file = \file_get_contents('./tests/resources/files/logo.png');
+        $hash = \md5($file);
+
+        $response = $this->execute(headers: ['x-action' => 'binary'], body: $file);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('image/png; charset=utf-8', $response['headers']['content-type']);
+
+        $responseHash = \md5($response['body']);
+
+        self::assertEquals($hash, $responseHash);
+    }
 }
