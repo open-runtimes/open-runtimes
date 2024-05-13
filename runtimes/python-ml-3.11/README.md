@@ -1,6 +1,6 @@
 # Python ML Runtime 3.11
 
-This is the Open Runtime that builds and runs Python ML code based on a `continuumio/miniconda3:24.1.2-0` base image. 
+This is the Open Runtime that builds and runs Python ML code based on a `python:3.11-bookworm` base image. 
 
 The runtime itself uses [Flask](https://flask.palletsprojects.com/en/2.0.x) as the Web Server to process the execution requests.
 

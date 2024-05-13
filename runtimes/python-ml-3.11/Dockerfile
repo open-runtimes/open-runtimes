@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:24.1.2-0
+FROM python:3.11-bookworm
 
 LABEL maintainer="team@appwrite.io"
 
@@ -16,13 +16,7 @@ WORKDIR /usr/local/server
 
 COPY requirements.txt .
 
-RUN conda config --append channels conda-forge
 
-RUN conda install -y --name base pip
-
-SHELL ["conda", "run", "-n", "base", "/bin/bash", "-c"]
-
-RUN pip install -r requirements.txt
 
 COPY . .
 
