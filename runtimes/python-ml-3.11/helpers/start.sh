@@ -3,4 +3,4 @@
 set -e
 
 . /usr/local/server/helpers/before-start.sh
-sh -c "$1"
+conda run -n base "$1"

@@ -3,5 +3,5 @@
 set -e
 
 . /usr/local/server/helpers/before-build.sh
-sh -c "$1"
+conda run -n base "$1"
 . /usr/local/server/helpers/after-build.sh
