@@ -440,9 +440,13 @@ class Base extends TestCase
         $response = $this->execute(headers: ['x-action' => 'binary'], body: $file);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('image/png; charset=utf-8', $response['headers']['content-type']);
-
+        
         $responseHash = \md5($response['body']);
-
         self::assertEquals($hash, $responseHash);
+
+        // Backwards-compatibility cehck (bodyRaw is string (not binary) if it's valid text)
+        $response = $this->execute(headers: ['x-action' => 'binary'], body: 'Text');
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Text', $response['body']);
     }
 }
