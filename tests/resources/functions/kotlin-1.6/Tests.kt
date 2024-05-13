@@ -159,6 +159,11 @@ When you can have two!
                     "todo" to todo
                 ))
             }
+            "binary" -> {
+                return context.res.send(context.req.bodyRaw, 200, mutableMapOf(
+                    "content-type" to "image/png"
+                ))
+            }
             "timeout" -> {
                 context.log("Timeout start.")
 

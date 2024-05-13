@@ -94,6 +94,8 @@ When you can have two!
         $response = $client->request('GET', '/todos/' . $context->req->bodyRaw);
         $todo = \json_decode($response->getBody()->getContents(), true);
         return $context->res->json([ 'todo' => $todo ]);
+      case 'binary':
+        return $context->res->send($context->req->bodyRaw, 200, [ 'content-type' => 'image/png' ]);
       case 'timeout':
         $context->log('Timeout start.');
         \sleep(3);

@@ -119,6 +119,9 @@ When you can have two!
       final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyRaw);
       return context.res.json({ 'todo': todo.data });
     }
+    case 'binary': {
+      return context.res.send(context.req.bodyRaw, 200, {'content-type': 'image/png'});
+    }
     case 'timeout': {
       context.log("Timeout start.");
 

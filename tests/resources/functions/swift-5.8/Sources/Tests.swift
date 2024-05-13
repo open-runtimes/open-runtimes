@@ -118,6 +118,10 @@ When you can have two!
         return try context.res.json([
             "todo": todo
         ])
+    case "binary":
+        return context.res.send(context.req.bodyRaw, headers: [
+            "content-type": "text/plain; charset=iso-8859-1"
+        ])
     case "timeout":
         context.log("Timeout start.")
 

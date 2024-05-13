@@ -149,6 +149,10 @@ public class Tests {
                 json.put("todo", todo);
                 return context.getRes().json(json);
             }
+            case "binary" -> {
+                headers.put("content-type", "image/png");
+                return context.getRes().send(context.getReq().getBodyRaw(), 200, headers);
+            }
             case "timeout" -> {
                 context.log("Timeout start.");
 

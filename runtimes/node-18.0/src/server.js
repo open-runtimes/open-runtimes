@@ -1,7 +1,7 @@
 const fs = require("fs");
 const micro = require("micro");
 const util = require("util");
-const { text: parseText, json: parseJson, send } = require("micro");
+const { json: parseJson, buffer: parseBuffer, send } = require("micro");
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
@@ -36,7 +36,15 @@ const action = async (req, res) => {
     const errors = [];
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
-    const bodyRaw = await parseText(req);
+    let bodyRaw = await parseBuffer(req);
+
+    const decoder = new TextDecoder("utf8", { fatal: true });
+    try {
+        bodyRaw = decoder.decode(bodyRaw);
+    } catch {
+        // Not valid string, likely binary file like image
+    }
+
     let body = bodyRaw;
 
     if (contentType.includes('application/json')) {

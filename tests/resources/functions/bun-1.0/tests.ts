@@ -82,6 +82,10 @@ When you can have two!
         case 'library':
             const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyRaw}`).then(r => r.json());
             return context.res.json({ todo });
+        case 'binary':
+            return context.res.send(context.req.bodyRaw, 200, {
+                'content-type': 'image/png'
+            });
         case 'timeout':
             context.log('Timeout start.');
 

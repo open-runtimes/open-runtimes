@@ -94,6 +94,8 @@ When you can have two!
         return context.res.json({
             'todo': todo
         })
+    elif action == 'binary':
+        return context.res.send(context.req.body_raw, 200, { 'content-type': 'text/image' })
     elif action == 'timeout':
         context.log('Timeout start.')
         await asyncio.sleep(3)

@@ -187,6 +187,9 @@ namespace runtime {
                 Json::Value response;
                 json["todo"] = todo;
                 return res.json(json);
+            } else if (action == "binary") {
+                headers["content-type"] = "text/plain; charset=iso-8859-1";
+                return context.res.send(req.bodyRaw, 200, headers);
             } else if (action == "timeout") {
                 context.log("Timeout start.");
 

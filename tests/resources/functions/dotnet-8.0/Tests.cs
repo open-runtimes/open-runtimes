@@ -138,6 +138,11 @@ When you can have two!
                     {
                         { "todo", todo }
                     });
+                case "binary":
+                    return context.Res.Send(context.Req.BodyRaw, 200, new Dictionary<string, string>()
+                    {
+                        { "content-type", "image/png" }
+                    });
                 case "timeout":
                     context.Log("Timeout start.");
 
