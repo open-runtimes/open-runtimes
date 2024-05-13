@@ -39,7 +39,7 @@ class RuntimeRequest {
 }
 
 class RuntimeResponse {
-  dynamic send(String body,
+  dynamic send(dynamic body,
       [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
     return {
       'body': body,
