@@ -41,7 +41,15 @@ const action = async (ctx: any) => {
   const errors: string[] = [];
 
   const contentType = ctx.request.headers.get('content-type') ?? 'text/plain';
-  const bodyRaw: string = await ctx.request.body({ type: 'text' }).value;
+  let bodyRaw: any = await ctx.request.body({ type: 'bytes' }).value;
+
+  const decoder = new TextDecoder("utf8", { fatal: true });
+  try {
+    bodyRaw = decoder.decode(bodyRaw);
+  } catch {
+    // Not valid string, likely binary file like image
+  }
+
   let body: any = bodyRaw;
 
   if (contentType.includes('application/json')) {

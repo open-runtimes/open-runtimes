@@ -22,7 +22,15 @@ const action = async (request) => {
   const errors: string[] = [];
 
   const contentType = request.headers.get('content-type') ?? 'text/plain';
-  const bodyRaw: string = await request.text();
+  let bodyRaw: any = await request.arrayBuffer();
+
+  const decoder = new TextDecoder("utf8", { fatal: true });
+  try {
+      bodyRaw = decoder.decode(bodyRaw);
+  } catch {
+      // Not valid string, likely binary file like image
+  }
+
   let body: any = bodyRaw;
 
   if (contentType.includes('application/json')) {

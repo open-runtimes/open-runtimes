@@ -25,7 +25,14 @@ Future<shelf.Response> action(req) async {
             'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
   }
 
-  String bodyRaw = await req.readAsString();
+  Stream<List<int>> bodyStream = await req.read();
+  dynamic bodyRaw = await bodyStream.expand((list) => list).toList();
+  try {
+    bodyRaw = Utf8Decoder(allowMalformed: false).convert(bodyRaw);
+  } catch (e, s) {
+    // Not valid string, likely binary file like image
+  }
+
   dynamic body = bodyRaw;
   String method = req.method;
   Map<String, dynamic> headers = {};
@@ -39,8 +46,8 @@ Future<shelf.Response> action(req) async {
 
   String contentType = req.headers['content-type'] ?? 'text/plain';
   if (contentType.contains('application/json')) {
-    if (!bodyRaw.isEmpty) {
-      body = jsonDecode(bodyRaw);
+    if (!(await body.isEmpty)) {
+      body = jsonDecode(body);
     } else {
       body = {};
     }
