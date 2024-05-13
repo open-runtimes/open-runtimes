@@ -17,6 +17,7 @@ COPY requirements.txt .
 
 RUN conda config --append channels conda-forge
 RUN conda install -y --name base --file requirements.txt
+RUN conda install -y --name base pip
 RUN conda init --all
 
 COPY . .
