@@ -131,6 +131,8 @@ public class Server {
 
         String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
         if (contentType.contains("application/json")) {
+            String jsonBody = (String) bodyRaw;
+            
             if (!bodyRaw.isEmpty()) {
                 body = gson.fromJson(bodyRaw, Map.class);
             } else {
