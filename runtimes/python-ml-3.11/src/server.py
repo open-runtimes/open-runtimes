@@ -135,6 +135,8 @@ async def action(request):
         if not key.lower().startswith('x-open-runtimes-'):
             context.req.headers[key.lower()] = headers[key]
 
+    sys.stdout = sys.stderr = customstd = StringIO()
+
     output = None
 
     async def execute(context):
@@ -161,12 +163,15 @@ async def action(request):
                 output = await asyncio.wait_for(execute(context), timeout=safeTimeout)
             except asyncio.TimeoutError:
                 context.error('Execution timed out.')
-                output = context.res.send('timeout', 500, {})
+                output = context.res.send('', 500, {})
         else:
             output = await execute(context)
     except Exception as e:
         context.error(''.join(traceback.TracebackException.from_exception(e).format()))
-        output = context.res.send(''.join(traceback.TracebackException.from_exception(e).format()), 500, {})
+        output = context.res.send('', 500, {})
+    finally:
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
 
     if output is None:
         context.error('Return statement missing. return context.res.empty() if no response is expected.')
@@ -186,6 +191,13 @@ async def action(request):
     if not resp.headers['content-type'].startswith('multipart/') and not 'charset=' in resp.headers['content-type']:
         resp.headers['content-type'] += '; charset=utf-8'
 
+    if customstd.getvalue():
+        context.log('----------------------------------------------------------------------------')
+        context.log('Unsupported logs detected. Use context.log() or context.error() for logging.')
+        context.log('----------------------------------------------------------------------------')
+        context.log(customstd.getvalue())
+        context.log('----------------------------------------------------------------------------')
+
     resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context.logs))
     resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context.errors))
 
@@ -202,16 +214,11 @@ async def handler(u_path):
             ''.join(traceback.TracebackException.from_exception(e).format())
         ]
 
-    resp = FlaskResponse(''.join(traceback.TracebackException.from_exception(e).format()), 500)
+    resp = FlaskResponse('', 500)
     resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(logs))
     resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(errors))
 
     return resp
-
-
-@app.errorhandler(Exception)
-def exception_handler(error):
-    return "!!!!"  + repr(error)
 
 if __name__ == "__main__":
     from waitress import serve
