@@ -4,8 +4,6 @@ import asyncio
 import tensorflow as tf
 
 async def main(context):
-    assert(tf.__version__ is not None)
-    
     action = context.req.headers.get('x-action', None)
 
     if action == 'plaintextResponse':
