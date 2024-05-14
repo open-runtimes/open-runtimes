@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace DotNetRuntime {
     public class RuntimeResponse
     {
-        public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
+        public RuntimeOutput Send(object body, int statusCode = 200, Dictionary<string, string>? headers = null)
         {
             return new RuntimeOutput(
                 body,

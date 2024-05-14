@@ -39,6 +39,11 @@ ENTRYPOINT="Tests.kt" # Test file file
 INSTALL_COMMAND="" # Build script
 START_COMMAND="java -jar src/function/kotlin-runtime-1.0.0.jar" # Run script
 
+RUNTIME="dotnet-8.0" # Folder name
+ENTRYPOINT="Tests.cs" # Test file file
+INSTALL_COMMAND="" # Build script
+START_COMMAND="dotnet src/function/DotNetRuntime.dll" # Run script
+
 # Cleanup
 docker rm --force $(docker ps -aq)
 

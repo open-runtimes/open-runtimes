@@ -12,7 +12,7 @@ namespace DotNetRuntime
 		public string Url { get; private set; }
 		public Dictionary<string, string> Headers { get; private set; }
 		public object Body { get; private set; }
-		public string BodyRaw { get; private set; }
+		public object BodyRaw { get; private set; }
 
 		public RuntimeRequest(
 		    string method,
@@ -25,7 +25,7 @@ namespace DotNetRuntime
 		    string url,
 		    Dictionary<string, string> headers,
 		    object body,
-		    string bodyRaw)
+		    object bodyRaw)
 		{
 			BodyRaw = bodyRaw;
 			Body = body;

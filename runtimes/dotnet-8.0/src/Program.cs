@@ -58,8 +58,28 @@ namespace DotNetRuntime
                 return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
             }
 
-            var reader = new StreamReader(request.Body);
-            var bodyRaw = await reader.ReadToEndAsync();
+            object bodyRaw = default(byte[]);
+            
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                await request.Body.CopyToAsync(memoryStream);
+                bodyRaw = memoryStream.ToArray();
+            }
+
+            try
+            {
+                string decodedString = Encoding.UTF8.GetString(bodyRaw as byte[]);
+                byte[] reEncodedBytes = Encoding.UTF8.GetBytes(decodedString);
+                if((bodyRaw as byte[]).Length == reEncodedBytes.Length)
+                {
+                    bodyRaw = decodedString;
+                }
+            }
+            catch
+            {
+                // Not valid string, likely binary file like image
+            }
+
             object body = bodyRaw;
             var headers = new Dictionary<string, string>();
             var method = request.Method;
@@ -78,13 +98,13 @@ namespace DotNetRuntime
             var contentType = request.Headers.TryGetValue("content-type", out var contentTypeValue) ? contentTypeValue.ToString() : "";
             if(contentType.Contains("application/json"))
             {
-                if(string.IsNullOrEmpty(bodyRaw))
+                if(string.IsNullOrEmpty(bodyRaw as String))
                 {
                     body = new Dictionary<string, object>();
                 } 
                 else
                 {
-                    body = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyRaw) ?? new Dictionary<string, object>();
+                    body = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyRaw as String) ?? new Dictionary<string, object>();
                 }
             }
 

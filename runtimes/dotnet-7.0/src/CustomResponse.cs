@@ -8,11 +8,11 @@ namespace DotNetRuntime
 {
     class CustomResponse : IResult
     {
-        private readonly string _body;
+        private readonly object _body;
         private readonly int _statusCode;
         private readonly Dictionary<string, string> _headers;
 
-        public CustomResponse(string body, int statusCode, Dictionary<string, string>? headers = null)
+        public CustomResponse(object body, int statusCode, Dictionary<string, string>? headers = null)
         {
             _body = body;
             _statusCode = statusCode;
@@ -40,9 +40,17 @@ namespace DotNetRuntime
 
             httpContext.Response.StatusCode = _statusCode;
             httpContext.Response.ContentType = contentTypeValue;
-            httpContext.Response.ContentLength = Encoding.UTF8.GetByteCount(_body);
 
-            return httpContext.Response.WriteAsync(_body);
+            if(_body is String) {
+                httpContext.Response.ContentLength = Encoding.UTF8.GetByteCount(_body as String);
+                return httpContext.Response.WriteAsync(_body as String);
+            } else if(_body is byte[]) {
+                httpContext.Response.ContentLength = (_body as byte[]).Length;
+                return httpContext.Response.Body.WriteAsync(_body as byte[], 0, (_body as byte[]).Length);
+            } else {
+                httpContext.Response.ContentLength = Encoding.UTF8.GetByteCount("");
+                return httpContext.Response.WriteAsync("");
+            }
         }
     }
 }
