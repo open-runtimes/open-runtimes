@@ -517,7 +517,7 @@ jobs:
             -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime \
             sh -c "sh helpers/start.sh \"${{ matrix.OPEN_RUNTIMES_START_COMMAND }}\""
           echo "Waiting for servers..."
-          sleep 10
+          sleep 20
       - name: Run tests
         env:
           OPEN_RUNTIMES_SECRET: test-secret-key
