@@ -8,7 +8,7 @@ public class RuntimeResponse {
     }
 
     fun send(
-        body: String,
+        body: Any,
         statusCode: Int = 200,
         headers: Map<String, String> = mapOf()
     ): RuntimeOutput {

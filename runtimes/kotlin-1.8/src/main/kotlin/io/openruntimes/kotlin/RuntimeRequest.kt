@@ -10,6 +10,6 @@ data class RuntimeRequest(
     val queryString: String,
     val headers: MutableMap<String, String>,
     val body: Any,
-    val bodyRaw: String,
+    val bodyRaw: Any,
     val url: String,
 )

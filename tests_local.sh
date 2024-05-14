@@ -34,6 +34,11 @@ ENTRYPOINT="Tests.java" # Test file file
 INSTALL_COMMAND="" # Build script
 START_COMMAND="java -jar src/function/java-runtime-1.0.0.jar" # Run script
 
+RUNTIME="kotlin-1.6" # Folder name
+ENTRYPOINT="Tests.kt" # Test file file
+INSTALL_COMMAND="" # Build script
+START_COMMAND="java -jar src/function/kotlin-runtime-1.0.0.jar" # Run script
+
 # Cleanup
 docker rm --force $(docker ps -aq)
 

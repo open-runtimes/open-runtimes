@@ -9,6 +9,11 @@ import kotlinx.coroutines.withTimeoutOrNull
 import java.io.*
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.nio.ByteBuffer
+import java.nio.charset.CharsetDecoder
+import java.nio.charset.CodingErrorAction
+import java.nio.charset.Charset
+import java.nio.CharBuffer
 import kotlin.reflect.KClass
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.createInstance
@@ -86,7 +91,20 @@ suspend fun action(ctx: Context) {
         return
     }
 
-    val bodyRaw = ctx.body()
+    var bodyRaw = ctx.bodyAsBytes() as Any;
+
+    val decoder = StandardCharsets.UTF_8.newDecoder();
+    decoder.onMalformedInput(CodingErrorAction.REPORT);
+    decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+    val buffer = ByteBuffer.wrap(bodyRaw as ByteArray);
+    
+    try {
+        decoder.decode(buffer);
+        bodyRaw = String(bodyRaw as ByteArray, Charset.forName("UTF-8"));
+    } catch (e: Exception) {
+        // Not valid string, likely binary file like image
+    }
+
     var body = bodyRaw as Any
     val headers = mutableMapOf<String, String>()
     val method = ctx.method()
@@ -100,8 +118,9 @@ suspend fun action(ctx: Context) {
 
     val contentType = ctx.header("content-type") ?: "text/plain"
     if (contentType.contains("application/json")) {
-        body = if (bodyRaw.isNotEmpty()) {
-            gson.fromJson(bodyRaw, MutableMap::class.java)
+        val jsonBody = bodyRaw as String;
+        body = if (jsonBody.isNotEmpty()) {
+            gson.fromJson(jsonBody, MutableMap::class.java)
         } else {
             mutableMapOf<String, Any>()
         }
@@ -262,5 +281,15 @@ suspend fun action(ctx: Context) {
         ctx.header("x-open-runtimes-errors", "Internal error while processing logs.")
     }
 
-    ctx.status(output.statusCode).result(output.body)
+    ctx.status(output.statusCode)
+
+    if(output.body is InputStream) {
+        ctx.result(output.body as InputStream)
+    } else if(output.body is ByteArray) {
+        ctx.result(output.body as ByteArray)
+    } else if(output.body is String) {
+        ctx.result(output.body as String)
+    } else {
+        ctx.result("")
+    }
 }
