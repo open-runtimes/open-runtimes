@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-python-3.11:
-    container_name: open-runtimes-python-3.11
+  open-runtimes-python-ml-3.11:
+    container_name: open-runtimes-python-ml-3.11
     build:
       context: .
     ports: 
