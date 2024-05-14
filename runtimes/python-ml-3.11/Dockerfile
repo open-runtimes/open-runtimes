@@ -15,9 +15,6 @@ RUN mkdir -p /usr/local/server/src/function
 WORKDIR /usr/local/server
 
 COPY requirements.txt .
-
-
-
 COPY . .
 
 RUN chmod +x /usr/local/server/helpers/before-start.sh
