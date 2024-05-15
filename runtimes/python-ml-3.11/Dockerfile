@@ -1,7 +1,8 @@
-FROM continuumio/miniconda3:24.1.2-0
+FROM python:3.11-bookworm
 
 LABEL maintainer="team@appwrite.io"
 
+RUN apt-get update && apt-get install -y gcc pkg-config libhdf5-dev
 
 ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
 
@@ -14,11 +15,6 @@ RUN mkdir -p /usr/local/server/src/function
 WORKDIR /usr/local/server
 
 COPY requirements.txt .
-
-RUN conda create -n base_env anaconda
-
-RUN pip install --no-cache-dir -r requirements.txt
-
 COPY . .
 
 RUN chmod +x /usr/local/server/helpers/before-start.sh
