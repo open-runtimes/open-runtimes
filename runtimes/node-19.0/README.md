@@ -1,6 +1,6 @@
 # Node Runtime 19.0
 
-This is the Open Runtime that builds and runs NodeJS code based on a `node:19.0-alpine3.16` base image. 
+This is the Open Runtime that builds and runs NodeJS code based on a `node:19.0-alpine3.16` base image.
 
 The runtime itself uses [Micro](https://github.com/vercel/micro) as the Web Server to process the execution requests.
 

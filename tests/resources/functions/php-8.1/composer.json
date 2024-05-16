@@ -3,12 +3,6 @@
     "description": "",
     "type": "library",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Team Appwrite",
-            "email": "team@appwrite.io"
-        }
-    ],
     "require": {
         "php": ">=7.4.0",
         "ext-curl": "*",

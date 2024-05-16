@@ -79,7 +79,7 @@ class RuntimeContext {
 
 $userFunction = null;
 
-$server->on("Request", function($req, $res) use(&$userFunction) {
+$action = function($req, $res) use (&$userFunction) {
     $requestHeaders = $req->header;
 
     $cookieHeaders = [];
@@ -163,6 +163,10 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
     if(\str_contains($contentType, 'application/json')) {
         if(!empty($context->req->bodyRaw)) {
             $context->req->body = json_decode($context->req->bodyRaw, true);
+
+            if($context->req->body === null) {
+                throw new \Exception('Invalid JSON body.');
+            }
         } else {
             $context->req->body = [];
         }
@@ -253,6 +257,24 @@ $server->on("Request", function($req, $res) use(&$userFunction) {
 
     $res->status($output['statusCode']);
     $res->end($output['body']);
+};
+
+$server->on("Request", function($req, $res) use($action) {
+    try {
+        $action($req, $res);
+    } catch (\Throwable $e) {
+        $logs = [];
+        $errors = [
+            $e->getMessage()."\n".$e->getTraceAsString(),
+            'At ' . $e->getFile() . ':' . $e->getLine()
+        ];
+
+        $res->header('x-open-runtimes-logs', \urlencode(\implode('\n', $logs)));
+        $res->header('x-open-runtimes-errors', \urlencode(\implode('\n', $errors)));
+    
+        $res->status(500);
+        $res->end('');
+    }
 });
 
 $server->start();

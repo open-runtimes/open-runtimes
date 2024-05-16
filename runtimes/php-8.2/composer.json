@@ -3,12 +3,6 @@
     "description": "End to end backend server for frontend and mobile apps.",
     "type": "project",
     "license": "BSD-3-Clause",
-    "authors": [
-        {
-            "name": "Appwrite Team",
-            "email": "team@appwrite.io"
-        }
-    ],
     "require": {
         "php": ">=8.2.0",
         "ext-swoole": "*"
