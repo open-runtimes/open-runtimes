@@ -118,6 +118,8 @@ When you can have two!
                     Console.WriteLine("Native log");
                     context.Log("Debug log");
                     context.Error("Error log");
+      
+                    context.Log("Log+With+Plus+Symbol");
                     
                     context.Log(42);
                     context.Log(4.2);

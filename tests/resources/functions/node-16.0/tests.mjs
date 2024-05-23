@@ -70,6 +70,8 @@ When you can have two!
             console.log('Native log');
             context.log('Debug log');
             context.error('Error log');
+                
+            context.log("Log+With+Plus+Symbol");
             
             context.log(42);
             context.log(4.2);

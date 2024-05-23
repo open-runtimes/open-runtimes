@@ -106,14 +106,14 @@ When you can have two!
       context.log('Debug log');
       context.error('Error log');
       
+      context.log("Log+With+Plus+Symbol");
+      
       context.log(42);
       context.log(4.2);
       context.log(true);
 
       context.log({ 'objectKey': 'objectValue' });
       context.log([ 'arrayValue' ]);
-
-      context.log("Log+With+Plus+Symbol");
 
       return context.res.send('');
     }
