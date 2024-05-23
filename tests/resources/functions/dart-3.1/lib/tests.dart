@@ -113,6 +113,8 @@ When you can have two!
       context.log({ 'objectKey': 'objectValue' });
       context.log([ 'arrayValue' ]);
 
+      context.log("Log+With+Plus+Symbol");
+
       return context.res.send('');
     }
     case 'library': {
