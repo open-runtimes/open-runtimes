@@ -1,3 +1,5 @@
+import Foundation
+
 extension CharacterSet {
     /// Override to encode plus symbol as well
     static var urlAllowedCharacters: CharacterSet {
