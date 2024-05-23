@@ -372,6 +372,7 @@ class Base extends TestCase
         self::assertStringContainsString('Unsupported logs detected.', $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('{"objectKey":"objectValue"}', $response['headers']['x-open-runtimes-logs']);
         self::assertStringContainsString('["arrayValue"]', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Log+With+Plus+Symbol', $response['headers']['x-open-runtimes-logs']);
     }
 
     public function testLibrary(): void
