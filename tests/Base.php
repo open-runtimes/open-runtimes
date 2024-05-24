@@ -216,7 +216,6 @@ class Base extends TestCase
         self::assertEquals('PATCH', $response['body']);
     }
 
-    /*
     public function testRequestUrl(): void
     {
         $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl']);
@@ -360,6 +359,7 @@ class Base extends TestCase
         self::assertNull($body['emptyVar']);
     }
 
+    /*
     public function testLogs(): void
     {
         $response = $this->execute(headers: ['x-action' => 'logs' ]);

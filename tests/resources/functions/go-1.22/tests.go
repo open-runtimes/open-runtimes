@@ -2,6 +2,7 @@ package handler
 
 import (
 	"openruntimes/types"
+	"os"
 )
 
 func Main(Context *types.Context) types.ResponseOutput {
@@ -11,7 +12,7 @@ func Main(Context *types.Context) types.ResponseOutput {
 	case "plaintextResponse":
 		return Context.Res.Send("Hello World 👋", 200, nil)
 	case "jsonResponse":
-		return Context.Res.Json(map[string]any{
+		return Context.Res.Json(map[string]interface{}{
 			"json":    true,
 			"message": "Developers are awesome.",
 		}, 200, nil)
@@ -65,6 +66,59 @@ When you can have two!
 		return Context.Res.Send("FAIL", 404, nil)
 	case "requestMethod":
 		return Context.Res.Send(Context.Req.Method, 200, nil)
+	case "requestUrl":
+		return Context.Res.Json(map[string]interface{}{
+			"url":         Context.Req.Url,
+			"port":        Context.Req.Port,
+			"path":        Context.Req.Path,
+			"query":       Context.Req.Query,
+			"queryString": Context.Req.QueryString,
+			"scheme":      Context.Req.Scheme,
+			"host":        Context.Req.Host,
+		}, 200, nil)
+	case "requestHeaders":
+		return Context.Res.Json(Context.Req.Headers, 200, nil)
+	case "requestBodyPlaintext":
+		body := Context.Req.Body.(string)
+		return Context.Res.Send(body, 200, nil)
+	case "requestBodyJson":
+		switch Context.Req.Body.(type) {
+		case string:
+			return Context.Res.Json(map[string]interface{}{
+				"key1": "Missing key",
+				"key2": "Missing key",
+				"raw":  Context.Req.BodyRaw,
+			}, 200, nil)
+		default:
+			body := Context.Req.Body.(map[string]interface{})
+
+			key1, ok := body["key1"]
+			if !ok {
+				key1 = "Missing key"
+			}
+
+			key2, ok := body["key2"]
+			if !ok {
+				key2 = "Missing key"
+			}
+
+			return Context.Res.Json(map[string]interface{}{
+				"key1": key1,
+				"key2": key2,
+				"raw":  Context.Req.BodyRaw,
+			}, 200, nil)
+		}
+	case "envVars":
+		var emptyVar *string
+		varValue := os.Getenv("NOT_DEFINED_VAR")
+		if varValue != "" {
+			emptyVar = &varValue
+		}
+
+		return Context.Res.Json(map[string]interface{}{
+			"var":      os.Getenv("CUSTOM_ENV_VAR"),
+			"emptyVar": emptyVar,
+		}, 200, nil)
 	default:
 		Context.Error("Unknown action in tests.go")
 		return Context.Res.Send("", 500, nil)
@@ -72,31 +126,6 @@ When you can have two!
 }
 
 /*
-   case 'requestUrl':
-       return context.res.json({
-           url: context.req.url,
-           port: context.req.port,
-           path: context.req.path,
-           query: context.req.query,
-           queryString: context.req.queryString,
-           scheme: context.req.scheme,
-           host: context.req.host
-       });
-   case 'requestHeaders':
-       return context.res.json(context.req.headers);
-   case 'requestBodyPlaintext':
-       return context.res.send(context.req.body);
-   case 'requestBodyJson':
-       return context.res.json({
-           key1: context.req.body.key1 ?? 'Missing key',
-           key2: context.req.body.key2 ?? 'Missing key',
-           raw: context.req.bodyRaw
-       })
-   case 'envVars':
-       return context.res.json({
-           var: process.env.CUSTOM_ENV_VAR,
-           emptyVar: process.env.NOT_DEFINED_VAR ?? null
-       });
    case 'logs':
        console.log('Native log');
        context.log('Debug log');

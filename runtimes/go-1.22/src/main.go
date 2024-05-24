@@ -56,21 +56,17 @@ func action(w http.ResponseWriter, r *http.Request) error {
 
 	bodyRaw := string(bodyBytes)
 
-	var body any = bodyRaw
+	var body interface{} = bodyRaw
 
 	if contentType == "application/json" {
-		if bodyRaw == "" {
-			var bodyJson map[string]interface{}
-			err := json.Unmarshal([]byte(bodyRaw), &bodyJson)
+		if bodyRaw != "" {
+			err := json.Unmarshal([]byte(bodyRaw), &body)
 
 			if err != nil {
 				return errors.New("Could not parse body into a JSON.")
 			}
-
-			body = bodyJson
-
 		} else {
-			body = map[string]string{}
+			body = map[string]interface{}{}
 		}
 	}
 
@@ -99,7 +95,8 @@ func action(w http.ResponseWriter, r *http.Request) error {
 	var host string
 	var port int
 
-	hostHeader := r.Header.Get("host")
+	hostHeader := r.Host
+
 	if strings.Contains(hostHeader, ":") {
 		chunks := strings.SplitN(hostHeader, ":", 2)
 		host = chunks[0]
@@ -124,8 +121,8 @@ func action(w http.ResponseWriter, r *http.Request) error {
 	for _, chunk := range queryChunks {
 		queryChunk := strings.SplitN(chunk, "=", 2)
 
-		var queryKey string
-		var queryValue string
+		queryKey := ""
+		queryValue := ""
 
 		if len(queryChunk) > 0 {
 			queryKey = queryChunk[0]
@@ -135,12 +132,15 @@ func action(w http.ResponseWriter, r *http.Request) error {
 			queryValue = queryChunk[1]
 		}
 
-		query[queryKey] = queryValue
+		if queryKey != "" && queryValue != "" {
+			query[queryKey] = queryValue
+		}
 	}
 
 	portInUrl := ""
 	if port != defaultPort {
-		portInUrl = ":" + string(port)
+		portString := strconv.Itoa(port)
+		portInUrl = ":" + string(portString)
 	}
 
 	queryStringInUrl := ""
