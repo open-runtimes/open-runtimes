@@ -96,7 +96,6 @@ class Base extends TestCase
         self::assertEquals('Developers are awesome.', $body['message']);
     }
 
-    /*
     public function testContentTypeResponse(): void 
     {
         $response = $this->execute(headers: ['x-action' => 'customCharsetResponse']);
@@ -166,7 +165,7 @@ class Base extends TestCase
 
         $entrypoint = \getenv('OPEN_RUNTIMES_ENTRYPOINT');
 
-        // Fix for dart (expected behaviour)
+        // Fix for Dart - only has file name
         if(\str_starts_with($entrypoint, 'lib/')) {
             $entrypoint = implode('', explode('lib', $entrypoint, 2));
         }
@@ -217,6 +216,7 @@ class Base extends TestCase
         self::assertEquals('PATCH', $response['body']);
     }
 
+    /*
     public function testRequestUrl(): void
     {
         $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl']);

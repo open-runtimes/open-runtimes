@@ -56,16 +56,8 @@ func Main(Context types.Context) types.ResponseOutput {
 		return Context.Res.Send("", 500, nil)
 	}
 
-	res, err := Context.Res.Json(Response{
+	return Context.Res.Json(Response{
 		Message: "Hello Open Runtimes 👋",
 		Todo:    todo,
 	}, 200, nil)
-
-	if err != nil {
-		Context.Error(err)
-		return Context.Res.Send("", 500, nil)
-
-	}
-
-	return res
 }

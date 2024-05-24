@@ -24,7 +24,10 @@ func action(w http.ResponseWriter, r *http.Request) error {
 		safeTimeoutInteger, err := strconv.Atoi(timeout)
 
 		if err != nil {
-			return errors.New("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Header().Set("content-type", "text/plain")
+			fmt.Fprintf(w, "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.")
+			return nil
 		}
 
 		safeTimeout = safeTimeoutInteger
@@ -34,7 +37,10 @@ func action(w http.ResponseWriter, r *http.Request) error {
 	serverSecret := os.Getenv("OPEN_RUNTIMES_SECRET")
 
 	if secret == "" || secret != serverSecret {
-		return errors.New("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("content-type", "text/plain")
+		fmt.Fprintf(w, "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
+		return nil
 	}
 
 	contentType := r.Header.Get("content-type")
@@ -218,8 +224,8 @@ func action(w http.ResponseWriter, r *http.Request) error {
 		outputHeaders["content-type"] = contentTypeValue + "; charset=utf-8"
 	}
 
-	w.Header().Set("x-open-runtimes-logs", url.QueryEscape(strings.Join(context.Errors, "\n")))
-	w.Header().Set("x-open-runtimes-errors", url.QueryEscape(strings.Join(context.Logs, "\n")))
+	w.Header().Set("x-open-runtimes-logs", url.QueryEscape(strings.Join(context.Logs, "\n")))
+	w.Header().Set("x-open-runtimes-errors", url.QueryEscape(strings.Join(context.Errors, "\n")))
 
 	for key, value := range outputHeaders {
 		w.Header().Set(key, value)

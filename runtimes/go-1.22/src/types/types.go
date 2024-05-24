@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/json"
-	"errors"
 )
 
 type Context struct {
@@ -82,7 +81,7 @@ func (r Response) Send(body string, statusCode int, headers map[string]string) R
 	}
 }
 
-func (r Response) Json(bodyStruct any, statusCode int, headers map[string]string) (ResponseOutput, error) {
+func (r Response) Json(bodyStruct any, statusCode int, headers map[string]string) ResponseOutput {
 	if headers == nil {
 		headers = map[string]string{}
 	}
@@ -95,12 +94,12 @@ func (r Response) Json(bodyStruct any, statusCode int, headers map[string]string
 
 	jsonData, err := json.Marshal(bodyStruct)
 	if err != nil {
-		return ResponseOutput{}, errors.New("Error encoding JSON.")
+		return r.Send("Error encoding JSON.", 500, nil)
 	}
 
 	jsonString := string(jsonData[:])
 
-	return r.Send(jsonString, statusCode, headers), nil
+	return r.Send(jsonString, statusCode, headers)
 }
 
 func (r Response) Empty() ResponseOutput {

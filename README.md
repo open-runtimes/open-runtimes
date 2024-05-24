@@ -65,6 +65,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 | .NET | 6.0 | [openruntimes/dotnet:v3-6.0](https://hub.docker.com/r/openruntimes/dotnet) | [Examples](/runtimes/dotnet-6.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dotnet?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dotnet) |
 | .NET | 7.0 | [openruntimes/dotnet:v3-7.0](https://hub.docker.com/r/openruntimes/dotnet) | [Examples](/runtimes/dotnet-7.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dotnet?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dotnet) |
 | Java | 8 | [openruntimes/java:v3-8.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-8.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
+| Go | 1.22 | [openruntimes/go:v3-1.22](https://hub.docker.com/r/openruntimes/go) | [Examples](/runtimes/go-1.22/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/go?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/go) |
 | Java | 11 | [openruntimes/java:v3-11.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-11.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
 | Java | 17 | [openruntimes/java:v3-17.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-17.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
 | Java | 18 | [openruntimes/java:v3-18.0](https://hub.docker.com/r/openruntimes/java) | [Examples](/runtimes/java-18.0/example) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
@@ -174,11 +175,7 @@ Every request sent to any of the runtimes must have the `x-open-runtimes-secret`
 
 We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by Travis CI, and tests run for all runtimes.
 
-Before running the tests, make sure to install all required PHP libraries:
-
-```bash
-docker run --rm --interactive --tty --volume $PWD:/app composer install
-```
+Before running the tests, make sure to install [Act](https://nektosact.com/installation/index.html), a local GitHub Action runner:
 
 Once ready, you can test runtimes. First, you need to pick which runtime you want to test. In this example you will be testing `node-17.0` runtime. You can test any runtime; make sure to get runtime name, php class name, and entrypoint from a runtime-related test in PHP file in `tests` directory.
 
