@@ -376,7 +376,6 @@ class Base extends TestCase
         self::assertStringContainsString('Log+With+Plus+Symbol', $response['headers']['x-open-runtimes-logs']);
     }
 
-    /*
     public function testLibrary(): void
     {
         $response = $this->execute(headers: ['x-action' => 'library'], body: '5');
@@ -428,7 +427,6 @@ class Base extends TestCase
         self::assertEquals(500, $response['code']);
         self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
     }
-    */
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
         $expected = preg_replace('/\s+/', '', $expected);
