@@ -20,7 +20,7 @@ func (l Log) String() string {
 	return l.Message
 }
 
-func (c Context) Log(message any) {
+func (c *Context) Log(message any) {
 	switch message.(type) {
 	case string:
 		c.Logs = append(c.Logs, message.(string))
@@ -32,7 +32,7 @@ func (c Context) Log(message any) {
 	}
 }
 
-func (c Context) Error(message any) {
+func (c *Context) Error(message any) {
 	switch message.(type) {
 	case string:
 		c.Errors = append(c.Errors, message.(string))

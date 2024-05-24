@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  open-runtimes-bun-1.0:
-    container_name: open-runtimes-bun-1.0
+  open-runtimes-go-1.22:
+    container_name: open-runtimes-go-1.22
     build:
       context: .
     ports: 

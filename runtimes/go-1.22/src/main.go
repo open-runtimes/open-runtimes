@@ -69,11 +69,11 @@ func action(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	headers := map[string]string{}
-	for key, value := range headers {
+	for key, value := range r.Header {
 		key = strings.ToLower(key)
 
 		if strings.HasPrefix(key, "x-open-runtimes-") == false {
-			headers[key] = value
+			headers[key] = value[0]
 		}
 	}
 
@@ -175,7 +175,7 @@ func action(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	actionPromise := func(ch chan types.ResponseOutput) {
-		output = handler.Main(context)
+		output = handler.Main(&context)
 		ch <- output
 	}
 

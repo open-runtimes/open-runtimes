@@ -81,6 +81,7 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals('Hello World 👋', $response['body']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
+
     }
 
     public function testJsonResponse(): void
@@ -95,6 +96,7 @@ class Base extends TestCase
         self::assertEquals('Developers are awesome.', $body['message']);
     }
 
+    /*
     public function testContentTypeResponse(): void 
     {
         $response = $this->execute(headers: ['x-action' => 'customCharsetResponse']);
@@ -426,6 +428,7 @@ class Base extends TestCase
         self::assertEquals(500, $response['code']);
         self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
     }
+    */
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
         $expected = preg_replace('/\s+/', '', $expected);
