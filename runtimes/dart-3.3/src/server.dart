@@ -181,9 +181,9 @@ Future<shelf.Response> action(req) async {
   }
 
   responseHeaders['x-open-runtimes-logs'] =
-      Uri.encodeFull(context.logs.join('\n'));
+      Uri.encodeComponent(context.logs.join('\n'));
   responseHeaders['x-open-runtimes-errors'] =
-      Uri.encodeFull(context.errors.join('\n'));
+      Uri.encodeComponent(context.errors.join('\n'));
 
   return shelf.Response(output['statusCode'],
       encoding: encoding,
@@ -205,9 +205,9 @@ void main() async {
       Map<String, String> responseHeaders = {};
 
       responseHeaders['x-open-runtimes-logs'] =
-          Uri.encodeFull(logs.join('\n'));
+          Uri.encodeComponent(logs.join('\n'));
       responseHeaders['x-open-runtimes-errors'] =
-          Uri.encodeFull(errors.join('\n'));
+          Uri.encodeComponent(errors.join('\n'));
 
       return shelf.Response(500,
           encoding: Encoding.getByName('utf-8'),

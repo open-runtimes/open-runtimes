@@ -37,10 +37,10 @@ func execute(req: Request) async throws -> Response {
         var outputHeaders = HTTPHeaders()
 
         var logs = logsArr.joined(separator: "\n")
-        logs = logs.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? logs
+        logs = logs.addingPercentEncoding(withAllowedCharacters: .urlAllowedCharacters) ?? logs
 
         var errors = errorsArr.joined(separator: "\n")
-        errors = errors.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? errors
+        errors = errors.addingPercentEncoding(withAllowedCharacters: .urlAllowedCharacters) ?? errors
 
         outputHeaders.add(name: "x-open-runtimes-logs", value: logs)
         outputHeaders.add(name: "x-open-runtimes-errors", value: errors)
@@ -213,10 +213,10 @@ func action(req: Request) async throws -> Response {
     }
 
     var logs = context.logs.joined(separator: "\n")
-    logs = logs.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? logs
+    logs = logs.addingPercentEncoding(withAllowedCharacters: .urlAllowedCharacters) ?? logs
 
     var errors = context.errors.joined(separator: "\n")
-    errors = errors.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? errors
+    errors = errors.addingPercentEncoding(withAllowedCharacters: .urlAllowedCharacters) ?? errors
 
     outputHeaders.add(name: "x-open-runtimes-logs", value: logs)
     outputHeaders.add(name: "x-open-runtimes-errors", value: errors)
