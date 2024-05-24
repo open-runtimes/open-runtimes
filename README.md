@@ -177,12 +177,10 @@ We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically te
 
 Before running the tests, make sure to install [Act](https://nektosact.com/installation/index.html), a local GitHub Action runner:
 
-Once ready, you can test runtimes. First, you need to pick which runtime you want to test. In this example you will be testing `node-17.0` runtime. You can test any runtime; make sure to get runtime name, php class name, and entrypoint from a runtime-related test in PHP file in `tests` directory.
-
-To run tests, you execute `tests.sh` while providing information about runtime you want to test:
+Once ready, you can test all runtimes:
 
 ```bash
-RUNTIME='node-18.0' TEST_CLASS='Base' ENTRYPOINT='tests.js' sh tests.sh
+act pull_request
 ```
 
 ## Contributing
