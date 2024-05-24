@@ -175,12 +175,28 @@ Every request sent to any of the runtimes must have the `x-open-runtimes-secret`
 
 We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by Travis CI, and tests run for all runtimes.
 
-Before running the tests, make sure to install [Act](https://nektosact.com/installation/index.html), a local GitHub Action runner:
-
-Once ready, you can test all runtimes:
+Before running the tests, make sure to install all required PHP libraries:
 
 ```bash
-act pull_request
+docker run --rm --interactive --tty --volume $PWD:/app composer install
+```
+
+Also install [jq](https://nektosact.com/installation/index.html), a local GitHub Action runner.
+
+MacOS:
+```bash
+brew install yq
+```
+
+Linux:
+```bash
+sudo apt-get update && sudo apt-get install yq
+```
+
+To run test for a runtime, get runtime name (folder name) and execute below command:
+
+```bash
+sh tests.sh go-1.22
 ```
 
 ## Contributing
