@@ -359,7 +359,6 @@ class Base extends TestCase
         self::assertNull($body['emptyVar']);
     }
 
-    /*
     public function testLogs(): void
     {
         $response = $this->execute(headers: ['x-action' => 'logs' ]);
@@ -377,6 +376,7 @@ class Base extends TestCase
         self::assertStringContainsString('Log+With+Plus+Symbol', $response['headers']['x-open-runtimes-logs']);
     }
 
+    /*
     public function testLibrary(): void
     {
         $response = $this->execute(headers: ['x-action' => 'library'], body: '5');

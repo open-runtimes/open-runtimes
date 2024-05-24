@@ -132,7 +132,7 @@ func action(w http.ResponseWriter, r *http.Request) error {
 			queryValue = queryChunk[1]
 		}
 
-		if queryKey != "" && queryValue != "" {
+		if queryKey != "" {
 			query[queryKey] = queryValue
 		}
 	}

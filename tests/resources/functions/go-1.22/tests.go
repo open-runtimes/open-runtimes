@@ -119,6 +119,21 @@ When you can have two!
 			"var":      os.Getenv("CUSTOM_ENV_VAR"),
 			"emptyVar": emptyVar,
 		}, 200, nil)
+	case "logs":
+		Context.Log("Native log") // TODO: Support native log
+		Context.Log("Debug log")
+		Context.Error("Error log")
+
+		Context.Log("Log+With+Plus+Symbol")
+
+		Context.Log(42)
+		Context.Log(4.2)
+		Context.Log(true)
+
+		Context.Log(map[string]string{"objectKey": "objectValue"})
+		Context.Log([]string{"arrayValue"})
+
+		return Context.Res.Send("", 200, nil)
 	default:
 		Context.Error("Unknown action in tests.go")
 		return Context.Res.Send("", 500, nil)
@@ -126,21 +141,6 @@ When you can have two!
 }
 
 /*
-   case 'logs':
-       console.log('Native log');
-       context.log('Debug log');
-       context.error('Error log');
-
-       context.log("Log+With+Plus+Symbol");
-
-       context.log(42);
-       context.log(4.2);
-       context.log(true);
-
-       context.log({ objectKey: 'objectValue' });
-       context.log([ 'arrayValue' ]);
-
-       return context.res.send('');
    case 'library':
        const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyRaw}`).then(r => r.json());
        return context.res.json({ todo });
