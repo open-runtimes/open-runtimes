@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import io.javalin.Javalin
 import io.javalin.http.Context
+import io.javalin.http.HandlerType
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.*
@@ -28,7 +29,7 @@ suspend fun main() {
         .patch("/*") { runBlocking { execute(it) } }
         .options("/*") { runBlocking { execute(it) } }
         .head("/*") { runBlocking { execute(it) } }
-        .trace("/*") { runBlocking { execute(it) } }
+        .addHandler(HandlerType.TRACE, "/*") { runBlocking { execute(it) } }
 }
 
 suspend fun execute(ctx: Context) {
