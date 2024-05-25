@@ -28,6 +28,7 @@ suspend fun main() {
         .patch("/*") { runBlocking { execute(it) } }
         .options("/*") { runBlocking { execute(it) } }
         .head("/*") { runBlocking { execute(it) } }
+        .trace("/*") { runBlocking { execute(it) } }
 }
 
 suspend fun execute(ctx: Context) {
