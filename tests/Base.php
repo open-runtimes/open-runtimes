@@ -213,6 +213,15 @@ class Base extends TestCase
         $response = $this->execute(method: 'PATCH', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('PATCH', $response['body']);
+
+        $response = $this->execute(method: 'HEAD', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        // Some runtimes either return '', while some return 'HEAD'
+        // self::assertEquals('', $response['body']);
+
+        $response = $this->execute(method: 'TRACE', headers: ['x-action' => 'requestMethod']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('TRACE', $response['body']);
     }
 
     public function testRequestUrl(): void
