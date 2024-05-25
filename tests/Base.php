@@ -216,8 +216,7 @@ class Base extends TestCase
 
         $response = $this->execute(method: 'HEAD', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
-        // Some runtimes either return '', while some return 'HEAD'
-        // self::assertEquals('', $response['body']);
+        self::assertContains($response['body'], ['HEAD', '']);
 
         $response = $this->execute(method: 'TRACE', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
