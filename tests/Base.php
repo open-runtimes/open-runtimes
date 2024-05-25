@@ -208,7 +208,7 @@ class Base extends TestCase
         $response = $this->execute(method: 'OPTIONS', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         // Bug in C++ framework makes this an empty string
-        // self::assertEquals('OPTIONS', $response['body']);
+        self::assertEquals('OPTIONS', $response['body']);
 
         $response = $this->execute(method: 'PATCH', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
