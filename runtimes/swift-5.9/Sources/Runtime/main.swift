@@ -9,6 +9,8 @@ app.on(.GET, "", body: .stream, use: execute)
 app.on(.GET, "**", body: .stream, use: execute)
 app.on(.POST, "", body: .stream, use: execute)
 app.on(.POST, "**", body: .stream, use: execute)
+app.on(.HEAD, "", body: .stream, use: execute)
+app.on(.HEAD, "**", body: .stream, use: execute)
 app.on(.PATCH, "", body: .stream, use: execute)
 app.on(.PATCH, "**", body: .stream, use: execute)
 app.on(.PUT, "", body: .stream, use: execute)
@@ -17,6 +19,8 @@ app.on(.DELETE, "", body: .stream, use: execute)
 app.on(.DELETE, "**", body: .stream, use: execute)
 app.on(.OPTIONS, "", body: .stream, use: execute)
 app.on(.OPTIONS, "**", body: .stream, use: execute)
+app.on(.TRACE, "", body: .stream, use: execute)
+app.on(.TRACE, "**", body: .stream, use: execute)
 
 func execute(req: Request) async throws -> Response {
     do {
