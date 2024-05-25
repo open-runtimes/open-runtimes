@@ -425,6 +425,7 @@ int main()
             },
             {
                 drogon::Get,
+                drogon::Head,
                 drogon::Post,
                 drogon::Put,
                 drogon::Patch,
