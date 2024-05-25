@@ -1,5 +1,5 @@
 tasks:
-  - init: docker run --rm --interactive --tty --volume $PWD:/app composer install && sudo apt-get update && sudo apt-get install yq
+  - init: docker run --rm --interactive --tty --volume $PWD:/app composer install && brew install yq
 ports:
   - port: 3000
     onOpen: notify

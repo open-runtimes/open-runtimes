@@ -181,16 +181,10 @@ Before running the tests, make sure to install all required PHP libraries:
 docker run --rm --interactive --tty --volume $PWD:/app composer install
 ```
 
-Also install [jq](https://nektosact.com/installation/index.html), a local GitHub Action runner.
+You also need to install [jq](https://nektosact.com/installation/index.html):
 
-MacOS:
 ```bash
 brew install yq
-```
-
-Linux:
-```bash
-sudo apt-get update && sudo apt-get install yq
 ```
 
 To run test for a runtime, get runtime name (folder name) and execute below command:
@@ -198,6 +192,8 @@ To run test for a runtime, get runtime name (folder name) and execute below comm
 ```bash
 sh tests.sh go-1.22
 ```
+
+> Replace `go-1.22` with runtime name that you want to test
 
 ## Contributing
 

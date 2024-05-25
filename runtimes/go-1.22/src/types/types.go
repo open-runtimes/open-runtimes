@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type Context struct {
@@ -27,7 +28,15 @@ func (c *Context) Log(message interface{}) {
 		log := message.(Log)
 		c.Logs = append(c.Logs, log.String())
 	default:
-		c.Logs = append(c.Logs, "Unsupported log. Please provide string or Log when logging into context.")
+		jsonData, err := json.Marshal(message)
+		if err != nil {
+			logString := fmt.Sprintf("%v", message)
+			c.Logs = append(c.Logs, logString)
+			return
+		}
+
+		jsonString := string(jsonData)
+		c.Logs = append(c.Logs, jsonString)
 	}
 }
 
@@ -39,7 +48,15 @@ func (c *Context) Error(message interface{}) {
 		log := message.(Log)
 		c.Errors = append(c.Errors, log.String())
 	default:
-		c.Errors = append(c.Errors, "Unsupported log. Please provide string or Log when logging into context.")
+		jsonData, err := json.Marshal(message)
+		if err != nil {
+			logString := fmt.Sprintf("%v", message)
+			c.Errors = append(c.Errors, logString)
+			return
+		}
+
+		jsonString := string(jsonData)
+		c.Errors = append(c.Errors, jsonString)
 	}
 }
 

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"openruntimes/handler"
@@ -187,6 +189,30 @@ func action(w http.ResponseWriter, r *http.Request) error {
 
 	outputChan := make(chan types.ResponseOutput)
 
+	stdout := os.Stdout
+	stderr := os.Stderr
+	defer func() {
+		os.Stdout = stdout
+		os.Stderr = stderr
+		log.SetOutput(os.Stderr)
+	}()
+
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		return errors.New("Could not prepare log capturing.")
+	}
+
+	os.Stdout = writer
+	os.Stderr = writer
+	log.SetOutput(writer)
+
+	customstd := make(chan string)
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, reader)
+		customstd <- buf.String()
+	}()
+
 	if safeTimeout != 0 {
 		go timeoutPromise(outputChan)
 	}
@@ -194,6 +220,12 @@ func action(w http.ResponseWriter, r *http.Request) error {
 	go actionPromise(outputChan)
 
 	output = <-outputChan
+
+	writer.Close()
+
+	os.Stdout = stdout
+	os.Stderr = stderr
+	log.SetOutput(os.Stderr)
 
 	if output.StatusCode == 0 {
 		output.StatusCode = 200
@@ -222,6 +254,21 @@ func action(w http.ResponseWriter, r *http.Request) error {
 
 	if strings.HasPrefix(contentTypeValue, "multipart/") == false && strings.Contains(contentTypeValue, "charset=") == false {
 		outputHeaders["content-type"] = contentTypeValue + "; charset=utf-8"
+	}
+
+	customLog := <-customstd
+	if customLog != "" {
+		context.Log("")
+		context.Log(
+			"----------------------------------------------------------------------------")
+		context.Log(
+			"Unsupported logs detected. Use Context.Log() or Context.Error() for logging.")
+
+		context.Log(
+			"----------------------------------------------------------------------------")
+		context.Log(customLog)
+		context.Log(
+			"----------------------------------------------------------------------------")
 	}
 
 	w.Header().Set("x-open-runtimes-logs", url.QueryEscape(strings.Join(context.Logs, "\n")))

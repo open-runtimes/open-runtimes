@@ -1,8 +1,13 @@
 package handler
 
 import (
+	"encoding/json"
+	"fmt"
 	"openruntimes/types"
 	"os"
+	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 func Main(Context *types.Context) types.ResponseOutput {
@@ -120,7 +125,7 @@ When you can have two!
 			"emptyVar": emptyVar,
 		}, 200, nil)
 	case "logs":
-		Context.Log("Native log") // TODO: Support native log
+		fmt.Println("Native log")
 		Context.Log("Debug log")
 		Context.Error("Error log")
 
@@ -134,23 +139,47 @@ When you can have two!
 		Context.Log([]string{"arrayValue"})
 
 		return Context.Res.Send("", 200, nil)
+	case "library":
+		client := resty.New()
+		resp, errResponse := client.R().
+			SetHeader("Accept", "application/json").
+			Get("https://jsonplaceholder.typicode.com/todos/" + Context.Req.BodyRaw)
+
+		if errResponse != nil {
+			Context.Error(errResponse)
+			return Context.Res.Send("", 500, nil)
+		}
+
+		body := resp.String()
+
+		type TodoObject struct {
+			UserId    int    `json:"userId"`
+			Id        int    `json:"id"`
+			Title     string `json:"title"`
+			Completed bool   `json:"completed"`
+		}
+
+		var todo TodoObject
+		errJson := json.Unmarshal([]byte(body), &todo)
+
+		if errJson != nil {
+			Context.Error(errJson)
+			return Context.Res.Send("", 500, nil)
+		}
+
+		return Context.Res.Json(map[string]interface{}{
+			"todo": todo,
+		}, 200, nil)
+	case "timeout":
+		Context.Log("Timeout start.")
+
+		time.Sleep(3 * time.Second)
+
+		Context.Log("Timeout end.")
+
+		return Context.Res.Send("Successful response.", 200, nil)
 	default:
 		Context.Error("Unknown action in tests.go")
 		return Context.Res.Send("", 500, nil)
 	}
 }
-
-/*
-   case 'library':
-       const todo = await fetch(`https://jsonplaceholder.typicode.com/todos/${context.req.bodyRaw}`).then(r => r.json());
-       return context.res.json({ todo });
-   case 'timeout':
-       context.log('Timeout start.');
-
-       await new Promise((resolve) => {
-           setTimeout(resolve, 3000);
-       });
-
-       context.log('Timeout end.');
-       return context.res.send('Successful response.');
-*/
