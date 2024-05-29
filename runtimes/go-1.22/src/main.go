@@ -118,25 +118,14 @@ func action(w http.ResponseWriter, r *http.Request) error {
 
 	queryString := r.URL.RawQuery
 
+	queryValues, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+		return errors.New("Could not parse url params.")
+	}
+
 	query := map[string]string{}
-	queryChunks := strings.Split(queryString, "&")
-	for _, chunk := range queryChunks {
-		queryChunk := strings.SplitN(chunk, "=", 2)
-
-		queryKey := ""
-		queryValue := ""
-
-		if len(queryChunk) > 0 {
-			queryKey = queryChunk[0]
-		}
-
-		if len(queryChunk) > 1 {
-			queryValue = queryChunk[1]
-		}
-
-		if queryKey != "" {
-			query[queryKey] = queryValue
-		}
+	for key, value := range queryValues {
+		query[key] = value[0]
 	}
 
 	portInUrl := ""
