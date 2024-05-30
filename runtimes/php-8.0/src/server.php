@@ -104,7 +104,7 @@ $action = function($req, $res) use (&$userFunction) {
         $safeTimeout = \intval($timeout);
     }
 
-    if (($requestHeaders['x-open-runtimes-secret'] ?? '') === '' || ($requestHeaders['x-open-runtimes-secret'] ?? '') !== (getenv('OPEN_RUNTIMES_SECRET') ?? '')) {
+    if((getenv('OPEN_RUNTIMES_SECRET') ?? '') != "" && ($requestHeaders['x-open-runtimes-secret'] ?? '') !== getenv('OPEN_RUNTIMES_SECRET')) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
         return;

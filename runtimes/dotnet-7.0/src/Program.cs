@@ -60,7 +60,7 @@ namespace DotNetRuntime
                 ? secretValue.ToString()
                 : string.Empty;
 
-            if(secret == string.Empty || secret != (Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? ""))
+            if(Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? "" != "" && secret != Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET")) {
             {
                 return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
             }

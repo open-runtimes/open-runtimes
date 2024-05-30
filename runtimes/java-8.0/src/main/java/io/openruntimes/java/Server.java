@@ -98,7 +98,7 @@ public class Server {
             serverSecret = "";
         }
 
-        if (reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals("") || !reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(serverSecret)) {
+        if(!serverSecret.equals("") && !reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(serverSecret)) {
             return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
         }
 

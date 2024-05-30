@@ -13,7 +13,7 @@ const action = async (request) => {
       safeTimeout = +timeout;
   }
 
-  if ((request.headers.get("x-open-runtimes-secret") ?? '')  === '' || (request.headers.get("x-open-runtimes-secret") ?? '') !== (Bun.env["OPEN_RUNTIMES_SECRET"] ?? '')) {
+  if(Bun.env["OPEN_RUNTIMES_SECRET"] && (request.headers.get("x-open-runtimes-secret") ?? '') !== Bun.env["OPEN_RUNTIMES_SECRET"]) {
     return new Response('Unauthorized. Provide correct "x-open-runtimes-secret" header.', {
       status: 500
     });

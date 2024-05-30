@@ -80,7 +80,7 @@ async def action(request):
             
         safeTimeout = int(timeout)
 
-    if (request.headers.get('x-open-runtimes-secret', '') == '' or request.headers.get('x-open-runtimes-secret', '') != os.getenv('OPEN_RUNTIMES_SECRET', '')):
+    if (os.getenv('OPEN_RUNTIMES_SECRET', '') != '' and request.headers.get('x-open-runtimes-secret', '') != os.getenv('OPEN_RUNTIMES_SECRET', '')):
         return 'Unauthorized. Provide correct "x-open-runtimes-secret" header.', 500
 
     context = Context()
