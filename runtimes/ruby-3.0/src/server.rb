@@ -106,7 +106,7 @@ def action(request, response)
   secret = request.env['HTTP_X_OPEN_RUNTIMES_SECRET'] || ''
   server_secret = ENV['OPEN_RUNTIMES_SECRET'] || ''
 
-  if secret.empty? || secret != server_secret
+  if !(server_secret.empty?) && secret != server_secret
     response.status = 500
     response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.'
     return

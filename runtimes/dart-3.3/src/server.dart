@@ -17,7 +17,7 @@ Future<shelf.Response> action(req) async {
     }
   }
 
-  if((Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '') !== '' && (req.headers['x-open-runtimes-secret'] ?? '') != Platform.environment['OPEN_RUNTIMES_SECRET']) {
+  if((Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '') != '' && (req.headers['x-open-runtimes-secret'] ?? '') != Platform.environment['OPEN_RUNTIMES_SECRET']) {
     return shelf.Response(500,
         body:
             'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
