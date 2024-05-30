@@ -180,13 +180,19 @@ Before running the tests, make sure to install all required PHP libraries:
 docker run --rm --interactive --tty --volume $PWD:/app composer install
 ```
 
-Once ready, you can test runtimes. First, you need to pick which runtime you want to test. In this example you will be testing `node-17.0` runtime. You can test any runtime; make sure to get runtime name, php class name, and entrypoint from a runtime-related test in PHP file in `tests` directory.
-
-To run tests, you execute `tests.sh` while providing information about runtime you want to test:
+You also need to install [jq](https://nektosact.com/installation/index.html):
 
 ```bash
-RUNTIME='node-18.0' TEST_CLASS='Base' ENTRYPOINT='tests.js' sh tests.sh
+brew install yq
 ```
+
+To run test for a runtime, get runtime name (folder name) and execute below command:
+
+```bash
+sh tests.sh go-1.22
+```
+
+> Replace `go-1.22` with runtime name that you want to test
 
 ## Contributing
 
