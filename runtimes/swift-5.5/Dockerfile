@@ -1,6 +1,7 @@
 FROM swiftarm/swift:5.5.3-ubuntu-jammy
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
 RUN mkdir -p /mnt/code
 RUN mkdir -p /usr/local/build
