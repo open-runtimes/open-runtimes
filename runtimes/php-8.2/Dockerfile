@@ -31,7 +31,9 @@ RUN \
 FROM php:8.2-cli-alpine3.19 as final
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
+ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
 ENV OPEN_RUNTIMES_ENTRYPOINT=index.php
 
 RUN \

@@ -1,7 +1,9 @@
 FROM python:3.10-alpine3.19
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
+ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
 ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
 
 RUN mkdir -p /mnt/code

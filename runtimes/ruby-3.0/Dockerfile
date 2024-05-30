@@ -1,7 +1,9 @@
 FROM ruby:3.0-alpine3.16
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
+ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
 ENV OPEN_RUNTIMES_ENTRYPOINT=index.rb
 
 RUN mkdir -p /mnt/code
