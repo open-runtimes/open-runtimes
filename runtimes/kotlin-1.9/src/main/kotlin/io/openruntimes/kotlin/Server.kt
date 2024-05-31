@@ -81,7 +81,7 @@ suspend fun action(ctx: Context) {
     val secret = ctx.header("x-open-runtimes-secret") ?: ""
     val serverSecret = System.getenv("OPEN_RUNTIMES_SECRET") ?: ""
 
-    if (secret == "" || secret != serverSecret) {
+    if (serverSecret != "" && secret != serverSecret) {
         ctx.status(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
         return
     }

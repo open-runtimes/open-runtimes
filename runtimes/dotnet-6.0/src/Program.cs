@@ -51,7 +51,9 @@ static async Task<IResult> Action(HttpRequest request)
         ? secretValue.ToString()
         : string.Empty;
 
-    if(secret == string.Empty || secret != (Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? ""))
+
+    string serverSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET");
+    if (!string.IsNullOrEmpty(serverSecret) && secret != serverSecret)
     {
         return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
     }

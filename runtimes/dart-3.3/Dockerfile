@@ -1,7 +1,9 @@
 FROM dart:3.3.1
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
+ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
 ENV OPEN_RUNTIMES_ENTRYPOINT=lib/main.dart
 
 RUN mkdir -p /mnt/code

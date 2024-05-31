@@ -1,6 +1,7 @@
 FROM eclipse-temurin:11-jdk-jammy
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
 RUN mkdir -p /mnt/code
 RUN mkdir -p /usr/local/build

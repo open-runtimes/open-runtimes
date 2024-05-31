@@ -93,8 +93,8 @@ public class Server {
             serverSecret = "";
         }
 
-        if (reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals("") || !reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(serverSecret)) {
-            return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
+
+        if(!serverSecret.equals("") && !reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(serverSecret)) {            return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
         }
 
         String bodyRaw = req.body() == null ? "" : new String(req.body(), StandardCharsets.UTF_8);

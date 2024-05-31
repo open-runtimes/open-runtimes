@@ -31,8 +31,8 @@ const action = async (ctx: any) => {
 
       safeTimeout = +timeout;
   }
-
-  if ((ctx.request.headers.get("x-open-runtimes-secret") ?? '')  === '' || (ctx.request.headers.get("x-open-runtimes-secret") ?? '') !== (Deno.env.get("OPEN_RUNTIMES_SECRET") ?? '')) {
+  
+  if(Deno.env.get("OPEN_RUNTIMES_SECRET") && (ctx.request.headers.get("x-open-runtimes-secret") ?? '') !== Deno.env.get("OPEN_RUNTIMES_SECRET")) {
     ctx.response.status = 500;
     ctx.response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.';
     return;

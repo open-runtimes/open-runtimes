@@ -1,6 +1,7 @@
 FROM alpine:3.16
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV DROGON_VERSION=v1.7.5

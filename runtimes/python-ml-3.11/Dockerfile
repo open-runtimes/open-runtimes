@@ -1,6 +1,7 @@
 FROM python:3.11-bookworm
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
 RUN apt-get update && apt-get install -y gcc pkg-config libhdf5-dev
 

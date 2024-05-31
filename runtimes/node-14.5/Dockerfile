@@ -1,7 +1,9 @@
 FROM node:14.5-alpine3.12
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
+ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
 ENV OPEN_RUNTIMES_ENTRYPOINT=index.js
 
 RUN mkdir -p /mnt/code

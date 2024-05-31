@@ -72,12 +72,13 @@ func action(req: Request) async throws -> Response {
         safeTimeout = timeoutInt
     }
 
-    if !req.headers.contains(name: "x-open-runtimes-secret")
-        || req.headers["x-open-runtimes-secret"].first != ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] {
-        return Response(
-            status: .internalServerError,
-            body: .init(string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
-        )
+    if let serverSecret = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] {
+        if !req.headers.contains(name: "x-open-runtimes-secret") || req.headers["x-open-runtimes-secret"].first != serverSecret {
+            return Response(
+                status: .internalServerError,
+                body: .init(string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
+            )
+        }
     }
 
     let bodyRaw = req.body.string ?? ""

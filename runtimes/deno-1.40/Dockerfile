@@ -1,7 +1,9 @@
 FROM denoland/deno:alpine-1.41.2
 
 LABEL maintainer="team@appwrite.io"
+LABEL namespace="open-runtimes"
 
+ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
 ENV OPEN_RUNTIMES_ENTRYPOINT=mod.ts
 
 RUN mkdir -p /mnt/code

@@ -56,7 +56,7 @@ int main()
                     }
 
                     std::string secret = req->getHeader("x-open-runtimes-secret");
-                    if (secret.empty() || secret != std::getenv("OPEN_RUNTIMES_SECRET"))
+                    if (std::getenv("OPEN_RUNTIMES_SECRET") != nullptr && secret != std::getenv("OPEN_RUNTIMES_SECRET"))
                     {
                         res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
                         res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
