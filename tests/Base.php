@@ -26,10 +26,6 @@ class Base extends TestCase
             'x-open-runtimes-secret' => \getenv('OPEN_RUNTIMES_SECRET')
         ], $headers);
 
-        if(!empty($id)) {
-            $headers['x-open-runtimes-id'] = $id;
-        }
-
         $headersParsed = [];
 
         foreach ($headers as $header => $value) {
