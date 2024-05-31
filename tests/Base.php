@@ -18,7 +18,7 @@ class Base extends TestCase
     {
     }
 
-    private function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000, $id = null) {
+    private function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000) {
         $ch = \curl_init();
 
         $headers = \array_merge([
@@ -124,11 +124,10 @@ class Base extends TestCase
 
     public function testNoResponse(): void
     {
-        $id = \uniqid();
-        $response = $this->execute(headers: ['x-action' => 'noResponse'], id: $id);
+        $response = $this->execute(headers: ['x-action' => 'noResponse']);
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertStringContainsString('Return statement missing.', $this->getErrors($id));
+        self::assertStringContainsString('Return statement missing.', $this->getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testDoubleResponse(): void
@@ -158,12 +157,11 @@ class Base extends TestCase
 
     public function testException(): void
     {
-        $id = \uniqid();
-        $response = $this->execute(headers: ['x-action' => 'nonExistingAction'], id: $id);
+        $response = $this->execute(headers: ['x-action' => 'nonExistingAction']);
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertEmpty($this->getLogs($id));
-        self::assertStringContainsString('Unknown action', $this->getErrors($id));
+        self::assertEmpty($this->getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('Unknown action', $this->getErrors($response['headers']['x-open-runtimes-log-id']));
 
         $entrypoint = \getenv('OPEN_RUNTIMES_ENTRYPOINT');
 
@@ -172,7 +170,7 @@ class Base extends TestCase
             $entrypoint = implode('', explode('lib', $entrypoint, 2));
         }
 
-        self::assertStringContainsString($entrypoint, $this->getErrors($id));
+        self::assertStringContainsString($entrypoint, $this->getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testWrongSecret(): void
@@ -363,11 +361,9 @@ class Base extends TestCase
 
     public function testLogs(): void
     {
-
-        $id = \uniqid();
-        $response = $this->execute(headers: ['x-action' => 'logs' ], id: $id);
-        $logs = $this->getLogs($id);
-        $errors = $this->getErrors($id);
+        $response = $this->execute(headers: ['x-action' => 'logs' ]);
+        $logs = $this->getLogs($response['headers']['x-open-runtimes-log-id']);
+        $errors = $this->getErrors($response['headers']['x-open-runtimes-log-id']);
         self::assertEquals(200, $response['code']);
         self::assertEmpty($response['body']);
         self::assertStringContainsString('Debug log', $logs);
@@ -397,12 +393,11 @@ class Base extends TestCase
 
     public function testInvalidJson(): void
     {
-        $id = \uniqid();
-        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}', id: $id);
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
         
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
-        self::assertThat($this->getErrors($id), self::callback(function($value) {
+        self::assertThat($this->getErrors($response['headers']['x-open-runtimes-log-id']), self::callback(function($value) {
             $value = \strtolower($value);
 
             // Code=3840 is Swift code for JSON error
@@ -417,19 +412,18 @@ class Base extends TestCase
 
     public function testTimeout(): void
     {
-        $id = \uniqid();
-        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1'], id: $id);
+        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
-        self::assertStringContainsString('Execution timed out.', $this->getErrors($id));
-        self::assertStringContainsString('Timeout start.', $this->getLogs($id));
-        self::assertStringNotContainsString('Timeout end.', $this->getLogs($id));
+        self::assertStringContainsString('Execution timed out.', $this->getErrors($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('Timeout start.', $this->getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringNotContainsString('Timeout end.', $this->getLogs($response['headers']['x-open-runtimes-log-id']));
 
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '5']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('Successful response.', $response['body']);
-        self::assertStringContainsString('Timeout start.', $this->getLogs($id));
-        self::assertStringContainsString('Timeout end.', $this->getLogs($id));
+        self::assertStringContainsString('Timeout start.', $this->getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('Timeout end.', $this->getLogs($response['headers']['x-open-runtimes-log-id']));
 
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
         self::assertEquals(500, $response['code']);
