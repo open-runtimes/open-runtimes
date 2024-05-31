@@ -5,20 +5,32 @@ const { text: parseText, json: parseJson, send } = require("micro");
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
+const writeLogs = (id, type, log) => {
+    fs.appendFileSync(`/mnt/logs/${id}_${type}.log`, log);
+}
+
 const server = micro(async (req, res) => {
     try {
         await action(req, res);
     } catch(e) {
-        const logs = [];
-        const errors = [e.stack || e];
-        res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
-        res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
+        const id = req.headers[`x-open-runtimes-id`] ?? '';
+
+        if(id) {
+            const logs = [];
+            const errors = [e.stack || e];
+
+            writeLogs(id, 'logs', logs.join('\n'));
+            writeLogs(id, 'errors', errors.join('\n'));
+        }
+
         return send(res, 500, '');
     }
 });
 
 const action = async (req, res) => {
     const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
+    const id = req.headers[`x-open-runtimes-id`] ?? '';
+
     let safeTimeout = null;
     if(timeout) {
         if(isNaN(timeout) || timeout === 0) {
@@ -31,9 +43,6 @@ const action = async (req, res) => {
     if(process.env['OPEN_RUNTIMES_SECRET'] && req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
-
-    const logs = [];
-    const errors = [];
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
     const bodyRaw = await parseText(req);
@@ -105,17 +114,21 @@ const action = async (req, res) => {
             }
         },
         log: function (message) {
+            if(!id) {
+                return;
+            }
+
             if (message instanceof Object || Array.isArray(message)) {
-                logs.push(JSON.stringify(message));
+                writeLogs(id, 'logs', JSON.stringify(message));
             } else {
-                logs.push(message + "");
+                writeLogs(id, 'logs', message + "");
             }
         },
         error: function (message) {
             if (message instanceof Object || Array.isArray(message)) {
-                errors.push(JSON.stringify(message));
+                writeLogs(id, 'errors', JSON.stringify(message));
             } else {
-                errors.push(message + "");
+                writeLogs(id, 'errors', message + "");
             }
         },
     };
@@ -222,17 +235,11 @@ const action = async (req, res) => {
         );
     }
     
-    if(customstd) {
-        context.log('');
-        context.log('----------------------------------------------------------------------------');
-        context.log('Unsupported logs detected. Use context.log() or context.error() for logging.');
-        context.log('----------------------------------------------------------------------------');
-        context.log(customstd);
-        context.log('----------------------------------------------------------------------------');
+    if(id && customstd) {
+        writeLogs(id, 'logs', `Native logs detected. Use context.log() or context.error() for better experience.
+Logs:
+${customstd}`);
     }
-
-    res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
-    res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
 
     return send(res, output.statusCode, output.body);
 };

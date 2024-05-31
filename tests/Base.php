@@ -18,13 +18,18 @@ class Base extends TestCase
     {
     }
 
-    private function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000) {
+    private function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000, $id = null) {
         $ch = \curl_init();
 
         $headers = \array_merge([
             'content-type' => 'text/plain',
             'x-open-runtimes-secret' => \getenv('OPEN_RUNTIMES_SECRET')
         ], $headers);
+
+        if(!empty($id)) {
+            $headers['x-open-runtimes-id'] = $id;
+        }
+
         $headersParsed = [];
 
         foreach ($headers as $header => $value) {
@@ -43,10 +48,6 @@ class Base extends TestCase
         
                 $key = strtolower(trim($header[0]));
                 $responseHeaders[$key] = trim($header[1]);
-
-                if(\in_array($key, ['x-open-runtimes-logs', 'x-open-runtimes-errors'])) {
-                    $responseHeaders[$key] = \urldecode($responseHeaders[$key]);
-                }
         
                 return $len;
             },
@@ -123,10 +124,11 @@ class Base extends TestCase
 
     public function testNoResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'noResponse']);
+        $id = \uniqid();
+        $response = $this->execute(headers: ['x-action' => 'noResponse'], id: $id);
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertStringContainsString('Return statement missing.', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString('Return statement missing.', $this->getErrors($id));
     }
 
     public function testDoubleResponse(): void
@@ -156,11 +158,12 @@ class Base extends TestCase
 
     public function testException(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'nonExistingAction']);
+        $id = \uniqid();
+        $response = $this->execute(headers: ['x-action' => 'nonExistingAction'], id: $id);
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertEmpty($response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Unknown action', $response['headers']['x-open-runtimes-errors']);
+        self::assertEmpty($this->getLogs($id));
+        self::assertStringContainsString('Unknown action', $this->getErrors($id));
 
         $entrypoint = \getenv('OPEN_RUNTIMES_ENTRYPOINT');
 
@@ -169,7 +172,7 @@ class Base extends TestCase
             $entrypoint = implode('', explode('lib', $entrypoint, 2));
         }
 
-        self::assertStringContainsString($entrypoint, $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString($entrypoint, $this->getErrors($id));
     }
 
     public function testWrongSecret(): void
@@ -360,19 +363,23 @@ class Base extends TestCase
 
     public function testLogs(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'logs' ]);
+
+        $id = \uniqid();
+        $response = $this->execute(headers: ['x-action' => 'logs' ], id: $id);
+        $logs = $this->getLogs($id);
+        $errors = $this->getErrors($id);
         self::assertEquals(200, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertStringContainsString('Debug log', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString(42, $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString(4.2, $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('true', \strtolower($response['headers']['x-open-runtimes-logs'])); // strlower allows True in Python
-        self::assertStringContainsString('Error log', $response['headers']['x-open-runtimes-errors']);
-        self::assertStringContainsString('Native log', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Unsupported logs detected.', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('{"objectKey":"objectValue"}', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('["arrayValue"]', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Log+With+Plus+Symbol', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Debug log', $logs);
+        self::assertStringContainsString(42, $logs);
+        self::assertStringContainsString(4.2, $logs);
+        self::assertStringContainsString('true', \strtolower($logs)); // strlower allows True in Python
+        self::assertStringContainsString('Error log', $errors);
+        self::assertStringContainsString('Native log', $logs);
+        self::assertStringContainsString('Native logs detected.', $logs);
+        self::assertStringContainsString('{"objectKey":"objectValue"}', $logs);
+        self::assertStringContainsString('["arrayValue"]', $logs);
+        self::assertStringContainsString('Log+With+Plus+Symbol', $logs);
     }
 
     public function testLibrary(): void
@@ -390,11 +397,12 @@ class Base extends TestCase
 
     public function testInvalidJson(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
+        $id = \uniqid();
+        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}', id: $id);
         
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
-        self::assertThat($response['headers']['x-open-runtimes-errors'], self::callback(function($value) {
+        self::assertThat($this->getErrors($id), self::callback(function($value) {
             $value = \strtolower($value);
 
             // Code=3840 is Swift code for JSON error
@@ -409,18 +417,19 @@ class Base extends TestCase
 
     public function testTimeout(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
+        $id = \uniqid();
+        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1'], id: $id);
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
-        self::assertStringContainsString('Execution timed out.', $response['headers']['x-open-runtimes-errors']);
-        self::assertStringContainsString('Timeout start.', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringNotContainsString('Timeout end.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Execution timed out.', $this->getErrors($id));
+        self::assertStringContainsString('Timeout start.', $this->getLogs($id));
+        self::assertStringNotContainsString('Timeout end.', $this->getLogs($id));
 
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '5']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('Successful response.', $response['body']);
-        self::assertStringContainsString('Timeout start.', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Timeout end.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Timeout start.', $this->getLogs($id));
+        self::assertStringContainsString('Timeout end.', $this->getLogs($id));
 
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
         self::assertEquals(500, $response['code']);
@@ -431,5 +440,20 @@ class Base extends TestCase
         $expected = preg_replace('/\s+/', '', $expected);
         $actual = preg_replace('/\s+/', '', $actual);
         self::assertEquals($expected, $actual, $message);
+    }
+
+    private function getErrors(string $id) {
+        if(!\file_exists("/tmp/logs/{$id}_errors.log")) {
+            return "";
+        }
+
+        return \file_get_contents("/tmp/logs/{$id}_errors.log");
+    }
+    private function getLogs(string $id) {
+        if(!\file_exists("/tmp/logs/{$id}_logs.log")) {
+            return "";
+        }
+
+        return \file_get_contents("/tmp/logs/{$id}_logs.log");
     }
 }
