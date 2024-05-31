@@ -524,4 +524,4 @@ jobs:
           OPEN_RUNTIMES_ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
         run: |
           echo "Running tests..."
-          vendor/bin/phpunit --configuration phpunit.xml tests/${{matrix.TEST_CLASS}}.php
+          RUNTIME=${{ matrix.RUNTIME }} vendor/bin/phpunit --configuration phpunit.xml tests/${{matrix.TEST_CLASS}}.php

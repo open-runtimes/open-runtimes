@@ -83,7 +83,7 @@ $action = function($req, $res) use (&$userFunction) {
     $requestHeaders = $req->header;
 
     $cookieHeaders = [];
-    foreach ($req->cookie as $key => $value) {
+    foreach (($req->cookie ?: []) as $key => $value) {
         $cookieHeaders[] = "{$key}={$value}";
     }
 

@@ -29,4 +29,4 @@ while ! timeout 0.5 bash -c "</dev/tcp/127.0.0.1/3000"; do sleep 0.5; done
 sleep 1
 
 # Run tests
-OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vendor/bin/phpunit --configuration phpunit.xml tests/Base.php
+RUNTIME=$RUNTIME OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vendor/bin/phpunit --configuration phpunit.xml tests/Base.php
