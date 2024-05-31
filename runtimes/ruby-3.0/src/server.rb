@@ -4,6 +4,15 @@ require 'timeout'
 
 USER_CODE_PATH = '/usr/local/server/src/function';
 
+configure do
+  class << Sinatra::Base
+    def trace(path, opts={}, &block)
+      route 'TRACE', path, opts, &block
+    end
+  end
+  Sinatra::Delegator.delegate :trace
+end
+
 class RuntimeResponse
   def send(body, status_code = 200, headers = {})
     {
@@ -311,6 +320,10 @@ delete '*' do
 end
 
 options '*' do
+  handle(request, response)
+end
+
+trace '*' do
   handle(request, response)
 end
 
