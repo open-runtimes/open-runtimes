@@ -65,6 +65,8 @@ class Logger {
                 this.streamErrors.end(undefined, undefined, res);
             })
         ]);
+
+        this.enabled = false;
     }
 
     overrideNativeLogs() {

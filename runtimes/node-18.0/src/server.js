@@ -5,21 +5,22 @@ const Logger = require("./logger");
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const server = micro(async (req, res) => {
+    const logger = new Logger(req.headers[`x-open-runtimes-logging`], req.headers[`x-open-runtimes-log-id`]);
+
     try {
-        await action(req, res);
+        await action(logger, req, res);
     } catch(e) {
-        const logger = new Logger(req.headers[`x-open-runtimes-logging`], req.headers[`x-open-runtimes-log-id`]);
         logger.write(e, Logger.TYPE_ERROR);
         res.setHeader('x-open-runtimes-log-id', logger.id);
         await logger.end();
 
         return send(res, 500, '');
+    } finally {
+        await logger.end();
     }
 });
 
-const action = async (req, res) => {
-    const logger = new Logger(req.headers[`x-open-runtimes-logging`], req.headers[`x-open-runtimes-log-id`]);
-
+const action = async (logger, req, res) => {
     const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
     let safeTimeout = null;
     if(timeout) {
