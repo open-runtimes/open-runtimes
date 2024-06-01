@@ -74,6 +74,9 @@ namespace runtime {
                 return res.send("FAIL", 404);
             } else if (action == "requestMethod") {
                 return res.send(req.method);
+            } else if (action == "requestHeadOrTrace") {
+                context.log(req.method);
+                return res.send("", 200);
             } else if (action == "requestUrl") {
                 json["url"] = req.url;
                 json["port"] = req.port;
