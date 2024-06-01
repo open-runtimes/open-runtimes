@@ -42,6 +42,9 @@ When you can have two!
         return context.res.send('FAIL', 404)
     when 'requestMethod'
         return context.res.send(context.req.method)
+    when 'requestHeadOrTrace'
+        context.log(context.req.method)
+        return context.res.send('', 200)
     when 'requestUrl'
         return context.res.json({
             'url': context.req.url,
