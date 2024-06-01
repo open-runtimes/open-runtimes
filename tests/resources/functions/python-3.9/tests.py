@@ -41,6 +41,9 @@ When you can have two!
         return context.res.send('FAIL', 404)
     elif action == 'requestMethod':
         return context.res.send(context.req.method)
+    elif action == 'requestHeadOrTrace':
+        context.log(context.req.method)
+        return context.res.send('', 200)
     elif action == 'requestUrl':
         return context.res.json({
             'url': context.req.url,
