@@ -223,26 +223,34 @@ class Base extends TestCase
         $response = $this->execute(method: 'PATCH', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('PATCH', $response['body']);
+    }
 
-        $response = $this->execute(method: 'HEAD', headers: ['x-action' => 'requestMethod']);
+    public function testHeadAndTraceRequestMethods(): void
+    {
+        $response = $this->execute(method: 'HEAD', headers: ['x-action' => 'requestHeadOrTrace']);
         self::assertEquals(200, $response['code']);
 
-        if($this->runtime === 'cpp') {
-            // Bug in C++ framework
-            self::assertEquals('', $response['body']);
+        if($this->runtime == 'cpp') {
+            // Bug in C++ framework, returns GET for HEAD
+            self::assertStringContainsString('GET', $response['headers']['x-open-runtimes-logs']);
         } else {
-            self::assertEquals('HEAD', $response['body']);
+            self::assertStringContainsString('HEAD', $response['headers']['x-open-runtimes-logs']);
         }
 
-        $response = $this->execute(method: 'TRACE', headers: ['x-action' => 'requestMethod']);
-
+        $response = $this->execute(method: 'TRACE', headers: ['x-action' => 'requestHeadOrTrace']);
         if($this->runtime === 'php') {
             // Bug in PHP Swoole
             self::assertEquals(400, $response['code']);
+        } else if ($this->runtime == 'cpp') {
+            // C++ doesn't support TRACE.
+            self::assertEquals(405, $response['code']);
         } else {
-            \var_dump($this->runtime);
             self::assertEquals(200, $response['code']);
-            self::assertEquals('TRACE', $response['body']);
+        }
+
+        if (!$this->runtime == 'cpp') {
+            // C++ doesn't support TRACE.
+            self::assertStringContainsString('TRACE', $response['headers']['x-open-runtimes-logs']);
         }
     }
 
