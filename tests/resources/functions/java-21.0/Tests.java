@@ -76,6 +76,10 @@ public class Tests {
             case "requestMethod" -> {
                 return context.getRes().send(context.getReq().getMethod());
             }
+            case "requestHeadOrTrace" -> {
+                context.log(context.getReq().getMethod());
+                return context.getRes().send("", 200);
+            }
             case "requestUrl" -> {
                 json.put("url", context.getReq().getUrl());
                 json.put("port", context.getReq().getPort());
