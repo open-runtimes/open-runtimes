@@ -71,6 +71,10 @@ When you can have two!
             "requestMethod" -> {
                 return context.res.send(context.req.method)
             }
+            "requestHeadOrTrace" -> {
+                context.log(context.req.method)
+                return context.res.send("", 200)
+            }
             "requestUrl" -> {
                 return context.res.json(mutableMapOf(
                     "url" to context.req.url,
