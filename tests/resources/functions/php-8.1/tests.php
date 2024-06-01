@@ -49,6 +49,9 @@ When you can have two!
           return $context->res->send('FAIL', 404);
       case 'requestMethod':
           return $context->res->send($context->req->method);
+      case 'requestHeadOrTrace':
+          $context->log($context->req->method);
+          return $context->res->send("", 200);
       case 'requestUrl':
           return $context->res->json([
             'url' => $context->req->url,
