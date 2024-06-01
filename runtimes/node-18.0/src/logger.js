@@ -1,3 +1,5 @@
+
+const util = require("node:util");
 const fs = require("node:fs");
 
 class Logger {
@@ -13,10 +15,13 @@ class Logger {
     nativeLogsCache = {};
 
     constructor(status, id) {
-        this.enabled = status === 'enabled';
-        this.id = id ? id : this.generateId();
-        this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`);
-        this.streamErrors = fs.createWriteStream(`/mnt/logs/${this.id}_errors.log`);
+        this.enabled = (status ? status : 'enabled') === 'enabled';
+
+        if(this.enabled) {
+            this.id = id ? id : this.generateId();
+            this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`);
+            this.streamErrors = fs.createWriteStream(`/mnt/logs/${this.id}_errors.log`);
+        }
     }
 
     generateId() {
@@ -33,7 +38,7 @@ class Logger {
             this.write('Native logs detected. Use context.log() or context.error() for better experience.');
         }
 
-        const stream = type === TYPE_ERROR ? this.streamErrors : this.streamLogs;
+        const stream = type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
 
         let stringLog = "";
         if(message instanceof Error) {
@@ -41,13 +46,17 @@ class Logger {
         } else if (message instanceof Object || Array.isArray(message)) {
             stringLog = JSON.stringify(message);
         } else {
-            stringLog = message;
+            stringLog = `${message}`;
         }
 
-        stream.write(stringLog);
+        stream.write(stringLog + '\n');
     }
 
     async end() {
+        if(!this.enabled) {
+            return;
+        }
+
         await Promise.all([
             new Promise((res) => {
                 this.streamLogs.end(undefined, undefined, res);
@@ -59,18 +68,26 @@ class Logger {
     }
 
     overrideNativeLogs() {
+        if(!this.enabled) {
+            return;
+        }
+
         this.nativeLogsCache.stdlog = console.log.bind(console);
         this.nativeLogsCache.stderror = console.error.bind(console);
         this.nativeLogsCache.stdinfo = console.info.bind(console);
         this.nativeLogsCache.stddebug = console.debug.bind(console);
         this.nativeLogsCache.stdwarn = console.warn.bind(console);
 
-        console.log = console.info = console.debug = console.warn = console.error = function() {
-            logger.write(util.format.apply(null, arguments) + '\n', Logger.TYPE_LOG, true);
+        console.log = console.info = console.debug = console.warn = console.error = () => {
+            this.write(util.format.apply(null, arguments) + '\n', Logger.TYPE_LOG, true);
         }
     }
 
     revertNativeLogs() {
+        if(!this.enabled) {
+            return;
+        }
+
         console.log = this.nativeLogsCache.stdlog;
         console.error = this.nativeLogsCache.stderror;
         console.debug = this.nativeLogsCache.stddebug;

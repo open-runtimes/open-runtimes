@@ -1,8 +1,6 @@
-const fs = require("fs");
 const micro = require("micro");
-const util = require("util");
-const Logger = require("./logger");
 const { text: parseText, json: parseJson, send } = require("micro");
+const Logger = require("./logger");
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
