@@ -20,10 +20,10 @@ class Logger {
         if(this.enabled) {
             this.id = id ? id : (process.env.OPEN_RUNTIMES_ENV === 'development' ? 'dev' : this.generateId());
             this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
-                flags: ['a']
+                flags: 'a'
             });
             this.streamErrors = fs.createWriteStream(`/mnt/logs/${this.id}_errors.log`, {
-                flags: ['a']
+                flags: 'a'
             });
         }
     }
