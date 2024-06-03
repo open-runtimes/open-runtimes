@@ -18,7 +18,7 @@ class Logger {
         this.enabled = (status ? status : 'enabled') === 'enabled';
 
         if(this.enabled) {
-            this.id = id ? id : this.generateId();
+            this.id = id ? id : (process.env.OPEN_RUNTIMES_ENV === 'development' ? 'dev' : this.generateId());
             this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`);
             this.streamErrors = fs.createWriteStream(`/mnt/logs/${this.id}_errors.log`);
         }
