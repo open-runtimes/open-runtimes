@@ -2,9 +2,9 @@ package handler
 
 import (
 	"encoding/json"
-	"openruntimes/types"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/open-runtimes/types-for-go/v3"
 )
 
 type RequestBody struct {
@@ -23,7 +23,7 @@ type Response struct {
 	Todo    TodoObject `json:"todo"`
 }
 
-func Main(Context types.Context) types.ResponseOutput {
+func Main(Context *types.Context) types.ResponseOutput {
 	var payload RequestBody
 	errRequest := json.Unmarshal([]byte(Context.Req.BodyRaw), &payload)
 	if errRequest != nil {

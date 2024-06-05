@@ -3,11 +3,11 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"openruntimes/types"
 	"os"
 	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/open-runtimes/types-for-go/v3"
 )
 
 func Main(Context *types.Context) types.ResponseOutput {

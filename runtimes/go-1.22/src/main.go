@@ -10,11 +10,12 @@ import (
 	"net/http"
 	"net/url"
 	"openruntimes/handler"
-	"openruntimes/types"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/open-runtimes/types-for-go/v3"
 )
 
 func action(w http.ResponseWriter, r *http.Request) error {
