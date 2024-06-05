@@ -1,44 +1,27 @@
-const fs = require("fs");
 const micro = require("micro");
-const util = require("util");
 const { text: parseText, json: parseJson, send } = require("micro");
+const Logger = require("./logger");
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
-const randomId = () => {
-    return `${new Date().getTime().toString(16)}${Math.round(Math.random() * 1000000000).toString(16)}`;
-}
-
-const writeLogs = (id, type, log) => {
-    fs.appendFileSync(`/mnt/logs/${id}_${type}.log`, log);
-}
-
 const server = micro(async (req, res) => {
+    const logger = new Logger(req.headers[`x-open-runtimes-logging`], req.headers[`x-open-runtimes-log-id`]);
+
     try {
-        await action(req, res);
+        await action(logger, req, res);
     } catch(e) {
-        const logging = req.headers[`x-open-runtimes-logging`] ?? 'enabled';
-        const logId = req.headers[`x-open-runtimes-log-id`] ?? randomId();
-
-        if(logging) {
-            const logs = [];
-            const errors = [e.stack || e];
-
-            writeLogs(logId, 'logs', logs.join('\n'));
-            writeLogs(logId, 'errors', errors.join('\n'));
-        }
-
-        res.setHeader('x-open-runtimes-log-id', logId);
+        logger.write(e, Logger.TYPE_ERROR);
+        res.setHeader('x-open-runtimes-log-id', logger.id);
+        await logger.end();
 
         return send(res, 500, '');
+    } finally {
+        await logger.end();
     }
 });
 
-const action = async (req, res) => {
+const action = async (logger, req, res) => {
     const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
-    const logging = req.headers[`x-open-runtimes-logging`] ?? 'enabled';
-    const logId = req.headers[`x-open-runtimes-log-id`] ?? randomId();
-
     let safeTimeout = null;
     if(timeout) {
         if(isNaN(timeout) || timeout === 0) {
@@ -122,35 +105,14 @@ const action = async (req, res) => {
             }
         },
         log: function (message) {
-            if(logging) {
-                if (message instanceof Object || Array.isArray(message)) {
-                    writeLogs(logId, 'logs', JSON.stringify(message));
-                } else {
-                    writeLogs(logId, 'logs', message + "");
-                }
-            }
+            logger.write(message, Logger.TYPE_LOG);
         },
         error: function (message) {
-            if(logging) {
-                if (message instanceof Object || Array.isArray(message)) {
-                    writeLogs(logId, 'errors', JSON.stringify(message));
-                } else {
-                    writeLogs(logId, 'errors', message + "");
-                }
-            }
+            logger.write(message, Logger.TYPE_ERROR);
         },
     };
 
-    console.stdlog = console.log.bind(console);
-    console.stderror = console.error.bind(console);
-    console.stdinfo = console.info.bind(console);
-    console.stddebug = console.debug.bind(console);
-    console.stdwarn = console.warn.bind(console);
-
-    let customstd = "";
-    console.log = console.info = console.debug = console.warn = console.error = function() {
-        customstd += util.format.apply(null, arguments) + '\n';
-    }
+    logger.overrideNativeLogs();
 
     let output = null;
 
@@ -209,11 +171,7 @@ const action = async (req, res) => {
         context.error(e.stack || e);
         output = context.res.send('', 500, {});
     } finally {
-        console.log = console.stdlog;
-        console.error = console.stderror;
-        console.debug = console.stddebug;
-        console.warn = console.stdwarn;
-        console.info = console.stdinfo;
+        logger.revertNativeLogs();
     }
 
     if(output === null || output === undefined) {
@@ -242,15 +200,10 @@ const action = async (req, res) => {
         contentTypeValue + "; charset=utf-8"
         );
     }
+
+    res.setHeader('x-open-runtimes-log-id', logger.id);
+    await logger.end();
     
-    if(logging && customstd) {
-        writeLogs(logId, 'logs', `Native logs detected. Use context.log() or context.error() for better experience.
-Logs:
-${customstd}`);
-    }
-
-    res.setHeader('x-open-runtimes-log-id', logId);
-
     return send(res, output.statusCode, output.body);
 };
 
