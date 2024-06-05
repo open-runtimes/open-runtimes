@@ -61,6 +61,8 @@ class Logger {
             return;
         }
 
+        this.enabled = false;
+
         await Promise.all([
             new Promise((res) => {
                 this.streamLogs.end(undefined, undefined, res);
@@ -69,8 +71,6 @@ class Logger {
                 this.streamErrors.end(undefined, undefined, res);
             })
         ]);
-
-        this.enabled = false;
     }
 
     overrideNativeLogs() {
