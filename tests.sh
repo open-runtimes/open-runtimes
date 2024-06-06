@@ -25,7 +25,7 @@ docker run -d --rm --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(p
 cd ../../../../
 
 # Wait for server to be ready
-sleep 15
+sleep 10
 
 # Run tests
 OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vendor/bin/phpunit --configuration phpunit.xml tests/Base.php
