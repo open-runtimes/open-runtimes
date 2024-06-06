@@ -380,6 +380,13 @@ class Base extends TestCase
         self::assertEmpty($logs);
         self::assertEmpty($errors);
 
+        $response = $this->execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'enabled' ]);
+        $logs = $this->getLogs($response['headers']['x-open-runtimes-log-id']);
+        $errors = $this->getErrors($response['headers']['x-open-runtimes-log-id']);
+        self::assertNotEmpty($response['headers']['x-open-runtimes-log-id']);
+        self::assertStringContainsString('Debug log', $logs);
+        self::assertStringContainsString('Error log', $errors);
+
         $response = $this->execute(headers: ['x-action' => 'logs', 'x-open-runtimes-log-id' => 'customLogs' ]);
         $logs = $this->getLogs('customLogs');
         $errors = $this->getErrors('customLogs');
