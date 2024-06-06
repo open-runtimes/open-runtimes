@@ -372,6 +372,7 @@ class Base extends TestCase
         self::assertStringContainsString('{"objectKey":"objectValue"}', $logs);
         self::assertStringContainsString('["arrayValue"]', $logs);
         self::assertStringContainsString('Log+With+Plus+Symbol', $logs);
+        self::assertStringContainsString("\n", $logs);
 
         $response = $this->execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'disabled', 'x-open-runtimes-log-id' => 'noLogs' ]);
         $logs = $this->getLogs('noLogs');

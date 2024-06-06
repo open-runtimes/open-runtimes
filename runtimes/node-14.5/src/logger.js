@@ -80,7 +80,7 @@ class Logger {
 
         console.log = console.info = console.debug = console.warn = console.error = (...args) => {
             const formattedArgs = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg);
-            this.write(formattedArgs.join(' ') + '\n', Logger.TYPE_LOG, true);
+            this.write(formattedArgs.join(' '), Logger.TYPE_LOG, true);
         }
     }
 
