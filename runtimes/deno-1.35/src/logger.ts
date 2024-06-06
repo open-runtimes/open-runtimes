@@ -43,7 +43,7 @@ export class Logger {
         }
     }
 
-    write(message, type = Logger.TYPE_LOG, native = false) {
+    write(message: any, type = Logger.TYPE_LOG, native = false) {
         if(!this.enabled) {
             return;
         }
@@ -73,7 +73,7 @@ export class Logger {
     }
 
     async end() {
-        if(!this.enabled) {
+        if(!this.enabled || !this.streamLogs || !this.streamErrors) {
             return;
         }
 

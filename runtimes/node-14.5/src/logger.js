@@ -1,5 +1,5 @@
-const util = require("node:util");
-const fs = require("node:fs");
+const util = require("util");
+const fs = require("fs");
 
 class Logger {
     static TYPE_ERROR = 'error';
