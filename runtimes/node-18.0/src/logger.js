@@ -28,10 +28,6 @@ class Logger {
         }
     }
 
-    generateId() {
-        return `${new Date().getTime().toString(16)}${Math.round(Math.random() * 1000000000).toString(16)}`;
-    }
-
     write(message, type = Logger.TYPE_LOG, native = false) {
         if(!this.enabled) {
             return;
@@ -99,6 +95,20 @@ class Logger {
         console.debug = this.nativeLogsCache.stddebug;
         console.warn = this.nativeLogsCache.stdwarn;
         console.info = this.nativeLogsCache.stdinfo;
+    }
+
+    // Recreated from https://www.php.net/manual/en/function.uniqid.php
+    generateId(padding = 7) {
+        const now = new Date();
+        const sec = Math.floor(now.getTime() / 1000);
+        const msec = now.getMilliseconds();
+        const baseId = sec.toString(16) + msec.toString(16).padStart(5, '0');
+        let randomPadding = '';
+        for (let i = 0; i < padding; i++) {
+            const randomHexDigit = Math.floor(Math.random() * 16).toString(16);
+            randomPadding += randomHexDigit;
+        }
+        return baseId + randomPadding;
     }
 }
 

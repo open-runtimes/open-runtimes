@@ -372,6 +372,20 @@ class Base extends TestCase
         self::assertStringContainsString('{"objectKey":"objectValue"}', $logs);
         self::assertStringContainsString('["arrayValue"]', $logs);
         self::assertStringContainsString('Log+With+Plus+Symbol', $logs);
+
+        $response = $this->execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'disabled', 'x-open-runtimes-log-id' => 'noLogs' ]);
+        $logs = $this->getLogs('noLogs');
+        $errors = $this->getErrors('noLogs');
+        self::assertEmpty($response['headers']['x-open-runtimes-log-id']);
+        self::assertEmpty($logs);
+        self::assertEmpty($errors);
+
+        $response = $this->execute(headers: ['x-action' => 'logs', 'x-open-runtimes-log-id' => 'customLogs' ]);
+        $logs = $this->getLogs('customLogs');
+        $errors = $this->getErrors('customLogs');
+        self::assertEquals('customLogs', $response['headers']['x-open-runtimes-log-id']);
+        self::assertStringContainsString('Debug log', $logs);
+        self::assertStringContainsString('Error log', $errors);
     }
 
     public function testLibrary(): void
