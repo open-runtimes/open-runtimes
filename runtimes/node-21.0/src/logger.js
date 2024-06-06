@@ -1,4 +1,3 @@
-const util = require("node:util");
 const fs = require("node:fs");
 
 class Logger {
@@ -79,8 +78,9 @@ class Logger {
         this.nativeLogsCache.stddebug = console.debug.bind(console);
         this.nativeLogsCache.stdwarn = console.warn.bind(console);
 
-        console.log = console.info = console.debug = console.warn = console.error = () => {
-            this.write(util.format.apply(null, arguments) + '\n', Logger.TYPE_LOG, true);
+        console.log = console.info = console.debug = console.warn = console.error = (...args) => {
+            const formattedArgs = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg);
+            this.write(formattedArgs.join(' ') + '\n', Logger.TYPE_LOG, true);
         }
     }
 

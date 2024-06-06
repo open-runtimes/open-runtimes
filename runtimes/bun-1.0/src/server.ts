@@ -1,6 +1,8 @@
+import { Logger } from "./logger";
+
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
-const action = async (request) => {
+const action = async (logger: Logger, request: any) => {
   const timeout = request.headers.get(`x-open-runtimes-timeout`) ?? '';
   let safeTimeout: number | null = null;
   if(timeout) {
@@ -18,8 +20,6 @@ const action = async (request) => {
       status: 500
     });
   }
-  const logs: string[] = [];
-  const errors: string[] = [];
 
   const contentType = request.headers.get('content-type') ?? 'text/plain';
   const bodyRaw: string = await request.text();
@@ -94,32 +94,14 @@ const action = async (request) => {
       }
     },
     log: function (message: any) {
-      if (message instanceof Object || Array.isArray(message)) {
-        logs.push(JSON.stringify(message));
-      } else {
-        logs.push(message + "");
-      }
+      logger.write(message, Logger.TYPE_LOG);
     },
     error: function (message: any) {
-      if (message instanceof Object || Array.isArray(message)) {
-        errors.push(JSON.stringify(message));
-      } else {
-        errors.push(message + "");
-      }
+      logger.write(message, Logger.TYPE_ERROR);
     },
   };
 
-  const stdlog = console.log.bind(console);
-  const stderror = console.error.bind(console);
-  const stdinfo = console.info.bind(console);
-  const stddebug = console.debug.bind(console);
-  const stdwarn = console.warn.bind(console);
-
-  let customstd = "";
-  console.log = console.info = console.debug = console.warn = console.error = function(...args: any[]) {
-    const formattedArgs = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg);
-    customstd += formattedArgs.join(' ') + '\n';
-  }
+  logger.overrideNativeLogs();
 
   let output: any = null;
 
@@ -158,11 +140,7 @@ const action = async (request) => {
     context.error(e.message.includes("Cannot resolve module") ? "Code file not found." : e.stack || e);
     output = context.res.send('', 500, {});
   } finally {
-    console.log = stdlog;
-    console.error = stderror;
-    console.debug = stddebug;
-    console.warn = stdwarn;
-    console.info = stdinfo;
+    logger.revertNativeLogs();
   }
 
   if(output === null || output === undefined) {
@@ -192,17 +170,8 @@ const action = async (request) => {
     responseHeaders["content-type"] = contentTypeValue + "; charset=utf-8";
   }
 
-  if(customstd) {
-    context.log('');
-    context.log('----------------------------------------------------------------------------');
-    context.log('Unsupported logs detected. Use context.log() or context.error() for logging.');
-    context.log('----------------------------------------------------------------------------');
-    context.log(customstd);
-    context.log('----------------------------------------------------------------------------');
-  }
-
-  responseHeaders['x-open-runtimes-logs'] = encodeURIComponent(logs.join('\n'));
-  responseHeaders['x-open-runtimes-errors'] = encodeURIComponent(errors.join('\n'));
+  responseHeaders['x-open-runtimes-log-id'] = logger.id;
+  await logger.end();
 
   return new Response(output.body, {
     status: output.statusCode,
@@ -213,17 +182,18 @@ const action = async (request) => {
 Bun.serve({
   port: 3000,
   async fetch(request) {
+    const logger = new Logger(request.headers.get('x-open-runtimes-logging'), request.headers.get('x-open-runtimes-log-id'));
+
     try {
-      return await action(request);
+      return await action(logger, request);
     } catch(e) {
-        const logs = [];
-        const errors = [e.stack || e];
+        logger.write(e, Logger.TYPE_ERROR);
 
         const responseHeaders: any = {};
+        responseHeaders['x-open-runtimes-log-id'] = logger.id;
 
-        responseHeaders['x-open-runtimes-logs'] = encodeURIComponent(logs.join('\n'));
-        responseHeaders['x-open-runtimes-errors'] = encodeURIComponent(errors.join('\n'));
-      
+        await logger.end();
+
         return new Response('', {
           status: 500,
           headers: responseHeaders

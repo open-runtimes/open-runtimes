@@ -1,6 +1,6 @@
 const fs = require("node:fs");
 
-class Logger {
+export class Logger {
     static TYPE_ERROR = 'error';
     static TYPE_LOG = 'log';
 
@@ -8,9 +8,9 @@ class Logger {
     enabled = false;
     includesNativeInfo = false;
 
-    streamLogs = null;
-    streamErrors = null;
-    nativeLogsCache = {};
+    streamLogs: null | fs.WriteStream = null;
+    streamErrors: null | fs.WriteStream = null;
+    nativeLogsCache: { [key: string]: any } = {};
 
     constructor(status, id) {
         this.enabled = (status ? status : 'enabled') === 'enabled';
@@ -38,6 +38,10 @@ class Logger {
 
         const stream = type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
 
+        if(!stream) {
+            return;
+        }
+
         let stringLog = "";
         if(message instanceof Error) {
             stringLog = [message.stack || message].join('\n');;
@@ -59,10 +63,10 @@ class Logger {
 
         await Promise.all([
             new Promise((res) => {
-                this.streamLogs.end(undefined, undefined, res);
+                this.streamLogs?.end(undefined, undefined, res);
             }),
             new Promise((res) => {
-                this.streamErrors.end(undefined, undefined, res);
+                this.streamErrors?.end(undefined, undefined, res);
             })
         ]);
     }
@@ -78,7 +82,7 @@ class Logger {
         this.nativeLogsCache.stddebug = console.debug.bind(console);
         this.nativeLogsCache.stdwarn = console.warn.bind(console);
 
-        console.log = console.info = console.debug = console.warn = console.error = (...args) => {
+        console.log = console.info = console.debug = console.warn = console.error = (...args: any[]) => {
             const formattedArgs = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg);
             this.write(formattedArgs.join(' ') + '\n', Logger.TYPE_LOG, true);
         }
@@ -110,5 +114,3 @@ class Logger {
         return baseId + randomPadding;
     }
 }
-
-module.exports = Logger;
