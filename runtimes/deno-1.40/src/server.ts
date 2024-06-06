@@ -5,7 +5,7 @@ const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const app = new Application();
 
-app.use(async (ctx) => {
+app.use(async (ctx: any) => {
   const logger = new Logger(ctx.request.headers.get('x-open-runtimes-logging'), ctx.request.headers.get('x-open-runtimes-log-id'));
   await logger.setup();
 
