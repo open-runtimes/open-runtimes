@@ -69,7 +69,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     final key = parts[0];
     final value = parts.sublist(1).join('=');
 
-    if (!key.isEmpty) {
+    if (key != null && !key.isEmpty) {
       query[key] = value;
     }
   }
