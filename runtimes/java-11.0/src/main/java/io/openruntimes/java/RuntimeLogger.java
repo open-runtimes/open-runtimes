@@ -160,7 +160,7 @@ public class RuntimeLogger {
         Random random = new Random();
         String randomPadding = "";
         for(int i = 0; i < padding; i++) {
-            randomPadding = randomPadding + Integer.toHexString(random.nextInt(0, 16));
+            randomPadding = randomPadding + Integer.toHexString(random.nextInt(16));
         }
 
         return baseId + randomPadding;
