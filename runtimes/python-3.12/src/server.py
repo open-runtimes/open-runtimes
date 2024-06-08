@@ -141,7 +141,7 @@ async def action(logger, request):
 @app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
 @app.route('/<path:u_path>', methods = HTTP_METHODS)
 async def handler(u_path):
-    logger = Logger(request.headers.get('x-open-runtimes-timeout', ''), request.headers.get('x-open-runtimes-timeout', ''))
+    logger = Logger(request.headers.get('x-open-runtimes-logging', ''), request.headers.get('x-open-runtimes-log-id', ''))
 
     try:
        return await action(logger, request)

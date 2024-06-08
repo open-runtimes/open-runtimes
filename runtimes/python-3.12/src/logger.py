@@ -1,3 +1,4 @@
+import json
 import sys
 from datetime import datetime
 import math
@@ -18,8 +19,8 @@ class Logger:
     custom_std = None
 
     def __init__(self, status = None, id = None):
-        if status is None:
-            self.enabled = true
+        if status is None or status == "":
+            self.enabled = True
         else:
             if status == "enabled":
                 self.enabled = True
@@ -27,14 +28,17 @@ class Logger:
                 self.enabled = False
     
         if self.enabled is True:
-            isDevelopment = False
-            if os.getenv("OPEN_RUNTIMES_SECRET") == "development":
-                isDevelopment = True
+            is_development = False
+            if os.getenv("OPEN_RUNTIMES_ENV") == "development":
+                is_development = True
 
-            if isDevelopment is True:
+            if is_development is True:
                 self.id = "dev"
             else:
-                self.id = self.generate_id()
+                if id is None or id == "":
+                    self.id = self.generate_id()
+                else:
+                    self.id = id
             
             self.stream_logs = open("/mnt/logs/" + self.id + "_logs.log", "a")
             self.stream_errors = open("/mnt/logs/" + self.id + "_errors.log", "a")

@@ -49,7 +49,7 @@ class Context:
         self.logger = logger
 
     def log(self, message):
-        logger.write(message, Logger.TYPE_LOG)
+        self.logger.write(message, Logger.TYPE_LOG)
 
     def error(self, message):
-        logger.write(message, Logger.TYPE_ERROR)
+        self.logger.write(message, Logger.TYPE_ERROR)
