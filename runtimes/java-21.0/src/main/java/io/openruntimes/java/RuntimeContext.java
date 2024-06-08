@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.io.IOException;
+
 public class RuntimeContext {
     private final RuntimeRequest req;
     private final RuntimeResponse res;
-
-    private final List<String> logs = new ArrayList<>();
-    private final List<String> errors = new ArrayList<>();
+    private final RuntimeLogger logger;
 
     public RuntimeRequest getReq() {
         return this.req;
@@ -23,37 +23,31 @@ public class RuntimeContext {
         return this.res;
     }
 
-    public List<String> getLogs() {
-        return this.logs;
-    }
-
-    public List<String> getErrors() {
-        return this.errors;
-    }
-
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
     public RuntimeContext(
             RuntimeRequest req,
-            RuntimeResponse res
+            RuntimeResponse res,
+            RuntimeLogger logger
     ) {
         this.req = req;
         this.res = res;
+        this.logger = logger;
     }
 
     public void log(Object message) {
-        if (message instanceof Map || message instanceof List || message instanceof Set) {
-            this.logs.add(gson.toJson(message));
-        } else {
-            this.logs.add(message.toString());
+        try {
+            this.logger.write(message, RuntimeLogger.TYPE_LOG, false);
+        } catch(IOException e) {
+            // Ignore missing logs
         }
     }
 
     public void error(Object message) {
-        if (message instanceof Map || message instanceof List || message instanceof Set) {
-            this.errors.add(gson.toJson(message));
-        } else {
-            this.errors.add(message.toString());
+        try {
+            this.logger.write(message, RuntimeLogger.TYPE_ERROR, false);
+        } catch(IOException e) {
+            // Ignore missing logs
         }
     }
 }
