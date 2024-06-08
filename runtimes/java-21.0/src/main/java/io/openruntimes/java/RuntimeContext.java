@@ -1,13 +1,5 @@
 package io.openruntimes.java;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import java.io.IOException;
 
 public class RuntimeContext {
@@ -22,8 +14,6 @@ public class RuntimeContext {
     public RuntimeResponse getRes() {
         return this.res;
     }
-
-    private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
     public RuntimeContext(
             RuntimeRequest req,
