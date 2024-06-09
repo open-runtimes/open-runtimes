@@ -179,7 +179,6 @@ class Base extends TestCase
         self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
     }
 
-
     public function testEmptySecret(): void
     {
         $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => '']);
@@ -310,40 +309,67 @@ class Base extends TestCase
         self::assertArrayNotHasKey('x-open-runtimes-custom-header', $body);
     }
 
-    public function testRequestBodyPlaintext(): void
+    public function testRequestBodyText(): void
     {
-        $response = $this->execute(body: 'Hello 👋', headers: ['x-action' => 'requestBodyPlaintext']);
+        $body = 'Hello 👋';
+        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyText']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('Hello 👋', $response['body']);
+        self::assertEquals($body, $response['body']);
 
-        $response = $this->execute(body: '', headers: ['x-action' => 'requestBodyPlaintext']);
+        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = $this->execute(body: '', headers: ['x-action' => 'requestBodyText']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('', $response['body']);
 
-        $response = $this->execute(headers: ['x-action' => 'requestBodyPlaintext']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('', $response['body']);
     }
 
     public function testRequestBodyJson(): void
     {
-        $response = $this->execute(body: '{"key1":"OK","key2":"👋","key3":"value3"}', headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
+        $body = '{"key1":"OK 👋","key2":true,"key3":3}';
+
+        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);
+        self::assertEquals('OK 👋', $body['key1']);
+        self::assertEquals(true, $body['key2']);
+        self::assertEquals(3, $body['key3']);
 
-        self::assertEquals('OK', $body['key1']);
-        self::assertEquals('👋', $body['key2']);
-        self::assertEquals('{"key1":"OK","key2":"👋","key3":"value3"}', $body['raw']);
-
-        $response = $this->execute(body: '{"data":"OK"}', headers: ['x-action' => 'requestBodyJson', 'content-type' => 'text/plain']);
+        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'application/json']);
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);
+        self::assertEquals('OK 👋', $body['key1']);
+        self::assertEquals(true, $body['key2']);
+        self::assertEquals(3, $body['key3']);
 
-        self::assertEquals('Missing key', $body['key1']);
-        self::assertEquals('Missing key', $body['key2']);
-        self::assertEquals('{"data":"OK"}', $body['raw']);
+        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyJson', 'content-type' => 'text/plain']);
+        self::assertEquals(200, $response['code']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals('OK 👋', $body['key1']);
+        self::assertEquals(true, $body['key2']);
+        self::assertEquals(3, $body['key3']);
+    }
+
+    public function testRequestBodyBinary(): void
+    {
+        $body = \hex2bin("0123456789abcdef");
+
+        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'application/octet-stream']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
     }
 
     public function testEnvVars(): void
@@ -390,7 +416,7 @@ class Base extends TestCase
 
     public function testInvalidJson(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
+        $response = $this->execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
         
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
@@ -401,10 +427,13 @@ class Base extends TestCase
             return \str_contains($value, 'json') || \str_contains($value, 'code=3840');
         }), 'Contains refference to JSON validation problem');
 
-        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '');
+        $response = $this->execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '');
 
+        self::assertEquals(500, $response['code']);
+
+        $response = $this->execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{}');
         self::assertEquals(200, $response['code']);
-        self::assertEquals('Hello World 👋', $response['body']);
+        self::assertEquals('{}', $response['body']);
     }
 
     public function testTimeout(): void
@@ -425,6 +454,21 @@ class Base extends TestCase
         $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
+    }
+
+    public function testDeprecatedMethods(): void
+    {
+        $response = $this->execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethods']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Hello', $response['body']);
+
+        $response = $this->execute(body: '{"hello":"world"}', headers: ['x-action' => 'deprecatedMethods', 'content-type' => 'application/json']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('{"hello":"world"}', $response['body']);
+
+        $response = $this->execute(body: '{"hello":"world"}', headers: ['x-action' => 'deprecatedMethods', 'content-type' => 'application/unknown']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('{"hello":"world"}', $response['body']);
     }
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {

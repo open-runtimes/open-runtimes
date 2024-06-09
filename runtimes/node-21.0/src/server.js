@@ -1,7 +1,7 @@
 const fs = require("fs");
 const micro = require("micro");
 const util = require("util");
-const { text: parseText, json: parseJson, send } = require("micro");
+const { buffer, send } = require("micro");
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
@@ -36,16 +36,7 @@ const action = async (req, res) => {
     const errors = [];
 
     const contentType = req.headers['content-type'] ?? 'text/plain';
-    const bodyRaw = await parseText(req);
-    let body = bodyRaw;
-
-    if (contentType.includes('application/json')) {
-        if(bodyRaw) {
-            body = await parseJson(req);
-        } else {
-            body = {};
-        }
-    }
+    const bodyBinary = await buffer(req);
 
     const headers = {};
     Object.keys(req.headers).filter((header) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header) => {
@@ -72,8 +63,32 @@ const action = async (req, res) => {
 
     const context = {
         req: {
-            bodyRaw,
-            body,
+            get body() {
+                if(contentType.includes("application/json")) {
+                    return this.bodyJson;
+                }
+
+                const binaryTypes = ["audio/", "video/", "octet", "binary"];
+                for(const type of binaryTypes) {
+                    if(contentType.includes(type)) {
+                        return this.bodyBinary;
+                    }
+                }
+
+                return this.bodyText;
+            },
+            get bodyRaw() {
+                return this.bodyText;
+            },
+            get bodyText() {
+                return bodyBinary.toString();
+            },
+            get bodyJson() {
+                return JSON.parse(this.bodyText);
+            },
+            get bodyBinary() {
+                return bodyBinary;
+            },
             headers,
             method: req.method,
             host,
@@ -86,23 +101,29 @@ const action = async (req, res) => {
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
+                return this.text(body, statusCode, headers);
+            },
+            text: function (body, statusCode = 200, headers = {}) {
+                return this.binary(Buffer.from(body, 'utf8'), statusCode, headers)
+            },
+            binary: function(bytes, statusCode = 200, headers = {}) {
                 return {
-                    body: body,
+                    body: bytes,
                     statusCode: statusCode,
                     headers: headers
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
-                    headers['content-type'] = 'application/json';
-                return this.send(JSON.stringify(obj), statusCode, headers);
+                headers['content-type'] = 'application/json';
+                return this.text(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
-                return this.send('', 204, {});
+                return this.text('', 204, {});
             },
             redirect: function (url, statusCode = 301, headers = {}) {
                 headers['location'] = url;
-                return this.send('', statusCode, headers);
-            }
+                return this.text('', statusCode, headers);
+            },
         },
         log: function (message) {
             if (message instanceof Object || Array.isArray(message)) {
