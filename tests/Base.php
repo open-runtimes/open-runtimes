@@ -18,13 +18,18 @@ class Base extends TestCase
     {
     }
 
-    private function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000) {
+    private function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000, $callback = null) {
         $ch = \curl_init();
 
         $headers = \array_merge([
             'content-type' => 'text/plain',
             'x-open-runtimes-secret' => \getenv('OPEN_RUNTIMES_SECRET')
         ], $headers);
+
+        if(isset($callback)) {
+            $headers[] = 'accept: text/event-stream';
+        }
+
         $headersParsed = [];
 
         foreach ($headers as $header => $value) {
@@ -34,7 +39,6 @@ class Base extends TestCase
         $responseHeaders = [];
         $optArray = [
             CURLOPT_URL => 'http://localhost:' . $port . $url,
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$responseHeaders) {
                 $len = strlen($header);
                 $header = explode(':', $header, 2);
@@ -56,10 +60,22 @@ class Base extends TestCase
             CURLOPT_HTTPHEADER => $headersParsed,
             CURLOPT_TIMEOUT => 5
         ];
+
+        if(isset($callback)) {
+            $handleEvent = function ($ch, $data) use ($callback) {
+                $callback($data);
+                return \strlen($data);
+            };
+
+            $optArray[CURLOPT_WRITEFUNCTION] = $handleEvent;
+        } else {
+            $optArray[CURLOPT_RETURNTRANSFER] = true;
+        }
         
         \curl_setopt_array($ch, $optArray);
 
         $body = curl_exec($ch);
+
         $code = curl_getinfo($ch, \CURLINFO_HTTP_CODE);
 
         if (curl_errno($ch)) {
@@ -469,6 +485,85 @@ class Base extends TestCase
         $response = $this->execute(body: '{"hello":"world"}', headers: ['x-action' => 'deprecatedMethods', 'content-type' => 'application/unknown']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('{"hello":"world"}', $response['body']);
+    }
+
+    public function testResponseChunkedSimple(): void
+    {
+        $body = '';
+        $chunks = 0;
+        $response = $this->execute(body: 'Hello', headers: ['x-action' => 'responseChunkedSimple'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('OK1OK2', $body);
+        self::assertGreaterThanOrEqual(2, $chunks);
+        self::assertEmpty($response['headers']['x-open-runtimes-logs']);
+        self::assertEmpty($response['headers']['x-open-runtimes-errors']);
+    }
+
+    public function testResponseChunkedComplex(): void
+    {
+        $body = '';
+        $chunks = 0;
+        $response = $this->execute(body: 'Hello', headers: ['x-action' => 'responseChunkedComplex'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
+
+        self::assertEquals(201, $response['code']);
+        self::assertStringContainsString('Start', $body);
+        self::assertStringContainsString('Step1', $body);
+        self::assertStringContainsString('{"step2":true}', $body);
+        self::assertStringContainsString(\hex2bin('0123456789abcdef'), $body);
+        self::assertGreaterThanOrEqual(3, $chunks);
+        self::assertEmpty($response['headers']['x-open-runtimes-logs']);
+        self::assertEmpty($response['headers']['x-open-runtimes-errors']);
+        self::assertEquals('end', $response['headers']['x-trainer-header']);
+        self::assertEquals('start', $response['headers']['x-start-header']);
+    }
+
+    public function testResponseChunkedErrorStartDouble(): void
+    {
+        $body = '';
+        $chunks = 0;
+        $response = $this->execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartDouble'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('', $body);
+        self::assertStringContainsString('You can only call', $response['headers']['x-open-runtimes-errors']);
+    }
+
+    public function testResponseChunkedErrorStartMissing(): void
+    {
+        $body = '';
+        $chunks = 0;
+        $response = $this->execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartMissing'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
+
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $body);
+        self::assertStringContainsString('You must call', $response['headers']['x-open-runtimes-errors']);
+    }
+
+    public function testResponseChunkedErrorStartWriteMissing(): void
+    {
+        $body = '';
+        $chunks = 0;
+        $response = $this->execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartWriteMissing'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
+
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $body);
+        self::assertStringContainsString('You must call', $response['headers']['x-open-runtimes-errors']);
     }
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
