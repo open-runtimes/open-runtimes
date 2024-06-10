@@ -32,13 +32,13 @@ class Logger:
             if os.getenv("OPEN_RUNTIMES_ENV") == "development":
                 is_development = True
 
-            if is_development is True:
-                self.id = "dev"
-            else:
-                if id is None or id == "":
-                    self.id = self.generate_id()
+            if id is None or id == "":
+                if is_development is True:
+                    self.id = "dev"
                 else:
-                    self.id = id
+                    self.id = self.generate_id()
+            else:
+                self.id = id
             
             self.stream_logs = open("/mnt/logs/" + self.id + "_logs.log", "a")
             self.stream_errors = open("/mnt/logs/" + self.id + "_errors.log", "a")

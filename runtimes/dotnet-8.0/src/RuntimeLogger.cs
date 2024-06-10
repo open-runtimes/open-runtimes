@@ -32,16 +32,16 @@ namespace DotNetRuntime
 			}
 
 			if(this.enabled) {
-				String? serverEnv = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_ENV");
-				if (!string.IsNullOrEmpty(serverEnv) && serverEnv == "development")
-				{
-					this.id = "dev";
-				} else {
-					if(string.IsNullOrEmpty(id)) {
-						this.id = this.GenerateId();
+				if(string.IsNullOrEmpty(id)) {
+					String? serverEnv = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_ENV");
+					if (!string.IsNullOrEmpty(serverEnv) && serverEnv == "development")
+					{
+						this.id = "dev";
 					} else {
-						this.id = id;
+						this.id = this.GenerateId();
 					}
+				} else {
+					this.id = id;
 				}
 
 				// Log stream

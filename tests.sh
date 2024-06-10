@@ -8,6 +8,10 @@ START_COMMAND=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.RU
 
 # Cleanup
 docker rm --force $(docker ps -aq)
+sudo rm -rf /tmp/logs/dev_logs.log
+sudo rm -rf /tmp/logs/dev_errors.log
+sudo rm -rf /tmp/logs/customLogs_logs.log
+sudo rm -rf /tmp/logs/customLogs_errors.log
 
 # Prepare image
 cd ./runtimes/$RUNTIME

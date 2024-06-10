@@ -17,7 +17,7 @@ class Logger {
     this.enabled = (status != null ? status : 'enabled') == 'enabled';
   
     if(this.enabled) {
-      this.id = id != null ? id : (Platform.environment['OPEN_RUNTIMES_SECRET'] == 'development' ? 'dev' : this.generateId());
+      this.id = id != null ? id : (Platform.environment['OPEN_RUNTIMES_ENV'] == 'development' ? 'dev' : this.generateId());
 
       this.streamLogs = File('/mnt/logs/' + this.id + '_logs.log').openWrite(mode: FileMode.append);
       this.streamErrors = File('/mnt/logs/' + this.id + '_errors.log').openWrite(mode: FileMode.append);

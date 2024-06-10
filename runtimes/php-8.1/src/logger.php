@@ -15,7 +15,7 @@ class Logger {
         $this->enabled = (!empty($status) ? $status : 'enabled') === 'enabled';
 
         if($this->enabled) {
-            $this->id = !empty($id) ? $id : (\getenv('OPEN_RUNTIMES_SECRET') === 'development' ? 'dev' : $this->generateId());
+            $this->id = !empty($id) ? $id : (\getenv('OPEN_RUNTIMES_ENV') === 'development' ? 'dev' : $this->generateId());
 
             $this->streamLogs = \fopen('/mnt/logs/' . $this->id . '_logs.log', 'a');
             $this->streamErrors = \fopen('/mnt/logs/' . $this->id . '_errors.log', 'a');
