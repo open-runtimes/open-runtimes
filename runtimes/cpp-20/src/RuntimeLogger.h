@@ -6,6 +6,9 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
+#include <cstdlib>
+#include <ctime>
+#include <sstream>
 
 namespace runtime
 {
@@ -16,11 +19,11 @@ namespace runtime
             std::string id = "";
             bool includesNativeInfo = false;
 
-            std::ofstream *streamLogs;
-            std::ofstream *streamErrors;
+            std::shared_ptr<std::ofstream> streamLogs;
+            std::shared_ptr<std::ofstream> streamErrors;
 
-            std::stringstream *customStdStreamLogs;
-            std::stringstream *customStdStreamErrors;
+            std::shared_ptr<std::stringstream> customStdStreamLogs;
+            std::shared_ptr<std::stringstream> customStdStreamErrors;
 
             std::streambuf *nativeLogsCache;
             std::streambuf *nativeErrorsCache;
@@ -37,14 +40,17 @@ namespace runtime
                     }
 
                     if(headerId == "") {
-                        if(serverEnv === "development") {
-                            id = generateId();
-                        } else {
+                        if(serverEnv == "development") {
                             id = "dev";
+                        } else {
+                            id = generateId();
                         }
                     } else {
                         id = headerId;
                     }
+
+                    streamLogs = std::make_shared<std::ofstream>("/mnt/logs/" + id + "_logs.log", std::ios_base::app);
+                    streamErrors = std::make_shared<std::ofstream>("/mnt/logs/" + id + "_errors.log", std::ios_base::app);
                 }
             }
         
@@ -63,9 +69,9 @@ namespace runtime
                     write("Native logs detected. Use context.log() or context.error() for better experience.", type, native);
                 }
 
-                std::ofstream* stream = type == "error" ? streamErrors : streamLogs;
+                std::shared_ptr<std::ofstream> stream = type == "error" ? streamErrors : streamLogs;
 
-                *(stream) << message;
+                *(stream) << (message + "\n");
             }
 
             void end()
@@ -82,36 +88,46 @@ namespace runtime
 
             void overrideNativeLogs()
             {
-                std::stringstream customStdStreamLogs;
-                std::stringstream customStdStreamErrors;
+                customStdStreamLogs = std::make_shared<std::stringstream>();
+                customStdStreamErrors = std::make_shared<std::stringstream>();
 
-                nativeLogsCache = std::cout.rdbuf(customStdStreamLogs.rdbuf());
-                nativeErrorsCache = std::cerr.rdbuf(customStdStreamErrors.rdbuf());
+                nativeLogsCache = std::cout.rdbuf(customStdStreamLogs->rdbuf());
+                nativeErrorsCache = std::cerr.rdbuf(customStdStreamErrors->rdbuf());
             }
 
             void revertNativeLogs()
             {
                 std::cout.rdbuf(nativeLogsCache);
                 std::cerr.rdbuf(nativeErrorsCache);
+
+                if(!customStdStreamLogs->str().empty()) {
+                    write(customStdStreamLogs->str(), "log", true);
+                }
+
+                if(!customStdStreamErrors->str().empty()) {
+                    write(customStdStreamErrors->str(), "log", true);
+                }
             }
 
-            std::string generateId(const int padding = 7)
+            std::string generateId(int padding = 7)
             {
-                // TODO: Randomness not working I think
-                auto now = std::chrono::system_clock::now();
-                auto duration = now.time_since_epoch();
-                auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+                auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+                long millis = std::chrono::duration_cast<std::chrono::microseconds>(now).count();
 
                 std::stringstream ss;
                 ss << std::hex << millis;
                 std::string result = ss.str();
 
-                if (padding > 0) {
-                    int paddingNeeded = padding - result.length();
-                    if (paddingNeeded > 0) {
-                        std::string paddingStr(paddingNeeded, '0');
-                        result = paddingStr + result;
-                    }
+                const char charset[] = "0123456789abcdef";
+                const size_t max_index = (sizeof(charset) - 1);
+                srand(time(NULL));
+                while (padding > 0) {
+                    char random_hex = charset[rand() % max_index];
+                    std::stringstream ss2;
+                    ss2 << random_hex;
+
+                    result = result + ss2.str();
+                    padding = padding - 1;
                 }
 
                 return result;

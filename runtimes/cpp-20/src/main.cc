@@ -30,7 +30,7 @@ int main()
             [](const drogon::HttpRequestPtr &req,
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
-                runtime::RuntimeLogger logger(req->getHeader("x-open-runtimes-logging"), req->getHeader("x-open-runtimes-log-id"));
+                std::shared_ptr<runtime::RuntimeLogger> logger = std::make_shared<runtime::RuntimeLogger>(req->getHeader("x-open-runtimes-logging"), req->getHeader("x-open-runtimes-log-id"));
 
                 try {
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
@@ -256,7 +256,7 @@ int main()
                     context.res = contextResponse;
                     context.logger = logger;
 
-                    logger.overrideNativeLogs();
+                    logger->overrideNativeLogs();
 
                     runtime::RuntimeOutput output;
 
@@ -292,7 +292,7 @@ int main()
                         output = contextResponse.send("", 500, {});
                     }
 
-                    logger.revertNativeLogs();
+                    logger->revertNativeLogs();
 
                     for (const std::string &key : output.headers.getMemberNames())
                     {
@@ -324,8 +324,8 @@ int main()
 
                     res->addHeader("content-type", contentTypeHeader);
 
-                    logger.end();
-                    res->addHeader("x-open-runtimes-log-id", logger.id);
+                    logger->end();
+                    res->addHeader("x-open-runtimes-log-id", logger->id);
 
                     res->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
                     res->setBody(output.body);
@@ -334,10 +334,10 @@ int main()
                 {
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
 
-                    logger.write(e.what());
-                    logger.end();
+                    logger->write(e.what(), "error");
+                    logger->end();
 
-                    res->addHeader("x-open-runtimes-log-id", logger.id);
+                    res->addHeader("x-open-runtimes-log-id", logger->id);
 
                     res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
                     res->setBody("");

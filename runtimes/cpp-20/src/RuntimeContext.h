@@ -13,16 +13,16 @@ namespace runtime
         public:
             RuntimeRequest req;
             RuntimeResponse res;
-            RuntimeLogger logger;
+            std::shared_ptr<runtime::RuntimeLogger> logger;
 
             void log(const std::string &message)
             {
-                logger.write(message, "log");
+                logger->write(message, "log");
             }
 
             void error(const std::string &message)
             {
-                logger.write(message, "error");
+                logger->write(message, "error");
             }
     };
 }

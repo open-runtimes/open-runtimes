@@ -304,8 +304,10 @@ class Base extends TestCase
     public function testLogs(): void
     {
         $response = Client::execute(headers: ['x-action' => 'logs' ]);
-        $logs = Client::getLogs($response['headers']['x-open-runtimes-log-id']);
-        $errors = Client::getErrors($response['headers']['x-open-runtimes-log-id']);
+        $logId = $response['headers']['x-open-runtimes-log-id'];
+        $logs = Client::getLogs($logId);
+        $errors = Client::getErrors($logId);
+        self::assertEquals(20, \strlen($logId));
         self::assertEquals(200, $response['code']);
         self::assertEmpty($response['body']);
         self::assertStringContainsString('Debug log', $logs);
@@ -319,6 +321,11 @@ class Base extends TestCase
         self::assertStringContainsString('["arrayValue"]', $logs);
         self::assertStringContainsString('Log+With+Plus+Symbol', $logs);
         self::assertStringContainsString("\n", $logs);
+
+        $response = Client::execute(headers: ['x-action' => 'logs' ]);
+        $logIdSecond = $response['headers']['x-open-runtimes-log-id'];
+        self::assertEquals(20, \strlen($logId));
+        self::assertNotEquals($logId, $logIdSecond);
 
         $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'disabled', 'x-open-runtimes-log-id' => 'noLogs' ]);
         $logs = Client::getLogs('noLogs');
