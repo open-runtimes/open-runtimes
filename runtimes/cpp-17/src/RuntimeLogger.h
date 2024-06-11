@@ -35,8 +35,8 @@ namespace runtime
 
                 if(enabled == true) {
                     std::string serverEnv = "";
-                    if (std::getenv("OPEN_RUNTIMES_SECRET") != nullptr) {
-                        serverEnv = std::getenv("OPEN_RUNTIMES_SECRET");
+                    if (std::getenv("OPEN_RUNTIMES_ENV") != nullptr) {
+                        serverEnv = std::getenv("OPEN_RUNTIMES_ENV");
                     }
 
                     if(headerId == "") {

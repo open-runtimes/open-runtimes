@@ -58,13 +58,16 @@ int main()
                         }
                     }
 
-                    std::string secret = req->getHeader("x-open-runtimes-secret");
-                    if (std::getenv("OPEN_RUNTIMES_SECRET") != nullptr && secret != std::getenv("OPEN_RUNTIMES_SECRET"))
-                    {
-                        res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
-                        res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
-                        callback(res);
-                        return;
+                    if(std::getenv("OPEN_RUNTIMES_SECRET") != nullptr) {
+                        std::string serverSecret(std::getenv("OPEN_RUNTIMES_SECRET"));
+                        std::string secret = req->getHeader("x-open-runtimes-secret");
+
+                        if(serverSecret != "" && secret != serverSecret) {
+                            res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
+                            res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
+                            callback(res);
+                            return;
+                        }
                     }
 
                     std::string method = req->getMethodString();
