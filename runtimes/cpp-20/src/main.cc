@@ -4,6 +4,7 @@
 #include "RuntimeRequest.h"
 #include "RuntimeOutput.h"
 #include "RuntimeContext.h"
+#include "RuntimeLogger.h"
 #include "{entrypointFile}"
 #include <vector>
 #include <numeric>
@@ -29,6 +30,8 @@ int main()
             [](const drogon::HttpRequestPtr &req,
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
+                runtime::RuntimeLogger logger(req->getHeader("x-open-runtimes-logging"), req->getHeader("x-open-runtimes-log-id"));
+
                 try {
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
 
@@ -251,11 +254,9 @@ int main()
 
                     context.req = runtimeRequest;
                     context.res = contextResponse;
+                    context.logger = logger;
 
-                    std::stringstream outBuffer;
-                    std::stringstream errBuffer;
-                    std::streambuf *oldOut = std::cout.rdbuf(outBuffer.rdbuf());
-                    std::streambuf *oldErr = std::cerr.rdbuf(errBuffer.rdbuf());
+                    logger.overrideNativeLogs();
 
                     runtime::RuntimeOutput output;
 
@@ -291,19 +292,7 @@ int main()
                         output = contextResponse.send("", 500, {});
                     }
 
-                    if(!outBuffer.str().empty() || !errBuffer.str().empty())
-                    {
-                        context.log("");
-                        context.log("----------------------------------------------------------------------------");
-                        context.log("Unsupported logs detected. Use context.log() or context.error() for logging.");
-                        context.log("----------------------------------------------------------------------------");
-                        context.log(outBuffer.str());
-                        context.log(errBuffer.str());
-                        context.log("----------------------------------------------------------------------------");
-                    }
-
-                    std::cout.rdbuf(oldOut);
-                    std::cerr.rdbuf(oldErr);
+                    logger.revertNativeLogs();
 
                     for (const std::string &key : output.headers.getMemberNames())
                     {
@@ -335,51 +324,8 @@ int main()
 
                     res->addHeader("content-type", contentTypeHeader);
 
-                    CURL *curl = curl_easy_init();
-
-                    if(!context.logs.empty())
-                    {
-                        std::string logsString = std::accumulate(
-                            std::next(context.logs.begin()), 
-                            context.logs.end(), 
-                            context.logs[0], 
-                            [](const std::string &a, const std::string &b) {
-                                return a + "\n" + b;
-                            }
-                        );
-
-                        std::string logsEncoded = curl_easy_escape(
-                            curl,
-                            logsString.c_str(),
-                            logsString.length()
-                        );
-
-                        res->addHeader("x-open-runtimes-logs", logsEncoded);
-                    } else {
-                        res->addHeader("x-open-runtimes-logs", "");
-                    }
-
-                    if(!context.errors.empty())
-                    {
-                        std::string errorsString = std::accumulate(
-                            std::next(context.errors.begin()), 
-                            context.errors.end(), 
-                            context.errors[0], 
-                            [](const std::string &a, const std::string &b) {
-                                return a + "\n" + b;
-                            }
-                        );
-
-                        std::string errorsEncoded = curl_easy_escape(
-                            curl,
-                            errorsString.c_str(),
-                            errorsString.length()
-                        );
-
-                        res->addHeader("x-open-runtimes-errors", errorsEncoded);
-                    } else {
-                        res->addHeader("x-open-runtimes-errors", "");
-                    }
+                    logger.end();
+                    res->addHeader("x-open-runtimes-log-id", logger.id);
 
                     res->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
                     res->setBody(output.body);
@@ -388,34 +334,10 @@ int main()
                 {
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
 
-                    std::vector<std::string> errors = {};
-                    errors.push_back(e.what());
+                    logger.write(e.what());
+                    logger.end();
 
-                    CURL *curl = curl_easy_init();
-
-                    res->addHeader("x-open-runtimes-logs", "");
-
-                    if(!errors.empty())
-                    {
-                        std::string errorsString = std::accumulate(
-                            std::next(errors.begin()), 
-                            errors.end(), 
-                            errors[0], 
-                            [](const std::string &a, const std::string &b) {
-                                return a + "\n" + b;
-                            }
-                        );
-
-                        std::string errorsEncoded = curl_easy_escape(
-                            curl,
-                            errorsString.c_str(),
-                            errorsString.length()
-                        );
-
-                        res->addHeader("x-open-runtimes-errors", errorsEncoded);
-                    } else {
-                        res->addHeader("x-open-runtimes-errors", "");
-                    }
+                    res->addHeader("x-open-runtimes-log-id", logger.id);
 
                     res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
                     res->setBody("");
