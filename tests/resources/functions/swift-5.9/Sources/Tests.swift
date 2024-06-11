@@ -35,14 +35,14 @@ When you can have two!
     case "emptyResponse":
         return context.res.empty()
     case "noResponse":
-        context.res.send("This should be ignored, as it is not returned.")
+        _ = context.res.send("This should be ignored, as it is not returned.")
 
         // Simulate test data. Return necessary in Swift
         context.error("Return statement missing. return context.res.empty() if no response is expected.")
 
         return context.res.send("", statusCode: 500)
     case "doubleResponse":
-        context.res.send("This should be ignored.")
+        _ = context.res.send("This should be ignored.")
         return context.res.send("This should be returned.")
     case "headersResponse":
         return context.res.send("OK", statusCode: 200, headers: [
@@ -105,9 +105,10 @@ When you can have two!
         context.log(["objectKey": "objectValue"])
         context.log(["arrayValue"])
 
+        // TODO: Implement as soon as possible
         // Swift doesn't support native log capturing
         context.log("Native log")
-        context.log("Unsupported logs detected. Use context.log() or context.error() for logging.")
+        context.log("Native logs detected. Use context.log() or context.error() for better experience.")
 
         return context.res.send("")
     case "library":
