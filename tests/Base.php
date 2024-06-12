@@ -401,6 +401,32 @@ class Base extends TestCase
         self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
     }
 
+    public function testEnforcedHeaders(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'requestHeaders']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals('requestHeaders', $body['x-action']);
+        self::assertEquals('value', $body['x-custom']);
+        self::assertIsString($body['x-open-runtimes-custom']);
+        self::assertEquals('248', $body['x-open-runtimes-custom']);
+
+
+        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'x-custom' => 'notenforced', 'x-open-runtimes-custom' => 'notenforced']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals('requestHeaders', $body['x-action']);
+        self::assertEquals('value', $body['x-custom']);
+        self::assertIsString($body['x-open-runtimes-custom']);
+        self::assertEquals('248', $body['x-open-runtimes-custom']);
+    }
+
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
         $expected = preg_replace('/\s+/', '', $expected);
         $actual = preg_replace('/\s+/', '', $actual);

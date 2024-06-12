@@ -53,7 +53,7 @@ const action = async (logger, req, res) => {
 
     const enforcedHeaders = JSON.parse(process.env.OPEN_RUNTIMES_HEADERS ?? '{}');
     for(const header in enforcedHeaders) {
-        headers[header.toLowerCase()] = enforcedHeaders[header];
+        headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
     }
 
     const scheme = (req.headers['x-forwarded-proto'] ?? 'http');
