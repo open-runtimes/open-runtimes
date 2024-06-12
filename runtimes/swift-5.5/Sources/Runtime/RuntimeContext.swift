@@ -11,36 +11,20 @@ extension NSDictionary : CollectionType {}
 class RuntimeContext {
     let req: RuntimeRequest
     let res: RuntimeResponse
-    var logs: [String] = []
-    var errors: [String] = []
+    let logger: RuntimeLogger
 
-    init(request: RuntimeRequest, response: RuntimeResponse) {
+    init(request: RuntimeRequest, response: RuntimeResponse, logger: RuntimeLogger) {
         self.req = request
         self.res = response
+        self.logger = logger
     }
 
     func log(_ message: Any) {
-        if message is CollectionType {
-            if let data = try? JSONSerialization.data(withJSONObject: message),
-               let string = String(data: data, encoding: .utf8) {
-                logs.append(string)
-                return
-            }
-        }
-        
-        logs.append(String(describing: message))
+        self.logger.write(message: message, type: RuntimeLogger.TYPE_LOG)
     }
 
     func error(_ message: Any) {
-        if message is CollectionType {
-            if let data = try? JSONSerialization.data(withJSONObject: message),
-               let string = String(data: data, encoding: .utf8) {
-                errors.append(string)
-                return
-            }
-        }
-        
-        errors.append(String(describing: message))
+        self.logger.write(message: message, type: RuntimeLogger.TYPE_ERROR)
     }
 
 }

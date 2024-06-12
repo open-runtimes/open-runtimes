@@ -1,25 +1,28 @@
 import { Application } from "https://deno.land/x/oak@v10.6.0/mod.ts";
+import { Logger } from "./logger.ts";
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const app = new Application();
 
 app.use(async (ctx: any) => {
-  try {
-    await action(ctx);
-  } catch(e) {
-      const logs: any[] = [];
-      const errors: any[] = [e.stack || e];
+  const logger = new Logger(ctx.request.headers.get('x-open-runtimes-logging'), ctx.request.headers.get('x-open-runtimes-log-id'));
+  await logger.setup();
 
-      ctx.response.headers.set('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
-      ctx.response.headers.set('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));	
-    
-      ctx.response.status = 500;
-      ctx.response.body = '';
+  try {
+    await action(logger, ctx);
+  } catch(e) {
+    logger.write(e, Logger.TYPE_ERROR);
+
+    ctx.response.headers.set('x-open-runtimes-log-id', logger.id);
+    await logger.end();
+
+    ctx.response.status = 500;
+    ctx.response.body = '';
   }
 });
 
-const action = async (ctx: any) => {
+const action = async (logger: Logger, ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? '';
   let safeTimeout: number | null = null;
   if(timeout) {
@@ -31,14 +34,12 @@ const action = async (ctx: any) => {
 
       safeTimeout = +timeout;
   }
-  
+
   if(Deno.env.get("OPEN_RUNTIMES_SECRET") && (ctx.request.headers.get("x-open-runtimes-secret") ?? '') !== Deno.env.get("OPEN_RUNTIMES_SECRET")) {
     ctx.response.status = 500;
     ctx.response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.';
     return;
   }
-  const logs: string[] = [];
-  const errors: string[] = [];
 
   const contentType = ctx.request.headers.get('content-type') ?? 'text/plain';
   const bodyRaw: string = await ctx.request.body({ type: 'text' }).value;
@@ -111,32 +112,14 @@ const action = async (ctx: any) => {
       }
     },
     log: function (message: any) {
-      if (message instanceof Object || Array.isArray(message)) {
-        logs.push(JSON.stringify(message));
-      } else {
-        logs.push(message + "");
-      }
+      logger.write(message, Logger.TYPE_LOG);
     },
     error: function (message: any) {
-      if (message instanceof Object || Array.isArray(message)) {
-        errors.push(JSON.stringify(message));
-      } else {
-        errors.push(message + "");
-      }
+      logger.write(message, Logger.TYPE_ERROR);
     },
   };
 
-  const stdlog = console.log.bind(console);
-  const stderror = console.error.bind(console);
-  const stdinfo = console.info.bind(console);
-  const stddebug = console.debug.bind(console);
-  const stdwarn = console.warn.bind(console);
-
-  let customstd = "";
-  console.log = console.info = console.debug = console.warn = console.error = function(...args: any[]) {
-    const formattedArgs = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg);
-    customstd += formattedArgs.join(' ') + '\n';
-  }
+  logger.overrideNativeLogs();
 
   let output: any = null;
 
@@ -175,11 +158,7 @@ const action = async (ctx: any) => {
     context.error(e.message.includes("Cannot resolve module") ? "Code file not found." : e.stack || e);
     output = context.res.send('', 500, {});
   } finally {
-    console.log = stdlog;
-    console.error = stderror;
-    console.debug = stddebug;
-    console.warn = stdwarn;
-    console.info = stdinfo;
+    logger.revertNativeLogs();
   }
 
   if(output === null || output === undefined) {
@@ -211,17 +190,8 @@ const action = async (ctx: any) => {
     );
   }
 
-  if(customstd) {
-    context.log('');
-    context.log('----------------------------------------------------------------------------');
-    context.log('Unsupported logs detected. Use context.log() or context.error() for logging.');
-    context.log('----------------------------------------------------------------------------');
-    context.log(customstd);
-    context.log('----------------------------------------------------------------------------');
-  }
-
-  ctx.response.headers.set('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
-  ctx.response.headers.set('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));	
+  ctx.response.headers.set('x-open-runtimes-log-id', logger.id);
+  await logger.end();
 
   ctx.response.status = output.statusCode;
   if(output.statusCode !== 204) {

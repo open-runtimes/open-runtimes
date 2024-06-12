@@ -3,7 +3,12 @@ FROM swiftarm/swift:5.9.2-ubuntu-22.04
 LABEL maintainer="team@appwrite.io"
 LABEL namespace="open-runtimes"
 
+ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
+ENV OPEN_RUNTIMES_ENTRYPOINT=
+ENV OPEN_RUNTIMES_ENV=production
+
 RUN mkdir -p /mnt/code
+RUN mkdir -p /mnt/logs
 RUN mkdir -p /usr/local/build
 RUN mkdir -p /usr/local/server
 RUN mkdir -p /usr/local/server/src

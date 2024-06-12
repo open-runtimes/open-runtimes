@@ -8,6 +8,8 @@ START_COMMAND=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.RU
 
 # Cleanup
 docker rm --force $(docker ps -aq)
+rm -rf /tmp/logs
+mkdir -p /tmp/logs
 
 # Prepare image
 cd ./runtimes/$RUNTIME
@@ -19,14 +21,20 @@ cd ./tests/resources/functions/$RUNTIME
 rm -rf code.tar.gz
 touch code.tar.gz
 
-# Build and start
-docker run --rm --name open-runtimes-test-build -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" open-runtimes/test-runtime sh -c "sh helpers/build.sh \"$INSTALL_COMMAND\""
-docker run -d --rm --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh helpers/start.sh \"$START_COMMAND\""
+# Build
+docker run --rm --name open-runtimes-test-build -v /tmp/.build:/usr/local/server/.build -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" open-runtimes/test-runtime sh -c "sh helpers/build.sh \"$INSTALL_COMMAND\""
+
+# Main tests
+docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh helpers/start.sh \"$START_COMMAND\""
 cd ../../../../
-
-## Wait for server to be ready
-while ! timeout 0.5 bash -c "</dev/tcp/127.0.0.1/3000"; do sleep 0.5; done
-sleep 1
-
-# Run tests
+sleep 10
 OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vendor/bin/phpunit --configuration phpunit.xml tests/Base.php
+
+# Dev tests (Uncomment only if fails on CI/CD. Changes rarely make them fail)
+
+docker rm --force $(docker ps -aq)
+cd ./tests/resources/functions/$RUNTIME
+docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_SECRET= -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh helpers/start.sh \"$START_COMMAND\""
+cd ../../../../
+sleep 10
+vendor/bin/phpunit --configuration phpunit.xml tests/BaseDev.php

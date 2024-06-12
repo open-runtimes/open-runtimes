@@ -1,3 +1,5 @@
+from function_types import Context, Request, Response
+from logger import Logger
 from flask import Flask, request, Response as FlaskResponse
 from urllib.parse import urlparse
 from io import StringIO
@@ -5,73 +7,14 @@ import traceback
 import pathlib
 import os
 import importlib
-import sys
 import urllib.parse
-import json
 import asyncio
 
 app = Flask(__name__)
 
-class Response:
-    def send(self, body, statusCode = 200, headers = {}):
-        return {
-            'body': body,
-            'statusCode': statusCode,
-            'headers': headers,
-        }
-
-    def json(self, obj, statusCode = 200, headers = {}):
-        headers['content-type'] = 'application/json'
-        return self.send(json.dumps(obj, separators=(',', ':')), statusCode, headers)
-    
-    def empty(self):
-        return self.send('', 204, {})
-
-    def redirect(self, url, statusCode = 301, headers = {}):
-        headers['location'] = url
-        return self.send('', statusCode, headers)
-
-class Request:
-    body_raw = None
-    body = None
-    headers = None
-    method = None
-    url = None
-    path = None
-    port = None
-    query = None
-    query_string = None
-    scheme = None
-    host = None
-
-class Context:
-    req = Request()
-    res = Response()
-
-    logs = []
-    errors = []
-
-    def __init__(self):
-        self.logs = []
-        self.errors = []
-        self.req = Request()
-        self.res = Response()
-
-    def log(self, message):
-        if isinstance(message, (list, dict, tuple)):
-            self.logs.append(json.dumps(message, separators=(',', ':')))
-        else:
-            self.logs.append(str(message))
-
-    def error(self, message):
-        if isinstance(message, (list, dict, tuple)):
-            self.errors.append(json.dumps(message, separators=(',', ':')))
-        else:
-            self.errors.append(str(message))
-
 HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
 
-async def action(request):
+async def action(logger, request):
     timeout = request.headers.get('x-open-runtimes-timeout', '')
     safeTimeout = None
     if (timeout):
@@ -83,7 +26,7 @@ async def action(request):
     if (os.getenv('OPEN_RUNTIMES_SECRET', '') != '' and request.headers.get('x-open-runtimes-secret', '') != os.getenv('OPEN_RUNTIMES_SECRET', '')):
         return 'Unauthorized. Provide correct "x-open-runtimes-secret" header.', 500
 
-    context = Context()
+    context = Context(logger)
 
     context.req.body_raw = request.get_data(as_text=True)
     context.req.body = context.req.body_raw
@@ -135,7 +78,7 @@ async def action(request):
         if not key.lower().startswith('x-open-runtimes-'):
             context.req.headers[key.lower()] = headers[key]
 
-    sys.stdout = sys.stderr = customstd = StringIO()
+    logger.override_native_logs()
 
     output = None
 
@@ -170,8 +113,7 @@ async def action(request):
         context.error(''.join(traceback.TracebackException.from_exception(e).format()))
         output = context.res.send('', 500, {})
     finally:
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
+        logger.revert_native_logs()
 
     if output is None:
         context.error('Return statement missing. return context.res.empty() if no response is expected.')
@@ -191,32 +133,26 @@ async def action(request):
     if not resp.headers['content-type'].startswith('multipart/') and not 'charset=' in resp.headers['content-type']:
         resp.headers['content-type'] += '; charset=utf-8'
 
-    if customstd.getvalue():
-        context.log('----------------------------------------------------------------------------')
-        context.log('Unsupported logs detected. Use context.log() or context.error() for logging.')
-        context.log('----------------------------------------------------------------------------')
-        context.log(customstd.getvalue())
-        context.log('----------------------------------------------------------------------------')
-
-    resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(context.logs))
-    resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(context.errors))
+    resp.headers['x-open-runtimes-log-id'] = logger.id
+    logger.end()
 
     return resp
 
 @app.route('/', defaults={'u_path': ''}, methods = HTTP_METHODS)
 @app.route('/<path:u_path>', methods = HTTP_METHODS)
 async def handler(u_path):
+    logger = Logger(request.headers.get('x-open-runtimes-logging', ''), request.headers.get('x-open-runtimes-log-id', ''))
+
     try:
-       return await action(request)
+       return await action(logger, request)
     except Exception as e:
-        logs = []
-        errors = [
-            ''.join(traceback.TracebackException.from_exception(e).format())
-        ]
+        message = "".join(traceback.TracebackException.from_exception(e).format())
+        logger.write(message, Logger.TYPE_ERROR)
 
     resp = FlaskResponse('', 500)
-    resp.headers['x-open-runtimes-logs'] = urllib.parse.quote('\n'.join(logs))
-    resp.headers['x-open-runtimes-errors'] = urllib.parse.quote('\n'.join(errors))
+
+    resp.headers['x-open-runtimes-log-id'] = logger.id
+    logger.end()
 
     return resp
 

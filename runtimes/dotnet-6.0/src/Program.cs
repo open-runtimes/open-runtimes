@@ -13,26 +13,32 @@ app.Run();
 
 static async Task<IResult> Execute(HttpRequest request)
 {
+    var loggingHeader = request.Headers.TryGetValue("x-open-runtimes-logging", out var loggingHeaderValue)
+        ? loggingHeaderValue.ToString()
+        : string.Empty;
+
+    var logIdHeader = request.Headers.TryGetValue("x-open-runtimes-log-id", out var logIdHeaderValue)
+        ? logIdHeaderValue.ToString()
+        : string.Empty;
+
+    RuntimeLogger logger = new RuntimeLogger(loggingHeader, logIdHeader);
+
     try
     {
-        return await Action(request);
+        return await Action(request, logger);
     } catch (Exception e)
     {
-        List<string> Logs = new List<string>();
-        List<string> Errors = new List<string>();
-
-        Errors.Add(e.ToString());
+        logger.Write(e.ToString(), RuntimeLogger.TYPE_ERROR);
+        logger.End();
 
         var outputHeaders = new Dictionary<string, string>();
-
-        outputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(string.Join("\n", Logs)));
-        outputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(string.Join("\n", Errors)));
+        outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
         return new CustomResponse("", 500, outputHeaders);
     }
 }
 
-static async Task<IResult> Action(HttpRequest request)
+static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
 {
     int safeTimout = -1;
     var timeout = request.Headers.TryGetValue("x-open-runtimes-timeout", out var timeoutValue)
@@ -167,15 +173,9 @@ static async Task<IResult> Action(HttpRequest request)
 
     var contextResponse = new RuntimeResponse();
 
-    var context = new RuntimeContext(contextRequest, contextResponse);
+    var context = new RuntimeContext(contextRequest, contextResponse, logger);
 
-    var originalOut = Console.Out;
-    var originalErr = Console.Error;
-
-    var customStd = new StringBuilder();
-    var customStdWriter = new StringWriter(customStd);
-    Console.SetOut(customStdWriter);
-    Console.SetError(customStdWriter);
+    logger.OverrideNativeLogs();
 
     RuntimeOutput? output = null;
 
@@ -212,8 +212,7 @@ static async Task<IResult> Action(HttpRequest request)
     }
     finally
     {
-        Console.SetOut(originalOut);
-        Console.SetError(originalErr);
+        logger.RevertNativeLogs();
     }
 
     if(output == null)
@@ -234,18 +233,9 @@ static async Task<IResult> Action(HttpRequest request)
         }
     }
 
-    if(!string.IsNullOrEmpty(customStd.ToString()))
-    {
-        context.Log("");
-        context.Log("----------------------------------------------------------------------------");
-        context.Log("Unsupported logs detected. Use context.Log() or context.Error() for logging.");
-        context.Log("----------------------------------------------------------------------------");
-        context.Log(customStd.ToString());
-        context.Log("----------------------------------------------------------------------------");
-    }
+    logger.End();
 
-    outputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(string.Join("\n", context.Logs)));
-    outputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(string.Join("\n", context.Errors)));
+    outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
     return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
 }

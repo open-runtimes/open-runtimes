@@ -3,6 +3,10 @@ FROM alpine:3.16
 LABEL maintainer="team@appwrite.io"
 LABEL namespace="open-runtimes"
 
+ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
+ENV OPEN_RUNTIMES_ENTRYPOINT=index.cc
+ENV OPEN_RUNTIMES_ENV=production
+
 ARG DEBIAN_FRONTEND=noninteractive
 ENV DROGON_VERSION=v1.7.5
 
@@ -32,6 +36,7 @@ RUN git clone --depth 1 --branch $DROGON_VERSION https://github.com/drogonframew
     && rm -rf /drogon
 
 RUN mkdir -p /mnt/code
+RUN mkdir -p /mnt/logs
 RUN mkdir -p /usr/local/build
 RUN mkdir -p /usr/local/server
 RUN mkdir -p /usr/local/server/src

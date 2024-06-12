@@ -19,31 +19,28 @@ app.on(.OPTIONS, "", body: .stream, use: execute)
 app.on(.OPTIONS, "**", body: .stream, use: execute)
 
 func execute(req: Request) async throws -> Response {
+    let headerLogger = req.headers["x-open-runtimes-logging"]
+    var loggerStatus = ""
+    if(!headerLogger.isEmpty) {
+        loggerStatus = headerLogger.first ?? ""
+    }
+
+    let headerLogId = req.headers["x-open-runtimes-log-id"]
+    var logId = ""
+    if(!headerLogId.isEmpty) {
+        logId = headerLogId.first ?? ""
+    }
+
+    let logger = RuntimeLogger(status: loggerStatus, id: logId)
     do {
-        return try await action(req: req)
+        return try await action(logger: logger, req: req)
     } catch {
-        var logsArr = [] as [String]
-        var errorsArr = [] as [String]
 
-        if error is CollectionType {
-            if let data = try? JSONSerialization.data(withJSONObject: error),
-               let string = String(data: data, encoding: .utf8) {
-                errorsArr.append(string)
-            }
-        } else {
-            errorsArr.append(String(describing: error))
-        }
-
+        logger.write(message: error, type: RuntimeLogger.TYPE_ERROR)
+        logger.end()
+       
         var outputHeaders = HTTPHeaders()
-
-        var logs = logsArr.joined(separator: "\n")
-        logs = logs.addingPercentEncoding(withAllowedCharacters: .urlAllowedCharacters) ?? logs
-
-        var errors = errorsArr.joined(separator: "\n")
-        errors = errors.addingPercentEncoding(withAllowedCharacters: .urlAllowedCharacters) ?? errors
-
-        outputHeaders.add(name: "x-open-runtimes-logs", value: logs)
-        outputHeaders.add(name: "x-open-runtimes-errors", value: errors)
+        outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
 
         let code: HTTPResponseStatus = .custom(code: UInt(500), reasonPhrase: "")
         let resBody: Response.Body = .init(string: "")
@@ -57,7 +54,7 @@ func execute(req: Request) async throws -> Response {
 
 }
 
-func action(req: Request) async throws -> Response {
+func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     var safeTimeout = -1
     let timeout = req.headers["x-open-runtimes-timeout"]
     if (!timeout.isEmpty) {
@@ -73,11 +70,13 @@ func action(req: Request) async throws -> Response {
     }
 
     if let serverSecret = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] {
-        if !req.headers.contains(name: "x-open-runtimes-secret") || req.headers["x-open-runtimes-secret"].first != serverSecret {
-            return Response(
-                status: .internalServerError,
-                body: .init(string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
-            )
+        if(serverSecret != "") {
+            if !req.headers.contains(name: "x-open-runtimes-secret") || req.headers["x-open-runtimes-secret"].first != serverSecret {
+                return Response(
+                    status: .internalServerError,
+                    body: .init(string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
+                )
+            }
         }
     }
 
@@ -161,7 +160,8 @@ func action(req: Request) async throws -> Response {
     
     let context = RuntimeContext(
         request: request,
-        response: response
+        response: response,
+        logger: logger
     )
 
     var output: RuntimeOutput
@@ -213,14 +213,8 @@ func action(req: Request) async throws -> Response {
         outputHeaders.replaceOrAdd(name: "content-type", value: contentTypeValue + "; charset=utf-8")
     }
 
-    var logs = context.logs.joined(separator: "\n")
-    logs = logs.addingPercentEncoding(withAllowedCharacters: .urlAllowedCharacters) ?? logs
-
-    var errors = context.errors.joined(separator: "\n")
-    errors = errors.addingPercentEncoding(withAllowedCharacters: .urlAllowedCharacters) ?? errors
-
-    outputHeaders.add(name: "x-open-runtimes-logs", value: logs)
-    outputHeaders.add(name: "x-open-runtimes-errors", value: errors)
+    logger.end()
+    outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
     
     let code: HTTPResponseStatus = .custom(code: UInt(output.statusCode), reasonPhrase: "")
     let resBody: Response.Body = .init(string: output.body)
