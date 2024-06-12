@@ -51,6 +51,11 @@ const action = async (logger, req, res) => {
         headers[header.toLowerCase()] = req.headers[header];
     });
 
+    const enforcedHeaders = JSON.parse(process.env.OPEN_RUNTIMES_HEADERS ?? '{}');
+    for(const header in enforcedHeaders) {
+        headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
+    }
+
     const scheme = (req.headers['x-forwarded-proto'] ?? 'http');
     const defaultPort = scheme === 'https' ? '443' : '80';
     const host = req.headers['host'].includes(':') ? req.headers['host'].split(':')[0] : req.headers['host'];
