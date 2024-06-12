@@ -2,6 +2,7 @@ package io.openruntimes.java;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.ToNumberPolicy;
 import org.rapidoid.http.Req;
 import org.rapidoid.http.Resp;
 import org.rapidoid.setup.On;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 
 public class Server {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
+    private static final Gson gsonInternal = new GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create();
 
     private static final ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -120,6 +122,15 @@ public class Server {
             if (!(header.startsWith("x-open-runtimes-"))) {
                 headers.put(header, entry.getValue());
             }
+        }
+
+        String enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS");
+        if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
+            enforcedHeadersString = "{}";
+        }
+        Map<String, Object> enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, Map.class);
+        for (Map.Entry<String, Object> entry : enforcedHeaders.entrySet()) {
+            headers.put(entry.getKey().toLowerCase(), String.valueOf(entry.getValue()));
         }
 
         String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
