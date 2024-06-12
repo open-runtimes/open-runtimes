@@ -70,11 +70,13 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     }
 
     if let serverSecret = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] {
-        if !req.headers.contains(name: "x-open-runtimes-secret") || req.headers["x-open-runtimes-secret"].first != serverSecret {
-            return Response(
-                status: .internalServerError,
-                body: .init(string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
-            )
+        if(serverSecret != "") {
+            if !req.headers.contains(name: "x-open-runtimes-secret") || req.headers["x-open-runtimes-secret"].first != serverSecret {
+                return Response(
+                    status: .internalServerError,
+                    body: .init(string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
+                )
+            }
         }
     }
 
