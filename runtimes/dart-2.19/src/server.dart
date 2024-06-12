@@ -36,7 +36,8 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  final enforcedHeaders = jsonDecode(Platform.environment['OPEN_RUNTIMES_HEADERS'] ?? '{}');
+  String? enforcedHeadersString = Platform.environment['OPEN_RUNTIMES_HEADERS'];
+  final enforcedHeaders = jsonDecode((enforcedHeadersString != null && !enforcedHeadersString.isEmpty) ? enforcedHeadersString : '{}');
   enforcedHeaders.forEach((key, value) {
     headers[key.toLowerCase()] = '${value}';
   });

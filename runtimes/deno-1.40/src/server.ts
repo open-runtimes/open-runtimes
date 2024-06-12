@@ -58,7 +58,7 @@ const action = async (logger: Logger, ctx: any) => {
     headers[header.toLowerCase()] = ctx.request.headers.get(header);
   });
 
-  const enforcedHeaders = JSON.parse(Deno.env.get("OPEN_RUNTIMES_HEADERS") ?? '{}');
+  const enforcedHeaders = JSON.parse(Deno.env.get("OPEN_RUNTIMES_HEADERS") ? (Deno.env.get("OPEN_RUNTIMES_HEADERS") ?? '{}') : '{}');
   for(const header in enforcedHeaders) {
       headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
   }

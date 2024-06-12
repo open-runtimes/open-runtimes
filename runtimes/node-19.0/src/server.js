@@ -51,7 +51,7 @@ const action = async (logger, req, res) => {
         headers[header.toLowerCase()] = req.headers[header];
     });
 
-    const enforcedHeaders = JSON.parse(process.env.OPEN_RUNTIMES_HEADERS ?? '{}');
+    const enforcedHeaders = JSON.parse(process.env.OPEN_RUNTIMES_HEADERS ? process.env.OPEN_RUNTIMES_HEADERS : '{}');
     for(const header in enforcedHeaders) {
         headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
     }
