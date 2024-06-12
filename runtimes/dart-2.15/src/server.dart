@@ -38,7 +38,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 
   final enforcedHeaders = jsonDecode(Platform.environment['OPEN_RUNTIMES_HEADERS'] ?? '{}');
   enforcedHeaders.forEach((key, value) {
-    headers[key] = '${value}';
+    headers[key.toLowerCase()] = '${value}';
   });
 
   String contentType = req.headers['content-type'] ?? 'text/plain';

@@ -111,6 +111,11 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
         }
     }
 
+    $enforcedHeaders = json_decode(getenv('OPEN_RUNTIMES_HEADERS') ?? '{}', true);
+    foreach ($enforcedHeaders as $key => $value) {
+        $context->req->headers[\strtolower($key)] = \strval($value);
+    }
+
     $output = null;
 
     $execute = function() use ($userFunction, &$output, $context, $logger) {

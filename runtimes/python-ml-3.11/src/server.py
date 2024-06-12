@@ -78,6 +78,10 @@ async def action(logger, request):
         if not key.lower().startswith('x-open-runtimes-'):
             context.req.headers[key.lower()] = headers[key]
 
+    enforced_headers = json.loads(os.getenv('OPEN_RUNTIMES_HEADERS', "{}"))
+    for key in enforced_headers.keys():
+        context.req.headers[key.lower()] = str(enforced_headers[key])
+
     logger.override_native_logs()
 
     output = None

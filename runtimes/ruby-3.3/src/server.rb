@@ -89,6 +89,11 @@ def action(request, response, logger)
     end
   end
 
+  enforced_headers = JSON.parse(ENV['OPEN_RUNTIMES_HEADERS'].empty? ? '{}' : ENV['OPEN_RUNTIMES_HEADERS'])
+  enforced_headers.each do |key, value|
+    headers[key.downcase] = value.to_s
+  end
+
   content_type = request.env['CONTENT_TYPE']
   content_type = 'text/plain' if content_type.nil?
 

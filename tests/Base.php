@@ -411,11 +411,12 @@ class Base extends TestCase
 
         self::assertEquals('requestHeaders', $body['x-action']);
         self::assertEquals('value', $body['x-custom']);
+        self::assertEquals('value2', $body['x-custom-uppercase']);
         self::assertIsString($body['x-open-runtimes-custom']);
         self::assertEquals('248', $body['x-open-runtimes-custom']);
 
 
-        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'x-custom' => 'notenforced', 'x-open-runtimes-custom' => 'notenforced']);
+        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'x-custom' => 'notenforced', 'x-custom-uppercase' => 'notenforced', 'x-open-runtimes-custom' => 'notenforced']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
 
@@ -423,8 +424,19 @@ class Base extends TestCase
 
         self::assertEquals('requestHeaders', $body['x-action']);
         self::assertEquals('value', $body['x-custom']);
+        self::assertEquals('value2', $body['x-custom-uppercase']);
         self::assertIsString($body['x-open-runtimes-custom']);
         self::assertEquals('248', $body['x-open-runtimes-custom']);
+
+
+        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'X-CUSTOM-UPPERCASE' => 'notenforced']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals('requestHeaders', $body['x-action']);
+        self::assertEquals('value2', $body['x-custom-uppercase']);
     }
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
