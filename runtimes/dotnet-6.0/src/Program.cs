@@ -90,7 +90,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     Dictionary<string, object> enforcedHeaders = JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString) ?? new Dictionary<string, object>();
     foreach(KeyValuePair<string, object> entry in enforcedHeaders)
     {
-        headers[entry.Key] = Convert.ToString(entry.Value);
+        headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
     }
 
     var contentType = request.Headers.TryGetValue("content-type", out var contentTypeValue) ? contentTypeValue.ToString() : "";
