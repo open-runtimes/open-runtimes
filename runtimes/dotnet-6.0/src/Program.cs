@@ -81,6 +81,18 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         }
     }
 
+    String enforcedHeadersString = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS");
+    if (string.IsNullOrEmpty(enforcedHeadersString))
+    {
+        enforcedHeadersString = "{}";
+    }
+
+    Dictionary<string, object> enforcedHeaders = JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString) ?? new Dictionary<string, object>();
+    foreach(KeyValuePair<string, object> entry in enforcedHeaders)
+    {
+        headers[entry.Key] = Convert.ToString(entry.Value);
+    }
+
     var contentType = request.Headers.TryGetValue("content-type", out var contentTypeValue) ? contentTypeValue.ToString() : "";
     if(contentType.Contains("application/json"))
     {
