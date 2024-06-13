@@ -58,6 +58,11 @@ const action = async (logger: Logger, ctx: any) => {
     headers[header.toLowerCase()] = ctx.request.headers.get(header);
   });
 
+  const enforcedHeaders = JSON.parse(Deno.env.get("OPEN_RUNTIMES_HEADERS") ? (Deno.env.get("OPEN_RUNTIMES_HEADERS") ?? '{}') : '{}');
+  for(const header in enforcedHeaders) {
+      headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
+  }
+
   const scheme = ctx.request.headers.get('x-forwarded-proto') ?? 'http';
   const defaultPort = scheme === 'https' ? '443' : '80';
   const hostHeader = ctx.request.headers.get('host') ?? '';

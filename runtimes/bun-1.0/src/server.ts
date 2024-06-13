@@ -38,6 +38,11 @@ const action = async (logger: Logger, request: any) => {
     headers[header.toLowerCase()] = request.headers.get(header);
   });
 
+  const enforcedHeaders = JSON.parse(Bun.env["OPEN_RUNTIMES_HEADERS"] ? Bun.env["OPEN_RUNTIMES_HEADERS"] : '{}');
+  for(const header in enforcedHeaders) {
+      headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
+  }
+
   const urlObject = new URL(request.url);
 
   const scheme = request.headers.get('x-forwarded-proto') ?? 'http';

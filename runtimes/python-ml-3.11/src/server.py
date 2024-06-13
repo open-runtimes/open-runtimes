@@ -1,3 +1,4 @@
+import json
 from function_types import Context, Request, Response
 from logger import Logger
 from flask import Flask, request, Response as FlaskResponse
@@ -77,6 +78,12 @@ async def action(logger, request):
     for key in headers.keys():
         if not key.lower().startswith('x-open-runtimes-'):
             context.req.headers[key.lower()] = headers[key]
+
+    server_headers = os.getenv('OPEN_RUNTIMES_HEADERS', "")
+    server_headers = server_headers if server_headers else "{}"
+    enforced_headers = json.loads(server_headers)
+    for key in enforced_headers.keys():
+        context.req.headers[key.lower()] = str(enforced_headers[key])
 
     logger.override_native_logs()
 

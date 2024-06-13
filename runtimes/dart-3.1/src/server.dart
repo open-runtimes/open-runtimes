@@ -36,6 +36,12 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
+  String? enforcedHeadersString = Platform.environment['OPEN_RUNTIMES_HEADERS'];
+  final enforcedHeaders = jsonDecode((enforcedHeadersString != null && !enforcedHeadersString.isEmpty) ? enforcedHeadersString : '{}');
+  enforcedHeaders.forEach((key, value) {
+    headers[key.toLowerCase()] = '${value}';
+  });
+
   String contentType = req.headers['content-type'] ?? 'text/plain';
   if (contentType.contains('application/json')) {
     if (!bodyRaw.isEmpty) {

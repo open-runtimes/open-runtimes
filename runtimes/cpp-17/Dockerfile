@@ -6,6 +6,7 @@ LABEL namespace="open-runtimes"
 ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
 ENV OPEN_RUNTIMES_ENTRYPOINT=index.cc
 ENV OPEN_RUNTIMES_ENV=production
+ENV OPEN_RUNTIMES_HEADERS="{}"
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV DROGON_VERSION=v1.7.5

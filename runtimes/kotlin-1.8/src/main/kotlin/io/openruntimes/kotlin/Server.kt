@@ -2,6 +2,7 @@ package io.openruntimes.kotlin
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.ToNumberPolicy
 import io.javalin.Javalin
 import io.javalin.http.Context
 import kotlinx.coroutines.runBlocking
@@ -16,6 +17,7 @@ import kotlin.reflect.full.memberFunctions
 import kotlin.time.Duration.Companion.seconds
 
 val gson: Gson = GsonBuilder().serializeNulls().create()
+val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
 
 suspend fun main() {
     Javalin
@@ -85,6 +87,17 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         if (!(header.startsWith("x-open-runtimes-"))) {
             headers[header] = entry.value
         }
+    }
+
+    var enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS")
+    if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
+        enforcedHeadersString = "{}"
+    }
+    val enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, MutableMap::class.java)
+
+    for (entry in enforcedHeaders.entries.iterator()) {
+        val header = "${entry.key}".lowercase()
+        headers[header] = "${entry.value}"
     }
 
     val contentType = ctx.header("content-type") ?: "text/plain"
