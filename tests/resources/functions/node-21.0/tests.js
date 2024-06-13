@@ -60,11 +60,11 @@ When you can have two!
         case 'requestBodyBinary':
             return context.res.binary(context.req.bodyBinary);
         case 'requestBodyTextAuto':
-            return context.res.text(context.req.body);
+            return context.res.text(context.req.bodyText);
         case 'requestBodyJsonAuto':
-            return context.res.json(context.req.body);
+            return context.res.json(context.req.bodyText);
         case 'requestBodyBinaryAuto':
-            return context.res.binary(context.req.body);
+            return context.res.binary(context.req.bodyText);
         case 'envVars':
             return context.res.json({
                 var: process.env.CUSTOM_ENV_VAR,

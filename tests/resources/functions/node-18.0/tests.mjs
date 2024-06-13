@@ -60,11 +60,11 @@ When you can have two!
         case 'requestBodyBinary':
             return context.res.binary(context.req.bodyBinary);
         case 'requestBodyTextAuto':
-            return context.res.text(context.req.body);
+            return context.res.text(context.req.bodyText);
         case 'requestBodyJsonAuto':
-            return context.res.json(context.req.body);
+            return context.res.json(context.req.bodyText);
         case 'requestBodyBinaryAuto':
-            return context.res.binary(context.req.body);
+            return context.res.binary(context.req.bodyText);
         case 'envVars':
             return context.res.json({
                 var: process.env.CUSTOM_ENV_VAR,
@@ -98,7 +98,7 @@ When you can have two!
             context.log('Timeout end.');
             return context.res.text('Successful response.');
         case 'deprecatedMethods':
-            return context.res.send(context.req.bodyRaw);
+            return context.res.text(context.req.bodyRaw);
         default:
             throw new Error('Unknown action');
     }

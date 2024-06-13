@@ -14,7 +14,7 @@ public class Tests {
     suspend fun main(context: RuntimeContext): RuntimeOutput {
         when (context.req.headers["x-action"]) {
             "plaintextResponse" -> {
-                return context.res.send("Hello World 👋")
+                return context.res.text("Hello World 👋")
             }
             "jsonResponse" -> {
                 return context.res.json(mutableMapOf(
@@ -23,12 +23,12 @@ public class Tests {
                 ))
             }
             "customCharsetResponse" -> {
-                return context.res.send("ÅÆ", 200, mutableMapOf(
+                return context.res.text("ÅÆ", 200, mutableMapOf(
                     "content-type" to "text/plain; charset=iso-8859-1"
                 ))
             }
             "multipartResponse" -> {
-                return context.res.send("""--12345
+                return context.res.text("""--12345
 Content-Disposition: form-data; name=\"partOne\"
 
 Why just have one part?
@@ -47,18 +47,18 @@ When you can have two!
                 return context.res.empty()
             }
             "noResponse" -> {
-                context.res.send("This should be ignored, as it is not returned.")
+                context.res.text("This should be ignored, as it is not returned.")
 
                 // Simulate test data. Return nessessary in Java
                 context.error("Return statement missing. return context.res.empty() if no response is expected.")
-                return context.res.send("", 500)
+                return context.res.text("", 500)
             }
             "doubleResponse" -> {
-                context.res.send("This should be ignored.")
-                return context.res.send("This should be returned.")
+                context.res.text("This should be ignored.")
+                return context.res.text("This should be returned.")
             }
             "headersResponse" -> {
-                return context.res.send("OK", 200, mutableMapOf(
+                return context.res.text("OK", 200, mutableMapOf(
                     "first-header" to "first-value",
                     "second-header" to context.req.headers.getOrDefault("x-open-runtimes-custom-in-header", "missing"),
                     "cookie" to context.req.headers.getOrDefault("cookie", "missing"),
@@ -66,10 +66,10 @@ When you can have two!
                 ))
             }
             "statusResponse" -> {
-                return context.res.send("FAIL", 404)
+                return context.res.text("FAIL", 404)
             }
             "requestMethod" -> {
-                return context.res.send(context.req.method)
+                return context.res.text(context.req.method)
             }
             "requestUrl" -> {
                 return context.res.json(mutableMapOf(
@@ -85,8 +85,8 @@ When you can have two!
             "requestHeaders" -> {
                 return context.res.json(context.req.headers as MutableMap<String, Any>)
             }
-            "requestBodyPlaintext" -> {
-                return context.res.send(context.req.body as String)
+            "requestBodyText" -> {
+                return context.res.text(context.req.body as String)
             }
             "requestBodyJson" -> {
                 val key1: String
@@ -133,7 +133,7 @@ When you can have two!
                     "objectKey" to "objectValue"
                 ));
 
-                return context.res.send("");
+                return context.res.text("");
             }
             "library" -> {
                 val gson = Gson()
@@ -169,7 +169,7 @@ When you can have two!
                 }
 
                 context.log("Timeout end.")
-                return context.res.send("Successful response.")
+                return context.res.text("Successful response.")
             }
             else -> {
                 throw Exception("Unknown action")
