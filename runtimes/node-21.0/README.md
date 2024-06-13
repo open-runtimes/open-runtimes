@@ -18,13 +18,13 @@ printf "module.exports = async (req, res) => {\n    res.json({ n: Math.random() 
 2. Build the code:
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT=index.js openruntimes/node:v3-21.0 sh helpers/build.sh "npm install"
+docker run --rm --interactive --tty --volume $PWD:/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT=index.js openruntimes/node:v4-21.0 sh helpers/build.sh "npm install"
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v3-21.0 sh helpers/start.sh "pm2 start src/server.js --no-daemon"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/node:v4-21.0 sh helpers/start.sh "pm2 start src/server.js --no-daemon"
 ```
 
 4. In new terminal window, execute function:

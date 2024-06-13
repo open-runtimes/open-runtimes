@@ -24,13 +24,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.swift --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/swift:v3-5.8 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.swift --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/swift:v4-5.8 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/swift:v3-5.8 sh helpers/start.sh "/usr/local/server/src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/swift:v4-5.8 sh helpers/start.sh "/usr/local/server/src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
 ```
 
 4. In new terminal window, execute function:
