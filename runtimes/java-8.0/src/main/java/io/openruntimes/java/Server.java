@@ -2,26 +2,25 @@ package io.openruntimes.java;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.ToNumberPolicy;
 import org.rapidoid.http.Req;
 import org.rapidoid.http.Resp;
 import org.rapidoid.setup.On;
 
-import java.io.UnsupportedEncodingException;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Server {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
+    private static final Gson gsonInternal = new GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create();
 
     private static final ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -37,23 +36,34 @@ public class Server {
     }
 
     public static Resp execute(Req req, Resp resp) {
-        try {
-            return Server.action(req, resp);
-        } catch (Exception e) {
-            List<String> logs = new ArrayList<>();
-            List<String> errors = new ArrayList<>();
+        RuntimeLogger logger = null;
 
+        try {
+            logger = new RuntimeLogger(req.headers().get("x-open-runtimes-logging"), req.headers().get("x-open-runtimes-log-id"));
+        } catch(IOException e) {
+            // Ignore missing logs
+            try {
+                logger = new RuntimeLogger("disabled", "");
+            } catch(IOException e2) {
+                // Never happens
+            }
+        }
+
+        try {
+            return Server.action(logger, req, resp);
+        } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
-
-            errors.add(sw.toString());
+            String message = sw.toString();
+            
+            resp = resp.header("x-open-runtimes-log-id", logger.getId());
 
             try {
-                resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", logs), StandardCharsets.UTF_8.toString()));
-                resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", errors), StandardCharsets.UTF_8.toString()));
-            } catch (UnsupportedEncodingException e2) {
-                resp = resp.header("x-open-runtimes-errors", "Unsupported encoding detected.");
+                logger.write(message, RuntimeLogger.TYPE_ERROR, false);
+                logger.end();
+            } catch(IOException e2) {
+                // Ignore missing logs
             }
 
             return resp
@@ -62,7 +72,7 @@ public class Server {
         }
     }
 
-    public static Resp action(Req req, Resp resp) {
+    public static Resp action(RuntimeLogger logger, Req req, Resp resp) {
         Map<String, String> reqHeaders = req.headers();
 
         ArrayList<String> cookieHeaders = new ArrayList<String>();
@@ -112,6 +122,15 @@ public class Server {
             if (!(header.startsWith("x-open-runtimes-"))) {
                 headers.put(header, entry.getValue());
             }
+        }
+
+        String enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS");
+        if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
+            enforcedHeadersString = "{}";
+        }
+        Map<String, Object> enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, Map.class);
+        for (Map.Entry<String, Object> entry : enforcedHeaders.entrySet()) {
+            headers.put(entry.getKey().toLowerCase(), String.valueOf(entry.getValue()));
         }
 
         String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
@@ -177,15 +196,9 @@ public class Server {
                 url
         );
         RuntimeResponse runtimeResponse = new RuntimeResponse();
-        RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse);
+        RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse, logger);
 
-        PrintStream systemOut = System.out;
-        PrintStream systemErr = System.err;
-
-        ByteArrayOutputStream customStdStream = new ByteArrayOutputStream();
-        PrintStream customStd = new PrintStream(customStdStream);
-        System.setOut(customStd);
-        System.setErr(customStd);
+        logger.overrideNativeLogs();
 
         RuntimeOutput output;
 
@@ -233,10 +246,7 @@ public class Server {
             context.error(sw.toString());
             output = context.getRes().send("", 500);
         } finally {
-            System.out.flush();
-            System.err.flush();
-            System.setOut(systemOut);
-            System.setErr(systemErr);
+            logger.revertNativeLogs();
         }
 
         if (output == null) {
@@ -259,21 +269,14 @@ public class Server {
             resp = resp.header(header, headerValue);
         }
 
-        if (!customStdStream.toString().isEmpty()) {
-            context.log("");
-            context.log("----------------------------------------------------------------------------");
-            context.log("Unsupported logs detected. Use context.log() or context.error() for logging.");
-            context.log("----------------------------------------------------------------------------");
-            context.log(customStdStream.toString());
-            context.log("----------------------------------------------------------------------------");
-        }
+        resp = resp.header("x-open-runtimes-log-id", logger.getId());
 
         try {
-            resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context.getLogs()), StandardCharsets.UTF_8.toString()));
-            resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", context.getErrors()), StandardCharsets.UTF_8.toString()));
-        } catch (UnsupportedEncodingException e) {
-            resp = resp.header("x-open-runtimes-errors", "Unsupported encoding detected.");
+            logger.end();
+        } catch(IOException e) {
+            // Ignore missing logs
         }
+
         return resp
                 .code(output.getStatusCode())
                 .result(output.getBody());

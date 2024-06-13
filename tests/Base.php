@@ -18,66 +18,9 @@ class Base extends TestCase
     {
     }
 
-    private function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000) {
-        $ch = \curl_init();
-
-        $headers = \array_merge([
-            'content-type' => 'text/plain',
-            'x-open-runtimes-secret' => \getenv('OPEN_RUNTIMES_SECRET')
-        ], $headers);
-        $headersParsed = [];
-
-        foreach ($headers as $header => $value) {
-            $headersParsed[] = $header . ': ' . $value;
-        }
-
-        $responseHeaders = [];
-        $optArray = [
-            CURLOPT_URL => 'http://localhost:' . $port . $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$responseHeaders) {
-                $len = strlen($header);
-                $header = explode(':', $header, 2);
-                if (count($header) < 2) // ignore invalid headers
-                    return $len;
-        
-                $key = strtolower(trim($header[0]));
-                $responseHeaders[$key] = trim($header[1]);
-
-                if(\in_array($key, ['x-open-runtimes-logs', 'x-open-runtimes-errors'])) {
-                    $responseHeaders[$key] = \urldecode($responseHeaders[$key]);
-                }
-        
-                return $len;
-            },
-            CURLOPT_CUSTOMREQUEST => $method,
-            CURLOPT_POSTFIELDS => \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body,
-            CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
-            CURLOPT_HTTPHEADER => $headersParsed,
-            CURLOPT_TIMEOUT => 5
-        ];
-        
-        \curl_setopt_array($ch, $optArray);
-
-        $body = curl_exec($ch);
-        $code = curl_getinfo($ch, \CURLINFO_HTTP_CODE);
-
-        if (curl_errno($ch)) {
-            \var_dump(curl_error($ch));
-        }
-
-        \curl_close($ch);
-
-        return [
-            'code' => $code,
-            'body' => $body,
-            'headers' => $responseHeaders
-        ];
-    }
-
     public function testPlaintextResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'plaintextResponse']);
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('Hello World 👋', $response['body']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
@@ -85,7 +28,7 @@ class Base extends TestCase
 
     public function testJsonResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'jsonResponse']);
+        $response = Client::execute(headers: ['x-action' => 'jsonResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
 
@@ -97,18 +40,18 @@ class Base extends TestCase
 
     public function testContentTypeResponse(): void 
     {
-        $response = $this->execute(headers: ['x-action' => 'customCharsetResponse']);
+        $response = Client::execute(headers: ['x-action' => 'customCharsetResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=iso-8859-1', $response['headers']['content-type']);
 
-        $response = $this->execute(headers: ['x-action' => 'multipartResponse']);
+        $response = Client::execute(headers: ['x-action' => 'multipartResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('multipart/form-data; boundary=12345', $response['headers']['content-type']);
     }
 
     public function testRedirectResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'redirectResponse']);
+        $response = Client::execute(headers: ['x-action' => 'redirectResponse']);
         self::assertEquals(301, $response['code']);
         self::assertEmpty($response['body']);
         self::assertEquals('https://github.com/', $response['headers']['location']);
@@ -116,29 +59,29 @@ class Base extends TestCase
 
     public function testEmptyResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'emptyResponse']);
+        $response = Client::execute(headers: ['x-action' => 'emptyResponse']);
         self::assertEquals(204, $response['code']);
         self::assertEmpty($response['body']);
     }
 
     public function testNoResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'noResponse']);
+        $response = Client::execute(headers: ['x-action' => 'noResponse']);
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertStringContainsString('Return statement missing.', $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString('Return statement missing.', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testDoubleResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'doubleResponse']);
+        $response = Client::execute(headers: ['x-action' => 'doubleResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('This should be returned.', $response['body']);
     }
 
     public function testHeadersResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'headersResponse', 'x-open-runtimes-custom-in-header' => 'notMissing', 'cookie' => 'cookieName=cookieValue; cookie2=value2; cookie3=value=3; cookie4=val:ue4; cookie5=value5']);
+        $response = Client::execute(headers: ['x-action' => 'headersResponse', 'x-open-runtimes-custom-in-header' => 'notMissing', 'cookie' => 'cookieName=cookieValue; cookie2=value2; cookie3=value=3; cookie4=val:ue4; cookie5=value5']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('OK', $response['body']);
         self::assertEquals('first-value', $response['headers']['first-header']);
@@ -149,18 +92,18 @@ class Base extends TestCase
 
     public function testStatusResponse(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'statusResponse']);
+        $response = Client::execute(headers: ['x-action' => 'statusResponse']);
         self::assertEquals(404, $response['code']);
         self::assertEquals('FAIL', $response['body']);
     }
 
     public function testException(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'nonExistingAction']);
+        $response = Client::execute(headers: ['x-action' => 'nonExistingAction']);
         self::assertEquals(500, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertEmpty($response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Unknown action', $response['headers']['x-open-runtimes-errors']);
+        self::assertEmpty(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('Unknown action', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
 
         $entrypoint = \getenv('OPEN_RUNTIMES_ENTRYPOINT');
 
@@ -169,54 +112,54 @@ class Base extends TestCase
             $entrypoint = implode('', explode('lib', $entrypoint, 2));
         }
 
-        self::assertStringContainsString($entrypoint, $response['headers']['x-open-runtimes-errors']);
+        self::assertStringContainsString($entrypoint, Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testWrongSecret(): void
     {
-        $response = $this->execute(headers: ['x-open-runtimes-secret' => 'wrongSecret']);
+        $response = Client::execute(headers: ['x-open-runtimes-secret' => 'wrongSecret']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
     }
 
     public function testEmptySecret(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => '']);
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => '']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
     }
 
     public function testRequestMethod(): void
     {
-        $response = $this->execute(method: 'GET', headers: ['x-action' => 'requestMethod']);
+        $response = Client::execute(method: 'GET', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('GET', $response['body']);
 
-        $response = $this->execute(method: 'POST', headers: ['x-action' => 'requestMethod']);
+        $response = Client::execute(method: 'POST', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('POST', $response['body']);
 
-        $response = $this->execute(method: 'PUT', headers: ['x-action' => 'requestMethod']);
+        $response = Client::execute(method: 'PUT', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('PUT', $response['body']);
 
-        $response = $this->execute(method: 'DELETE', headers: ['x-action' => 'requestMethod']);
+        $response = Client::execute(method: 'DELETE', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('DELETE', $response['body']);
 
-        $response = $this->execute(method: 'OPTIONS', headers: ['x-action' => 'requestMethod']);
+        $response = Client::execute(method: 'OPTIONS', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         // Bug in C++ framework makes this an empty string
         // self::assertEquals('OPTIONS', $response['body']);
 
-        $response = $this->execute(method: 'PATCH', headers: ['x-action' => 'requestMethod']);
+        $response = Client::execute(method: 'PATCH', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('PATCH', $response['body']);
     }
 
     public function testRequestUrl(): void
     {
-        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl']);
+        $response = Client::execute(url: '/', headers: ['x-action' => 'requestUrl']);
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);
@@ -230,7 +173,7 @@ class Base extends TestCase
         self::assertContains($body['host'], ['localhost', '0.0.0.0', '127.0.0.1']);
         self::assertContains($body['url'], ['http://localhost:3000/', 'http://0.0.0.0:3000/', 'http://127.0.0.1:3000/']);
 
-        $response = $this->execute(url: '/a/b?c=d&e=f#something', headers: [
+        $response = Client::execute(url: '/a/b?c=d&e=f#something', headers: [
             'x-action' => 'requestUrl',
             'x-forwarded-proto' => 'https',
             'host' => 'www.mydomain.com:3001'
@@ -250,14 +193,14 @@ class Base extends TestCase
         self::assertEquals('www.mydomain.com', $body['host']);
         self::assertEquals('https://www.mydomain.com:3001/a/b?c=d&e=f', $body['url']);
 
-        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'www.mydomain.com:80']);
+        $response = Client::execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'www.mydomain.com:80']);
         self::assertEquals(200, $response['code']);
         $body = \json_decode($response['body'], true);
         self::assertEquals(80, $body['port']);
         self::assertEquals('www.mydomain.com', $body['host']);
         self::assertEquals('http://www.mydomain.com/', $body['url']);
 
-        $response = $this->execute(url: '/?a=b&c==d&e=f=g=&h&i=j&&k', headers: ['x-action' => 'requestUrl']);
+        $response = Client::execute(url: '/?a=b&c==d&e=f=g=&h&i=j&&k', headers: ['x-action' => 'requestUrl']);
         self::assertEquals(200, $response['code']);
         $body = \json_decode($response['body'], true);
         self::assertEquals('b', $body['query']['a']);
@@ -267,28 +210,28 @@ class Base extends TestCase
         self::assertEquals('', $body['query']['k']);
         self::assertArrayNotHasKey('l', $body['query']);
 
-        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com', 'x-forwarded-proto' => 'https']);
+        $response = Client::execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com', 'x-forwarded-proto' => 'https']);
         self::assertEquals(200, $response['code']);
         $body = \json_decode($response['body'], true);
         self::assertEquals('myapp.com', $body['host']);
         self::assertEquals(443, $body['port']);
         self::assertEquals('https://myapp.com/', $body['url']);
 
-        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com:443', 'x-forwarded-proto' => 'https']);
+        $response = Client::execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com:443', 'x-forwarded-proto' => 'https']);
         self::assertEquals(200, $response['code']);
         $body = \json_decode($response['body'], true);
         self::assertEquals('myapp.com', $body['host']);
         self::assertEquals(443, $body['port']);
         self::assertEquals('https://myapp.com/', $body['url']);
 
-        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com:80', 'x-forwarded-proto' => 'https']);
+        $response = Client::execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com:80', 'x-forwarded-proto' => 'https']);
         self::assertEquals(200, $response['code']);
         $body = \json_decode($response['body'], true);
         self::assertEquals('myapp.com', $body['host']);
         self::assertEquals(80, $body['port']);
         self::assertEquals('https://myapp.com:80/', $body['url']);
 
-        $response = $this->execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com:80', 'x-forwarded-proto' => 'http']);
+        $response = Client::execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com:80', 'x-forwarded-proto' => 'http']);
         self::assertEquals(200, $response['code']);
         $body = \json_decode($response['body'], true);
         self::assertEquals('myapp.com', $body['host']);
@@ -298,7 +241,7 @@ class Base extends TestCase
 
     public function testRequestHeaders(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'requestHeaders', 'x-first-header' => 'first-value', 'x-open-runtimes-custom-header' => 'should-be-hidden']);
+        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'x-first-header' => 'first-value', 'x-open-runtimes-custom-header' => 'should-be-hidden']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
 
@@ -312,15 +255,15 @@ class Base extends TestCase
     public function testRequestBodyText(): void
     {
         $body = 'Hello 👋';
-        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyText']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyText']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
 
-        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
 
-        $response = $this->execute(body: '', headers: ['x-action' => 'requestBodyText']);
+        $response = Client::execute(body: '', headers: ['x-action' => 'requestBodyText']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('', $response['body']);
 
@@ -330,7 +273,7 @@ class Base extends TestCase
     {
         $body = '{"key1":"OK 👋","key2":true,"key3":3}';
 
-        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);
@@ -338,7 +281,7 @@ class Base extends TestCase
         self::assertEquals(true, $body['key2']);
         self::assertEquals(3, $body['key3']);
 
-        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'application/json']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'application/json']);
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);
@@ -346,7 +289,7 @@ class Base extends TestCase
         self::assertEquals(true, $body['key2']);
         self::assertEquals(3, $body['key3']);
 
-        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyJson', 'content-type' => 'text/plain']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson', 'content-type' => 'text/plain']);
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);
@@ -359,22 +302,22 @@ class Base extends TestCase
     {
         $body = \hex2bin("0123456789abcdef");
 
-        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'application/octet-stream']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'application/octet-stream']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
 
-        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
 
-        $response = $this->execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
     }
 
     public function testEnvVars(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'envVars']);
+        $response = Client::execute(headers: ['x-action' => 'envVars']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
 
@@ -386,24 +329,55 @@ class Base extends TestCase
 
     public function testLogs(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'logs' ]);
+        $response = Client::execute(headers: ['x-action' => 'logs' ]);
+        $logId = $response['headers']['x-open-runtimes-log-id'];
+        $logs = Client::getLogs($logId);
+        $errors = Client::getErrors($logId);
+        self::assertEquals(20, \strlen($logId));
         self::assertEquals(200, $response['code']);
         self::assertEmpty($response['body']);
-        self::assertStringContainsString('Debug log', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString(42, $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString(4.2, $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('true', \strtolower($response['headers']['x-open-runtimes-logs'])); // strlower allows True in Python
-        self::assertStringContainsString('Error log', $response['headers']['x-open-runtimes-errors']);
-        self::assertStringContainsString('Native log', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Unsupported logs detected.', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('{"objectKey":"objectValue"}', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('["arrayValue"]', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Log+With+Plus+Symbol', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Debug log', $logs);
+        self::assertStringContainsString(42, $logs);
+        self::assertStringContainsString(4.2, $logs);
+        self::assertStringContainsString('true', \strtolower($logs)); // strlower allows True in Python
+        self::assertStringContainsString('Error log', $errors);
+        self::assertStringContainsString('Native log', $logs);
+        self::assertStringContainsString('Native logs detected.', $logs);
+        self::assertStringContainsString('{"objectKey":"objectValue"}', $logs);
+        self::assertStringContainsString('["arrayValue"]', $logs);
+        self::assertStringContainsString('Log+With+Plus+Symbol', $logs);
+        self::assertStringContainsString("\n", $logs);
+
+        $response = Client::execute(headers: ['x-action' => 'logs' ]);
+        $logIdSecond = $response['headers']['x-open-runtimes-log-id'];
+        self::assertEquals(20, \strlen($logId));
+        self::assertNotEquals($logId, $logIdSecond);
+
+        $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'disabled', 'x-open-runtimes-log-id' => 'noLogs' ]);
+        $logs = Client::getLogs('noLogs');
+        $errors = Client::getErrors('noLogs');
+        self::assertEmpty($response['headers']['x-open-runtimes-log-id']);
+        self::assertEmpty($logs);
+        self::assertEmpty($errors);
+
+        $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'enabled' ]);
+        $logs = Client::getLogs($response['headers']['x-open-runtimes-log-id']);
+        $errors = Client::getErrors($response['headers']['x-open-runtimes-log-id']);
+        self::assertNotEmpty($response['headers']['x-open-runtimes-log-id']);
+        self::assertStringContainsString('Debug log', $logs);
+        self::assertStringContainsString('Error log', $errors);
+
+        $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-log-id' => 'customLogs' ]);
+        $logs = Client::getLogs('customLogs');
+        $errors = Client::getErrors('customLogs');
+        self::assertEquals('customLogs', $response['headers']['x-open-runtimes-log-id']);
+        self::assertStringContainsString('Debug log', $logs);
+        self::assertStringContainsString('Error log', $errors);
     }
 
     public function testLibrary(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'library'], body: '5');
+        $response = Client::execute(headers: ['x-action' => 'library'], body: '5');
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);
@@ -416,57 +390,57 @@ class Base extends TestCase
 
     public function testInvalidJson(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
+        $response = Client::execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
         
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
-        self::assertThat($response['headers']['x-open-runtimes-errors'], self::callback(function($value) {
+        self::assertThat(Client::getErrors($response['headers']['x-open-runtimes-log-id']), self::callback(function($value) {
             $value = \strtolower($value);
 
             // Code=3840 is Swift code for JSON error
             return \str_contains($value, 'json') || \str_contains($value, 'code=3840');
         }), 'Contains refference to JSON validation problem');
 
-        $response = $this->execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '');
+        $response = Client::execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '');
 
         self::assertEquals(500, $response['code']);
 
-        $response = $this->execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{}');
+        $response = Client::execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{}');
         self::assertEquals(200, $response['code']);
         self::assertEquals('{}', $response['body']);
     }
 
     public function testTimeout(): void
     {
-        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
+        $response = Client::execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
-        self::assertStringContainsString('Execution timed out.', $response['headers']['x-open-runtimes-errors']);
-        self::assertStringContainsString('Timeout start.', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringNotContainsString('Timeout end.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Execution timed out.', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('Timeout start.', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringNotContainsString('Timeout end.', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
 
-        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '5']);
+        $response = Client::execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '5']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('Successful response.', $response['body']);
-        self::assertStringContainsString('Timeout start.', $response['headers']['x-open-runtimes-logs']);
-        self::assertStringContainsString('Timeout end.', $response['headers']['x-open-runtimes-logs']);
+        self::assertStringContainsString('Timeout start.', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('Timeout end.', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
 
-        $response = $this->execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
+        $response = Client::execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => 'abcd']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
     }
 
     public function testDeprecatedMethods(): void
     {
-        $response = $this->execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethods']);
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethods']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('Hello', $response['body']);
 
-        $response = $this->execute(body: '{"hello":"world"}', headers: ['x-action' => 'deprecatedMethods', 'content-type' => 'application/json']);
+        $response = Client::execute(body: '{"hello":"world"}', headers: ['x-action' => 'deprecatedMethods', 'content-type' => 'application/json']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('{"hello":"world"}', $response['body']);
 
-        $response = $this->execute(body: '{"hello":"world"}', headers: ['x-action' => 'deprecatedMethods', 'content-type' => 'application/unknown']);
+        $response = Client::execute(body: '{"hello":"world"}', headers: ['x-action' => 'deprecatedMethods', 'content-type' => 'application/unknown']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('{"hello":"world"}', $response['body']);
     }
