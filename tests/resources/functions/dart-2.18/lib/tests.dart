@@ -8,19 +8,19 @@ Future<dynamic> main(final context) async {
 
   switch(action) { 
     case 'plaintextResponse': {
-      return context.res.send('Hello World 👋');
+      return context.res.text('Hello World 👋');
     }
     case 'jsonResponse': {
       return context.res.json({ 'json': true, 'message': 'Developers are awesome.' });
     }
     case 'customCharsetResponse':
     {
-      return context.res.send(
+      return context.res.text(
           'ÅÆ', 200, {'content-type': 'text/plain; charset=iso-8859-1'});
     }
     case 'multipartResponse':
     {
-      return context.res.send("""--12345
+      return context.res.text("""--12345
 Content-Disposition: form-data; name=\"partOne\"
 
 Why just have one part?
@@ -39,15 +39,15 @@ When you can have two!
       return context.res.empty();
     }
     case 'noResponse': {
-      context.res.send('This should be ignored, as it is not returned.');
+      context.res.text('This should be ignored, as it is not returned.');
       break;
     }
     case 'doubleResponse': {
-      context.res.send('This should be ignored.');
-      return context.res.send('This should be returned.');
+      context.res.text('This should be ignored.');
+      return context.res.text('This should be returned.');
     }
     case 'headersResponse': {
-      return context.res.send('OK', 200, {
+      return context.res.text('OK', 200, {
         'first-header': 'first-value',
         'second-header': context.req.headers['x-open-runtimes-custom-in-header'] ?? 'missing',
         'cookie': context.req.headers['cookie'] ?? 'missing',
@@ -55,10 +55,10 @@ When you can have two!
       });
     }
     case 'statusResponse': {
-      return context.res.send('FAIL', 404);
+      return context.res.text('FAIL', 404);
     }
     case 'requestMethod': {
-      return context.res.send(context.req.method);
+      return context.res.text(context.req.method);
     }
     case 'requestUrl': {
         return context.res.json({
@@ -74,8 +74,8 @@ When you can have two!
     case 'requestHeaders': {
       return context.res.json(context.req.headers);
     }
-    case 'requestBodyPlaintext': {
-      return context.res.send(context.req.body);
+    case 'requestBodyText': {
+      return context.res.text(context.req.bodyText);
     }
     case 'requestBodyJson': {
       var key1 = null;
@@ -115,7 +115,7 @@ When you can have two!
       context.log({ 'objectKey': 'objectValue' });
       context.log([ 'arrayValue' ]);
 
-      return context.res.send('');
+      return context.res.text('');
     }
     case 'library': {
       final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyRaw);
@@ -127,7 +127,7 @@ When you can have two!
       await Future.delayed(Duration(seconds: 3));
 
       context.log("Timeout end.");
-      return context.res.send("Successful response.");
+      return context.res.text("Successful response.");
     }
     default: { 
       throw new Exception('Unknown action');

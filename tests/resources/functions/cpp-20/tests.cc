@@ -23,17 +23,17 @@ namespace runtime {
             std::string action = req.headers["x-action"].asString();
 
             if (action == "plaintextResponse") {
-                return res.send("Hello World 👋");
+                return res.text("Hello World 👋");
             } else if (action == "jsonResponse") {
                 json["json"] = true;
                 json["message"] = "Developers are awesome.";
                 return res.json(json);
             } else if (action == "customCharsetResponse") {
                 headers["content-type"] = "text/plain; charset=iso-8859-1";
-                return res.send("ÅÆ", 200, headers);
+                return res.text("ÅÆ", 200, headers);
             } else if (action == "multipartResponse") {
                 headers["content-type"] = "multipart/form-data; boundary=12345";
-                return res.send("--12345\n"
+                return res.text("--12345\n"
 "Content-Disposition: form-data; name=\"partOne\"\n"
 "\n"
 "Why just have one part?\n"
@@ -47,13 +47,13 @@ namespace runtime {
             } else if (action == "emptyResponse") {
                 return res.empty();
             } else if (action == "noResponse") {
-                res.send("This should be ignored, as it is not returned.");
+                res.text("This should be ignored, as it is not returned.");
                 // Simulate test data. Return necessary in C++
                 context.error("Return statement missing. return context.res.empty() if no response is expected.");
-                return res.send("", 500);
+                return res.text("", 500);
             } else if (action == "doubleResponse") {
-                res.send("This should be ignored.");
-                return res.send("This should be returned.");
+                res.text("This should be ignored.");
+                return res.text("This should be returned.");
             } else if (action == "headersResponse") {
                 auto secondHeader = req.headers["x-open-runtimes-custom-in-header"].asString();
                 if (secondHeader.empty()) {
@@ -69,11 +69,11 @@ namespace runtime {
                 headers["second-header"] = secondHeader;
                 headers["cookie"] = cookieHeader;
                 headers["x-open-runtimes-custom-out-header"] = "third-value";
-                return res.send("OK", 200, headers);
+                return res.text("OK", 200, headers);
             } else if (action == "statusResponse") {
-                return res.send("FAIL", 404);
+                return res.text("FAIL", 404);
             } else if (action == "requestMethod") {
-                return res.send(req.method);
+                return res.text(req.method);
             } else if (action == "requestUrl") {
                 json["url"] = req.url;
                 json["port"] = req.port;
@@ -86,14 +86,14 @@ namespace runtime {
                 return res.json(json);
             } else if (action == "requestHeaders") {
                 return res.json(req.headers);
-            } else if (action == "requestBodyPlaintext") {
-                std::string body = std::any_cast<std::string>(req.body);
-                return res.send(body);
+            } else if (action == "requestBodyText") {
+                std::string body = std::any_cast<std::string>(req.bodyText);
+                return res.text(body);
             } else if (action == "requestBodyJson") {
                 auto isJson = false;
 
                 try {
-                    Json::Value body = std::any_cast<Json::Value>(req.body);
+                    Json::Value body = std::any_cast<Json::Value>(req.bodyText);
                     isJson = true;
                 } catch (const std::exception &e) {
                     isJson = false;
@@ -103,7 +103,7 @@ namespace runtime {
                 Json::String key2 = "";
 
                 if (isJson) {
-                    Json::Value body = std::any_cast<Json::Value>(req.body);
+                    Json::Value body = std::any_cast<Json::Value>(req.bodyText);
                     key1 = body["key1"].asString();
                     key2 = body["key2"].asString();
 
@@ -153,7 +153,7 @@ namespace runtime {
                 context.log("{\"objectKey\":\"objectValue\"}");
                 context.log("[\"arrayValue\"]");
 
-                return context.res.send("");
+                return context.res.text("");
             } else if (action == "library") {
                 Json::CharReaderBuilder builder;
                 Json::CharReader *reader = builder.newCharReader();
@@ -197,7 +197,7 @@ namespace runtime {
                 }).wait();
 
                 context.log("Timeout end.");
-                return context.res.send("Successful response.");
+                return context.res.text("Successful response.");
             } else {
                 // C++ cannot get stack trace. Below makes test pass
                 context.error("tests.cc");

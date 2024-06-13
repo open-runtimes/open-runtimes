@@ -6,18 +6,18 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
 
     switch action {
     case "plaintextResponse":
-        return context.res.send("Hello World 👋")
+        return context.res.text("Hello World 👋")
     case "jsonResponse":
         return try context.res.json([
             "json": true,
             "message": "Developers are awesome."
         ])
     case "customCharsetResponse":
-        return context.res.send("ÅÆ", headers: [
+        return context.res.text("ÅÆ", headers: [
             "content-type": "text/plain; charset=iso-8859-1"
         ])
     case "multipartResponse":
-        return context.res.send("""
+        return context.res.text("""
 --12345
 Content-Disposition: form-data; name=\"partOne\"
 
@@ -35,26 +35,26 @@ When you can have two!
     case "emptyResponse":
         return context.res.empty()
     case "noResponse":
-        _ = context.res.send("This should be ignored, as it is not returned.")
+        _ = context.res.text("This should be ignored, as it is not returned.")
 
         // Simulate test data. Return necessary in Swift
         context.error("Return statement missing. return context.res.empty() if no response is expected.")
 
-        return context.res.send("", statusCode: 500)
+        return context.res.text("", statusCode: 500)
     case "doubleResponse":
-        _ = context.res.send("This should be ignored.")
-        return context.res.send("This should be returned.")
+        _ = context.res.text("This should be ignored.")
+        return context.res.text("This should be returned.")
     case "headersResponse":
-        return context.res.send("OK", statusCode: 200, headers: [
+        return context.res.text("OK", statusCode: 200, headers: [
             "first-header": "first-value",
             "second-header": context.req.headers["x-open-runtimes-custom-in-header"] ?? "missing",
             "cookie": context.req.headers["cookie"] ?? "missing",
             "x-open-runtimes-custom-out-header": "third-value"
         ])
     case "statusResponse":
-        return context.res.send("FAIL", statusCode: 404)
+        return context.res.text("FAIL", statusCode: 404)
     case "requestMethod":
-        return context.res.send(context.req.method)
+        return context.res.text(context.req.method)
     case "requestUrl":
         return try context.res.json([
             "url": context.req.url,
@@ -67,8 +67,8 @@ When you can have two!
         ])
     case "requestHeaders":
         return try context.res.json(context.req.headers)
-    case "requestBodyPlaintext":
-        return context.res.send(context.req.body as! String)
+    case "requestBodyText":
+        return context.res.text(context.req.body as! String)
     case "requestBodyJson":
         var key1: String
         var key2: String
@@ -110,7 +110,7 @@ When you can have two!
         context.log("Native log")
         context.log("Native logs detected. Use context.log() or context.error() for better experience.")
 
-        return context.res.send("")
+        return context.res.text("")
     case "library":
         let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         let request = HTTPClientRequest(url: "https://jsonplaceholder.typicode.com/todos/\(context.req.bodyRaw)")
@@ -128,7 +128,7 @@ When you can have two!
         try Task.checkCancellation()
 
         context.log("Timeout end.")
-        return context.res.send("Successful response.")
+        return context.res.text("Successful response.")
     default:
         throw annotatedError(NSError(domain: "Unknown action", code: 500))
     }

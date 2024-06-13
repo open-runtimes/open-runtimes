@@ -11,7 +11,7 @@ namespace DotNetRuntime {
             switch (Action)
             {
                 case "plaintextResponse":
-                    return context.Res.Send("Hello World 👋");
+                    return context.Res.Text("Hello World 👋");
                 case "jsonResponse":
                     return context.Res.Json(new Dictionary<string, object?>()
                     {
@@ -19,12 +19,12 @@ namespace DotNetRuntime {
                         { "message", "Developers are awesome." }
                     });
                 case "customCharsetResponse":
-                    return context.Res.Send("ÅÆ", 200, new Dictionary<string, string>()
+                    return context.Res.Text("ÅÆ", 200, new Dictionary<string, string>()
                     {
                         { "content-type", "text/plain; charset=iso-8859-1" }
                     });
                 case "multipartResponse":
-                    return context.Res.Send(@"--12345
+                    return context.Res.Text(@"--12345
 Content-Disposition: form-data; name=""partOne""
 
 Why just have one part?
@@ -41,14 +41,14 @@ When you can have two!
                 case "emptyResponse":
                     return context.Res.Empty();
                 case "noResponse":
-                    context.Res.Send("This should be ignored, as it is not returned.");
+                    context.Res.Text("This should be ignored, as it is not returned.");
 
                     // Simulate test data. Return nessessary in Java
                     context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-                    return context.Res.Send("", 500);
+                    return context.Res.Text("", 500);
                 case "doubleResponse":
-                    context.Res.Send("This should be ignored.");
-                    return context.Res.Send("This should be returned.");
+                    context.Res.Text("This should be ignored.");
+                    return context.Res.Text("This should be returned.");
                 case "headersResponse":
                     var headers = new Dictionary<string, string>();
                     headers.Add("first-header", "first-value");
@@ -57,11 +57,11 @@ When you can have two!
                     var cookieHeader = context.Req.Headers.TryGetValue("cookie", out string cookieHeaderValue) ? cookieHeaderValue : "missing";
                     headers.Add("cookie", cookieHeader);
                     headers.Add("x-open-runtimes-custom-out-header", "third-value");
-                    return context.Res.Send("OK", 200, headers);
+                    return context.Res.Text("OK", 200, headers);
                 case "statusResponse":
-                    return context.Res.Send("FAIL", 404);
+                    return context.Res.Text("FAIL", 404);
                 case "requestMethod":
-                    return context.Res.Send(context.Req.Method);
+                    return context.Res.Text(context.Req.Method);
                 case "requestUrl":
                     return context.Res.Json(new Dictionary<string, object?>()
                     {
@@ -82,8 +82,8 @@ When you can have two!
                     }
 
                     return context.Res.Json(json);
-                case "requestBodyPlaintext":
-                    return context.Res.Send((string) context.Req.Body);
+                case "requestBodyText":
+                    return context.Res.Text((string) context.Req.Body);
                 case "requestBodyJson":
                     var key1 = "";
                     var key2 = "";
@@ -131,7 +131,7 @@ When you can have two!
 
                     context.Log(Arr);
 
-                    return context.Res.Send("");
+                    return context.Res.Text("");
                 case "library":
                     var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{context.Req.BodyRaw}");
                     var todo = JsonSerializer.Deserialize<Dictionary<string, object>>(response) ?? new Dictionary<string, object>();
@@ -146,7 +146,7 @@ When you can have two!
                     await Task.Delay(3000);
 
                     context.Log("Timeout end.");
-                    return context.Res.Send("Successful response.");
+                    return context.Res.Text("Successful response.");
                 default:
                     throw new Exception("Unknown action");
             }
