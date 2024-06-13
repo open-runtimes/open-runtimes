@@ -98,7 +98,7 @@ When you can have two!
             context.log('Timeout end.');
             return context.res.text('Successful response.');
         case 'deprecatedMethods':
-            return context.res.text(context.req.bodyRaw);
+            return context.res.send(context.req.bodyRaw);
         default:
             throw new Error('Unknown action');
     }
