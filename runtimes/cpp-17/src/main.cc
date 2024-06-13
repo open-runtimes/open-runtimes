@@ -224,6 +224,37 @@ int main()
                         headers["cookie"] = cookieHeadersString;
                     }
 
+                    char* serverHeadersChar = std::getenv("OPEN_RUNTIMES_HEADERS");
+                    if(serverHeadersChar != nullptr) {
+                        std::string serverHeadersString(serverHeadersChar);
+
+                        if(serverHeadersString.empty()) {
+                            serverHeadersString = "{}";
+                        }
+
+                        Json::Value serverHeaders;   
+                        Json::Reader serverHeadersReader;
+                        bool parsingResult = serverHeadersReader.parse(serverHeadersString, serverHeaders);
+                        if(!parsingResult)
+                        {
+                            throw std::runtime_error("Invalid JSON body.");
+                        }
+
+                        for (const std::string &key : serverHeaders.getMemberNames())
+                        {
+                            std::string headerKey = key;
+                            std::transform(
+                                headerKey.begin(),
+                                headerKey.end(),
+                                headerKey.begin(),
+                                [](unsigned char c){ return std::tolower(c); }
+                            );
+
+                            auto value = serverHeaders[key];
+                            headers[headerKey] = value.asString();
+                        }
+                    }
+
                     runtimeRequest.headers = headers;
 
                     std::string contentType = req->getHeader("content-type");
