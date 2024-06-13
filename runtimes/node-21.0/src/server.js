@@ -34,7 +34,7 @@ const action = async (logger, req, res) => {
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
-    const contentType = req.headers['content-type'] ?? 'text/plain';
+    const contentType = (req.headers['content-type'] ?? 'text/plain').toLowerCase();
     const bodyBinary = await buffer(req);
 
     const headers = {};
@@ -68,13 +68,13 @@ const action = async (logger, req, res) => {
     const context = {
         req: {
             get body() {
-                if(contentType.includes("application/json")) {
+                if(contentType.startsWith("application/json")) {
                     return this.bodyJson;
                 }
 
-                const binaryTypes = ["audio/", "video/", "octet", "binary"];
+                const binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
                 for(const type of binaryTypes) {
-                    if(contentType.includes(type)) {
+                    if(contentType.startsWith(type)) {
                         return this.bodyBinary;
                     }
                 }
@@ -215,7 +215,7 @@ const action = async (logger, req, res) => {
         res.setHeader(header.toLowerCase(), output.headers[header]);
     }
 
-    const contentTypeValue = res.getHeader("content-type") ?? "text/plain";
+    const contentTypeValue = (res.getHeader("content-type") ?? "text/plain").toLowerCase();
     if (
         !contentTypeValue.startsWith("multipart/") &&
         !contentTypeValue.includes("charset=")

@@ -310,6 +310,23 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
 
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'audio/mpeg']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'font/ttf']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'image/png']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'video/mp4']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
