@@ -274,7 +274,7 @@ const action = async (logger, req, res) => {
         responseHeaders[header.toLowerCase()] = output.headers[header];
     }
 
-    const contentTypeValue = responseHeaders["content-type"] ?? "text/plain".toLowerCase();
+    const contentTypeValue = (responseHeaders["content-type"] ?? "text/plain").toLowerCase();
     if (
         !contentTypeValue.startsWith("multipart/") &&
         !contentTypeValue.includes("charset=")
@@ -282,7 +282,7 @@ const action = async (logger, req, res) => {
         responseHeaders["content-type"] = contentTypeValue + "; charset=utf-8";
     }
 
-    res.setHeader('x-open-runtimes-log-id', logger.id);
+    responseHeaders['x-open-runtimes-log-id'] = logger.id;
     await logger.end();
 
     if(output.chunked) {

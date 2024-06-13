@@ -3,7 +3,7 @@
 namespace Tests;
 
 class Client {
-    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000) {
+    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000, $callback = null) {
         $ch = \curl_init();
 
         $headers = \array_merge([
