@@ -2,6 +2,7 @@ package io.openruntimes.kotlin
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.ToNumberPolicy
 import io.javalin.Javalin
 import io.javalin.http.Context
 import kotlinx.coroutines.runBlocking
@@ -16,6 +17,7 @@ import kotlin.reflect.full.memberFunctions
 import kotlin.time.Duration.Companion.seconds
 
 val gson: Gson = GsonBuilder().serializeNulls().create()
+val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
 
 suspend fun main() {
     Javalin
@@ -31,37 +33,26 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
+    val logger = RuntimeLogger(ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"))
     try {
-        action(ctx)
+        action(logger, ctx)
     } catch (e: Exception) {
-        val logs = mutableListOf<String>()
-        val errors = mutableListOf<String>()
-
         val sw = StringWriter()
         val pw = PrintWriter(sw)
         e.printStackTrace(pw)
 
-        errors.add(sw.toString())
+        val message = sw.toString()
 
-        try {
-            ctx.header(
-                "x-open-runtimes-logs",
-                URLEncoder.encode(logs.joinToString("\n"), StandardCharsets.UTF_8.toString())
-            )
-            ctx.header(
-                "x-open-runtimes-errors",
-                URLEncoder.encode(errors.joinToString("\n"), StandardCharsets.UTF_8.toString())
-            )
-        } catch (ex: UnsupportedEncodingException) {
-            ctx.header("x-open-runtimes-logs", "Internal error while processing logs.")
-            ctx.header("x-open-runtimes-errors", "Internal error while processing logs.")
-        }
+        ctx.header("x-open-runtimes-log-id", logger.id ?: "")
     
+        logger.write(message, RuntimeLogger.TYPE_ERROR, false)
+        logger.end()
+
         ctx.status(500).result("")
     }
 }
 
-suspend fun action(ctx: Context) {
+suspend fun action(logger: RuntimeLogger, ctx: Context) {
     var safeTimeout = -1;
     val timeout = ctx.header("x-open-runtimes-timeout") ?: ""
     if (timeout.isNotEmpty()) {
@@ -96,6 +87,17 @@ suspend fun action(ctx: Context) {
         if (!(header.startsWith("x-open-runtimes-"))) {
             headers[header] = entry.value
         }
+    }
+
+    var enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS")
+    if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
+        enforcedHeadersString = "{}"
+    }
+    val enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, MutableMap::class.java)
+
+    for (entry in enforcedHeaders.entries.iterator()) {
+        val header = "${entry.key}".lowercase()
+        headers[header] = "${entry.value}"
     }
 
     val contentType = ctx.header("content-type") ?: "text/plain"
@@ -162,15 +164,9 @@ suspend fun action(ctx: Context) {
         url,
     )
     val runtimeResponse = RuntimeResponse()
-    val context = RuntimeContext(runtimeRequest, runtimeResponse)
+    val context = RuntimeContext(runtimeRequest, runtimeResponse, logger)
 
-    val systemOut = System.out
-    val systemErr = System.err
-
-    val customStdStream = ByteArrayOutputStream()
-    val customStd = PrintStream(customStdStream)
-    System.setOut(customStd)
-    System.setErr(customStd)
+    logger.overrideNativeLogs()
 
     var output: RuntimeOutput?
 
@@ -212,10 +208,7 @@ suspend fun action(ctx: Context) {
         context.error(sw.toString())
         output = context.res.send("", 500, mutableMapOf())
     } finally {
-        System.out.flush()
-        System.err.flush()
-        System.setOut(systemOut)
-        System.setErr(systemErr)
+        logger.revertNativeLogs()
     }
 
     if (output == null) {
@@ -239,28 +232,9 @@ suspend fun action(ctx: Context) {
         }
     }
 
-    if (customStdStream.toString().isNotEmpty()) {
-        context.log("");
-        context.log("----------------------------------------------------------------------------");
-        context.log("Unsupported logs detected. Use context.log() or context.error() for logging.");
-        context.log("----------------------------------------------------------------------------");
-        context.log(customStdStream.toString());
-        context.log("----------------------------------------------------------------------------");
-    }
-
-    try {
-        ctx.header(
-            "x-open-runtimes-logs",
-            URLEncoder.encode(context.logs.joinToString("\n"), StandardCharsets.UTF_8.toString())
-        )
-        ctx.header(
-            "x-open-runtimes-errors",
-            URLEncoder.encode(context.errors.joinToString("\n"), StandardCharsets.UTF_8.toString())
-        )
-    } catch (ex: UnsupportedEncodingException) {
-        ctx.header("x-open-runtimes-logs", "Internal error while processing logs.")
-        ctx.header("x-open-runtimes-errors", "Internal error while processing logs.")
-    }
+    ctx.header("x-open-runtimes-log-id", logger.id ?: "")
+    
+    logger.end()
 
     ctx.status(output.statusCode).result(output.body)
 }

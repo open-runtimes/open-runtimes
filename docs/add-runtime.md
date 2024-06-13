@@ -178,7 +178,7 @@ Open up the `./build.sh` script at the root of the project and add your runtime 
 
 ```bash
 echo 'Dart 2.12...'
-docker build -t openruntimes/dart:v3-2.12 ./runtimes/dart-2.12
+docker build -t openruntimes/dart:v4-2.12 ./runtimes/dart-2.12
 ```
 
 ## 4. Adding tests

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'logger.dart';
 
 class RuntimeRequest {
   String bodyRaw;
@@ -68,35 +69,18 @@ class RuntimeResponse {
 class RuntimeContext {
   RuntimeRequest req;
   RuntimeResponse res;
+  Logger logger;
 
-  List<String> logs = [];
-  List<String> errors = [];
-
-  RuntimeContext(RuntimeRequest req, RuntimeResponse res)
+  RuntimeContext(RuntimeRequest req, RuntimeResponse res, Logger logger)
       : req = req,
-        res = res {}
+        res = res,
+        logger = logger {}
 
   void log(dynamic message) {
-    if (message is List || message is Map) {
-      try {
-        this.logs.add(jsonEncode(message));
-      } catch (e, s) {
-        this.logs.add(message.toString());
-      }
-    } else {
-      this.logs.add(message.toString());
-    }
+    this.logger.write(message, Logger.TYPE_LOG);
   }
 
   void error(dynamic message) {
-    if (message is List || message is Map) {
-      try {
-        this.errors.add(jsonEncode(message));
-      } catch (e, s) {
-        this.errors.add(message.toString());
-      }
-    } else {
-      this.errors.add(message.toString());
-    }
+    this.logger.write(message, Logger.TYPE_ERROR);
   }
 }

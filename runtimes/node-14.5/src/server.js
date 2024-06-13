@@ -1,23 +1,25 @@
-const fs = require("fs");
 const micro = require("micro");
-const util = require("util");
-const { text: parseText, json: parseJson, send } = require("micro");
+const { buffer, send } = require("micro");
+const Logger = require("./logger");
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const server = micro(async (req, res) => {
+    const logger = new Logger(req.headers[`x-open-runtimes-logging`], req.headers[`x-open-runtimes-log-id`]);
+
     try {
-        await action(req, res);
+        await action(logger, req, res);
     } catch(e) {
-        const logs = [];
-        const errors = [e.stack || e];
-        res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
-        res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
+        logger.write(e, Logger.TYPE_ERROR);
+
+        res.setHeader('x-open-runtimes-log-id', logger.id);
+        await logger.end();
+
         return send(res, 500, '');
     }
 });
 
-const action = async (req, res) => {
+const action = async (logger, req, res) => {
     const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
     let safeTimeout = null;
     if(timeout) {
@@ -32,25 +34,18 @@ const action = async (req, res) => {
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
-    const logs = [];
-    const errors = [];
-
-    const contentType = req.headers['content-type'] ?? 'text/plain';
-    const bodyRaw = await parseText(req);
-    let body = bodyRaw;
-
-    if (contentType.includes('application/json')) {
-        if(bodyRaw) {
-            body = await parseJson(req);
-        } else {
-            body = {};
-        }
-    }
+    const contentType = (req.headers['content-type'] ?? 'text/plain').toLowerCase();
+    const bodyBinary = await buffer(req);
 
     const headers = {};
     Object.keys(req.headers).filter((header) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header) => {
         headers[header.toLowerCase()] = req.headers[header];
     });
+
+    const enforcedHeaders = JSON.parse(process.env.OPEN_RUNTIMES_HEADERS ? process.env.OPEN_RUNTIMES_HEADERS : '{}');
+    for(const header in enforcedHeaders) {
+        headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
+    }
 
     const scheme = (req.headers['x-forwarded-proto'] ?? 'http');
     const defaultPort = scheme === 'https' ? '443' : '80';
@@ -72,8 +67,32 @@ const action = async (req, res) => {
 
     const context = {
         req: {
-            bodyRaw,
-            body,
+            get body() {
+                if(contentType.startsWith("application/json")) {
+                    return this.bodyJson;
+                }
+
+                const binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
+                for(const type of binaryTypes) {
+                    if(contentType.startsWith(type)) {
+                        return this.bodyBinary;
+                    }
+                }
+
+                return this.bodyText;
+            },
+            get bodyRaw() {
+                return this.bodyText;
+            },
+            get bodyText() {
+                return bodyBinary.toString();
+            },
+            get bodyJson() {
+                return JSON.parse(this.bodyText);
+            },
+            get bodyBinary() {
+                return bodyBinary;
+            },
             headers,
             method: req.method,
             host,
@@ -86,50 +105,39 @@ const action = async (req, res) => {
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
+                return this.text(body, statusCode, headers);
+            },
+            text: function (body, statusCode = 200, headers = {}) {
+                return this.binary(Buffer.from(body, 'utf8'), statusCode, headers)
+            },
+            binary: function(bytes, statusCode = 200, headers = {}) {
                 return {
-                    body: body,
+                    body: bytes,
                     statusCode: statusCode,
                     headers: headers
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
                 headers['content-type'] = 'application/json';
-                return this.send(JSON.stringify(obj), statusCode, headers);
+                return this.text(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
-                return this.send('', 204, {});
+                return this.text('', 204, {});
             },
             redirect: function (url, statusCode = 301, headers = {}) {
                 headers['location'] = url;
-                return this.send('', statusCode, headers);
-            }
+                return this.text('', statusCode, headers);
+            },
         },
         log: function (message) {
-            if (message instanceof Object || Array.isArray(message)) {
-                logs.push(JSON.stringify(message));
-            } else {
-                logs.push(message + "");
-            }
+            logger.write(message, Logger.TYPE_LOG);
         },
         error: function (message) {
-            if (message instanceof Object || Array.isArray(message)) {
-                errors.push(JSON.stringify(message));
-            } else {
-                errors.push(message + "");
-            }
+            logger.write(message, Logger.TYPE_ERROR);
         },
     };
 
-    console.stdlog = console.log.bind(console);
-    console.stderror = console.error.bind(console);
-    console.stdinfo = console.info.bind(console);
-    console.stddebug = console.debug.bind(console);
-    console.stdwarn = console.warn.bind(console);
-
-    let customstd = "";
-    console.log = console.info = console.debug = console.warn = console.error = function() {
-        customstd += util.format.apply(null, arguments) + '\n';
-    }
+    logger.overrideNativeLogs();
 
     let output = null;
 
@@ -175,7 +183,7 @@ const action = async (req, res) => {
 
             if(!executed) {
                 context.error('Execution timed out.');
-                output = context.res.send('', 500, {});
+                output = context.res.text('', 500, {});
             }
         } else {
             await execute();
@@ -186,18 +194,14 @@ const action = async (req, res) => {
         }
 
         context.error(e.stack || e);
-        output = context.res.send('', 500, {});
+        output = context.res.text('', 500, {});
     } finally {
-        console.log = console.stdlog;
-        console.error = console.stderror;
-        console.debug = console.stddebug;
-        console.warn = console.stdwarn;
-        console.info = console.stdinfo;
+        logger.revertNativeLogs();
     }
 
     if(output === null || output === undefined) {
         context.error('Return statement missing. return context.res.empty() if no response is expected.');
-        output = context.res.send('', 500, {});
+        output = context.res.text('', 500, {});
     }
 
     output.body = output.body ?? '';
@@ -208,11 +212,10 @@ const action = async (req, res) => {
         if(header.toLowerCase().startsWith('x-open-runtimes-')) {
             continue;
         }
-        
         res.setHeader(header.toLowerCase(), output.headers[header]);
     }
 
-    const contentTypeValue = res.getHeader("content-type") ?? "text/plain";
+    const contentTypeValue = (res.getHeader("content-type") ?? "text/plain").toLowerCase();
     if (
         !contentTypeValue.startsWith("multipart/") &&
         !contentTypeValue.includes("charset=")
@@ -222,18 +225,9 @@ const action = async (req, res) => {
         contentTypeValue + "; charset=utf-8"
         );
     }
-    
-    if(customstd) {
-        context.log('');
-        context.log('----------------------------------------------------------------------------');
-        context.log('Unsupported logs detected. Use context.log() or context.error() for logging.');
-        context.log('----------------------------------------------------------------------------');
-        context.log(customstd);
-        context.log('----------------------------------------------------------------------------');
-    }
 
-    res.setHeader('x-open-runtimes-logs', encodeURIComponent(logs.join('\n')));
-    res.setHeader('x-open-runtimes-errors', encodeURIComponent(errors.join('\n')));
+    res.setHeader('x-open-runtimes-log-id', logger.id);
+    await logger.end();
 
     return send(res, output.statusCode, output.body);
 };
