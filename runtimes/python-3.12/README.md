@@ -25,13 +25,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=main.py --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/python:v3-3.12 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=main.py --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/python:v4-3.12 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/python:v3-3.12 sh helpers/start.sh "python3 src/server.py"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/python:v4-3.12 sh helpers/start.sh "python3 src/server.py"
 ```
 
 4. In new terminal window, execute function:

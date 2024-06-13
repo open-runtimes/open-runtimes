@@ -27,13 +27,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=lib/main.dart --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dart:v3-2.15 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=lib/main.dart --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/dart:v4-2.15 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/dart:v3-2.15 sh helpers/start.sh "/usr/local/server/src/function/server"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/dart:v4-2.15 sh helpers/start.sh "/usr/local/server/src/function/server"
 ```
 
 4. In new terminal window, execute function:

@@ -40,13 +40,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.cc --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/cpp:v3-17 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.cc --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/cpp:v4-17 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/cpp:v3-17 sh helpers/start.sh "/usr/local/server/src/function/cpp_runtime"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/cpp:v4-17 sh helpers/start.sh "/usr/local/server/src/function/cpp_runtime"
 ```
 
 4. In new terminal window, execute function:
