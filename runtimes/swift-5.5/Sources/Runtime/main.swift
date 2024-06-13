@@ -132,6 +132,25 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         }
     }
 
+    if var serverHeadersString = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] {
+        if(serverHeadersString == "") {
+            serverHeadersString = "{}"
+        }
+
+        let serverHeaders = try JSONSerialization.jsonObject(
+            with: serverHeadersString.data(using: .utf8)!,
+            options: .allowFragments
+        ) as! [String: Any?]
+
+        for (key, value) in serverHeaders {
+            if let value = value {
+                headers[key.lowercased()] =  String(describing: value)
+            } else {
+                headers[key.lowercased()] = ""
+            }
+        }
+    }
+
     let contentType = req.headers["content-type"].first ?? "text/plain"
     if contentType.starts(with: "application/json"),
         !bodyRaw.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
