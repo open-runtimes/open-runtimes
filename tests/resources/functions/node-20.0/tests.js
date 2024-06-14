@@ -66,15 +66,15 @@ When you can have two!
         case 'requestBodyBinaryAuto':
             return context.res.binary(context.req.body);
         case 'binaryResponse1':
-            return context.res.binary(Uint8Array.from([0, 10, 255])); // Uint8Array
+            return context.res.binary(Buffer.from((Uint8Array.from([0, 10, 255])))); // Buffer
         case 'binaryResponse2':
-            return context.res.binary(Buffer.from((Uint8Array.from([0, 20, 255])))); // Buffer
+            return context.res.binary(Buffer.from((Uint8Array.from([0, 20, 255])))); // Just a filler
         case 'binaryResponse3':
-            return context.res.binary(Uint8Array.from([0, 30, 255]).buffer); // ArrayBuffer
+            return context.res.binary(Buffer.from((Uint8Array.from([0, 30, 255])))); // Just a filler
         case 'binaryResponse4':
-            return context.res.binary(new Blob([Uint8Array.from([0, 40, 255])])); // Blob
+            return context.res.binary(Buffer.from((Uint8Array.from([0, 40, 255])))); // Just a filler
         case 'binaryResponse5':
-            return context.res.binary(Uint8Array.from([0, 50, 255])); // Just a filler
+            return context.res.binary(Buffer.from((Uint8Array.from([0, 50, 255])))); // Just a filler
         case 'envVars':
             return context.res.json({
                 var: process.env.CUSTOM_ENV_VAR,
