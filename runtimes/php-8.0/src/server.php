@@ -80,8 +80,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
 
     $context = new RuntimeContext($logger);
 
-    $context->req->bodyRaw = $req->getContent();
-    $context->req->body = $context->req->bodyRaw;
+    $context->req->bodyBinary = \unpack('C*',$req->getContent());
     $context->req->method = $req->getMethod();
     $context->req->url = $url;
     $context->req->path = $path;
@@ -91,19 +90,6 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $context->req->query = $query;
     $context->req->queryString = $queryString;
     $context->req->headers = [];
-
-    $contentType = $requestHeaders['content-type'] ?? 'text/plain';
-    if(\str_contains($contentType, 'application/json')) {
-        if(!empty($context->req->bodyRaw)) {
-            $context->req->body = json_decode($context->req->bodyRaw, true);
-
-            if($context->req->body === null) {
-                throw new \Exception('Invalid JSON body.');
-            }
-        } else {
-            $context->req->body = [];
-        }
-    }
 
     foreach ($requestHeaders as $header => $value) {
         if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
@@ -144,7 +130,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
 
             if(!$executed) {
                 $context->error('Execution timed out.');
-                $output = $context->res->send('', 500);
+                $output = $context->res->text('', 500);
             }
         } else {
             \call_user_func($execute);
@@ -152,12 +138,12 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     } catch (\Throwable $e) {
         $context->error($e->getMessage()."\n".$e->getTraceAsString());
         $context->error('At ' . $e->getFile() . ':' . $e->getLine());
-        $output = $context->res->send('', 500);
+        $output = $context->res->text('', 500);
     }
 
     if($output == null) {
         $context->error('Return statement missing. return $context->res->empty() if no response is expected.');
-        $output = $context->res->send('', 500);
+        $output = $context->res->text('', 500);
     }
 
     $output['body'] ??= '';
@@ -184,7 +170,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $logger->end();
 
     $res->status($output['statusCode']);
-    $res->end($output['body']);
+    $res->end(pack("C*",...$output['body']));
 };
 
 $server->on("Request", function($req, $res) use($action) {
@@ -201,7 +187,7 @@ $server->on("Request", function($req, $res) use($action) {
 
         $res->header('x-open-runtimes-log-id', $logger->id);
         $logger->end();
-    
+
         $res->status(500);
         $res->end('');
     }

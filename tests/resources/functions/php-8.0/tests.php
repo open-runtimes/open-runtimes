@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 require 'vendor/autoload.php';
 
@@ -65,11 +65,30 @@ When you can have two!
       case 'requestBodyText':
           return $context->res->text($context->req->body);
       case 'requestBodyJson':
-          return $context->res->json([
-              'key1' => $context->req->body['key1'] ?? 'Missing key',
-              'key2' => $context->req->body['key2'] ?? 'Missing key',
-              'raw' => $context->req->bodyRaw
-          ]);
+          return $context->res->json($context->res->bodyJson);
+      case 'requestBodyBinary':
+          return $context->res->binary($context->req->bodyBinary);
+      case 'requestBodyTextAuto':
+          return $context->res->text($context->req->body);
+      case 'requestBodyJsonAuto':
+          return $context->res->json($context->req->body);
+      case 'requestBodyBinaryAuto':
+          return $context->res->binary($context->req->body);
+      case 'binaryResponse1':
+          $bytes = [0, 10, 255];
+          return $context->res->binary($bytes); // List<int>
+      case 'binaryResponse2':
+          $bytes = [0, 20, 255];
+          return $context->res->binary($bytes); // Just a filler
+      case 'binaryResponse3':
+          $bytes = [0, 30, 255];
+          return $context->res->binary($bytes); // Just a filler
+      case 'binaryResponse4':
+          $bytes = [0, 40, 255];
+          return $context->res->binary($bytes); // Just a filler
+      case 'binaryResponse5':
+          $bytes = [0, 50, 255];
+          return $context->res->binary($bytes); // Just a filler
       case 'envVars':
           $var = getenv('CUSTOM_ENV_VAR');
           $emptyVar = getenv('NOT_DEFINED_VAR');
@@ -81,9 +100,9 @@ When you can have two!
           \var_dump('Native log');
           $context->log('Debug log');
           $context->error('Error log');
-                
+
           $context->log("Log+With+Plus+Symbol");
-          
+
           $context->log(42);
           $context->log(4.2);
           $context->log('true'); // true logs as 1
