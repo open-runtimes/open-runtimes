@@ -44,6 +44,10 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=iso-8859-1', $response['headers']['content-type']);
 
+        $response = Client::execute(headers: ['x-action' => 'uppercaseCharsetResponse']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
+
         $response = Client::execute(headers: ['x-action' => 'multipartResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('multipart/form-data; boundary=12345', $response['headers']['content-type']);
@@ -293,6 +297,14 @@ class Base extends TestCase
         self::assertEquals(3, $body['key3']);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'application/json']);
+        self::assertEquals(200, $response['code']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals('OK 👋', $body['key1']);
+        self::assertEquals(true, $body['key2']);
+        self::assertEquals(3, $body['key3']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'ApPlIcAtIoN/JSON']);
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);

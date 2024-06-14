@@ -42,7 +42,7 @@ const action = async (logger: Logger, ctx: any) => {
   }
 
   const contentType = ctx.request.headers.get('content-type') ?? 'text/plain';
-  const bodyBinary: string = await ctx.request.body({ type: 'bytes' }).value;
+  const bodyBinary: any = await ctx.request.body({ type: 'bytes' }).value;
 
   const headers: any = {};
   Array.from(ctx.request.headers.keys()).filter((header: any) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header: any) => {
@@ -116,11 +116,11 @@ const action = async (logger: Logger, ctx: any) => {
       send: function (body: any, statusCode = 200, headers: any = {}) {
         return this.text(body, statusCode, headers);
       },
-      text: function (body, statusCode = 200, headers = {}) {
+      text: function (body: string, statusCode = 200, headers = {}) {
         const encoder = new TextEncoder();
         return this.binary(encoder.encode(body), statusCode, headers);
       },
-      binary: function(bytes, statusCode = 200, headers = {}) {
+      binary: function(bytes: any, statusCode = 200, headers = {}) {
         return {
           body: bytes,
           statusCode: statusCode,

@@ -98,10 +98,10 @@ const action = async (logger: Logger, request: any) => {
       send: function (body, statusCode = 200, headers = {}) {
         return this.text(body, statusCode, headers);
       },
-      text: function (body, statusCode = 200, headers = {}) {
+      text: function (body: string, statusCode = 200, headers = {}) {
         return this.binary(Buffer.from(body, 'utf8'), statusCode, headers)
       },
-      binary: function(bytes, statusCode = 200, headers = {}) {
+      binary: function(bytes: any, statusCode = 200, headers = {}) {
         return {
           body: bytes,
           statusCode: statusCode,

@@ -10,6 +10,8 @@ export default async (context) => {
             return context.res.json({ json: true, message: 'Developers are awesome.' });
         case 'customCharsetResponse':
             return context.res.text('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' });
+        case 'uppercaseCharsetResponse':
+            return context.res.text('ÅÆ', 200, { 'content-type': 'text/plain' });
         case 'multipartResponse':
             return context.res.text(`--12345
 Content-Disposition: form-data; name="partOne"

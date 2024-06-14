@@ -18,6 +18,11 @@ Future<dynamic> main(final context) async {
       return context.res.text(
           'ÅÆ', 200, {'content-type': 'text/plain; charset=iso-8859-1'});
     }
+    case 'uppercaseCharsetResponse':
+    {
+      return context.res.text(
+          'ÅÆ', 200, {'content-type': 'text/plain'});
+    }
     case 'multipartResponse':
     {
       return context.res.text("""--12345
