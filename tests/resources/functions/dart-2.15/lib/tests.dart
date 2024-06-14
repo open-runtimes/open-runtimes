@@ -21,7 +21,7 @@ Future<dynamic> main(final context) async {
     case 'uppercaseCharsetResponse':
     {
       return context.res.text(
-          'ÅÆ', 200, {'content-type': 'text/plain'});
+          'ÅÆ', 200, {'content-type': 'TEXT/PLAIN'});
     }
     case 'multipartResponse':
     {

@@ -11,7 +11,7 @@ module.exports = async (context) => {
         case 'customCharsetResponse':
             return context.res.text('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' });
         case 'uppercaseCharsetResponse':
-            return context.res.text('ÅÆ', 200, { 'content-type': 'text/plain' });
+            return context.res.text('ÅÆ', 200, { 'content-type': 'TEXT/PLAIN' });
         case 'multipartResponse':
             return context.res.text(`--12345
 Content-Disposition: form-data; name="partOne"
