@@ -462,6 +462,51 @@ class Base extends TestCase
         self::assertEquals('{"hello":"world"}', $response['body']);
     }
 
+    public function testBinaryResponse(): void
+    {
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse1']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(10, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse2']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(20, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse3']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(30, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse4']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(40, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse5']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(50, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+    }
+
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
         $expected = preg_replace('/\s+/', '', $expected);
         $actual = preg_replace('/\s+/', '', $actual);

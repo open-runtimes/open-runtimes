@@ -65,6 +65,16 @@ When you can have two!
             return context.res.json(context.req.body);
         case 'requestBodyBinaryAuto':
             return context.res.binary(context.req.body);
+        case 'binaryResponse1':
+            return context.res.binary(Uint8Array.from([0, 10, 255])); // Uint8Array
+        case 'binaryResponse2':
+            return context.res.binary(Buffer.from((Uint8Array.from([0, 20, 255])))); // Buffer
+        case 'binaryResponse3':
+            return context.res.binary(Uint8Array.from([0, 30, 255]).buffer); // ArrayBuffer
+        case 'binaryResponse4':
+            return context.res.binary(new Blob([Uint8Array.from([0, 40, 255])])); // Blob
+        case 'binaryResponse5':
+            return context.res.binary(Uint8Array.from([0, 50, 255])); // Just a filler
         case 'envVars':
             return context.res.json({
                 var: process.env.CUSTOM_ENV_VAR,
@@ -98,7 +108,7 @@ When you can have two!
             context.log('Timeout end.');
             return context.res.text('Successful response.');
         case 'deprecatedMethods':
-            return context.res.text(context.req.bodyRaw);
+            return context.res.send(context.req.bodyRaw);
         default:
             throw new Error('Unknown action');
     }

@@ -85,7 +85,7 @@ const action = async (logger, req, res) => {
                 return this.bodyText;
             },
             get bodyText() {
-                return bodyBinary.toString();
+                return this.bodyBinary.toString();
             },
             get bodyJson() {
                 return JSON.parse(this.bodyText);
