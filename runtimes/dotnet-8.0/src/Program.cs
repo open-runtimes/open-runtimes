@@ -66,8 +66,8 @@ namespace DotNetRuntime
             }
 
             var reader = new StreamReader(request.Body);
-            var bodyRaw = await reader.ReadToEndAsync();
-            object body = bodyRaw;
+            var bodyBinary  = System.Text.Encoding.UTF8.GetBytes(await reader.ReadToEndAsync());
+            
             var headers = new Dictionary<string, string>();
             var method = request.Method;
 
@@ -92,24 +92,6 @@ namespace DotNetRuntime
             foreach(KeyValuePair<string, object> entry in enforcedHeaders)
             {
                 headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
-            }
-
-            var contentType = request.Headers.TryGetValue("content-type", out var contentTypeValue) ? contentTypeValue.ToString() : "";
-            if(contentType.Contains("application/json"))
-            {
-                if(string.IsNullOrEmpty(bodyRaw))
-                {
-                    body = new Dictionary<string, object>();
-                } 
-                else
-                {
-                    body = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyRaw) ?? new Dictionary<string, object>();
-                }
-            }
-
-            if(body == null)
-            {
-                body = new Dictionary<string, object>();
             }
 
             var hostHeader = request.Headers.TryGetValue("host", out var hostHeaderValue)
@@ -181,8 +163,7 @@ namespace DotNetRuntime
                 queryString,
                 url,
                 headers,
-                body,
-                bodyRaw);
+                bodyBinary);
 
             var contextResponse = new RuntimeResponse();
 
@@ -211,7 +192,7 @@ namespace DotNetRuntime
                     else
                     {
                         context.Error("Execution timed out.");
-                        output = context.Res.Send("", 500);
+                        output = context.Res.Text("", 500);
                     }
                 } else
                 {
@@ -221,7 +202,7 @@ namespace DotNetRuntime
             catch (Exception e)
             {
                 context.Error(e.ToString());
-                output = context.Res.Send("", 500, new Dictionary<string,string>());
+                output = context.Res.Text("", 500, new Dictionary<string,string>());
             }
             finally
             {
@@ -231,7 +212,7 @@ namespace DotNetRuntime
             if(output == null)
             {
                 context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-                output = context.Res.Send("", 500, new Dictionary<string,string>());
+                output = context.Res.Text("", 500, new Dictionary<string,string>());
             }
 
             var outputHeaders = new Dictionary<string, string>();
@@ -240,6 +221,11 @@ namespace DotNetRuntime
                 var header = entry.Key.ToLower();
                 var value = entry.Value;
 
+                if (header == "content-type" && !string.IsNullOrEmpty(value))
+                {
+                    value = value.ToLower();
+                }
+                
                 if (!(header.StartsWith("x-open-runtimes-")))
                 {
                     outputHeaders.Add(header, value);
@@ -250,7 +236,7 @@ namespace DotNetRuntime
 
             outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
-            return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
+            return new CustomResponse(System.Text.Encoding.UTF8.GetString(output.Body, 0, output.Body.Length), output.StatusCode, outputHeaders);
         }
     }
 }

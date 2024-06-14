@@ -23,6 +23,11 @@ namespace DotNetRuntime {
                     {
                         { "content-type", "text/plain; charset=iso-8859-1" }
                     });
+                case "uppercaseCharsetResponse":
+                    return context.Res.Text("ÅÆ", 200, new Dictionary<string, string>()
+                    {
+                        { "content-type", "tTEXT/PLAIN" }
+                    });
                 case "multipartResponse":
                     return context.Res.Text(@"--12345
 Content-Disposition: form-data; name=""partOne""
@@ -85,25 +90,30 @@ When you can have two!
                 case "requestBodyText":
                     return context.Res.Text((string) context.Req.Body);
                 case "requestBodyJson":
-                    var key1 = "";
-                    var key2 = "";
-
-                    if(context.Req.Body is string) {
-                        key1 = "Missing key";
-                        key2 = "Missing key";
-                    } else {
-                        var body = (Dictionary<String, Object>) context.Req.Body;
-
-                        key1 = body.TryGetValue("key1", out var key1Value) ? key1Value.ToString() : "Missing key";
-                        key2 = body.TryGetValue("key2", out var key2Value) ? key2Value.ToString() : "Missing key";
-                    }
-
-                    return context.Res.Json(new Dictionary<string, object?>()
-                    {
-                        { "key1", key1 },
-                        { "key2", key2 },
-                        { "raw", context.Req.BodyRaw }
-                    });
+                    return context.Res.Json(text.Res.BodyJson);
+                case 'requestBodyBinary':
+                    return context.Res.Binary(text.Res.BodyBinary);
+                case 'requestBodyTextAuto':
+                    return context.Res.Text((string) text.Res.Body);
+                case 'requestBodyJsonAuto':
+                    return context.Res.Json(text.Res.Body);
+                case 'requestBodyBinaryAuto':
+                    return context.Res.Binary(text.Res.Body);
+                case 'binaryResponse1':
+                    byte[] bytes = [0, 10, 255];
+                    return context.Res.Binary(bytes); // List<int>
+                case 'binaryResponse2':
+                    byte[] bytes = [0, 10, 255];
+                    return context.Res.Binary(bytes); // Just a filler
+                case 'binaryResponse3':
+                    byte[] bytes = [0, 10, 255];
+                    return context.Res.Binary(bytes); // Just a filler
+                case 'binaryResponse4':
+                    byte[] bytes = [0, 10, 255];
+                    return context.Res.Binary(bytes); // Just a filler
+                case 'binaryResponse5':
+                    byte[] bytes = [0, 10, 255];
+                    return context.Res.Binary(bytes); // Just a filler
                 case "envVars":
                     return context.Res.Json(new Dictionary<string, object?>()
                     {
@@ -147,6 +157,8 @@ When you can have two!
 
                     context.Log("Timeout end.");
                     return context.Res.Text("Successful response.");
+                case "deprecatedMethods"
+                    return context.Res.Send(Context.Req.BodyRaw);
                 default:
                     throw new Exception("Unknown action");
             }

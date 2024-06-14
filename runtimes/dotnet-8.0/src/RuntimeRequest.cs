@@ -1,44 +1,67 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace DotNetRuntime
 {
-	public class RuntimeRequest
-	{
-		public string Method { get; private set; }
-		public string Scheme { get; private set; }
-		public string Host { get; private set; }
-		public int Port { get; private set; }
-		public string Path { get; private set; }
-		public Dictionary<string, string> Query { get; private set; }
-		public string QueryString { get; private set; }
-		public string Url { get; private set; }
-		public Dictionary<string, string> Headers { get; private set; }
-		public object Body { get; private set; }
-		public string BodyRaw { get; private set; }
+    public class RuntimeRequest
+    {
+        public string Method { get; private set; }
+        public string Scheme { get; private set; }
+        public string Host { get; private set; }
+        public int Port { get; private set; }
+        public string Path { get; private set; }
+        public Dictionary<string, string> Query { get; private set; }
+        public string QueryString { get; private set; }
+        public string Url { get; private set; }
+        public Dictionary<string, string> Headers { get; private set; }
+        public object Body
+        {
+            get
+            {
+                var contentType = (Headers["content-type"] ?? "").ToLower();
+                
+                if (contentType.Contains("application/json"))
+                {
+                    return BodyJson;
+                }
 
-		public RuntimeRequest(
-		    string method,
-		    string scheme,
-		    string host,
-		    int port,
-		    string path,
-		    Dictionary<string, string> query,
-		    string queryString,
-		    string url,
-		    Dictionary<string, string> headers,
-		    object body,
-		    string bodyRaw)
-		{
-			BodyRaw = bodyRaw;
-			Body = body;
-			Headers = headers;
-			Method = method;
-			Url = url;
-			Host = host;
-			Scheme = scheme;
-			Path = path;
-			QueryString = queryString;
-			Query = query;
-			Port = port;
-		}
-	}
+                string[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };
+                
+                if (binaryTypes.Any(binaryType => contentType.Contains(binaryType)))
+                {
+                    return BodyBinary;
+                }
+                
+                return BodyText;
+            }
+        }
+        public byte[] BodyBinary{get; private set;}
+        public string BodyText => System.Text.Encoding.UTF8.GetString(BodyBinary, 0, BodyBinary.Length);
+        public object BodyRaw => BodyText;
+        public Dictionary<string, object> BodyJson => JsonSerializer.Deserialize<Dictionary<string, object>>(BodyText) ?? new Dictionary<string, object>();
+
+        public RuntimeRequest(
+            string method,
+            string scheme,
+            string host,
+            int port,
+            string path,
+            Dictionary<string, string> query,
+            string queryString,
+            string url,
+            Dictionary<string, string> headers,
+            byte[] bodyBinary)
+        {
+            BodyBinary = bodyBinary;
+            Headers = headers;
+            Method = method;
+            Url = url;
+            Host = host;
+            Scheme = scheme;
+            Path = path;
+            QueryString = queryString;
+            Query = query;
+            Port = port;
+        }
+    }
 }
-
