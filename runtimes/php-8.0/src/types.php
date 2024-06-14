@@ -21,7 +21,7 @@ class RuntimeResponse {
 
     function json(array $obj, int $statusCode = 200, array $headers = []): array {
         $headers['content-type'] = 'application/json';
-        return $this->text(\json_encode($obj), $statusCode, $headers);
+        return $this->text(\json_encode($obj, JSON_FORCE_OBJECT), $statusCode, $headers);
     }
 
     function empty(): array {
@@ -79,19 +79,11 @@ class RuntimeRequest {
     }
     private function getBodyText(): string
     {
-        $string = implode(array_map("chr", $this->bodyBinary));
-        $encoding = mb_detect_encoding($string,mb_list_encodings());
-        $converted =  mb_convert_encoding($string,'UTF-8', $encoding);
-
-        if(is_string($converted)){
-            return $converted;
-        }
-
-        return '';
+        return pack('C*', ...$this->bodyBinary);
     }
-    private function getBodyJson(): string
+    private function getBodyJson(): array
     {
-        return \json_decode($this->getBodyText());
+        return \json_decode($this->getBodyText(), true);
     }
 }
 

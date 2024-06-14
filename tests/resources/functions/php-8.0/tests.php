@@ -18,6 +18,8 @@ return function($context) use ($client) {
           return $context->res->json([ 'json' => true, 'message' => 'Developers are awesome.' ]);
       case 'customCharsetResponse':
           return $context->res->text('ÅÆ', 200, [ 'content-type' => 'text/plain; charset=iso-8859-1' ]);
+      case 'uppercaseCharsetResponse':
+        return $context->res->text('ÅÆ', 200, [ 'content-type' => 'TEXT/PLAIN' ]);
       case 'multipartResponse':
           return $context->res->text("--12345
 Content-Disposition: form-data; name=\"partOne\"
@@ -65,7 +67,7 @@ When you can have two!
       case 'requestBodyText':
           return $context->res->text($context->req->body);
       case 'requestBodyJson':
-          return $context->res->json($context->res->bodyJson);
+          return $context->res->json($context->req->bodyJson);
       case 'requestBodyBinary':
           return $context->res->binary($context->req->bodyBinary);
       case 'requestBodyTextAuto':
@@ -121,6 +123,8 @@ When you can have two!
 
         $context->log('Timeout end.');
         return $context->res->text('Successful response.');
+    case 'deprecatedMethods':
+        return $context->res->send($context->req->bodyRaw);
       default:
         throw new Exception('Unknown action');
   }

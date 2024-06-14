@@ -102,6 +102,8 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
         $context->req->headers[\strtolower($key)] = \strval($value);
     }
 
+    $context->req->headers = array_change_key_case($context->req->headers);
+
     $output = null;
 
     $execute = function() use ($userFunction, &$output, $context, $logger) {
@@ -151,6 +153,10 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $output['headers'] ??= [];
 
     $headers = \array_change_key_case($output['headers']);
+    
+    if(!empty($headers['content-type'])) {
+        $headers['content-type'] = \strtolower($headers['content-type']);
+    }
 
     if (!isset($headers['content-type'])) {
         $headers['content-type'] = 'text/plain; charset=utf-8';
