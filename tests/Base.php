@@ -330,6 +330,24 @@ class Base extends TestCase
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
+
+        $body = hex2bin(implode('', ["00", "0A", "FF"]));
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(10, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(10, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
     }
 
     public function testEnvVars(): void
