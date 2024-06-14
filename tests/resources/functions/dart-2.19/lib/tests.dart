@@ -78,22 +78,39 @@ When you can have two!
       return context.res.text(context.req.bodyText);
     }
     case 'requestBodyJson': {
-      var key1 = null;
-      var key2 = null;
-
-      if(context.req.body is String) {
-        key1 = 'Missing key';
-        key2 = 'Missing key';
-      } else {
-        key1 = context.req.body['key1'] ?? 'Missing key';
-        key2 = context.req.body['key2'] ?? 'Missing key';
-      }
-
-      return context.res.json({
-        'key1': key1,
-        'key2': key2,
-        'raw': context.req.bodyRaw
-      });
+      return context.res.json(context.req.bodyJson);
+    }
+    case 'requestBodyBinary': {
+      return context.res.binary(context.req.bodyBinary);
+    }
+    case 'requestBodyTextAuto': {
+      return context.res.text(context.req.body);
+    }
+    case 'requestBodyJsonAuto': {
+      return context.res.json(context.req.body);
+    }
+    case 'requestBodyBinaryAuto': {
+      return context.res.binary(context.req.body);
+    }
+    case 'binaryResponse1': {
+      List<int> bytes = [0, 10, 255];
+      return context.res.binary(bytes); // List<int>
+    }
+    case 'binaryResponse2': {
+      List<int> bytes = [0, 20, 255];
+      return context.res.binary(bytes); // Just a filler
+    }
+    case 'binaryResponse3': {
+      List<int> bytes = [0, 30, 255];
+      return context.res.binary(bytes); // Just a filler
+    }
+    case 'binaryResponse4': {
+      List<int> bytes = [0, 40, 255];
+      return context.res.binary(bytes); // Just a filler
+    }
+    case 'binaryResponse5': {
+      List<int> bytes = [0, 50, 255];
+      return context.res.binary(bytes); // Just a filler
     }
     case 'envVars': {
       return context.res.json({
@@ -128,6 +145,9 @@ When you can have two!
 
       context.log("Timeout end.");
       return context.res.text("Successful response.");
+    }
+    case 'deprecatedMethods': {
+      return context.res.send(context.req.bodyRaw);
     }
     default: { 
       throw new Exception('Unknown action');
