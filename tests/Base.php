@@ -250,6 +250,17 @@ class Base extends TestCase
         self::assertEquals('requestHeaders', $body['x-action']);
         self::assertEquals('first-value', $body['x-first-header']);
         self::assertArrayNotHasKey('x-open-runtimes-custom-header', $body);
+
+
+        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'X-UpPeRcAsE-KeY' => 'value']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals('requestHeaders', $body['x-action']);
+        self::assertEquals('value', $body['x-uppercase-key']);
+        self::assertArrayNotHasKey('X-UpPeRcAsE-KeY', $body);
     }
 
     public function testRequestBodyText(): void
