@@ -30,24 +30,6 @@ ENTRYPOINT=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.RUNTI
 INSTALL_COMMAND=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.RUNTIME == \"$RUNTIME\") | .OPEN_RUNTIMES_BUILD_COMMAND" .github/workflows/test.yaml | head -n 1)
 START_COMMAND=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.RUNTIME == \"$RUNTIME\") | .OPEN_RUNTIMES_START_COMMAND" .github/workflows/test.yaml | head -n 1)
 
-# Determine the architecture of the machine
-ARCH=$(uname -m)
-case $ARCH in
-    x86_64)
-        PLATFORM="linux/amd64"
-        ;;
-    aarch64)
-        PLATFORM="linux/arm64"
-        ;;
-    arm*)
-        PLATFORM="linux/arm/v7"
-        ;;
-    *)
-        echo "Unsupported architecture: $ARCH"
-        exit 1
-        ;;
-esac
-
 # Cleanup
 containers=$(docker ps -aq)
 if [ -n "$containers" ]; then
@@ -56,7 +38,7 @@ fi
 
 # Prepare image
 cd ./runtimes/$RUNTIME
-docker build -t open-runtimes/test-runtime . --platform $PLATFORM
+docker build -t open-runtimes/test-runtime .
 cd ../../
 
 # Prevent Docker from creating folder
