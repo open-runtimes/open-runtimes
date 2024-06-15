@@ -33,7 +33,7 @@ START_COMMAND=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.RU
 # Cleanup
 containers=$(docker ps -aq)
 if [ -n "$containers" ]; then
-  docker rm --force $containers
+  docker rm --force "$containers"
 fi
 
 # Prepare image
