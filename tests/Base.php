@@ -14,7 +14,8 @@ class Base extends TestCase
 
     public function setUp(): void
     {
-        $this->runtime = \explode('-', \getenv('RUNTIME'), 2)[0] ?? '';
+        $segments = explode('-', getenv('RUNTIME'));
+        $this->runtime = implode('-', count($segments) > 1 ? array_slice($segments, 0, -1) : $segments);
     }
 
     public function tearDown(): void
