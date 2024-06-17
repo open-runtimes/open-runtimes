@@ -70,13 +70,7 @@ namespace DotNetRuntime
 
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                await Task.WhenAny<object?>(
-                    Task.Run<object?>(async () => {
-                        bodyStream.CopyToAsync(memoryStream);
-                        return null;
-                    })
-                );
-               
+                bodyStream.CopyToAsync(memoryStream);
                 bodyBinary = memoryStream.ToArray();
             }
             
@@ -189,7 +183,7 @@ namespace DotNetRuntime
             {
                 if (safeTimout != -1)
                 {
-                    var result = await Task.WhenAny<RuntimeOutput?>(
+                    var result = await await Task.WhenAny<RuntimeOutput?>(
                         Task.Run<RuntimeOutput?>(async () => {
                             await Task.Delay(safeTimout * 1000);
                             return null;
