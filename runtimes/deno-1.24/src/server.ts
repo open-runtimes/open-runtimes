@@ -41,7 +41,7 @@ const action = async (logger: Logger, ctx: any) => {
     return;
   }
 
-  const contentType = ctx.request.headers.get('content-type') ?? 'text/plain';
+  const contentType = (ctx.request.headers.get('content-type') ?? 'text/plain').toLowerCase();
   const bodyBinary: any = await ctx.request.body({ type: 'bytes' }).value;
 
   const headers: any = {};
@@ -207,7 +207,7 @@ const action = async (logger: Logger, ctx: any) => {
   }
 
   const contentTypeValue =
-    ctx.response.headers.get("content-type") ?? "text/plain";
+    (ctx.response.headers.get("content-type") ?? "text/plain").toLowerCase();
   if (
     !contentTypeValue.startsWith("multipart/") &&
     !contentTypeValue.includes("charset=")

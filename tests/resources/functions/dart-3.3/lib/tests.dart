@@ -154,6 +154,12 @@ When you can have two!
     case 'deprecatedMethods': {
       return context.res.send(context.req.bodyRaw);
     }
+    case 'deprecatedMethodsUntypedBody': {
+      return context.res.send("50"); // Send only supported String
+    }
+    case 'deprecatedMethodsUntypedBody': {
+      return context.res.send("50"); // Send only supported String
+    }
     default: { 
       throw new Exception('Unknown action');
     }
