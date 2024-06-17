@@ -18,7 +18,7 @@ namespace DotNetRuntime
         {
             get
             {
-                var contentType = (Headers["content-type"] ?? "").ToLower();
+                var contentType = Headers.ContainsKey("content-type")? (Headers["content-type"] ?? "").ToLower():"";
                 
                 if (contentType.Contains("application/json"))
                 {
