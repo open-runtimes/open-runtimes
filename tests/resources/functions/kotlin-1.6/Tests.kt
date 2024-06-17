@@ -27,6 +27,11 @@ public class Tests {
                     "content-type" to "text/plain; charset=iso-8859-1"
                 ))
             }
+            "uppercaseCharsetResponse" -> {
+                return context.res.text("ÅÆ", 200, mutableMapOf(
+                    "content-type" to "TEXT/PLAIN"
+                ))
+            }
             "multipartResponse" -> {
                 return context.res.text("""--12345
 Content-Disposition: form-data; name=\"partOne\"
@@ -89,24 +94,39 @@ When you can have two!
                 return context.res.text(context.req.body as String)
             }
             "requestBodyJson" -> {
-                val key1: String
-                val key2: String
-
-                if(context.req.body is String) {
-                    key1 = "Missing key"
-                    key2 = "Missing key"
-                } else {
-                    val body: MutableMap<String, Any> = context.req.body as MutableMap<String, Any>
-
-                    key1 = body.getOrDefault("key1", "Missing key").toString();
-                    key2 = body.getOrDefault("key2", "Missing key").toString();
-                }
-
-                return context.res.json(mutableMapOf(
-                    "key1" to key1,
-                    "key2" to key2,
-                    "raw" to context.req.bodyRaw
-                ))
+                return context.res.json(context.req.bodyJson)
+            }
+            "requestBodyBinary" -> {
+                return context.res.binary(context.req.bodyBinary);
+            }
+            "requestBodyTextAuto" -> {
+                return context.res.text(context.req.body as String);
+            }
+            "requestBodyJsonAuto" -> {
+                return context.res.json(context.req.body as MutableMap<String, Any>);
+            }
+            "requestBodyBinaryAuto" -> {
+                return context.res.binary(context.req.body as ByteArray);
+            }
+            "binaryResponse1" -> {
+                var bytes: ByteArray = byteArrayOf(0, 10, 127)
+                return context.res.binary(bytes); // byte[]
+            }
+            "binaryResponse2" -> {
+                var bytes: ByteArray = byteArrayOf(0, 20, 127)
+                return context.res.binary(bytes); // Just a filler
+            }
+            "binaryResponse3" -> {
+                var bytes: ByteArray = byteArrayOf(0, 30, 127)
+                return context.res.binary(bytes); // Just a filler
+            }
+            "binaryResponse4" -> {
+                var bytes: ByteArray = byteArrayOf(0, 40, 127)
+                return context.res.binary(bytes); // Just a filler
+            }
+            "binaryResponse5" -> {
+                var bytes: ByteArray = byteArrayOf(0, 50, 127)
+                return context.res.binary(bytes); // Just a filler
             }
             "envVars" -> {
                 return context.res.json(mutableMapOf(
@@ -118,7 +138,7 @@ When you can have two!
                 System.out.println("Native log");
                 context.log("Debug log");
                 context.error("Error log");
-                
+
                 context.log("Log+With+Plus+Symbol");
 
                 context.log(42);
@@ -170,6 +190,12 @@ When you can have two!
 
                 context.log("Timeout end.")
                 return context.res.text("Successful response.")
+            }
+            "deprecatedMethods" -> {
+                return context.res.send(context.req.bodyRaw);
+            }
+            "deprecatedMethodsUntypedBody" -> {
+                return context.res.send("50");
             }
             else -> {
                 throw Exception("Unknown action")

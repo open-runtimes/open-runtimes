@@ -7,12 +7,28 @@ public class RuntimeResponse {
         private val gson = GsonBuilder().serializeNulls().create()
     }
 
+    fun binary(
+        body: ByteArray,
+        statusCode: Int = 200,
+        headers: Map<String, String> = mapOf()
+    ): RuntimeOutput {
+        return RuntimeOutput(body, statusCode, headers)
+    }
+
+    fun text(
+        body: String,
+        statusCode: Int = 200,
+        headers: Map<String, String> = mapOf()
+    ): RuntimeOutput {
+        return binary(body.toByteArray(), statusCode, headers)
+    }
+
     fun send(
         body: String,
         statusCode: Int = 200,
         headers: Map<String, String> = mapOf()
     ): RuntimeOutput {
-        return RuntimeOutput(body, statusCode, headers)
+        return text(body, statusCode, headers)
     }
 
     fun json(
@@ -21,11 +37,11 @@ public class RuntimeResponse {
         headers: MutableMap<String, String> = mutableMapOf()
     ): RuntimeOutput {
         headers["content-type"] = "application/json"
-        return this.send(gson.toJson(json), statusCode, headers)
+        return this.text(gson.toJson(json), statusCode, headers)
     }
 
     fun empty(): RuntimeOutput {
-        return this.send("", 204, mutableMapOf<String, String>())
+        return this.text("", 204, mutableMapOf<String, String>())
     }
 
     fun redirect(
@@ -34,6 +50,6 @@ public class RuntimeResponse {
         headers: MutableMap<String, String> = mutableMapOf()
     ): RuntimeOutput {
         headers["location"] = url
-        return this.send("", statusCode, headers)
+        return this.text("", statusCode, headers)
     }
 }
