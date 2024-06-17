@@ -226,5 +226,5 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
 
     logger.end()
 
-    ctx.status(output.statusCode).result(output.body)
+    ctx.status(output.statusCode).result(output.body.toByteArray())
 }
