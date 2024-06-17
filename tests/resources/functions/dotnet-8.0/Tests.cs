@@ -159,6 +159,8 @@ When you can have two!
                     return context.Res.Text("Successful response.");
                 case "deprecatedMethods":
                     return context.Res.Send(context.Req.BodyRaw);
+                case "deprecatedMethodsUntypedBody":
+                    return context.Res.Send("50"); // Send only supported String
                 default:
                     throw new Exception("Unknown action");
             }
