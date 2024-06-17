@@ -26,7 +26,7 @@ namespace DotNetRuntime {
                 case "uppercaseCharsetResponse":
                     return context.Res.Text("ÅÆ", 200, new Dictionary<string, string>()
                     {
-                        { "content-type", "tTEXT/PLAIN" }
+                        { "content-type", "TEXT/PLAIN" }
                     });
                 case "multipartResponse":
                     return context.Res.Text(@"--12345

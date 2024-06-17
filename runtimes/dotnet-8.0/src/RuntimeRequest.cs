@@ -20,14 +20,14 @@ namespace DotNetRuntime
             {
                 var contentType = Headers.TryGetValue("content-type", out string? value) ? (value ?? "").ToLower():"";
 
-                if (contentType.Contains("application/json"))
+                if (contentType.StartsWith("application/json"))
                 {
                     return BodyJson;
                 }
                 
                 string[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };
 
-                if (binaryTypes.Any(binaryType => contentType.Contains(binaryType)))
+                if (binaryTypes.Any(binaryType => contentType.StartsWith(binaryType)))
                 {
                     return BodyBinary;
                 }
