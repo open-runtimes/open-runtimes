@@ -503,6 +503,14 @@ class Base extends TestCase
         self::assertEquals('{"hello":"world"}', $response['body']);
     }
 
+    public function testDeprecatedMethodsUntypedBody(): void
+    {
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethodsUntypedBody']);
+        self::assertEquals(200, $response['code']);
+        self::assertIsString($response['body']);
+        self::assertEquals('50', $response['body']);
+    }
+
     public function testBinaryResponse(): void
     {
         $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse1']);
