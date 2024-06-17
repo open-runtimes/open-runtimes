@@ -102,8 +102,8 @@ When you can have two!
       return context.res.binary(bytes); // List<int>
     }
     case 'binaryResponse2': {
-      List<int> bytes = [0, 20, 255];
-      return context.res.binary(bytes); // Just a filler
+      Uint8List bytes = Uint8List.fromList([0, 20, 255]);
+      return context.res.binary(bytes); // Uint8List
     }
     case 'binaryResponse3': {
       List<int> bytes = [0, 30, 255];

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart' hide Response;
 import 'dart:io' show Platform;
+import 'dart:typed_data';
 
 Future<dynamic> main(final context) async {
   String action = context.req.headers['x-action'] ?? '';
@@ -102,8 +103,8 @@ When you can have two!
       return context.res.binary(bytes); // List<int>
     }
     case 'binaryResponse2': {
-      List<int> bytes = [0, 20, 255];
-      return context.res.binary(bytes); // Just a filler
+      Uint8List bytes = Uint8List.fromList([0, 20, 255]);
+      return context.res.binary(bytes); // Uint8List
     }
     case 'binaryResponse3': {
       List<int> bytes = [0, 30, 255];
@@ -153,9 +154,6 @@ When you can have two!
     }
     case 'deprecatedMethods': {
       return context.res.send(context.req.bodyRaw);
-    }
-    case 'deprecatedMethodsUntypedBody': {
-      return context.res.send("50"); // Send only supported String
     }
     case 'deprecatedMethodsUntypedBody': {
       return context.res.send("50"); // Send only supported String
