@@ -36,7 +36,7 @@ namespace DotNetRuntime
                 var outputHeaders = new Dictionary<string, string>();
                 outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
-                return new CustomResponse("", 500, outputHeaders);
+                return new CustomResponse(Encoding.UTF8.GetBytes(""), 500, outputHeaders);
             }
         }
 
@@ -51,7 +51,7 @@ namespace DotNetRuntime
             {
                 if(!Int32.TryParse(timeout, out safeTimout) || safeTimout == 0)
                 {
-                    return new CustomResponse("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.", 500);
+                    return new CustomResponse("Header \"x-open-runtimes-timeout\" must be an integer greater than 0."u8.ToArray(), 500);
                 }
             }
 
@@ -62,12 +62,12 @@ namespace DotNetRuntime
             string serverSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET");
             if (!string.IsNullOrEmpty(serverSecret) && secret != serverSecret)
             {
-                return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
+                return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header."u8.ToArray(), 500);
             }
 
             var reader = new StreamReader(request.Body);
-            var bodyBinary  = System.Text.Encoding.UTF8.GetBytes(await reader.ReadToEndAsync());
-            
+            var bodyBinary  = Encoding.UTF8.GetBytes(await reader.ReadToEndAsync());
+
             var headers = new Dictionary<string, string>();
             var method = request.Method;
 
@@ -113,7 +113,7 @@ namespace DotNetRuntime
             {
                 host = hostHeader.Split(":")[0];
                 port = Int32.Parse(hostHeader.Split(":")[1]);
-            } 
+            }
             else
             {
                 host = hostHeader;
@@ -123,7 +123,7 @@ namespace DotNetRuntime
             var path = request.Path;
 
             var queryString = request.QueryString.Value ?? "";
-            if(queryString.StartsWith("?")) 
+            if(queryString.StartsWith("?"))
             {
                 queryString = queryString.Remove(0, 1);
             }
@@ -132,7 +132,7 @@ namespace DotNetRuntime
             foreach (var param in queryString.Split("&"))
             {
                 var pair = param.Split("=", 2);
-                if(pair.Length >= 1 && !string.IsNullOrEmpty(pair[0])) 
+                if(pair.Length >= 1 && !string.IsNullOrEmpty(pair[0]))
                 {
                     var value = pair.Length == 2 ? pair[1] : "";
                     query.Add(pair[0], value);
@@ -225,7 +225,7 @@ namespace DotNetRuntime
                 {
                     value = value.ToLower();
                 }
-                
+
                 if (!(header.StartsWith("x-open-runtimes-")))
                 {
                     outputHeaders.Add(header, value);
@@ -236,11 +236,8 @@ namespace DotNetRuntime
 
             outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
-            return new CustomResponse(System.Text.Encoding.UTF8.GetString(output.Body, 0, output.Body.Length), output.StatusCode, outputHeaders);
+            return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
         }
     }
+
 }
-
-
-
-

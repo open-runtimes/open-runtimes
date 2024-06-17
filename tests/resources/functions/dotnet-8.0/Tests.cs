@@ -90,29 +90,29 @@ When you can have two!
                 case "requestBodyText":
                     return context.Res.Text((string) context.Req.Body);
                 case "requestBodyJson":
-                    return context.Res.Json(text.Res.BodyJson);
-                case 'requestBodyBinary':
-                    return context.Res.Binary(text.Res.BodyBinary);
-                case 'requestBodyTextAuto':
-                    return context.Res.Text((string) text.Res.Body);
-                case 'requestBodyJsonAuto':
-                    return context.Res.Json(text.Res.Body);
-                case 'requestBodyBinaryAuto':
-                    return context.Res.Binary(text.Res.Body);
-                case 'binaryResponse1':
+                    return context.Res.Json(context.Req.BodyJson);
+                case "requestBodyBinary":
+                    return context.Res.Binary(context.Req.BodyBinary);
+                case "requestBodyTextAuto":
+                    return context.Res.Text((string) context.Req.Body);
+                case "requestBodyJsonAuto":
+                    return context.Res.Json((Dictionary<string, object>) context.Req.Body);
+                case "requestBodyBinaryAuto":
+                    return context.Res.Binary((byte[]) context.Req.Body);
+                case "binaryResponse1":
                     byte[] bytes = [0, 10, 255];
                     return context.Res.Binary(bytes); // List<int>
-                case 'binaryResponse2':
-                    byte[] bytes = [0, 10, 255];
+                case "binaryResponse2":
+                    bytes = [0, 20, 255];
                     return context.Res.Binary(bytes); // Just a filler
-                case 'binaryResponse3':
-                    byte[] bytes = [0, 10, 255];
+                case "binaryResponse3":
+                    bytes = [0, 30, 255];
                     return context.Res.Binary(bytes); // Just a filler
-                case 'binaryResponse4':
-                    byte[] bytes = [0, 10, 255];
+                case "binaryResponse4":
+                    bytes = [0, 40, 255];
                     return context.Res.Binary(bytes); // Just a filler
-                case 'binaryResponse5':
-                    byte[] bytes = [0, 10, 255];
+                case "binaryResponse5":
+                    bytes = [0, 50, 255];
                     return context.Res.Binary(bytes); // Just a filler
                 case "envVars":
                     return context.Res.Json(new Dictionary<string, object?>()
@@ -124,9 +124,9 @@ When you can have two!
                     Console.WriteLine("Native log");
                     context.Log("Debug log");
                     context.Error("Error log");
-      
+
                     context.Log("Log+With+Plus+Symbol");
-                    
+
                     context.Log(42);
                     context.Log(4.2);
                     context.Log(true);
@@ -157,8 +157,8 @@ When you can have two!
 
                     context.Log("Timeout end.");
                     return context.Res.Text("Successful response.");
-                case "deprecatedMethods"
-                    return context.Res.Send(Context.Req.BodyRaw);
+                case "deprecatedMethods":
+                    return context.Res.Send(context.Req.BodyRaw);
                 default:
                     throw new Exception("Unknown action");
             }

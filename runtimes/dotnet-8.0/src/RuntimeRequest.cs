@@ -19,26 +19,26 @@ namespace DotNetRuntime
             get
             {
                 var contentType = Headers.ContainsKey("content-type")? (Headers["content-type"] ?? "").ToLower():"";
-                
+
                 if (contentType.Contains("application/json"))
                 {
                     return BodyJson;
                 }
 
                 string[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };
-                
+
                 if (binaryTypes.Any(binaryType => contentType.Contains(binaryType)))
                 {
                     return BodyBinary;
                 }
-                
+
                 return BodyText;
             }
         }
         public byte[] BodyBinary{get; private set;}
         public string BodyText => System.Text.Encoding.UTF8.GetString(BodyBinary, 0, BodyBinary.Length);
-        public object BodyRaw => BodyText;
-        public Dictionary<string, object> BodyJson => JsonSerializer.Deserialize<Dictionary<string, object>>(BodyText) ?? new Dictionary<string, object>();
+        public string BodyRaw => BodyText;
+        public Dictionary<string, object?> BodyJson => JsonSerializer.Deserialize<Dictionary<string, object?>>(BodyText) ?? new Dictionary<string, object?>();
 
         public RuntimeRequest(
             string method,
