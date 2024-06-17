@@ -41,7 +41,7 @@ suspend fun execute(ctx: Context) {
         val message = sw.toString()
 
         ctx.header("x-open-runtimes-log-id", logger.id ?: "")
-    
+
         logger.write(message, RuntimeLogger.TYPE_ERROR, false)
         logger.end()
 
@@ -74,7 +74,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         return
     }
 
-    val bodyBinary = ctx.bodyAsBytes()
+    val bodyBinary = ctx.bodyAsBytes().toUByteArray()
     val headers = mutableMapOf<String, String>()
     val method = ctx.method()
 
@@ -223,7 +223,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
     }
 
     ctx.header("x-open-runtimes-log-id", logger.id ?: "")
-    
+
     logger.end()
 
     ctx.status(output.statusCode).result(output.body)

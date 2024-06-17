@@ -9,7 +9,7 @@ data class RuntimeRequest(
     val query: MutableMap<String, String>,
     val queryString: String,
     val headers: MutableMap<String, String>,
-    val bodyBinary: ByteArray,
+    val bodyBinary: UByteArray,
     val url: String,
 ) {
     val bodyText: String

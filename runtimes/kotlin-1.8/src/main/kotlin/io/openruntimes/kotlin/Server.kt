@@ -74,7 +74,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         return
     }
 
-    val bodyBinary = ctx.bodyAsBytes()
+    val bodyBinary = ctx.bodyAsBytes().toUByteArray()
     val headers = mutableMapOf<String, String>()
     val method = ctx.method()
 

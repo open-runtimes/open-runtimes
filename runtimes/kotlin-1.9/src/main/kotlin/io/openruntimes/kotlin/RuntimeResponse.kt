@@ -8,7 +8,7 @@ public class RuntimeResponse {
     }
 
     fun binary(
-        body: ByteArray,
+        body: UByteArray,
         statusCode: Int = 200,
         headers: Map<String, String> = mapOf()
     ): RuntimeOutput {
@@ -20,7 +20,7 @@ public class RuntimeResponse {
         statusCode: Int = 200,
         headers: Map<String, String> = mapOf()
     ): RuntimeOutput {
-        return binary(body.toByteArray(), statusCode, headers)
+        return binary(body.toByteArray().toUByteArray(), statusCode, headers)
     }
 
     fun send(
