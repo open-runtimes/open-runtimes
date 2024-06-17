@@ -14,11 +14,6 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v timeout &> /dev/null; then
-    echo "timeout is not available."
-    exit 1
-fi
-
 RUNTIME=$1
 if [ -z "$RUNTIME" ]; then
     echo "Usage: $0 <runtime>"
