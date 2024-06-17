@@ -109,23 +109,23 @@ When you can have two!
                 return context.res.binary(context.req.body as ByteArray);
             }
             "binaryResponse1" -> {
-                var bytes: ByteArray = byteArrayOf(0, 10, 127)
+                var bytes: UByteArray = ubyteArrayOf(0u, 10u, 255u)
                 return context.res.binary(bytes); // byte[]
             }
             "binaryResponse2" -> {
-                var bytes: ByteArray = byteArrayOf(0, 20, 127)
+                var bytes: UByteArray = ubyteArrayOf(0u, 20u, 255u)
                 return context.res.binary(bytes); // Just a filler
             }
             "binaryResponse3" -> {
-                var bytes: ByteArray = byteArrayOf(0, 30, 127)
+                var bytes: UByteArray = ubyteArrayOf(0u, 30u, 255u)
                 return context.res.binary(bytes); // Just a filler
             }
             "binaryResponse4" -> {
-                var bytes: ByteArray = byteArrayOf(0, 40, 127)
+                var bytes: UByteArray = ubyteArrayOf(0u, 40u, 255u)
                 return context.res.binary(bytes); // Just a filler
             }
             "binaryResponse5" -> {
-                var bytes: ByteArray = byteArrayOf(0, 50, 127)
+                var bytes: UByteArray = ubyteArrayOf(0u, 50u, 255u)
                 return context.res.binary(bytes); // Just a filler
             }
             "envVars" -> {
