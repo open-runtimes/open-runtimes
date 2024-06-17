@@ -230,20 +230,24 @@ class Base extends TestCase
         $response = $this->execute(method: 'HEAD', headers: ['x-action' => 'requestHeadOrTrace']);
         self::assertEquals(200, $response['code']);
 
-        // head, trace dont work well with cpp [drogon].
-        if($this->runtime === 'cpp') return;
-
-        self::assertStringContainsString('HEAD', $response['headers']['x-open-runtimes-logs']);
+        if($this->runtime === 'cpp') {
+            // CPP returns `GET` for `HEAD`.
+        } else {
+            self::assertStringContainsString('HEAD', $response['headers']['x-open-runtimes-logs']);
+        }
 
         $response = $this->execute(method: 'TRACE', headers: ['x-action' => 'requestHeadOrTrace']);
-        if($this->runtime === 'php') {
+
+        if($this->runtime === 'cpp') {
+            // CPP doesn't support `TRACE` yet.
+            self::assertEquals(405, $response['code']);
+        } else if($this->runtime === 'php') {
             // Bug in PHP Swoole
             self::assertEquals(400, $response['code']);
         } else {
             self::assertEquals(200, $response['code']);
+            self::assertStringContainsString('TRACE', $response['headers']['x-open-runtimes-logs']);
         }
-
-        self::assertStringContainsString('TRACE', $response['headers']['x-open-runtimes-logs']);
     }
 
     public function testRequestUrl(): void
