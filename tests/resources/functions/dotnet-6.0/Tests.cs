@@ -65,6 +65,9 @@ When you can have two!
                 return context.Res.Send("FAIL", 404);
             case "requestMethod":
                 return context.Res.Send(context.Req.Method);
+            case "requestHeadOrTrace":
+                context.Log(context.Req.Method);
+                return context.Res.Send("", 200);
             case "requestUrl":
                 return context.Res.Json(new()
                 {

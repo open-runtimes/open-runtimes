@@ -69,7 +69,7 @@ class Context:
         else:
             self.errors.append(str(message))
 
-HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
+HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'TRACE', 'PATCH']
 
 async def action(request):
     timeout = request.headers.get('x-open-runtimes-timeout', '')

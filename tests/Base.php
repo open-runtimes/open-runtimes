@@ -10,8 +10,12 @@ error_reporting(E_ALL);
 
 class Base extends TestCase
 {
+    private string $runtime = '';
+
     public function setUp(): void
     {
+        $segments = explode('-', getenv('RUNTIME'));
+        $this->runtime = implode('-', count($segments) > 1 ? array_slice($segments, 0, -1) : $segments);
     }
 
     public function tearDown(): void
@@ -164,9 +168,11 @@ class Base extends TestCase
 
         $entrypoint = \getenv('OPEN_RUNTIMES_ENTRYPOINT');
 
-        // Fix for dart (expected behaviour)
-        if(\str_starts_with($entrypoint, 'lib/')) {
-            $entrypoint = implode('', explode('lib', $entrypoint, 2));
+        if($this->runtime === 'dart') {
+            // Folder name of entrypoint not there in Dart logs
+            if(\str_starts_with($entrypoint, 'lib/')) {
+                $entrypoint = implode('', explode('lib', $entrypoint, 2));
+            }
         }
 
         self::assertStringContainsString($entrypoint, $response['headers']['x-open-runtimes-errors']);
@@ -207,12 +213,42 @@ class Base extends TestCase
 
         $response = $this->execute(method: 'OPTIONS', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
-        // Bug in C++ framework makes this an empty string
-        // self::assertEquals('OPTIONS', $response['body']);
+
+        if($this->runtime === 'cpp') {
+            // Bug in C++ framework
+            self::assertEquals('', $response['body']);
+        } else {
+            self::assertEquals('OPTIONS', $response['body']);
+        }
 
         $response = $this->execute(method: 'PATCH', headers: ['x-action' => 'requestMethod']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('PATCH', $response['body']);
+    }
+
+    public function testHeadAndTraceRequestMethods(): void
+    {
+        $response = $this->execute(method: 'HEAD', headers: ['x-action' => 'requestHeadOrTrace']);
+        self::assertEquals(200, $response['code']);
+
+        if($this->runtime === 'cpp') {
+            // CPP returns `GET` for `HEAD`.
+        } else {
+            self::assertStringContainsString('HEAD', $response['headers']['x-open-runtimes-logs']);
+        }
+
+        $response = $this->execute(method: 'TRACE', headers: ['x-action' => 'requestHeadOrTrace']);
+
+        if($this->runtime === 'cpp') {
+            // CPP doesn't support `TRACE` yet.
+            self::assertEquals(405, $response['code']);
+        } else if($this->runtime === 'php') {
+            // Bug in PHP Swoole
+            self::assertEquals(400, $response['code']);
+        } else {
+            self::assertEquals(200, $response['code']);
+            self::assertStringContainsString('TRACE', $response['headers']['x-open-runtimes-logs']);
+        }
     }
 
     public function testRequestUrl(): void
@@ -397,8 +433,12 @@ class Base extends TestCase
         self::assertThat($response['headers']['x-open-runtimes-errors'], self::callback(function($value) {
             $value = \strtolower($value);
 
-            // Code=3840 is Swift code for JSON error
-            return \str_contains($value, 'json') || \str_contains($value, 'code=3840');
+            if($this->runtime === 'swift') {
+                // Code=3840 is code for JSON error
+                return \str_contains($value, 'code=3840');
+            }
+
+            return \str_contains($value, 'json');
         }), 'Contains refference to JSON validation problem');
 
         $response = $this->execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '');

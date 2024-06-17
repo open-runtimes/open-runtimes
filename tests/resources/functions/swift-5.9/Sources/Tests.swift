@@ -55,6 +55,9 @@ When you can have two!
         return context.res.send("FAIL", statusCode: 404)
     case "requestMethod":
         return context.res.send(context.req.method)
+    case "requestHeadOrTrace":
+        context.log(context.req.method)
+        return context.res.send("", statusCode: 200)
     case "requestUrl":
         return try context.res.json([
             "url": context.req.url,

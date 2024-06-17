@@ -34,6 +34,7 @@ public class Server {
         On.patch("/*").plain(Server::execute);
         On.options("/*").plain(Server::execute);
         On.head("/*").plain(Server::execute);
+        On.trace("/*").plain(Server::execute);
     }
 
     public static Resp execute(Req req, Resp resp) {

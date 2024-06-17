@@ -60,6 +60,10 @@ When you can have two!
     case 'requestMethod': {
       return context.res.send(context.req.method);
     }
+    case 'requestHeadOrTrace': {
+      context.log(context.req.method);
+      return context.res.send("", 200);
+    }
     case 'requestUrl': {
         return context.res.json({
             'url': context.req.url,
