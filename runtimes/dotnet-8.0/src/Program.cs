@@ -65,8 +65,14 @@ namespace DotNetRuntime
                 return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header."u8.ToArray(), 500);
             }
 
-            var reader = new StreamReader(request.Body);
-            var bodyBinary  = Encoding.Default.GetBytes(await reader.ReadToEndAsync());
+            byte[] bodyBinary = [];
+            System.IO.Stream bodyStream = request.Body;
+
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                bodyStream.CopyToAsync(memoryStream);
+                bodyBinary = memoryStream.ToArray();
+            }
             
             var headers = new Dictionary<string, string>();
             var method = request.Method;

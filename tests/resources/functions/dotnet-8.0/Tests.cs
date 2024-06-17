@@ -101,7 +101,7 @@ When you can have two!
                     return context.Res.Binary((byte[]) context.Req.Body);
                 case "binaryResponse1":
                     byte[] bytes = [0, 10, 255];
-                    return context.Res.Binary(bytes); // List<int>
+                    return context.Res.Binary(bytes); // byte[]
                 case "binaryResponse2":
                     bytes = [0, 20, 255];
                     return context.Res.Binary(bytes); // Just a filler

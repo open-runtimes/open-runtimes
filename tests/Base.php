@@ -493,7 +493,7 @@ class Base extends TestCase
 
     public function testBinaryResponse(): void
     {
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse1']);
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse1']);
         self::assertEquals(200, $response['code']);
         $bytes = \unpack('C*byte', $response['body']);
         self::assertCount(3, $bytes);
@@ -501,7 +501,7 @@ class Base extends TestCase
         self::assertEquals(10, $bytes['byte2']);
         self::assertEquals(255, $bytes['byte3']);
 
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse2']);
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse2']);
         self::assertEquals(200, $response['code']);
         $bytes = \unpack('C*byte', $response['body']);
         self::assertCount(3, $bytes);
@@ -509,7 +509,7 @@ class Base extends TestCase
         self::assertEquals(20, $bytes['byte2']);
         self::assertEquals(255, $bytes['byte3']);
 
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse3']);
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse3']);
         self::assertEquals(200, $response['code']);
         $bytes = \unpack('C*byte', $response['body']);
         self::assertCount(3, $bytes);
@@ -518,7 +518,7 @@ class Base extends TestCase
         self::assertEquals(255, $bytes['byte3']);
 
 
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse4']);
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse4']);
         self::assertEquals(200, $response['code']);
         $bytes = \unpack('C*byte', $response['body']);
         self::assertCount(3, $bytes);
@@ -527,7 +527,7 @@ class Base extends TestCase
         self::assertEquals(255, $bytes['byte3']);
 
 
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'binaryResponse5']);
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse5']);
         self::assertEquals(200, $response['code']);
         $bytes = \unpack('C*byte', $response['body']);
         self::assertCount(3, $bytes);
