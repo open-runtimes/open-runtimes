@@ -13,7 +13,7 @@ data class RuntimeRequest(
     val url: String,
 ) {
     val bodyText: String
-        get() = String(bodyBinary)
+        get() = String(bodyBinary.toByteArray())
     @Suppress("UNCHECKED_CAST")
     val bodyJson: MutableMap<String, Any>
         get() = gson.fromJson(bodyText, MutableMap::class.java) as MutableMap<String, Any>
