@@ -354,7 +354,7 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
 
-        $body = hex2bin(implode('', ["00", "0A", "FF"]));
+        $body = pack('C*', ...[0,10,255]);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
         self::assertEquals(200, $response['code']);
