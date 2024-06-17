@@ -26,6 +26,7 @@ public class Server {
 
     public static void main(String[] args) {
         On.port(3000);
+
         On.get("/*").plain(Server::execute);
         On.post("/*").plain(Server::execute);
         On.put("/*").plain(Server::execute);
@@ -56,7 +57,7 @@ public class Server {
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             String message = sw.toString();
-            
+
             resp = resp.header("x-open-runtimes-log-id", logger.getId());
 
             try {
@@ -111,9 +112,8 @@ public class Server {
         if(!serverSecret.equals("") && !reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(serverSecret)) {
             return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
         }
+        byte[] bodyBinary = req.body();
 
-        String bodyRaw = req.body() == null ? "" : new String(req.body(), StandardCharsets.UTF_8);
-        Object body = bodyRaw;
         Map<String, String> headers = new HashMap<>();
         String method = req.verb();
 
@@ -131,15 +131,6 @@ public class Server {
         Map<String, Object> enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, Map.class);
         for (Map.Entry<String, Object> entry : enforcedHeaders.entrySet()) {
             headers.put(entry.getKey().toLowerCase(), String.valueOf(entry.getValue()));
-        }
-
-        String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
-        if (contentType.contains("application/json")) {
-            if (!bodyRaw.isEmpty()) {
-                body = gson.fromJson(bodyRaw, Map.class);
-            } else {
-                body = new HashMap<String, Object>();
-            }
         }
 
         String scheme = reqHeaders.getOrDefault("x-forwarded-proto", "http");
@@ -191,8 +182,7 @@ public class Server {
                 query,
                 queryString,
                 headers,
-                body,
-                bodyRaw,
+                bodyBinary,
                 url
         );
         RuntimeResponse runtimeResponse = new RuntimeResponse();
@@ -221,6 +211,7 @@ public class Server {
                         e.printStackTrace(pw);
 
                         context.error(sw.toString());
+                        System.out.println(sw.toString());
                         context.getRes().send("", 500);
                     }
 
@@ -232,6 +223,7 @@ public class Server {
                 } catch (TimeoutException e) {
                     future.cancel(true);
                     context.error("Execution timed out.");
+                    System.out.println("Execution timed out.");
                     output = context.getRes().send("", 500);
                 }
             } else {
@@ -244,6 +236,7 @@ public class Server {
             e.printStackTrace(pw);
 
             context.error(sw.toString());
+            System.out.println(sw.toString());
             output = context.getRes().send("", 500);
         } finally {
             logger.revertNativeLogs();
@@ -251,6 +244,7 @@ public class Server {
 
         if (output == null) {
             context.error("Return statement missing. return context.res.empty() if no response is expected.");
+            System.out.println("Return statement missing. return context.res.empty() if no response is expected.");
             output = context.getRes().send("", 500);
         }
 
@@ -262,8 +256,12 @@ public class Server {
                 continue;
             }
 
-            if (header.equals("content-type") && !headerValue.startsWith("multipart/") && !headerValue.contains("charset=")) {
-                headerValue += "; charset=utf-8";
+            if (header.equals("content-type") && !headerValue.startsWith("multipart/")) {
+                headerValue = headerValue.toLowerCase();
+
+                if(!headerValue.contains("charset=")) {
+                    headerValue += "; charset=utf-8";
+                }
             }
 
             resp = resp.header(header, headerValue);

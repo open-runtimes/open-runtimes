@@ -34,6 +34,10 @@ public class Tests {
                 headers.put("content-type", "text/plain; charset=iso-8859-1");
                 return context.getRes().text("ÅÆ", 200, headers);
             }
+            case "uppercaseCharsetResponse" -> {
+                headers.put("content-type", "TEXT/PLAIN");
+                return context.getRes().text("ÅÆ", 200, headers);
+            }
             case "multipartResponse" -> {
                 headers.put("content-type", "multipart/form-data; boundary=12345");
                 return context.getRes().text("--12345\n" +
@@ -96,21 +100,39 @@ public class Tests {
                 return context.getRes().text((String) context.getReq().getBody());
             }
             case "requestBodyJson" -> {
-                String key1 = "";
-                String key2 = "";
-                if (context.getReq().getBody() instanceof String) {
-                    key1 = "Missing key";
-                    key2 = "Missing key";
-                } else {
-                    Map<String, Object> body = (Map<String, Object>) context.getReq().getBody();
-
-                    key1 = body.getOrDefault("key1", "Missing key").toString();
-                    key2 = body.getOrDefault("key2", "Missing key").toString();
-                }
-                json.put("key1", key1);
-                json.put("key2", key2);
-                json.put("raw", context.getReq().getBodyRaw());
-                return context.getRes().json(json);
+                return context.getRes().json(context.getReq().getBodyJson());
+            }
+            case "requestBodyBinary" -> {
+                return context.getRes().binary(context.getReq().getBodyBinary());
+            }
+            case "requestBodyTextAuto" -> {
+                return context.getRes().text((String) context.getReq().getBody());
+            }
+            case "requestBodyJsonAuto" -> {
+                return context.getRes().json((Map<String, Object>) context.getReq().getBody());
+            }
+            case "requestBodyBinaryAuto" -> {
+                return context.getRes().binary((byte[]) context.getReq().getBody());
+            }
+            case "binaryResponse1" -> {
+                byte[] bytes = {0, 10, 127};
+                return context.getRes().binary(bytes); // byte[]
+            }
+            case "binaryResponse2" -> {
+                byte[] bytes = {0, 20, 127};
+                return context.getRes().binary(bytes); // Just a filler
+            }
+            case "binaryResponse3" -> {
+                byte[] bytes = {0, 30, 127};
+                return context.getRes().binary(bytes); // Just a filler
+            }
+            case "binaryResponse4" -> {
+                byte[] bytes = {0, 40, 127};
+                return context.getRes().binary(bytes); // Just a filler
+            }
+            case "binaryResponse5" -> {
+                byte[] bytes = {0, 50, 127};
+                return context.getRes().binary(bytes); // Just a filler
             }
             case "envVars" -> {
                 json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
@@ -164,6 +186,9 @@ public class Tests {
                 context.log("Timeout end.");
 
                 return context.getRes().text("Successful response.");
+            }
+            case "deprecatedMethods" -> {
+                return context.getRes().send(context.getReq().getBodyRaw());
             }
             default -> throw new Exception("Unknown action");
         }
