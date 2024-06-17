@@ -106,7 +106,7 @@ When you can have two!
                 return context.res.json(context.req.body as MutableMap<String, Any>);
             }
             "requestBodyBinaryAuto" -> {
-                return context.res.binary(context.req.body as ByteArray);
+                return context.res.binary(context.req.body as UByteArray);
             }
             "binaryResponse1" -> {
                 var bytes: UByteArray = ubyteArrayOf(0u, 10u, 255u)
