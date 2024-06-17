@@ -10,7 +10,7 @@ class RuntimeResponse {
     }
 
     function send(string $body, int $statusCode = 200, array $headers = []): array {
-        return $this->text($body,$statusCode, $headers);
+        return $this->text(\strval($body),$statusCode, $headers);
     }
 
 

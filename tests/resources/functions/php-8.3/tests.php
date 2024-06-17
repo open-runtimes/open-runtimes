@@ -78,7 +78,7 @@ When you can have two!
             return $context->res->binary($context->req->body);
         case 'binaryResponse1':
             $bytes = [0, 10, 255];
-            return $context->res->binary($bytes); // List<int>
+            return $context->res->binary($bytes); // int[]
         case 'binaryResponse2':
             $bytes = [0, 20, 255];
             return $context->res->binary($bytes); // Just a filler
@@ -125,6 +125,8 @@ When you can have two!
             return $context->res->text('Successful response.');
         case 'deprecatedMethods':
             return $context->res->send($context->req->bodyRaw);
+        case 'deprecatedMethodsUntypedBody':
+            return $context->res->send(50);
         default:
             throw new Exception('Unknown action');
     }
