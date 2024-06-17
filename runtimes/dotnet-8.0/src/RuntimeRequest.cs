@@ -18,13 +18,13 @@ namespace DotNetRuntime
         {
             get
             {
-                var contentType = Headers.ContainsKey("content-type")? (Headers["content-type"] ?? "").ToLower():"";
+                var contentType = Headers.TryGetValue("content-type", out string? value) ? (value ?? "").ToLower():"";
 
                 if (contentType.Contains("application/json"))
                 {
                     return BodyJson;
                 }
-
+                
                 string[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };
 
                 if (binaryTypes.Any(binaryType => contentType.Contains(binaryType)))

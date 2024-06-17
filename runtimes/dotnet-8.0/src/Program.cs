@@ -66,8 +66,8 @@ namespace DotNetRuntime
             }
 
             var reader = new StreamReader(request.Body);
-            var bodyBinary  = Encoding.UTF8.GetBytes(await reader.ReadToEndAsync());
-
+            var bodyBinary  = Encoding.Default.GetBytes(await reader.ReadToEndAsync());
+            
             var headers = new Dictionary<string, string>();
             var method = request.Method;
 

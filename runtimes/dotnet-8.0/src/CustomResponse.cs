@@ -37,8 +37,8 @@ namespace DotNetRuntime
             httpContext.Response.StatusCode = _statusCode;
             httpContext.Response.ContentType = contentTypeValue;
             httpContext.Response.ContentLength = _body.Length;
-
-            return httpContext.Response.BodyWriter.WriteAsync(_body).AsTask();
+            
+            return httpContext.Response.Body.WriteAsync(_body,0 , _body.Length);
         }
     }
 }
