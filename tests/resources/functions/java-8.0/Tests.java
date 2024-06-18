@@ -86,27 +86,27 @@ public class Tests {
                 return context.getRes().text((String) context.getReq().getBody());
             case "requestBodyJson":
                 return context.getRes().json(context.getReq().getBodyJson());
-            case "requestBodyBinary"
+            case "requestBodyBinary":
                 return context.getRes().binary(context.getReq().getBodyBinary());
-            case "requestBodyTextAuto"
+            case "requestBodyTextAuto":
                 return context.getRes().text((String) context.getReq().getBody());
-            case "requestBodyJsonAuto"
+            case "requestBodyJsonAuto":
                 return context.getRes().json((Map<String, Object>) context.getReq().getBody());
-            case "requestBodyBinaryAuto"
+            case "requestBodyBinaryAuto":
                 return context.getRes().binary((byte[]) context.getReq().getBody());
-            case "binaryResponse1"
+            case "binaryResponse1":
                 byte[] bytes = {0, 10, (byte) 255};
                 return context.getRes().binary(bytes); // byte[]
-            case "binaryResponse2"
+            case "binaryResponse2":
                 byte[] bytes = {0, 20, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
-            case "binaryResponse3"
+            case "binaryResponse3":
                 byte[] bytes = {0, 30, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
-            case "binaryResponse4"
+            case "binaryResponse4":
                 byte[] bytes = {0, 40, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
-            case "binaryResponse5"
+            case "binaryResponse5":
                 byte[] bytes = {0, 50, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             case "envVars":
