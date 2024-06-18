@@ -98,16 +98,16 @@ public class Tests {
                 byte[] bytes = {0, 10, (byte) 255};
                 return context.getRes().binary(bytes); // byte[]
             case "binaryResponse2":
-                byte[] bytes = {0, 20, (byte) 255};
+                bytes = {0, 20, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             case "binaryResponse3":
-                byte[] bytes = {0, 30, (byte) 255};
+                bytes = {0, 30, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             case "binaryResponse4":
-                byte[] bytes = {0, 40, (byte) 255};
+                bytes = {0, 40, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             case "binaryResponse5":
-                byte[] bytes = {0, 50, (byte) 255};
+                bytes = {0, 50, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             case "envVars":
                 json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
