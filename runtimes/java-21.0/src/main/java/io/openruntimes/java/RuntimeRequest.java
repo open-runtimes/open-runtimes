@@ -2,6 +2,7 @@ package io.openruntimes.java;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -90,7 +91,7 @@ public class RuntimeRequest {
 
         String[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };
 
-        if(Arrays.stream(binaryTypes).anyMatch(binaryType -> binaryType.startsWith(contentType))){
+        if(Arrays.stream(binaryTypes).anyMatch(contentType::startsWith)){
             return getBodyBinary();
         }
 
@@ -101,7 +102,10 @@ public class RuntimeRequest {
         return new String(bodyBinary);
     }
 
-    public Map<String, Object> getBodyJson() {
+    public Map<String, Object> getBodyJson() throws JsonSyntaxException{
+        if(getBodyText().isEmpty()){
+            throw new JsonSyntaxException("Body is empty");
+        }
         return gson.fromJson(getBodyText(), Map.class);
     }
 
