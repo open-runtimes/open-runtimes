@@ -1,11 +1,25 @@
 <?php
 
 class RuntimeResponse {
+    private $chunkHeadersSent = false;
+    private $res;
+
+    public function __construct(mixed $res)
+    {
+        $this->res = $res;
+    }
+
+    public function getChunkStatus()
+    {
+        return $this->chunkHeadersSent;
+    }
+
     function binary(array $bytes, int $statusCode = 200, array $headers = []): array {
         return [
             'body' => $bytes,
             'statusCode' => $statusCode,
             'headers' => $headers,
+            'chunked' => false,
         ];
     }
 
@@ -31,6 +45,54 @@ class RuntimeResponse {
     function redirect(string $url, int $statusCode = 301, array $headers = []): array {
         $headers['location'] = $url;
         return $this->text('', $statusCode, $headers);
+    }
+
+    /**
+     * @throws Exception
+     */
+    function start($statusCode = 200, array $headers = []) {
+        if(!$this->chunkHeadersSent) {
+            $this->chunkHeadersSent = true;
+
+            $headers['cache-control'] =  $headers['cache-control'] ?? 'no-store';
+            $headers['content-type'] =  $headers['content-type'] ?? 'text/event-stream';
+            $headers['connection'] =  $headers['connection'] ?? 'keep-alive';
+            $headers['transfer-encoding'] =  $headers['transfer-encoding'] ?? 'chunked';
+
+            foreach ($headers as $key => $value) {
+                $this->res->header($key, $value);
+            }
+            $this->res->status($statusCode);
+        }else{
+            throw new Exception('You can only call $res->start() once');
+        }
+    }
+
+    function writeText($body){
+        $this->writeBinary(\unpack("C*", $body));
+    }
+    function writeJson($body){
+        $this->writeText(json_encode($body));
+    }
+    function writeBinary($body){
+        if(!$this->chunkHeadersSent){
+            throw new Exception('You must call $res->start() to start a chunk response.');
+        }
+
+        $this->res->write(pack("C*",...$body));
+    }
+
+    function end(array $headers = []): array {
+        if(!$this->chunkHeadersSent){
+            throw new Exception('You must call $res->start() to start a chunk response.');
+        }
+
+        return [
+            'body' => '',
+            'statusCode' => 0,
+            'headers' => $headers,
+            'chunked' => true,
+        ];
     }
 }
 
@@ -92,9 +154,9 @@ class RuntimeContext {
     public RuntimeResponse $res;
     private Logger $logger;
 
-    function __construct(Logger $logger) {
+    function __construct(Logger $logger, mixed $res) {
         $this->req = new RuntimeRequest();
-        $this->res = new RuntimeResponse();
+        $this->res = new RuntimeResponse($res);
         $this->logger = $logger;
     }
 
