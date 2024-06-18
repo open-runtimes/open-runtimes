@@ -20,6 +20,7 @@ public class Tests {
 
         Map<String, Object> json = new HashMap<>();
         Map<String, String> headers = new HashMap<String, String>();
+        byte[] bytes = {};
 
         switch (action) {
             case "plaintextResponse":
@@ -95,19 +96,19 @@ public class Tests {
             case "requestBodyBinaryAuto":
                 return context.getRes().binary((byte[]) context.getReq().getBody());
             case "binaryResponse1":
-                byte[] bytes = {0, 10, (byte) 255};
+                bytes = new byte[]{0, 10, (byte) 255};
                 return context.getRes().binary(bytes); // byte[]
             case "binaryResponse2":
-                bytes = {0, 20, (byte) 255};
+                bytes = new byte[]{0, 20, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             case "binaryResponse3":
-                bytes = {0, 30, (byte) 255};
+                bytes = new byte[]{0, 30, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             case "binaryResponse4":
-                bytes = {0, 40, (byte) 255};
+                bytes = new byte[]{0, 40, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             case "binaryResponse5":
-                bytes = {0, 50, (byte) 255};
+                bytes = new byte[]{0, 50, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             case "envVars":
                 json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
