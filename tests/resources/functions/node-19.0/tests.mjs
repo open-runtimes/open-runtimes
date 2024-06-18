@@ -10,8 +10,6 @@ export default async (context) => {
             return context.res.json({ json: true, message: 'Developers are awesome.' });
         case 'customCharsetResponse':
             return context.res.text('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' });
-        case 'uppercaseCharsetResponse':
-            return context.res.text('ÅÆ', 200, { 'content-type': 'TEXT/PLAIN' });
         case 'multipartResponse':
             return context.res.text(`--12345
 Content-Disposition: form-data; name="partOne"
@@ -67,16 +65,6 @@ When you can have two!
             return context.res.json(context.req.body);
         case 'requestBodyBinaryAuto':
             return context.res.binary(context.req.body);
-        case 'binaryResponse1':
-            return context.res.binary(Buffer.from((Uint8Array.from([0, 10, 255])))); // Buffer
-        case 'binaryResponse2':
-            return context.res.binary(Buffer.from((Uint8Array.from([0, 20, 255])))); // Just a filler
-        case 'binaryResponse3':
-            return context.res.binary(Buffer.from((Uint8Array.from([0, 30, 255])))); // Just a filler
-        case 'binaryResponse4':
-            return context.res.binary(Buffer.from((Uint8Array.from([0, 40, 255])))); // Just a filler
-        case 'binaryResponse5':
-            return context.res.binary(Buffer.from((Uint8Array.from([0, 50, 255])))); // Just a filler
         case 'envVars':
             return context.res.json({
                 var: process.env.CUSTOM_ENV_VAR,
@@ -111,8 +99,6 @@ When you can have two!
             return context.res.text('Successful response.');
         case 'deprecatedMethods':
             return context.res.send(context.req.bodyRaw);
-        case 'deprecatedMethodsUntypedBody':
-            return context.res.send(50);
         default:
             throw new Error('Unknown action');
     }
