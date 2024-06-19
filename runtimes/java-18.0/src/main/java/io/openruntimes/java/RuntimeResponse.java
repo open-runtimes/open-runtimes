@@ -9,8 +9,20 @@ import java.util.Map;
 public class RuntimeResponse {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
-    public RuntimeOutput send(String body, int statusCode, Map<String, String> headers) {
+    public RuntimeOutput binary(byte[] body, int statusCode, Map<String, String> headers) {
         return new RuntimeOutput(body, statusCode, headers);
+    }
+
+    public RuntimeOutput binary(byte[] body, int statusCode) {
+        return this.binary(body, statusCode, new HashMap<>());
+    }
+
+    public RuntimeOutput binary(byte[] body) {
+        return this.binary(body, 200, new HashMap<>());
+    }
+
+    public RuntimeOutput send(String body, int statusCode, Map<String, String> headers) {
+        return this.text(body, statusCode, headers);
     }
 
     public RuntimeOutput send(String body, int statusCode) {
@@ -21,9 +33,22 @@ public class RuntimeResponse {
         return this.send(body, 200, new HashMap<>());
     }
 
+
+    public RuntimeOutput text(String body, int statusCode, Map<String, String> headers) {
+        return this.binary(body.getBytes(),statusCode,headers);
+    }
+
+    public RuntimeOutput text(String body, int statusCode) {
+        return this.text(body, statusCode, new HashMap<>());
+    }
+
+    public RuntimeOutput text(String body) {
+        return this.text(body, 200, new HashMap<>());
+    }
+
     public RuntimeOutput json(Map<String, Object> json, int statusCode, Map<String, String> headers) {
         headers.put("content-type", "application/json");
-        return this.send(gson.toJson(json), statusCode, headers);
+        return this.text(gson.toJson(json), statusCode, headers);
     }
 
     public RuntimeOutput json(Map<String, Object> json, int statusCode) {
@@ -35,12 +60,12 @@ public class RuntimeResponse {
     }
 
     public RuntimeOutput empty() {
-        return this.send("", 204, new HashMap<>());
+        return this.text("", 204, new HashMap<>());
     }
 
     public RuntimeOutput redirect(String url, int statusCode, Map<String, String> headers) {
         headers.put("location", url);
-        return this.send("", statusCode, headers);
+        return this.text("", statusCode, headers);
     }
 
     public RuntimeOutput redirect(String url, int statusCode) {
