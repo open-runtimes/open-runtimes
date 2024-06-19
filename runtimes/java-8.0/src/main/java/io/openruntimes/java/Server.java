@@ -40,7 +40,6 @@ public class Server {
         try {
             logger = new RuntimeLogger(ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"));
         } catch (IOException e) {
-            System.err.println(e.getMessage());
             // Ignore missing logs
             try {
                 logger = new RuntimeLogger("disabled", "");

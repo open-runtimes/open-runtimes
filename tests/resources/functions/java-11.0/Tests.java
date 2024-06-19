@@ -162,7 +162,7 @@ public class Tests {
             case "deprecatedMethods":
                 return context.getRes().send(context.getReq().getBodyRaw());
             case "deprecatedMethodsUntypedBody":
-                return context.getRes().send("50");
+                return context.getRes().send("50"); // Send only supported String
             default:
                 throw new Exception("Unknown action");
         }

@@ -115,23 +115,23 @@ public class Tests {
                 return context.getRes().binary((byte[]) context.getReq().getBody());
             }
           case "binaryResponse1" -> {
-                byte[] bytes = {0, 10, (byte) 255};
+                byte[] bytes = {(byte) 0, (byte) 10, (byte) 255};
                 return context.getRes().binary(bytes); // byte[]
             }
             case "binaryResponse2" -> {
-                byte[] bytes = {0, 20, (byte) 255};
+                byte[] bytes = {(byte) 0, (byte) 20, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             }
             case "binaryResponse3" -> {
-                byte[] bytes = {0, 30, (byte) 255};
+                byte[] bytes = {(byte) 0, (byte) 30, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             }
             case "binaryResponse4" -> {
-                byte[] bytes = {0, 40, (byte) 255};
+                byte[] bytes = {(byte) 0, (byte) 40, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             }
             case "binaryResponse5" -> {
-                byte[] bytes = {0, 50, (byte) 255};
+                byte[] bytes = {(byte) 0, (byte) 50, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             }
             case "envVars" -> {
@@ -191,7 +191,7 @@ public class Tests {
                 return context.getRes().send(context.getReq().getBodyRaw());
             }
             case "deprecatedMethodsUntypedBody" -> {
-                return context.getRes().send("50");
+                return context.getRes().send("50"); // Send only supported String
             }
             default -> throw new Exception("Unknown action");
         }
