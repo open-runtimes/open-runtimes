@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 public class Server {
+    private static final Gson gson = new GsonBuilder().serializeNulls().create();
     private static final Gson gsonInternal = new GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create();
 
     private static final ExecutorService executor = Executors.newCachedThreadPool();
@@ -69,7 +70,7 @@ public class Server {
         }
     }
 
-    public static Context action(RuntimeLogger logger, Context ctx) {
+    public static Context action(RuntimeLogger logger, Context ctx) throws Exception {
         int safeTimeout = -1;
         String timeout = ctx.header("x-open-runtimes-timeout");
         if (timeout != null && !timeout.isEmpty()) {
@@ -128,7 +129,8 @@ public class Server {
         String scheme = (scheme = ctx.header("x-forwarded-proto")) != null ? scheme : "http";
         String defaultPort = scheme.equals("https") ? "443" : "80";
 
-        String hostHeader = (hostHeader = ctx.header("host")) != null ? hostHeader : "";;
+        String hostHeader = (hostHeader = ctx.header("host")) != null ? hostHeader : "";
+        ;
         String host = "";
         int port;
 
@@ -177,7 +179,7 @@ public class Server {
                 bodyBinary,
                 url
         );
-        RuntimeResponse runtimeResponse = new RuntimeResponse();
+        RuntimeResponse runtimeResponse = new RuntimeResponse(ctx.res(), logger);
         RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse, logger);
 
         logger.overrideNativeLogs();
@@ -214,7 +216,11 @@ public class Server {
                 } catch (TimeoutException e) {
                     future.cancel(true);
                     context.error("Execution timed out.");
-                    output = context.getRes().send("", 500);
+                    if (context.getRes().getChunkStatus()) {
+                        output = context.getRes().send("", 500);
+                    } else {
+                        output = context.getRes().end();
+                    }
                 }
             } else {
                 output = (RuntimeOutput) classMethod.invoke(instance, context);
@@ -226,23 +232,32 @@ public class Server {
             e.printStackTrace(pw);
 
             context.error(sw.toString());
-            output = context.getRes().send("", 500);
+            if (context.getRes().getChunkStatus()) {
+                output = context.getRes().send("", 500);
+            } else {
+                output = context.getRes().end();
+            }
         } finally {
             logger.revertNativeLogs();
         }
 
         if (output == null) {
             context.error("Return statement missing. return context.res.empty() if no response is expected.");
-            output = context.getRes().send("", 500);
+            if (context.getRes().getChunkStatus()) {
+                output = context.getRes().send("", 500);
+            } else {
+                output = context.getRes().end();
+            }
         }
 
         output.getHeaders().putIfAbsent("content-type", "text/plain");
+        output.getHeaders().putIfAbsent("x-open-runtimes-log-id", logger.getId());
 
         for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
             String header = entry.getKey().toLowerCase();
             String headerValue = entry.getValue();
 
-            if (header.startsWith("x-open-runtimes-")) {
+            if (header.startsWith("x-open-runtimes-") && !header.equals("x-open-runtimes-log-id")) {
                 continue;
             }
 
@@ -253,17 +268,20 @@ public class Server {
                     headerValue += "; charset=utf-8";
                 }
             }
-
             ctx.header(header, headerValue);
         }
-        ctx.header("x-open-runtimes-log-id", logger.getId());
+
 
         try {
             logger.end();
         } catch (IOException e) {
             // Ignore missing logs
         }
+        if (context.getRes().getChunkStatus()) {
+            return ctx.result("");
+        } else {
+            return ctx.status(output.getStatusCode()).result(output.getBody());
+        }
 
-        return ctx.status(output.getStatusCode()).result(output.getBody());
     }
 }

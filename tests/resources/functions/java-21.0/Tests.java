@@ -6,7 +6,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+
 import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
@@ -15,6 +17,7 @@ import java.util.concurrent.FutureTask;
 
 public class Tests {
     final Gson gson = new Gson();
+
     public RuntimeOutput main(RuntimeContext context) throws Exception {
         String action = context.getReq().getHeaders().getOrDefault("x-action", "");
 
@@ -114,7 +117,7 @@ public class Tests {
             case "requestBodyBinaryAuto" -> {
                 return context.getRes().binary((byte[]) context.getReq().getBody());
             }
-          case "binaryResponse1" -> {
+            case "binaryResponse1" -> {
                 byte[] bytes = {(byte) 0, (byte) 10, (byte) 255};
                 return context.getRes().binary(bytes); // byte[]
             }
@@ -193,7 +196,62 @@ public class Tests {
             case "deprecatedMethodsUntypedBody" -> {
                 return context.getRes().send("50"); // Send only supported String
             }
+            case "responseChunkedSimple" -> {
+                context.getRes().start();
+                context.getRes().writeText("OK1");
+                context.getRes().writeText("OK2");
+                return context.getRes().end();
+            }
+            case "responseChunkedComplex" -> {
+                headers.put("x-start-header", "start");
+                context.getRes().start(201, headers);
+                context.getRes().writeText("Start");
+                Thread.sleep(1000);
+                context.getRes().writeText("Step1");
+                Thread.sleep(1000);
+                json.put("step2", true);
+                context.getRes().writeJson(json);
+                Thread.sleep(1000);
+                context.getRes().writeBinary(hex2bin("0123456789abcdef"));
+                headers.clear();
+                headers.put("x-trainer-header", "end");
+
+                return context.getRes().end(headers);
+            }
+            case "responseChunkedErrorStartDouble" -> {
+                context.getRes().start();
+                context.getRes().start();
+                context.getRes().writeText("OK");
+                return context.getRes().end();
+            }
+            case "responseChunkedErrorStartMissing" -> {
+                context.getRes().writeText("OK");
+                return context.getRes().end();
+            }
+            case "responseChunkedErrorStartWriteMissing" -> {
+                return context.getRes().end();
+            }
             default -> throw new Exception("Unknown action");
         }
+    }
+
+    public static byte[] hex2bin(String hex) throws NumberFormatException {
+        if (hex.length() % 2 > 0) {
+            throw new NumberFormatException("Hexadecimal input string must have an even length.");
+        }
+        byte[] r = new byte[hex.length() / 2];
+        for (int i = hex.length(); i > 0;) {
+            r[i / 2 - 1] = (byte) (digit(hex.charAt(--i)) | (digit(hex.charAt(--i)) << 4));
+        }
+        return r;
+    }
+
+    private static int digit(char ch) {
+        //TODO Optimize this
+        int r = Character.digit(ch, 16);
+        if (r < 0) {
+            throw new NumberFormatException("Invalid hexadecimal string: " + ch);
+        }
+        return r;
     }
 }
