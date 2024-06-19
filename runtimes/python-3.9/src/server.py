@@ -29,8 +29,7 @@ async def action(logger, request):
 
     context = Context(logger)
 
-    context.req.body_raw = request.get_data(as_text=True)
-    context.req.body = context.req.body_raw
+    context.req.body_binary = request.get_data()
     context.req.method = request.method
     context.req.headers = {}
 
@@ -66,13 +65,6 @@ async def action(logger, request):
 
     if(context.req.query_string):
         context.req.url += '?' + context.req.query_string
-
-    contentType = request.headers.get('content-type', 'text/plain')
-    if 'application/json' in contentType:
-        if not context.req.body_raw:
-            context.req.body = {}
-        else:
-            context.req.body = request.get_json(force=True, silent=False)
 
     headers = dict(request.headers)
     for key in headers.keys():
@@ -136,7 +128,7 @@ async def action(logger, request):
         if not key.lower().startswith('x-open-runtimes-'):
             resp.headers[key.lower()] = output['headers'][key]
 
-    resp.headers['content-type'] = output['headers'].get('content-type', 'text/plain')
+    resp.headers['content-type'] = output['headers'].get('content-type', 'text/plain').lower()
     if not resp.headers['content-type'].startswith('multipart/') and not 'charset=' in resp.headers['content-type']:
         resp.headers['content-type'] += '; charset=utf-8'
 
