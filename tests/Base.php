@@ -330,6 +330,7 @@ class Base extends TestCase
         self::assertEquals($body, $response['body']);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
+
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
 
