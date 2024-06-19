@@ -197,7 +197,8 @@ public class Tests {
                 return context.getRes().end();
             case "responseChunkedErrorStartWriteMissing":
                 return context.getRes().end();
-            default -> throw new Exception("Unknown action");
+            default:
+                throw new Exception("Unknown action");
         }
 
         public static byte[] hex2bin (String hex) throws NumberFormatException {
