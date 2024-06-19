@@ -179,7 +179,7 @@ public class Server {
                 bodyBinary,
                 url
         );
-        RuntimeResponse runtimeResponse = new RuntimeResponse(ctx.res(), logger);
+        RuntimeResponse runtimeResponse = new RuntimeResponse(ctx.res, logger);
         RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse, logger);
 
         logger.overrideNativeLogs();

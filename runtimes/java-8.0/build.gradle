@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-	implementation "io.javalin:javalin:5.0.0"
+	implementation "io.javalin:javalin:4.6.8"
 	implementation "org.slf4j:slf4j-simple:2.0.10"
 	implementation 'com.google.code.gson:gson:2.9.0'
 }
