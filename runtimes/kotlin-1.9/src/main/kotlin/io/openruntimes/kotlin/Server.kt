@@ -74,7 +74,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         return
     }
 
-    val bodyBinary = ctx.bodyAsBytes().toUByteArray()
+    val bodyBinary = ctx.bodyAsBytes()
     val headers = mutableMapOf<String, String>()
     val method = ctx.method()
 
@@ -226,5 +226,5 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
 
     logger.end()
 
-    ctx.status(output.statusCode).result(output.body.toByteArray())
+    ctx.status(output.statusCode).result(output.body)
 }

@@ -9,11 +9,11 @@ data class RuntimeRequest(
     val query: MutableMap<String, String>,
     val queryString: String,
     val headers: MutableMap<String, String>,
-    val bodyBinary: UByteArray,
+    val bodyBinary: ByteArray,
     val url: String,
 ) {
     val bodyText: String
-        get() = String(bodyBinary.toByteArray())
+        get() = String(bodyBinary)
     val bodyJson: MutableMap<String, Any>
         get() = gson.fromJson(bodyText, MutableMap::class.java) as MutableMap<String, Any>
     val bodyRaw: String

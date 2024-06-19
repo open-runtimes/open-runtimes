@@ -106,26 +106,46 @@ When you can have two!
                 return context.res.json(context.req.body as MutableMap<String, Any>);
             }
             "requestBodyBinaryAuto" -> {
-                return context.res.binary(context.req.body as UByteArray);
+                return context.res.binary(context.req.body as ByteArray);
             }
             "binaryResponse1" -> {
-                var bytes: UByteArray = ubyteArrayOf(0u, 10u, 255u)
-                return context.res.binary(bytes); // byte[]
+                val bytes: ByteArray = byteArrayOf(
+                    0.toByte(),
+                    10.toByte(),
+                    255.toByte()
+                )
+                return context.res.binary(bytes); // ByteArray
             }
             "binaryResponse2" -> {
-                var bytes: UByteArray = ubyteArrayOf(0u, 20u, 255u)
-                return context.res.binary(bytes); // Just a filler
+                val bytes: Array<Byte> = arrayOf(
+                    0.toByte(),
+                    20.toByte(),
+                    255.toByte()
+                )
+                return context.res.binary(bytes.toByteArray()); // Array<Byte>
             }
             "binaryResponse3" -> {
-                var bytes: UByteArray = ubyteArrayOf(0u, 30u, 255u)
+                var bytes: ByteArray = byteArrayOf(
+                    0.toByte(),
+                    30.toByte(),
+                    255.toByte()
+                )
                 return context.res.binary(bytes); // Just a filler
             }
             "binaryResponse4" -> {
-                var bytes: UByteArray = ubyteArrayOf(0u, 40u, 255u)
+                var bytes: ByteArray = byteArrayOf(
+                    0.toByte(),
+                    40.toByte(),
+                    255.toByte()
+                )
                 return context.res.binary(bytes); // Just a filler
             }
             "binaryResponse5" -> {
-                var bytes: UByteArray = ubyteArrayOf(0u, 50u, 255u)
+                var bytes: ByteArray = byteArrayOf(
+                    0.toByte(),
+                    50.toByte(),
+                    255.toByte()
+                )
                 return context.res.binary(bytes); // Just a filler
             }
             "envVars" -> {
