@@ -149,7 +149,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         bodyBinary,
         url,
     )
-    val runtimeResponse = RuntimeResponse()
+    val runtimeResponse = RuntimeResponse(ctx.res, logger)
     val context = RuntimeContext(runtimeRequest, runtimeResponse, logger)
 
     logger.overrideNativeLogs()
@@ -177,7 +177,13 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
 
             if (output == null) {
                 context.error("Execution timed out.")
-                output = context.res.send("", 500)
+
+                if (!context.res.chunkHeaderSent) {
+                    output = context.res.send("", 500)
+                } else {
+                    output = context.res.end()
+                }
+
             }
         } else {
             output = if (classMethod.isSuspend) {
@@ -192,14 +198,22 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         e.printStackTrace(pw)
 
         context.error(sw.toString())
-        output = context.res.send("", 500, mutableMapOf())
+        if(!context.res.chunkHeaderSent){
+            output = context.res.send("", 500)
+        }else{
+            output = context.res.end()
+        }
     } finally {
         logger.revertNativeLogs()
     }
 
     if (output == null) {
         context.error("Return statement missing. return context.res.empty() if no response is expected.")
-        output = context.res.send("", 500, mutableMapOf())
+        if(!context.res.chunkHeaderSent){
+            output = context.res.send("", 500)
+        }else{
+            output = context.res.end()
+        }
     }
 
     val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap();
@@ -216,15 +230,20 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         }
     }
 
+    resHeaders.putIfAbsent("x-open-runtimes-log-id", logger.id ?: "")
+
     resHeaders.forEach { (key, value) ->
-        if (!key.startsWith("x-open-runtimes-")) {
+        if (!key.startsWith("x-open-runtimes-") || key.equals("x-open-runtimes-log-id")) {
             ctx.header(key, value)
         }
     }
 
-    ctx.header("x-open-runtimes-log-id", logger.id ?: "")
 
     logger.end()
+    if(!context.res.chunkHeaderSent){
+        ctx.status(output.statusCode).result(output.body)
+    }else{
+        ctx.result("")
+    }
 
-    ctx.status(output.statusCode).result(output.body)
 }

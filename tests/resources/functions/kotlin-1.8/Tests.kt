@@ -217,9 +217,66 @@ When you can have two!
             "deprecatedMethodsUntypedBody" -> {
                 return context.res.send("50"); // Send only supported String
             }
+            "responseChunkedSimple" -> {
+                context.res.start();
+                context.res.writeText("OK1");
+                context.res.writeText("OK2");
+                return context.res.end();
+            }
+            "responseChunkedComplex" -> {
+                context.res.start(201, mutableMapOf(
+                    "x-start-header" to "start"
+                ));
+                context.res.writeText("Start");
+                Thread.sleep(1000);
+                context.res.writeText("Step1");
+                Thread.sleep(1000);
+                context.res.writeJson(mutableMapOf(
+                    "step2" to true
+                ));
+                Thread.sleep(1000);
+                context.res.writeBinary(hex2bin("0123456789abcdef"));
+                return context.res.end(mutableMapOf(
+                    "x-trainer-header" to "end"
+                ));
+            }
+            "responseChunkedErrorStartDouble" -> {
+                context.res.start();
+                context.res.start();
+                context.res.writeText("OK");
+                return context.res.end();
+            }
+            "responseChunkedErrorStartMissing" -> {
+                context.res.writeText("OK");
+                return context.res.end();
+            }
+            "responseChunkedErrorStartWriteMissing" -> {
+                return context.res.end();
+            }
             else -> {
                 throw Exception("Unknown action")
             }
         }
+    }
+
+    @kotlin.Throws(java.lang.NumberFormatException::class)
+    fun hex2bin(hex: String): ByteArray {
+        if (hex.length % 2 > 0) {
+            throw java.lang.NumberFormatException("Hexadecimal input string must have an even length.")
+        }
+        val r = ByteArray(hex.length / 2)
+        var i = hex.length
+        while (i > 0) {
+            r[i / 2 - 1] = (digit(hex[--i]) or (digit(hex[--i]) shl 4)).toByte()
+        }
+        return r
+    }
+
+    private fun digit(ch: Char): Int {
+        val r = ch.digitToIntOrNull(16) ?: -1
+        if (r < 0) {
+            throw java.lang.NumberFormatException("Invalid hexadecimal string: $ch")
+        }
+        return r
     }
 }
