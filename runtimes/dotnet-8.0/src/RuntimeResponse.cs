@@ -1,13 +1,17 @@
+using System.Buffers;
 using System.Text.Json;
 
 namespace DotNetRuntime {
-    public class RuntimeResponse
+    public class RuntimeResponse(HttpResponse httpContextResponse, RuntimeLogger logger)
     {
+        public bool ChunkHeaderSent { get; set; } = false;
+
         public RuntimeOutput Binary(byte[] bytes,int statusCode = 200, Dictionary<string, string>? headers = null ){
             return new RuntimeOutput(
                 bytes,
                 statusCode,
-                headers ?? new Dictionary<string,string>());
+                headers ?? new Dictionary<string,string>(),
+                false);
         }
 
 
@@ -53,6 +57,66 @@ namespace DotNetRuntime {
             headers.Add("location", url);
 
             return Text("", statusCode, headers);
+        }
+
+        public void Start(int statusCode = 200, Dictionary<string, string>? headers = null)
+        {
+            headers ??= new Dictionary<string, string>();
+
+            if (!ChunkHeaderSent)
+            {
+                ChunkHeaderSent = true;
+                headers.TryAdd("cache-control", "no-store");
+                headers.TryAdd("content-type", "text/event-stream");
+                headers.TryAdd("connection", "keep-alive");
+                headers.TryAdd("transfer-encoding", "chunked");
+                headers.TryAdd("x-open-runtimes-log-id", logger.id);
+
+                foreach(KeyValuePair<string, string> entry in headers)
+                {
+                    httpContextResponse.Headers.Append(entry.Key,entry.Value);
+                }
+                
+                httpContextResponse.StatusCode = statusCode;
+                httpContextResponse.Body.Flush();
+
+            }
+            else
+            {
+                throw new Exception("You can only call res.Start() once");
+            }
+        }
+
+        public void WriteJson(object body)
+        {
+            WriteText(JsonSerializer.Serialize(body));
+        }
+
+        public void WriteText(string body)
+        {
+            WriteBinary(System.Text.Encoding.UTF8.GetBytes(body));
+        }
+
+        public void WriteBinary(byte[] body)
+        {
+            if (!ChunkHeaderSent)
+            {
+                throw new Exception("You must call res.Start() to start a chunk response");
+            }
+            httpContextResponse.Body.Write(body,0,body.Length);
+            httpContextResponse.Body.Flush();
+        }
+
+        public RuntimeOutput End(Dictionary<string, string>? headers = null)
+        {           
+            httpContextResponse.Body.Close();
+            headers ??= new Dictionary<string, string>();
+            if (!ChunkHeaderSent)
+            {
+                throw new Exception("You must call res.Start() to start a chunk response");
+            }
+
+            return new RuntimeOutput(System.Text.Encoding.UTF8.GetBytes(""), 200, headers, true);
         }
     }
 }

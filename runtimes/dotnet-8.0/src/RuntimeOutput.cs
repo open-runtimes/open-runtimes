@@ -6,11 +6,13 @@ namespace DotNetRuntime
         public int StatusCode { get; set; }
         public Dictionary<string, string> Headers { get; set; }
 
-        public RuntimeOutput(byte[] body, int statusCode, Dictionary<string, string> headers)
+        public bool Chunked { get; set; }
+        public RuntimeOutput(byte[] body, int statusCode, Dictionary<string, string> headers, bool chunked)
         {
             Body = body;
             StatusCode = statusCode;
             Headers = headers;
+            Chunked = chunked;
         }
     }
 }
