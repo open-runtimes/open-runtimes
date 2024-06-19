@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart' hide Response;
 import 'dart:io' show Platform;
+import 'dart:typed_data';
 
 Future<dynamic> main(final context) async {
   String action = context.req.headers['x-action'] ?? '';
