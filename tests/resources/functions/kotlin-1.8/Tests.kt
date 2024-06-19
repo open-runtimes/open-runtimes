@@ -195,7 +195,7 @@ When you can have two!
                 return context.res.send(context.req.bodyRaw);
             }
             "deprecatedMethodsUntypedBody" -> {
-                return context.res.send("50");
+                return context.res.send("50"); // Send only supported String
             }
             else -> {
                 throw Exception("Unknown action")
