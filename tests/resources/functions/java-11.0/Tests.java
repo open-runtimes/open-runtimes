@@ -200,24 +200,26 @@ public class Tests {
             default:
                 throw new Exception("Unknown action");
         }
-
-        public static byte[] hex2bin (String hex) throws NumberFormatException {
-            if (hex.length() % 2 > 0) {
-                throw new NumberFormatException("Hexadecimal input string must have an even length.");
-            }
-            byte[] r = new byte[hex.length() / 2];
-            for (int i = hex.length(); i > 0; ) {
-                r[i / 2 - 1] = (byte) (digit(hex.charAt(--i)) | (digit(hex.charAt(--i)) << 4));
-            }
-            return r;
-        }
-
-        private static int digit ( char ch){
-            //TODO Optimize this
-            int r = Character.digit(ch, 16);
-            if (r < 0) {
-                throw new NumberFormatException("Invalid hexadecimal string: " + ch);
-            }
-            return r;
-        }
     }
+
+    public static byte[] hex2bin (String hex) throws NumberFormatException {
+        if (hex.length() % 2 > 0) {
+            throw new NumberFormatException("Hexadecimal input string must have an even length.");
+        }
+        byte[] r = new byte[hex.length() / 2];
+        for (int i = hex.length(); i > 0; ) {
+            r[i / 2 - 1] = (byte) (digit(hex.charAt(--i)) | (digit(hex.charAt(--i)) << 4));
+        }
+        return r;
+    }
+
+    private static int digit ( char ch){
+        //TODO Optimize this
+        int r = Character.digit(ch, 16);
+        if (r < 0) {
+            throw new NumberFormatException("Invalid hexadecimal string: " + ch);
+        }
+        return r;
+    }
+
+}
