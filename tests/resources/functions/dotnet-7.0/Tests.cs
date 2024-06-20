@@ -128,9 +128,9 @@ When you can have two!
                     Console.WriteLine("Native log");
                     context.Log("Debug log");
                     context.Error("Error log");
-      
+
                     context.Log("Log+With+Plus+Symbol");
-                    
+
                     context.Log(42);
                     context.Log(4.2);
                     context.Log(true);
@@ -165,6 +165,42 @@ When you can have two!
                     return context.Res.Send(context.Req.BodyRaw);
                 case "deprecatedMethodsUntypedBody":
                     return context.Res.Send("50"); // Send only supported String
+            case "responseChunkedSimple":
+                context.Res.Start();
+                context.Res.WriteText("OK1");
+                context.Res.WriteText("OK2");
+                return context.Res.End();
+            case "responseChunkedComplex":
+                context.Res.Start(201, new Dictionary<string, string>()
+                {
+                    { "x-start-header", "start" },
+                });
+                context.Res.WriteText("Start");
+                await Task.Delay(1000);
+                context.Res.WriteText("Step1");
+                await Task.Delay(1000);
+                context.Res.WriteJson(new Dictionary<string, bool>()
+                {
+                    { "step2", true },
+                });
+                await Task.Delay(1000);
+                String hexstr = "0123456789abcdef";
+                byte[] bin  = (from i in Enumerable.Range(0, hexstr.Length / 2) select Convert.ToByte(hexstr.Substring(i * 2, 2), 16)).ToArray();
+                context.Res.WriteBinary(bin);
+                return context.Res.End(new Dictionary<string, string>()
+                {
+                    { "x-trainer-header", "end" },
+                });
+            case "responseChunkedErrorStartDouble":
+                context.Res.Start();
+                context.Res.Start();
+                context.Res.WriteText("OK");
+                return context.Res.End();
+            case "responseChunkedErrorStartMissing":
+                context.Res.WriteText("OK");
+                return context.Res.End();
+            case "responseChunkedErrorStartWriteMissing":
+                return context.Res.End();
                 default:
                     throw new Exception("Unknown action");
             }

@@ -11,7 +11,7 @@ app.Urls.Add("http://0.0.0.0:3000");
 app.MapMethods("/{*path}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE" }, Execute);
 app.Run();
 
-static async Task<IResult> Execute(HttpRequest request)
+static async Task<IResult> Execute(HttpRequest request, HttpContext context)
 {
     var loggingHeader = request.Headers.TryGetValue("x-open-runtimes-logging", out var loggingHeaderValue)
         ? loggingHeaderValue.ToString()
@@ -25,7 +25,7 @@ static async Task<IResult> Execute(HttpRequest request)
 
     try
     {
-        return await Action(request, logger);
+        return await Action(request, logger, context);
     } catch (Exception e)
     {
         logger.Write(e.ToString(), RuntimeLogger.TYPE_ERROR);
@@ -38,7 +38,7 @@ static async Task<IResult> Execute(HttpRequest request)
     }
 }
 
-static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
+static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger, HttpContext httpContext)
 {
     int safeTimout = -1;
     var timeout = request.Headers.TryGetValue("x-open-runtimes-timeout", out var timeoutValue)
@@ -124,7 +124,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     {
         host = hostHeader.Split(":")[0];
         port = Int32.Parse(hostHeader.Split(":")[1]);
-    } 
+    }
     else
     {
         host = hostHeader;
@@ -134,7 +134,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     var path = request.Path;
 
     var queryString = request.QueryString.Value ?? "";
-    if(queryString.StartsWith("?")) 
+    if(queryString.StartsWith("?"))
     {
         queryString = queryString.Remove(0, 1);
     }
@@ -143,7 +143,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     foreach (var param in queryString.Split("&"))
     {
         var pair = param.Split("=", 2);
-        if(pair.Length >= 1 && !string.IsNullOrEmpty(pair[0])) 
+        if(pair.Length >= 1 && !string.IsNullOrEmpty(pair[0]))
         {
             var value = pair.Length == 2 ? pair[1] : "";
             query.Add(pair[0], value);
@@ -176,7 +176,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         headers,
         bodyBinary);
 
-    var contextResponse = new RuntimeResponse();
+    var contextResponse = new RuntimeResponse(httpContext.Response, logger);
 
     var context = new RuntimeContext(contextRequest, contextResponse, logger);
 
@@ -203,8 +203,14 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
             else
             {
                 context.Error("Execution timed out.");
-                output = context.Res.Text("", 500);
-            }
+                if (context.Res.ChunkHeaderSent)
+                {
+                    output = context.Res.End();
+                }else
+                {
+                 output = context.Res.Text("", 500);
+                }
+             }
         } else
         {
             output = await new Handler().Main(context);
@@ -213,7 +219,13 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     catch (Exception e)
     {
         context.Error(e.ToString());
-        output = context.Res.Text("", 500, new Dictionary<string,string>());
+        if (context.Res.ChunkHeaderSent)
+        {
+            output = context.Res.End();
+        }else
+        {
+            output = context.Res.Text("", 500);
+        }
     }
     finally
     {
@@ -223,7 +235,13 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     if(output == null)
     {
         context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-        output = context.Res.Text("", 500, new Dictionary<string,string>());
+        if (context.Res.ChunkHeaderSent)
+        {
+            output = context.Res.End();
+        }else
+        {
+            output = context.Res.Text("", 500);
+        }
     }
 
     var outputHeaders = new Dictionary<string, string>();
@@ -244,8 +262,11 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     }
 
     logger.End();
+    outputHeaders.TryAdd("x-open-runtimes-log-id", logger.id);
 
-    outputHeaders.Add("x-open-runtimes-log-id", logger.id);
-
+    if (context.Res.ChunkHeaderSent)
+    {
+         return new CustomBinaryResponse(outputHeaders);
+    }
     return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
 }

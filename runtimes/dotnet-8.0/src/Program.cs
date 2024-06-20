@@ -257,20 +257,11 @@ namespace DotNetRuntime
             }
 
             logger.End();
+            outputHeaders.TryAdd("x-open-runtimes-log-id", logger.id);
 
-            try
+           if (context.Res.ChunkHeaderSent)
             {
-                outputHeaders.TryAdd("x-open-runtimes-log-id", logger.id);
-            }
-            catch (Exception e)
-            {
-                // ignored
-            }
-
-            if (context.Res.ChunkHeaderSent)
-            {
-                // await httpContext.Response.CompleteAsync();
-                return Results.Ok(new { Message = "" });
+                return new CustomBinaryResponse(outputHeaders);
             }
             return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
         }

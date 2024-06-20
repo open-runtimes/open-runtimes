@@ -69,7 +69,6 @@ namespace DotNetRuntime {
                 headers.TryAdd("cache-control", "no-store");
                 headers.TryAdd("content-type", "text/event-stream");
                 headers.TryAdd("connection", "keep-alive");
-                headers.TryAdd("transfer-encoding", "chunked");
                 headers.TryAdd("x-open-runtimes-log-id", logger.id);
 
                 foreach(KeyValuePair<string, string> entry in headers)
@@ -78,8 +77,6 @@ namespace DotNetRuntime {
                 }
                 
                 httpContextResponse.StatusCode = statusCode;
-                httpContextResponse.Body.Flush();
-
             }
             else
             {
@@ -94,6 +91,7 @@ namespace DotNetRuntime {
 
         public void WriteText(string body)
         {
+
             WriteBinary(System.Text.Encoding.UTF8.GetBytes(body));
         }
 
@@ -103,13 +101,12 @@ namespace DotNetRuntime {
             {
                 throw new Exception("You must call res.Start() to start a chunk response");
             }
-            httpContextResponse.Body.Write(body,0,body.Length);
-            httpContextResponse.Body.Flush();
+            httpContextResponse.Body.WriteAsync(body,0,body.Length);
+            httpContextResponse.Body.FlushAsync();
         }
 
         public RuntimeOutput End(Dictionary<string, string>? headers = null)
         {           
-            httpContextResponse.Body.Close();
             headers ??= new Dictionary<string, string>();
             if (!ChunkHeaderSent)
             {

@@ -13,7 +13,7 @@ namespace DotNetRuntime
             app.Run();
         }
 
-        static async Task<IResult> Execute(HttpRequest request)
+        static async Task<IResult> Execute(HttpRequest request, HttpContext context)
         {
             var loggingHeader = request.Headers.TryGetValue("x-open-runtimes-logging", out var loggingHeaderValue)
                 ? loggingHeaderValue.ToString()
@@ -27,7 +27,7 @@ namespace DotNetRuntime
 
             try
             {
-                return await Action(request, logger);
+                return await Action(request, logger, context);
             } catch (Exception e)
             {
                 logger.Write(e.ToString(), RuntimeLogger.TYPE_ERROR);
@@ -40,7 +40,7 @@ namespace DotNetRuntime
             }
         }
 
-        static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
+        static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger, HttpContext httpContext)
         {
             int safeTimout = -1;
             var timeout = request.Headers.TryGetValue("x-open-runtimes-timeout", out var timeoutValue)
@@ -73,7 +73,7 @@ namespace DotNetRuntime
                 bodyStream.CopyToAsync(memoryStream);
                 bodyBinary = memoryStream.ToArray();
             }
-            
+
             var headers = new Dictionary<string, string>();
             var method = request.Method;
 
@@ -171,7 +171,7 @@ namespace DotNetRuntime
                 headers,
                 bodyBinary);
 
-            var contextResponse = new RuntimeResponse();
+            var contextResponse = new RuntimeResponse(httpContext.Response, logger);
 
             var context = new RuntimeContext(contextRequest, contextResponse, logger);
 
@@ -198,7 +198,13 @@ namespace DotNetRuntime
                     else
                     {
                         context.Error("Execution timed out.");
-                        output = context.Res.Text("", 500);
+                        if (context.Res.ChunkHeaderSent)
+                        {
+                            output = context.Res.End();
+                        }else
+                        {
+                            output = context.Res.Text("", 500);
+                        }
                     }
                 } else
                 {
@@ -208,7 +214,13 @@ namespace DotNetRuntime
             catch (Exception e)
             {
                 context.Error(e.ToString());
-                output = context.Res.Text("", 500, new Dictionary<string,string>());
+                if (context.Res.ChunkHeaderSent)
+                {
+                    output = context.Res.End();
+                }else
+                {
+                    output = context.Res.Text("", 500);
+                }
             }
             finally
             {
@@ -218,7 +230,13 @@ namespace DotNetRuntime
             if(output == null)
             {
                 context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-                output = context.Res.Text("", 500, new Dictionary<string,string>());
+                if (context.Res.ChunkHeaderSent)
+                {
+                    output = context.Res.End();
+                }else
+                {
+                    output = context.Res.Text("", 500);
+                }
             }
 
             var outputHeaders = new Dictionary<string, string>();
@@ -239,9 +257,12 @@ namespace DotNetRuntime
             }
 
             logger.End();
+            outputHeaders.TryAdd("x-open-runtimes-log-id", logger.id);
 
-            outputHeaders.Add("x-open-runtimes-log-id", logger.id);
-
+           if (context.Res.ChunkHeaderSent)
+            {
+                return new CustomBinaryResponse(outputHeaders);
+            }
             return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
         }
     }

@@ -185,7 +185,7 @@ When you can have two!
                 context.Res.WriteBinary(bin);
                 return context.Res.End(new Dictionary<string, string>()
                 {
-                    { "trainer-header", "end" },
+                    { "x-trainer-header", "end" },
                 });
             case "responseChunkedErrorStartDouble":
                 context.Res.Start();
