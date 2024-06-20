@@ -3,6 +3,7 @@
 
 #include <string>
 #include <json/value.h>
+#include <algorithm>
 #include "RuntimeOutput.h"
 
 namespace runtime
