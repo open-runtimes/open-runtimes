@@ -179,9 +179,9 @@ When you can have two!
             context.Res.WriteText("Step1");
             await Task.Delay(1000);
             
-            var json = new Dictionary<string, bool>();
-            json.Add("step2", true);
-            context.Res.WriteJson(json);
+            var json2 = new Dictionary<string, bool>();
+            json2.Add("step2", true);
+            context.Res.WriteJson(json2);
             await Task.Delay(1000);
             
             String hexstr = "0123456789abcdef";
