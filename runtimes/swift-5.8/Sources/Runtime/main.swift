@@ -80,8 +80,6 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         }
     }
 
-    let bodyRaw = req.body.string ?? ""
-    var body = bodyRaw as Any
     var headers = [String: String]()
     let method = req.method.string
     let scheme = req.uri.scheme!
@@ -151,19 +149,13 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         }
     }
 
-    let contentType = req.headers["content-type"].first ?? "text/plain"
-    if contentType.starts(with: "application/json"),
-        !bodyRaw.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
-        bodyRaw != "\"\"" {
-            body = try JSONSerialization.jsonObject(
-                with: bodyRaw.data(using: .utf8)!,
-                options: .allowFragments
-            ) as Any
+    var bodyBinary = Data()
+    if let requestBodyData = req.body.data {
+        bodyBinary = Data(buffer: requestBodyData)
     }
 
     let request = RuntimeRequest(
-        bodyRaw: bodyRaw,
-        body: body,
+        bodyBinary: bodyBinary,
         headers: headers,
         method: method,
         url: url,
@@ -227,7 +219,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         }
     }
 
-    let contentTypeValue = outputHeaders.first(name: "content-type") ?? "text/plain"
+    let contentTypeValue = (outputHeaders.first(name: "content-type") ?? "text/plain").lowercased()
     if !contentTypeValue.starts(with: "multipart/") && !contentTypeValue.contains("charset=") {
         outputHeaders.replaceOrAdd(name: "content-type", value: contentTypeValue + "; charset=utf-8")
     }
@@ -236,7 +228,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
     
     let code: HTTPResponseStatus = .custom(code: UInt(output.statusCode), reasonPhrase: "")
-    let resBody: Response.Body = .init(string: output.body)
+    let resBody: Response.Body = .init(data: output.body)
     
     return Response(
         status: code,
