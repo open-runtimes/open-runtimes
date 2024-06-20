@@ -178,11 +178,12 @@ When you can have two!
             await Task.Delay(1000);
             context.Res.WriteText("Step1");
             await Task.Delay(1000);
-            context.Res.WriteJson(new()
-            {
-                { "step2", true },
-            });
+            
+            var json = new Dictionary<string, bool>();
+            json.Add("step2", true);
+            context.Res.WriteJson(json);
             await Task.Delay(1000);
+            
             String hexstr = "0123456789abcdef";
             byte[] bin  = (from i in Enumerable.Range(0, hexstr.Length / 2) select Convert.ToByte(hexstr.Substring(i * 2, 2), 16)).ToArray();
             context.Res.WriteBinary(bin);
