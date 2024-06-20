@@ -31,6 +31,9 @@ namespace runtime {
             } else if (action == "customCharsetResponse") {
                 headers["content-type"] = "text/plain; charset=iso-8859-1";
                 return res.text("ÅÆ", 200, headers);
+            } else if (action == "uppercaseCharsetResponse") {
+                headers["content-type"] = "TEXT/PLAIN";
+                return res.text("ÅÆ", 200, headers);
             } else if (action == "multipartResponse") {
                 headers["content-type"] = "multipart/form-data; boundary=12345";
                 return res.text("--12345\n"
@@ -87,42 +90,68 @@ namespace runtime {
             } else if (action == "requestHeaders") {
                 return res.json(req.headers);
             } else if (action == "requestBodyText") {
-                std::string body = std::any_cast<std::string>(req.bodyText);
-                return res.text(body);
+                return res.text(req.bodyText);
             } else if (action == "requestBodyJson") {
-                auto isJson = false;
+                // Getters dont work, so we dont get exception on ivnalid JSON. Throw it here instead
+                if(req.bodyJson.empty()) {
+                    Json::Value bodyRoot;   
+                    Json::Reader reader;
+                    bool parsingResult = reader.parse(req.bodyText, bodyRoot);
 
-                try {
-                    Json::Value body = std::any_cast<Json::Value>(req.bodyText);
-                    isJson = true;
-                } catch (const std::exception &e) {
-                    isJson = false;
-                }
-
-                Json::String key1 = "";
-                Json::String key2 = "";
-
-                if (isJson) {
-                    Json::Value body = std::any_cast<Json::Value>(req.bodyText);
-                    key1 = body["key1"].asString();
-                    key2 = body["key2"].asString();
-
-                    if (key1.empty()) {
-                        key1 = "Missing key";
+                    if(!parsingResult)
+                    {
+                        throw std::invalid_argument("Invalid JSON");
+                    } else {
+                        return res.send("{}");
                     }
-
-                    if (key2.empty()) {
-                        key2 = "Missing key";
-                    }
-                } else {
-                    key1 = "Missing key";
-                    key2 = "Missing key";
                 }
+                return res.json(req.bodyJson);
+            } else if (action == "requestBodyBinary") {
+                return res.binary(req.bodyBinary);
+            } else if (action == "requestBodyTextAuto") {
+                std::string body = std::any_cast<std::string>(req.body);
+                return res.text(body);
+            } else if (action == "requestBodyJsonAuto") {
+                Json::Value body = std::any_cast<Json::Value>(req.body);
+                return res.json(body);
+            } else if (action == "requestBodyBinaryAuto") {
+                std::vector<std::byte> body = std::any_cast<std::vector<std::byte>>(req.body);
+                return res.binary(body);
+            } else if (action == "binaryResponse1") {
+                std::vector<std::byte> bytes;
+                bytes.push_back(std::byte{0});
+                bytes.push_back(std::byte{10});
+                bytes.push_back(std::byte{255});
 
-                json["key1"] = key1;
-                json["key2"] = key2;
-                json["raw"] = req.bodyRaw;
-                return res.json(json);
+                return res.binary(bytes); // std::vector<std::byte>
+            } else if (action == "binaryResponse2") {
+                std::vector<std::byte> bytes;
+                bytes.push_back(std::byte{0});
+                bytes.push_back(std::byte{20});
+                bytes.push_back(std::byte{255});
+
+                return res.binary(bytes); // Just a filler
+            } else if (action == "binaryResponse3") {
+                std::vector<std::byte> bytes;
+                bytes.push_back(std::byte{0});
+                bytes.push_back(std::byte{30});
+                bytes.push_back(std::byte{255});
+
+                return res.binary(bytes); // Just a filler
+            } else if (action == "binaryResponse4") {
+                std::vector<std::byte> bytes;
+                bytes.push_back(std::byte{0});
+                bytes.push_back(std::byte{40});
+                bytes.push_back(std::byte{255});
+
+                return res.binary(bytes); // Just a filler
+            } else if (action == "binaryResponse5") {
+                std::vector<std::byte> bytes;
+                bytes.push_back(std::byte{0});
+                bytes.push_back(std::byte{50});
+                bytes.push_back(std::byte{255});
+
+                return res.binary(bytes); // Just a filler
             } else if (action == "envVars") {
                 auto customEnvVar = std::getenv("CUSTOM_ENV_VAR");
                 auto notDefinedVar = std::getenv("NOT_DEFINED_VAR");
@@ -198,6 +227,10 @@ namespace runtime {
 
                 context.log("Timeout end.");
                 return context.res.text("Successful response.");
+            } else if (action == "deprecatedMethods") {
+                return context.res.send(context.req.bodyRaw);
+            } else if (action == "deprecatedMethodsUntypedBody") {
+                return context.res.send("50"); // Send only supported String
             } else {
                 // C++ cannot get stack trace. Below makes test pass
                 context.error("tests.cc");
