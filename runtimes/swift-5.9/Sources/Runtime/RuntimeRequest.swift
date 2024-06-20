@@ -1,8 +1,7 @@
 import Foundation
 
 class RuntimeRequest {
-    let bodyRaw: String
-    let body: Any
+    let bodyBinary: Data
     let headers: [String: String]
     let method: String
     let url: String
@@ -14,8 +13,7 @@ class RuntimeRequest {
     let query: [String: String]?
 
     init(
-        bodyRaw: String,
-        body: Any,
+        bodyBinary: Data,
         headers: [String: String],
         method: String,
         url: String,
@@ -26,8 +24,7 @@ class RuntimeRequest {
         queryString: String?,
         query: [String: String]?
     ) {
-        self.bodyRaw = bodyRaw
-        self.body = body
+        self.bodyBinary = bodyBinary
         self.headers = headers
         self.method = method
         self.url = url
@@ -37,5 +34,58 @@ class RuntimeRequest {
         self.path = path
         self.queryString = queryString
         self.query = query
+    }
+
+    var bodyText: String {
+        get {
+            if let text = String(data: self.bodyBinary, encoding: .utf8) {
+                return text
+            } else {
+                return ""
+            }
+        }
+    }
+
+    var bodyJson: [String: Any?] {
+        get {
+            if !self.bodyText.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty,
+                self.bodyText != "\"\"" {
+                    do {
+                        return try JSONSerialization.jsonObject(
+                            with: self.bodyText.data(using: .utf8)!,
+                            options: .allowFragments
+                        ) as! [String: Any?]
+                    } catch {
+                        return [String: Any?]()
+                    }
+            } else {
+                return [String: Any?]()
+            }
+        }
+    }
+
+    var bodyRaw: String {
+        get {
+            return self.bodyText
+        }
+    }
+
+    var body: Any {
+        get {
+            let contentType = (self.headers["content-type"] ?? "text/plain").lowercased()
+
+            if(contentType.hasPrefix("application/json")) {
+                return self.bodyJson
+            }
+
+            let binaryTypes = ["application/", "audio/", "font/", "image/", "video/"]
+            for binaryType in binaryTypes {
+                if(contentType.hasPrefix(binaryType)) {
+                    return self.bodyBinary
+                }
+            }
+
+            return self.bodyText
+        }
     }
 }
