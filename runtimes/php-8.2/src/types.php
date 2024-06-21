@@ -60,13 +60,17 @@ class RuntimeRequest {
     {
         $contentType = strtolower($this->headers['content-type'] ?? 'text/plain');
 
-        if(\str_contains($contentType, 'application/json')) {
-            return $this->getBodyJson();
+        if(\str_starts_with($contentType, 'application/json')) {
+            if(\count($this->bodyBinary) > 0) {
+                return $this->getBodyJson();
+            } else {
+                return [];
+            }
         }
 
         $binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
         foreach ($binaryTypes as $type) {
-            if(\str_contains($contentType, $type)) {
+            if(\str_starts_with($contentType, $type)) {
                 return  $this->bodyBinary;
             }
         }

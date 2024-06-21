@@ -334,6 +334,8 @@ class Base extends TestCase
         self::assertEquals(3, $body['key3']);
 
         $response = Client::execute(body: '', headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'application/json']);
+        var_dump(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+        \var_dump($response);
         self::assertEquals(200, $response['code']);
         self::assertEquals('{}', $response['body']);
     }

@@ -77,7 +77,11 @@ class RuntimeResponse
       content_type = (@headers['content-type'] || 'text/plain').downcase
 
       if content_type.start_with?("application/json")
-        return self.body_json
+        if self.body_binary.empty?
+          return {}
+        else
+          return self.body_json
+        end
       end
 
       binary_types = ["application/", "audio/", "font/", "image/", "video/"]

@@ -77,7 +77,7 @@ const action = async (logger: Logger, ctx: any) => {
     req: {
       get body() {
         if(contentType.startsWith("application/json")) {
-          return this.bodyJson;
+          return this.bodyBinary && this.bodyBinary.length > 0 ? this.bodyJson : {};
         }
 
         const binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
