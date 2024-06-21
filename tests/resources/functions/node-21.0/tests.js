@@ -129,7 +129,7 @@ When you can have two!
             await new Promise((resolve) => {
                 setTimeout(resolve, 1000);
             });
-            context.res.writeBinary(Buffer.from("0123456789abcdef", "hex"));
+            context.res.writeBinary(Buffer.from((Uint8Array.from([0, 100, 255]))));
             await new Promise((resolve) => {
                 setTimeout(resolve, 1000);
             });

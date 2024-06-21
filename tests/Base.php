@@ -538,7 +538,11 @@ class Base extends TestCase
         self::assertCount(3, $body);
         self::assertStringContainsString('Step1', $body[0]);
         self::assertStringContainsString('{"step2":true}', $body[1]);
-        self::assertStringContainsString(\hex2bin('0123456789abcdef'), $body[2]);
+        $bytes = \unpack('C*byte', $body[2]);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(100, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
         self::assertEmpty(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
         self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
         self::assertEquals('end', $response['headers']['x-trainer-header']);
