@@ -22,7 +22,11 @@ namespace DotNetRuntime
 
                 if (contentType.StartsWith("application/json"))
                 {
-                    return BodyJson;
+                    if(BodyBinary.Length == 0) {
+                        return new Dictionary<string, object?>();
+                    } else {
+                        return BodyJson;
+                    }
                 }
                 
                 string[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };

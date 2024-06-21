@@ -119,7 +119,12 @@ int main()
                     );
 
                     if (contentType.rfind("application/json", 0) == 0) {
-                        runtimeRequest.body = runtimeRequest.bodyJson;
+                        if(runtimeRequest.bodyBinary.empty()) {
+                            Json::Value bodyRootEmpty;
+                            runtimeRequest.body = bodyRootEmpty;
+                        } else {
+                            runtimeRequest.body = runtimeRequest.bodyJson;
+                        }
                     } else {
                         bool isBinary = false;
 

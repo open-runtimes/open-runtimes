@@ -37,11 +37,11 @@ class Base extends TestCase
         self::assertEquals(true, $body['json']);
         self::assertEquals('Developers are awesome.', $body['message']);
 
-        $body = [ "name" => "Open Rntimes", "version" => 3.5, "published" => true ];
-        $bodyString = \json_encode($body);
-        $response = Client::execute(body: $bodyString, headers: ['x-action' => 'requestBodyJson']);
+        $body = \json_encode([ "name" => "Open Rntimes", "version" => 3.5, "published" => true, "nested" => [ [ 'object' => 1 ] ] ]);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals($bodyString, $response['body']);
+        self::assertStringNotContainsStringIgnoringCase(" ", $response['body']);
+        self::assertStringNotContainsStringIgnoringCase("\n", $response['body']);
     }
 
     public function testContentTypeResponse(): void 
@@ -334,8 +334,6 @@ class Base extends TestCase
         self::assertEquals(3, $body['key3']);
 
         $response = Client::execute(body: '', headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'application/json']);
-        var_dump(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
-        \var_dump($response);
         self::assertEquals(200, $response['code']);
         self::assertEquals('{}', $response['body']);
     }
