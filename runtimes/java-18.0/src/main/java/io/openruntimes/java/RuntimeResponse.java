@@ -9,8 +9,8 @@ import java.util.Map;
 public class RuntimeResponse {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
-    public RuntimeOutput binary(byte[] body, int statusCode, Map<String, String> headers) {
-        return new RuntimeOutput(body, statusCode, headers);
+    public RuntimeOutput binary(byte[] bytes, int statusCode, Map<String, String> headers) {
+        return new RuntimeOutput(bytes, statusCode, headers);
     }
 
     public RuntimeOutput binary(byte[] body, int statusCode) {

@@ -177,7 +177,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
 
             if (output == null) {
                 context.error("Execution timed out.")
-                output = context.res.send("", 500)
+                output = context.res.text("", 500)
             }
         } else {
             output = if (classMethod.isSuspend) {
@@ -192,14 +192,14 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         e.printStackTrace(pw)
 
         context.error(sw.toString())
-        output = context.res.send("", 500, mutableMapOf())
+        output = context.res.text("", 500, mutableMapOf())
     } finally {
         logger.revertNativeLogs()
     }
 
     if (output == null) {
         context.error("Return statement missing. return context.res.empty() if no response is expected.")
-        output = context.res.send("", 500, mutableMapOf())
+        output = context.res.text("", 500, mutableMapOf())
     }
 
     val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap();

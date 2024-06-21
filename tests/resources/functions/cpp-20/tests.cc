@@ -102,7 +102,7 @@ namespace runtime {
                     {
                         throw std::invalid_argument("Invalid JSON");
                     } else {
-                        return res.send("{}");
+                        return res.json(req.bodyJson);
                     }
                 }
                 return res.json(req.bodyJson);

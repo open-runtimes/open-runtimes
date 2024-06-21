@@ -201,14 +201,14 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
                 }
             } catch {
                 context.error("Execution timed out.")
-                output = context.res.send("", statusCode: 500)
+                output = context.res.text("", statusCode: 500)
             }
         } else {
             output = try await annotateError(try await main(context: context))
         }
     } catch {
         context.error(error)
-        output = context.res.send("", statusCode: 500)
+        output = context.res.text("", statusCode: 500)
     }
 
     var outputHeaders = HTTPHeaders()
