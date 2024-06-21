@@ -112,7 +112,9 @@ const action = async (req, res) => {
             }
         },
         error: function (message) {
-            if (message instanceof Object || Array.isArray(message)) {
+            if (message instanceof Error) {
+                errors.push(message.stack ?? message.message);
+            } else if (message instanceof Object || Array.isArray(message)) {
                 errors.push(JSON.stringify(message));
             } else {
                 errors.push(message + "");
