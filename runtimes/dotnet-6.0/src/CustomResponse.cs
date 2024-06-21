@@ -18,10 +18,10 @@ namespace DotNetRuntime
         public Task ExecuteAsync(HttpContext httpContext)
         {
             string contentTypeValue = "text/plain";
-            
+
             if (_headers.TryGetValue("content-type", out string contentType)) {
                  contentTypeValue = contentType;
-            } 
+            }
 
             if (!contentTypeValue.StartsWith("multipart/") &&
                 !contentTypeValue.Contains("charset="))
@@ -31,7 +31,7 @@ namespace DotNetRuntime
 
             foreach (var entry in _headers)
             {
-                httpContext.Response.Headers.Add(entry.Key, entry.Value);
+                httpContext.Response.Headers.TryAdd(entry.Key, entry.Value);
             }
 
             httpContext.Response.StatusCode = _statusCode;

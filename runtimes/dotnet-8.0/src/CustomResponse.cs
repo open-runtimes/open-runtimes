@@ -31,7 +31,7 @@ namespace DotNetRuntime
 
             foreach (var entry in _headers)
             {
-                httpContext.Response.Headers.Add(entry.Key, entry.Value);
+                httpContext.Response.Headers.TryAdd(entry.Key, entry.Value);
             }
 
             httpContext.Response.StatusCode = _statusCode;

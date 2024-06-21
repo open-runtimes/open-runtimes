@@ -41,9 +41,9 @@ Content-Disposition: form-data; name=""partTwo""
 
 When you can have two!
 --12345--", 200, new Dictionary<string, string>()
-                {
-                    { "content-type", "multipart/form-data; boundary=12345" }
-                });
+            {
+                { "content-type", "multipart/form-data; boundary=12345" }
+            });
             case "redirectResponse":
                 return context.Res.Redirect("https://github.com/");
             case "emptyResponse":
@@ -127,9 +127,9 @@ When you can have two!
                 Console.WriteLine("Native log");
                 context.Log("Debug log");
                 context.Error("Error log");
-      
+
                 context.Log("Log+With+Plus+Symbol");
-                
+
                 context.Log(42);
                 context.Log(4.2);
                 context.Log(true);
@@ -164,6 +164,40 @@ When you can have two!
                 return context.Res.Send(context.Req.BodyRaw);
             case "deprecatedMethodsUntypedBody":
                 return context.Res.Send("50"); // Send only supported String
+        case "responseChunkedSimple":
+            context.Res.Start();
+            context.Res.WriteText("OK1");
+            context.Res.WriteText("OK2");
+            return context.Res.End();
+        case "responseChunkedComplex":
+            context.Res.Start(201, new()
+            {
+                { "x-start-header", "start" },
+            });
+            context.Res.WriteText("Start");
+            await Task.Delay(1000);
+            context.Res.WriteText("Step1");
+            await Task.Delay(1000);
+
+            var json2 = new Dictionary<string, bool>();
+            json2.Add("step2", true);
+            context.Res.WriteJson(json2);
+            await Task.Delay(1000);
+
+            String hexstr = "0123456789abcdef";
+            byte[] bin  = (from i in Enumerable.Range(0, hexstr.Length / 2) select Convert.ToByte(hexstr.Substring(i * 2, 2), 16)).ToArray();
+            context.Res.WriteBinary(bin);
+            return context.Res.End();
+        case "responseChunkedErrorStartDouble":
+            context.Res.Start();
+            context.Res.Start();
+            context.Res.WriteText("OK");
+            return context.Res.End();
+        case "responseChunkedErrorStartMissing":
+            context.Res.WriteText("OK");
+            return context.Res.End();
+        case "responseChunkedErrorStartWriteMissing":
+            return context.Res.End();
             default:
                 throw new Exception("Unknown action");
         }
