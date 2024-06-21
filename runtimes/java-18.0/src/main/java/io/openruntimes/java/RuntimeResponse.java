@@ -137,14 +137,10 @@ public class RuntimeResponse {
     }
 
     public RuntimeOutput end() throws Exception {
-        return this.end(new HashMap<>());
-    }
-
-    public RuntimeOutput end(Map<String, String> headers) throws Exception {
         if (!this.chunkHeaderSent) {
             throw new Exception("You must call res.start() to start a chunk response");
         }
 
-        return new RuntimeOutput("".getBytes(), 0, headers, true);
+        return new RuntimeOutput("".getBytes(), 0, new HashMap<>(), true);
     }
 }
