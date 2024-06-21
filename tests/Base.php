@@ -37,7 +37,7 @@ class Base extends TestCase
         self::assertEquals(true, $body['json']);
         self::assertEquals('Developers are awesome.', $body['message']);
 
-        $body = \json_encode([ "name" => "Open Rntimes", "version" => 3.5, "published" => true, "nested" => [ [ 'object' => 1 ] ] ]);
+        $body = \json_encode([ "name" => "OpenRntimes", "version" => 3.5, "published" => true, "nested" => [ [ 'object' => 1 ] ] ]);
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson']);
         self::assertEquals(200, $response['code']);
         self::assertStringNotContainsStringIgnoringCase(" ", $response['body']);
