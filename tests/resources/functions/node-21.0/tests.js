@@ -118,7 +118,6 @@ When you can have two!
             return context.res.end();
         case 'responseChunkedComplex':
             context.res.start(201, { 'x-start-header': 'start' });
-            context.res.writeText('Start');
             await new Promise((resolve) => {
                 setTimeout(resolve, 1000);
             });
@@ -131,6 +130,9 @@ When you can have two!
                 setTimeout(resolve, 1000);
             });
             context.res.writeBinary(Buffer.from("0123456789abcdef", "hex"));
+            await new Promise((resolve) => {
+                setTimeout(resolve, 1000);
+            });
             return context.res.end({ 'x-trainer-header': 'end' });
         case 'responseChunkedErrorStartDouble':
             context.res.start();

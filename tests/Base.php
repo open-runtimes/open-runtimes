@@ -506,80 +506,87 @@ class Base extends TestCase
 
     public function testResponseChunkedSimple(): void
     {
-        $body = '';
-        $chunks = 0;
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedSimple'], callback: function($chunk) use(&$body, &$chunks) {
-            $body .= $chunk;
-            $chunks += 1;
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedSimple'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
         });
 
         self::assertEquals(200, $response['code']);
-        self::assertEquals('OK1OK2', $body);
-        self::assertGreaterThanOrEqual(2, $chunks);
+        self::assertCount(2, $body);
+        self::assertEquals('OK1', $body[0]);
+        self::assertEquals('OK2', $body[1]);
         self::assertEmpty(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
         self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testResponseChunkedComplex(): void
     {
-        $body = '';
-        $chunks = 0;
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedComplex'], callback: function($chunk) use(&$body, &$chunks) {
-            $body .= $chunk;
-            $chunks += 1;
+        $timings = [];
+        $timingsStart = \microtime(true);
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedComplex'], callback: function($chunk) use(&$body, &$timings, $timingsStart) {
+            $body[] = $chunk;
+
+            if(\count($timings) === 0) {
+                $timings[] = \microtime(true) - $timingsStart;
+            } else {
+                $timings[] = \microtime(true) - $timingsStart - \array_sum($timings);
+            }
         });
 
         self::assertEquals(201, $response['code']);
-        self::assertStringContainsString('Start', $body);
-        self::assertStringContainsString('Step1', $body);
-        self::assertStringContainsString('{"step2":true}', $body);
-        self::assertStringContainsString(\hex2bin('0123456789abcdef'), $body);
-        self::assertGreaterThanOrEqual(3, $chunks);
+        self::assertCount(3, $body);
+        self::assertStringContainsString('Step1', $body[0]);
+        self::assertStringContainsString('{"step2":true}', $body[1]);
+        self::assertStringContainsString(\hex2bin('0123456789abcdef'), $body[2]);
         self::assertEmpty(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
         self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
         self::assertEquals('end', $response['headers']['x-trainer-header']);
         self::assertEquals('start', $response['headers']['x-start-header']);
+        self::assertCount(3, $timings);
+        self::assertGreaterThanOrEqual(0.9, $timings[0]);
+        self::assertLessThanOrEqual(5, $timings[0]);
+        self::assertGreaterThanOrEqual(0.9, $timings[1]);
+        self::assertLessThanOrEqual(5, $timings[1]);
+        self::assertGreaterThanOrEqual(0.9, $timings[2]);
+        self::assertLessThanOrEqual(5, $timings[2]);
+        self::assertGreaterThanOrEqual(2.9, \array_sum($timings));
+        self::assertLessThanOrEqual(10, \array_sum($timings));
     }
 
     public function testResponseChunkedErrorStartDouble(): void
     {
-        $body = '';
-        $chunks = 0;
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartDouble'], callback: function($chunk) use(&$body, &$chunks) {
-            $body .= $chunk;
-            $chunks += 1;
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartDouble'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
         });
 
         self::assertEquals(200, $response['code']);
-        self::assertEquals('', $body);
+        self::assertCount(0, $body);
         self::assertStringContainsString('You can only call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testResponseChunkedErrorStartMissing(): void
     {
-        $body = '';
-        $chunks = 0;
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartMissing'], callback: function($chunk) use(&$body, &$chunks) {
-            $body .= $chunk;
-            $chunks += 1;
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartMissing'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
         });
 
         self::assertEquals(500, $response['code']);
-        self::assertEquals('', $body);
+        self::assertCount(0, $body);
         self::assertStringContainsString('You must call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testResponseChunkedErrorStartWriteMissing(): void
     {
-        $body = '';
-        $chunks = 0;
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartWriteMissing'], callback: function($chunk) use(&$body, &$chunks) {
-            $body .= $chunk;
-            $chunks += 1;
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartWriteMissing'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
         });
 
         self::assertEquals(500, $response['code']);
-        self::assertEquals('', $body);
+        self::assertCount(0, $body);
         self::assertStringContainsString('You must call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 

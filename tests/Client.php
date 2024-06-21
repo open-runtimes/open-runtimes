@@ -32,10 +32,6 @@ class Client {
         
                 $key = strtolower(trim($header[0]));
                 $responseHeaders[$key] = trim($header[1]);
-
-                if(\in_array($key, ['x-open-runtimes-logs', 'x-open-runtimes-errors'])) {
-                    $responseHeaders[$key] = \urldecode($responseHeaders[$key]);
-                }
         
                 return $len;
             },
