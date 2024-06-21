@@ -213,10 +213,7 @@ public class Tests {
                 context.getRes().writeJson(json);
                 Thread.sleep(1000);
                 context.getRes().writeBinary(hex2bin("0123456789abcdef"));
-                headers.clear();
-                headers.put("x-trainer-header", "end");
-
-                return context.getRes().end(headers);
+                return context.getRes().end();
             }
             case "responseChunkedErrorStartDouble" -> {
                 context.getRes().start();
