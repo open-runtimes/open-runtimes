@@ -144,7 +144,7 @@ const action = async (logger, req, res) => {
                     headers['transfer-encoding'] = headers['transfer-encoding'] ?? 'chunked';
                     res.writeHead(statusCode, headers);
                 } else {
-                    throw new Error('You can only call res.start() once');
+                    throw new Error('You can only call res.start() once.');
                 }
             },
             writeText: function(body) {
