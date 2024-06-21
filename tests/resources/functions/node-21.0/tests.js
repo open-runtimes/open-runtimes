@@ -144,6 +144,10 @@ When you can have two!
             return context.res.end();
         case 'responseChunkedErrorStartWriteMissing':
             return context.res.end();
+        case 'responseChunkedErrorSend':
+            context.res.start();
+            context.res.writeText('OK');
+            return context.res.send('OK2');
         case 'deprecatedMethodsUntypedBody':
             return context.res.send(50);
         default:

@@ -113,6 +113,10 @@ const action = async (logger, req, res) => {
                 return this.binary(Buffer.from(body, 'utf8'), statusCode, headers);
             },
             binary: function(bytes, statusCode = 200, headers = {}) {
+                if(chunkHeadersSent) {
+                    throw new Error('You must return res.end() in a chunk response.');
+                }
+
                 return {
                     body: bytes,
                     statusCode: statusCode,

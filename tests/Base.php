@@ -594,6 +594,20 @@ class Base extends TestCase
         self::assertStringContainsString('You must call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
+
+    public function testResponseChunkedErrorSend(): void
+    {
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorSend'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertCount(1, $body);
+        self::assertEquals("OK", $body[0]);
+        self::assertStringContainsString('You must return', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
+
     public function testDeprecatedMethodsUntypedBody(): void
     {
         $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethodsUntypedBody']);
