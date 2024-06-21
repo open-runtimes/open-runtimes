@@ -519,6 +519,35 @@ class Base extends TestCase
         self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
+    public function testResponseChunkedCustomHeaders(): void
+    {
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedSimple'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertCount(2, $body);
+        self::assertEquals("no-store", $response['headers']["cache-control"]);
+        self::assertEquals("text/event-stream", $response['headers']["content-type"]);
+        self::assertEquals("keep-alive", $response['headers']["connection"]);
+        self::assertEquals("chunked", $response['headers']["transfer-encoding"]);
+
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedCustomHeaders'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertCount(2, $body);
+        self::assertEquals("no-cache", $response['headers']["cache-control"]);
+        self::assertEquals("application/custom-stream", $response['headers']["content-type"]);
+        self::assertEquals("KEEP-ALIVE", $response['headers']["connection"]);
+        self::assertEquals("CHUNKED", $response['headers']["transfer-encoding"]);
+        self::assertArrayNotHasKey('x-open-runtimes-start', $response['headers']);
+        self::assertArrayNotHasKey('x-open-runtimes-end', $response['headers']);
+    }
+
     public function testResponseChunkedComplex(): void
     {
         $timings = [];

@@ -138,10 +138,17 @@ const action = async (logger, req, res) => {
             start: function(statusCode = 200, headers = {}) {
                 if(!chunkHeadersSent) {
                     chunkHeadersSent = true;
-                    headers['cache-control'] = headers['content-type'] ?? 'no-store';
+                    headers['cache-control'] = headers['cache-control'] ?? 'no-store';
                     headers['content-type'] = headers['content-type'] ?? 'text/event-stream';
                     headers['connection'] = headers['connection'] ?? 'keep-alive';
                     headers['transfer-encoding'] = headers['transfer-encoding'] ?? 'chunked';
+
+                    for(const key in headers) {
+                        if(key.toLowerCase().startsWith('x-open-runtimes-')) {
+                            delete headers[key];
+                        }
+                    }
+
                     res.writeHead(statusCode, headers);
                 } else {
                     throw new Error('You can only call res.start() once.');
@@ -278,12 +285,14 @@ const action = async (logger, req, res) => {
         responseHeaders[header.toLowerCase()] = output.headers[header];
     }
 
-    const contentTypeValue = (responseHeaders["content-type"] ?? "text/plain").toLowerCase();
-    if (
-        !contentTypeValue.startsWith("multipart/") &&
-        !contentTypeValue.includes("charset=")
-    ) {
-        responseHeaders["content-type"] = contentTypeValue + "; charset=utf-8";
+    if(!output.chunked) {
+        const contentTypeValue = (responseHeaders["content-type"] ?? "text/plain").toLowerCase();
+        if (
+            !contentTypeValue.startsWith("multipart/") &&
+            !contentTypeValue.includes("charset=")
+        ) {
+            responseHeaders["content-type"] = contentTypeValue + "; charset=utf-8";
+        }
     }
 
     responseHeaders['x-open-runtimes-log-id'] = logger.id;

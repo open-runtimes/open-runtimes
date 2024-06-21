@@ -116,6 +116,19 @@ When you can have two!
             context.res.writeText('OK1');
             context.res.writeText('OK2');
             return context.res.end();
+        case 'responseChunkedCustomHeaders':
+            context.res.start(200, {
+                'cache-control': 'no-cache',
+                'content-type': 'application/custom-stream',
+                'connection': 'KEEP-ALIVE',
+                'transfer-encoding': 'CHUNKED',
+                'x-open-runtimes-start': 'start'
+            });
+            context.res.writeText('OK1');
+            context.res.writeText('OK2');
+            return context.res.end({
+                'x-open-runtimes-end': 'end'
+            });
         case 'responseChunkedComplex':
             context.res.start(201, { 'x-start-header': 'start' });
             await new Promise((resolve) => {
