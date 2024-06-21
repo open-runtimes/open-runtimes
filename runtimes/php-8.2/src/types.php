@@ -3,10 +3,12 @@
 class RuntimeResponse {
     private $chunkHeadersSent = false;
     private $res;
+    private Logger $logger;
 
-    public function __construct(mixed $res)
+    public function __construct(mixed $res, $logger)
     {
         $this->res = $res;
+        $this->logger = $logger;
     }
 
     public function getChunkStatus()
@@ -58,6 +60,7 @@ class RuntimeResponse {
             $headers['content-type'] =  $headers['content-type'] ?? 'text/event-stream';
             $headers['connection'] =  $headers['connection'] ?? 'keep-alive';
             $headers['transfer-encoding'] =  $headers['transfer-encoding'] ?? 'chunked';
+            $headers['x-open-runtimes-log-id'] =  $this->logger->id;
 
             foreach ($headers as $key => $value) {
                 $this->res->header($key, $value);
@@ -156,7 +159,7 @@ class RuntimeContext {
 
     function __construct(Logger $logger, mixed $res) {
         $this->req = new RuntimeRequest();
-        $this->res = new RuntimeResponse($res);
+        $this->res = new RuntimeResponse($res, $logger);
         $this->logger = $logger;
     }
 
