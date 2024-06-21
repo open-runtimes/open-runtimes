@@ -236,9 +236,7 @@ When you can have two!
                 ));
                 Thread.sleep(1000);
                 context.res.writeBinary(hex2bin("0123456789abcdef"));
-                return context.res.end(mutableMapOf(
-                    "x-trainer-header" to "end"
-                ));
+                return context.res.end();
             }
             "responseChunkedErrorStartDouble" -> {
                 context.res.start();
