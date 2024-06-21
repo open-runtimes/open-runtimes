@@ -111,11 +111,8 @@ When you can have two!
             return context.res.text('Successful response.');
         case 'deprecatedMethods':
             return context.res.send(context.req.bodyRaw);
-<<<<<<< HEAD
-=======
         case 'deprecatedMethodsUntypedBody':
             return context.res.send(50);
->>>>>>> origin/feat-binaries
         default:
             throw new Error('Unknown action');
     }
