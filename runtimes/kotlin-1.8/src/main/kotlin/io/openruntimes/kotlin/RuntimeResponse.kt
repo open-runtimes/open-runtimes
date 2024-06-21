@@ -102,11 +102,11 @@ public class RuntimeResponse(
     }
 
     @Throws(java.lang.Exception::class)
-    fun end(headers: Map<String, String> = mapOf()): RuntimeOutput {
+    fun end(): RuntimeOutput {
         if (!this.chunkHeaderSent) {
             throw java.lang.Exception("You must call res.start() to start a chunk response")
         }
 
-        return RuntimeOutput("".toByteArray(), 0, headers, true)
+        return RuntimeOutput("".toByteArray(), 0, mapOf(), true)
     }
 }

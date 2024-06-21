@@ -38,7 +38,7 @@ class Base extends TestCase
         self::assertEquals('Developers are awesome.', $body['message']);
     }
 
-    public function testContentTypeResponse(): void 
+    public function testContentTypeResponse(): void
     {
         $response = Client::execute(headers: ['x-action' => 'customCharsetResponse']);
         self::assertEquals(200, $response['code']);
@@ -408,7 +408,7 @@ class Base extends TestCase
     public function testInvalidJson(): void
     {
         $response = Client::execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
-        
+
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
         self::assertThat(Client::getErrors($response['headers']['x-open-runtimes-log-id']), self::callback(function($value) {
@@ -495,7 +495,6 @@ class Base extends TestCase
         self::assertGreaterThanOrEqual(3, $chunks);
         self::assertEmpty(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
         self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
-        self::assertEquals('end', $response['headers']['x-trainer-header']);
         self::assertEquals('start', $response['headers']['x-start-header']);
     }
 
