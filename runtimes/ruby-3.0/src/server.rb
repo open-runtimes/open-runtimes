@@ -66,8 +66,7 @@ def action(request, response, logger)
     end
   end
 
-  body_raw = request.body.read
-  body = body_raw
+  body_binary = request.body.read.unpack("C*")
   method = request.request_method
   headers = {}
 
@@ -94,16 +93,7 @@ def action(request, response, logger)
     headers[key.downcase] = value.to_s
   end
 
-  content_type = request.env['CONTENT_TYPE']
-  content_type = 'text/plain' if content_type.nil?
-
-  if content_type.include?('application/json')
-    unless body_raw.empty?
-      body = JSON.parse(body_raw)
-    end
-  end
-
-  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body, body_raw)
+  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body_binary)
   context_res = RuntimeResponse.new
   context = RuntimeContext.new(context_req, context_res, logger)
   
@@ -169,13 +159,14 @@ def action(request, response, logger)
   response.headers['x-open-runtimes-log-id'] = logger.id
 
   response.headers['content-type'] = 'text/plain' if response.headers['content-type'].nil?
+  response.headers['content-type'] = response.headers['content-type'].downcase
 
   unless response.headers['content-type'].start_with?('multipart/') || response.headers['content-type'].include?('charset=') 
     response.headers['content-type'] += '; charset=utf-8'
   end
 
   response.status = output['statusCode']
-  response.body = output['body']
+  response.body = output['body'].pack('C*')
   response
 end
 
