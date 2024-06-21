@@ -82,7 +82,7 @@ class RuntimeResponse {
         $this->res->write(pack("C*",...$body));
     }
 
-    function end(array $headers = []): array {
+    function end(): array {
         if(!$this->chunkHeadersSent){
             throw new Exception('You must call $res->start() to start a chunk response.');
         }
@@ -90,7 +90,7 @@ class RuntimeResponse {
         return [
             'body' => '',
             'statusCode' => 0,
-            'headers' => $headers,
+            'headers' => [],
             'chunked' => true,
         ];
     }

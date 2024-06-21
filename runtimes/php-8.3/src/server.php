@@ -185,8 +185,10 @@ $action = function(Logger $logger, RuntimeContext $context, mixed $req, mixed $r
     $logger->end();
     $res->header['x-open-runtimes-log-id'] = $headers['x-open-runtimes-log-id'];
     foreach ($headers as $header => $value) {
-        if(!(\str_starts_with($header, 'x-open-runtimes-')) || $header === 'x-open-runtimes-log-id') {
-            $output['chunked'] ? $res->trailer($header, $value) : $res->header($header, $value);
+        if (!(\str_starts_with($header, 'x-open-runtimes-')) || $header === 'x-open-runtimes-log-id') {
+            if (!$output['chunked']) {
+                $res->header($header, $value);
+            }
         }
     }
 

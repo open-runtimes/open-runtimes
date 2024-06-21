@@ -141,7 +141,7 @@ When you can have two!
             $context->res->writeJson(['step2' => true]);
             sleep(1);
             $context->res->writeBinary(\unpack("C*",\hex2bin("0123456789abcdef")));
-            return $context->res->end(['x-trainer-header' => 'end']);
+            return $context->res->end();
         case 'responseChunkedErrorStartDouble':
             $context->res->start();
             $context->res->start();
