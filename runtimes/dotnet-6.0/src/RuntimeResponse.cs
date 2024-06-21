@@ -7,7 +7,7 @@ public class RuntimeResponse
     private readonly RuntimeLogger logger;
     private readonly HttpResponse httpContextResponse;
     public bool ChunkHeaderSent { get; set; } = false;
-    
+
     public RuntimeResponse(HttpResponse httpContextResponse, RuntimeLogger logger)
     {
         this.httpContextResponse = httpContextResponse;
@@ -114,7 +114,7 @@ public class RuntimeResponse
         httpContextResponse.Body.FlushAsync();
     }
 
-    public RuntimeOutput End(Dictionary<string, string>? headers = null)
+    public RuntimeOutput End()
     {
         headers ??= new Dictionary<string, string>();
         if (!ChunkHeaderSent)
@@ -122,6 +122,6 @@ public class RuntimeResponse
             throw new Exception("You must call res.Start() to start a chunk response");
         }
 
-        return new RuntimeOutput(System.Text.Encoding.UTF8.GetBytes(""), 200, headers, true);
+        return new RuntimeOutput(System.Text.Encoding.UTF8.GetBytes(""), 200, null, true);
     }
 }

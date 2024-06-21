@@ -187,10 +187,7 @@ When you can have two!
                 String hexstr = "0123456789abcdef";
                 byte[] bin  = (from i in Enumerable.Range(0, hexstr.Length / 2) select Convert.ToByte(hexstr.Substring(i * 2, 2), 16)).ToArray();
                 context.Res.WriteBinary(bin);
-                return context.Res.End(new Dictionary<string, string>()
-                {
-                    { "x-trainer-header", "end" },
-                });
+                return context.Res.End();
             case "responseChunkedErrorStartDouble":
                 context.Res.Start();
                 context.Res.Start();
