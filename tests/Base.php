@@ -36,6 +36,12 @@ class Base extends TestCase
 
         self::assertEquals(true, $body['json']);
         self::assertEquals('Developers are awesome.', $body['message']);
+
+        $body = \json_encode([ "name" => "OpenRntimes", "version" => 3.5, "published" => true, "nested" => [ [ 'object' => 1 ] ] ]);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson']);
+        self::assertEquals(200, $response['code']);
+        self::assertStringNotContainsStringIgnoringCase(" ", $response['body']);
+        self::assertStringNotContainsStringIgnoringCase("\n", $response['body']);
     }
 
     public function testContentTypeResponse(): void
@@ -267,6 +273,13 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals('', $response['body']);
 
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'not-application/json']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'not-video/mp4']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
     }
 
     public function testRequestBodyJson(): void
@@ -296,6 +309,10 @@ class Base extends TestCase
         self::assertEquals('OK 👋', $body['key1']);
         self::assertEquals(true, $body['key2']);
         self::assertEquals(3, $body['key3']);
+
+        $response = Client::execute(body: '', headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'application/json']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('{}', $response['body']);
     }
 
     public function testRequestBodyBinary(): void

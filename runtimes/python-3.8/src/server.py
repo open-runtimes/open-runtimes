@@ -105,18 +105,18 @@ async def action(logger, request):
                 output = await asyncio.wait_for(execute(context), timeout=safeTimeout)
             except asyncio.TimeoutError:
                 context.error('Execution timed out.')
-                output = context.res.send('', 500, {})
+                output = context.res.text('', 500, {})
         else:
             output = await execute(context)
     except Exception as e:
         context.error(''.join(traceback.TracebackException.from_exception(e).format()))
-        output = context.res.send('', 500, {})
+        output = context.res.text('', 500, {})
     finally:
         logger.revert_native_logs()
 
     if output is None:
         context.error('Return statement missing. return context.res.empty() if no response is expected.')
-        output = context.res.send('', 500, {})
+        output = context.res.text('', 500, {})
 
     output['body'] = output.get('body', '')
     output['statusCode'] = output.get('statusCode', 200)

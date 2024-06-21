@@ -77,8 +77,71 @@ int main()
                     runtime::RuntimeRequest runtimeRequest;
                     runtimeRequest.method = method;
                     runtimeRequest.queryString = queryString;
-                    runtimeRequest.bodyRaw = req->getBody();
-                    runtimeRequest.body = runtimeRequest.bodyRaw;
+
+                    runtimeRequest.bodyText = req->getBody();
+                    runtimeRequest.bodyRaw = runtimeRequest.bodyText;
+                    std::vector<std::byte> bodyBytes;
+                    bodyBytes.reserve(runtimeRequest.bodyText.size());
+                    std::transform(std::begin(runtimeRequest.bodyText), std::end(runtimeRequest.bodyText), std::back_inserter(bodyBytes), [](char c){
+                        return std::byte(c);
+                    });
+                    runtimeRequest.bodyBinary = bodyBytes;
+
+                    if(runtimeRequest.bodyText.empty())
+                    {
+                        Json::Value bodyRootEmpty;
+                        runtimeRequest.bodyJson = bodyRootEmpty;
+                    } else {
+                        Json::Value bodyRoot;   
+                        Json::Reader reader;
+                        bool parsingResult = reader.parse(runtimeRequest.bodyText, bodyRoot);
+
+                        if(!parsingResult)
+                        {
+                            Json::Value bodyRootEmpty;
+                            runtimeRequest.bodyJson = bodyRootEmpty;
+                        } else {
+                            runtimeRequest.bodyJson = bodyRoot;
+                        }
+                    }
+
+                    std::string contentType = req->getHeader("content-type");
+                    if(contentType.empty())
+                    {
+                        contentType = "text/plain";
+                    }
+
+                    std::transform(
+                        contentType.begin(),
+                        contentType.end(),
+                        contentType.begin(),
+                        [](unsigned char c){ return std::tolower(c); }
+                    );
+
+                    if (contentType.rfind("application/json", 0) == 0) {
+                        if(runtimeRequest.bodyBinary.empty()) {
+                            Json::Value bodyRootEmpty;
+                            runtimeRequest.body = bodyRootEmpty;
+                        } else {
+                            runtimeRequest.body = runtimeRequest.bodyJson;
+                        }
+                    } else {
+                        bool isBinary = false;
+
+                        std::vector<std::string> binaryTypes = {"application/", "audio/", "font/", "image/", "video/"};
+                        for (const std::string& binaryType : binaryTypes) {
+                            if (contentType.rfind(binaryType, 0) == 0) {
+                                runtimeRequest.body = runtimeRequest.bodyBinary;
+                                isBinary = true;
+                                break;
+                            }
+                        }
+
+                        if(!isBinary) {
+                            runtimeRequest.body = runtimeRequest.bodyText;
+                        }
+                    }
+                    
                     runtimeRequest.path = path;
 
                     std::string scheme = req->getHeader("x-forwarded-proto");
@@ -257,32 +320,6 @@ int main()
 
                     runtimeRequest.headers = headers;
 
-                    std::string contentType = req->getHeader("content-type");
-                    if(contentType.empty())
-                    {
-                        contentType = "text/plain";
-                    }
-
-                    if (contentType.find("application/json") != std::string::npos)
-                    {
-                        if(runtimeRequest.bodyRaw.empty())
-                        {
-                            Json::Value bodyRoot;
-                            runtimeRequest.body = bodyRoot;
-                        } else {
-                            Json::Value bodyRoot;   
-                            Json::Reader reader;
-                            bool parsingResult = reader.parse(runtimeRequest.bodyRaw, bodyRoot);
-
-                            if(!parsingResult)
-                            {
-                                throw std::runtime_error("Invalid JSON body.");
-                            }
-
-                            runtimeRequest.body = bodyRoot;
-                        }
-                    }
-
                     runtime::RuntimeResponse contextResponse;
                     runtime:: RuntimeContext context;
 
@@ -311,7 +348,7 @@ int main()
 
                             if (waiter.wait_for(std::chrono::seconds(timeout)) == std::future_status::timeout) {
                                 context.error("Execution timed out.");
-                                output = context.res.send("", 500, {});
+                                output = context.res.text("", 500, {});
                                 pthread_cancel(thread.native_handle());
                             } else {
                                 output = future.get();
@@ -350,6 +387,13 @@ int main()
                         contentTypeHeader = "text/plain";
                     }
 
+                    std::transform(
+                        contentTypeHeader.begin(),
+                        contentTypeHeader.end(),
+                        contentTypeHeader.begin(),
+                        [](unsigned char c){ return std::tolower(c); }
+                    );
+
                     if (contentTypeHeader.find("multipart/") == std::string::npos &&
                         contentTypeHeader.find("charset=") == std::string::npos)
                     {
@@ -362,7 +406,13 @@ int main()
                     res->addHeader("x-open-runtimes-log-id", logger->id);
 
                     res->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
-                    res->setBody(output.body);
+
+                    std::string outputBodyString;
+                    for (const auto& byte : output.body) {
+                        outputBodyString += static_cast<char>(byte);
+                    }
+
+                    res->setBody(outputBodyString);
                     callback(res);
                 } catch(const std::exception& e)
                 {

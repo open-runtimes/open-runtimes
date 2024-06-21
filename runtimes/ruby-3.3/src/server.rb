@@ -121,7 +121,7 @@ def action(request, response, logger)
 
       unless executed
         context.error('Execution timed out.')
-        output = context.res.send('', 500, {})
+        output = context.res.text('', 500, {})
       end
     else
       output = main(context)
@@ -129,14 +129,14 @@ def action(request, response, logger)
   rescue Exception => e
     context.error(e)
     context.error(e.backtrace.join("\n"))
-    output = context.res.send('', 500, {})
+    output = context.res.text('', 500, {})
   ensure
     logger.revert_native_logs
   end
 
   if output.nil?
     context.error('Return statement missing. return context.res.empty() if no response is expected.')
-    output = context.res.send('', 500, {})
+    output = context.res.text('', 500, {})
   end
 
   output['body'] = '' if output['body'].nil?

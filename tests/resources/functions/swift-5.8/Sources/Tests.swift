@@ -16,6 +16,10 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return context.res.text("ÅÆ", headers: [
             "content-type": "text/plain; charset=iso-8859-1"
         ])
+    case "uppercaseCharsetResponse":
+        return context.res.text("ÅÆ", headers: [
+            "content-type": "TEXT/PLAIN"
+        ])
     case "multipartResponse":
         return context.res.text("""
 --12345
@@ -68,26 +72,47 @@ When you can have two!
     case "requestHeaders":
         return try context.res.json(context.req.headers)
     case "requestBodyText":
-        return context.res.text(context.req.body as! String)
+        return context.res.text(context.req.bodyText)
     case "requestBodyJson":
-        var key1: String
-        var key2: String
+        // Throwing of invalid JSON caused crash instead of exception. We expect that test to throw here instead
+        do {
+            _ = try JSONSerialization.jsonObject(
+                with: context.req.bodyText.data(using: .utf8)!,
+                options: .allowFragments
+            ) as! [String: Any?]
 
-        if context.req.body is String {
-            key1 = "Missing key"
-            key2 = "Missing key"
-        } else {
-            let body = context.req.body as! [String: Any?]
-
-            key1 = (body["key1"] as? String) ?? "Missing key"
-            key2 = (body["key2"] as? String) ?? "Missing key"
+            return try context.res.json(context.req.bodyJson)
+        } catch {
+            throw annotatedError(NSError(domain: "Invalid JSON", code: 500))
         }
-
-        return try context.res.json([
-            "key1": key1,
-            "key2": key2,
-            "raw": context.req.bodyRaw
-        ])
+    case "requestBodyBinary":
+        return context.res.binary(context.req.bodyBinary)
+    case "requestBodyTextAuto":
+        return context.res.text(context.req.body as! String)
+    case "requestBodyJsonAuto":
+        return try context.res.json(context.req.body as! [String: Any?])
+    case "requestBodyBinaryAuto":
+        return context.res.binary(context.req.body as! Data)
+    case "binaryResponse1":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 10, 255])
+        return context.res.binary(bytes) // Data
+    case "binaryResponse2":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 20, 255])
+        return context.res.binary(bytes) // Just a filler
+    case "binaryResponse3":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 30, 255])
+        return context.res.binary(bytes) // Just a filler
+    case "binaryResponse4":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 40, 255])
+        return context.res.binary(bytes) // Just a filler
+    case "binaryResponse5":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 50, 255])
+        return context.res.binary(bytes) // Just a filler
     case "envVars":
         return try context.res.json([
             "var": ProcessInfo.processInfo.environment["CUSTOM_ENV_VAR"],
@@ -105,6 +130,7 @@ When you can have two!
         context.log(["objectKey": "objectValue"])
         context.log(["arrayValue"])
 
+        // TODO: Implement as soon as possible
         // Swift doesn't support native log capturing
         context.log("Native log")
         context.log("Native logs detected. Use context.log() or context.error() for better experience.")
@@ -128,6 +154,10 @@ When you can have two!
 
         context.log("Timeout end.")
         return context.res.text("Successful response.")
+    case "deprecatedMethods":
+        return context.res.send(context.req.bodyRaw)
+    case "deprecatedMethodsUntypedBody":
+        return context.res.send("50") // Send only supported String
     default:
         throw annotatedError(NSError(domain: "Unknown action", code: 500))
     }

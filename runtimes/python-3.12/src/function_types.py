@@ -55,7 +55,10 @@ class Request:
         content_type = self.headers.get('content-type', 'text/plain').lower()
 
         if content_type.startswith('application/json'):
-            return self.body_json
+            if len(self.body_binary) > 0:
+                return self.body_json
+            else:
+                return {}
 
         binary_types = ["application/", "audio/", "font/", "image/", "video/"]
         for binary_type in binary_types:

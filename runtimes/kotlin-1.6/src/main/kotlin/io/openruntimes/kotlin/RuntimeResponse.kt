@@ -8,11 +8,11 @@ public class RuntimeResponse {
     }
 
     fun binary(
-        body: ByteArray,
+        bytes: ByteArray,
         statusCode: Int = 200,
         headers: Map<String, String> = mapOf()
     ): RuntimeOutput {
-        return RuntimeOutput(body, statusCode, headers)
+        return RuntimeOutput(bytes, statusCode, headers)
     }
 
     fun text(

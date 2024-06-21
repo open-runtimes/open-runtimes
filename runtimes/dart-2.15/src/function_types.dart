@@ -17,7 +17,11 @@ class RuntimeRequest {
     String contentType = (this.headers['content-type'] ?? 'text/plain').toLowerCase();
 
     if(contentType.startsWith("application/json")) {
-      return this.bodyJson;
+      if(this.bodyBinary.isEmpty) {
+        return new Map<String, dynamic>();
+      } else {
+        return this.bodyJson;
+      }
     }
 
     List<String> binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];

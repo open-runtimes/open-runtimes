@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
+import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -86,7 +87,11 @@ public class RuntimeRequest {
 
         if (contentType.startsWith("application/json"))
         {
-            return getBodyJson();
+            if(bodyBinary.length > 0) {
+                return getBodyJson();
+            } else {
+                return new HashMap<String, Object>();
+            }
         }
 
         String[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };
