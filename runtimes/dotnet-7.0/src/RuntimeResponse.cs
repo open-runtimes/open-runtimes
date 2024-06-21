@@ -115,13 +115,12 @@ namespace DotNetRuntime {
 
         public RuntimeOutput End()
         {
-            headers ??= new Dictionary<string, string>();
             if (!ChunkHeaderSent)
             {
                 throw new Exception("You must call res.Start() to start a chunk response");
             }
 
-            return new RuntimeOutput(System.Text.Encoding.UTF8.GetBytes(""), 200, null, true);
+            return new RuntimeOutput(System.Text.Encoding.UTF8.GetBytes(""), 200, new Dictionary<string, string>(), true);
         }
     }
 }
