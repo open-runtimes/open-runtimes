@@ -10,6 +10,8 @@ export default async function(context: any) {
             return context.res.json({ json: true, message: 'Developers are awesome.' });
         case 'customCharsetResponse':
             return context.res.text('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' });
+        case 'uppercaseCharsetResponse':
+            return context.res.text('ÅÆ', 200, { 'content-type': 'TEXT/PLAIN' });
         case 'multipartResponse':
             return context.res.text(`--12345
 Content-Disposition: form-data; name="partOne"
@@ -56,11 +58,25 @@ When you can have two!
         case 'requestBodyText':
             return context.res.text(context.req.bodyText);
         case 'requestBodyJson':
-            return context.res.json({
-                key1: context.req.body.key1 ?? 'Missing key',
-                key2: context.req.body.key2 ?? 'Missing key',
-                raw: context.req.bodyRaw
-            })
+            return context.res.json(context.req.bodyJson);
+        case 'requestBodyBinary':
+            return context.res.binary(context.req.bodyBinary);
+        case 'requestBodyTextAuto':
+            return context.res.text(context.req.body);
+        case 'requestBodyJsonAuto':
+            return context.res.json(context.req.body);
+        case 'requestBodyBinaryAuto':
+            return context.res.binary(context.req.body);
+        case 'binaryResponse1':
+            return context.res.binary(Uint8Array.from([0, 10, 255])); // Uint8Array
+        case 'binaryResponse2':
+            return context.res.binary(Buffer.from((Uint8Array.from([0, 20, 255])))); // Buffer
+        case 'binaryResponse3':
+            return context.res.binary(Uint8Array.from([0, 30, 255]).buffer); // ArrayBuffer
+        case 'binaryResponse4':
+            return context.res.binary(new Blob([Uint8Array.from([0, 40, 255])])); // Blob
+        case 'binaryResponse5':
+            return context.res.binary(Uint8Array.from([0, 50, 255])); // Just a filler
         case 'envVars':
             return context.res.json({
                 var: Bun.env["CUSTOM_ENV_VAR"] ?? null,
@@ -93,6 +109,10 @@ When you can have two!
 
             context.log('Timeout end.');
             return context.res.text('Successful response.');
+        case 'deprecatedMethods':
+            return context.res.send(context.req.bodyRaw);
+        case 'deprecatedMethodsUntypedBody':
+            return context.res.send(50);
         default:
             throw new Error('Unknown action');
     }

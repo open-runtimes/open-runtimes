@@ -11,6 +11,8 @@ async def main(context):
         return context.res.json({ 'json': True, 'message': 'Developers are awesome.' })
     elif action == 'customCharsetResponse':
         return context.res.text('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
+    elif action == 'uppercaseCharsetResponse':
+        return context.res.text('ÅÆ', 200, { 'content-type': 'TEXT/PLAIN' })
     elif action == 'multipartResponse':
         return context.res.text("""--12345
 Content-Disposition: form-data; name=\"partOne\"
@@ -54,23 +56,27 @@ When you can have two!
     elif action == 'requestHeaders':
         return context.res.json(context.req.headers)
     elif action == 'requestBodyText':
-        return context.res.text(context.req.bodyText)
+        return context.res.text(context.req.body_text)
     elif action == 'requestBodyJson':
-        key1 = None
-        key2 = None
-
-        if isinstance(context.req.body, str):
-            key1 = 'Missing key'
-            key2 = 'Missing key'
-        else:
-            key1 = context.req.body.get('key1', 'Missing key')
-            key2 = context.req.body.get('key2', 'Missing key')
-
-        return context.res.json({
-            'key1': key1,
-            'key2': key2,
-            'raw': context.req.body_raw
-        })
+        return context.res.json(context.req.body_json)
+    elif action == 'requestBodyBinary':
+        return context.res.binary(context.req.body_binary)
+    elif action == 'requestBodyTextAuto':
+        return context.res.text(context.req.body)
+    elif action == 'requestBodyJsonAuto':
+        return context.res.json(context.req.body)
+    elif action == 'requestBodyBinaryAuto':
+        return context.res.binary(context.req.body)
+    elif action == 'binaryResponse1':
+        return context.res.binary(bytearray([0,10,255])) # bytearray
+    elif action == 'binaryResponse2':
+        return context.res.binary(bytes([0,20,255])) # bytes
+    elif action == 'binaryResponse3':
+        return context.res.binary(bytearray([0,30,255])) # Just a filler
+    elif action == 'binaryResponse4':
+        return context.res.binary(bytearray([0,40,255])) # Just a filler
+    elif action == 'binaryResponse5':
+        return context.res.binary(bytearray([0,50,255])) # Just a filler
     elif action == 'envVars':
         return context.res.json({
             'var': os.environ.get('CUSTOM_ENV_VAR', None),
@@ -101,5 +107,9 @@ When you can have two!
         await asyncio.sleep(3)
         context.log('Timeout end.')
         return context.res.text('Successful response.')
+    elif action == 'deprecatedMethods':
+        return context.res.send(context.req.body_raw)
+    elif action == 'deprecatedMethodsUntypedBody':
+        return context.res.send(50)
     else:
         raise Exception('Unknown action')

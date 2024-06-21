@@ -1,8 +1,15 @@
 package io.openruntimes.java;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+
+import java.util.Arrays;
 import java.util.Map;
 
 public class RuntimeRequest {
+    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+
     private final String method;
     private final String scheme;
     private final String host;
@@ -11,8 +18,7 @@ public class RuntimeRequest {
     private final Map<String, String> query;
     private final String queryString;
     private final Map<String, String> headers;
-    private final Object body;
-    private final String bodyRaw;
+    private final byte[] bodyBinary;
     private final String url;
 
     public RuntimeRequest(
@@ -24,8 +30,7 @@ public class RuntimeRequest {
             Map<String, String> query,
             String queryString,
             Map<String, String> headers,
-            Object body,
-            String bodyRaw,
+            byte[] bodyBinary,
             String url
     ) {
         this.method = method;
@@ -36,8 +41,7 @@ public class RuntimeRequest {
         this.query = query;
         this.queryString = queryString;
         this.headers = headers;
-        this.body = body;
-        this.bodyRaw = bodyRaw;
+        this.bodyBinary = bodyBinary;
         this.url = url;
     }
 
@@ -73,12 +77,40 @@ public class RuntimeRequest {
         return headers;
     }
 
+    public byte[] getBodyBinary() {
+        return bodyBinary;
+    }
+
     public Object getBody() {
-        return body;
+        String contentType = headers.getOrDefault("content-type","text/plain").toLowerCase();
+
+        if (contentType.startsWith("application/json"))
+        {
+            return getBodyJson();
+        }
+
+        String[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };
+
+        if(Arrays.stream(binaryTypes).anyMatch(contentType::startsWith)){
+            return getBodyBinary();
+        }
+
+        return getBodyText();
+    }
+
+    public String getBodyText() {
+        return new String(bodyBinary);
+    }
+
+    public Map<String, Object> getBodyJson() throws JsonSyntaxException{
+        if(getBodyText().isEmpty()){
+            throw new JsonSyntaxException("Body is empty");
+        }
+        return gson.fromJson(getBodyText(), Map.class);
     }
 
     public String getBodyRaw() {
-        return bodyRaw;
+        return getBodyText();
     }
 
     public String getUrl() {

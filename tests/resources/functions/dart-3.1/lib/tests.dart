@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart' hide Response;
 import 'dart:io' show Platform;
+import 'dart:typed_data';
 
 Future<dynamic> main(final context) async {
   String action = context.req.headers['x-action'] ?? '';
@@ -17,6 +18,11 @@ Future<dynamic> main(final context) async {
     {
       return context.res.text(
           'ÅÆ', 200, {'content-type': 'text/plain; charset=iso-8859-1'});
+    }
+    case 'uppercaseCharsetResponse':
+    {
+      return context.res.text(
+          'ÅÆ', 200, {'content-type': 'TEXT/PLAIN'});
     }
     case 'multipartResponse':
     {
@@ -78,22 +84,39 @@ When you can have two!
       return context.res.text(context.req.bodyText);
     }
     case 'requestBodyJson': {
-      var key1 = null;
-      var key2 = null;
-
-      if(context.req.body is String) {
-        key1 = 'Missing key';
-        key2 = 'Missing key';
-      } else {
-        key1 = context.req.body['key1'] ?? 'Missing key';
-        key2 = context.req.body['key2'] ?? 'Missing key';
-      }
-
-      return context.res.json({
-        'key1': key1,
-        'key2': key2,
-        'raw': context.req.bodyRaw
-      });
+      return context.res.json(context.req.bodyJson);
+    }
+    case 'requestBodyBinary': {
+      return context.res.binary(context.req.bodyBinary);
+    }
+    case 'requestBodyTextAuto': {
+      return context.res.text(context.req.body);
+    }
+    case 'requestBodyJsonAuto': {
+      return context.res.json(context.req.body);
+    }
+    case 'requestBodyBinaryAuto': {
+      return context.res.binary(context.req.body);
+    }
+    case 'binaryResponse1': {
+      List<int> bytes = [0, 10, 255];
+      return context.res.binary(bytes); // List<int>
+    }
+    case 'binaryResponse2': {
+      Uint8List bytes = Uint8List.fromList([0, 20, 255]);
+      return context.res.binary(bytes); // Uint8List
+    }
+    case 'binaryResponse3': {
+      List<int> bytes = [0, 30, 255];
+      return context.res.binary(bytes); // Just a filler
+    }
+    case 'binaryResponse4': {
+      List<int> bytes = [0, 40, 255];
+      return context.res.binary(bytes); // Just a filler
+    }
+    case 'binaryResponse5': {
+      List<int> bytes = [0, 50, 255];
+      return context.res.binary(bytes); // Just a filler
     }
     case 'envVars': {
       return context.res.json({
@@ -128,6 +151,12 @@ When you can have two!
 
       context.log("Timeout end.");
       return context.res.text("Successful response.");
+    }
+    case 'deprecatedMethods': {
+      return context.res.send(context.req.bodyRaw);
+    }
+    case 'deprecatedMethodsUntypedBody': {
+      return context.res.send("50"); // Send only supported String
     }
     default: { 
       throw new Exception('Unknown action');

@@ -4,10 +4,27 @@ using System.Text.Json;
 
 public class RuntimeResponse
 {
+    public RuntimeOutput Binary(byte[] bytes,int statusCode = 200, Dictionary<string, string>? headers = null ){
+        return new RuntimeOutput(
+            bytes,
+            statusCode,
+            headers ?? new Dictionary<string,string>());
+    }
+
+
+
     public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
     {
-        return new RuntimeOutput(
+        return Text(
             body,
+            statusCode,
+            headers ?? new Dictionary<string,string>());
+    }
+
+    public RuntimeOutput Text(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
+    {
+        return Binary(
+            System.Text.Encoding.UTF8.GetBytes(body),
             statusCode,
             headers ?? new Dictionary<string,string>());
     }
@@ -20,12 +37,12 @@ public class RuntimeResponse
         }
 
         headers.Add("content-type", "application/json");
-        return Send(JsonSerializer.Serialize(json), statusCode, headers);
+        return Text(JsonSerializer.Serialize(json), statusCode, headers);
     }
 
     public RuntimeOutput Empty()
     {
-        return Send("", 204, new Dictionary<string, string>());
+        return Text("", 204, new Dictionary<string, string>());
     }
 
     public RuntimeOutput Redirect(String url, int statusCode = 301, Dictionary<string, string>? headers = null)
@@ -36,6 +53,6 @@ public class RuntimeResponse
 
         headers.Add("location", url);
 
-        return Send("", statusCode, headers);
+        return Text("", statusCode, headers);
     }
 }

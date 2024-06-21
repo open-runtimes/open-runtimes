@@ -3,12 +3,12 @@ package io.openruntimes.java;
 import java.util.Map;
 
 public class RuntimeOutput {
-    private final String body;
+    private final byte[] body;
     private final int statusCode;
     private final Map<String, String> headers;
 
     public RuntimeOutput(
-            String body,
+            byte[] body,
             int statusCode,
             Map<String, String> headers
     ) {
@@ -17,7 +17,7 @@ public class RuntimeOutput {
         this.headers = headers;
     }
 
-    public String getBody() {
+    public byte[] getBody() {
         return this.body;
     }
 

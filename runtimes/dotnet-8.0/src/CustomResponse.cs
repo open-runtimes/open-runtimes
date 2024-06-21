@@ -4,11 +4,11 @@ namespace DotNetRuntime
 {
     class CustomResponse : IResult
     {
-        private readonly string _body;
+        private readonly byte[] _body;
         private readonly int _statusCode;
         private readonly Dictionary<string, string> _headers;
 
-        public CustomResponse(string body, int statusCode, Dictionary<string, string>? headers = null)
+        public CustomResponse(byte[] body, int statusCode, Dictionary<string, string>? headers = null)
         {
             _body = body;
             _statusCode = statusCode;
@@ -36,9 +36,9 @@ namespace DotNetRuntime
 
             httpContext.Response.StatusCode = _statusCode;
             httpContext.Response.ContentType = contentTypeValue;
-            httpContext.Response.ContentLength = Encoding.UTF8.GetByteCount(_body);
-
-            return httpContext.Response.WriteAsync(_body);
+            httpContext.Response.ContentLength = _body.Length;
+            
+            return httpContext.Response.Body.WriteAsync(_body,0 , _body.Length);
         }
     }
 }

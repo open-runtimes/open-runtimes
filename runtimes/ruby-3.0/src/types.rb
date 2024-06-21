@@ -3,34 +3,41 @@ require_relative 'logger.rb'
 require 'json'
 
 class RuntimeResponse
-    def send(body, status_code = 200, headers = {})
+    def binary(bytes, status_code = 200, headers = {})
       {
-        'body' => body,
+        'body' => bytes,
         'statusCode' => status_code,
         'headers' => headers
       }
+    end
+
+    def send(body, status_code = 200, headers = {})
+      self.text(body.to_s, status_code, headers)
+    end
+
+    def text(body, status_code = 200, headers = {})
+      self.binary(body.unpack("C*"), status_code, headers)
     end
   
     def json(obj, status_code = 200, headers = {})
       headers['content-type'] = 'application/json'
   
-      self.send(obj.to_json, status_code, headers)
+      self.text(obj.to_json, status_code, headers)
     end
   
     def empty()
-      self.send('', 204, {})
+      self.text('', 204, {})
     end
   
     def redirect(url, status_code = 301, headers = {})
       headers['location'] = url
   
-      self.send('', status_code, headers)
+      self.text('', status_code, headers)
     end
   end
   
   class RuntimeRequest
-    attr_accessor :body_raw
-    attr_accessor :body
+    attr_accessor :body_binary
     attr_accessor :headers
     attr_accessor :method
     attr_accessor :url
@@ -41,9 +48,8 @@ class RuntimeResponse
     attr_accessor :query
     attr_accessor :query_string
   
-    def initialize(url, method, scheme, host, port, path, query, query_string, headers, body, body_raw)
-      @body_raw = body_raw
-      @body = body
+    def initialize(url, method, scheme, host, port, path, query, query_string, headers, body_binary)
+      @body_binary = body_binary
       @headers = headers
       @method = method
       @url = url
@@ -53,6 +59,36 @@ class RuntimeResponse
       @host = host
       @query = query
       @query_string = query_string
+    end
+
+    def body_text
+      self.body_binary.pack('C*')
+    end
+
+    def body_raw
+      self.body_text
+    end
+
+    def body_json
+      JSON.parse(self.body_text)
+    end
+
+    def body
+      content_type = (@headers['content-type'] || 'text/plain').downcase
+
+      if content_type.start_with?("application/json")
+        return self.body_json
+      end
+
+      binary_types = ["application/", "audio/", "font/", "image/", "video/"]
+
+      for binary_type in binary_types
+        if content_type.start_with?(binary_type)
+          return self.body_binary
+        end
+      end
+
+      return self.body_text
     end
   end
   
@@ -72,6 +108,6 @@ class RuntimeResponse
     end
   
     def error(message)
-        @logger.write(message, RuntimeLogger::TYPE_ERROR)
+      @logger.write(message, RuntimeLogger::TYPE_ERROR)
     end
   end

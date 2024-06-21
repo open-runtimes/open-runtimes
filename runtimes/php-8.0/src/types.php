@@ -1,32 +1,41 @@
 <?php
 
 class RuntimeResponse {
-    function send(string $body, int $statusCode = 200, array $headers = []): array {
+    function binary(array $bytes, int $statusCode = 200, array $headers = []): array {
         return [
-            'body' => $body,
+            'body' => $bytes,
             'statusCode' => $statusCode,
             'headers' => $headers,
         ];
     }
 
-    function json(array $obj, int $statusCode = 200, array $headers = []) {
+    function send(string $body, int $statusCode = 200, array $headers = []): array {
+        return $this->text(\strval($body),$statusCode, $headers);
+    }
+
+
+    function text(string $body, int $statusCode = 200, array $headers = []): array {
+        $bin = \unpack("C*", $body);
+        return $this->binary($bin, $statusCode, $headers);
+    }
+
+    function json(array $obj, int $statusCode = 200, array $headers = []): array {
         $headers['content-type'] = 'application/json';
-        return $this->send(\json_encode($obj), $statusCode, $headers);
+        return $this->text(\json_encode($obj, JSON_FORCE_OBJECT), $statusCode, $headers);
     }
 
-    function empty() {
-        return $this->send('', 204, []);
+    function empty(): array {
+        return $this->text('', 204, []);
     }
 
-    function redirect(string $url, int $statusCode = 301, array $headers = []) {
+    function redirect(string $url, int $statusCode = 301, array $headers = []): array {
         $headers['location'] = $url;
-        return $this->send('', $statusCode, $headers);
+        return $this->text('', $statusCode, $headers);
     }
 }
 
 class RuntimeRequest {
-    public string $bodyRaw = '';
-    public mixed $body = '';
+    public array $bodyBinary = [];
     public array $headers = [];
     public string $method = '';
     public string $url = '';
@@ -36,6 +45,46 @@ class RuntimeRequest {
     public string $scheme = '';
     public string $queryString = '';
     public array $query = [];
+
+    public function __get(string $name)
+    {
+        return match ($name) {
+            'body' => $this->getBody(),
+            'bodyRaw' => $this->getRawBody(),
+            'bodyJson' => $this->getBodyJson(),
+            default => ''
+        };
+    }
+
+    private function getBody()
+    {
+        $contentType = strtolower($this->headers['content-type'] ?? 'text/plain');
+
+        if(\str_contains($contentType, 'application/json')) {
+            return $this->getBodyJson();
+        }
+
+        $binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
+        foreach ($binaryTypes as $type) {
+            if(\str_contains($contentType, $type)) {
+                return  $this->bodyBinary;
+            }
+        }
+
+        return $this->getBodyText();
+    }
+    private function getRawBody(): string
+    {
+        return $this->getBodyText();
+    }
+    private function getBodyText(): string
+    {
+        return pack('C*', ...$this->bodyBinary);
+    }
+    private function getBodyJson(): array
+    {
+        return \json_decode($this->getBodyText(), true);
+    }
 }
 
 class RuntimeContext {

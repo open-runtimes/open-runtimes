@@ -18,7 +18,10 @@ namespace runtime
         std::string queryString;
         Json::Value headers;
         std::any body;
+        std::vector<std::byte> bodyBinary;
         std::string bodyRaw;
+        std::string bodyText;
+        Json::Value bodyJson;
         std::string url;
     };
 }
