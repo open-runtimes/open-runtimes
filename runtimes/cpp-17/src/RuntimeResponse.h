@@ -3,6 +3,7 @@
 
 #include <string>
 #include <json/value.h>
+#include <json/json.h>
 #include <algorithm>
 #include "RuntimeOutput.h"
 
@@ -39,7 +40,15 @@ namespace runtime
             RuntimeOutput json(const Json::Value &json, const int statusCode = 200, Json::Value headers = {})
             {
                 headers["content-type"] = "application/json";
-                return this->text(json.toStyledString(), statusCode, headers);
+
+                if(json.empty()) {
+                    return this->text("{}", statusCode, headers);
+                }
+
+                Json::StreamWriterBuilder wbuilder;
+                wbuilder["indentation"] = "";
+                std::string document = Json::writeString(wbuilder, json);
+                return this->text(document, statusCode, headers);
             }
 
             RuntimeOutput empty()
