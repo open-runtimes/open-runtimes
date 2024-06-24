@@ -2,15 +2,29 @@ package io.openruntimes.java;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class RuntimeResponse {
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
+    private final HttpServletResponse res;
+    private final RuntimeLogger logger;
+    private boolean chunkHeaderSent = false;
 
-    public RuntimeOutput binary(byte[] bytes, int statusCode, Map<String, String> headers) {
-        return new RuntimeOutput(bytes, statusCode, headers);
+    public RuntimeResponse(HttpServletResponse res, RuntimeLogger logger) {
+        this.res = res;
+        this.logger = logger;
+    }
+
+
+    public boolean getChunkStatus() {
+        return chunkHeaderSent;
+    }
+
+    public RuntimeOutput binary(byte[] body, int statusCode, Map<String, String> headers) {
+        return new RuntimeOutput(body, statusCode, headers, false);
     }
 
     public RuntimeOutput binary(byte[] body, int statusCode) {
@@ -35,7 +49,7 @@ public class RuntimeResponse {
 
 
     public RuntimeOutput text(String body, int statusCode, Map<String, String> headers) {
-        return this.binary(body.getBytes(),statusCode,headers);
+        return this.binary(body.getBytes(), statusCode, headers);
     }
 
     public RuntimeOutput text(String body, int statusCode) {
@@ -74,5 +88,59 @@ public class RuntimeResponse {
 
     public RuntimeOutput redirect(String url) {
         return this.redirect(url, 301, new HashMap<>());
+    }
+
+    public void start() throws Exception {
+        this.start(200, new HashMap<>());
+    }
+
+    public void start(int statusCode) throws Exception {
+        this.start(statusCode, new HashMap<>());
+    }
+
+    public void start(int statusCode, Map<String, String> headers) throws Exception {
+        if (!this.chunkHeaderSent) {
+            this.chunkHeaderSent = true;
+
+            headers.putIfAbsent("cache-control", "no-store");
+            headers.putIfAbsent("content-type", "text/event-stream");
+            headers.putIfAbsent("connection", "keep-alive");
+            headers.putIfAbsent("transfer-encoding", "chunked");
+            headers.putIfAbsent("x-open-runtimes-log-id",this.logger.getId());
+
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                this.res.setHeader(entry.getKey(), entry.getValue());
+            }
+
+            this.res.setStatus(statusCode);
+            this.res.getOutputStream().flush();
+        } else {
+            throw new Exception("You can only call res.start() once");
+        }
+    }
+
+    public void writeJson(Object body) throws Exception {
+        this.writeText(gson.toJson(body));
+    }
+
+    public void writeText(String body) throws Exception {
+        this.writeBinary(body.getBytes());
+    }
+
+    public void writeBinary(byte[] body) throws Exception {
+        if (!this.chunkHeaderSent) {
+            throw new Exception("You must call res.start() to start a chunk response");
+        }
+
+        this.res.getOutputStream().write(body);
+        this.res.getOutputStream().flush();
+    }
+
+    public RuntimeOutput end() throws Exception {
+        if (!this.chunkHeaderSent) {
+            throw new Exception("You must call res.start() to start a chunk response");
+        }
+
+        return new RuntimeOutput("".getBytes(), 0, new HashMap<>(), true);
     }
 }

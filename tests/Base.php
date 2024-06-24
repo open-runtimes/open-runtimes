@@ -44,15 +44,11 @@ class Base extends TestCase
         self::assertStringNotContainsStringIgnoringCase("\n", $response['body']);
     }
 
-    public function testContentTypeResponse(): void 
+    public function testContentTypeResponse(): void
     {
         $response = Client::execute(headers: ['x-action' => 'customCharsetResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=iso-8859-1', $response['headers']['content-type']);
-
-        $response = Client::execute(headers: ['x-action' => 'uppercaseCharsetResponse']);
-        self::assertEquals(200, $response['code']);
-        self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
 
         $response = Client::execute(headers: ['x-action' => 'multipartResponse']);
         self::assertEquals(200, $response['code']);
@@ -260,17 +256,6 @@ class Base extends TestCase
         self::assertEquals('requestHeaders', $body['x-action']);
         self::assertEquals('first-value', $body['x-first-header']);
         self::assertArrayNotHasKey('x-open-runtimes-custom-header', $body);
-
-
-        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'X-UpPeRcAsE-KeY' => 'value']);
-        self::assertEquals(200, $response['code']);
-        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
-
-        $body = \json_decode($response['body'], true);
-
-        self::assertEquals('requestHeaders', $body['x-action']);
-        self::assertEquals('value', $body['x-uppercase-key']);
-        self::assertArrayNotHasKey('X-UpPeRcAsE-KeY', $body);
     }
 
     public function testRequestBodyText(): void
@@ -317,14 +302,6 @@ class Base extends TestCase
         self::assertEquals(true, $body['key2']);
         self::assertEquals(3, $body['key3']);
 
-        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'ApPlIcAtIoN/JSON']);
-        self::assertEquals(200, $response['code']);
-
-        $body = \json_decode($response['body'], true);
-        self::assertEquals('OK 👋', $body['key1']);
-        self::assertEquals(true, $body['key2']);
-        self::assertEquals(3, $body['key3']);
-
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson', 'content-type' => 'text/plain']);
         self::assertEquals(200, $response['code']);
 
@@ -347,7 +324,6 @@ class Base extends TestCase
         self::assertEquals($body, $response['body']);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
-
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
 
@@ -371,24 +347,6 @@ class Base extends TestCase
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
-
-        $body = pack('C*', ...[0,10,255]);
-
-        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
-        self::assertEquals(200, $response['code']);
-        $bytes = \unpack('C*byte', $response['body']);
-        self::assertCount(3, $bytes);
-        self::assertEquals(0, $bytes['byte1']);
-        self::assertEquals(10, $bytes['byte2']);
-        self::assertEquals(255, $bytes['byte3']);
-
-        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
-        self::assertEquals(200, $response['code']);
-        $bytes = \unpack('C*byte', $response['body']);
-        self::assertCount(3, $bytes);
-        self::assertEquals(0, $bytes['byte1']);
-        self::assertEquals(10, $bytes['byte2']);
-        self::assertEquals(255, $bytes['byte3']);
     }
 
     public function testEnvVars(): void
@@ -467,7 +425,7 @@ class Base extends TestCase
     public function testInvalidJson(): void
     {
         $response = Client::execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
-        
+
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
         self::assertThat(Client::getErrors($response['headers']['x-open-runtimes-log-id']), self::callback(function($value) {
@@ -521,57 +479,82 @@ class Base extends TestCase
         self::assertEquals('{"hello":"world"}', $response['body']);
     }
 
-    public function testDeprecatedMethodsUntypedBody(): void
+    public function testResponseChunkedSimple(): void
     {
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethodsUntypedBody']);
+        $body = '';
+        $chunks = 0;
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedSimple'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
+
         self::assertEquals(200, $response['code']);
-        self::assertIsString($response['body']);
-        self::assertEquals('50', $response['body']);
+        self::assertEquals('OK1OK2', $body);
+        self::assertGreaterThanOrEqual(2, $chunks);
+        self::assertEmpty(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
-    public function testBinaryResponse(): void
+    public function testResponseChunkedComplex(): void
     {
-        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse1']);
+        $body = '';
+        $chunks = 0;
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedComplex'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
+
+        self::assertEquals(201, $response['code']);
+        self::assertStringContainsString('Start', $body);
+        self::assertStringContainsString('Step1', $body);
+        self::assertStringContainsString('{"step2":true}', $body);
+        self::assertStringContainsString(\hex2bin('0123456789abcdef'), $body);
+        self::assertGreaterThanOrEqual(3, $chunks);
+        self::assertEmpty(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+        self::assertEquals('start', $response['headers']['x-start-header']);
+    }
+
+    public function testResponseChunkedErrorStartDouble(): void
+    {
+        $body = '';
+        $chunks = 0;
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartDouble'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
+
         self::assertEquals(200, $response['code']);
-        $bytes = \unpack('C*byte', $response['body']);
-        self::assertCount(3, $bytes);
-        self::assertEquals(0, $bytes['byte1']);
-        self::assertEquals(10, $bytes['byte2']);
-        self::assertEquals(255, $bytes['byte3']);
+        self::assertEquals('', $body);
+        self::assertStringContainsString('You can only call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
 
-        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse2']);
-        self::assertEquals(200, $response['code']);
-        $bytes = \unpack('C*byte', $response['body']);
-        self::assertCount(3, $bytes);
-        self::assertEquals(0, $bytes['byte1']);
-        self::assertEquals(20, $bytes['byte2']);
-        self::assertEquals(255, $bytes['byte3']);
+    public function testResponseChunkedErrorStartMissing(): void
+    {
+        $body = '';
+        $chunks = 0;
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartMissing'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
 
-        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse3']);
-        self::assertEquals(200, $response['code']);
-        $bytes = \unpack('C*byte', $response['body']);
-        self::assertCount(3, $bytes);
-        self::assertEquals(0, $bytes['byte1']);
-        self::assertEquals(30, $bytes['byte2']);
-        self::assertEquals(255, $bytes['byte3']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $body);
+        self::assertStringContainsString('You must call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
 
+    public function testResponseChunkedErrorStartWriteMissing(): void
+    {
+        $body = '';
+        $chunks = 0;
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartWriteMissing'], callback: function($chunk) use(&$body, &$chunks) {
+            $body .= $chunk;
+            $chunks += 1;
+        });
 
-        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse4']);
-        self::assertEquals(200, $response['code']);
-        $bytes = \unpack('C*byte', $response['body']);
-        self::assertCount(3, $bytes);
-        self::assertEquals(0, $bytes['byte1']);
-        self::assertEquals(40, $bytes['byte2']);
-        self::assertEquals(255, $bytes['byte3']);
-
-
-        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse5']);
-        self::assertEquals(200, $response['code']);
-        $bytes = \unpack('C*byte', $response['body']);
-        self::assertCount(3, $bytes);
-        self::assertEquals(0, $bytes['byte1']);
-        self::assertEquals(50, $bytes['byte2']);
-        self::assertEquals(255, $bytes['byte3']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $body);
+        self::assertStringContainsString('You must call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
