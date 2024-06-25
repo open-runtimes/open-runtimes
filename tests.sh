@@ -32,9 +32,9 @@ OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vend
 
 # Dev tests (Uncomment only if fails on CI/CD. Changes rarely make them fail)
 
-docker rm --force $(docker ps -aq)
-cd ./tests/resources/functions/$RUNTIME
-docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_SECRET= -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh helpers/start.sh \"$START_COMMAND\""
-cd ../../../../
-sleep 10
-vendor/bin/phpunit --configuration phpunit.xml tests/BaseDev.php
+# docker rm --force $(docker ps -aq)
+# cd ./tests/resources/functions/$RUNTIME
+# docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_SECRET= -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh helpers/start.sh \"$START_COMMAND\""
+# cd ../../../../
+# sleep 10
+# vendor/bin/phpunit --configuration phpunit.xml tests/BaseDev.php

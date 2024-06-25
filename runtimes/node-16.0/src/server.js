@@ -35,7 +35,7 @@ const action = async (logger, req, res) => {
     }
 
     const contentType = (req.headers['content-type'] ?? 'text/plain').toLowerCase();
-    const bodyBinary = await buffer(req);
+    const bodyBinary = await buffer(req, { limit: '20mb' });
 
     const headers = {};
     Object.keys(req.headers).filter((header) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header) => {

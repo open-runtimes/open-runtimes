@@ -564,7 +564,6 @@ class Base extends TestCase
         self::assertEquals(40, $bytes['byte2']);
         self::assertEquals(255, $bytes['byte3']);
 
-
         $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse5']);
         self::assertEquals(200, $response['code']);
         $bytes = \unpack('C*byte', $response['body']);
@@ -572,6 +571,22 @@ class Base extends TestCase
         self::assertEquals(0, $bytes['byte1']);
         self::assertEquals(50, $bytes['byte2']);
         self::assertEquals(255, $bytes['byte3']);
+    }
+
+    public function testBinaryResponseLarge(): void
+    {
+        $body = \file_get_contents(__DIR__.'/resources/large-file.zip');
+        $md5 = \md5($body);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "GET");
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($md5, $response['body']);
+        self::assertEquals('GET', $response['headers']['x-method']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "POST");
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($md5, $response['body']);
+        self::assertEquals('POST', $response['headers']['x-method']);
     }
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {

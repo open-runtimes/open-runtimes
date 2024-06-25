@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const crypto = require("crypto");
 
 module.exports = async (context) => {
     const payload = context.req.body;
