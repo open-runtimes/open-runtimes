@@ -3,20 +3,17 @@
 namespace Tests;
 
 class Client {
-    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000) {
+    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000, $callback = null) {
         $ch = \curl_init();
 
-        $initHeaders = [];
+        $headers = \array_merge([
+            'content-type' => 'text/plain',
+            'x-open-runtimes-secret' => \getenv('OPEN_RUNTIMES_SECRET')
+        ], $headers);
 
-        if(!(\array_key_exists('content-type', $headers))) {
-            $initHeaders['content-type'] = 'text/plain';
+        if(isset($callback)) {
+            $headers[] = 'accept: text/event-stream';
         }
-
-        if(!empty(\getenv('OPEN_RUNTIMES_SECRET'))) {
-            $initHeaders['x-open-runtimes-secret'] = \getenv('OPEN_RUNTIMES_SECRET');
-        }
-
-        $headers = \array_merge($initHeaders, $headers);
 
         $headersParsed = [];
 
@@ -27,7 +24,6 @@ class Client {
         $responseHeaders = [];
         $optArray = [
             CURLOPT_URL => 'http://localhost:' . $port . $url,
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$responseHeaders) {
                 $len = strlen($header);
                 $header = explode(':', $header, 2);
@@ -45,10 +41,22 @@ class Client {
             CURLOPT_HTTPHEADER => $headersParsed,
             CURLOPT_TIMEOUT => 5
         ];
+
+        if(isset($callback)) {
+            $handleEvent = function ($ch, $data) use ($callback) {
+                $callback($data);
+                return \strlen($data);
+            };
+
+            $optArray[CURLOPT_WRITEFUNCTION] = $handleEvent;
+        } else {
+            $optArray[CURLOPT_RETURNTRANSFER] = true;
+        }
         
         \curl_setopt_array($ch, $optArray);
 
         $body = curl_exec($ch);
+
         $code = curl_getinfo($ch, \CURLINFO_HTTP_CODE);
 
         if (curl_errno($ch)) {
