@@ -1,3 +1,4 @@
+from hashlib import md5
 import requests
 import os
 import asyncio
@@ -79,6 +80,12 @@ When you can have two!
         return context.res.binary(bytearray([0,40,255])) # Just a filler
     elif action == 'binaryResponse5':
         return context.res.binary(bytearray([0,50,255])) # Just a filler
+    elif action == 'binaryResponseLarge':
+        bytes_body = context.req.body_binary
+        hex = md5(bytes_body).hexdigest()
+        return context.res.send(hex, 200, {
+            'x-method': context.req.method
+        })
     elif action == 'envVars':
         return context.res.json({
             'var': os.environ.get('CUSTOM_ENV_VAR', None),
@@ -88,7 +95,7 @@ When you can have two!
         print('Native log')
         context.log('Debug log')
         context.error('Error log')
-                
+
         context.log("Log+With+Plus+Symbol")
 
         context.log(42)
