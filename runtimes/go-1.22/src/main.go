@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"openruntimes/handler"
@@ -15,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/open-runtimes/types-for-go/v3"
+	"github.com/open-runtimes/types-for-go/v4"
 )
 
-func action(w http.ResponseWriter, r *http.Request) error {
+func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 	timeout := r.Header.Get("x-open-runtimes-timeout")
 
 	var safeTimeout int
@@ -143,6 +141,7 @@ func action(w http.ResponseWriter, r *http.Request) error {
 	requestUrl := scheme + "://" + host + portInUrl + path + queryStringInUrl
 
 	context := types.Context{
+		Logger: logger,
 		Req: types.Request{
 			BodyRaw:     bodyRaw,
 			Body:        body,
@@ -179,29 +178,7 @@ func action(w http.ResponseWriter, r *http.Request) error {
 
 	outputChan := make(chan types.ResponseOutput)
 
-	stdout := os.Stdout
-	stderr := os.Stderr
-	defer func() {
-		os.Stdout = stdout
-		os.Stderr = stderr
-		log.SetOutput(os.Stderr)
-	}()
-
-	reader, writer, err := os.Pipe()
-	if err != nil {
-		return errors.New("Could not prepare log capturing.")
-	}
-
-	os.Stdout = writer
-	os.Stderr = writer
-	log.SetOutput(writer)
-
-	customstd := make(chan string)
-	go func() {
-		var buf bytes.Buffer
-		io.Copy(&buf, reader)
-		customstd <- buf.String()
-	}()
+	logger.OverrideNativeLogs()
 
 	if safeTimeout != 0 {
 		go timeoutPromise(outputChan)
@@ -211,11 +188,7 @@ func action(w http.ResponseWriter, r *http.Request) error {
 
 	output = <-outputChan
 
-	writer.Close()
-
-	os.Stdout = stdout
-	os.Stderr = stderr
-	log.SetOutput(os.Stderr)
+	logger.RevertNativeLogs()
 
 	if output.StatusCode == 0 {
 		output.StatusCode = 200
@@ -246,23 +219,8 @@ func action(w http.ResponseWriter, r *http.Request) error {
 		outputHeaders["content-type"] = contentTypeValue + "; charset=utf-8"
 	}
 
-	customLog := <-customstd
-	if customLog != "" {
-		context.Log("")
-		context.Log(
-			"----------------------------------------------------------------------------")
-		context.Log(
-			"Unsupported logs detected. Use Context.Log() or Context.Error() for logging.")
-
-		context.Log(
-			"----------------------------------------------------------------------------")
-		context.Log(customLog)
-		context.Log(
-			"----------------------------------------------------------------------------")
-	}
-
-	w.Header().Set("x-open-runtimes-logs", url.QueryEscape(strings.Join(context.Logs, "\n")))
-	w.Header().Set("x-open-runtimes-errors", url.QueryEscape(strings.Join(context.Errors, "\n")))
+	logger.End()
+	w.Header().Set("x-open-runtimes-log-id", logger.Id)
 
 	for key, value := range outputHeaders {
 		w.Header().Set(key, value)
@@ -276,14 +234,36 @@ func action(w http.ResponseWriter, r *http.Request) error {
 
 func main() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		err := action(w, r)
-		if err != nil {
-			errors := []string{
-				err.Error(),
-			}
+		logging := r.Header.Get("x-open-runtimes-logging")
+		logId := r.Header.Get("x-open-runtimes-log-id")
 
-			w.Header().Set("x-open-runtimes-errors", url.QueryEscape(strings.Join(errors, "\n")))
+		logger, loggerErr := types.NewLogger(logging, logId)
+
+		if loggerErr != nil {
+			logger.Write([]string{
+				loggerErr.Error(),
+			}, types.LOGGER_TYPE_ERROR, false)
+
+			logger.End()
+
 			w.WriteHeader(http.StatusInternalServerError)
+			w.Header().Set("x-open-runtimes-log-id", logger.Id)
+			w.Header().Set("content-type", "text/plain")
+			fmt.Fprintf(w, "")
+			return
+		}
+
+		err := action(w, r, logger)
+
+		if err != nil {
+			logger.Write([]string{
+				err.Error(),
+			}, types.LOGGER_TYPE_ERROR, false)
+
+			logger.End()
+
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Header().Set("x-open-runtimes-log-id", logger.Id)
 			w.Header().Set("content-type", "text/plain")
 			fmt.Fprintf(w, "")
 		}

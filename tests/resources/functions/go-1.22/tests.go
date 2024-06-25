@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/open-runtimes/types-for-go/v3"
+	"github.com/open-runtimes/types-for-go/v4"
 )
 
 func Main(Context *types.Context) types.ResponseOutput {

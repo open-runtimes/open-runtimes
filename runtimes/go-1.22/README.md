@@ -18,7 +18,7 @@ package handler
 import (
 	"math/rand"
 	
-	"github.com/open-runtimes/types-for-go/v3"
+	"github.com/open-runtimes/types-for-go/v4"
 )
 
 func Main(Context *types.Context) types.ResponseOutput {
@@ -37,7 +37,7 @@ END
 tee -a go.mod << END
 module openruntimes/handler
 
-require github.com/open-runtimes/types-for-go/v3 v3.0.0
+require github.com/open-runtimes/types-for-go/v4 v4.0.0
 
 END
 
@@ -101,7 +101,7 @@ You can also make changes to the example code and apply the changes with the `do
 package handler
 
 import (
-	"github.com/open-runtimes/types-for-go/v3"
+	"github.com/open-runtimes/types-for-go/v4"
 )
 
 func Main(Context *types.Context) types.ResponseOutput {

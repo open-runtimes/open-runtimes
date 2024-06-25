@@ -1,8 +1,9 @@
 module openruntimes/server
 
-go 1.22.0
+go 1.22.2
 
 replace openruntimes/handler v0.0.0 => /usr/local/build
 
 require openruntimes/handler v0.0.0
-require github.com/open-runtimes/types-for-go/v3 v3.0.0
+require github.com/open-runtimes/types-for-go/v4 v4.0.0-20240625153559-d896eded41cc // indirect
+// TODO: Release once finished

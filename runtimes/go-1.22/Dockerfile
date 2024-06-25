@@ -2,6 +2,8 @@ FROM golang:1.22-alpine
 
 LABEL maintainer="team@appwrite.io"
 
+RUN apk add git
+
 ENV OPEN_RUNTIMES_ENTRYPOINT=main.go
 
 RUN mkdir -p /mnt/code
