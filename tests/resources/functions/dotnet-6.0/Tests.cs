@@ -117,6 +117,17 @@ When you can have two!
             case "binaryResponse5":
                 byte[] bytes5 = new byte[] {0, 50, 255};
                 return context.Res.Binary(bytes5); // Just a filler
+            case "binaryResponseLarge":
+                byte[] bytes = context.Req.BodyBinary;
+                byte[] hash;
+                using (var md5 = System.Security.Cryptography.MD5.Create()) {
+                    md5.TransformFinalBlock(bytes, 0, bytes.Length);
+                    hash = md5.Hash;
+                }
+                string hex = BitConverter.ToString(hash).Replace("-", "").ToLower();
+                return context.Res.Send(hex, 200, new() {
+                    {"x-method", context.Req.Method}
+                });
             case "envVars":
                 return context.Res.Json(new()
                 {
@@ -127,9 +138,9 @@ When you can have two!
                 Console.WriteLine("Native log");
                 context.Log("Debug log");
                 context.Error("Error log");
-      
+
                 context.Log("Log+With+Plus+Symbol");
-                
+
                 context.Log(42);
                 context.Log(4.2);
                 context.Log(true);
