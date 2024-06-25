@@ -2,83 +2,76 @@ package io.openruntimes.java;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.rapidoid.http.Req;
-import org.rapidoid.http.Resp;
-import org.rapidoid.setup.On;
+import com.google.gson.ToNumberPolicy;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 
-import java.io.UnsupportedEncodingException;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.Console;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Server {
-    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+    private static final Gson gsonInternal = new GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create();
 
     private static final ExecutorService executor = Executors.newCachedThreadPool();
 
     public static void main(String[] args) {
-        On.port(3000);
-        On.get("/*").plain(Server::execute);
-        On.post("/*").plain(Server::execute);
-        On.put("/*").plain(Server::execute);
-        On.delete("/*").plain(Server::execute);
-        On.patch("/*").plain(Server::execute);
-        On.options("/*").plain(Server::execute);
-        On.head("/*").plain(Server::execute);
+
+        Javalin
+                .create()
+                .start(3000)
+                .get("/*", Server::execute)
+                .post("/*", Server::execute)
+                .put("/*", Server::execute)
+                .delete("/*", Server::execute)
+                .patch("/*", Server::execute)
+                .options("/*", Server::execute)
+                .head("/*", Server::execute);
     }
 
-    public static Resp execute(Req req, Resp resp) {
-        try {
-            return Server.action(req, resp);
-        } catch (Exception e) {
-            List<String> logs = new ArrayList<>();
-            List<String> errors = new ArrayList<>();
+    public static Context execute(Context ctx) {
+        RuntimeLogger logger = null;
 
+        try {
+            logger = new RuntimeLogger(ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"));
+        } catch (IOException e) {
+            // Ignore missing logs
+            try {
+                logger = new RuntimeLogger("disabled", "");
+            } catch (IOException e2) {
+                // Never happens
+            }
+        }
+
+        try {
+            return Server.action(logger, ctx);
+        } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
+            String message = sw.toString();
 
-            errors.add(sw.toString());
+            ctx.header("x-open-runtimes-log-id", logger.getId());
 
             try {
-                resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", logs), StandardCharsets.UTF_8.toString()));
-                resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", errors), StandardCharsets.UTF_8.toString()));
-            } catch (UnsupportedEncodingException e2) {
-                resp = resp.header("x-open-runtimes-errors", "Unsupported encoding detected.");
+                logger.write(message, RuntimeLogger.TYPE_ERROR, false);
+                logger.end();
+            } catch (IOException e2) {
+                // Ignore missing logs
             }
 
-            return resp
-                .code(500)
-                .result("");
+            return ctx.status(500).result("");
         }
     }
 
-    public static Resp action(Req req, Resp resp) {
-        Map<String, String> reqHeaders = req.headers();
-
-        ArrayList<String> cookieHeaders = new ArrayList<String>();
-
-        for (Map.Entry<String, String> entry : req.cookies().entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            cookieHeaders.add(key + "=" + value);
-        }
-
-        if (!(cookieHeaders.isEmpty())) {
-            reqHeaders.put("cookie", String.join("; ", cookieHeaders));
-        }
-
+    public static Context action(RuntimeLogger logger, Context ctx) {
         int safeTimeout = -1;
-        String timeout = reqHeaders.get("x-open-runtimes-timeout");
+        String timeout = ctx.header("x-open-runtimes-timeout");
         if (timeout != null && !timeout.isEmpty()) {
             boolean invalid = false;
 
@@ -89,7 +82,7 @@ public class Server {
             }
 
             if (invalid || safeTimeout == 0) {
-                return resp.code(500).result("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.");
+                return ctx.status(500).result("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.");
             }
         }
 
@@ -98,37 +91,46 @@ public class Server {
             serverSecret = "";
         }
 
-        if (reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals("") || !reqHeaders.getOrDefault("x-open-runtimes-secret", "").equals(serverSecret)) {
-            return resp.code(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
+        String secret = ctx.header("x-open-runtimes-secret");
+
+        if (secret == null) {
+            secret = "";
         }
 
-        String bodyRaw = req.body() == null ? "" : new String(req.body(), StandardCharsets.UTF_8);
-        Object body = bodyRaw;
-        Map<String, String> headers = new HashMap<>();
-        String method = req.verb();
 
-        for (Map.Entry<String, String> entry : reqHeaders.entrySet()) {
+        if (!serverSecret.equals("") && !secret.equals(serverSecret)) {
+            return ctx.status(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
+        }
+        byte[] bodyBinary = ctx.bodyAsBytes();
+
+        Map<String, String> headers = new HashMap<>();
+        String method = ctx.method().toString();
+
+        for (Map.Entry<String, String> entry : ctx.headerMap().entrySet()) {
             String header = entry.getKey().toLowerCase();
             if (!(header.startsWith("x-open-runtimes-"))) {
                 headers.put(header, entry.getValue());
             }
         }
 
-        String contentType = reqHeaders.getOrDefault("content-type", "text/plain");
-        if (contentType.contains("application/json")) {
-            if (!bodyRaw.isEmpty()) {
-                body = gson.fromJson(bodyRaw, Map.class);
-            } else {
-                body = new HashMap<String, Object>();
-            }
+        String enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS");
+
+        if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
+            enforcedHeadersString = "{}";
         }
 
-        String scheme = reqHeaders.getOrDefault("x-forwarded-proto", "http");
+        Map<String, Object> enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, Map.class);
+
+        for (Map.Entry<String, Object> entry : enforcedHeaders.entrySet()) {
+            headers.put(entry.getKey().toLowerCase(), String.valueOf(entry.getValue()));
+        }
+
+        String scheme = (scheme = ctx.header("x-forwarded-proto")) != null ? scheme : "http";
         String defaultPort = scheme.equals("https") ? "443" : "80";
 
-        String hostHeader = reqHeaders.getOrDefault("host", "");
+        String hostHeader = (hostHeader = ctx.header("host")) != null ? hostHeader : "";;
         String host = "";
-        int port = Integer.parseInt(defaultPort);
+        int port;
 
         if (hostHeader.contains(":")) {
             host = hostHeader.split(":")[0];
@@ -138,8 +140,8 @@ public class Server {
             port = Integer.parseInt(defaultPort);
         }
 
-        String path = req.path();
-        String queryString = req.query();
+        String path = ctx.path();
+        String queryString = (queryString = ctx.queryString()) != null ? queryString : "";
         Map<String, String> query = new HashMap<>();
 
         for (String param : queryString.split("&")) {
@@ -172,20 +174,13 @@ public class Server {
                 query,
                 queryString,
                 headers,
-                body,
-                bodyRaw,
+                bodyBinary,
                 url
         );
         RuntimeResponse runtimeResponse = new RuntimeResponse();
-        RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse);
+        RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse, logger);
 
-        PrintStream systemOut = System.out;
-        PrintStream systemErr = System.err;
-
-        ByteArrayOutputStream customStdStream = new ByteArrayOutputStream();
-        PrintStream customStd = new PrintStream(customStdStream);
-        System.setOut(customStd);
-        System.setErr(customStd);
+        logger.overrideNativeLogs();
 
         RuntimeOutput output;
 
@@ -233,16 +228,15 @@ public class Server {
             context.error(sw.toString());
             output = context.getRes().send("", 500);
         } finally {
-            System.out.flush();
-            System.err.flush();
-            System.setOut(systemOut);
-            System.setErr(systemErr);
+            logger.revertNativeLogs();
         }
 
         if (output == null) {
             context.error("Return statement missing. return context.res.empty() if no response is expected.");
             output = context.getRes().send("", 500);
         }
+
+        output.getHeaders().putIfAbsent("content-type", "text/plain");
 
         for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
             String header = entry.getKey().toLowerCase();
@@ -252,30 +246,24 @@ public class Server {
                 continue;
             }
 
-            if (header.equals("content-type") && !headerValue.startsWith("multipart/") && !headerValue.contains("charset=")) {
-                headerValue += "; charset=utf-8";
+            if (header.equals("content-type") && !headerValue.startsWith("multipart/")) {
+                headerValue = headerValue.toLowerCase();
+
+                if (!headerValue.contains("charset=")) {
+                    headerValue += "; charset=utf-8";
+                }
             }
 
-            resp = resp.header(header, headerValue);
+            ctx.header(header, headerValue);
         }
-
-        if (!customStdStream.toString().isEmpty()) {
-            context.log("");
-            context.log("----------------------------------------------------------------------------");
-            context.log("Unsupported logs detected. Use context.log() or context.error() for logging.");
-            context.log("----------------------------------------------------------------------------");
-            context.log(customStdStream.toString());
-            context.log("----------------------------------------------------------------------------");
-        }
+        ctx.header("x-open-runtimes-log-id", logger.getId());
 
         try {
-            resp = resp.header("x-open-runtimes-logs", URLEncoder.encode(String.join("\n", context.getLogs()), StandardCharsets.UTF_8.toString()));
-            resp = resp.header("x-open-runtimes-errors", URLEncoder.encode(String.join("\n", context.getErrors()), StandardCharsets.UTF_8.toString()));
-        } catch (UnsupportedEncodingException e) {
-            resp = resp.header("x-open-runtimes-errors", "Unsupported encoding detected.");
+            logger.end();
+        } catch (IOException e) {
+            // Ignore missing logs
         }
-        return resp
-                .code(output.getStatusCode())
-                .result(output.getBody());
+
+        return ctx.status(output.getStatusCode()).result(output.getBody());
     }
 }

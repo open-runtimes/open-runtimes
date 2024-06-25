@@ -2,93 +2,12 @@ require 'sinatra'
 require 'json'
 require 'async'
 
+require_relative 'types.rb'
+require_relative 'logger.rb'
+
 USER_CODE_PATH = '/usr/local/server/src/function';
 
-class RuntimeResponse
-  def send(body, status_code = 200, headers = {})
-    {
-      'body' => body,
-      'statusCode' => status_code,
-      'headers' => headers
-    }
-  end
-
-  def json(obj, status_code = 200, headers = {})
-    headers['content-type'] = 'application/json'
-
-    self.send(obj.to_json, status_code, headers)
-  end
-
-  def empty()
-    self.send('', 204, {})
-  end
-
-  def redirect(url, status_code = 301, headers = {})
-    headers['location'] = url
-
-    self.send('', status_code, headers)
-  end
-end
-
-class RuntimeRequest
-  attr_accessor :body_raw
-  attr_accessor :body
-  attr_accessor :headers
-  attr_accessor :method
-  attr_accessor :url
-  attr_accessor :path
-  attr_accessor :port
-  attr_accessor :scheme
-  attr_accessor :host
-  attr_accessor :query
-  attr_accessor :query_string
-
-  def initialize(url, method, scheme, host, port, path, query, query_string, headers, body, body_raw)
-    @body_raw = body_raw
-    @body = body
-    @headers = headers
-    @method = method
-    @url = url
-    @path = path
-    @port = port
-    @scheme = scheme
-    @host = host
-    @query = query
-    @query_string = query_string
-  end
-end
-
-class RuntimeContext
-  attr_accessor :req
-  attr_accessor :res
-  attr_accessor :logs
-  attr_accessor :errors
-
-  def initialize(req, res)
-    @req = req
-    @res = res
-    @logs = []
-    @errors = []
-  end
-
-  def log(message)
-    if message.kind_of?(Array) || message.kind_of?(Hash)
-      @logs.push(message.to_json)
-    else
-      @logs.push(message.to_s)
-    end
-  end
-
-  def error(message)
-    if message.kind_of?(Array) || message.kind_of?(Hash)
-      @errors.push(message.to_json)
-    else
-      @errors.push(message.to_s)
-    end
-  end
-end
-
-def action(request, response)
+def action(request, response, logger)
   safe_timeout = nil
 
   if request.env.key?('HTTP_X_OPEN_RUNTIMES_TIMEOUT')
@@ -106,7 +25,7 @@ def action(request, response)
   secret = request.env['HTTP_X_OPEN_RUNTIMES_SECRET'] || ''
   server_secret = ENV['OPEN_RUNTIMES_SECRET'] || ''
 
-  if secret.empty? || secret != server_secret
+  if !(server_secret.empty?) && secret != server_secret
     response.status = 500
     response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.'
     return
@@ -147,8 +66,7 @@ def action(request, response)
     end
   end
 
-  body_raw = request.body.read
-  body = body_raw
+  body_binary = request.body.read.unpack("C*")
   method = request.request_method
   headers = {}
 
@@ -170,20 +88,14 @@ def action(request, response)
     end
   end
 
-  content_type = request.env['CONTENT_TYPE']
-  content_type = 'text/plain' if content_type.nil?
-
-  if content_type.include?('application/json')
-    unless body_raw.empty?
-      body = JSON.parse(body_raw)
-    end
+  enforced_headers = JSON.parse(ENV['OPEN_RUNTIMES_HEADERS'].empty? ? '{}' : ENV['OPEN_RUNTIMES_HEADERS'])
+  enforced_headers.each do |key, value|
+    headers[key.downcase] = value.to_s
   end
 
-  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body, body_raw)
+  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body_binary)
   context_res = RuntimeResponse.new
-  context = RuntimeContext.new(context_req, context_res)
-
-  custom_std = nil
+  context = RuntimeContext.new(context_req, context_res, logger)
   
   output = nil
 
@@ -194,11 +106,7 @@ def action(request, response)
       raise 'User function is not valid.'
     end
 
-    system_out = $stdout
-    system_err = $stderr
-    custom_std = StringIO.new
-    $stdout = custom_std
-    $stderr = custom_std
+    logger.override_native_logs
 
     unless safe_timeout.nil?
       executed = true
@@ -213,7 +121,7 @@ def action(request, response)
 
       unless executed
         context.error('Execution timed out.')
-        output = context.res.send('', 500, {})
+        output = context.res.text('', 500, {})
       end
     else
       output = main(context)
@@ -221,15 +129,14 @@ def action(request, response)
   rescue Exception => e
     context.error(e)
     context.error(e.backtrace.join("\n"))
-    output = context.res.send('', 500, {})
+    output = context.res.text('', 500, {})
   ensure
-    $stdout = system_out
-    $stderr = system_err
+    logger.revert_native_logs
   end
 
   if output.nil?
     context.error('Return statement missing. return context.res.empty() if no response is expected.')
-    output = context.res.send('', 500, {})
+    output = context.res.text('', 500, {})
   end
 
   output['body'] = '' if output['body'].nil?
@@ -244,41 +151,36 @@ def action(request, response)
     end
   end
 
-  unless custom_std.string.nil? || custom_std.string.empty?
-    context.log('----------------------------------------------------------------------------')
-    context.log('Unsupported logs detected. Use context.log() or context.error() for logging.')
-    context.log('----------------------------------------------------------------------------')
-    context.log(custom_std.string)
-    context.log('----------------------------------------------------------------------------')
-  end
-
-  response.headers['x-open-runtimes-logs'] = ERB::Util.url_encode(context.logs.join('\n'))
-  response.headers['x-open-runtimes-errors'] = ERB::Util.url_encode(context.errors.join('\n'))
+  logger.end
+  response.headers['x-open-runtimes-log-id'] = logger.id
 
   response.headers['content-type'] = 'text/plain' if response.headers['content-type'].nil?
+  response.headers['content-type'] = response.headers['content-type'].downcase
 
   unless response.headers['content-type'].start_with?('multipart/') || response.headers['content-type'].include?('charset=') 
     response.headers['content-type'] += '; charset=utf-8'
   end
 
   response.status = output['statusCode']
-  response.body = output['body']
+  response.body = output['body'].pack('C*')
   response
 end
 
 def handle(request, response)
+  logger = RuntimeLogger.new(request.env['HTTP_X_OPEN_RUNTIMES_LOGGING'], request.env['HTTP_X_OPEN_RUNTIMES_LOG_ID'])
   begin
-    action(request, response)
+    action(request, response, logger)
     response
   rescue Exception => e
-    logs = []
-    errors = [
-      e,
-      e.backtrace.join("\n")
-    ]
+    message = ""
+    message += e.full_message
+    message += "\n"
+    message +=  e.backtrace.join("\n")
 
-    response.headers['x-open-runtimes-logs'] = ERB::Util.url_encode(logs.join('\n'))
-    response.headers['x-open-runtimes-errors'] = ERB::Util.url_encode(errors.join('\n'))
+    logger.write(e, RuntimeLogger::TYPE_ERROR)
+    logger.end
+
+    response.headers['x-open-runtimes-log-id'] = logger.id
     response.headers['content-type'] = 'text/plain'
     response.status = 500
     response.body = ''

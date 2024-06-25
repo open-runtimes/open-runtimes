@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+ 
 namespace DotNetRuntime
 {
 	public class RuntimeRequest
@@ -11,8 +14,37 @@ namespace DotNetRuntime
 		public string QueryString { get; private set; }
 		public string Url { get; private set; }
 		public Dictionary<string, string> Headers { get; private set; }
-		public object Body { get; private set; }
-		public string BodyRaw { get; private set; }
+
+		public object Body
+        {
+            get
+            {
+                var contentType = Headers.TryGetValue("content-type", out string? value) ? (value ?? "").ToLower():"";
+
+                if (contentType.StartsWith("application/json"))
+                {
+                    if(BodyBinary.Length == 0) {
+                        return new Dictionary<string, object?>();
+                    } else {
+                        return BodyJson;
+                    }
+                }
+                
+                string[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };
+
+                if (binaryTypes.Any(binaryType => contentType.StartsWith(binaryType)))
+                {
+                    return BodyBinary;
+                }
+
+                return BodyText;
+            }
+        }
+        public byte[] BodyBinary{get; private set;}
+        public string BodyText => System.Text.Encoding.UTF8.GetString(BodyBinary, 0, BodyBinary.Length);
+        public string BodyRaw => BodyText;
+        public Dictionary<string, object?> BodyJson => JsonSerializer.Deserialize<Dictionary<string, object?>>(BodyText) ?? new Dictionary<string, object?>();
+
 
 		public RuntimeRequest(
 		    string method,
@@ -24,11 +56,9 @@ namespace DotNetRuntime
 		    string queryString,
 		    string url,
 		    Dictionary<string, string> headers,
-		    object body,
-		    string bodyRaw)
+		    byte[] bodyBinary)
 		{
-			BodyRaw = bodyRaw;
-			Body = body;
+			BodyBinary = bodyBinary;
 			Headers = headers;
 			Method = method;
 			Url = url;

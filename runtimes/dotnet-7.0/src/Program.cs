@@ -1,12 +1,5 @@
-using DotNetRuntime;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.IO;
 using System.Text;
 using System.Text.Json;
-using System.Web;
-using Microsoft.Extensions.Primitives;
 
 namespace DotNetRuntime
 {
@@ -22,26 +15,32 @@ namespace DotNetRuntime
 
         static async Task<IResult> Execute(HttpRequest request)
         {
+            var loggingHeader = request.Headers.TryGetValue("x-open-runtimes-logging", out var loggingHeaderValue)
+                ? loggingHeaderValue.ToString()
+                : string.Empty;
+
+            var logIdHeader = request.Headers.TryGetValue("x-open-runtimes-log-id", out var logIdHeaderValue)
+                ? logIdHeaderValue.ToString()
+                : string.Empty;
+
+            RuntimeLogger logger = new RuntimeLogger(loggingHeader, logIdHeader);
+
             try
             {
-                return await Action(request);
+                return await Action(request, logger);
             } catch (Exception e)
             {
-                List<string> Logs = new List<string>();
-                List<string> Errors = new List<string>();
-
-                Errors.Add(e.ToString());
+                logger.Write(e.ToString(), RuntimeLogger.TYPE_ERROR);
+                logger.End();
 
                 var outputHeaders = new Dictionary<string, string>();
+                outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
-                outputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(string.Join("\n", Logs)));
-                outputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(string.Join("\n", Errors)));
-
-                return new CustomResponse("", 500, outputHeaders);
+                return new CustomResponse(Encoding.UTF8.GetBytes(""), 500, outputHeaders);
             }
         }
 
-        static async Task<IResult> Action(HttpRequest request)
+        static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         {
             int safeTimout = -1;
             var timeout = request.Headers.TryGetValue("x-open-runtimes-timeout", out var timeoutValue)
@@ -52,7 +51,7 @@ namespace DotNetRuntime
             {
                 if(!Int32.TryParse(timeout, out safeTimout) || safeTimout == 0)
                 {
-                    return new CustomResponse("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.", 500);
+                    return new CustomResponse("Header \"x-open-runtimes-timeout\" must be an integer greater than 0."u8.ToArray(), 500);
                 }
             }
 
@@ -60,14 +59,21 @@ namespace DotNetRuntime
                 ? secretValue.ToString()
                 : string.Empty;
 
-            if(secret == string.Empty || secret != (Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? ""))
+            string serverSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET");
+            if (!string.IsNullOrEmpty(serverSecret) && secret != serverSecret)
             {
-                return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
+                return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header."u8.ToArray(), 500);
             }
 
-            var reader = new StreamReader(request.Body);
-            var bodyRaw = await reader.ReadToEndAsync();
-            object body = bodyRaw;
+            byte[] bodyBinary = new byte[] {};
+            System.IO.Stream bodyStream = request.Body;
+
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                bodyStream.CopyToAsync(memoryStream);
+                bodyBinary = memoryStream.ToArray();
+            }
+            
             var headers = new Dictionary<string, string>();
             var method = request.Method;
 
@@ -82,22 +88,16 @@ namespace DotNetRuntime
                 }
             }
 
-            var contentType = request.Headers.TryGetValue("content-type", out var contentTypeValue) ? contentTypeValue.ToString() : "";
-            if(contentType.Contains("application/json"))
+            String enforcedHeadersString = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS");
+            if (string.IsNullOrEmpty(enforcedHeadersString))
             {
-                if(string.IsNullOrEmpty(bodyRaw))
-                {
-                    body = new Dictionary<string, object>();
-                } 
-                else
-                {
-                    body = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyRaw) ?? new Dictionary<string, object>();
-                }
+                enforcedHeadersString = "{}";
             }
 
-            if(body == null)
+            Dictionary<string, object> enforcedHeaders = JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString) ?? new Dictionary<string, object>();
+            foreach(KeyValuePair<string, object> entry in enforcedHeaders)
             {
-                body = new Dictionary<string, object>();
+                headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
             }
 
             var hostHeader = request.Headers.TryGetValue("host", out var hostHeaderValue)
@@ -119,7 +119,7 @@ namespace DotNetRuntime
             {
                 host = hostHeader.Split(":")[0];
                 port = Int32.Parse(hostHeader.Split(":")[1]);
-            } 
+            }
             else
             {
                 host = hostHeader;
@@ -129,7 +129,7 @@ namespace DotNetRuntime
             var path = request.Path;
 
             var queryString = request.QueryString.Value ?? "";
-            if(queryString.StartsWith("?")) 
+            if(queryString.StartsWith("?"))
             {
                 queryString = queryString.Remove(0, 1);
             }
@@ -138,7 +138,7 @@ namespace DotNetRuntime
             foreach (var param in queryString.Split("&"))
             {
                 var pair = param.Split("=", 2);
-                if(pair.Length >= 1 && !string.IsNullOrEmpty(pair[0])) 
+                if(pair.Length >= 1 && !string.IsNullOrEmpty(pair[0]))
                 {
                     var value = pair.Length == 2 ? pair[1] : "";
                     query.Add(pair[0], value);
@@ -169,20 +169,13 @@ namespace DotNetRuntime
                 queryString,
                 url,
                 headers,
-                body,
-                bodyRaw);
+                bodyBinary);
 
             var contextResponse = new RuntimeResponse();
 
-            var context = new RuntimeContext(contextRequest, contextResponse);
+            var context = new RuntimeContext(contextRequest, contextResponse, logger);
 
-            var originalOut = Console.Out;
-            var originalErr = Console.Error;
-
-            var customStd = new StringBuilder();
-            var customStdWriter = new StringWriter(customStd);
-            Console.SetOut(customStdWriter);
-            Console.SetError(customStdWriter);
+            logger.OverrideNativeLogs();
 
             RuntimeOutput? output = null;
 
@@ -205,7 +198,7 @@ namespace DotNetRuntime
                     else
                     {
                         context.Error("Execution timed out.");
-                        output = context.Res.Send("", 500);
+                        output = context.Res.Text("", 500);
                     }
                 } else
                 {
@@ -215,18 +208,17 @@ namespace DotNetRuntime
             catch (Exception e)
             {
                 context.Error(e.ToString());
-                output = context.Res.Send("", 500, new Dictionary<string,string>());
+                output = context.Res.Text("", 500, new Dictionary<string,string>());
             }
             finally
             {
-                Console.SetOut(originalOut);
-                Console.SetError(originalErr);
+                logger.RevertNativeLogs();
             }
 
             if(output == null)
             {
                 context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-                output = context.Res.Send("", 500, new Dictionary<string,string>());
+                output = context.Res.Text("", 500, new Dictionary<string,string>());
             }
 
             var outputHeaders = new Dictionary<string, string>();
@@ -235,30 +227,23 @@ namespace DotNetRuntime
                 var header = entry.Key.ToLower();
                 var value = entry.Value;
 
+                if (header == "content-type" && !string.IsNullOrEmpty(value))
+                {
+                    value = value.ToLower();
+                }
+
                 if (!(header.StartsWith("x-open-runtimes-")))
                 {
                     outputHeaders.Add(header, value);
                 }
             }
 
-            if(!string.IsNullOrEmpty(customStd.ToString()))
-            {
-                context.Log("");
-                context.Log("----------------------------------------------------------------------------");
-                context.Log("Unsupported logs detected. Use context.Log() or context.Error() for logging.");
-                context.Log("----------------------------------------------------------------------------");
-                context.Log(customStd.ToString());
-                context.Log("----------------------------------------------------------------------------");
-            }
+            logger.End();
 
-            outputHeaders.Add("x-open-runtimes-logs", System.Web.HttpUtility.UrlEncode(string.Join("\n", context.Logs)));
-            outputHeaders.Add("x-open-runtimes-errors", System.Web.HttpUtility.UrlEncode(string.Join("\n", context.Errors)));
+            outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
             return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
         }
     }
+
 }
-
-
-
-

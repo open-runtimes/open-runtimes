@@ -25,13 +25,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.php --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/php:v3-8.1 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.php --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/php:v4-8.1 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/php:v3-8.1 sh helpers/start.sh "php src/server.php"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/php:v4-8.1 sh helpers/start.sh "php src/server.php"
 ```
 
 4. In new terminal window, execute function:

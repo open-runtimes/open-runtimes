@@ -6,13 +6,15 @@ def main(context)
 
     case action
     when 'plaintextResponse'
-        return context.res.send('Hello World 👋')
+        return context.res.text('Hello World 👋')
     when 'jsonResponse'
         return context.res.json({ 'json': true, 'message': 'Developers are awesome.' })
     when 'customCharsetResponse'
-        return context.res.send('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
+        return context.res.text('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
+    when 'uppercaseCharsetResponse'
+        return context.res.text('ÅÆ', 200, { 'content-type': 'TEXT/PLAIN' })
     when 'multipartResponse'
-        return context.res.send("--12345
+        return context.res.text("--12345
 Content-Disposition: form-data; name=\"partOne\"
 
 Why just have one part?
@@ -26,22 +28,22 @@ When you can have two!
     when 'emptyResponse'
         return context.res.empty()
     when 'noResponse'
-        context.res.send('This should be ignored, as it is not returned.')
+        context.res.text('This should be ignored, as it is not returned.')
         return nil
     when 'doubleResponse'
-        context.res.send('This should be ignored.')
-        return context.res.send('This should be returned.')
+        context.res.text('This should be ignored.')
+        return context.res.text('This should be returned.')
     when 'headersResponse'
-        return context.res.send('OK', 200, {
+        return context.res.text('OK', 200, {
             'first-header': 'first-value',
             'second-header': context.req.headers['x-open-runtimes-custom-in-header'] || 'missing',
             'cookie': context.req.headers['cookie'] || 'missing',
             'x-open-runtimes-custom-out-header': 'third-value'
         })
     when 'statusResponse'
-        return context.res.send('FAIL', 404)
+        return context.res.text('FAIL', 404)
     when 'requestMethod'
-        return context.res.send(context.req.method)
+        return context.res.text(context.req.method)
     when 'requestUrl'
         return context.res.json({
             'url': context.req.url,
@@ -54,25 +56,28 @@ When you can have two!
         })
     when 'requestHeaders'
         return context.res.json(context.req.headers)
-    when 'requestBodyPlaintext'
-        return context.res.send(context.req.body)
+    when 'requestBodyText'
+        return context.res.text(context.req.body_text)
     when 'requestBodyJson'
-        key1 = nil
-        key2 = nil
-
-        if context.req.body.instance_of?(String)
-            key1 = 'Missing key'
-            key2 = 'Missing key'
-        else
-            key1 = context.req.body['key1'] || 'Missing key'
-            key2 = context.req.body['key2'] || 'Missing key'
-        end
-
-        return context.res.json({
-            'key1': key1,
-            'key2': key2,
-            'raw': context.req.body_raw
-        })
+        return context.res.json(context.req.body_json)
+    when 'requestBodyBinary'
+        return context.res.binary(context.req.body_binary)
+    when 'requestBodyTextAuto'
+        return context.res.text(context.req.body)
+    when 'requestBodyJsonAuto'
+        return context.res.json(context.req.body)
+    when 'requestBodyBinaryAuto'
+        return context.res.binary(context.req.body)
+    when 'binaryResponse1'
+        return context.res.binary([0,10,255]) # bytes array
+    when 'binaryResponse2'
+        return context.res.binary([0,20,255]) # Just a filler
+    when 'binaryResponse3'
+        return context.res.binary([0,30,255]) # Just a filler
+    when 'binaryResponse4'
+        return context.res.binary([0,40,255]) # Just a filler
+    when 'binaryResponse5'
+        return context.res.binary([0,50,255]) # Just a filler
     when 'envVars'
         return context.res.json({
             'var': ENV['CUSTOM_ENV_VAR'] || nil,
@@ -92,7 +97,7 @@ When you can have two!
         context.log({ 'objectKey': 'objectValue' })
         context.log([ 'arrayValue' ])
 
-        return context.res.send('')
+        return context.res.text('')
     when 'library'
         todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_raw).body)
         return context.res.json({ 'todo': todo })
@@ -103,7 +108,11 @@ When you can have two!
         end
         thread.join
         context.log('Timeout end.');
-        return context.res.send('Successful response.');
+        return context.res.text('Successful response.');
+    when 'deprecatedMethods'
+        return context.res.send(context.req.body_raw);
+    when 'deprecatedMethodsUntypedBody'
+        return context.res.send(50);
     else
         raise 'Unknown action'
     end

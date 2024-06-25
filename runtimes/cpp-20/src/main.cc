@@ -4,6 +4,7 @@
 #include "RuntimeRequest.h"
 #include "RuntimeOutput.h"
 #include "RuntimeContext.h"
+#include "RuntimeLogger.h"
 #include "{entrypointFile}"
 #include <vector>
 #include <numeric>
@@ -29,6 +30,8 @@ int main()
             [](const drogon::HttpRequestPtr &req,
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
+                std::shared_ptr<runtime::RuntimeLogger> logger = std::make_shared<runtime::RuntimeLogger>(req->getHeader("x-open-runtimes-logging"), req->getHeader("x-open-runtimes-log-id"));
+
                 try {
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
 
@@ -55,13 +58,16 @@ int main()
                         }
                     }
 
-                    std::string secret = req->getHeader("x-open-runtimes-secret");
-                    if (secret.empty() || secret != std::getenv("OPEN_RUNTIMES_SECRET"))
-                    {
-                        res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
-                        res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
-                        callback(res);
-                        return;
+                    if(std::getenv("OPEN_RUNTIMES_SECRET") != nullptr) {
+                        std::string serverSecret(std::getenv("OPEN_RUNTIMES_SECRET"));
+                        std::string secret = req->getHeader("x-open-runtimes-secret");
+
+                        if(serverSecret != "" && secret != serverSecret) {
+                            res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
+                            res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
+                            callback(res);
+                            return;
+                        }
                     }
 
                     std::string method = req->getMethodString();
@@ -71,8 +77,71 @@ int main()
                     runtime::RuntimeRequest runtimeRequest;
                     runtimeRequest.method = method;
                     runtimeRequest.queryString = queryString;
-                    runtimeRequest.bodyRaw = req->getBody();
-                    runtimeRequest.body = runtimeRequest.bodyRaw;
+
+                    runtimeRequest.bodyText = req->getBody();
+                    runtimeRequest.bodyRaw = runtimeRequest.bodyText;
+                    std::vector<std::byte> bodyBytes;
+                    bodyBytes.reserve(runtimeRequest.bodyText.size());
+                    std::transform(std::begin(runtimeRequest.bodyText), std::end(runtimeRequest.bodyText), std::back_inserter(bodyBytes), [](char c){
+                        return std::byte(c);
+                    });
+                    runtimeRequest.bodyBinary = bodyBytes;
+
+                    if(runtimeRequest.bodyText.empty())
+                    {
+                        Json::Value bodyRootEmpty;
+                        runtimeRequest.bodyJson = bodyRootEmpty;
+                    } else {
+                        Json::Value bodyRoot;   
+                        Json::Reader reader;
+                        bool parsingResult = reader.parse(runtimeRequest.bodyText, bodyRoot);
+
+                        if(!parsingResult)
+                        {
+                            Json::Value bodyRootEmpty;
+                            runtimeRequest.bodyJson = bodyRootEmpty;
+                        } else {
+                            runtimeRequest.bodyJson = bodyRoot;
+                        }
+                    }
+
+                    std::string contentType = req->getHeader("content-type");
+                    if(contentType.empty())
+                    {
+                        contentType = "text/plain";
+                    }
+
+                    std::transform(
+                        contentType.begin(),
+                        contentType.end(),
+                        contentType.begin(),
+                        [](unsigned char c){ return std::tolower(c); }
+                    );
+
+                    if (contentType.rfind("application/json", 0) == 0) {
+                        if(runtimeRequest.bodyBinary.empty()) {
+                            Json::Value bodyRootEmpty;
+                            runtimeRequest.body = bodyRootEmpty;
+                        } else {
+                            runtimeRequest.body = runtimeRequest.bodyJson;
+                        }
+                    } else {
+                        bool isBinary = false;
+
+                        std::vector<std::string> binaryTypes = {"application/", "audio/", "font/", "image/", "video/"};
+                        for (const std::string& binaryType : binaryTypes) {
+                            if (contentType.rfind(binaryType, 0) == 0) {
+                                runtimeRequest.body = runtimeRequest.bodyBinary;
+                                isBinary = true;
+                                break;
+                            }
+                        }
+
+                        if(!isBinary) {
+                            runtimeRequest.body = runtimeRequest.bodyText;
+                        }
+                    }
+                    
                     runtimeRequest.path = path;
 
                     std::string scheme = req->getHeader("x-forwarded-proto");
@@ -218,44 +287,47 @@ int main()
                         headers["cookie"] = cookieHeadersString;
                     }
 
-                    runtimeRequest.headers = headers;
+                    char* serverHeadersChar = std::getenv("OPEN_RUNTIMES_HEADERS");
+                    if(serverHeadersChar != nullptr) {
+                        std::string serverHeadersString(serverHeadersChar);
 
-                    std::string contentType = req->getHeader("content-type");
-                    if(contentType.empty())
-                    {
-                        contentType = "text/plain";
-                    }
+                        if(serverHeadersString.empty()) {
+                            serverHeadersString = "{}";
+                        }
 
-                    if (contentType.find("application/json") != std::string::npos)
-                    {
-                        if(runtimeRequest.bodyRaw.empty())
+                        Json::Value serverHeaders;   
+                        Json::Reader serverHeadersReader;
+                        bool parsingResult = serverHeadersReader.parse(serverHeadersString, serverHeaders);
+                        if(!parsingResult)
                         {
-                            Json::Value bodyRoot;
-                            runtimeRequest.body = bodyRoot;
-                        } else {
-                            Json::Value bodyRoot;   
-                            Json::Reader reader;
-                            bool parsingResult = reader.parse(runtimeRequest.bodyRaw, bodyRoot);
+                            throw std::runtime_error("Invalid JSON body.");
+                        }
 
-                            if(!parsingResult)
-                            {
-                                throw std::runtime_error("Invalid JSON body.");
-                            }
+                        for (const std::string &key : serverHeaders.getMemberNames())
+                        {
+                            std::string headerKey = key;
+                            std::transform(
+                                headerKey.begin(),
+                                headerKey.end(),
+                                headerKey.begin(),
+                                [](unsigned char c){ return std::tolower(c); }
+                            );
 
-                            runtimeRequest.body = bodyRoot;
+                            auto value = serverHeaders[key];
+                            headers[headerKey] = value.asString();
                         }
                     }
+
+                    runtimeRequest.headers = headers;
 
                     runtime::RuntimeResponse contextResponse;
                     runtime:: RuntimeContext context;
 
                     context.req = runtimeRequest;
                     context.res = contextResponse;
+                    context.logger = logger;
 
-                    std::stringstream outBuffer;
-                    std::stringstream errBuffer;
-                    std::streambuf *oldOut = std::cout.rdbuf(outBuffer.rdbuf());
-                    std::streambuf *oldErr = std::cerr.rdbuf(errBuffer.rdbuf());
+                    logger->overrideNativeLogs();
 
                     runtime::RuntimeOutput output;
 
@@ -276,7 +348,7 @@ int main()
 
                             if (waiter.wait_for(std::chrono::seconds(timeout)) == std::future_status::timeout) {
                                 context.error("Execution timed out.");
-                                output = context.res.send("", 500, {});
+                                output = context.res.text("", 500, {});
                                 pthread_cancel(thread.native_handle());
                             } else {
                                 output = future.get();
@@ -291,19 +363,7 @@ int main()
                         output = contextResponse.send("", 500, {});
                     }
 
-                    if(!outBuffer.str().empty() || !errBuffer.str().empty())
-                    {
-                        context.log("");
-                        context.log("----------------------------------------------------------------------------");
-                        context.log("Unsupported logs detected. Use context.log() or context.error() for logging.");
-                        context.log("----------------------------------------------------------------------------");
-                        context.log(outBuffer.str());
-                        context.log(errBuffer.str());
-                        context.log("----------------------------------------------------------------------------");
-                    }
-
-                    std::cout.rdbuf(oldOut);
-                    std::cerr.rdbuf(oldErr);
+                    logger->revertNativeLogs();
 
                     for (const std::string &key : output.headers.getMemberNames())
                     {
@@ -327,6 +387,13 @@ int main()
                         contentTypeHeader = "text/plain";
                     }
 
+                    std::transform(
+                        contentTypeHeader.begin(),
+                        contentTypeHeader.end(),
+                        contentTypeHeader.begin(),
+                        [](unsigned char c){ return std::tolower(c); }
+                    );
+
                     if (contentTypeHeader.find("multipart/") == std::string::npos &&
                         contentTypeHeader.find("charset=") == std::string::npos)
                     {
@@ -335,87 +402,26 @@ int main()
 
                     res->addHeader("content-type", contentTypeHeader);
 
-                    CURL *curl = curl_easy_init();
-
-                    if(!context.logs.empty())
-                    {
-                        std::string logsString = std::accumulate(
-                            std::next(context.logs.begin()), 
-                            context.logs.end(), 
-                            context.logs[0], 
-                            [](const std::string &a, const std::string &b) {
-                                return a + "\n" + b;
-                            }
-                        );
-
-                        std::string logsEncoded = curl_easy_escape(
-                            curl,
-                            logsString.c_str(),
-                            logsString.length()
-                        );
-
-                        res->addHeader("x-open-runtimes-logs", logsEncoded);
-                    } else {
-                        res->addHeader("x-open-runtimes-logs", "");
-                    }
-
-                    if(!context.errors.empty())
-                    {
-                        std::string errorsString = std::accumulate(
-                            std::next(context.errors.begin()), 
-                            context.errors.end(), 
-                            context.errors[0], 
-                            [](const std::string &a, const std::string &b) {
-                                return a + "\n" + b;
-                            }
-                        );
-
-                        std::string errorsEncoded = curl_easy_escape(
-                            curl,
-                            errorsString.c_str(),
-                            errorsString.length()
-                        );
-
-                        res->addHeader("x-open-runtimes-errors", errorsEncoded);
-                    } else {
-                        res->addHeader("x-open-runtimes-errors", "");
-                    }
+                    logger->end();
+                    res->addHeader("x-open-runtimes-log-id", logger->id);
 
                     res->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
-                    res->setBody(output.body);
+
+                    std::string outputBodyString;
+                    for (const auto& byte : output.body) {
+                        outputBodyString += static_cast<char>(byte);
+                    }
+
+                    res->setBody(outputBodyString);
                     callback(res);
                 } catch(const std::exception& e)
                 {
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
 
-                    std::vector<std::string> errors = {};
-                    errors.push_back(e.what());
+                    logger->write(e.what(), "error");
+                    logger->end();
 
-                    CURL *curl = curl_easy_init();
-
-                    res->addHeader("x-open-runtimes-logs", "");
-
-                    if(!errors.empty())
-                    {
-                        std::string errorsString = std::accumulate(
-                            std::next(errors.begin()), 
-                            errors.end(), 
-                            errors[0], 
-                            [](const std::string &a, const std::string &b) {
-                                return a + "\n" + b;
-                            }
-                        );
-
-                        std::string errorsEncoded = curl_easy_escape(
-                            curl,
-                            errorsString.c_str(),
-                            errorsString.length()
-                        );
-
-                        res->addHeader("x-open-runtimes-errors", errorsEncoded);
-                    } else {
-                        res->addHeader("x-open-runtimes-errors", "");
-                    }
+                    res->addHeader("x-open-runtimes-log-id", logger->id);
 
                     res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
                     res->setBody("");

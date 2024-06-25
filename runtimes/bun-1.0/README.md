@@ -24,13 +24,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.ts --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/bun:v3-1.0 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=index.ts --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/bun:v4-1.0 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=index.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/bun:v3-1.0 sh helpers/start.sh "bun src/server.ts"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=index.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/bun:v4-1.0 sh helpers/start.sh "bun src/server.ts"
 ```
 
 4. In new terminal window, execute function:

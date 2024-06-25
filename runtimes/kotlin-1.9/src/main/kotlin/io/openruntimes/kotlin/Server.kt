@@ -2,20 +2,19 @@ package io.openruntimes.kotlin
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.ToNumberPolicy
 import io.javalin.Javalin
 import io.javalin.http.Context
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.*
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-import kotlin.reflect.KClass
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberFunctions
 import kotlin.time.Duration.Companion.seconds
 
 val gson: Gson = GsonBuilder().serializeNulls().create()
+val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
 
 suspend fun main() {
     Javalin
@@ -31,37 +30,26 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
+    val logger = RuntimeLogger(ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"))
     try {
-        action(ctx)
+        action(logger, ctx)
     } catch (e: Exception) {
-        val logs = mutableListOf<String>()
-        val errors = mutableListOf<String>()
-
         val sw = StringWriter()
         val pw = PrintWriter(sw)
         e.printStackTrace(pw)
 
-        errors.add(sw.toString())
+        val message = sw.toString()
 
-        try {
-            ctx.header(
-                "x-open-runtimes-logs",
-                URLEncoder.encode(logs.joinToString("\n"), StandardCharsets.UTF_8.toString())
-            )
-            ctx.header(
-                "x-open-runtimes-errors",
-                URLEncoder.encode(errors.joinToString("\n"), StandardCharsets.UTF_8.toString())
-            )
-        } catch (ex: UnsupportedEncodingException) {
-            ctx.header("x-open-runtimes-logs", "Internal error while processing logs.")
-            ctx.header("x-open-runtimes-errors", "Internal error while processing logs.")
-        }
-    
+        ctx.header("x-open-runtimes-log-id", logger.id ?: "")
+
+        logger.write(message, RuntimeLogger.TYPE_ERROR, false)
+        logger.end()
+
         ctx.status(500).result("")
     }
 }
 
-suspend fun action(ctx: Context) {
+suspend fun action(logger: RuntimeLogger, ctx: Context) {
     var safeTimeout = -1;
     val timeout = ctx.header("x-open-runtimes-timeout") ?: ""
     if (timeout.isNotEmpty()) {
@@ -81,13 +69,12 @@ suspend fun action(ctx: Context) {
     val secret = ctx.header("x-open-runtimes-secret") ?: ""
     val serverSecret = System.getenv("OPEN_RUNTIMES_SECRET") ?: ""
 
-    if (secret == "" || secret != serverSecret) {
+    if (serverSecret != "" && secret != serverSecret) {
         ctx.status(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
         return
     }
 
-    val bodyRaw = ctx.body()
-    var body = bodyRaw as Any
+    val bodyBinary = ctx.bodyAsBytes()
     val headers = mutableMapOf<String, String>()
     val method = ctx.method()
 
@@ -98,13 +85,15 @@ suspend fun action(ctx: Context) {
         }
     }
 
-    val contentType = ctx.header("content-type") ?: "text/plain"
-    if (contentType.contains("application/json")) {
-        body = if (bodyRaw.isNotEmpty()) {
-            gson.fromJson(bodyRaw, MutableMap::class.java)
-        } else {
-            mutableMapOf<String, Any>()
-        }
+    var enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS")
+    if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
+        enforcedHeadersString = "{}"
+    }
+    val enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, MutableMap::class.java)
+
+    for (entry in enforcedHeaders.entries.iterator()) {
+        val header = "${entry.key}".lowercase()
+        headers[header] = "${entry.value}"
     }
 
     val hostHeader = ctx.header("host") ?: ""
@@ -157,20 +146,13 @@ suspend fun action(ctx: Context) {
         query,
         queryString,
         headers,
-        body,
-        bodyRaw,
+        bodyBinary,
         url,
     )
     val runtimeResponse = RuntimeResponse()
-    val context = RuntimeContext(runtimeRequest, runtimeResponse)
+    val context = RuntimeContext(runtimeRequest, runtimeResponse, logger)
 
-    val systemOut = System.out
-    val systemErr = System.err
-
-    val customStdStream = ByteArrayOutputStream()
-    val customStd = PrintStream(customStdStream)
-    System.setOut(customStd)
-    System.setErr(customStd)
+    logger.overrideNativeLogs()
 
     var output: RuntimeOutput?
 
@@ -195,7 +177,7 @@ suspend fun action(ctx: Context) {
 
             if (output == null) {
                 context.error("Execution timed out.")
-                output = context.res.send("", 500)
+                output = context.res.text("", 500)
             }
         } else {
             output = if (classMethod.isSuspend) {
@@ -210,17 +192,14 @@ suspend fun action(ctx: Context) {
         e.printStackTrace(pw)
 
         context.error(sw.toString())
-        output = context.res.send("", 500, mutableMapOf())
+        output = context.res.text("", 500, mutableMapOf())
     } finally {
-        System.out.flush()
-        System.err.flush()
-        System.setOut(systemOut)
-        System.setErr(systemErr)
+        logger.revertNativeLogs()
     }
 
     if (output == null) {
         context.error("Return statement missing. return context.res.empty() if no response is expected.")
-        output = context.res.send("", 500, mutableMapOf())
+        output = context.res.text("", 500, mutableMapOf())
     }
 
     val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap();
@@ -229,8 +208,12 @@ suspend fun action(ctx: Context) {
         resHeaders["content-type"] = "text/plain"
     }
 
-    if (!resHeaders["content-type"]!!.startsWith("multipart/") && !resHeaders["content-type"]!!.contains("charset=")) {
-        resHeaders["content-type"] += "; charset=utf-8"
+    if (!resHeaders["content-type"]!!.startsWith("multipart/")) {
+        resHeaders["content-type"] = resHeaders["content-type"]!!.lowercase()
+
+        if(!resHeaders["content-type"]!!.contains("charset=")) {
+            resHeaders["content-type"] += "; charset=utf-8"
+        }
     }
 
     resHeaders.forEach { (key, value) ->
@@ -239,28 +222,9 @@ suspend fun action(ctx: Context) {
         }
     }
 
-    if (customStdStream.toString().isNotEmpty()) {
-        context.log("");
-        context.log("----------------------------------------------------------------------------");
-        context.log("Unsupported logs detected. Use context.log() or context.error() for logging.");
-        context.log("----------------------------------------------------------------------------");
-        context.log(customStdStream.toString());
-        context.log("----------------------------------------------------------------------------");
-    }
+    ctx.header("x-open-runtimes-log-id", logger.id ?: "")
 
-    try {
-        ctx.header(
-            "x-open-runtimes-logs",
-            URLEncoder.encode(context.logs.joinToString("\n"), StandardCharsets.UTF_8.toString())
-        )
-        ctx.header(
-            "x-open-runtimes-errors",
-            URLEncoder.encode(context.errors.joinToString("\n"), StandardCharsets.UTF_8.toString())
-        )
-    } catch (ex: UnsupportedEncodingException) {
-        ctx.header("x-open-runtimes-logs", "Internal error while processing logs.")
-        ctx.header("x-open-runtimes-errors", "Internal error while processing logs.")
-    }
+    logger.end()
 
     ctx.status(output.statusCode).result(output.body)
 }
