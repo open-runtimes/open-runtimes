@@ -18,7 +18,9 @@ val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrateg
 
 suspend fun main() {
     Javalin
-        .create()
+        .create { config ->
+            config.maxRequestSize = 20L * 1024 * 1024
+        }
         .start(3000)
         .get("/*") { runBlocking { execute(it) } }
         .post("/*") { runBlocking { execute(it) } }
