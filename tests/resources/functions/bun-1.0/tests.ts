@@ -77,6 +77,13 @@ When you can have two!
             return context.res.binary(new Blob([Uint8Array.from([0, 40, 255])])); // Blob
         case 'binaryResponse5':
             return context.res.binary(Uint8Array.from([0, 50, 255])); // Just a filler
+        case 'binaryResponseLarge':
+            const buffer = Buffer.from(context.req.bodyBinary);
+            const md5 = new Bun.CryptoHasher('md5');
+            const hash = md5.update(buffer).digest('hex');
+            return context.res.send(hash, 200, {
+                'x-method': context.req.method
+            });
         case 'envVars':
             return context.res.json({
                 var: Bun.env["CUSTOM_ENV_VAR"] ?? null,
@@ -86,9 +93,9 @@ When you can have two!
             console.log('Native log');
             context.log('Debug log');
             context.error('Error log');
-      
+
             context.log("Log+With+Plus+Symbol");
-            
+
             context.log(42);
             context.log(4.2);
             context.log(true);
