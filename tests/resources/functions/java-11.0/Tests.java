@@ -1,13 +1,14 @@
 package io.openruntimes.java;
 
-import java.util.Map;
-import java.util.HashMap;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import com.google.gson.Gson;
-import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -32,7 +33,7 @@ public class Tests {
             case "customCharsetResponse":
                 headers.put("content-type", "text/plain; charset=iso-8859-1");
                 return context.getRes().text("ÅÆ", 200, headers);
-           case "uppercaseCharsetResponse":
+            case "uppercaseCharsetResponse":
                 headers.put("content-type", "TEXT/PLAIN");
                 return context.getRes().text("ÅÆ", 200, headers);
             case "multipartResponse":
@@ -110,6 +111,18 @@ public class Tests {
             case "binaryResponse5":
                 bytes = new byte[]{0, 50, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
+            case "binaryResponseLarge":
+                bytes = context.getReq().getBodyBinary();
+                MessageDigest md5Digest = null;
+                try {
+                    md5Digest = MessageDigest.getInstance("MD5");
+                } catch (NoSuchAlgorithmException e) {
+                }
+                md5Digest.update(bytes);
+                byte[] digestBytes = md5Digest.digest();
+                String hex = bytesToHex(digestBytes).toLowerCase(Locale.ROOT);
+                headers.put("x-method", context.getReq().getMethod());
+                return context.getRes().send(hex, 200, headers);
             case "envVars":
                 json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
                 json.put("emptyVar", System.getenv().getOrDefault("NOT_DEFINED_VAR", null));
@@ -167,4 +180,22 @@ public class Tests {
                 throw new Exception("Unknown action");
         }
     }
+
+    public static String bytesToHex(byte[] bytes) {
+
+        char[] result = new char[bytes.length * 2];
+
+        for (int index = 0; index < bytes.length; index++) {
+            int v = bytes[index];
+
+            int upper = (v >>> 4) & 0xF;
+            result[index * 2] = (char) (upper + (upper < 10 ? 48 : 65 - 10));
+
+            int lower = v & 0xF;
+            result[index * 2 + 1] = (char) (lower + (lower < 10 ? 48 : 65 - 10));
+        }
+
+        return new String(result);
+    }
+
 }
