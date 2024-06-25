@@ -42,7 +42,7 @@ const action = async (logger: Logger, ctx: any) => {
   }
 
   const contentType = (ctx.request.headers.get('content-type') ?? 'text/plain').toLowerCase();
-  const bodyBinary: any = await ctx.request.body({ type: 'bytes' }).value;
+  const bodyBinary: any = await ctx.request.body({type: 'bytes', limit: 20 * 1024 * 1024}).value;
 
   const headers: any = {};
   Array.from(ctx.request.headers.keys()).filter((header: any) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header: any) => {
