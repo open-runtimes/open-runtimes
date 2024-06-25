@@ -9,4 +9,4 @@ environment:
 
 dependencies:
   dio: ^4.0.4
-  
+  crypto: ^3.0.0
