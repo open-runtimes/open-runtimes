@@ -123,10 +123,35 @@ When you can have two!
 
         $context->log('Timeout end.');
         return $context->res->text('Successful response.');
-    case 'deprecatedMethods':
-        return $context->res->send($context->req->bodyRaw);
-    case 'deprecatedMethodsUntypedBody':
-        return $context->res->send(50);
+      case 'deprecatedMethods':
+          return $context->res->send($context->req->bodyRaw);
+      case 'deprecatedMethodsUntypedBody':
+          return $context->res->send(50);
+      case 'responseChunkedSimple':
+          $context->res->start();
+          $context->res->writeText('OK1');
+          $context->res->writeText('OK2');
+          return $context->res->end();
+      case 'responseChunkedComplex':
+          $context->res->start(201, ['x-start-header' => 'start']);
+          $context->res->writeText('Start');
+          sleep(1);
+          $context->res->writeText('Step1');
+          sleep(1);
+          $context->res->writeJson(['step2' => true]);
+          sleep(1);
+          $context->res->writeBinary(\unpack("C*",\hex2bin("0123456789abcdef")));
+          return $context->res->end();
+        case 'responseChunkedErrorStartDouble':
+            $context->res->start();
+            $context->res->start();
+            $context->res->writeText('OK');
+            return $context->res->end();
+        case 'responseChunkedErrorStartMissing':
+            $context->res->writeText('OK');
+            return $context->res->end();
+        case 'responseChunkedErrorStartWriteMissing':
+            return $context->res->end();
       default:
         throw new Exception('Unknown action');
   }

@@ -12,12 +12,15 @@ const USER_CODE_PATH = '/usr/local/server/src/function';
 
 $userFunction = null;
 
-$action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) {
+$action = function(Logger $logger, RuntimeContext $context, mixed $req, mixed $res) use (&$userFunction) {
     $requestHeaders = $req->header;
 
     $cookieHeaders = [];
-    foreach ($req->cookie as $key => $value) {
-        $cookieHeaders[] = "{$key}={$value}";
+
+    if(is_array($req->cookie)) {
+        foreach ($req->cookie as $key => $value) {
+            $cookieHeaders[] = "{$key}={$value}";
+        }
     }
 
     if (!empty($cookieHeaders)) {
@@ -78,8 +81,6 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
         $url .= '?' . $queryString;
     }
 
-    $context = new RuntimeContext($logger);
-
     $context->req->bodyBinary = \unpack('C*',$req->getContent());
     $context->req->method = $req->getMethod();
     $context->req->url = $url;
@@ -132,7 +133,12 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
 
             if(!$executed) {
                 $context->error('Execution timed out.');
-                $output = $context->res->text('', 500);
+
+                if ($context->res->getChunkStatus()) {
+                    $output = $context->res->end();
+                } else {
+                    $output = $context->res->text('', 500);
+                }
             }
         } else {
             \call_user_func($execute);
@@ -140,20 +146,29 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     } catch (\Throwable $e) {
         $context->error($e->getMessage()."\n".$e->getTraceAsString());
         $context->error('At ' . $e->getFile() . ':' . $e->getLine());
-        $output = $context->res->text('', 500);
+        if ($context->res->getChunkStatus()) {
+            $output = $context->res->end();
+        } else {
+            $output = $context->res->text('', 500);
+        }
     }
 
     if($output == null) {
         $context->error('Return statement missing. return $context->res->empty() if no response is expected.');
-        $output = $context->res->text('', 500);
+        if ($context->res->getChunkStatus()) {
+            $output = $context->res->end();
+        } else {
+            $output = $context->res->text('', 500);
+        }
     }
 
+    $output['chunked'] ??= false;
     $output['body'] ??= '';
     $output['statusCode'] ??= 200;
     $output['headers'] ??= [];
 
     $headers = \array_change_key_case($output['headers']);
-    
+
     if(!empty($headers['content-type'])) {
         $headers['content-type'] = \strtolower($headers['content-type']);
     }
@@ -166,24 +181,30 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
         $headers['content-type'] .= '; charset=utf-8';
     }
 
+    $headers['x-open-runtimes-log-id'] = $logger->id;
+    $logger->end();
+    $res->header['x-open-runtimes-log-id'] = $headers['x-open-runtimes-log-id'];
     foreach ($headers as $header => $value) {
-        if(!(\str_starts_with($header, 'x-open-runtimes-'))) {
-            $res->header($header, $value);
+        if (!(\str_starts_with($header, 'x-open-runtimes-')) || $header === 'x-open-runtimes-log-id') {
+            if (!$output['chunked']) {
+                $res->header($header, $value);
+            }
         }
     }
 
-    $res->header('x-open-runtimes-log-id', $logger->id);
-    $logger->end();
-
-    $res->status($output['statusCode']);
-    $res->end(pack("C*",...$output['body']));
+    if($output['chunked']){
+        $res->end();
+    } else{
+        $res->status($output['statusCode']);
+        $res->end(pack("C*",...$output['body']));
+    }
 };
 
 $server->on("Request", function($req, $res) use($action) {
     $logger = new Logger($req->header['x-open-runtimes-logging'], $req->header['x-open-runtimes-log-id']);
-
+    $context = new RuntimeContext($logger, $res);
     try {
-        $action($logger, $req, $res);
+        $action($logger, $context,$req, $res);
     } catch (\Throwable $e) {
         $message = $e->getMessage() . "\n";
         $message .= $e->getTraceAsString() . "\n";
@@ -191,11 +212,17 @@ $server->on("Request", function($req, $res) use($action) {
 
         $logger->write($message, Logger::TYPE_ERROR);
 
+        $res->status(500);
         $res->header('x-open-runtimes-log-id', $logger->id);
         $logger->end();
 
-        $res->status(500);
-        $res->end('');
+        if ($context->res->getChunkStatus()) {
+            $res->end();
+        } else {
+            $res->end('');
+        }
+
+
     }
 });
 

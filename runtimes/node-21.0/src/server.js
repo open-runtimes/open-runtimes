@@ -65,6 +65,8 @@ const action = async (logger, req, res) => {
 
     const url = `${scheme}://${host}${port.toString() === defaultPort ? '' : `:${port}`}${path}${queryString === '' ? '' : `?${queryString}`}`;
 
+    let chunkHeadersSent = false;
+
     const context = {
         req: {
             get body() {
@@ -114,7 +116,8 @@ const action = async (logger, req, res) => {
                 return {
                     body: bytes,
                     statusCode: statusCode,
-                    headers: headers
+                    headers: headers,
+                    chunked: false
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
@@ -128,6 +131,43 @@ const action = async (logger, req, res) => {
                 headers['location'] = url;
                 return this.text('', statusCode, headers);
             },
+            start: function(statusCode = 200, headers = {}) {
+                if(!chunkHeadersSent) {
+                    chunkHeadersSent = true;
+                    headers['cache-control'] = headers['content-type'] ?? 'no-store';
+                    headers['content-type'] = headers['content-type'] ?? 'text/event-stream';
+                    headers['connection'] = headers['connection'] ?? 'keep-alive';
+                    headers['transfer-encoding'] = headers['transfer-encoding'] ?? 'chunked';
+                    res.writeHead(statusCode, headers);
+                } else {
+                    throw new Error('You can only call res.start() once');
+                }
+            },
+            writeText: function(body) {
+                this.writeBinary(Buffer.from(body, 'utf8'));
+            },
+            writeJson: function(body) {
+                this.writeText(JSON.stringify(body));
+            },
+            writeBinary: function(bytes) {
+                if(!chunkHeadersSent) {
+                    throw new Error('You must call res.start() to start a chunk response.');
+                }
+
+                res.write(bytes);
+            },
+            end: function(headers = {}) {
+                if(!chunkHeadersSent) {
+                    throw new Error('You must call res.start() to start a chunk response.');
+                }
+
+                return {
+                    body: "",
+                    statusCode: 0,
+                    headers: headers,
+                    chunked: true
+                };
+            }
         },
         log: function (message) {
             logger.write(message, Logger.TYPE_LOG);
@@ -183,7 +223,12 @@ const action = async (logger, req, res) => {
 
             if(!executed) {
                 context.error('Execution timed out.');
-                output = context.res.text('', 500, {});
+
+                if(chunkHeadersSent) {
+                    output = context.res.end();
+                } else {
+                    output = context.res.text('', 500, {});
+                }
             }
         } else {
             await execute();
@@ -194,42 +239,62 @@ const action = async (logger, req, res) => {
         }
 
         context.error(e.stack || e);
-        output = context.res.text('', 500, {});
+
+        if(chunkHeadersSent) {
+            output = context.res.end();
+        } else {
+            output = context.res.text('', 500, {});
+        }
     } finally {
         logger.revertNativeLogs();
     }
 
     if(output === null || output === undefined) {
         context.error('Return statement missing. return context.res.empty() if no response is expected.');
-        output = context.res.text('', 500, {});
+
+        if(chunkHeadersSent) {
+            output = context.res.end();
+        } else {
+            output = context.res.text('', 500, {});
+        }
     }
 
+    output.chunked = output.chunked ?? false;
     output.body = output.body ?? '';
     output.statusCode = output.statusCode ?? 200;
     output.headers = output.headers ?? {};
+
+    const responseHeaders = {};
 
     for (const header in output.headers) {
         if(header.toLowerCase().startsWith('x-open-runtimes-')) {
             continue;
         }
-        res.setHeader(header.toLowerCase(), output.headers[header]);
+
+        responseHeaders[header.toLowerCase()] = output.headers[header];
     }
 
-    const contentTypeValue = (res.getHeader("content-type") ?? "text/plain").toLowerCase();
+    const contentTypeValue = (responseHeaders["content-type"] ?? "text/plain").toLowerCase();
     if (
         !contentTypeValue.startsWith("multipart/") &&
         !contentTypeValue.includes("charset=")
     ) {
-        res.setHeader(
-        "content-type",
-        contentTypeValue + "; charset=utf-8"
-        );
+        responseHeaders["content-type"] = contentTypeValue + "; charset=utf-8";
     }
 
-    res.setHeader('x-open-runtimes-log-id', logger.id);
+    responseHeaders['x-open-runtimes-log-id'] = logger.id;
     await logger.end();
 
-    return send(res, output.statusCode, output.body);
+    if(output.chunked) {
+        res.addTrailers(responseHeaders);
+        res.end();
+        return;
+    } else {
+        for(const headerName in responseHeaders) {
+            res.setHeader(headerName, responseHeaders[headerName]);
+        }
+        return send(res, output.statusCode, output.body);
+    }
 };
 
 server.listen(3000);
