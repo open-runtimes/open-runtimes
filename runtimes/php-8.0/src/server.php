@@ -5,8 +5,12 @@ require_once 'types.php';
 require_once 'logger.php';
 
 Swoole\Runtime::enableCoroutine($flags = SWOOLE_HOOK_ALL);
-
+$payloadSize = 20 * (1024 * 1024); // 12MB - adding slight buffer for headers and other data that might be sent with the payload - update later with valid testing
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
+$server->set([
+    'package_max_length' => $payloadSize,
+    'buffer_output_size' => $payloadSize,
+]);
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
@@ -79,8 +83,9 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     }
 
     $context = new RuntimeContext($logger);
+    $content = $req->getContent();
 
-    $context->req->bodyBinary = \unpack('C*',$req->getContent());
+    $context->req->bodyBinary = strlen($content) > 10_000 ? (array)$content :\unpack('C*',$content);
     $context->req->method = $req->getMethod();
     $context->req->url = $url;
     $context->req->path = $path;
@@ -153,7 +158,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $output['headers'] ??= [];
 
     $headers = \array_change_key_case($output['headers']);
-    
+
     if(!empty($headers['content-type'])) {
         $headers['content-type'] = \strtolower($headers['content-type']);
     }

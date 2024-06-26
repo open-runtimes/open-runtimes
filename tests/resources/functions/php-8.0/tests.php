@@ -91,6 +91,11 @@ When you can have two!
       case 'binaryResponse5':
           $bytes = [0, 50, 255];
           return $context->res->binary($bytes); // Just a filler
+      case 'binaryResponseLarge':
+          $hash = md5(implode($context->req->bodyBinary));
+          return $context->res->send($hash, 200, [
+              'x-method' => $context->req->method,
+          ]);
       case 'envVars':
           $var = getenv('CUSTOM_ENV_VAR');
           $emptyVar = getenv('NOT_DEFINED_VAR');
