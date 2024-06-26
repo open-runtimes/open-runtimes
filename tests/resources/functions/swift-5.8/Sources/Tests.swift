@@ -1,5 +1,6 @@
 import Foundation
 import AsyncHTTPClient
+import Crypto
 
 func main(context: RuntimeContext) async throws -> RuntimeOutput {
     let action = context.req.headers["x-action"] ?? "default"
@@ -113,6 +114,12 @@ When you can have two!
         var bytes = Data()
         bytes.append(contentsOf: [0, 50, 255])
         return context.res.binary(bytes) // Just a filler
+    case "binaryResponseLarge":
+        let bytes = context.req.bodyBinary
+        let hex = Insecure.MD5.hash(data: bytes).map { String(format: "%02hhx", $0) }.joined()
+        return context.res.send(hex, statusCode: 200, headers: [
+            "x-method": context.req.method
+        ])
     case "envVars":
         return try context.res.json([
             "var": ProcessInfo.processInfo.environment["CUSTOM_ENV_VAR"],
@@ -121,7 +128,7 @@ When you can have two!
     case "logs":
         context.log("Debug log")
         context.error("Error log")
-                
+
         context.log("Log+With+Plus+Symbol")
 
         context.log(42)
