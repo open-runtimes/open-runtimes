@@ -1,5 +1,6 @@
 require 'httparty'
 require 'json'
+require 'digest'
 
 def main(context)
     action = context.req.headers['x-action'] || ''
@@ -78,6 +79,12 @@ When you can have two!
         return context.res.binary([0,40,255]) # Just a filler
     when 'binaryResponse5'
         return context.res.binary([0,50,255]) # Just a filler
+    when 'binaryResponseLarge'
+        bytes_body = context.req.body_binary
+        hex = Digest::MD5.hexdigest bytes_body.pack 'C*'
+        return context.res.send(hex, 200, {
+            'x-method': context.req.method
+        })
     when 'envVars'
         return context.res.json({
             'var': ENV['CUSTOM_ENV_VAR'] || nil,
@@ -87,7 +94,7 @@ When you can have two!
         puts 'Native log'
         context.log('Debug log')
         context.error('Error log')
-                
+
         context.log("Log+With+Plus+Symbol")
 
         context.log(42)
