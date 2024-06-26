@@ -83,9 +83,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     }
 
     $context = new RuntimeContext($logger);
-    $content = $req->getContent();
-
-    $context->req->bodyBinary = strlen($content) > 10_000 ? (array)$content :\unpack('C*',$content);
+    $context->req->bodyBinary = $req->getContent();
     $context->req->method = $req->getMethod();
     $context->req->url = $url;
     $context->req->path = $path;
@@ -181,7 +179,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $logger->end();
 
     $res->status($output['statusCode']);
-    $res->end(pack("C*",...$output['body']));
+    $res->end($output['body']);
 };
 
 $server->on("Request", function($req, $res) use($action) {
