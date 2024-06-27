@@ -1,22 +1,21 @@
 <?php
 
 class RuntimeResponse {
-    function binary(array $bytes, int $statusCode = 200, array $headers = []): array {
+    function binary(string $binary, int $statusCode = 200, array $headers = []): array {
         return [
-            'body' => $bytes,
+            'body' => $binary,
             'statusCode' => $statusCode,
             'headers' => $headers,
         ];
     }
 
     function send(string $body, int $statusCode = 200, array $headers = []): array {
-        return $this->text(\strval($body), $statusCode, $headers);
+        return $this->text(\strval($body),$statusCode, $headers);
     }
 
 
     function text(string $body, int $statusCode = 200, array $headers = []): array {
-        $bin = \unpack("C*", $body);
-        return $this->binary($bin, $statusCode, $headers);
+        return $this->binary($body, $statusCode, $headers);
     }
 
     function json(array $obj, int $statusCode = 200, array $headers = []): array {
@@ -35,7 +34,7 @@ class RuntimeResponse {
 }
 
 class RuntimeRequest {
-    public array $bodyBinary = [];
+    public string $bodyBinary = '';
     public array $headers = [];
     public string $method = '';
     public string $url = '';
@@ -61,7 +60,7 @@ class RuntimeRequest {
         $contentType = strtolower($this->headers['content-type'] ?? 'text/plain');
 
         if(\str_starts_with($contentType, 'application/json')) {
-            if(\count($this->bodyBinary) > 0) {
+            if(!empty($this->bodyBinary)) {
                 return $this->getBodyJson();
             } else {
                 return [];
@@ -83,7 +82,7 @@ class RuntimeRequest {
     }
     private function getBodyText(): string
     {
-        return pack('C*', ...$this->bodyBinary);
+        return $this->bodyBinary;
     }
     private function getBodyJson(): array
     {

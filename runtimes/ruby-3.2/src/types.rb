@@ -16,7 +16,7 @@ class RuntimeResponse
     end
 
     def text(body, status_code = 200, headers = {})
-      self.binary(body.unpack("C*"), status_code, headers)
+      self.binary(body, status_code, headers)
     end
   
     def json(obj, status_code = 200, headers = {})
@@ -62,7 +62,7 @@ class RuntimeResponse
     end
 
     def body_text
-      self.body_binary.pack('C*')
+      self.body_binary
     end
 
     def body_raw

@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const crypto = require("crypto");
 
 module.exports = async (context) => {
     const action = context.req.headers['x-action'];
@@ -77,6 +78,12 @@ When you can have two!
             return context.res.binary(Buffer.from((Uint8Array.from([0, 40, 255])))); // Just a filler
         case 'binaryResponse5':
             return context.res.binary(Buffer.from((Uint8Array.from([0, 50, 255])))); // Just a filler
+        case 'binaryResponseLarge':
+            const buffer = Buffer.from(context.req.bodyBinary);
+            const hash = crypto.createHash('md5').update(buffer).digest('hex');
+            return context.res.send(hash, 200, {
+                'x-method': context.req.method
+            });
         case 'envVars':
             return context.res.json({
                 var: process.env.CUSTOM_ENV_VAR,

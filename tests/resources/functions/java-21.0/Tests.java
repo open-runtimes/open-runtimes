@@ -1,5 +1,7 @@
 package io.openruntimes.java;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.HashMap;
 import java.net.HttpURLConnection;
@@ -115,24 +117,37 @@ public class Tests {
                 return context.getRes().binary((byte[]) context.getReq().getBody());
             }
           case "binaryResponse1" -> {
-                byte[] bytes = {(byte) 0, (byte) 10, (byte) 255};
+                byte[] bytes = {0, 10, (byte) 255};
                 return context.getRes().binary(bytes); // byte[]
             }
             case "binaryResponse2" -> {
-                byte[] bytes = {(byte) 0, (byte) 20, (byte) 255};
+                byte[] bytes = {0, 20, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             }
             case "binaryResponse3" -> {
-                byte[] bytes = {(byte) 0, (byte) 30, (byte) 255};
+                byte[] bytes = {0, 30, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             }
             case "binaryResponse4" -> {
-                byte[] bytes = {(byte) 0, (byte) 40, (byte) 255};
+                byte[] bytes = {0, 40, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
             }
             case "binaryResponse5" -> {
-                byte[] bytes = {(byte) 0, (byte) 50, (byte) 255};
+                byte[] bytes = {0, 50, (byte) 255};
                 return context.getRes().binary(bytes); // Just a filler
+            }
+            case "binaryResponseLarge" -> {
+                byte[] bytes = context.getReq().getBodyBinary();
+                MessageDigest md5Digest = null;
+                try {
+                    md5Digest = MessageDigest.getInstance("MD5");
+                } catch (NoSuchAlgorithmException e) {
+                }
+                md5Digest.update(bytes);
+                byte[] digestBytes = md5Digest.digest();
+                String hex = bytesToHex(digestBytes).toLowerCase();
+                headers.put("x-method", context.getReq().getMethod());
+                return context.getRes().send(hex, 200, headers);
             }
             case "envVars" -> {
                 json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
@@ -195,5 +210,22 @@ public class Tests {
             }
             default -> throw new Exception("Unknown action");
         }
+    }
+
+    public static String bytesToHex(byte[] bytes) {
+
+        char[] result = new char[bytes.length * 2];
+
+        for (int index = 0; index < bytes.length; index++) {
+            int v = bytes[index];
+
+            int upper = (v >>> 4) & 0xF;
+            result[index * 2] = (char) (upper + (upper < 10 ? 48 : 65 - 10));
+
+            int lower = v & 0xF;
+            result[index * 2 + 1] = (char) (lower + (lower < 10 ? 48 : 65 - 10));
+        }
+
+        return new String(result);
     }
 }

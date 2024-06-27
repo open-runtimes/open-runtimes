@@ -3,11 +3,12 @@ import 'dart:convert';
 import 'package:dio/dio.dart' hide Response;
 import 'dart:io' show Platform;
 import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 
 Future<dynamic> main(final context) async {
   String action = context.req.headers['x-action'] ?? '';
 
-  switch(action) { 
+  switch(action) {
     case 'plaintextResponse': {
       return context.res.text('Hello World 👋');
     }
@@ -15,18 +16,18 @@ Future<dynamic> main(final context) async {
       return context.res.json({ 'json': true, 'message': 'Developers are awesome.' });
     }
     case 'customCharsetResponse':
-    {
-      return context.res.text(
-          'ÅÆ', 200, {'content-type': 'text/plain; charset=iso-8859-1'});
-    }
+      {
+        return context.res.text(
+            'ÅÆ', 200, {'content-type': 'text/plain; charset=iso-8859-1'});
+      }
     case 'uppercaseCharsetResponse':
-    {
-      return context.res.text(
-          'ÅÆ', 200, {'content-type': 'TEXT/PLAIN'});
-    }
+      {
+        return context.res.text(
+            'ÅÆ', 200, {'content-type': 'TEXT/PLAIN'});
+      }
     case 'multipartResponse':
-    {
-      return context.res.text("""--12345
+      {
+        return context.res.text("""--12345
 Content-Disposition: form-data; name=\"partOne\"
 
 Why just have one part?
@@ -35,9 +36,9 @@ Content-Disposition: form-data; name=\"partTwo\"
 
 When you can have two!
 --12345--""", 200, {
-        'content-type': 'multipart/form-data; boundary=12345'
-      });
-    }
+          'content-type': 'multipart/form-data; boundary=12345'
+        });
+      }
     case 'redirectResponse': {
       return context.res.redirect('https://github.com/');
     }
@@ -67,15 +68,15 @@ When you can have two!
       return context.res.text(context.req.method);
     }
     case 'requestUrl': {
-        return context.res.json({
-            'url': context.req.url,
-            'port': context.req.port,
-            'path': context.req.path,
-            'query': context.req.query,
-            'queryString': context.req.queryString,
-            'scheme': context.req.scheme,
-            'host': context.req.host,
-        });
+      return context.res.json({
+        'url': context.req.url,
+        'port': context.req.port,
+        'path': context.req.path,
+        'query': context.req.query,
+        'queryString': context.req.queryString,
+        'scheme': context.req.scheme,
+        'host': context.req.host,
+      });
     }
     case 'requestHeaders': {
       return context.res.json(context.req.headers);
@@ -118,6 +119,13 @@ When you can have two!
       List<int> bytes = [0, 50, 255];
       return context.res.binary(bytes); // Just a filler
     }
+    case 'binaryResponseLarge':{
+      final bytes = Uint8List.fromList(context.req.bodyBinary);
+      final hash = md5.convert(bytes);
+      return context.res.send(hash.toString(), 200, {
+        'x-method': context.req.method
+      });
+    }
     case 'envVars': {
       return context.res.json({
         'var': Platform.environment['CUSTOM_ENV_VAR'],
@@ -128,9 +136,9 @@ When you can have two!
       print('Native log');
       context.log('Debug log');
       context.error('Error log');
-      
+
       context.log("Log+With+Plus+Symbol");
-      
+
       context.log(42);
       context.log(4.2);
       context.log(true);
@@ -158,8 +166,8 @@ When you can have two!
     case 'deprecatedMethodsUntypedBody': {
       return context.res.send("50"); // Send only supported String
     }
-    default: { 
+    default: {
       throw new Exception('Unknown action');
     }
-  } 
+  }
 }

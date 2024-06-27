@@ -3,11 +3,12 @@ import 'dart:convert';
 import 'package:dio/dio.dart' hide Response;
 import 'dart:io' show Platform;
 import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 
 Future<dynamic> main(final context) async {
   String action = context.req.headers['x-action'] ?? '';
 
-  switch(action) { 
+  switch(action) {
     case 'plaintextResponse': {
       return context.res.text('Hello World 👋');
     }
@@ -117,6 +118,13 @@ When you can have two!
     case 'binaryResponse5': {
       List<int> bytes = [0, 50, 255];
       return context.res.binary(bytes); // Just a filler
+    }
+    case 'binaryResponseLarge':{
+      final bytes = Uint8List.fromList(context.req.bodyBinary);
+      final hash = md5.convert(bytes);
+      return context.res.send(hash.toString(), 200, {
+        'x-method': context.req.method
+      });
     }
     case 'envVars': {
       return context.res.json({
