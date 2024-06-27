@@ -5,7 +5,7 @@ require_once 'types.php';
 require_once 'logger.php';
 
 Swoole\Runtime::enableCoroutine($flags = SWOOLE_HOOK_ALL);
-$payloadSize = 20 * (1024 * 1024); // 12MB - adding slight buffer for headers and other data that might be sent with the payload - update later with valid testing
+$payloadSize = 20 * (1024 * 1024);
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 $server->set([
     'package_max_length' => $payloadSize,
