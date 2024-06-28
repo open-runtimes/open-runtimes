@@ -159,7 +159,7 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 
 	outputChan := make(chan types.ResponseOutput)
 
-	// logger.OverrideNativeLogs()
+	logger.OverrideNativeLogs()
 
 	if safeTimeout != 0 {
 		go timeoutPromise(outputChan)
@@ -169,7 +169,7 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 
 	output = <-outputChan
 
-	// logger.RevertNativeLogs()
+	logger.RevertNativeLogs()
 
 	if output.StatusCode == 0 {
 		output.StatusCode = 200

@@ -90,7 +90,14 @@ When you can have two!
 	case "requestBodyText":
 		return Context.Res.Text(Context.Req.BodyText(), 200, nil)
 	case "requestBodyJson":
-		return Context.Res.Json(Context.Req.BodyJson(), 200, nil)
+		bodyJson, err := Context.Req.BodyJson()
+
+		if err != nil {
+			Context.Error("Cannot parse JSON body")
+			return Context.Res.Text("", 500, nil)
+		}
+
+		return Context.Res.Json(bodyJson, 200, nil)
 	case "requestBodyBinary":
 		return Context.Res.Binary(Context.Req.BodyBinary(), 200, nil)
 	case "requestBodyTextAuto":

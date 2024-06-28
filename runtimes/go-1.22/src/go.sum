@@ -1,3 +1,12 @@
-github.com/open-runtimes/types-for-go/v4 v4.0.0-20240625153559-d896eded41cc h1:ejSk9nItj4CrF6kKzznpdfiKLP8TbhZplgNurBCX32s=
-github.com/open-runtimes/types-for-go/v4 v4.0.0-20240625153559-d896eded41cc/go.mod h1:88UUMYovXGRbv5keL4uTKDYMWeNtIKV0BbxDRQ18/xY=
-// TODO: Remove once finished
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628092355-531b727f4f47 h1:2DKDI9ctklD1c8dLw2Bu59U9y51gnMPpaYFdjHrokYk=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628092355-531b727f4f47/go.mod h1:88UUMYovXGRbv5keL4uTKDYMWeNtIKV0BbxDRQ18/xY=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628092729-a1106bcb8158 h1:yQ9Z+QH7cLs7F1Zdu/k8/TxcrMWvr+x1Khk/LuRONEw=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628092729-a1106bcb8158/go.mod h1:88UUMYovXGRbv5keL4uTKDYMWeNtIKV0BbxDRQ18/xY=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628103438-84e8cd9b2fa8 h1:+gyOB58PLmT1DXwpEtsXCa775lVOeWJK+DuUdQq0ZKA=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628103438-84e8cd9b2fa8/go.mod h1:88UUMYovXGRbv5keL4uTKDYMWeNtIKV0BbxDRQ18/xY=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628103736-789a8e09fedf h1:xAC3jWrpWhFciesfmfDA1j0662/X6fLOc36cEsAE23E=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628103736-789a8e09fedf/go.mod h1:88UUMYovXGRbv5keL4uTKDYMWeNtIKV0BbxDRQ18/xY=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628103947-0c9ca642d91a h1:k4J4plQeeW4MpWREBIU81l/8b4/oLDfFopCUoiCo5I4=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628103947-0c9ca642d91a/go.mod h1:88UUMYovXGRbv5keL4uTKDYMWeNtIKV0BbxDRQ18/xY=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628105135-703f69729e7c h1:0FlPQhHYEPDiYIFx7PhUCDbpyI8gmurQXeuI96f1yaw=
+github.com/open-runtimes/types-for-go/v4 v4.0.0-20240628105135-703f69729e7c/go.mod h1:88UUMYovXGRbv5keL4uTKDYMWeNtIKV0BbxDRQ18/xY=
