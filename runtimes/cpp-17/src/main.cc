@@ -24,6 +24,7 @@ std::vector<std::string> split(const std::string &s, const char delim) {
 int main()
 {
     drogon::app()
+        .setClientMaxBodySize(20 * 1024 * 1024)
         .addListener("0.0.0.0", 3000)
         .registerHandlerViaRegex(
             "/.*",
@@ -92,7 +93,7 @@ int main()
                         Json::Value bodyRootEmpty;
                         runtimeRequest.bodyJson = bodyRootEmpty;
                     } else {
-                        Json::Value bodyRoot;   
+                        Json::Value bodyRoot;
                         Json::Reader reader;
                         bool parsingResult = reader.parse(runtimeRequest.bodyText, bodyRoot);
 
@@ -141,7 +142,7 @@ int main()
                             runtimeRequest.body = runtimeRequest.bodyText;
                         }
                     }
-                    
+
                     runtimeRequest.path = path;
 
                     std::string scheme = req->getHeader("x-forwarded-proto");
@@ -218,26 +219,26 @@ int main()
                                 pairs.erase(pairs.begin());
 
                                 std::string value = std::accumulate(
-                                    std::next(pairs.begin()), 
-                                    pairs.end(), 
-                                    pairs[0], 
+                                    std::next(pairs.begin()),
+                                    pairs.end(),
+                                    pairs[0],
                                     [](const std::string &a, const std::string &b) {
                                         return a + "=" + b;
                                     }
                                 );
-                                
+
                                 query[key] = value.c_str();
                             }
                         } else
                         {
-                            if(!param.empty()) 
+                            if(!param.empty())
                             {
                                 query[param] = "";
                             }
                         }
                     }
 
-                    if (query.empty()) 
+                    if (query.empty())
                     {
                         Json::Value root;
                         Json::Reader reader;
@@ -276,9 +277,9 @@ int main()
                     if(!(cookieHeaders.empty()))
                     {
                         std::string cookieHeadersString = std::accumulate(
-                            std::next(cookieHeaders.begin()), 
-                            cookieHeaders.end(), 
-                            cookieHeaders[0], 
+                            std::next(cookieHeaders.begin()),
+                            cookieHeaders.end(),
+                            cookieHeaders[0],
                             [](const std::string &a, const std::string &b) {
                                 return a + "; " + b;
                             }
@@ -295,7 +296,7 @@ int main()
                             serverHeadersString = "{}";
                         }
 
-                        Json::Value serverHeaders;   
+                        Json::Value serverHeaders;
                         Json::Reader serverHeadersReader;
                         bool parsingResult = serverHeadersReader.parse(serverHeadersString, serverHeaders);
                         if(!parsingResult)
@@ -380,7 +381,7 @@ int main()
                             res->addHeader(headerKey, output.headers[key].asString());
                         }
                     }
-                    
+
                     std::string contentTypeHeader = res->getHeader("content-type");
                     if (contentTypeHeader.empty())
                     {

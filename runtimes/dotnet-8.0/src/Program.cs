@@ -70,10 +70,10 @@ namespace DotNetRuntime
 
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                bodyStream.CopyToAsync(memoryStream);
+                await bodyStream.CopyToAsync(memoryStream);
                 bodyBinary = memoryStream.ToArray();
             }
-            
+
             var headers = new Dictionary<string, string>();
             var method = request.Method;
 

@@ -24,7 +24,9 @@ public class Server {
     public static void main(String[] args) {
 
         Javalin
-                .create()
+                .create(config -> {
+                    config.http.maxRequestSize = 20L * 1024 * 1024;
+                })
                 .start(3000)
                 .get("/*", Server::execute)
                 .post("/*", Server::execute)

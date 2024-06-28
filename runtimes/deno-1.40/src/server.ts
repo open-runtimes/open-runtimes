@@ -26,13 +26,13 @@ const action = async (logger: Logger, ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? '';
   let safeTimeout: number | null = null;
   if(timeout) {
-      if(isNaN(+timeout) || timeout === '0') {
-          ctx.response.status = 500;
-          ctx.response.body = 'Header "x-open-runtimes-timeout" must be an integer greater than 0.';
-          return;
-      }
+    if(isNaN(+timeout) || timeout === '0') {
+      ctx.response.status = 500;
+      ctx.response.body = 'Header "x-open-runtimes-timeout" must be an integer greater than 0.';
+      return;
+    }
 
-      safeTimeout = +timeout;
+    safeTimeout = +timeout;
   }
 
   if(Deno.env.get("OPEN_RUNTIMES_SECRET") && (ctx.request.headers.get("x-open-runtimes-secret") ?? '') !== Deno.env.get("OPEN_RUNTIMES_SECRET")) {
@@ -42,7 +42,7 @@ const action = async (logger: Logger, ctx: any) => {
   }
 
   const contentType = (ctx.request.headers.get('content-type') ?? 'text/plain').toLowerCase();
-  const bodyBinary: any = await ctx.request.body({ type: 'bytes' }).value;
+  const bodyBinary: any = await ctx.request.body({type: 'bytes', limit: 20 * 1024 * 1024}).value;
 
   const headers: any = {};
   Array.from(ctx.request.headers.keys()).filter((header: any) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header: any) => {
@@ -51,7 +51,7 @@ const action = async (logger: Logger, ctx: any) => {
 
   const enforcedHeaders = JSON.parse(Deno.env.get("OPEN_RUNTIMES_HEADERS") ? (Deno.env.get("OPEN_RUNTIMES_HEADERS") ?? '{}') : '{}');
   for(const header in enforcedHeaders) {
-      headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
+    headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
   }
 
   const scheme = ctx.request.headers.get('x-forwarded-proto') ?? 'http';
@@ -66,9 +66,9 @@ const action = async (logger: Logger, ctx: any) => {
     let [key, ...valueArr] = param.split('=');
     const value = valueArr.join('=');
 
-      if(key) {
-          query[key] = value;
-      }
+    if(key) {
+      query[key] = value;
+    }
   }
 
   const url = `${scheme}://${host}${port.toString() === defaultPort ? '' : `:${port}`}${path}${queryString === '' ? '' : `?${queryString}`}`;
@@ -180,7 +180,7 @@ const action = async (logger: Logger, ctx: any) => {
         output = context.res.text('', 500, {});
       }
     } else {
-        await execute();
+      await execute();
     }
   } catch(e: any) {
     context.error(e.message.includes("Cannot resolve module") ? "Code file not found." : e.stack || e);
@@ -202,19 +202,19 @@ const action = async (logger: Logger, ctx: any) => {
     if(header.toLowerCase().startsWith('x-open-runtimes-')) {
       continue;
     }
-    
+
     ctx.response.headers.set(header.toLowerCase(), output.headers[header]);
   }
 
   const contentTypeValue =
-    (ctx.response.headers.get("content-type") ?? "text/plain").toLowerCase();
+      (ctx.response.headers.get("content-type") ?? "text/plain").toLowerCase();
   if (
-    !contentTypeValue.startsWith("multipart/") &&
-    !contentTypeValue.includes("charset=")
+      !contentTypeValue.startsWith("multipart/") &&
+      !contentTypeValue.includes("charset=")
   ) {
     ctx.response.headers.set(
-      "content-type",
-      contentTypeValue + "; charset=utf-8"
+        "content-type",
+        contentTypeValue + "; charset=utf-8"
     );
   }
 

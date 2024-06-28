@@ -77,20 +77,25 @@ When you can have two!
         case 'requestBodyBinaryAuto':
             return $context->res->binary($context->req->body);
         case 'binaryResponse1':
-            $bytes = [0, 10, 255];
+            $bytes = pack('C*', ...[0, 10, 255]);
             return $context->res->binary($bytes); // int[]
         case 'binaryResponse2':
-            $bytes = [0, 20, 255];
+            $bytes = pack('C*', ...[0, 20, 255]);
             return $context->res->binary($bytes); // Just a filler
         case 'binaryResponse3':
-            $bytes = [0, 30, 255];
+            $bytes = pack('C*', ...[0, 30, 255]);
             return $context->res->binary($bytes); // Just a filler
         case 'binaryResponse4':
-            $bytes = [0, 40, 255];
+            $bytes = pack('C*', ...[0, 40, 255]);
             return $context->res->binary($bytes); // Just a filler
         case 'binaryResponse5':
-            $bytes = [0, 50, 255];
+            $bytes = pack('C*', ...[0, 50, 255]);
             return $context->res->binary($bytes); // Just a filler
+        case 'binaryResponseLarge':
+            $hash = md5($context->req->bodyBinary);
+            return $context->res->send($hash, 200, [
+                'x-method' => $context->req->method,
+            ]);
         case 'envVars':
             $var = getenv('CUSTOM_ENV_VAR');
             $emptyVar = getenv('NOT_DEFINED_VAR');

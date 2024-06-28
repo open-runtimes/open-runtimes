@@ -5,8 +5,12 @@ require_once 'types.php';
 require_once 'logger.php';
 
 Swoole\Runtime::enableCoroutine($flags = SWOOLE_HOOK_ALL);
-
+$payloadSize = 20 * (1024 * 1024);
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
+$server->set([
+    'package_max_length' => $payloadSize,
+    'buffer_output_size' => $payloadSize,
+]);
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
@@ -79,8 +83,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     }
 
     $context = new RuntimeContext($logger);
-
-    $context->req->bodyBinary = \unpack('C*',$req->getContent());
+    $context->req->bodyBinary = $req->getContent();
     $context->req->method = $req->getMethod();
     $context->req->url = $url;
     $context->req->path = $path;
@@ -176,7 +179,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $logger->end();
 
     $res->status($output['statusCode']);
-    $res->end(pack("C*",...$output['body']));
+    $res->end($output['body']);
 };
 
 $server->on("Request", function($req, $res) use($action) {

@@ -65,20 +65,13 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     }
 
     byte[] bodyBinary = new byte[] {};
-    System.IO.Stream bodyStream = request.Body;
+    Stream bodyStream = request.Body;
 
     using (MemoryStream memoryStream = new MemoryStream())
     {
-        await Task.WhenAny<object?>(
-            Task.Run<object?>(async () => {
-                bodyStream.CopyToAsync(memoryStream);
-                return null;
-            })
-        );
-
+        await bodyStream.CopyToAsync(memoryStream);
         bodyBinary = memoryStream.ToArray();
     }
-
     var headers = new Dictionary<string, string>();
     var method = request.Method;
 

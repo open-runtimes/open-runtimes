@@ -8,6 +8,10 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+
 
 public class Tests {
     @Throws(Exception::class)
@@ -148,6 +152,21 @@ When you can have two!
                 )
                 return context.res.binary(bytes); // Just a filler
             }
+            "binaryResponseLarge" -> {
+                val bytes: ByteArray = context.req.bodyBinary
+                var md5Digest: MessageDigest? = null
+                try {
+                    md5Digest = MessageDigest.getInstance("MD5")
+                } catch (e: NoSuchAlgorithmException) {
+                }
+                md5Digest!!.update(bytes)
+                val digestBytes: ByteArray = md5Digest!!.digest()
+                val hex: String = bytesToHex(digestBytes).lowercase()
+                return context.res.send(hex, 200, mapOf(
+                    "x-method" to  context.req.method,
+                )
+                )
+            }
             "envVars" -> {
                 return context.res.json(mutableMapOf(
                     "var" to System.getenv().getOrDefault("CUSTOM_ENV_VAR", null),
@@ -221,5 +240,20 @@ When you can have two!
                 throw Exception("Unknown action")
             }
         }
+    }
+    fun bytesToHex(bytes: ByteArray): String {
+        val result = CharArray(bytes.size * 2)
+
+        for (index in bytes.indices) {
+            val v = bytes[index].toInt()
+
+            val upper = (v ushr 4) and 0xF
+            result[index * 2] = (upper + (if (upper < 10) 48 else 65 - 10)).toChar()
+
+            val lower = v and 0xF
+            result[index * 2 + 1] = (lower + (if (lower < 10) 48 else 65 - 10)).toChar()
+        }
+
+        return kotlin.text.String(result)
     }
 }

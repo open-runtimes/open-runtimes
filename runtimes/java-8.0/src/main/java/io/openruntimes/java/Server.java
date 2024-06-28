@@ -23,7 +23,9 @@ public class Server {
     public static void main(String[] args) {
 
         Javalin
-                .create()
+                .create(config -> {
+                    config.maxRequestSize = 20L * 1024 * 1024;
+                })
                 .start(3000)
                 .get("/*", Server::execute)
                 .post("/*", Server::execute)
@@ -128,7 +130,8 @@ public class Server {
         String scheme = (scheme = ctx.header("x-forwarded-proto")) != null ? scheme : "http";
         String defaultPort = scheme.equals("https") ? "443" : "80";
 
-        String hostHeader = (hostHeader = ctx.header("host")) != null ? hostHeader : "";;
+        String hostHeader = (hostHeader = ctx.header("host")) != null ? hostHeader : "";
+        ;
         String host = "";
         int port;
 

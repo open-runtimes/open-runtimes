@@ -45,7 +45,7 @@ class Base extends TestCase
         self::assertStringNotContainsStringIgnoringCase("\n", $response['body']);
     }
 
-    public function testContentTypeResponse(): void 
+    public function testContentTypeResponse(): void
     {
         $response = Client::execute(headers: ['x-action' => 'customCharsetResponse']);
         self::assertEquals(200, $response['code']);
@@ -468,7 +468,7 @@ class Base extends TestCase
     public function testInvalidJson(): void
     {
         $response = Client::execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
-        
+
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
         self::assertThat(Client::getErrors($response['headers']['x-open-runtimes-log-id']), self::callback(function($value) {
@@ -565,7 +565,6 @@ class Base extends TestCase
         self::assertEquals(40, $bytes['byte2']);
         self::assertEquals(255, $bytes['byte3']);
 
-
         $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse5']);
         self::assertEquals(200, $response['code']);
         $bytes = \unpack('C*byte', $response['body']);
@@ -573,6 +572,22 @@ class Base extends TestCase
         self::assertEquals(0, $bytes['byte1']);
         self::assertEquals(50, $bytes['byte2']);
         self::assertEquals(255, $bytes['byte3']);
+    }
+
+    public function testBinaryResponseLarge(): void
+    {
+        $body = \file_get_contents(__DIR__.'/resources/large-file.zip');
+        $md5 = \md5($body);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "PUT");
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($md5, $response['body']);
+        self::assertEquals('PUT', $response['headers']['x-method']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "POST");
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($md5, $response['body']);
+        self::assertEquals('POST', $response['headers']['x-method']);
     }
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {

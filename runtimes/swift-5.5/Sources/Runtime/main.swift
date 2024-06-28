@@ -5,18 +5,18 @@ var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
 let app = Application(env)
 
-app.on(.GET, "", body: .stream, use: execute)
-app.on(.GET, "**", body: .stream, use: execute)
-app.on(.POST, "", body: .stream, use: execute)
-app.on(.POST, "**", body: .stream, use: execute)
-app.on(.PATCH, "", body: .stream, use: execute)
-app.on(.PATCH, "**", body: .stream, use: execute)
-app.on(.PUT, "", body: .stream, use: execute)
-app.on(.PUT, "**", body: .stream, use: execute)
-app.on(.DELETE, "", body: .stream, use: execute)
-app.on(.DELETE, "**", body: .stream, use: execute)
-app.on(.OPTIONS, "", body: .stream, use: execute)
-app.on(.OPTIONS, "**", body: .stream, use: execute)
+app.on(.GET, "", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.GET, "**", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.POST, "", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.POST, "**", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.PATCH, "", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.PATCH, "**", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.PUT, "", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.PUT, "**", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.DELETE, "", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.DELETE, "**", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.OPTIONS, "", body: .collect(maxSize: "20mb"), use: execute)
+app.on(.OPTIONS, "**", body: .collect(maxSize: "20mb"), use: execute)
 
 func execute(req: Request) async throws -> Response {
     let headerLogger = req.headers["x-open-runtimes-logging"]
@@ -38,13 +38,13 @@ func execute(req: Request) async throws -> Response {
 
         logger.write(message: error, type: RuntimeLogger.TYPE_ERROR)
         logger.end()
-       
+
         var outputHeaders = HTTPHeaders()
         outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
 
         let code: HTTPResponseStatus = .custom(code: UInt(500), reasonPhrase: "")
         let resBody: Response.Body = .init(string: "")
-        
+
         return Response(
             status: code,
             headers: outputHeaders,
@@ -88,14 +88,14 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     let path = req.uri.path
     let queryString = req.uri.query
     var query = [String: String]()
-    
+
     if let queryString = queryString {
         for param in queryString.split(separator: "&") {
             let parts = param.split(separator: "=", maxSplits: 1)
-            
+
             var key: String? = nil
             var value: String? = nil
-            
+
             if parts.isEmpty {
                 continue
             }
@@ -105,24 +105,24 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
             if parts.count == 2 {
                 value = String(parts[1])
             }
-            
+
             query[key!] = value ?? ""
         }
     }
-    
+
     var url = "\(scheme)://\(host)"
-    
+
     if (scheme == "http" && port != 80) || (scheme == "https" && port != 443) {
         url += ":\(port)"
     }
-    
+
     url += path
-    
+
     if !((queryString ?? "").isEmpty) {
         url += "?"
         url += queryString!
     }
-    
+
     for header in req.headers {
         let key = header.name.lowercased()
         if !key.starts(with: "x-open-runtimes-") {
@@ -150,6 +150,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     }
 
     var bodyBinary = Data()
+
     if let requestBodyData = req.body.data {
         bodyBinary = Data(buffer: requestBodyData)
     }
@@ -166,9 +167,9 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         queryString: queryString,
         query: query
     )
-    
+
     let response = RuntimeResponse()
-    
+
     let context = RuntimeContext(
         request: request,
         response: response,
@@ -182,7 +183,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
             do {
                 output = try await withThrowingTaskGroup(of: RuntimeOutput.self) { group in
                     let deadline = Date(timeIntervalSinceNow: Double(safeTimeout))
-                    
+
                     group.addTask {
                         return try await annotateError(try await main(context: context))
                     }
@@ -192,11 +193,11 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
                         try Task.checkCancellation()
                         throw CancellationError()
                     }
-                    
+
                     let result = try await group.next()!
-                    
+
                     group.cancelAll()
-                    
+
                     return result
                 }
             } catch {
@@ -226,10 +227,10 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
 
     logger.end()
     outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
-    
+
     let code: HTTPResponseStatus = .custom(code: UInt(output.statusCode), reasonPhrase: "")
     let resBody: Response.Body = .init(data: output.body)
-    
+
     return Response(
         status: code,
         headers: outputHeaders,

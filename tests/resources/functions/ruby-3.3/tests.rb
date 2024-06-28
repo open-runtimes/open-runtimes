@@ -1,5 +1,6 @@
 require 'httparty'
 require 'json'
+require 'digest'
 
 def main(context)
     action = context.req.headers['x-action'] || ''
@@ -69,15 +70,21 @@ When you can have two!
     when 'requestBodyBinaryAuto'
         return context.res.binary(context.req.body)
     when 'binaryResponse1'
-        return context.res.binary([0,10,255]) # bytes array
+        return context.res.binary([0,10,255].pack('C*')) # bytes array
     when 'binaryResponse2'
-        return context.res.binary([0,20,255]) # Just a filler
+        return context.res.binary([0,20,255].pack('C*')) # Just a filler
     when 'binaryResponse3'
-        return context.res.binary([0,30,255]) # Just a filler
+        return context.res.binary([0,30,255].pack('C*')) # Just a filler
     when 'binaryResponse4'
-        return context.res.binary([0,40,255]) # Just a filler
+        return context.res.binary([0,40,255].pack('C*')) # Just a filler
     when 'binaryResponse5'
-        return context.res.binary([0,50,255]) # Just a filler
+        return context.res.binary([0,50,255].pack('C*')) # Just a filler
+    when 'binaryResponseLarge'
+        bytes_body = context.req.body_binary
+        hex = Digest::MD5.hexdigest bytes_body
+        return context.res.send(hex, 200, {
+            'x-method': context.req.method
+        })
     when 'envVars'
         return context.res.json({
             'var': ENV['CUSTOM_ENV_VAR'] || nil,
@@ -87,7 +94,7 @@ When you can have two!
         puts 'Native log'
         context.log('Debug log')
         context.error('Error log')
-                
+
         context.log("Log+With+Plus+Symbol")
 
         context.log(42)

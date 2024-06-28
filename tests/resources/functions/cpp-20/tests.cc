@@ -9,6 +9,9 @@
 #include <any>
 #include <string>
 #include <curl/curl.h>
+#include <openssl/md5.h>
+#include <iomanip>
+#include <sstream>
 
 namespace runtime {
     class Handler {
@@ -94,7 +97,7 @@ namespace runtime {
             } else if (action == "requestBodyJson") {
                 // Getters dont work, so we dont get exception on ivnalid JSON. Throw it here instead
                 if(req.bodyJson.empty()) {
-                    Json::Value bodyRoot;   
+                    Json::Value bodyRoot;
                     Json::Reader reader;
                     bool parsingResult = reader.parse(req.bodyText, bodyRoot);
 
@@ -152,6 +155,11 @@ namespace runtime {
                 bytes.push_back(std::byte{255});
 
                 return res.binary(bytes); // Just a filler
+            } else if (action == "binaryResponseLarge") {
+                auto bytes = req.bodyBinary;
+                auto hex = Handler::md5HexDigest(bytes);
+                headers["x-method"] = req.method;
+                return context.res.send(hex, 200, headers);
             } else if (action == "envVars") {
                 auto customEnvVar = std::getenv("CUSTOM_ENV_VAR");
                 auto notDefinedVar = std::getenv("NOT_DEFINED_VAR");
@@ -173,7 +181,7 @@ namespace runtime {
                 std::cout << "Native log";
                 context.log("Debug log");
                 context.error("Error log");
-      
+
                 context.log("Log+With+Plus+Symbol");
 
                 context.log("42");
@@ -239,6 +247,20 @@ namespace runtime {
             }
 
             return res.empty();
+        }
+
+        static std::string md5HexDigest(const std::vector<std::byte>& data) {
+            unsigned char digest[MD5_DIGEST_LENGTH];
+            MD5_CTX ctx;
+            MD5_Init(&ctx);
+            MD5_Update(&ctx, reinterpret_cast<const unsigned char*>(data.data()), data.size());
+            MD5_Final(digest, &ctx);
+
+            std::ostringstream oss;
+            for (int i = 0; i < MD5_DIGEST_LENGTH; ++i) {
+                oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(digest[i]);
+            }
+            return oss.str();
         }
     };
 }

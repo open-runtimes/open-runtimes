@@ -65,8 +65,8 @@ def action(request, response, logger)
       end
     end
   end
-
-  body_binary = request.body.read.unpack("C*")
+  
+  body_binary = request.body.read
   method = request.request_method
   headers = {}
 
@@ -166,7 +166,7 @@ def action(request, response, logger)
   end
 
   response.status = output['statusCode']
-  response.body = output['body'].pack('C*')
+  response.body = output['body']
   response
 end
 
