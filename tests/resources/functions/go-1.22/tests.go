@@ -15,18 +15,22 @@ func Main(Context *types.Context) types.ResponseOutput {
 
 	switch a := action; a {
 	case "plaintextResponse":
-		return Context.Res.Send("Hello World 👋", 200, nil)
+		return Context.Res.Text("Hello World 👋", 200, nil)
 	case "jsonResponse":
 		return Context.Res.Json(map[string]interface{}{
 			"json":    true,
 			"message": "Developers are awesome.",
 		}, 200, nil)
 	case "customCharsetResponse":
-		return Context.Res.Send("ÅÆ", 200, map[string]string{
+		return Context.Res.Text("ÅÆ", 200, map[string]string{
 			"content-type": "text/plain; charset=iso-8859-1",
 		})
+	case "uppercaseCharsetResponse":
+		return Context.Res.Text("ÅÆ", 200, map[string]string{
+			"content-type": "TEXT/PLAIN",
+		})
 	case "multipartResponse":
-		return Context.Res.Send(`--12345
+		return Context.Res.Text(`--12345
 Content-Disposition: form-data; name="partOne"
 
 Why just have one part?
@@ -42,14 +46,14 @@ When you can have two!
 	case "emptyResponse":
 		return Context.Res.Empty()
 	case "noResponse":
-		Context.Res.Send("This should be ignored, as it is not returned.", 200, nil)
+		Context.Res.Text("This should be ignored, as it is not returned.", 200, nil)
 
 		// Simulate test data. Return nessessary in Golang
 		Context.Error("Return statement missing. return context.getRes().empty() if no response is expected.")
-		return Context.Res.Send("", 500, nil)
+		return Context.Res.Text("", 500, nil)
 	case "doubleResponse":
-		Context.Res.Send("This should be ignored.", 200, nil)
-		return Context.Res.Send("This should be returned.", 200, nil)
+		Context.Res.Text("This should be ignored.", 200, nil)
+		return Context.Res.Text("This should be returned.", 200, nil)
 	case "headersResponse":
 		secondHeader, ok := Context.Req.Headers["x-open-runtimes-custom-in-header"]
 		if !ok {
@@ -61,16 +65,16 @@ When you can have two!
 			cookie = "missing"
 		}
 
-		return Context.Res.Send("OK", 200, map[string]string{
+		return Context.Res.Text("OK", 200, map[string]string{
 			"first-header":                      "first-value",
 			"second-header":                     secondHeader,
 			"cookie":                            cookie,
 			"x-open-runtimes-custom-out-header": "third-value",
 		})
 	case "statusResponse":
-		return Context.Res.Send("FAIL", 404, nil)
+		return Context.Res.Text("FAIL", 404, nil)
 	case "requestMethod":
-		return Context.Res.Send(Context.Req.Method, 200, nil)
+		return Context.Res.Text(Context.Req.Method, 200, nil)
 	case "requestUrl":
 		return Context.Res.Json(map[string]interface{}{
 			"url":         Context.Req.Url,
@@ -83,36 +87,33 @@ When you can have two!
 		}, 200, nil)
 	case "requestHeaders":
 		return Context.Res.Json(Context.Req.Headers, 200, nil)
-	case "requestBodyPlaintext":
-		body := Context.Req.Body.(string)
-		return Context.Res.Send(body, 200, nil)
+	case "requestBodyText":
+		return Context.Res.Text(Context.Req.BodyText(), 200, nil)
 	case "requestBodyJson":
-		switch Context.Req.Body.(type) {
-		case string:
-			return Context.Res.Json(map[string]interface{}{
-				"key1": "Missing key",
-				"key2": "Missing key",
-				"raw":  Context.Req.BodyRaw,
-			}, 200, nil)
-		default:
-			body := Context.Req.Body.(map[string]interface{})
-
-			key1, ok := body["key1"]
-			if !ok {
-				key1 = "Missing key"
-			}
-
-			key2, ok := body["key2"]
-			if !ok {
-				key2 = "Missing key"
-			}
-
-			return Context.Res.Json(map[string]interface{}{
-				"key1": key1,
-				"key2": key2,
-				"raw":  Context.Req.BodyRaw,
-			}, 200, nil)
-		}
+		return Context.Res.Json(Context.Req.BodyJson(), 200, nil)
+	case "requestBodyBinary":
+		return Context.Res.Binary(Context.Req.BodyBinary(), 200, nil)
+	case "requestBodyTextAuto":
+		return Context.Res.Text(Context.Req.Body().(string), 200, nil)
+	case "requestBodyJsonAuto":
+		return Context.Res.Json(Context.Req.Body().(map[string]interface{}), 200, nil)
+	case "requestBodyBinaryAuto":
+		return Context.Res.Binary(Context.Req.Body().([]byte), 200, nil)
+	case "binaryResponse1":
+		bytes := []byte{0, 10, 255}
+		return Context.Res.Binary(bytes, 200, nil) // []byte
+	case "binaryResponse2":
+		bytes := []byte{0, 20, 255}
+		return Context.Res.Binary(bytes, 200, nil) // Just a filler
+	case "binaryResponse3":
+		bytes := []byte{0, 30, 255}
+		return Context.Res.Binary(bytes, 200, nil) // Just a filler
+	case "binaryResponse4":
+		bytes := []byte{0, 40, 255}
+		return Context.Res.Binary(bytes, 200, nil) // Just a filler
+	case "binaryResponse5":
+		bytes := []byte{0, 50, 255}
+		return Context.Res.Binary(bytes, 200, nil) // Just a filler
 	case "envVars":
 		var emptyVar *string
 		varValue := os.Getenv("NOT_DEFINED_VAR")
@@ -138,16 +139,16 @@ When you can have two!
 		Context.Log(map[string]string{"objectKey": "objectValue"})
 		Context.Log([]string{"arrayValue"})
 
-		return Context.Res.Send("", 200, nil)
+		return Context.Res.Text("", 200, nil)
 	case "library":
 		client := resty.New()
 		resp, errResponse := client.R().
 			SetHeader("Accept", "application/json").
-			Get("https://jsonplaceholder.typicode.com/todos/" + Context.Req.BodyRaw)
+			Get("https://jsonplaceholder.typicode.com/todos/" + Context.Req.BodyText())
 
 		if errResponse != nil {
 			Context.Error(errResponse)
-			return Context.Res.Send("", 500, nil)
+			return Context.Res.Text("", 500, nil)
 		}
 
 		body := resp.String()
@@ -164,7 +165,7 @@ When you can have two!
 
 		if errJson != nil {
 			Context.Error(errJson)
-			return Context.Res.Send("", 500, nil)
+			return Context.Res.Text("", 500, nil)
 		}
 
 		return Context.Res.Json(map[string]interface{}{
@@ -177,9 +178,13 @@ When you can have two!
 
 		Context.Log("Timeout end.")
 
-		return Context.Res.Send("Successful response.", 200, nil)
+		return Context.Res.Text("Successful response.", 200, nil)
+	case "deprecatedMethods":
+		return Context.Res.Send(Context.Req.BodyRaw(), 200, nil)
+	case "deprecatedMethodsUntypedBody":
+		return Context.Res.Send("50", 200, nil) // Send only supported String
 	default:
 		Context.Error("Unknown action in tests.go")
-		return Context.Res.Send("", 500, nil)
+		return Context.Res.Text("", 500, nil)
 	}
 }

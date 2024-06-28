@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -27,7 +25,7 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Header().Set("content-type", "text/plain")
-			fmt.Fprintf(w, "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.")
+			w.Write([]byte("Header \"x-open-runtimes-timeout\" must be an integer greater than 0."))
 			return nil
 		}
 
@@ -37,16 +35,11 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 	secret := r.Header.Get("x-open-runtimes-secret")
 	serverSecret := os.Getenv("OPEN_RUNTIMES_SECRET")
 
-	if secret == "" || secret != serverSecret {
+	if serverSecret != "" && secret != serverSecret {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Header().Set("content-type", "text/plain")
-		fmt.Fprintf(w, "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
+		w.Write([]byte("Unauthorized. Provide correct \"x-open-runtimes-secret\" header."))
 		return nil
-	}
-
-	contentType := r.Header.Get("content-type")
-	if contentType == "" {
-		contentType = "text/plain"
 	}
 
 	bodyBytes, err := io.ReadAll(r.Body)
@@ -55,25 +48,13 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 		return errors.New("Could not parse body into a string.")
 	}
 
-	bodyRaw := string(bodyBytes)
-
-	var body interface{} = bodyRaw
-
-	if contentType == "application/json" {
-		if bodyRaw != "" {
-			err := json.Unmarshal([]byte(bodyRaw), &body)
-
-			if err != nil {
-				return errors.New("Could not parse body into a JSON.")
-			}
-		} else {
-			body = map[string]interface{}{}
-		}
-	}
-
 	headers := map[string]string{}
 	for key, value := range r.Header {
 		key = strings.ToLower(key)
+
+		if key == "content-type" {
+			value[0] = strings.ToLower(value[0])
+		}
 
 		if strings.HasPrefix(key, "x-open-runtimes-") == false {
 			headers[key] = value[0]
@@ -143,8 +124,6 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 	context := types.Context{
 		Logger: logger,
 		Req: types.Request{
-			BodyRaw:     bodyRaw,
-			Body:        body,
 			Headers:     headers,
 			Method:      method,
 			Url:         requestUrl,
@@ -158,9 +137,11 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 		Res: types.Response{},
 	}
 
+	context.Req.SetBodyBinary(bodyBytes)
+
 	output := types.ResponseOutput{
 		StatusCode: 500,
-		Body:       "",
+		Body:       []byte{},
 		Headers:    map[string]string{},
 	}
 
@@ -168,7 +149,7 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 		time.Sleep(time.Duration(safeTimeout) * time.Second)
 
 		context.Error("Execution timed out.")
-		ch <- context.Res.Send("", 500, map[string]string{})
+		ch <- context.Res.Text("", 500, map[string]string{})
 	}
 
 	actionPromise := func(ch chan types.ResponseOutput) {
@@ -178,7 +159,7 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 
 	outputChan := make(chan types.ResponseOutput)
 
-	logger.OverrideNativeLogs()
+	// logger.OverrideNativeLogs()
 
 	if safeTimeout != 0 {
 		go timeoutPromise(outputChan)
@@ -188,7 +169,7 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 
 	output = <-outputChan
 
-	logger.RevertNativeLogs()
+	// logger.RevertNativeLogs()
 
 	if output.StatusCode == 0 {
 		output.StatusCode = 200
@@ -215,6 +196,8 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 		contentTypeValue = "text/plain"
 	}
 
+	contentTypeValue = strings.ToLower(contentTypeValue)
+
 	if strings.HasPrefix(contentTypeValue, "multipart/") == false && strings.Contains(contentTypeValue, "charset=") == false {
 		outputHeaders["content-type"] = contentTypeValue + "; charset=utf-8"
 	}
@@ -227,7 +210,7 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 	}
 
 	w.WriteHeader(output.StatusCode)
-	fmt.Fprintf(w, output.Body)
+	w.Write(output.Body)
 
 	return nil
 }
@@ -249,7 +232,7 @@ func main() {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Header().Set("x-open-runtimes-log-id", logger.Id)
 			w.Header().Set("content-type", "text/plain")
-			fmt.Fprintf(w, "")
+			w.Write([]byte{})
 			return
 		}
 
@@ -265,7 +248,7 @@ func main() {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Header().Set("x-open-runtimes-log-id", logger.Id)
 			w.Header().Set("content-type", "text/plain")
-			fmt.Fprintf(w, "")
+			w.Write([]byte{})
 		}
 	}
 
