@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -190,6 +192,12 @@ When you can have two!
 		return Context.Res.Send(Context.Req.BodyRaw(), 200, nil)
 	case "deprecatedMethodsUntypedBody":
 		return Context.Res.Send("50", 200, nil) // Send only supported String
+	case "binaryResponseLarge":
+		hashBinary := md5.Sum(Context.Req.BodyBinary())
+		hashHex := hex.EncodeToString(hashBinary[:])
+		return Context.Res.Send(hashHex, 200, map[string]string{
+			"x-method": Context.Req.Method,
+		})
 	default:
 		Context.Error("Unknown action in tests.go")
 		return Context.Res.Text("", 500, nil)
