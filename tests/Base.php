@@ -36,13 +36,23 @@ class Base extends TestCase
 
         self::assertEquals(true, $body['json']);
         self::assertEquals('Developers are awesome.', $body['message']);
+
+        $body = \json_encode([ "name" => "OpenRntimes", "version" => 3.5, "published" => true, "nested" => [ [ 'object' => 1 ] ] ]);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson']);
+        self::assertEquals(200, $response['code']);
+        self::assertStringNotContainsStringIgnoringCase(" ", $response['body']);
+        self::assertStringNotContainsStringIgnoringCase("\n", $response['body']);
     }
 
-    public function testContentTypeResponse(): void 
+    public function testContentTypeResponse(): void
     {
         $response = Client::execute(headers: ['x-action' => 'customCharsetResponse']);
         self::assertEquals(200, $response['code']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=iso-8859-1', $response['headers']['content-type']);
+
+        $response = Client::execute(headers: ['x-action' => 'uppercaseCharsetResponse']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
 
         $response = Client::execute(headers: ['x-action' => 'multipartResponse']);
         self::assertEquals(200, $response['code']);
@@ -121,7 +131,6 @@ class Base extends TestCase
         self::assertEquals(500, $response['code']);
         self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
     }
-
 
     public function testEmptySecret(): void
     {
@@ -251,42 +260,135 @@ class Base extends TestCase
         self::assertEquals('requestHeaders', $body['x-action']);
         self::assertEquals('first-value', $body['x-first-header']);
         self::assertArrayNotHasKey('x-open-runtimes-custom-header', $body);
+
+
+        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'X-UpPeRcAsE-KeY' => 'value']);
+        self::assertEquals(200, $response['code']);
+        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
+
+        $body = \json_decode($response['body'], true);
+
+        self::assertEquals('requestHeaders', $body['x-action']);
+        self::assertEquals('value', $body['x-uppercase-key']);
+        self::assertArrayNotHasKey('X-UpPeRcAsE-KeY', $body);
     }
 
-    public function testRequestBodyPlaintext(): void
+    public function testRequestBodyText(): void
     {
-        $response = Client::execute(body: 'Hello 👋', headers: ['x-action' => 'requestBodyPlaintext']);
+        $body = 'Hello 👋';
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyText']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('Hello 👋', $response['body']);
+        self::assertEquals($body, $response['body']);
 
-        $response = Client::execute(body: '', headers: ['x-action' => 'requestBodyPlaintext']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: '', headers: ['x-action' => 'requestBodyText']);
         self::assertEquals(200, $response['code']);
         self::assertEquals('', $response['body']);
 
-        $response = Client::execute(headers: ['x-action' => 'requestBodyPlaintext']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'not-application/json']);
         self::assertEquals(200, $response['code']);
-        self::assertEquals('', $response['body']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'not-video/mp4']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
     }
 
     public function testRequestBodyJson(): void
     {
-        $response = Client::execute(body: '{"key1":"OK","key2":"👋","key3":"value3"}', headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
+        $body = '{"key1":"OK 👋","key2":true,"key3":3}';
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json']);
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);
+        self::assertEquals('OK 👋', $body['key1']);
+        self::assertEquals(true, $body['key2']);
+        self::assertEquals(3, $body['key3']);
 
-        self::assertEquals('OK', $body['key1']);
-        self::assertEquals('👋', $body['key2']);
-        self::assertEquals('{"key1":"OK","key2":"👋","key3":"value3"}', $body['raw']);
-
-        $response = Client::execute(body: '{"data":"OK"}', headers: ['x-action' => 'requestBodyJson', 'content-type' => 'text/plain']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'application/json']);
         self::assertEquals(200, $response['code']);
 
         $body = \json_decode($response['body'], true);
+        self::assertEquals('OK 👋', $body['key1']);
+        self::assertEquals(true, $body['key2']);
+        self::assertEquals(3, $body['key3']);
 
-        self::assertEquals('Missing key', $body['key1']);
-        self::assertEquals('Missing key', $body['key2']);
-        self::assertEquals('{"data":"OK"}', $body['raw']);
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'ApPlIcAtIoN/JSON']);
+        self::assertEquals(200, $response['code']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals('OK 👋', $body['key1']);
+        self::assertEquals(true, $body['key2']);
+        self::assertEquals(3, $body['key3']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson', 'content-type' => 'text/plain']);
+        self::assertEquals(200, $response['code']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals('OK 👋', $body['key1']);
+        self::assertEquals(true, $body['key2']);
+        self::assertEquals(3, $body['key3']);
+
+        $response = Client::execute(body: '', headers: ['x-action' => 'requestBodyJsonAuto', 'content-type' => 'application/json']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('{}', $response['body']);
+    }
+
+    public function testRequestBodyBinary(): void
+    {
+        $body = \hex2bin("0123456789abcdef");
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'application/octet-stream']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'audio/mpeg']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'font/ttf']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'image/png']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'video/mp4']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+
+        $body = pack('C*', ...[0,10,255]);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(10, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(10, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
     }
 
     public function testEnvVars(): void
@@ -364,8 +466,8 @@ class Base extends TestCase
 
     public function testInvalidJson(): void
     {
-        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
-        
+        $response = Client::execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{"invaludJson:true}');
+
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
         self::assertThat(Client::getErrors($response['headers']['x-open-runtimes-log-id']), self::callback(function($value) {
@@ -375,10 +477,13 @@ class Base extends TestCase
             return \str_contains($value, 'json') || \str_contains($value, 'code=3840');
         }), 'Contains refference to JSON validation problem');
 
-        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'content-type' => 'application/json'], body: '');
+        $response = Client::execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '');
 
+        self::assertEquals(500, $response['code']);
+
+        $response = Client::execute(headers: ['x-action' => 'requestBodyJson', 'content-type' => 'application/json'], body: '{}');
         self::assertEquals(200, $response['code']);
-        self::assertEquals('Hello World 👋', $response['body']);
+        self::assertEquals('{}', $response['body']);
     }
 
     public function testTimeout(): void
@@ -401,42 +506,87 @@ class Base extends TestCase
         self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
     }
 
-    public function testEnforcedHeaders(): void
+    public function testDeprecatedMethods(): void
     {
-        $response = Client::execute(headers: ['x-action' => 'requestHeaders']);
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethods']);
         self::assertEquals(200, $response['code']);
-        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
+        self::assertEquals('Hello', $response['body']);
 
-        $body = \json_decode($response['body'], true);
-
-        self::assertEquals('requestHeaders', $body['x-action']);
-        self::assertEquals('value', $body['x-custom']);
-        self::assertEquals('value2', $body['x-custom-uppercase']);
-        self::assertIsString($body['x-open-runtimes-custom']);
-        self::assertEquals('248', $body['x-open-runtimes-custom']);
-
-
-        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'x-custom' => 'notenforced', 'x-custom-uppercase' => 'notenforced', 'x-open-runtimes-custom' => 'notenforced']);
+        $response = Client::execute(body: '{"hello":"world"}', headers: ['x-action' => 'deprecatedMethods', 'content-type' => 'application/json']);
         self::assertEquals(200, $response['code']);
-        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
+        self::assertEquals('{"hello":"world"}', $response['body']);
 
-        $body = \json_decode($response['body'], true);
-
-        self::assertEquals('requestHeaders', $body['x-action']);
-        self::assertEquals('value', $body['x-custom']);
-        self::assertEquals('value2', $body['x-custom-uppercase']);
-        self::assertIsString($body['x-open-runtimes-custom']);
-        self::assertEquals('248', $body['x-open-runtimes-custom']);
-
-
-        $response = Client::execute(headers: ['x-action' => 'requestHeaders', 'X-CUSTOM-UPPERCASE' => 'notenforced']);
+        $response = Client::execute(body: '{"hello":"world"}', headers: ['x-action' => 'deprecatedMethods', 'content-type' => 'application/unknown']);
         self::assertEquals(200, $response['code']);
-        self::assertEqualsIgnoringWhitespace('application/json; charset=utf-8', $response['headers']['content-type']);
+        self::assertEquals('{"hello":"world"}', $response['body']);
+    }
 
-        $body = \json_decode($response['body'], true);
+    public function testDeprecatedMethodsUntypedBody(): void
+    {
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethodsUntypedBody']);
+        self::assertEquals(200, $response['code']);
+        self::assertIsString($response['body']);
+        self::assertEquals('50', $response['body']);
+    }
 
-        self::assertEquals('requestHeaders', $body['x-action']);
-        self::assertEquals('value2', $body['x-custom-uppercase']);
+    public function testBinaryResponse(): void
+    {
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse1']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(10, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse2']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(20, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse3']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(30, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse4']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(40, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+
+        $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse5']);
+        self::assertEquals(200, $response['code']);
+        $bytes = \unpack('C*byte', $response['body']);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(50, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+    }
+
+    public function testBinaryResponseLarge(): void
+    {
+        $body = \file_get_contents(__DIR__.'/resources/large-file.zip');
+        $md5 = \md5($body);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "PUT");
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($md5, $response['body']);
+        self::assertEquals('PUT', $response['headers']['x-method']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "POST");
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($md5, $response['body']);
+        self::assertEquals('POST', $response['headers']['x-method']);
     }
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {

@@ -186,6 +186,8 @@ You also need to install [jq](https://nektosact.com/installation/index.html):
 brew install yq
 ```
 
+> Alternatively run `go install github.com/mikefarah/yq/v4@latest` if brew isn't installed
+
 To run test for a runtime, get runtime name (folder name) and execute below command:
 
 ```bash

@@ -8,9 +8,6 @@ import io.javalin.http.Context
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.*
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-import kotlin.reflect.KClass
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberFunctions
@@ -21,7 +18,9 @@ val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrateg
 
 suspend fun main() {
     Javalin
-        .create()
+        .create { config ->
+            config.maxRequestSize = 20L * 1024 * 1024
+        }
         .start(3000)
         .get("/*") { runBlocking { execute(it) } }
         .post("/*") { runBlocking { execute(it) } }
@@ -44,7 +43,7 @@ suspend fun execute(ctx: Context) {
         val message = sw.toString()
 
         ctx.header("x-open-runtimes-log-id", logger.id ?: "")
-    
+
         logger.write(message, RuntimeLogger.TYPE_ERROR, false)
         logger.end()
 
@@ -77,8 +76,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         return
     }
 
-    val bodyRaw = ctx.body()
-    var body = bodyRaw as Any
+    val bodyBinary = ctx.bodyAsBytes()
     val headers = mutableMapOf<String, String>()
     val method = ctx.method()
 
@@ -98,15 +96,6 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
     for (entry in enforcedHeaders.entries.iterator()) {
         val header = "${entry.key}".lowercase()
         headers[header] = "${entry.value}"
-    }
-
-    val contentType = ctx.header("content-type") ?: "text/plain"
-    if (contentType.contains("application/json")) {
-        body = if (bodyRaw.isNotEmpty()) {
-            gson.fromJson(bodyRaw, MutableMap::class.java)
-        } else {
-            mutableMapOf<String, Any>()
-        }
     }
 
     val hostHeader = ctx.header("host") ?: ""
@@ -159,8 +148,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         query,
         queryString,
         headers,
-        body,
-        bodyRaw,
+        bodyBinary,
         url,
     )
     val runtimeResponse = RuntimeResponse()
@@ -191,7 +179,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
 
             if (output == null) {
                 context.error("Execution timed out.")
-                output = context.res.send("", 500)
+                output = context.res.text("", 500)
             }
         } else {
             output = if (classMethod.isSuspend) {
@@ -206,14 +194,14 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         e.printStackTrace(pw)
 
         context.error(sw.toString())
-        output = context.res.send("", 500, mutableMapOf())
+        output = context.res.text("", 500, mutableMapOf())
     } finally {
         logger.revertNativeLogs()
     }
 
     if (output == null) {
         context.error("Return statement missing. return context.res.empty() if no response is expected.")
-        output = context.res.send("", 500, mutableMapOf())
+        output = context.res.text("", 500, mutableMapOf())
     }
 
     val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap();
@@ -222,8 +210,12 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         resHeaders["content-type"] = "text/plain"
     }
 
-    if (!resHeaders["content-type"]!!.startsWith("multipart/") && !resHeaders["content-type"]!!.contains("charset=")) {
-        resHeaders["content-type"] += "; charset=utf-8"
+    if (!resHeaders["content-type"]!!.startsWith("multipart/")) {
+        resHeaders["content-type"] = resHeaders["content-type"]!!.lowercase()
+
+        if(!resHeaders["content-type"]!!.contains("charset=")) {
+            resHeaders["content-type"] += "; charset=utf-8"
+        }
     }
 
     resHeaders.forEach { (key, value) ->
@@ -233,7 +225,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
     }
 
     ctx.header("x-open-runtimes-log-id", logger.id ?: "")
-    
+
     logger.end()
 
     ctx.status(output.statusCode).result(output.body)

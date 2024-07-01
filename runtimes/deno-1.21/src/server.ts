@@ -41,17 +41,8 @@ const action = async (logger: Logger, ctx: any) => {
     return;
   }
 
-  const contentType = ctx.request.headers.get('content-type') ?? 'text/plain';
-  const bodyRaw: string = await ctx.request.body({ type: 'text' }).value;
-  let body: any = bodyRaw;
-
-  if (contentType.includes('application/json')) {
-    if(bodyRaw) {
-      body = await ctx.request.body({ type: 'json' }).value;
-    } else {
-      body = {};
-    }
-  }
+  const contentType = (ctx.request.headers.get('content-type') ?? 'text/plain').toLowerCase();
+  const bodyBinary: any = await ctx.request.body({type: 'bytes', limit: 20 * 1024 * 1024}).value;
 
   const headers: any = {};
   Array.from(ctx.request.headers.keys()).filter((header: any) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header: any) => {
@@ -84,8 +75,33 @@ const action = async (logger: Logger, ctx: any) => {
 
   const context: any = {
     req: {
-      bodyRaw,
-      body,
+      get body() {
+        if(contentType.startsWith("application/json")) {
+          return this.bodyBinary && this.bodyBinary.length > 0 ? this.bodyJson : {};
+        }
+
+        const binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
+        for(const type of binaryTypes) {
+          if(contentType.startsWith(type)) {
+            return this.bodyBinary;
+          }
+        }
+
+        return this.bodyText;
+      },
+      get bodyRaw() {
+        return this.bodyText;
+      },
+      get bodyText() {
+        const decoder = new TextDecoder();
+        return decoder.decode(this.bodyBinary);
+      },
+      get bodyJson() {
+        return JSON.parse(this.bodyText);
+      },
+      get bodyBinary() {
+        return bodyBinary;
+      },
       headers,
       method: ctx.request.method,
       url,
@@ -98,22 +114,29 @@ const action = async (logger: Logger, ctx: any) => {
     },
     res: {
       send: function (body: any, statusCode = 200, headers: any = {}) {
+        return this.text(body, statusCode, headers);
+      },
+      text: function (body: string, statusCode = 200, headers = {}) {
+        const encoder = new TextEncoder();
+        return this.binary(encoder.encode(body), statusCode, headers);
+      },
+      binary: function(bytes: any, statusCode = 200, headers = {}) {
         return {
-          body: body,
+          body: bytes,
           statusCode: statusCode,
           headers: headers
         }
       },
       json: function (obj: any, statusCode = 200, headers: any = {}) {
         headers['content-type'] = 'application/json';
-        return this.send(JSON.stringify(obj), statusCode, headers);
+        return this.text(JSON.stringify(obj), statusCode, headers);
       },
       empty: function () {
-        return this.send('', 204, {});
+        return this.text('', 204, {});
       },
       redirect: function (url: string, statusCode = 301, headers: any = {}) {
         headers['location'] = url;
-        return this.send('', statusCode, headers);
+        return this.text('', statusCode, headers);
       }
     },
     log: function (message: any) {
@@ -154,21 +177,21 @@ const action = async (logger: Logger, ctx: any) => {
 
       if(!executed) {
         context.error('Execution timed out.');
-        output = context.res.send('', 500, {});
+        output = context.res.text('', 500, {});
       }
     } else {
         await execute();
     }
   } catch(e: any) {
     context.error(e.message.includes("Cannot resolve module") ? "Code file not found." : e.stack || e);
-    output = context.res.send('', 500, {});
+    output = context.res.text('', 500, {});
   } finally {
     logger.revertNativeLogs();
   }
 
   if(output === null || output === undefined) {
     context.error('Return statement missing. return context.res.empty() if no response is expected.');
-    output = context.res.send('', 500, {});
+    output = context.res.text('', 500, {});
   }
 
   output.body = output.body ?? '';
@@ -184,7 +207,7 @@ const action = async (logger: Logger, ctx: any) => {
   }
 
   const contentTypeValue =
-    ctx.response.headers.get("content-type") ?? "text/plain";
+    (ctx.response.headers.get("content-type") ?? "text/plain").toLowerCase();
   if (
     !contentTypeValue.startsWith("multipart/") &&
     !contentTypeValue.includes("charset=")

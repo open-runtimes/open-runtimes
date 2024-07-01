@@ -1,5 +1,5 @@
 const micro = require("micro");
-const { text: parseText, json: parseJson, send } = require("micro");
+const { buffer, send } = require("micro");
 const Logger = require("./logger");
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
@@ -34,17 +34,8 @@ const action = async (logger, req, res) => {
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
-    const contentType = req.headers['content-type'] ?? 'text/plain';
-    const bodyRaw = await parseText(req);
-    let body = bodyRaw;
-
-    if (contentType.includes('application/json')) {
-        if(bodyRaw) {
-            body = await parseJson(req);
-        } else {
-            body = {};
-        }
-    }
+    const contentType = (req.headers['content-type'] ?? 'text/plain').toLowerCase();
+    const bodyBinary = await buffer(req, { limit: '20mb' });
 
     const headers = {};
     Object.keys(req.headers).filter((header) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header) => {
@@ -76,8 +67,32 @@ const action = async (logger, req, res) => {
 
     const context = {
         req: {
-            bodyRaw,
-            body,
+            get body() {
+                if(contentType.startsWith("application/json")) {
+                    return this.bodyBinary && this.bodyBinary.length > 0 ? this.bodyJson : {};
+                }
+
+                const binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
+                for(const type of binaryTypes) {
+                    if(contentType.startsWith(type)) {
+                        return this.bodyBinary;
+                    }
+                }
+
+                return this.bodyText;
+            },
+            get bodyRaw() {
+                return this.bodyText;
+            },
+            get bodyText() {
+                return this.bodyBinary.toString();
+            },
+            get bodyJson() {
+                return JSON.parse(this.bodyText);
+            },
+            get bodyBinary() {
+                return bodyBinary;
+            },
             headers,
             method: req.method,
             host,
@@ -90,23 +105,29 @@ const action = async (logger, req, res) => {
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
+                return this.text(`${body}`, statusCode, headers);
+            },
+            text: function (body, statusCode = 200, headers = {}) {
+                return this.binary(Buffer.from(body, 'utf8'), statusCode, headers)
+            },
+            binary: function(bytes, statusCode = 200, headers = {}) {
                 return {
-                    body: body,
+                    body: bytes,
                     statusCode: statusCode,
                     headers: headers
                 }
             },
             json: function (obj, statusCode = 200, headers = {}) {
                 headers['content-type'] = 'application/json';
-                return this.send(JSON.stringify(obj), statusCode, headers);
+                return this.text(JSON.stringify(obj), statusCode, headers);
             },
             empty: function () {
-                return this.send('', 204, {});
+                return this.text('', 204, {});
             },
             redirect: function (url, statusCode = 301, headers = {}) {
                 headers['location'] = url;
-                return this.send('', statusCode, headers);
-            }
+                return this.text('', statusCode, headers);
+            },
         },
         log: function (message) {
             logger.write(message, Logger.TYPE_LOG);
@@ -162,7 +183,7 @@ const action = async (logger, req, res) => {
 
             if(!executed) {
                 context.error('Execution timed out.');
-                output = context.res.send('', 500, {});
+                output = context.res.text('', 500, {});
             }
         } else {
             await execute();
@@ -173,14 +194,14 @@ const action = async (logger, req, res) => {
         }
 
         context.error(e.stack || e);
-        output = context.res.send('', 500, {});
+        output = context.res.text('', 500, {});
     } finally {
         logger.revertNativeLogs();
     }
 
     if(output === null || output === undefined) {
         context.error('Return statement missing. return context.res.empty() if no response is expected.');
-        output = context.res.send('', 500, {});
+        output = context.res.text('', 500, {});
     }
 
     output.body = output.body ?? '';
@@ -194,7 +215,7 @@ const action = async (logger, req, res) => {
         res.setHeader(header.toLowerCase(), output.headers[header]);
     }
 
-    const contentTypeValue = res.getHeader("content-type") ?? "text/plain";
+    const contentTypeValue = (res.getHeader("content-type") ?? "text/plain").toLowerCase();
     if (
         !contentTypeValue.startsWith("multipart/") &&
         !contentTypeValue.includes("charset=")

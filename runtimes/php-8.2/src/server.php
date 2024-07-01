@@ -5,8 +5,12 @@ require_once 'types.php';
 require_once 'logger.php';
 
 Swoole\Runtime::enableCoroutine($flags = SWOOLE_HOOK_ALL);
-
+$payloadSize = 20 * (1024 * 1024);
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
+$server->set([
+    'package_max_length' => $payloadSize,
+    'buffer_output_size' => $payloadSize,
+]);
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
@@ -79,9 +83,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     }
 
     $context = new RuntimeContext($logger);
-
-    $context->req->bodyRaw = $req->getContent();
-    $context->req->body = $context->req->bodyRaw;
+    $context->req->bodyBinary = $req->getContent();
     $context->req->method = $req->getMethod();
     $context->req->url = $url;
     $context->req->path = $path;
@@ -91,19 +93,6 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $context->req->query = $query;
     $context->req->queryString = $queryString;
     $context->req->headers = [];
-
-    $contentType = $requestHeaders['content-type'] ?? 'text/plain';
-    if(\str_contains($contentType, 'application/json')) {
-        if(!empty($context->req->bodyRaw)) {
-            $context->req->body = json_decode($context->req->bodyRaw, true);
-
-            if($context->req->body === null) {
-                throw new \Exception('Invalid JSON body.');
-            }
-        } else {
-            $context->req->body = [];
-        }
-    }
 
     foreach ($requestHeaders as $header => $value) {
         if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
@@ -115,6 +104,8 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     foreach ($enforcedHeaders as $key => $value) {
         $context->req->headers[\strtolower($key)] = \strval($value);
     }
+
+    $context->req->headers = array_change_key_case($context->req->headers);
 
     $output = null;
 
@@ -144,7 +135,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
 
             if(!$executed) {
                 $context->error('Execution timed out.');
-                $output = $context->res->send('', 500);
+                $output = $context->res->text('', 500);
             }
         } else {
             \call_user_func($execute);
@@ -152,12 +143,12 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     } catch (\Throwable $e) {
         $context->error($e->getMessage()."\n".$e->getTraceAsString());
         $context->error('At ' . $e->getFile() . ':' . $e->getLine());
-        $output = $context->res->send('', 500);
+        $output = $context->res->text('', 500);
     }
 
     if($output == null) {
         $context->error('Return statement missing. return $context->res->empty() if no response is expected.');
-        $output = $context->res->send('', 500);
+        $output = $context->res->text('', 500);
     }
 
     $output['body'] ??= '';
@@ -165,6 +156,10 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $output['headers'] ??= [];
 
     $headers = \array_change_key_case($output['headers']);
+
+    if(!empty($headers['content-type'])) {
+        $headers['content-type'] = \strtolower($headers['content-type']);
+    }
 
     if (!isset($headers['content-type'])) {
         $headers['content-type'] = 'text/plain; charset=utf-8';
@@ -201,7 +196,7 @@ $server->on("Request", function($req, $res) use($action) {
 
         $res->header('x-open-runtimes-log-id', $logger->id);
         $logger->end();
-    
+
         $res->status(500);
         $res->end('');
     }

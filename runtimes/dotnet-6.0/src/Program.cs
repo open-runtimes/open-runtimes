@@ -34,7 +34,7 @@ static async Task<IResult> Execute(HttpRequest request)
         var outputHeaders = new Dictionary<string, string>();
         outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
-        return new CustomResponse("", 500, outputHeaders);
+        return new CustomResponse(Encoding.UTF8.GetBytes(""), 500, outputHeaders);
     }
 }
 
@@ -49,7 +49,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     {
         if(!Int32.TryParse(timeout, out safeTimout) || safeTimout == 0)
         {
-            return new CustomResponse("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.", 500);
+            return new CustomResponse(System.Text.Encoding.UTF8.GetBytes("Header \"x-open-runtimes-timeout\" must be an integer greater than 0."), 500);
         }
     }
 
@@ -61,12 +61,17 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     string serverSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET");
     if (!string.IsNullOrEmpty(serverSecret) && secret != serverSecret)
     {
-        return new CustomResponse("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.", 500);
+        return new CustomResponse(System.Text.Encoding.UTF8.GetBytes("Unauthorized. Provide correct \"x-open-runtimes-secret\" header."), 500);
     }
 
-    var reader = new StreamReader(request.Body);
-    var bodyRaw = await reader.ReadToEndAsync();
-    object body = bodyRaw;
+    byte[] bodyBinary = new byte[] {};
+    Stream bodyStream = request.Body;
+
+    using (MemoryStream memoryStream = new MemoryStream())
+    {
+        await bodyStream.CopyToAsync(memoryStream);
+        bodyBinary = memoryStream.ToArray();
+    }
     var headers = new Dictionary<string, string>();
     var method = request.Method;
 
@@ -91,24 +96,6 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     foreach(KeyValuePair<string, object> entry in enforcedHeaders)
     {
         headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
-    }
-
-    var contentType = request.Headers.TryGetValue("content-type", out var contentTypeValue) ? contentTypeValue.ToString() : "";
-    if(contentType.Contains("application/json"))
-    {
-        if(string.IsNullOrEmpty(bodyRaw))
-        {
-            body = new Dictionary<string, object>();
-        } 
-        else
-        {
-            body = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyRaw) ?? new Dictionary<string, object>();
-        }
-    }
-
-    if(body == null)
-    {
-        body = new Dictionary<string, object>();
     }
 
     var hostHeader = request.Headers.TryGetValue("host", out var hostHeaderValue)
@@ -180,8 +167,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         queryString,
         url,
         headers,
-        body,
-        bodyRaw);
+        bodyBinary);
 
     var contextResponse = new RuntimeResponse();
 
@@ -210,7 +196,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
             else
             {
                 context.Error("Execution timed out.");
-                output = context.Res.Send("", 500);
+                output = context.Res.Text("", 500);
             }
         } else
         {
@@ -220,7 +206,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     catch (Exception e)
     {
         context.Error(e.ToString());
-        output = context.Res.Send("", 500, new Dictionary<string,string>());
+        output = context.Res.Text("", 500, new Dictionary<string,string>());
     }
     finally
     {
@@ -230,7 +216,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     if(output == null)
     {
         context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-        output = context.Res.Send("", 500, new Dictionary<string,string>());
+        output = context.Res.Text("", 500, new Dictionary<string,string>());
     }
 
     var outputHeaders = new Dictionary<string, string>();
@@ -238,6 +224,11 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     {
         var header = entry.Key.ToLower();
         var value = entry.Value;
+
+        if (header == "content-type" && !string.IsNullOrEmpty(value))
+        {
+            value = value.ToLower();
+        }
 
         if (!(header.StartsWith("x-open-runtimes-")))
         {

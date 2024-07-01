@@ -24,8 +24,12 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
             'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
   }
 
-  String bodyRaw = await req.readAsString();
-  dynamic body = bodyRaw;
+  Stream<List<int>> bodyStream = await req.read();
+  List<int> bodyBinary = [];
+  await for (List<int> data in bodyStream) {
+    bodyBinary.addAll(data);
+  }
+
   String method = req.method;
   Map<String, dynamic> headers = {};
 
@@ -41,15 +45,6 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   enforcedHeaders.forEach((key, value) {
     headers[key.toLowerCase()] = '${value}';
   });
-
-  String contentType = req.headers['content-type'] ?? 'text/plain';
-  if (contentType.contains('application/json')) {
-    if (!bodyRaw.isEmpty) {
-      body = jsonDecode(bodyRaw);
-    } else {
-      body = {};
-    }
-  }
 
   String hostHeader = req.headers['host'] ?? '';
 
@@ -93,17 +88,17 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   }
 
   RuntimeRequest contextReq = new RuntimeRequest(
-      method: method,
-      scheme: scheme,
-      host: host,
-      port: port,
-      path: path,
-      query: query,
-      queryString: queryString,
-      headers: headers,
-      body: body,
-      bodyRaw: bodyRaw,
-      url: url);
+    method: method,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+    queryString: queryString,
+    headers: headers,
+    bodyBinary: bodyBinary,
+    url: url
+  );
   RuntimeResponse contextRes = new RuntimeResponse();
   RuntimeContext context = new RuntimeContext(contextReq, contextRes, logger);
 
@@ -121,7 +116,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
             output = result;
           } else {
             context.error('Execution timed out.');
-            output = context.res.send('', 500, const {});
+            output = context.res.text('', 500, const {});
           }
         } else {
           output = await user_code.main(context);
@@ -136,13 +131,13 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   } catch (e, s) {
     context.error(e.toString());
     context.error(s.toString());
-    output = context.res.send('', 500, const {});
+    output = context.res.text('', 500, const {});
   }
 
   if (output == null) {
     context.error(
         'Return statement missing. return context.res.empty() if no response is expected.');
-    output = context.res.send('', 500, const {});
+    output = context.res.text('', 500, const {});
   }
 
   output['body'] = output['body'] ?? '';
@@ -158,7 +153,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  String contentTypeValue = responseHeaders['content-type'] ?? 'text/plain';
+  String contentTypeValue = (responseHeaders['content-type'] ?? 'text/plain').toLowerCase();
   Encoding? encoding = null;
 
   if (contentTypeValue.contains('charset=')) {

@@ -14,7 +14,7 @@ public class Handler {
         switch (Action)
         {
             case "plaintextResponse":
-                return context.Res.Send("Hello World 👋");
+                return context.Res.Text("Hello World 👋");
             case "jsonResponse":
                 return context.Res.Json(new()
                 {
@@ -22,12 +22,17 @@ public class Handler {
                     { "message", "Developers are awesome." }
                 });
             case "customCharsetResponse":
-                return context.Res.Send("ÅÆ", 200, new Dictionary<string, string>()
+                return context.Res.Text("ÅÆ", 200, new Dictionary<string, string>()
                 {
                     { "content-type", "text/plain; charset=iso-8859-1" }
                 });
+            case "uppercaseCharsetResponse":
+                return context.Res.Text("ÅÆ", 200, new Dictionary<string, string>()
+                {
+                    { "content-type", "TEXT/PLAIN" }
+                });
             case "multipartResponse":
-                return context.Res.Send(@"--12345
+                return context.Res.Text(@"--12345
 Content-Disposition: form-data; name=""partOne""
 
 Why just have one part?
@@ -44,14 +49,14 @@ When you can have two!
             case "emptyResponse":
                 return context.Res.Empty();
             case "noResponse":
-                context.Res.Send("This should be ignored, as it is not returned.");
+                context.Res.Text("This should be ignored, as it is not returned.");
 
                 // Simulate test data. Return nessessary in Java
                 context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-                return context.Res.Send("", 500);
+                return context.Res.Text("", 500);
             case "doubleResponse":
-                context.Res.Send("This should be ignored.");
-                return context.Res.Send("This should be returned.");
+                context.Res.Text("This should be ignored.");
+                return context.Res.Text("This should be returned.");
             case "headersResponse":
                 var headers = new Dictionary<string, string>();
                 headers.Add("first-header", "first-value");
@@ -60,11 +65,11 @@ When you can have two!
                 var cookieHeader = context.Req.Headers.TryGetValue("cookie", out string cookieHeaderValue) ? cookieHeaderValue : "missing";
                 headers.Add("cookie", cookieHeader);
                 headers.Add("x-open-runtimes-custom-out-header", "third-value");
-                return context.Res.Send("OK", 200, headers);
+                return context.Res.Text("OK", 200, headers);
             case "statusResponse":
-                return context.Res.Send("FAIL", 404);
+                return context.Res.Text("FAIL", 404);
             case "requestMethod":
-                return context.Res.Send(context.Req.Method);
+                return context.Res.Text(context.Req.Method);
             case "requestUrl":
                 return context.Res.Json(new()
                 {
@@ -85,27 +90,43 @@ When you can have two!
                 }
 
                 return context.Res.Json(json);
-            case "requestBodyPlaintext":
-                return context.Res.Send((string) context.Req.Body);
+            case "requestBodyText":
+                return context.Res.Text((string) context.Req.Body);
             case "requestBodyJson":
-                var key1 = "";
-                var key2 = "";
-
-                if(context.Req.Body is string) {
-                    key1 = "Missing key";
-                    key2 = "Missing key";
-                } else {
-                    var body = (Dictionary<String, Object>) context.Req.Body;
-
-                    key1 = body.TryGetValue("key1", out var key1Value) ? key1Value.ToString() : "Missing key";
-                    key2 = body.TryGetValue("key2", out var key2Value) ? key2Value.ToString() : "Missing key";
+                return context.Res.Json(context.Req.BodyJson);
+            case "requestBodyBinary":
+                return context.Res.Binary(context.Req.BodyBinary);
+            case "requestBodyTextAuto":
+                return context.Res.Text((string) context.Req.Body);
+            case "requestBodyJsonAuto":
+                return context.Res.Json((Dictionary<string, object>) context.Req.Body);
+            case "requestBodyBinaryAuto":
+                return context.Res.Binary((byte[]) context.Req.Body);
+            case "binaryResponse1":
+                byte[] bytes1 = new byte[] {0, 10, 255};
+                return context.Res.Binary(bytes1); // byte[]
+            case "binaryResponse2":
+                byte[] bytes2 = new byte[] {0, 20, 255};
+                return context.Res.Binary(bytes2); // Just a filler
+            case "binaryResponse3":
+                byte[] bytes3 = new byte[] {0, 30, 255};
+                return context.Res.Binary(bytes3); // Just a filler
+            case "binaryResponse4":
+                byte[] bytes4 = new byte[] {0, 40, 255};
+                return context.Res.Binary(bytes4); // Just a filler
+            case "binaryResponse5":
+                byte[] bytes5 = new byte[] {0, 50, 255};
+                return context.Res.Binary(bytes5); // Just a filler
+            case "binaryResponseLarge":
+                byte[] bytes = context.Req.BodyBinary;
+                byte[] hash;
+                using (var md5 = System.Security.Cryptography.MD5.Create()) {
+                    md5.TransformFinalBlock(bytes, 0, bytes.Length);
+                    hash = md5.Hash;
                 }
-
-                return context.Res.Json(new()
-                {
-                    { "key1", key1 },
-                    { "key2", key2 },
-                    { "raw", context.Req.BodyRaw }
+                string hex = BitConverter.ToString(hash).Replace("-", "").ToLower();
+                return context.Res.Send(hex, 200, new() {
+                    {"x-method", context.Req.Method}
                 });
             case "envVars":
                 return context.Res.Json(new()
@@ -117,9 +138,9 @@ When you can have two!
                 Console.WriteLine("Native log");
                 context.Log("Debug log");
                 context.Error("Error log");
-      
+
                 context.Log("Log+With+Plus+Symbol");
-                
+
                 context.Log(42);
                 context.Log(4.2);
                 context.Log(true);
@@ -134,7 +155,7 @@ When you can have two!
 
                 context.Log(Arr);
 
-                return context.Res.Send("");
+                return context.Res.Text("");
             case "library":
                 var response = await http.GetStringAsync($"https://jsonplaceholder.typicode.com/todos/{context.Req.BodyRaw}");
                 var todo = JsonSerializer.Deserialize<Dictionary<string, object>>(response) ?? new Dictionary<string, object>();
@@ -149,7 +170,11 @@ When you can have two!
                 await Task.Delay(3000);
 
                 context.Log("Timeout end.");
-                return context.Res.Send("Successful response.");
+                return context.Res.Text("Successful response.");
+            case "deprecatedMethods":
+                return context.Res.Send(context.Req.BodyRaw);
+            case "deprecatedMethodsUntypedBody":
+                return context.Res.Send("50"); // Send only supported String
             default:
                 throw new Exception("Unknown action");
         }

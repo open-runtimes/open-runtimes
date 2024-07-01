@@ -2,25 +2,35 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart' hide Response;
 import 'dart:io' show Platform;
+import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 
 Future<dynamic> main(final context) async {
   String action = context.req.headers['x-action'] ?? '';
 
-  switch(action) { 
-    case 'plaintextResponse': {
-      return context.res.send('Hello World 👋');
-    }
-    case 'jsonResponse': {
-      return context.res.json({ 'json': true, 'message': 'Developers are awesome.' });
-    }
+  switch (action) {
+    case 'plaintextResponse':
+      {
+        return context.res.text('Hello World 👋');
+      }
+    case 'jsonResponse':
+      {
+        return context.res
+            .json({'json': true, 'message': 'Developers are awesome.'});
+      }
     case 'customCharsetResponse':
-    {
-      return context.res.send(
-          'ÅÆ', 200, {'content-type': 'text/plain; charset=iso-8859-1'});
-    }
+      {
+        return context.res.text(
+            'ÅÆ', 200, {'content-type': 'text/plain; charset=iso-8859-1'});
+      }
+    case 'uppercaseCharsetResponse':
+      {
+        return context.res.text('ÅÆ', 200, {'content-type': 'TEXT/PLAIN'});
+      }
     case 'multipartResponse':
-    {
-      return context.res.send("""--12345
+      {
+        return context.res.text(
+            """--12345
 Content-Disposition: form-data; name=\"partOne\"
 
 Why just have one part?
@@ -31,106 +41,167 @@ When you can have two!
 --12345--""", 200, {
         'content-type': 'multipart/form-data; boundary=12345'
       });
-    }
-    case 'redirectResponse': {
-      return context.res.redirect('https://github.com/');
-    }
-    case 'emptyResponse': {
-      return context.res.empty();
-    }
-    case 'noResponse': {
-      context.res.send('This should be ignored, as it is not returned.');
-      break;
-    }
-    case 'doubleResponse': {
-      context.res.send('This should be ignored.');
-      return context.res.send('This should be returned.');
-    }
-    case 'headersResponse': {
-      return context.res.send('OK', 200, {
-        'first-header': 'first-value',
-        'second-header': context.req.headers['x-open-runtimes-custom-in-header'] ?? 'missing',
-        'cookie': context.req.headers['cookie'] ?? 'missing',
-        'x-open-runtimes-custom-out-header': 'third-value'
-      });
-    }
-    case 'statusResponse': {
-      return context.res.send('FAIL', 404);
-    }
-    case 'requestMethod': {
-      return context.res.send(context.req.method);
-    }
-    case 'requestUrl': {
-        return context.res.json({
-            'url': context.req.url,
-            'port': context.req.port,
-            'path': context.req.path,
-            'query': context.req.query,
-            'queryString': context.req.queryString,
-            'scheme': context.req.scheme,
-            'host': context.req.host,
-        });
-    }
-    case 'requestHeaders': {
-      return context.res.json(context.req.headers);
-    }
-    case 'requestBodyPlaintext': {
-      return context.res.send(context.req.body);
-    }
-    case 'requestBodyJson': {
-      var key1 = null;
-      var key2 = null;
-
-      if(context.req.body is String) {
-        key1 = 'Missing key';
-        key2 = 'Missing key';
-      } else {
-        key1 = context.req.body['key1'] ?? 'Missing key';
-        key2 = context.req.body['key2'] ?? 'Missing key';
       }
+    case 'redirectResponse':
+      {
+        return context.res.redirect('https://github.com/');
+      }
+    case 'emptyResponse':
+      {
+        return context.res.empty();
+      }
+    case 'noResponse':
+      {
+        context.res.text('This should be ignored, as it is not returned.');
+        break;
+      }
+    case 'doubleResponse':
+      {
+        context.res.text('This should be ignored.');
+        return context.res.text('This should be returned.');
+      }
+    case 'headersResponse':
+      {
+        return context.res.text('OK', 200, {
+          'first-header': 'first-value',
+          'second-header':
+              context.req.headers['x-open-runtimes-custom-in-header'] ??
+                  'missing',
+          'cookie': context.req.headers['cookie'] ?? 'missing',
+          'x-open-runtimes-custom-out-header': 'third-value'
+        });
+      }
+    case 'statusResponse':
+      {
+        return context.res.text('FAIL', 404);
+      }
+    case 'requestMethod':
+      {
+        return context.res.text(context.req.method);
+      }
+    case 'requestUrl':
+      {
+        return context.res.json({
+          'url': context.req.url,
+          'port': context.req.port,
+          'path': context.req.path,
+          'query': context.req.query,
+          'queryString': context.req.queryString,
+          'scheme': context.req.scheme,
+          'host': context.req.host,
+        });
+      }
+    case 'requestHeaders':
+      {
+        return context.res.json(context.req.headers);
+      }
+    case 'requestBodyText':
+      {
+        return context.res.text(context.req.bodyText);
+      }
+    case 'requestBodyJson':
+      {
+        return context.res.json(context.req.bodyJson);
+      }
+    case 'requestBodyBinary':
+      {
+        return context.res.binary(context.req.bodyBinary);
+      }
+    case 'requestBodyTextAuto':
+      {
+        return context.res.text(context.req.body);
+      }
+    case 'requestBodyJsonAuto':
+      {
+        return context.res.json(context.req.body);
+      }
+    case 'requestBodyBinaryAuto':
+      {
+        return context.res.binary(context.req.body);
+      }
+    case 'binaryResponse1':
+      {
+        List<int> bytes = [0, 10, 255];
+        return context.res.binary(bytes); // List<int>
+      }
+    case 'binaryResponse2':
+      {
+        Uint8List bytes = Uint8List.fromList([0, 20, 255]);
+        return context.res.binary(bytes); // Uint8List
+      }
+    case 'binaryResponse3':
+      {
+        List<int> bytes = [0, 30, 255];
+        return context.res.binary(bytes); // Just a filler
+      }
+    case 'binaryResponse4':
+      {
+        List<int> bytes = [0, 40, 255];
+        return context.res.binary(bytes); // Just a filler
+      }
+    case 'binaryResponse5':
+      {
+        List<int> bytes = [0, 50, 255];
+        return context.res.binary(bytes); // Just a filler
+      }
+    case 'binaryResponseLarge':
+      {
+        final bytes = Uint8List.fromList(context.req.bodyBinary);
+        final hash = md5.convert(bytes);
+        return context.res
+            .send(hash.toString(), 200, {'x-method': context.req.method});
+      }
+    case 'envVars':
+      {
+        return context.res.json({
+          'var': Platform.environment['CUSTOM_ENV_VAR'],
+          'emptyVar': Platform.environment['NOT_DEFINED_VAR'] ?? null
+        });
+      }
+    case 'logs':
+      {
+        print('Native log');
+        context.log('Debug log');
+        context.error('Error log');
 
-      return context.res.json({
-        'key1': key1,
-        'key2': key2,
-        'raw': context.req.bodyRaw
-      });
-    }
-    case 'envVars': {
-      return context.res.json({
-        'var': Platform.environment['CUSTOM_ENV_VAR'],
-        'emptyVar': Platform.environment['NOT_DEFINED_VAR'] ?? null
-      });
-    }
-    case 'logs': {
-      print('Native log');
-      context.log('Debug log');
-      context.error('Error log');
-      
-      context.log("Log+With+Plus+Symbol");
-      
-      context.log(42);
-      context.log(4.2);
-      context.log(true);
+        context.log("Log+With+Plus+Symbol");
 
-      context.log({ 'objectKey': 'objectValue' });
-      context.log([ 'arrayValue' ]);
+        context.log(42);
+        context.log(4.2);
+        context.log(true);
 
-      return context.res.send('');
-    }
-    case 'library': {
-      final todo = await Dio().get('https://jsonplaceholder.typicode.com/todos/' + context.req.bodyRaw);
-      return context.res.json({ 'todo': todo.data });
-    }
-    case 'timeout': {
-      context.log("Timeout start.");
+        context.log({'objectKey': 'objectValue'});
+        context.log(['arrayValue']);
 
-      await Future.delayed(Duration(seconds: 3));
+        return context.res.text('');
+      }
+    case 'library':
+      {
+        final todo = await Dio().get(
+            'https://jsonplaceholder.typicode.com/todos/' +
+                context.req.bodyRaw);
+        return context.res.json({'todo': todo.data});
+      }
+    case 'timeout':
+      {
+        context.log("Timeout start.");
 
-      context.log("Timeout end.");
-      return context.res.send("Successful response.");
-    }
-    default: { 
-      throw new Exception('Unknown action');
-    }
-  } 
+        await Future.delayed(Duration(seconds: 3));
+
+        context.log("Timeout end.");
+        return context.res.text("Successful response.");
+      }
+    case 'deprecatedMethods':
+      {
+        return context.res.send(context.req.bodyRaw);
+      }
+    case 'deprecatedMethodsUntypedBody':
+      {
+        return context.res.send("50"); // Send only supported String
+      }
+    default:
+      {
+        throw new Exception('Unknown action');
+      }
+  }
 }

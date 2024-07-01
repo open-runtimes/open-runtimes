@@ -8,7 +8,7 @@ namespace runtime
 {
     struct RuntimeOutput
     {
-        std::string body;
+        std::vector<std::byte> body;
         int statusCode;
         Json::Value headers;
     };

@@ -65,9 +65,8 @@ def action(request, response, logger)
       end
     end
   end
-
-  body_raw = request.body.read
-  body = body_raw
+  
+  body_binary = request.body.read
   method = request.request_method
   headers = {}
 
@@ -94,16 +93,7 @@ def action(request, response, logger)
     headers[key.downcase] = value.to_s
   end
 
-  content_type = request.env['CONTENT_TYPE']
-  content_type = 'text/plain' if content_type.nil?
-
-  if content_type.include?('application/json')
-    unless body_raw.empty?
-      body = JSON.parse(body_raw)
-    end
-  end
-
-  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body, body_raw)
+  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body_binary)
   context_res = RuntimeResponse.new
   context = RuntimeContext.new(context_req, context_res, logger)
   
@@ -131,7 +121,7 @@ def action(request, response, logger)
 
       unless executed
         context.error('Execution timed out.')
-        output = context.res.send('', 500, {})
+        output = context.res.text('', 500, {})
       end
     else
       output = main(context)
@@ -139,14 +129,14 @@ def action(request, response, logger)
   rescue Exception => e
     context.error(e)
     context.error(e.backtrace.join("\n"))
-    output = context.res.send('', 500, {})
+    output = context.res.text('', 500, {})
   ensure
     logger.revert_native_logs
   end
 
   if output.nil?
     context.error('Return statement missing. return context.res.empty() if no response is expected.')
-    output = context.res.send('', 500, {})
+    output = context.res.text('', 500, {})
   end
 
   output['body'] = '' if output['body'].nil?
@@ -165,6 +155,7 @@ def action(request, response, logger)
   response.headers['x-open-runtimes-log-id'] = logger.id
 
   response.headers['content-type'] = 'text/plain' if response.headers['content-type'].nil?
+  response.headers['content-type'] = response.headers['content-type'].downcase
 
   unless response.headers['content-type'].start_with?('multipart/') || response.headers['content-type'].include?('charset=') 
     response.headers['content-type'] += '; charset=utf-8'

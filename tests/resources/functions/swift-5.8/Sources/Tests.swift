@@ -1,23 +1,28 @@
 import Foundation
 import AsyncHTTPClient
+import Crypto
 
 func main(context: RuntimeContext) async throws -> RuntimeOutput {
     let action = context.req.headers["x-action"] ?? "default"
 
     switch action {
     case "plaintextResponse":
-        return context.res.send("Hello World 👋")
+        return context.res.text("Hello World 👋")
     case "jsonResponse":
         return try context.res.json([
             "json": true,
             "message": "Developers are awesome."
         ])
     case "customCharsetResponse":
-        return context.res.send("ÅÆ", headers: [
+        return context.res.text("ÅÆ", headers: [
             "content-type": "text/plain; charset=iso-8859-1"
         ])
+    case "uppercaseCharsetResponse":
+        return context.res.text("ÅÆ", headers: [
+            "content-type": "TEXT/PLAIN"
+        ])
     case "multipartResponse":
-        return context.res.send("""
+        return context.res.text("""
 --12345
 Content-Disposition: form-data; name=\"partOne\"
 
@@ -35,26 +40,26 @@ When you can have two!
     case "emptyResponse":
         return context.res.empty()
     case "noResponse":
-        _ = context.res.send("This should be ignored, as it is not returned.")
+        _ = context.res.text("This should be ignored, as it is not returned.")
 
         // Simulate test data. Return necessary in Swift
         context.error("Return statement missing. return context.res.empty() if no response is expected.")
 
-        return context.res.send("", statusCode: 500)
+        return context.res.text("", statusCode: 500)
     case "doubleResponse":
-        _ = context.res.send("This should be ignored.")
-        return context.res.send("This should be returned.")
+        _ = context.res.text("This should be ignored.")
+        return context.res.text("This should be returned.")
     case "headersResponse":
-        return context.res.send("OK", statusCode: 200, headers: [
+        return context.res.text("OK", statusCode: 200, headers: [
             "first-header": "first-value",
             "second-header": context.req.headers["x-open-runtimes-custom-in-header"] ?? "missing",
             "cookie": context.req.headers["cookie"] ?? "missing",
             "x-open-runtimes-custom-out-header": "third-value"
         ])
     case "statusResponse":
-        return context.res.send("FAIL", statusCode: 404)
+        return context.res.text("FAIL", statusCode: 404)
     case "requestMethod":
-        return context.res.send(context.req.method)
+        return context.res.text(context.req.method)
     case "requestUrl":
         return try context.res.json([
             "url": context.req.url,
@@ -67,26 +72,53 @@ When you can have two!
         ])
     case "requestHeaders":
         return try context.res.json(context.req.headers)
-    case "requestBodyPlaintext":
-        return context.res.send(context.req.body as! String)
+    case "requestBodyText":
+        return context.res.text(context.req.bodyText)
     case "requestBodyJson":
-        var key1: String
-        var key2: String
+        // Throwing of invalid JSON caused crash instead of exception. We expect that test to throw here instead
+        do {
+            _ = try JSONSerialization.jsonObject(
+                with: context.req.bodyText.data(using: .utf8)!,
+                options: .allowFragments
+            ) as! [String: Any?]
 
-        if context.req.body is String {
-            key1 = "Missing key"
-            key2 = "Missing key"
-        } else {
-            let body = context.req.body as! [String: Any?]
-
-            key1 = (body["key1"] as? String) ?? "Missing key"
-            key2 = (body["key2"] as? String) ?? "Missing key"
+            return try context.res.json(context.req.bodyJson)
+        } catch {
+            throw annotatedError(NSError(domain: "Invalid JSON", code: 500))
         }
-
-        return try context.res.json([
-            "key1": key1,
-            "key2": key2,
-            "raw": context.req.bodyRaw
+    case "requestBodyBinary":
+        return context.res.binary(context.req.bodyBinary)
+    case "requestBodyTextAuto":
+        return context.res.text(context.req.body as! String)
+    case "requestBodyJsonAuto":
+        return try context.res.json(context.req.body as! [String: Any?])
+    case "requestBodyBinaryAuto":
+        return context.res.binary(context.req.body as! Data)
+    case "binaryResponse1":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 10, 255])
+        return context.res.binary(bytes) // Data
+    case "binaryResponse2":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 20, 255])
+        return context.res.binary(bytes) // Just a filler
+    case "binaryResponse3":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 30, 255])
+        return context.res.binary(bytes) // Just a filler
+    case "binaryResponse4":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 40, 255])
+        return context.res.binary(bytes) // Just a filler
+    case "binaryResponse5":
+        var bytes = Data()
+        bytes.append(contentsOf: [0, 50, 255])
+        return context.res.binary(bytes) // Just a filler
+    case "binaryResponseLarge":
+        let bytes = context.req.bodyBinary
+        let hex = Insecure.MD5.hash(data: bytes).map { String(format: "%02hhx", $0) }.joined()
+        return context.res.send(hex, statusCode: 200, headers: [
+            "x-method": context.req.method
         ])
     case "envVars":
         return try context.res.json([
@@ -96,7 +128,7 @@ When you can have two!
     case "logs":
         context.log("Debug log")
         context.error("Error log")
-                
+
         context.log("Log+With+Plus+Symbol")
 
         context.log(42)
@@ -105,11 +137,12 @@ When you can have two!
         context.log(["objectKey": "objectValue"])
         context.log(["arrayValue"])
 
+        // TODO: Implement as soon as possible
         // Swift doesn't support native log capturing
         context.log("Native log")
         context.log("Native logs detected. Use context.log() or context.error() for better experience.")
 
-        return context.res.send("")
+        return context.res.text("")
     case "library":
         let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
         let request = HTTPClientRequest(url: "https://jsonplaceholder.typicode.com/todos/\(context.req.bodyRaw)")
@@ -127,7 +160,11 @@ When you can have two!
         try Task.checkCancellation()
 
         context.log("Timeout end.")
-        return context.res.send("Successful response.")
+        return context.res.text("Successful response.")
+    case "deprecatedMethods":
+        return context.res.send(context.req.bodyRaw)
+    case "deprecatedMethodsUntypedBody":
+        return context.res.send("50") // Send only supported String
     default:
         throw annotatedError(NSError(domain: "Unknown action", code: 500))
     }

@@ -1,5 +1,7 @@
 package io.openruntimes.java;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.HashMap;
 import java.net.HttpURLConnection;
@@ -23,7 +25,7 @@ public class Tests {
 
         switch (action) {
             case "plaintextResponse" -> {
-                return context.getRes().send("Hello World 👋");
+                return context.getRes().text("Hello World 👋");
             }
             case "jsonResponse" -> {
                 json.put("json", true);
@@ -32,11 +34,15 @@ public class Tests {
             }
             case "customCharsetResponse" -> {
                 headers.put("content-type", "text/plain; charset=iso-8859-1");
-                return context.getRes().send("ÅÆ", 200, headers);
+                return context.getRes().text("ÅÆ", 200, headers);
+            }
+            case "uppercaseCharsetResponse" -> {
+                headers.put("content-type", "TEXT/PLAIN");
+                return context.getRes().text("ÅÆ", 200, headers);
             }
             case "multipartResponse" -> {
                 headers.put("content-type", "multipart/form-data; boundary=12345");
-                return context.getRes().send("--12345\n" +
+                return context.getRes().text("--12345\n" +
                         "Content-Disposition: form-data; name=\"partOne\"\n" +
                         "\n" +
                         "Why just have one part?\n" +
@@ -53,28 +59,28 @@ public class Tests {
                 return context.getRes().empty();
             }
             case "noResponse" -> {
-                context.getRes().send("This should be ignored, as it is not returned.");
+                context.getRes().text("This should be ignored, as it is not returned.");
 
                 // Simulate test data. Return nessessary in Java
                 context.error("Return statement missing. return context.getRes().empty() if no response is expected.");
-                return context.getRes().send("", 500);
+                return context.getRes().text("", 500);
             }
             case "doubleResponse" -> {
-                context.getRes().send("This should be ignored.");
-                return context.getRes().send("This should be returned.");
+                context.getRes().text("This should be ignored.");
+                return context.getRes().text("This should be returned.");
             }
             case "headersResponse" -> {
                 headers.put("first-header", "first-value");
                 headers.put("second-header", context.getReq().getHeaders().getOrDefault("x-open-runtimes-custom-in-header", "missing"));
                 headers.put("cookie", context.getReq().getHeaders().getOrDefault("cookie", "missing"));
                 headers.put("x-open-runtimes-custom-out-header", "third-value");
-                return context.getRes().send("OK", 200, headers);
+                return context.getRes().text("OK", 200, headers);
             }
             case "statusResponse" -> {
-                return context.getRes().send("FAIL", 404);
+                return context.getRes().text("FAIL", 404);
             }
             case "requestMethod" -> {
-                return context.getRes().send(context.getReq().getMethod());
+                return context.getRes().text(context.getReq().getMethod());
             }
             case "requestUrl" -> {
                 json.put("url", context.getReq().getUrl());
@@ -92,25 +98,56 @@ public class Tests {
                 }
                 return context.getRes().json(json);
             }
-            case "requestBodyPlaintext" -> {
-                return context.getRes().send((String) context.getReq().getBody());
+            case "requestBodyText" -> {
+                return context.getRes().text((String) context.getReq().getBody());
             }
             case "requestBodyJson" -> {
-                String key1 = "";
-                String key2 = "";
-                if (context.getReq().getBody() instanceof String) {
-                    key1 = "Missing key";
-                    key2 = "Missing key";
-                } else {
-                    Map<String, Object> body = (Map<String, Object>) context.getReq().getBody();
-
-                    key1 = body.getOrDefault("key1", "Missing key").toString();
-                    key2 = body.getOrDefault("key2", "Missing key").toString();
+                return context.getRes().json(context.getReq().getBodyJson());
+            }
+            case "requestBodyBinary" -> {
+                return context.getRes().binary(context.getReq().getBodyBinary());
+            }
+            case "requestBodyTextAuto" -> {
+                return context.getRes().text((String) context.getReq().getBody());
+            }
+            case "requestBodyJsonAuto" -> {
+                return context.getRes().json((Map<String, Object>) context.getReq().getBody());
+            }
+            case "requestBodyBinaryAuto" -> {
+                return context.getRes().binary((byte[]) context.getReq().getBody());
+            }
+          case "binaryResponse1" -> {
+                byte[] bytes = {0, 10, (byte) 255};
+                return context.getRes().binary(bytes); // byte[]
+            }
+            case "binaryResponse2" -> {
+                byte[] bytes = {0, 20, (byte) 255};
+                return context.getRes().binary(bytes); // Just a filler
+            }
+            case "binaryResponse3" -> {
+                byte[] bytes = {0, 30, (byte) 255};
+                return context.getRes().binary(bytes); // Just a filler
+            }
+            case "binaryResponse4" -> {
+                byte[] bytes = {0, 40, (byte) 255};
+                return context.getRes().binary(bytes); // Just a filler
+            }
+            case "binaryResponse5" -> {
+                byte[] bytes = {0, 50, (byte) 255};
+                return context.getRes().binary(bytes); // Just a filler
+            }
+            case "binaryResponseLarge" -> {
+                byte[] bytes = context.getReq().getBodyBinary();
+                MessageDigest md5Digest = null;
+                try {
+                    md5Digest = MessageDigest.getInstance("MD5");
+                } catch (NoSuchAlgorithmException e) {
                 }
-                json.put("key1", key1);
-                json.put("key2", key2);
-                json.put("raw", context.getReq().getBodyRaw());
-                return context.getRes().json(json);
+                md5Digest.update(bytes);
+                byte[] digestBytes = md5Digest.digest();
+                String hex = bytesToHex(digestBytes).toLowerCase();
+                headers.put("x-method", context.getReq().getMethod());
+                return context.getRes().send(hex, 200, headers);
             }
             case "envVars" -> {
                 json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
@@ -131,7 +168,7 @@ public class Tests {
                 HashMap<String, String> map = new HashMap<String, String>();
                 map.put("objectKey", "objectValue");
                 context.log(map);
-                return context.getRes().send("");
+                return context.getRes().text("");
             }
             case "library" -> {
                 URL url = new URL("https://jsonplaceholder.typicode.com/todos/" + context.getReq().getBodyRaw());
@@ -163,9 +200,32 @@ public class Tests {
 
                 context.log("Timeout end.");
 
-                return context.getRes().send("Successful response.");
+                return context.getRes().text("Successful response.");
+            }
+            case "deprecatedMethods" -> {
+                return context.getRes().send(context.getReq().getBodyRaw());
+            }
+            case "deprecatedMethodsUntypedBody" -> {
+                return context.getRes().send("50"); // Send only supported String
             }
             default -> throw new Exception("Unknown action");
         }
+    }
+
+    public static String bytesToHex(byte[] bytes) {
+
+        char[] result = new char[bytes.length * 2];
+
+        for (int index = 0; index < bytes.length; index++) {
+            int v = bytes[index];
+
+            int upper = (v >>> 4) & 0xF;
+            result[index * 2] = (char) (upper + (upper < 10 ? 48 : 65 - 10));
+
+            int lower = v & 0xF;
+            result[index * 2 + 1] = (char) (lower + (lower < 10 ? 48 : 65 - 10));
+        }
+
+        return new String(result);
     }
 }

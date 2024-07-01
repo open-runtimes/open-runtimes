@@ -2,27 +2,32 @@ from logger import Logger
 import json
 
 class Response:
-    def send(self, body, statusCode = 200, headers = {}):
+    def binary(self, bytes, statusCode = 200, headers = {}):
         return {
-            'body': body,
+            'body': bytes,
             'statusCode': statusCode,
             'headers': headers,
         }
+    
+    def text(self, body, statusCode = 200, headers = {}):
+        return self.binary(body.encode("utf-8"), statusCode, headers)
+
+    def send(self, body, statusCode = 200, headers = {}):
+        return self.text(str(body), statusCode, headers)
 
     def json(self, obj, statusCode = 200, headers = {}):
         headers['content-type'] = 'application/json'
-        return self.send(json.dumps(obj, separators=(',', ':')), statusCode, headers)
+        return self.text(json.dumps(obj, separators=(',', ':')), statusCode, headers)
     
     def empty(self):
-        return self.send('', 204, {})
+        return self.text('', 204, {})
 
     def redirect(self, url, statusCode = 301, headers = {}):
         headers['location'] = url
-        return self.send('', statusCode, headers)
+        return self.text('', statusCode, headers)
 
 class Request:
-    body_raw = None
-    body = None
+    body_binary = None
     headers = None
     method = None
     url = None
@@ -32,6 +37,35 @@ class Request:
     query_string = None
     scheme = None
     host = None
+
+    @property
+    def body_text(self):
+        return self.body_binary.decode("utf-8")
+
+    @property
+    def body_json(self):
+        return json.loads(self.body_text)
+
+    @property
+    def body_raw(self):
+        return self.body_text
+
+    @property
+    def body(self):
+        content_type = self.headers.get('content-type', 'text/plain').lower()
+
+        if content_type.startswith('application/json'):
+            if len(self.body_binary) > 0:
+                return self.body_json
+            else:
+                return {}
+
+        binary_types = ["application/", "audio/", "font/", "image/", "video/"]
+        for binary_type in binary_types:
+            if content_type.startswith(binary_type):
+                return self.body_binary
+
+        return self.body_text
 
 class Context:
     req = Request()

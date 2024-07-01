@@ -1,3 +1,5 @@
+from hashlib import md5
+
 import requests
 import os
 import asyncio
@@ -6,13 +8,15 @@ async def main(context):
     action = context.req.headers.get('x-action', None)
 
     if action == 'plaintextResponse':
-        return context.res.send('Hello World 👋')
+        return context.res.text('Hello World 👋')
     elif action == 'jsonResponse':
         return context.res.json({ 'json': True, 'message': 'Developers are awesome.' })
     elif action == 'customCharsetResponse':
-        return context.res.send('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
+        return context.res.text('ÅÆ', 200, { 'content-type': 'text/plain; charset=iso-8859-1' })
+    elif action == 'uppercaseCharsetResponse':
+        return context.res.text('ÅÆ', 200, { 'content-type': 'TEXT/PLAIN' })
     elif action == 'multipartResponse':
-        return context.res.send("""--12345
+        return context.res.text("""--12345
 Content-Disposition: form-data; name=\"partOne\"
 
 Why just have one part?
@@ -26,21 +30,21 @@ When you can have two!
     elif action == 'emptyResponse':
         return context.res.empty()
     elif action == 'noResponse':
-        context.res.send('This should be ignored, as it is not returned.')
+        context.res.text('This should be ignored, as it is not returned.')
     elif action == 'doubleResponse':
-        context.res.send('This should be ignored.')
-        return context.res.send('This should be returned.')
+        context.res.text('This should be ignored.')
+        return context.res.text('This should be returned.')
     elif action == 'headersResponse':
-        return context.res.send('OK', 200, {
+        return context.res.text('OK', 200, {
             'first-header': 'first-value',
             'second-header': context.req.headers.get('x-open-runtimes-custom-in-header', 'missing'),
             'cookie': context.req.headers.get('cookie', 'missing'),
             'x-open-runtimes-custom-out-header': 'third-value'
         })
     elif action == 'statusResponse':
-        return context.res.send('FAIL', 404)
+        return context.res.text('FAIL', 404)
     elif action == 'requestMethod':
-        return context.res.send(context.req.method)
+        return context.res.text(context.req.method)
     elif action == 'requestUrl':
         return context.res.json({
             'url': context.req.url,
@@ -53,23 +57,33 @@ When you can have two!
         })
     elif action == 'requestHeaders':
         return context.res.json(context.req.headers)
-    elif action == 'requestBodyPlaintext':
-        return context.res.send(context.req.body)
+    elif action == 'requestBodyText':
+        return context.res.text(context.req.body_text)
     elif action == 'requestBodyJson':
-        key1 = None
-        key2 = None
-
-        if isinstance(context.req.body, str):
-            key1 = 'Missing key'
-            key2 = 'Missing key'
-        else:
-            key1 = context.req.body.get('key1', 'Missing key')
-            key2 = context.req.body.get('key2', 'Missing key')
-
-        return context.res.json({
-            'key1': key1,
-            'key2': key2,
-            'raw': context.req.body_raw
+        return context.res.json(context.req.body_json)
+    elif action == 'requestBodyBinary':
+        return context.res.binary(context.req.body_binary)
+    elif action == 'requestBodyTextAuto':
+        return context.res.text(context.req.body)
+    elif action == 'requestBodyJsonAuto':
+        return context.res.json(context.req.body)
+    elif action == 'requestBodyBinaryAuto':
+        return context.res.binary(context.req.body)
+    elif action == 'binaryResponse1':
+        return context.res.binary(bytearray([0,10,255])) # bytearray
+    elif action == 'binaryResponse2':
+        return context.res.binary(bytes([0,20,255])) # bytes
+    elif action == 'binaryResponse3':
+        return context.res.binary(bytearray([0,30,255])) # Just a filler
+    elif action == 'binaryResponse4':
+        return context.res.binary(bytearray([0,40,255])) # Just a filler
+    elif action == 'binaryResponse5':
+        return context.res.binary(bytearray([0,50,255])) # Just a filler
+    elif action == 'binaryResponseLarge':
+        bytes_body = context.req.body_binary
+        hex = md5(bytes_body).hexdigest()
+        return context.res.send(hex, 200, {
+            'x-method': context.req.method
         })
     elif action == 'envVars':
         return context.res.json({
@@ -80,7 +94,7 @@ When you can have two!
         print('Native log')
         context.log('Debug log')
         context.error('Error log')
-                
+
         context.log("Log+With+Plus+Symbol")
 
         context.log(42)
@@ -90,7 +104,7 @@ When you can have two!
         context.log({ 'objectKey': 'objectValue' })
         context.log([ 'arrayValue' ])
 
-        return context.res.send('')
+        return context.res.text('')
     elif action == 'library':
         todo = (requests.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_raw)).json()
         return context.res.json({
@@ -100,6 +114,10 @@ When you can have two!
         context.log('Timeout start.')
         await asyncio.sleep(3)
         context.log('Timeout end.')
-        return context.res.send('Successful response.')
+        return context.res.text('Successful response.')
+    elif action == 'deprecatedMethods':
+        return context.res.send(context.req.body_raw)
+    elif action == 'deprecatedMethodsUntypedBody':
+        return context.res.send(50)
     else:
         raise Exception('Unknown action')
