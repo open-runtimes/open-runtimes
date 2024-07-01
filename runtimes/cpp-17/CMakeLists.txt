@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME}
         src/main.cc
         src/RuntimeResponse.h
         src/RuntimeRequest.h
+        src/RuntimeLogger.h
         src/$ENV{OPEN_RUNTIMES_ENTRYPOINT})
 
 find_package(Drogon CONFIG REQUIRED)
