@@ -24,6 +24,7 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals('Hello World 👋', $response['body']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
+
     }
 
     public function testJsonResponse(): void
@@ -117,7 +118,7 @@ class Base extends TestCase
 
         $entrypoint = \getenv('OPEN_RUNTIMES_ENTRYPOINT');
 
-        // Fix for dart (expected behaviour)
+        // Fix for Dart - only has file name
         if(\str_starts_with($entrypoint, 'lib/')) {
             $entrypoint = implode('', explode('lib', $entrypoint, 2));
         }
