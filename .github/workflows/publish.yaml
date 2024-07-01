@@ -430,6 +430,16 @@ jobs:
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: "bun install"
             OPEN_RUNTIMES_START_COMMAND: "bun src/server.ts"
+
+          # Go
+          - runtimes: go-1.22
+            RUNTIME: go-1.22
+            ENTRYPOINT: tests.go
+            IMAGE: openruntimes/go:v4-1.22
+            ARCH: "linux/amd64,linux/arm64"
+            TEST_CLASS: "Base"
+            OPEN_RUNTIMES_BUILD_COMMAND: ""
+            OPEN_RUNTIMES_START_COMMAND: "src/function/server"
     name: ${{ matrix.runtimes }}
     runs-on: ubuntu-latest
 

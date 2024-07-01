@@ -46,13 +46,13 @@ END
 3. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=main.go --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/go:v3-1.22 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=main.go --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/go:v4-1.22 sh helpers/build.sh
 ```
 
 4. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/go:v3-1.22 sh helpers/start.sh "/usr/local/server/src/function/server"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/go:v4-1.22 sh helpers/start.sh "/usr/local/server/src/function/server"
 ```
 
 5. In new terminal window, execute function:
