@@ -7,6 +7,8 @@ on:
   release:
     types: [published]
 
+# TODO: From this file remove test class, build command, start command, entrypoint.. Anything we dont need
+
 jobs:
   deploy:
     strategy:

@@ -227,35 +227,27 @@ jobs:
             RUNTIME: ruby
             VERSION: "3.3"
             ENTRYPOINT: tests.rb
-            IMAGE: openruntimes/ruby:v4-3.3
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
+            INSTALL_COMMAND: ""
+            START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
           - ID: ruby-3.2
             RUNTIME: ruby
             VERSION: "3.2"
             ENTRYPOINT: tests.rb
-            IMAGE: openruntimes/ruby:v4-3.2
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
+            INSTALL_COMMAND: ""
+            START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
           - ID: ruby-3.1
             RUNTIME: ruby
             VERSION: "3.1"
             VERBOSE: ruby
             ENTRYPOINT: tests.rb
-            IMAGE: openruntimes/ruby:v4-3.1
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
+            INSTALL_COMMAND: ""
+            START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
           - ID: ruby-3.0
             RUNTIME: ruby
             VERSION: "3.0"
             ENTRYPOINT: tests.rb
-            IMAGE: openruntimes/ruby:v4-3.0
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
+            INSTALL_COMMAND: ""
+            START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 
           # PHP
           - runtimes: php-8.3
@@ -426,7 +418,7 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
-    name: ${{ matrix.runtimes }}
+    name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
 
     steps:
@@ -444,52 +436,12 @@ jobs:
         run: composer install
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build runtime Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./runtimes/${{ matrix.RUNTIME }}
-          push: false
-          tags: open-runtimes/test-runtime
-          load: true
-      - name: Prevent Docker mount from creating directory
-        working-directory: ./tests/resources/functions/${{ matrix.RUNTIME }}
-        run: |
-          rm -rf code.tar.gz
-          touch code.tar.gz
-      - name: Build and start runtime
-        working-directory: ./tests/resources/functions/${{ matrix.RUNTIME }}
-        run: |
-          docker run --rm --name open-runtimes-test-build \
-            -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT=${{ matrix.ENTRYPOINT }} \
-            open-runtimes/test-runtime \
-            sh -c "sh helpers/build.sh \"${{ matrix.OPEN_RUNTIMES_BUILD_COMMAND }}\""
-          docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw \
-            -e OPEN_RUNTIMES_ENTRYPOINT=${{ matrix.ENTRYPOINT }} -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_SECRET=test-secret-key \
-            -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime \
-            sh -c "sh helpers/start.sh \"${{ matrix.OPEN_RUNTIMES_START_COMMAND }}\""
-          echo "Waiting for servers..."
-          sleep 20
       - name: Run tests
+        working-directory: ./
+        run: sh tests_ci.sh
         env:
-          OPEN_RUNTIMES_SECRET: test-secret-key
-          OPEN_RUNTIMES_ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
-        run: |
-          echo "Running tests..."
-          vendor/bin/phpunit --configuration phpunit.xml tests/Base.php
-      - name: Start development runtime
-        working-directory: ./tests/resources/functions/${{ matrix.RUNTIME }}
-        run: |
-          docker rm --force $(docker ps -aq)
-          docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw \
-            -e OPEN_RUNTIMES_ENTRYPOINT=${{ matrix.ENTRYPOINT }} -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_SECRET= \
-            -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime \
-            sh -c "sh helpers/start.sh \"${{ matrix.OPEN_RUNTIMES_START_COMMAND }}\""
-          echo "Waiting for servers..."
-          sleep 20
-      - name: Run tests
-        env:
-          OPEN_RUNTIMES_SECRET: test-secret-key
-          OPEN_RUNTIMES_ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
-        run: |
-          echo "Running tests..."
-          vendor/bin/phpunit --configuration phpunit.xml tests/BaseDev.php
+          RUNTIME: ${{ matrix.RUNTIME }}
+          ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
+          VERSION: ${{ matrix.VERSION }}
+          INSTALL_COMMAND: ${{ matrix.INSTALL_COMMAND }}
+          START_COMMAND: ${{ matrix.START_COMMAND }}
