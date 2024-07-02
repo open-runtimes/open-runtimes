@@ -15,14 +15,6 @@ set +o allexport
 # Enter server folder
 cd /usr/local/server
 
-# Link user's depenrencies
-if [ -f "/usr/local/server/src/function/Gemfile" ]; then
-    echo "eval_gemfile '/usr/local/server/src/function/Gemfile'" >> /usr/local/server/Gemfile
-fi
-
-# Copy dependencies
-cp -R /usr/local/server/src/function/vendor /usr/local/server/vendor
-
-bundle config set --local path 'vendor/bundle'
+. /usr/local/server/helpers/prepare-start.sh
 
 echo 'Starting ...'

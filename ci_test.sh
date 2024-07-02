@@ -1,23 +1,10 @@
-# Use tests_dev.sh instead, when running locally
+# Use tests.sh instead, when running locally
 
-# Cleanup
-docker rm --force $(docker ps -aq)
-rm -rf /tmp/logs
-mkdir -p /tmp/logs
+sh ci-cleanup.sh
+sh ci-runtime-prepare.sh
+sh ci-runtime-build.sh
 
-# Prepare version
-
-rm -rf ./runtimes/.test
-mkdir -p ./runtimes/.test
-cp -R ./runtimes/$RUNTIME/* ./runtimes/.test
-cp -R ./runtimes/$RUNTIME/versions/$VERSION/* ./runtimes/.test
-
-
-# Prepare image
-cd ./runtimes/.test
-docker build -t open-runtimes/test-runtime .
-cd ../../
-
+# Find test folder (versioned takes presence)
 TEST_FOLDER="./tests/resources/functions/$RUNTIME-$VERSION/"
 if [ -d "$TEST_FOLDER" ]; then
     TEST_FOLDER="./tests/resources/functions/$RUNTIME-$VERSION"

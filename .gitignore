@@ -1,4 +1,5 @@
-.test
+runtimes/.release
+runtimes/.test
 code.tar.gz
 bin
 vendor

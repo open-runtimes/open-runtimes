@@ -7,8 +7,6 @@ on:
   release:
     types: [published]
 
-# TODO: From this file remove test class, build command, start command, entrypoint.. Anything we dont need
-
 jobs:
   deploy:
     strategy:
@@ -218,38 +216,26 @@ jobs:
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
 
           # Ruby
-          - runtimes: ruby-3.3
-            RUNTIME: ruby-3.3
-            ENTRYPOINT: tests.rb
+          - ID: ruby-3.3
+            RUNTIME: ruby
+            VERSION: "3.3"
             IMAGE: openruntimes/ruby:v4-3.3
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
-          - runtimes: ruby-3.2
-            RUNTIME: ruby-3.2
-            ENTRYPOINT: tests.rb
+          - ID: ruby-3.2
+            RUNTIME: ruby
+            VERSION: "3.2"
             IMAGE: openruntimes/ruby:v4-3.2
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
-          - runtimes: ruby-3.1
-            RUNTIME: ruby-3.1
-            ENTRYPOINT: tests.rb
+          - ID: ruby-3.1
+            RUNTIME: ruby
+            VERSION: "3.1"
             IMAGE: openruntimes/ruby:v4-3.1
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
-          - runtimes: ruby-3.0
-            RUNTIME: ruby-3.0
-            ENTRYPOINT: tests.rb
+          - ID: ruby-3.0
+            RUNTIME: ruby
+            VERSION: "3.0"
             IMAGE: openruntimes/ruby:v4-3.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 
           # PHP
           - runtimes: php-8.3
@@ -442,7 +428,7 @@ jobs:
             TEST_CLASS: "Base"
             OPEN_RUNTIMES_BUILD_COMMAND: ""
             OPEN_RUNTIMES_START_COMMAND: "src/function/server"
-    name: ${{ matrix.runtimes }}
+    name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
 
     steps:
@@ -457,10 +443,20 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME  }}
           password: ${{ secrets.DOCKERHUB_TOKEN  }}
+      - name: Prepare runtime folder
+        working-directory: ./
+        run: |
+           sh ./ci_release.sh
+        env:
+          RUNTIME: ${{ matrix.RUNTIME }}
+          ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
+          VERSION: ${{ matrix.VERSION }}
+          INSTALL_COMMAND: ${{ matrix.INSTALL_COMMAND }}
+          START_COMMAND: ${{ matrix.START_COMMAND }}
       - name: Build & Publish to DockerHub
         uses: docker/build-push-action@v4
         with:
-          context: ./runtimes/${{ matrix.RUNTIME }}/
+          context: ./runtimes/.test
           platforms: ${{ matrix.ARCH }}
           build-args: |
             VERSION=${{ matrix.IMAGE }}

@@ -10,12 +10,7 @@ cp -R /mnt/code/* /usr/local/build
 # Enter build folder
 cd /usr/local/build
 
-# Link user's depenrencies
-if [ -f "Gemfile" ]; then
-    echo "eval_gemfile '/usr/local/build/Gemfile'" >> /usr/local/server/Gemfile
-fi
-
-bundle config set --local path 'vendor/bundle'
+. /usr/local/server/helpers/prepare-build.sh
 
 # Enter build folder
 cd /usr/local/build
