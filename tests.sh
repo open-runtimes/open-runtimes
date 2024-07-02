@@ -1,18 +1,28 @@
 # Usage: sh tests.sh node-21.0
 
 # Configurable varaible for different runtimes
-RUNTIME=$1
-ENTRYPOINT=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.RUNTIME == \"$RUNTIME\") | .ENTRYPOINT" .github/workflows/test.yaml | head -n 1)
-INSTALL_COMMAND=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.RUNTIME == \"$RUNTIME\") | .OPEN_RUNTIMES_BUILD_COMMAND" .github/workflows/test.yaml | head -n 1)
-START_COMMAND=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.RUNTIME == \"$RUNTIME\") | .OPEN_RUNTIMES_START_COMMAND" .github/workflows/test.yaml | head -n 1)
+ID=$1
+ENTRYPOINT=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.ID == \"$ID\") | .ENTRYPOINT" .github/workflows/test.yaml | head -n 1)
+INSTALL_COMMAND=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.ID == \"$ID\") | .OPEN_RUNTIMES_BUILD_COMMAND" .github/workflows/test.yaml | head -n 1)
+START_COMMAND=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.ID == \"$ID\") | .OPEN_RUNTIMES_START_COMMAND" .github/workflows/test.yaml | head -n 1)
+RUNTIME=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.ID == \"$ID\") | .RUNTIME" .github/workflows/test.yaml | head -n 1)
+VERSION=$(yq e ".jobs.open-runtimes.strategy.matrix.include[] | select(.ID == \"$ID\") | .VERSION" .github/workflows/test.yaml | head -n 1)
 
 # Cleanup
 docker rm --force $(docker ps -aq)
 rm -rf /tmp/logs
 mkdir -p /tmp/logs
 
+# Prepare version
+
+rm -rf ./runtimes/.test
+mkdir -p ./runtimes/.test
+cp -R ./runtimes/$RUNTIME/* ./runtimes/.test
+cp -R ./runtimes/$RUNTIME/versions/$VERSION/* ./runtimes/.test
+
+
 # Prepare image
-cd ./runtimes/$RUNTIME
+cd ./runtimes/.test
 docker build -t open-runtimes/test-runtime .
 cd ../../
 
