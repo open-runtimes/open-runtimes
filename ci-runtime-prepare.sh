@@ -9,3 +9,7 @@ cp -R ./runtimes/$RUNTIME/* ./runtimes/.test
 
 # Version-specific files
 cp -R ./runtimes/$RUNTIME/versions/$VERSION/* ./runtimes/.test
+
+# Global Docker configuration
+cp ./base-before.dockerfile ./runtimes/.test/base-before.dockerfile
+cp ./base-after.dockerfile ./runtimes/.test/base-after.dockerfile
