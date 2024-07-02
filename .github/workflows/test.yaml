@@ -438,7 +438,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Run tests
         working-directory: ./
-        run: sh tests_ci.sh
+        run: sh ci_tests.sh
         env:
           RUNTIME: ${{ matrix.RUNTIME }}
           ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
