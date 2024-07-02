@@ -171,32 +171,6 @@ Structure of `helpers/` directory follows:
 
 Every request sent to any of the runtimes must have the `x-open-runtimes-secret` header. The value of this header has to match the value of environment variable `OPEN_RUNTIMES_SECRET` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
 
-## Testing
-
-We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by Travis CI, and tests run for all runtimes.
-
-Before running the tests, make sure to install all required PHP libraries:
-
-```bash
-docker run --rm --interactive --tty --volume $PWD:/app composer install
-```
-
-You also need to install [jq](https://nektosact.com/installation/index.html):
-
-```bash
-brew install yq
-```
-
-> Alternatively run `go install github.com/mikefarah/yq/v4@latest` if brew isn't installed
-
-To run test for a runtime, get runtime name (folder name) and execute below command:
-
-```bash
-sh tests.sh go-1.22
-```
-
-> Replace `go-1.22` with runtime name that you want to test
-
 ## Contributing
 
 All code contributions - including those of people having commit access - must go through a pull request and be approved by a core developer before being merged. This is to ensure a proper review of all the code.

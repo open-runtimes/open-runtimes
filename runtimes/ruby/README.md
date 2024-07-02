@@ -43,36 +43,6 @@ curl -H "x-open-runtimes-secret: secret-key" -X GET http://localhost:3000/
 
 Output `{"n":0.7232589496628183}` with random float will be displayed after the execution.
 
-## Local development
-
-1. Clone the [open-runtimes](https://github.com/open-runtimes/open-runtimes) repository:
-
-```bash
-git clone https://github.com/open-runtimes/open-runtimes.git
-```
-
-2. Enter the Ruby runtime folder:
-
-```bash
-cd open-runtimes/runtimes/ruby
-```
-
-3. Run the included example cloud function:
-
-```bash
-docker compose up -d
-```
-
-4. Execute the function:
-
-```bash
-curl -H "x-open-runtimes-secret: secret-key" -H "Content-Type: application/json" -X POST http://localhost:3000/ -d '{"id": "4"}'
-```
-
-You can now send `POST` request to `http://localhost:3000`. Make sure you have header `x-open-runtimes-secret: secret-key`.
-
-You can also make changes to the example code and apply the changes with the `docker compose restart` command.
-
 ## Notes
 
 - When writing function for this runtime, ensure it is named `main`. An example of this is:
