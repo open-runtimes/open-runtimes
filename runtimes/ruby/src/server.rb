@@ -1,9 +1,9 @@
 require 'sinatra'
 require 'json'
-require 'async'
 
 require_relative 'types.rb'
 require_relative 'logger.rb'
+require_relative 'execute.rb'
 
 USER_CODE_PATH = '/usr/local/server/src/function';
 
@@ -111,13 +111,9 @@ def action(request, response, logger)
     unless safe_timeout.nil?
       executed = true
 
-      Async do |task|
-        task.with_timeout(safe_timeout) do
-          output = main(context)
-        rescue Async::TimeoutError
-          executed = false
-        end
-      end.wait
+      results = execute(safe_timeout, main, context)
+      executed = results[0]
+      output = results[1]
 
       unless executed
         context.error('Execution timed out.')

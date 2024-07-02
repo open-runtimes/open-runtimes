@@ -2,6 +2,8 @@ require 'httparty'
 require 'json'
 require 'digest'
 
+require_relative 'awaited_sleep.rb'
+
 def main(context)
     action = context.req.headers['x-action'] || ''
 
@@ -110,9 +112,7 @@ When you can have two!
         return context.res.json({ 'todo': todo })
     when 'timeout'
         context.log('Timeout start.')
-        Async do
-          sleep(3)
-        end.wait
+        awaited_sleep()
         context.log('Timeout end.');
         return context.res.text('Successful response.');
     when 'deprecatedMethods'
