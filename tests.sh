@@ -26,8 +26,15 @@ cd ./runtimes/.test
 docker build -t open-runtimes/test-runtime .
 cd ../../
 
+TEST_FOLDER="./tests/resources/functions/$RUNTIME-$VERSION/"
+if [ -d "$TEST_FOLDER" ]; then
+    TEST_FOLDER="./tests/resources/functions/$RUNTIME-$VERSION"
+else
+    TEST_FOLDER="./tests/resources/functions/$RUNTIME"
+fi
+
 # Prevent Docker from creating folder
-cd ./tests/resources/functions/$RUNTIME
+cd $TEST_FOLDER
 rm -rf code.tar.gz
 touch code.tar.gz
 
