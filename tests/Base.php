@@ -521,6 +521,139 @@ class Base extends TestCase
         self::assertEquals('{"hello":"world"}', $response['body']);
     }
 
+    public function testResponseChunkedSimple(): void
+    {
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedSimple'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertCount(2, $body);
+        self::assertEquals('OK1', $body[0]);
+        self::assertEquals('OK2', $body[1]);
+        self::assertEmpty(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
+
+    public function testResponseChunkedCustomHeaders(): void
+    {
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedSimple'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertCount(2, $body);
+        self::assertEquals("no-store", $response['headers']["cache-control"]);
+        self::assertEquals("text/event-stream", $response['headers']["content-type"]);
+        self::assertEquals("keep-alive", $response['headers']["connection"]);
+        self::assertEquals("chunked", $response['headers']["transfer-encoding"]);
+
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedCustomHeaders'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertCount(2, $body);
+        self::assertEquals("no-cache", $response['headers']["cache-control"]);
+        self::assertEquals("application/custom-stream", $response['headers']["content-type"]);
+        self::assertEquals("KEEP-ALIVE", $response['headers']["connection"]);
+        self::assertEquals("CHUNKED", $response['headers']["transfer-encoding"]);
+        self::assertArrayNotHasKey('x-open-runtimes-start', $response['headers']);
+        self::assertArrayNotHasKey('x-open-runtimes-end', $response['headers']);
+    }
+
+    public function testResponseChunkedComplex(): void
+    {
+        $timings = [];
+        $timingsStart = \microtime(true);
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedComplex'], callback: function($chunk) use(&$body, &$timings, $timingsStart) {
+            $body[] = $chunk;
+
+            if(\count($timings) === 0) {
+                $timings[] = \microtime(true) - $timingsStart;
+            } else {
+                $timings[] = \microtime(true) - $timingsStart - \array_sum($timings);
+            }
+        });
+
+        self::assertEquals(201, $response['code']);
+        self::assertCount(3, $body);
+        self::assertStringContainsString('Step1', $body[0]);
+        self::assertStringContainsString('{"step2":true}', $body[1]);
+        $bytes = \unpack('C*byte', $body[2]);
+        self::assertCount(3, $bytes);
+        self::assertEquals(0, $bytes['byte1']);
+        self::assertEquals(100, $bytes['byte2']);
+        self::assertEquals(255, $bytes['byte3']);
+        self::assertEmpty(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+        self::assertEquals('end', $response['headers']['x-trainer-header']);
+        self::assertEquals('start', $response['headers']['x-start-header']);
+        self::assertCount(3, $timings);
+        self::assertGreaterThanOrEqual(0.9, $timings[0]);
+        self::assertLessThanOrEqual(5, $timings[0]);
+        self::assertGreaterThanOrEqual(0.9, $timings[1]);
+        self::assertLessThanOrEqual(5, $timings[1]);
+        self::assertGreaterThanOrEqual(0.9, $timings[2]);
+        self::assertLessThanOrEqual(5, $timings[2]);
+        self::assertGreaterThanOrEqual(2.9, \array_sum($timings));
+        self::assertLessThanOrEqual(10, \array_sum($timings));
+    }
+
+    public function testResponseChunkedErrorStartDouble(): void
+    {
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartDouble'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertCount(0, $body);
+        self::assertStringContainsString('You can only call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
+
+    public function testResponseChunkedErrorStartMissing(): void
+    {
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartMissing'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(500, $response['code']);
+        self::assertCount(0, $body);
+        self::assertStringContainsString('You must call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
+
+    public function testResponseChunkedErrorStartWriteMissing(): void
+    {
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorStartWriteMissing'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(500, $response['code']);
+        self::assertCount(0, $body);
+        self::assertStringContainsString('You must call', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
+
+
+    public function testResponseChunkedErrorSend(): void
+    {
+        $body = [];
+        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'responseChunkedErrorSend'], callback: function($chunk) use(&$body) {
+            $body[] = $chunk;
+        });
+
+        self::assertEquals(200, $response['code']);
+        self::assertCount(1, $body);
+        self::assertEquals("OK", $body[0]);
+        self::assertStringContainsString('You must return', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
+
     public function testDeprecatedMethodsUntypedBody(): void
     {
         $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethodsUntypedBody']);

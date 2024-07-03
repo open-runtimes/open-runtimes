@@ -118,6 +118,56 @@ When you can have two!
             return context.res.text('Successful response.');
         case 'deprecatedMethods':
             return context.res.send(context.req.bodyRaw);
+        case 'responseChunkedSimple':
+            context.res.start();
+            context.res.writeText('OK1');
+            context.res.writeText('OK2');
+            return context.res.end();
+        case 'responseChunkedCustomHeaders':
+            context.res.start(200, {
+                'cache-control': 'no-cache',
+                'content-type': 'application/custom-stream',
+                'connection': 'KEEP-ALIVE',
+                'transfer-encoding': 'CHUNKED',
+                'x-open-runtimes-start': 'start'
+            });
+            context.res.writeText('OK1');
+            context.res.writeText('OK2');
+            return context.res.end({
+                'x-open-runtimes-end': 'end'
+            });
+        case 'responseChunkedComplex':
+            context.res.start(201, { 'x-start-header': 'start' });
+            await new Promise((resolve) => {
+                setTimeout(resolve, 1000);
+            });
+            context.res.writeText('Step1');
+            await new Promise((resolve) => {
+                setTimeout(resolve, 1000);
+            });
+            context.res.writeJson({ step2: true });
+            await new Promise((resolve) => {
+                setTimeout(resolve, 1000);
+            });
+            context.res.writeBinary(Buffer.from((Uint8Array.from([0, 100, 255]))));
+            await new Promise((resolve) => {
+                setTimeout(resolve, 1000);
+            });
+            return context.res.end({ 'x-trainer-header': 'end' });
+        case 'responseChunkedErrorStartDouble':
+            context.res.start();
+            context.res.start();
+            context.res.writeText('OK');
+            return context.res.end();
+        case 'responseChunkedErrorStartMissing':
+            context.res.writeText('OK');
+            return context.res.end();
+        case 'responseChunkedErrorStartWriteMissing':
+            return context.res.end();
+        case 'responseChunkedErrorSend':
+            context.res.start();
+            context.res.writeText('OK');
+            return context.res.send('OK2');
         case 'deprecatedMethodsUntypedBody':
             return context.res.send(50);
         default:
