@@ -4,7 +4,8 @@ set -e
 
 # Install dependencies
 cd /usr/local/server
-bundle install
+
+. /usr/local/server/helpers/prepare-compile.sh
 
 echo "Packing build ..."
 
