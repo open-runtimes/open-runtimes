@@ -250,34 +250,30 @@ jobs:
             START_COMMAND: "bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 
           # PHP
-          - runtimes: php-8.3
-            RUNTIME: php-8.3
+          - ID: php-8.0
+            RUNTIME: php
+            VERSION: "8.0"
             ENTRYPOINT: tests.php
-            IMAGE: openruntimes/php:v4-8.3
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
-            OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
-          - runtimes: php-8.2
-            RUNTIME: php-8.2
+            INSTALL_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
+            START_COMMAND: "php src/server.php"
+          - ID: php-8.1
+            RUNTIME: php
+            VERSION: "8.1"
             ENTRYPOINT: tests.php
-            IMAGE: openruntimes/php:v4-8.2
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
-            OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
-          - runtimes: php-8.1
-            RUNTIME: php-8.1
+            INSTALL_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
+            START_COMMAND: "php src/server.php"
+          - ID: php-8.2
+            RUNTIME: php
+            VERSION: "8.2"
             ENTRYPOINT: tests.php
-            IMAGE: openruntimes/php:v4-8.1
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
-            OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
-          - runtimes: php-8.0
-            RUNTIME: php-8.0
+            INSTALL_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
+            START_COMMAND: "php src/server.php"
+          - ID: php-8.3
+            RUNTIME: php
+            VERSION: "8.3"
             ENTRYPOINT: tests.php
-            IMAGE: openruntimes/php:v4-8.0
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
-            OPEN_RUNTIMES_START_COMMAND: "php src/server.php"
+            INSTALL_COMMAND: "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev"
+            START_COMMAND: "php src/server.php"
 
           # Swift
           - runtimes: swift-5.9
