@@ -1,5 +1,3 @@
-ENV PHP_SWOOLE_VERSION=v5.1.2
-
 RUN \
   apk add --no-cache --virtual .deps \
   make \

@@ -31,8 +31,6 @@ WORKDIR /usr/local/server
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20200930/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20200930/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20200930/
-
 # Add Source Code
 COPY . .
 
