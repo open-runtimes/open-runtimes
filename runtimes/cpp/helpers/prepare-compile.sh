@@ -1,6 +1,4 @@
 #!/bin/sh
-# Fail build if any command fails
-set -e
 
 # Append User Function Dependencies
 if [ -f "/usr/local/build/CMakeLists.txt" ]; then
@@ -31,14 +29,3 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j"$(nproc)"
 mv /usr/local/server/build/cpp_runtime /usr/local/build/compiled/cpp_runtime
-
-echo "Packing build ..."
-
-# Store entrypoint into build. Will be used during start process
-touch /usr/local/build/compiled/.open-runtimes
-echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" > /usr/local/build/compiled/.open-runtimes
-
-# Finish build by preparing tar to use for starting the runtime
-tar -C /usr/local/build/compiled --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
-
-echo "Build finished."

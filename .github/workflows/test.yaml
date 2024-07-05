@@ -341,20 +341,18 @@ jobs:
             OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
 
           # C++
-          - runtimes: cpp-20
-            RUNTIME: cpp-20
+          - ID: cpp-20
+            RUNTIME: cpp
+            VERSION: "20"
             ENTRYPOINT: tests.cc
-            IMAGE: openruntimes/cpp:v4-20
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "src/function/cpp_runtime"
-          - runtimes: cpp-17
-            RUNTIME: cpp-17
+            INSTALL_COMMAND: ""
+            START_COMMAND: "src/function/cpp_runtime"
+          - ID: cpp-17
+            RUNTIME: cpp
+            VERSION: "17"
             ENTRYPOINT: tests.cc
-            IMAGE: openruntimes/cpp:v4-17
-            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "src/function/cpp_runtime"
+            INSTALL_COMMAND: ""
+            START_COMMAND: "src/function/cpp_runtime"
 
           # Dotnet
           - runtimes: dotnet-8.0
