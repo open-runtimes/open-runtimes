@@ -1,0 +1,11 @@
+name: prepare
+description: Prepare runtime with package details nad import fixes
+version: 1.0.0
+publish_to: none
+# homepage: https://www.example.com
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies: 
+  pubspec: ^2.3.0
