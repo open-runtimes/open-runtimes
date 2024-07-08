@@ -1,4 +1,0 @@
-Flask==2.0.1
-flask[async]
-Waitress==2.0.0
-Werkzeug==2.3.7

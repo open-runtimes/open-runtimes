@@ -86,56 +86,38 @@ jobs:
             ARCH: "linux/amd64"
 
           # Python
-          - runtimes: python-3.12
-            RUNTIME: python-3.12
-            ENTRYPOINT: tests.py
+          - ID: python-3.12
+            RUNTIME: python
+            VERSION: "3.12"
             IMAGE: openruntimes/python:v4-3.12
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
-            OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
-          - runtimes: python-3.11
-            RUNTIME: python-3.11
-            ENTRYPOINT: tests.py
+          - ID: python-3.11
+            RUNTIME: python
+            VERSION: "3.11"
             IMAGE: openruntimes/python:v4-3.11
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
-            OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
-          - runtimes: python-3.10
-            RUNTIME: python-3.10
-            ENTRYPOINT: tests.py
+          - ID: python-3.10
+            RUNTIME: python
+            VERSION: "3.10"
             IMAGE: openruntimes/python:v4-3.10
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
-            OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
-          - runtimes: python-3.9
-            RUNTIME: python-3.9
-            ENTRYPOINT: tests.py
+          - ID: python-3.9
+            RUNTIME: python
+            VERSION: "3.9"
             IMAGE: openruntimes/python:v4-3.9
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
-            OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
-          - runtimes: python-3.8
-            RUNTIME: python-3.8
-            ENTRYPOINT: tests.py
+          - ID: python-3.8
+            RUNTIME: python
+            VERSION: "3.8"
             IMAGE: openruntimes/python:v4-3.8
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
-            OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
 
           # Python ML
-          - runtimes: python-ml-3.11
-            RUNTIME: python-ml-3.11
-            ENTRYPOINT: tests.py
+          - ID: python-ml-3.11
+            RUNTIME: python
+            VERSION: "ml-3.11"
             IMAGE: openruntimes/python-ml:v4-3.11
             ARCH: "linux/amd64,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "pip install --no-cache-dir -r requirements.txt"
-            OPEN_RUNTIMES_START_COMMAND: "python3 src/server.py"
 
           # Dart
           - ID: dart-3.3
