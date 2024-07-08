@@ -354,14 +354,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Go
-          - runtimes: go-1.22
-            RUNTIME: go-1.22
-            ENTRYPOINT: tests.go
+          - ID: go-1.22
+            RUNTIME: go
+            VERSION: "1.22"
             IMAGE: openruntimes/go:v4-1.22
             ARCH: "linux/amd64,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "src/function/server"
     name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
 
