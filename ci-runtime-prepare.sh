@@ -4,6 +4,9 @@ mkdir -p ./runtimes/.test
 mkdir -p ./runtimes/.test/helpers
 cp -R ./helpers/* ./runtimes/.test/helpers
 
+# Runtime base dockerfile
+cp -R ./runtimes/$RUNTIME/$RUNTIME.dockerfile ./runtimes/.test
+
 # Runtime-specific files (most)
 cp -R ./runtimes/$RUNTIME/versions/latest/* ./runtimes/.test
 
