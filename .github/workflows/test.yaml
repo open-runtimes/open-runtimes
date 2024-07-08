@@ -355,27 +355,24 @@ jobs:
             START_COMMAND: "src/function/cpp_runtime"
 
           # Dotnet
-          - runtimes: dotnet-8.0
-            RUNTIME: dotnet-8.0
+          - ID: dotnet-8.0
+            RUNTIME: dotnet
+            VERSION: "8.0"
             ENTRYPOINT: Tests.cs
-            IMAGE: openruntimes/dotnet:v4-8.0
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
-          - runtimes: dotnet-7.0
-            RUNTIME: dotnet-7.0
+            INSTALL_COMMAND: ""
+            START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
+          - ID: dotnet-7.0
+            RUNTIME: dotnet
+            VERSION: "7.0"
             ENTRYPOINT: Tests.cs
-            IMAGE: openruntimes/dotnet:v4-7.0
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
-          - runtimes: dotnet-6.0
-            RUNTIME: dotnet-6.0
+            INSTALL_COMMAND: ""
+            START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
+          - ID: dotnet-6.0
+            RUNTIME: dotnet
+            VERSION: "6.0"
             ENTRYPOINT: Tests.cs
-            IMAGE: openruntimes/dotnet:v4-6.0
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
+            INSTALL_COMMAND: ""
+            START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
 
           # Bun
           - ID: bun-1.0
