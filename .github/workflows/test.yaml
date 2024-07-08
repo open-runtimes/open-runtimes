@@ -275,64 +275,56 @@ jobs:
             OPEN_RUNTIMES_START_COMMAND: "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
 
           # Kotlin
-          - runtimes: kotlin-1.9
-            RUNTIME: kotlin-1.9
+          - ID: kotlin-1.9
+            RUNTIME: kotlin
+            VERSION: "1.9"
             ENTRYPOINT: Tests.kt
-            IMAGE: openruntimes/kotlin:v4-1.9
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
-          - runtimes: kotlin-1.8
-            RUNTIME: kotlin-1.8
+            INSTALL_COMMAND: ""
+            START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
+          - ID: kotlin-1.8
+            RUNTIME: kotlin
+            VERSION: "1.8"
             ENTRYPOINT: Tests.kt
-            IMAGE: openruntimes/kotlin:v4-1.8
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
-          - runtimes: kotlin-1.6
-            RUNTIME: kotlin-1.6
+            INSTALL_COMMAND: ""
+            START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
+          - ID: kotlin-1.6
+            RUNTIME: kotlin
+            VERSION: "1.6"
             ENTRYPOINT: Tests.kt
-            IMAGE: openruntimes/kotlin:v4-1.6
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
+            INSTALL_COMMAND: ""
+            START_COMMAND: "java -jar src/function/kotlin-runtime-1.0.0.jar"
 
           # Java
-          - runtimes: java-21.0
-            RUNTIME: java-21.0
+          - ID: java-21.0
+            RUNTIME: java
+            VERSION: "21.0"
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:v4-21.0
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
-          - runtimes: java-18.0
-            RUNTIME: java-18.0
+            INSTALL_COMMAND: ""
+            START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
+          - ID: java-18.0
+            RUNTIME: java
+            VERSION: "18.0"
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:v4-18.0
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
-          - runtimes: java-17.0
-            RUNTIME: java-17.0
+            INSTALL_COMMAND: ""
+            START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
+          - ID: java-17.0
+            RUNTIME: java
+            VERSION: "17.0"
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:v4-17.0
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
-          - runtimes: java-11.0
-            RUNTIME: java-11.0
+            INSTALL_COMMAND: ""
+            START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
+          - ID: java-11.0
+            RUNTIME: java
+            VERSION: "11.0"
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:v4-11.0
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
-          - runtimes: java-8.0
-            RUNTIME: java-8.0
+            INSTALL_COMMAND: ""
+            START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
+          - ID: java-8.0
+            RUNTIME: java
+            VERSION: "8.0"
             ENTRYPOINT: Tests.java
-            IMAGE: openruntimes/java:v4-8.0
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
+            INSTALL_COMMAND: ""
+            START_COMMAND: "java -jar src/function/java-runtime-1.0.0.jar"
 
           # C++
           - ID: cpp-20
