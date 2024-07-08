@@ -14,8 +14,8 @@ fi
 
 mkdir -p ./tests/.runtime
 
-cp -R ./tests/resources/functions/$RUNTIME/* ./tests/.runtime
-cp -R ./tests/resources/functions/$RUNTIME-$VERSION/* ./tests/.runtime
+cp -R ./tests/resources/functions/$RUNTIME/latest/* ./tests/.runtime
+cp -R ./tests/resources/functions/$RUNTIME/$VERSION/* ./tests/.runtime
 
 # Prevent Docker from creating folder
 cd ./tests/.runtime

@@ -5,7 +5,7 @@ mkdir -p ./runtimes/.test/helpers
 cp -R ./helpers/* ./runtimes/.test/helpers
 
 # Runtime-specific files (most)
-cp -R ./runtimes/$RUNTIME/* ./runtimes/.test
+cp -R ./runtimes/$RUNTIME/versions/latest/* ./runtimes/.test
 
 # Version-specific files
 cp -R ./runtimes/$RUNTIME/versions/$VERSION/* ./runtimes/.test
