@@ -380,13 +380,12 @@ jobs:
             OPEN_RUNTIMES_START_COMMAND: "dotnet src/function/DotNetRuntime.dll"
 
           # Bun
-          - runtimes: bun-1.0
-            RUNTIME: bun-1.0
+          - ID: bun-1.0
+            RUNTIME: bun
+            VERSION: "1.0"
             ENTRYPOINT: tests.ts
-            IMAGE: openruntimes/bun:v4-1.0
-            ARCH: "linux/amd64,linux/arm64"
-            OPEN_RUNTIMES_BUILD_COMMAND: "bun install"
-            OPEN_RUNTIMES_START_COMMAND: "bun src/server.ts"
+            INSTALL_COMMAND: "bun install"
+            START_COMMAND: "bun src/server.ts"
 
           # Go
           - runtimes: go-1.22
