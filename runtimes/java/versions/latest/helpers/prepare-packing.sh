@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 mkdir -p /tmp/compiled
 mv /usr/local/build/compiled/* /tmp/compiled
