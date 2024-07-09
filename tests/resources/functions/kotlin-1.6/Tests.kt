@@ -66,6 +66,13 @@ When you can have two!
                 context.res.text("This should be ignored.")
                 return context.res.text("This should be returned.")
             }
+            "enforcedHeaders" -> {
+                return context.res.json(mutableMapOf(
+                    "x-custom" to context.req.headers.getOrDefault("x-custom", ""),
+                    "x-custom-uppercase" to context.req.headers.getOrDefault("x-custom-uppercase", ""),
+                    "x-open-runtimes-custom" to context.req.headers.getOrDefault("x-open-runtimes-custom", ""),
+                ))
+            }
             "headersResponse" -> {
                 return context.res.text("OK", 200, mutableMapOf(
                     "first-header" to "first-value",

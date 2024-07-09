@@ -81,6 +81,17 @@ When you can have two!
                     { "scheme", context.Req.Scheme },
                     { "host", context.Req.Host }
                 });
+            case "enforcedHeaders":
+                var xCustom = context.Req.Headers.TryGetValue("x-custom", out string xCustomValue) ? xCustomValue : "";
+                var xCustomUppercase = context.Req.Headers.TryGetValue("x-custom-uppercase", out string xCustomUppercaseValue) ? xCustomUppercaseValue : "";
+                var xOpenRuntimesCustom = context.Req.Headers.TryGetValue("x-open-runtimes-custom", out string xOpenRuntimesCustomValue) ? xOpenRuntimesCustomValue : "";
+
+                return context.Res.Json(new()
+                {
+                    { "x-custom", xCustom },
+                    { "x-custom-uppercase", xCustomUppercase },
+                    { "x-open-runtimes-custom", xOpenRuntimesCustom },
+                });
             case "requestHeaders":
                 var json = new Dictionary<string, object>();
 

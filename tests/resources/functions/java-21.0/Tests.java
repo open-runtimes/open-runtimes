@@ -69,6 +69,13 @@ public class Tests {
                 context.getRes().text("This should be ignored.");
                 return context.getRes().text("This should be returned.");
             }
+            case "enforcedHeaders" -> {
+                json.put("x-custom", context.getReq().getHeaders().getOrDefault("x-custom", ""));
+                json.put("x-custom-uppercase", context.getReq().getHeaders().getOrDefault("x-custom-uppercase", ""));
+                json.put("x-open-runtimes-custom", context.getReq().getHeaders().getOrDefault("x-open-runtimes-custom", ""));
+
+                return context.getRes().json(json);
+            }
             case "headersResponse" -> {
                 headers.put("first-header", "first-value");
                 headers.put("second-header", context.getReq().getHeaders().getOrDefault("x-open-runtimes-custom-in-header", "missing"));

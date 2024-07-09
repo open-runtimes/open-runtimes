@@ -53,6 +53,13 @@ When you can have two!
       context.res.text('This should be ignored.');
       return context.res.text('This should be returned.');
     }
+    case 'enforcedHeaders': {
+      return context.res.json({
+        'x-custom': context.req.headers['x-custom'],
+        'x-custom-uppercase': context.req.headers['x-custom-uppercase'],
+        'x-open-runtimes-custom': context.req.headers['x-open-runtimes-custom']
+      });
+    }
     case 'headersResponse': {
       return context.res.text('OK', 200, {
         'first-header': 'first-value',
