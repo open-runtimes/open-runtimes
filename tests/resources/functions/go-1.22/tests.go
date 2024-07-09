@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -142,7 +143,7 @@ When you can have two!
 		}, 200, nil)
 	case "logs":
 		fmt.Println("Native log")
-		Context.Log("Debug log")
+		Context.Log(errors.New("Debug log"))
 		Context.Error("Error log")
 
 		Context.Log("Log+With+Plus+Symbol")
