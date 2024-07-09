@@ -61,6 +61,21 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 		}
 	}
 
+	enforcedHeadersBytes, err := json.Marshal(os.Getenv("OPEN_RUNTIMES_HEADERS") == "" ? "{}" : os.Getenv("OPEN_RUNTIMES_HEADERS"))
+	if err != nil {
+		enforcedHeadersBytes = []byte{}
+	}
+	enforcedHeadersString := string(enforcedHeadersBytes)
+
+	for key, value := range enforcedHeadersString {
+		valueString, ok := value.(string)
+		if !ok {
+			valueString = ""
+		}
+
+		headers[strings.ToLower(key)] = strings.ToLower(valueString)
+    }
+
 	method := r.Method
 
 	scheme := "http"
