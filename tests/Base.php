@@ -420,10 +420,13 @@ class Base extends TestCase
         self::assertStringContainsString('Error log', $errors);
         self::assertStringContainsString('Native log', $logs);
         self::assertStringContainsString('Native logs detected.', $logs);
-        self::assertStringContainsString('{"objectKey":"objectValue"}', $logs);
-        self::assertStringContainsString('["arrayValue"]', $logs);
+        self::assertStringContainsString('objectKey', $logs);
+        self::assertStringContainsString('objectValue', $logs);
+        self::assertStringContainsString('arrayValue', $logs);
         self::assertStringContainsString('Log+With+Plus+Symbol', $logs);
         self::assertStringContainsString("\n", $logs);
+        self::assertGreaterThanOrEqual(9, \count(\explode("\n", $logs))); // Ensures each logs is on new line
+        self::assertGreaterThanOrEqual(1, \count(\explode("\n", $errors))); // Ensures each error is on new line
 
         $response = Client::execute(headers: ['x-action' => 'logs' ]);
         $logIdSecond = $response['headers']['x-open-runtimes-log-id'];

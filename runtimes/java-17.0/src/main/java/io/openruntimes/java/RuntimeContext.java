@@ -27,7 +27,7 @@ public class RuntimeContext {
 
     public void log(Object message) {
         try {
-            this.logger.write(message, RuntimeLogger.TYPE_LOG, false);
+            this.logger.write(message + "\n", RuntimeLogger.TYPE_LOG, false);
         } catch(IOException e) {
             // Ignore missing logs
         }
@@ -35,7 +35,7 @@ public class RuntimeContext {
 
     public void error(Object message) {
         try {
-            this.logger.write(message, RuntimeLogger.TYPE_ERROR, false);
+            this.logger.write(message + "\n", RuntimeLogger.TYPE_ERROR, false);
         } catch(IOException e) {
             // Ignore missing logs
         }
