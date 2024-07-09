@@ -590,6 +590,36 @@ class Base extends TestCase
         self::assertEquals('POST', $response['headers']['x-method']);
     }
 
+    function testEnforcedHeaders(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'enforcedHeaders'], method: "POST");
+        self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals("value", $body['x-custom']);
+        self::assertEquals("value2", $body['x-custom-uppercase']);
+        self::assertEquals("248", $body['x-open-runtimes-custom']);
+
+        $response = Client::execute(headers: ['x-action' => 'enforcedHeaders', 'x-custom' => 'IS_IGNORED', 'x-custom-uppercase' => 'IS_IGNORED', 'x-open-runtimes-custom' => 'IS_IGNORED'], method: "POST");
+        self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals("value", $body['x-custom']);
+        self::assertEquals("value2", $body['x-custom-uppercase']);
+        self::assertEquals("248", $body['x-open-runtimes-custom']);
+
+        $response = Client::execute(headers: ['x-action' => 'enforcedHeaders', 'X-CUSTOM-UPPERCASE' => 'IS_IGNORED'], method: "POST");
+        self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals("value", $body['x-custom']);
+        self::assertEquals("value2", $body['x-custom-uppercase']);
+        self::assertEquals("248", $body['x-open-runtimes-custom']);
+    }
+
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
         $expected = preg_replace('/\s+/', '', $expected);
         $actual = preg_replace('/\s+/', '', $actual);

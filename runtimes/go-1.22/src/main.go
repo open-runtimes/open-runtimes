@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -61,20 +63,28 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 		}
 	}
 
-	enforcedHeadersBytes, err := json.Marshal(os.Getenv("OPEN_RUNTIMES_HEADERS") == "" ? "{}" : os.Getenv("OPEN_RUNTIMES_HEADERS"))
-	if err != nil {
-		enforcedHeadersBytes = []byte{}
+	headersEnv := os.Getenv("OPEN_RUNTIMES_HEADERS")
+	if headersEnv == "" {
+		headersEnv = "{}"
 	}
-	enforcedHeadersString := string(enforcedHeadersBytes)
 
-	for key, value := range enforcedHeadersString {
-		valueString, ok := value.(string)
-		if !ok {
-			valueString = ""
+	var enforcedHeaders map[string]interface{}
+	err = json.Unmarshal([]byte(headersEnv), &enforcedHeaders)
+	if err != nil {
+		enforcedHeaders = map[string]interface{}{}
+	}
+
+	for key, value := range enforcedHeaders {
+		valueString := ""
+		switch v := value.(type) {
+		default:
+			valueString = fmt.Sprintf("%#v", value)
+		case string:
+			valueString = v
 		}
 
 		headers[strings.ToLower(key)] = strings.ToLower(valueString)
-    }
+	}
 
 	method := r.Method
 
