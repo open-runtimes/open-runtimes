@@ -601,7 +601,7 @@ class Base extends TestCase
 
         $body = \json_decode($response['body'], true);
         self::assertEquals("value", $body['x-custom']);
-        self::assertEquals("value2", $body['x-custom-uppercase']);
+        self::assertEquals("Value2", $body['x-custom-uppercase']);
         self::assertEquals("248", $body['x-open-runtimes-custom']);
 
         $response = Client::execute(headers: ['x-action' => 'enforcedHeaders', 'x-custom' => 'IS_IGNORED', 'x-custom-uppercase' => 'IS_IGNORED', 'x-open-runtimes-custom' => 'IS_IGNORED'], method: "POST");
@@ -610,7 +610,7 @@ class Base extends TestCase
 
         $body = \json_decode($response['body'], true);
         self::assertEquals("value", $body['x-custom']);
-        self::assertEquals("value2", $body['x-custom-uppercase']);
+        self::assertEquals("Value2", $body['x-custom-uppercase']);
         self::assertEquals("248", $body['x-open-runtimes-custom']);
 
         $response = Client::execute(headers: ['x-action' => 'enforcedHeaders', 'X-CUSTOM-UPPERCASE' => 'IS_IGNORED'], method: "POST");
@@ -619,7 +619,7 @@ class Base extends TestCase
 
         $body = \json_decode($response['body'], true);
         self::assertEquals("value", $body['x-custom']);
-        self::assertEquals("value2", $body['x-custom-uppercase']);
+        self::assertEquals("Value2", $body['x-custom-uppercase']);
         self::assertEquals("248", $body['x-open-runtimes-custom']);
     }
 

@@ -83,7 +83,7 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 			valueString = v
 		}
 
-		headers[strings.ToLower(key)] = strings.ToLower(valueString)
+		headers[strings.ToLower(key)] = valueString
 	}
 
 	method := r.Method
