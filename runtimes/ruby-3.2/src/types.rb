@@ -109,9 +109,11 @@ class RuntimeResponse
   
     def log(message)
       @logger.write(message, RuntimeLogger::TYPE_LOG)
+      @logger.write("\n", RuntimeLogger::TYPE_LOG)
     end
   
     def error(message)
       @logger.write(message, RuntimeLogger::TYPE_ERROR)
+      @logger.write("\n", RuntimeLogger::TYPE_ERROR)
     end
   end
