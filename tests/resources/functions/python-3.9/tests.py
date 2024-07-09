@@ -34,6 +34,12 @@ When you can have two!
     elif action == 'doubleResponse':
         context.res.text('This should be ignored.')
         return context.res.text('This should be returned.')
+    elif action == 'enforcedHeaders':
+        return context.res.json({
+            'x-custom': context.req.headers['x-custom'],
+            'x-custom-uppercase': context.req.headers['x-custom-uppercase'],
+            'x-open-runtimes-custom': context.req.headers['x-open-runtimes-custom'],
+        })
     elif action == 'headersResponse':
         return context.res.text('OK', 200, {
             'first-header': 'first-value',

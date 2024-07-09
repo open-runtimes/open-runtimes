@@ -56,6 +56,12 @@ When you can have two!
 	case "doubleResponse":
 		Context.Res.Text("This should be ignored.", 200, nil)
 		return Context.Res.Text("This should be returned.", 200, nil)
+	case "enforcedHeaders":
+		return Context.Res.Json(map[string]interface{}{
+			"x-custom":               Context.Req.Headers["x-custom"],
+			"x-custom-uppercase":     Context.Req.Headers["x-custom-uppercase"],
+			"x-open-runtimes-custom": Context.Req.Headers["x-open-runtimes-custom"],
+		}, 200, nil)
 	case "headersResponse":
 		secondHeader, ok := Context.Req.Headers["x-open-runtimes-custom-in-header"]
 		if !ok {

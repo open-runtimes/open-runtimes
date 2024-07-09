@@ -60,6 +60,12 @@ namespace runtime {
             } else if (action == "doubleResponse") {
                 res.text("This should be ignored.");
                 return res.text("This should be returned.");
+            } else if (action == "enforcedHeaders") {
+                json["x-custom"] = req.headers["x-custom"].asString();
+                json["x-custom-uppercase"] = req.headers["x-custom-uppercase"].asString();
+                json["x-open-runtimes-custom"] = req.headers["x-open-runtimes-custom"].asString();
+
+                return res.json(json);
             } else if (action == "headersResponse") {
                 auto secondHeader = req.headers["x-open-runtimes-custom-in-header"].asString();
                 if (secondHeader.empty()) {
