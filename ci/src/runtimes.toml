@@ -6,7 +6,7 @@ commands = { install = "npm install", start = "pm2 start src/server.js --no-daem
 [node-mjs]
 test_only = true
 entry = "tests.mjs"
-version = ["21.0-mjs", "20.0-mjs", "19.0-mjs", "18.0-mjs", "16.0-mjs", "14.5-mjs"]
+versions = ["21.0-mjs", "20.0-mjs", "19.0-mjs", "18.0-mjs", "16.0-mjs", "14.5-mjs"]
 commands = { install = "npm install", start = "pm2 start src/server.js --no-daemon" }
 
 [deno]
