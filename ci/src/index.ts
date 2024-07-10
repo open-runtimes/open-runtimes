@@ -40,6 +40,8 @@ if (perRuntime) {
 }
 exec(`echo "matrix=${JSON.stringify(matrix)}" >> $GITHUB_OUTPUT`);
 exec(`echo "length=${matrix.length}" >> $GITHUB_OUTPUT`);
+console.log(process.env.GITHUB_OUTPUT);
+console.log(process.env.$GITHUB_OUTPUT);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];
