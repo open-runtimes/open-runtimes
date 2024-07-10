@@ -5,7 +5,7 @@ publish_to: none
 # homepage: https://www.example.com
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  shelf: ^1.4.1
+  shelf: ^1.2.0
