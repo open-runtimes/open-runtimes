@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 // @ts-ignore
 import data from './runtimes.toml'
+import {exec} from 'child_process';
 
 interface RuntimeCommands {
     install: string,
@@ -37,10 +38,8 @@ if (perRuntime) {
         }
     });
 }
-
-core.setOutput('matrix', JSON.stringify(matrix));
-core.setOutput('length', matrix.length.toString());
-
+exec(`echo "matrix=${JSON.stringify(matrix)}" >> $GITHUB_OUTPUT`);
+exec(`echo "length=${matrix.length}" >> $GITHUB_OUTPUT`);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];
