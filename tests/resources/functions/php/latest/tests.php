@@ -139,6 +139,6 @@ When you can have two!
         case 'deprecatedMethodsUntypedBody':
             return $context->res->send(50);
         default:
-            throw new Exception('Unknown action');
+            throw new Exception('Unknown action.');
     }
 };
