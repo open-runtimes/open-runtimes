@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -59,6 +61,29 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 		if strings.HasPrefix(key, "x-open-runtimes-") == false {
 			headers[key] = value[0]
 		}
+	}
+
+	headersEnv := os.Getenv("OPEN_RUNTIMES_HEADERS")
+	if headersEnv == "" {
+		headersEnv = "{}"
+	}
+
+	var enforcedHeaders map[string]interface{}
+	err = json.Unmarshal([]byte(headersEnv), &enforcedHeaders)
+	if err != nil {
+		enforcedHeaders = map[string]interface{}{}
+	}
+
+	for key, value := range enforcedHeaders {
+		valueString := ""
+		switch v := value.(type) {
+		default:
+			valueString = fmt.Sprintf("%#v", value)
+		case string:
+			valueString = v
+		}
+
+		headers[strings.ToLower(key)] = valueString
 	}
 
 	method := r.Method

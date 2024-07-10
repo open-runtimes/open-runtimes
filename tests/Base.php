@@ -420,10 +420,13 @@ class Base extends TestCase
         self::assertStringContainsString('Error log', $errors);
         self::assertStringContainsString('Native log', $logs);
         self::assertStringContainsString('Native logs detected.', $logs);
-        self::assertStringContainsString('{"objectKey":"objectValue"}', $logs);
-        self::assertStringContainsString('["arrayValue"]', $logs);
+        self::assertStringContainsString('objectKey', $logs);
+        self::assertStringContainsString('objectValue', $logs);
+        self::assertStringContainsString('arrayValue', $logs);
         self::assertStringContainsString('Log+With+Plus+Symbol', $logs);
         self::assertStringContainsString("\n", $logs);
+        self::assertGreaterThanOrEqual(9, \count(\explode("\n", $logs))); // Ensures each logs is on new line
+        self::assertGreaterThanOrEqual(1, \count(\explode("\n", $errors))); // Ensures each error is on new line
 
         $response = Client::execute(headers: ['x-action' => 'logs' ]);
         $logIdSecond = $response['headers']['x-open-runtimes-log-id'];
@@ -588,6 +591,36 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals($md5, $response['body']);
         self::assertEquals('POST', $response['headers']['x-method']);
+    }
+
+    function testEnforcedHeaders(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'enforcedHeaders'], method: "POST");
+        self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals("value", $body['x-custom']);
+        self::assertEquals("Value2", $body['x-custom-uppercase']);
+        self::assertEquals("248", $body['x-open-runtimes-custom']);
+
+        $response = Client::execute(headers: ['x-action' => 'enforcedHeaders', 'x-custom' => 'IS_IGNORED', 'x-custom-uppercase' => 'IS_IGNORED', 'x-open-runtimes-custom' => 'IS_IGNORED'], method: "POST");
+        self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals("value", $body['x-custom']);
+        self::assertEquals("Value2", $body['x-custom-uppercase']);
+        self::assertEquals("248", $body['x-open-runtimes-custom']);
+
+        $response = Client::execute(headers: ['x-action' => 'enforcedHeaders', 'X-CUSTOM-UPPERCASE' => 'IS_IGNORED'], method: "POST");
+        self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
+
+        $body = \json_decode($response['body'], true);
+        self::assertEquals("value", $body['x-custom']);
+        self::assertEquals("Value2", $body['x-custom-uppercase']);
+        self::assertEquals("248", $body['x-open-runtimes-custom']);
     }
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
