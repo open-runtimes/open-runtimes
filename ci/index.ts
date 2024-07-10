@@ -44,10 +44,11 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             runtime.entry = "tests.mjs";
         }
 
+
         object.push({
             ID: `${key}-${version}`,
             RUNTIME: key,
-            VERSION: version,
+            VERSION: cleanVersion(version),
             ENTRYPOINT: runtime.entry,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,
@@ -56,6 +57,10 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
     });
 
     return object;
+}
+
+function cleanVersion(version: string): string {
+    return version.replace('-mjs', '');
 }
 
 function getFolders(changes: string[]): string[] {
