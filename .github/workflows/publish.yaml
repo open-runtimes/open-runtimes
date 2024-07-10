@@ -188,30 +188,21 @@ jobs:
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # Swift
-          - runtimes: swift-5.9
-            RUNTIME: swift-5.9
-            ENTRYPOINT: Tests.swift
+          - ID: swift-5.9
+            RUNTIME: swift
+            VERSION: "5.9"
             IMAGE: openruntimes/swift:v4-5.9
             ARCH: "linux/amd64,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
-          - runtimes: swift-5.8
-            RUNTIME: swift-5.8
-            ENTRYPOINT: Tests.swift
+          - ID: swift-5.8
+            RUNTIME: swift
+            VERSION: "5.8"
             IMAGE: openruntimes/swift:v4-5.8
             ARCH: "linux/amd64,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
-          - runtimes: swift-5.5
-            RUNTIME: swift-5.5
-            ENTRYPOINT: Tests.swift
+          - ID: swift-5.5
+            RUNTIME: swift
+            VERSION: "5.5"
             IMAGE: openruntimes/swift:v4-5.5
             ARCH: "linux/amd64,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: ""
-            OPEN_RUNTIMES_START_COMMAND: "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000"
 
           # Kotlin
           - ID: kotlin-1.9
