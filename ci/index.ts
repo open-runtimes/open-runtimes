@@ -1,4 +1,3 @@
-import * as core from '@actions/core';
 // @ts-ignore
 import data from './runtimes.toml'
 import {exec} from 'child_process';
@@ -31,10 +30,6 @@ if (perRuntime) {
     folders.forEach((folder) => {
         if (runtimes[folder] !== undefined) {
             matrix.push(...generateRuntimeObject(runtimes[folder], folder));
-
-            if (folder === 'node') {
-                matrix.push(...generateRuntimeObject(runtimes['node-mjs'], 'node-mjs'));
-            }
         }
     });
 }
@@ -45,6 +40,10 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];
 
     runtime.versions.forEach((version) => {
+        if (key === 'node' && version.includes('mjs')) {
+            runtime.entry = "tests.mjs";
+        }
+
         object.push({
             ID: `${key}-${version}`,
             RUNTIME: key,
