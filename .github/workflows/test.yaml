@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.prepare.outputs.matrix }}
-      length: ${{ steps.prepare.outputs.length }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,42 +31,34 @@ jobs:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: bun ./ci/src/index.ts
 
-  testing:
+  open-runtimes:
     needs: prepare
+    name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
-      - run: echo ${{ needs.prepare.outputs.length }}
-      - run: echo ${{ needs.prepare.outputs.matrix }}
-#
-#  open-runtimes:
-#    needs: prepare
-#    if: ${{ needs.prepare.outputs.length > 0 }}
-#    name: ${{ matrix.ID }}
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#      - name: Setup PHP
-#        uses: shivammathur/setup-php@v2
-#      - name: Setup Composer
-#        run: |
-#          php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-#          php composer-setup.php
-#          php -r "unlink('composer-setup.php');"
-#          mv composer.phar /usr/local/bin/composer
-#      - name: Install dependencies
-#        run: composer install
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v3
-#      - name: Run tests
-#        working-directory: ./
-#        run: sh ci_tests.sh
-#        env:
-#          RUNTIME: ${{ matrix.RUNTIME }}
-#          ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
-#          VERSION: ${{ matrix.VERSION }}
-#          INSTALL_COMMAND: ${{ matrix.INSTALL_COMMAND }}
-#          START_COMMAND: ${{ matrix.START_COMMAND }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+      - name: Setup Composer
+        run: |
+          php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+          php composer-setup.php
+          php -r "unlink('composer-setup.php');"
+          mv composer.phar /usr/local/bin/composer
+      - name: Install dependencies
+        run: composer install
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Run tests
+        working-directory: ./
+        run: sh ci_tests.sh
+        env:
+          RUNTIME: ${{ matrix.RUNTIME }}
+          ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
+          VERSION: ${{ matrix.VERSION }}
+          INSTALL_COMMAND: ${{ matrix.INSTALL_COMMAND }}
+          START_COMMAND: ${{ matrix.START_COMMAND }}
