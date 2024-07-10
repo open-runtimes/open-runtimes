@@ -9,7 +9,7 @@ const server = micro(async (req, res) => {
 
     try {
         await action(logger, req, res);
-    } catch(e) {
+    } catch (e) {
         logger.write(e, Logger.TYPE_ERROR);
 
         res.setHeader('x-open-runtimes-log-id', logger.id);
@@ -22,15 +22,15 @@ const server = micro(async (req, res) => {
 const action = async (logger, req, res) => {
     const timeout = req.headers[`x-open-runtimes-timeout`] ?? '';
     let safeTimeout = null;
-    if(timeout) {
-        if(isNaN(timeout) || timeout === 0) {
+    if (timeout) {
+        if (isNaN(timeout) || timeout === 0) {
             return send(res, 500, 'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
         }
-        
+
         safeTimeout = +timeout;
     }
 
-    if(process.env['OPEN_RUNTIMES_SECRET'] && req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
+    if (process.env['OPEN_RUNTIMES_SECRET'] && req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
         return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
     }
 
@@ -43,7 +43,7 @@ const action = async (logger, req, res) => {
     });
 
     const enforcedHeaders = JSON.parse(process.env.OPEN_RUNTIMES_HEADERS ? process.env.OPEN_RUNTIMES_HEADERS : '{}');
-    for(const header in enforcedHeaders) {
+    for (const header in enforcedHeaders) {
         headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
     }
 
@@ -54,11 +54,11 @@ const action = async (logger, req, res) => {
     const path = req.url.includes('?') ? req.url.split('?')[0] : req.url;
     const queryString = req.url.includes('?') ? req.url.split('?')[1] : '';
     const query = {};
-    for(const param of queryString.split('&')) {
+    for (const param of queryString.split('&')) {
         let [key, ...valueArr] = param.split('=');
         const value = valueArr.join('=');
 
-        if(key) {
+        if (key) {
             query[key] = value ?? '';
         }
     }
@@ -68,13 +68,13 @@ const action = async (logger, req, res) => {
     const context = {
         req: {
             get body() {
-                if(contentType.startsWith("application/json")) {
+                if (contentType.startsWith("application/json")) {
                     return this.bodyBinary && this.bodyBinary.length > 0 ? this.bodyJson : {};
                 }
 
                 const binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
-                for(const type of binaryTypes) {
-                    if(contentType.startsWith(type)) {
+                for (const type of binaryTypes) {
+                    if (contentType.startsWith(type)) {
                         return this.bodyBinary;
                     }
                 }
@@ -110,7 +110,7 @@ const action = async (logger, req, res) => {
             text: function (body, statusCode = 200, headers = {}) {
                 return this.binary(Buffer.from(body, 'utf8'), statusCode, headers);
             },
-            binary: function(bytes, statusCode = 200, headers = {}) {
+            binary: function (bytes, statusCode = 200, headers = {}) {
                 return {
                     body: bytes,
                     statusCode: statusCode,
@@ -145,8 +145,8 @@ const action = async (logger, req, res) => {
         let userFunction;
         try {
             userFunction = require(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
-        } catch(err) {
-            if(err.code === 'ERR_REQUIRE_ESM') {
+        } catch (err) {
+            if (err.code === 'ERR_REQUIRE_ESM') {
                 userFunction = await import(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
             } else {
                 throw err;
@@ -169,7 +169,7 @@ const action = async (logger, req, res) => {
     }
 
     try {
-        if(safeTimeout !== null) {
+        if (safeTimeout !== null) {
             let executed = true;
 
             const timeoutPromise = new Promise((promiseRes) => {
@@ -181,7 +181,7 @@ const action = async (logger, req, res) => {
 
             await Promise.race([execute(), timeoutPromise]);
 
-            if(!executed) {
+            if (!executed) {
                 context.error('Execution timed out.');
                 output = context.res.text('', 500, {});
             }
@@ -189,7 +189,7 @@ const action = async (logger, req, res) => {
             await execute();
         }
     } catch (e) {
-        if(e.code === 'MODULE_NOT_FOUND') {
+        if (e.code === 'MODULE_NOT_FOUND') {
             context.error('Could not load code file.');
         }
 
@@ -199,7 +199,7 @@ const action = async (logger, req, res) => {
         logger.revertNativeLogs();
     }
 
-    if(output === null || output === undefined) {
+    if (output === null || output === undefined) {
         context.error('Return statement missing. return context.res.empty() if no response is expected.');
         output = context.res.text('', 500, {});
     }
@@ -209,7 +209,7 @@ const action = async (logger, req, res) => {
     output.headers = output.headers ?? {};
 
     for (const header in output.headers) {
-        if(header.toLowerCase().startsWith('x-open-runtimes-')) {
+        if (header.toLowerCase().startsWith('x-open-runtimes-')) {
             continue;
         }
         res.setHeader(header.toLowerCase(), output.headers[header]);
@@ -220,10 +220,7 @@ const action = async (logger, req, res) => {
         !contentTypeValue.startsWith("multipart/") &&
         !contentTypeValue.includes("charset=")
     ) {
-        res.setHeader(
-        "content-type",
-        contentTypeValue + "; charset=utf-8"
-        );
+        res.setHeader("content-type", contentTypeValue + "; charset=utf-8");
     }
 
     res.setHeader('x-open-runtimes-log-id', logger.id);

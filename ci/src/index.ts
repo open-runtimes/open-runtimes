@@ -16,7 +16,7 @@ interface Runtime {
 const runtimes: Record<string, Runtime> = data;
 const matrix: Record<string, any>[] = [];
 console.log(process.env.ALL_CHANGED_FILES);
-const changedFiles = JSON.parse(process.env.ALL_CHANGED_FILES ?? '[]');
+const changedFiles = (process.env.ALL_CHANGED_FILES ?? '').split(' ');
 console.log(changedFiles);
 core.setOutput('matrix', JSON.stringify(matrix));
 core.setOutput('length', matrix.length.toString());
