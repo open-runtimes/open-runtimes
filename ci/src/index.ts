@@ -38,9 +38,8 @@ if (perRuntime) {
     });
 }
 
-core.setOutput('matrix', JSON.stringify(matrix));
-core.setOutput('length', matrix.length.toString());
-
+console.log(`::set-output name=matrix::${JSON.stringify(matrix)}`);
+console.log(`::set-output name=length::${matrix.length}`);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];
