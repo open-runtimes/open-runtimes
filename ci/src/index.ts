@@ -21,19 +21,19 @@ const folders = getFolders((process.env.ALL_CHANGED_FILES ?? '').split(' '));
 
 // Test all in case of CI or Test file changes
 if (folders.includes('ci') || folders.includes('.github')) {
-    for (const [key, runtime] of Object.entries(runtimes)) {        // matrix.push(generateRuntimeObject(runtime, key));
+    for (const [key, runtime] of Object.entries(runtimes)) {
+        // matrix.push(...generateRuntimeObject(runtime, key));
         // perRuntime = false;
-
     }
 }
 
 if (perRuntime) {
     folders.forEach((folder) => {
         if (runtimes[folder] !== undefined) {
-            matrix.push(generateRuntimeObject(runtimes[folder], folder));
+            matrix.push(...generateRuntimeObject(runtimes[folder], folder));
 
             if (folder === 'node') {
-                matrix.push(generateRuntimeObject(runtimes['node-mjs'], 'node-mjs'));
+                matrix.push(...generateRuntimeObject(runtimes['node-mjs'], 'node-mjs'));
             }
         }
     });
