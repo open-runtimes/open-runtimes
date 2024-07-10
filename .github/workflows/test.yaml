@@ -29,7 +29,7 @@ jobs:
       - name: Prepare
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-        run: bun ./ci/changes.ts
+        run: bun ./ci/src/index.ts
 
   open-runtimes:
     needs: prepare
