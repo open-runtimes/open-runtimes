@@ -26,7 +26,8 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - name: prepare
+      - name: Prepare
+        id: prepare
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: bun ./ci/src/index.ts
