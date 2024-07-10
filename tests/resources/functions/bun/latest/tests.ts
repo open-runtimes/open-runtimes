@@ -127,6 +127,6 @@ When you can have two!
         case 'deprecatedMethodsUntypedBody':
             return context.res.send(50);
         default:
-            throw new Error('Unknown action');
+            throw new Error('Unknown action.');
     }
 }

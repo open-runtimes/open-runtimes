@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 // @ts-ignore
-import data from 'runtimes.toml'
+import data from './runtimes.toml'
 
 interface RuntimeCommands {
     install: string,
@@ -30,6 +30,10 @@ if (perRuntime) {
     folders.forEach((folder) => {
         if (runtimes[folder] !== undefined) {
             matrix.push(generateRuntimeObject(runtimes[folder], folder));
+
+            if (folder === 'node') {
+                matrix.push(generateRuntimeObject(runtimes['node-mjs'], 'node-mjs'));
+            }
         }
     });
 }
