@@ -39,7 +39,7 @@ if (perRuntime) {
     });
 }
 
-exec(`echo "matrix=${JSON.stringify({include: matrix}).replaceAll('"','\"')}" >> $GITHUB_OUTPUT`);
+exec(`echo "matrix=${JSON.stringify(JSON.stringify({include: matrix}))}" >> $GITHUB_OUTPUT`);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];
