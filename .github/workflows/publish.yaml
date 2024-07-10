@@ -14,54 +14,36 @@ jobs:
       matrix:
         include:
           # Node
-          - runtimes: node-21.js
-            RUNTIME: node-21.0
-            ENTRYPOINT: tests.js
+          - ID: node-21.js
+            RUNTIME: node
+            VERSION: "21.0"
             IMAGE: openruntimes/node:v4-21.0
             ARCH: "linux/amd64,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
-            OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
-          - runtimes: node-20.js
-            RUNTIME: node-20.0
-            ENTRYPOINT: tests.js
+          - ID: node-20.js
+            RUNTIME: node
+            VERSION: "20.0"
             IMAGE: openruntimes/node:v4-20.0
             ARCH: "linux/amd64,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
-            OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
-          - runtimes: node-19.js
-            RUNTIME: node-19.0
-            ENTRYPOINT: tests.js
+          - ID: node-19.js
+            RUNTIME: node
+            VERSION: "19.0"
             IMAGE: openruntimes/node:v4-19.0
             ARCH: "linux/amd64,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
-            OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
-          - runtimes: node-18.js
-            RUNTIME: node-18.0
-            ENTRYPOINT: tests.js
+          - ID: node-18.js
+            RUNTIME: node
+            VERSION: "18.0"
             IMAGE: openruntimes/node:v4-18.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
-            OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
-          - runtimes: node-16.js
-            RUNTIME: node-16.0
-            ENTRYPOINT: tests.js
+          - ID: node-16.js
+            RUNTIME: node
+            VERSION: "16.0"
             IMAGE: openruntimes/node:v4-16.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
-            OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
-          - runtimes: node-14.5.js
-            RUNTIME: node-14.5
-            ENTRYPOINT: tests.js
+          - ID: node-14.5.js
+            RUNTIME: node
+            VERSION: "14.5"
             IMAGE: openruntimes/node:v4-14.5
             ARCH: "linux/amd64"
-            TEST_CLASS: "Base"
-            OPEN_RUNTIMES_BUILD_COMMAND: "npm install"
-            OPEN_RUNTIMES_START_COMMAND: "pm2 start src/server.js --no-daemon"
 
           # Deno
           - ID: deno-1.40
