@@ -93,6 +93,32 @@ docker build -t {{Image Tag Name}} ./runtimes/{{Folder of your runtime}}
 
 5. [Follow our contribution guide to learn how you can add support for more runtimes.](docs/add-runtime.md)
 
+## Testing
+
+We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by Travis CI, and tests run for all runtimes.
+
+Before running the tests, make sure to install all required PHP libraries:
+
+```bash
+docker run --rm --interactive --tty --volume $PWD:/app composer install
+```
+
+You also need to install [jq](https://nektosact.com/installation/index.html):
+
+```bash
+brew install yq
+```
+
+> Alternatively run `go install github.com/mikefarah/yq/v4@latest` if brew isn't installed
+
+To run test for a runtime, get runtime name (folder name) and execute below command:
+
+```bash
+sh tests.sh go-1.22
+```
+
+> Replace `go-1.22` with runtime name that you want to test
+
 ## Introducing New Features
 
 We would 💖 for you to contribute to Open Runtimes, but we would also like to make sure Open Runtimes is as great as possible and loyal to its vision and mission statement 🙏.

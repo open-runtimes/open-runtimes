@@ -1,3 +1,7 @@
+tests/.runtime
+runtimes/.release
+runtimes/.test
+code.tar.gz
 bin
 vendor
 .phpunit.result.cache
