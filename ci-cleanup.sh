@@ -1,6 +1,6 @@
 set -e
 
-if [ "$(docker ps -q)" ]; then
+if [ "$(docker ps -aq)" ]; then
     docker rm --force $(docker ps -aq)
 fi
 
