@@ -5,18 +5,13 @@ sh ci-cleanup.sh
 sh ci-runtime-prepare.sh
 sh ci-runtime-build.sh
 
-# Find test folder (versioned takes presence)
-TEST_FOLDER="./tests/resources/functions/$RUNTIME-$VERSION/"
-if [ -d "$TEST_FOLDER" ]; then
-    TEST_FOLDER="./tests/resources/functions/$RUNTIME-$VERSION"
-else
-    TEST_FOLDER="./tests/resources/functions/$RUNTIME"
-fi
-
 mkdir -p ./tests/.runtime
 
 cp -R ./tests/resources/functions/$RUNTIME/latest/* ./tests/.runtime
-cp -R ./tests/resources/functions/$RUNTIME/$VERSION/* ./tests/.runtime
+
+if [ -d "./tests/resources/functions/$RUNTIME/$VERSION/" ]; then
+    cp -R ./tests/resources/functions/$RUNTIME/$VERSION/* ./tests/.runtime
+fi
 
 # Prevent Docker from creating folder
 cd ./tests/.runtime
@@ -31,7 +26,6 @@ docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/c
 cd ../../
 sleep 20
 OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vendor/bin/phpunit --configuration phpunit.xml tests/Base.php
-echo $?
 
 # Dev tests
 

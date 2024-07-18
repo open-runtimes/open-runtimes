@@ -1,6 +1,8 @@
 set -e
 
-docker rm --force $(docker ps -aq)
+if [ "$(docker ps -q)" ]; then
+    docker rm --force $(docker ps -aq)
+fi
 
 rm -rf /tmp/logs
 mkdir -p /tmp/logs
