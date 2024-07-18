@@ -56,7 +56,7 @@ commands = { install = "", start = "dotnet src/function/DotNetRuntime.dll" }
 [go]
 entry = "tests.go"
 versions = ["1.22"]
-commands = { install = "", start = "src/function/server" }
+commands = { install = "", start = "supervisord -c /etc/supervisord.conf -u root" }
 
 [bun]
 entry = "tests.ts"
