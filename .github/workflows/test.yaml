@@ -371,7 +371,7 @@ jobs:
             VERSION: "1.22"
             ENTRYPOINT: tests.go
             INSTALL_COMMAND: ""
-            START_COMMAND: "src/function/server"
+            START_COMMAND: "supervisord -c /etc/supervisord.conf -u root"
     name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
 

@@ -205,6 +205,8 @@ When you can have two!
 		return Context.Res.Send(hashHex, 200, map[string]string{
 			"x-method": Context.Req.Method,
 		})
+	case "crash":
+		panic("intentional process exit")
 	default:
 		Context.Error("Unknown action in tests.go")
 		return Context.Res.Text("", 500, nil)

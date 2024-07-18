@@ -51,8 +51,11 @@ class Client {
         $body = curl_exec($ch);
         $code = curl_getinfo($ch, \CURLINFO_HTTP_CODE);
 
+        $error = null;
+        $errorNumber = null;
         if (curl_errno($ch)) {
-            \var_dump(curl_error($ch));
+            $errorNumber = curl_errno($ch);
+            $error = curl_error($ch);
         }
 
         \curl_close($ch);
@@ -60,7 +63,9 @@ class Client {
         return [
             'code' => $code,
             'body' => $body,
-            'headers' => $responseHeaders
+            'headers' => $responseHeaders,
+            'error' => $error,
+            'errorNumber' => $errorNumber,
         ];
     }
 
