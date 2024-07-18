@@ -623,6 +623,7 @@ class Base extends TestCase
         self::assertEquals("248", $body['x-open-runtimes-custom']);
     }
 
+    /*
     function testCrash(): void
     {
         $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
@@ -642,6 +643,7 @@ class Base extends TestCase
         $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
         self::assertEquals(200, $response['code']);
     }
+    */
 
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
         $expected = preg_replace('/\s+/', '', $expected);

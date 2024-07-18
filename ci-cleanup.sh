@@ -1,3 +1,5 @@
+set -e
+
 docker rm --force $(docker ps -aq)
 
 rm -rf /tmp/logs

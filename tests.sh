@@ -1,4 +1,5 @@
 # Usage: sh tests.sh node-21.0
+set -e
 
 # Configurable varaible for different runtimes
 ID=$1

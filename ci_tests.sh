@@ -1,4 +1,5 @@
 # Use tests.sh instead, when running locally
+set -e
 
 sh ci-cleanup.sh
 sh ci-runtime-prepare.sh
@@ -30,6 +31,7 @@ docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/c
 cd ../../
 sleep 20
 OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vendor/bin/phpunit --configuration phpunit.xml tests/Base.php
+echo $?
 
 # Dev tests
 
