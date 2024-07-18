@@ -12,6 +12,7 @@ class BaseDev extends TestCase
 {
     public function setUp(): void
     {
+        Client::$port = 3001;
     }
 
     public function tearDown(): void

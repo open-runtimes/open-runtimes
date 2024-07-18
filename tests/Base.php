@@ -40,6 +40,9 @@ class Base extends TestCase
 
         $body = \json_encode([ "name" => "OpenRntimes", "version" => 3.5, "published" => true, "nested" => [ [ 'object' => 1 ] ] ]);
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyJson']);
+        \var_dump($response);
+        \var_dump(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+        \var_dump(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
         self::assertEquals(200, $response['code']);
         self::assertStringNotContainsStringIgnoringCase(" ", $response['body']);
         self::assertStringNotContainsStringIgnoringCase("\n", $response['body']);
