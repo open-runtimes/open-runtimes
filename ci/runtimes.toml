@@ -31,7 +31,7 @@ commands = { install = "composer update --no-interaction --ignore-platform-reqs 
 [swift]
 entry = "Tests.swift"
 versions = ["5.9", "5.8", "5.5", ]
-commands = { install = "", start = "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000" }
+commands = { install = "", start = "supervisord -c /etc/supervisord.conf -u root" }
 
 [kotlin]
 entry = "Tests.kt"

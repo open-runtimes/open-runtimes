@@ -16,8 +16,8 @@ RUN if [ -x "$(command -v apk)" ]; then \
     apk add --update supervisor && \
     rm -rf /tmp/* /var/cache/apk/*; \
   else \
-    apt update && \
-    apt install -y supervisor && \
+    apt-get -m update && \
+    apt-get install -y supervisor && \
     rm -rf /var/lib/apt/lists/*; \
 fi
 
