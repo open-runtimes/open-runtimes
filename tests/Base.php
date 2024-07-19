@@ -623,12 +623,12 @@ class Base extends TestCase
         self::assertEquals("248", $body['x-open-runtimes-custom']);
     }
 
-    function testPanic(): void
+    function testExit(): void
     {
         $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
         self::assertEquals(200, $response['code']);
 
-        $response = Client::execute(headers: ['x-action' => 'panic']);
+        $response = Client::execute(headers: ['x-action' => 'exit']);
         self::assertEquals(0, $response['code']);
         self::assertEquals('Empty reply from server', $response['error']);
 
