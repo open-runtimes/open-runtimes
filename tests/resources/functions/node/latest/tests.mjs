@@ -126,6 +126,8 @@ When you can have two!
             return context.res.send(context.req.bodyRaw);
         case 'deprecatedMethodsUntypedBody':
             return context.res.send(50);
+        case 'exit':
+            process.exit();
         default:
             throw new Error('Unknown action');
     }
