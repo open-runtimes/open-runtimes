@@ -206,7 +206,7 @@ When you can have two!
 			"x-method": Context.Req.Method,
 		})
 	case "exit":
-		panic()
+		panic("Exit")
 	default:
 		Context.Error("Unknown action in tests.go")
 		return Context.Res.Text("", 500, nil)

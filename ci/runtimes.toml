@@ -6,12 +6,12 @@ commands = { install = "npm install", start = "supervisord -c /etc/supervisord.c
 [deno]
 entry = "tests.ts"
 versions = ["1.40", "1.35", "1.24", "1.21"]
-commands = { install = "deno cache tests.ts", start = "denon start" }
+commands = { install = "deno cache tests.ts", start = "supervisord -c /etc/supervisord.conf -u root" }
 
 [python]
 entry = "tests.py"
 versions = ["3.12", "3.11", "3.10", "3.9", "3.8", "ml-3.11"]
-commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "python3 src/server.py" }
+commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "supervisord -c /etc/supervisord.conf -u root" }
 
 [dart]
 entry = "lib/tests.dart"
@@ -26,7 +26,7 @@ commands = { install = "", start = "bundle exec puma -b tcp://0.0.0.0:3000 -e pr
 [php]
 entry = "tests.php"
 versions = ["8.0", "8.1", "8.2", "8.3"]
-commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "php src/server.php" }
+commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "supervisord -c /etc/supervisord.conf -u root" }
 
 [swift]
 entry = "Tests.swift"
@@ -61,4 +61,4 @@ commands = { install = "", start = "supervisord -c /etc/supervisord.conf -u root
 [bun]
 entry = "tests.ts"
 versions = ["1.0"]
-commands = { install = "bun install", start = "bun src/server.ts" }
+commands = { install = "bun install", start = "supervisord -c /etc/supervisord.conf -u root" }

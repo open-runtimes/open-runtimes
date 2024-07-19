@@ -20,7 +20,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $requestHeaders = $req->header;
 
     $cookieHeaders = [];
-    foreach ($req->cookie as $key => $value) {
+    foreach (($req->cookie ?? []) as $key => $value) {
         $cookieHeaders[] = "{$key}={$value}";
     }
 
@@ -183,7 +183,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
 };
 
 $server->on("Request", function($req, $res) use($action) {
-    $logger = new Logger($req->header['x-open-runtimes-logging'], $req->header['x-open-runtimes-log-id']);
+    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '');
 
     try {
         $action($logger, $req, $res);
@@ -200,6 +200,10 @@ $server->on("Request", function($req, $res) use($action) {
         $res->status(500);
         $res->end('');
     }
+});
+
+$server->on("Start", function() {
+    echo("HTTP server successfully started!\n");
 });
 
 $server->start();

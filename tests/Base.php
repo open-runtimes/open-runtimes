@@ -630,7 +630,7 @@ class Base extends TestCase
 
         $response = Client::execute(headers: ['x-action' => 'exit']);
         self::assertEquals(0, $response['code']);
-        self::assertEquals('Empty reply from server', $response['error']);
+        self::assertNotEmpty($response['error']);
 
         \sleep(10);
 

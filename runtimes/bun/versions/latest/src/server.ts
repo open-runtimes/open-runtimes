@@ -228,3 +228,5 @@ Bun.serve({
     }
   }
 });
+
+console.log("HTTP server successfully started!");

@@ -126,5 +126,7 @@ When you can have two!
         return context.res.send(context.req.body_raw)
     elif action == 'deprecatedMethodsUntypedBody':
         return context.res.send(50)
+    elif action == 'exit':
+        os.system("supervisorctl restart server")
     else:
         raise Exception('Unknown action')

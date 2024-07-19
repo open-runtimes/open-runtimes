@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from io import StringIO
 import traceback
 import pathlib
+import sys
 import os
 import importlib
 import urllib.parse
@@ -157,4 +158,5 @@ async def handler(u_path):
 
 if __name__ == "__main__":
     from waitress import serve
+    print("HTTP server successfully started!", flush=True)
     serve(app, host="0.0.0.0", port=3000)

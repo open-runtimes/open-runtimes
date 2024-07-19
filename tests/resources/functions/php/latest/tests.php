@@ -138,6 +138,8 @@ When you can have two!
             return $context->res->send($context->req->bodyRaw);
         case 'deprecatedMethodsUntypedBody':
             return $context->res->send(50);
+        case 'exit':
+            \shell_exec('supervisorctl restart server');
         default:
             throw new Exception('Unknown action');
     }
