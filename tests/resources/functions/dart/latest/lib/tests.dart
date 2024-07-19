@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart' hide Response;
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, exit;
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 
@@ -172,6 +172,9 @@ When you can have two!
     }
     case 'deprecatedMethodsUntypedBody': {
       return context.res.send("50"); // Send only supported String
+    }
+    case 'exit': {
+      exit(0);
     }
     default: {
       throw new Exception('Unknown action');

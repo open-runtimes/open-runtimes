@@ -1,6 +1,7 @@
 package io.openruntimes.kotlin
 
 import com.google.gson.Gson
+import kotlin.system.exitProcess
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -242,6 +243,10 @@ When you can have two!
             }
             "deprecatedMethodsUntypedBody" -> {
                 return context.res.send("50"); // Send only supported String
+            }
+            "exit" -> {
+                exitProcess(0)
+                return context.res.empty(); // Builds fail without this, but code doesnt get here
             }
             else -> {
                 throw Exception("Unknown action")

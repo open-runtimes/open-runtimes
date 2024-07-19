@@ -193,4 +193,6 @@ void main() async {
           headers: responseHeaders);
     }
   }, '0.0.0.0', 3000);
+
+  print("HTTP server successfully started!");
 }

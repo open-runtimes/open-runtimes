@@ -215,6 +215,10 @@ public class Tests {
             case "deprecatedMethodsUntypedBody" -> {
                 return context.getRes().send("50"); // Send only supported String
             }
+            case "exit" -> {
+                System.exit(0);
+                return context.getRes().empty(); // Builds fail without this, but code doesnt get here
+            }
             default -> throw new Exception("Unknown action");
         }
     }

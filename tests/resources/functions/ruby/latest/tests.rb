@@ -125,6 +125,8 @@ When you can have two!
         return context.res.send(context.req.body_raw);
     when 'deprecatedMethodsUntypedBody'
         return context.res.send(50);
+    when 'exit'
+        system("supervisorctl restart server");
     else
         raise 'Unknown action'
     end

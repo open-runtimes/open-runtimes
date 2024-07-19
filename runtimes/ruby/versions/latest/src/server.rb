@@ -215,3 +215,5 @@ error do
     ENV['sinatra.error'].message.to_json
   end
 end
+
+puts "HTTP server successfully started!"
