@@ -46,7 +46,7 @@ commands = { install = "", start = "supervisord -c /etc/supervisord.conf -u root
 [cpp]
 entry = "tests.cc"
 versions = ["20", "17"]
-commands = { install = "", start = "src/function/cpp_runtime" }
+commands = { install = "", start = "supervisord -c /etc/supervisord.conf -u root" }
 
 [dotnet]
 entry = "Tests.cs"
