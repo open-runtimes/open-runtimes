@@ -103,13 +103,11 @@ Before running the tests, make sure to install all required PHP libraries:
 docker run --rm --interactive --tty --volume $PWD:/app composer install
 ```
 
-You also need to install [jq](https://nektosact.com/installation/index.html):
+You also need to install [tomlq](https://github.com/cryptaliagy/tomlq):
 
 ```bash
-brew install yq
+cargo install tomlq
 ```
-
-> Alternatively run `go install github.com/mikefarah/yq/v4@latest` if brew isn't installed
 
 To run test for a runtime, get runtime name (folder name) and execute below command:
 
