@@ -10,6 +10,9 @@ namespace DotNetRuntime
             var app = WebApplication.Create(args);
             app.Urls.Add("http://0.0.0.0:3000");
             app.MapMethods("/{*path}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE" }, Execute);
+
+            Console.WriteLine("HTTP server successfully started!");
+            
             app.Run();
         }
 

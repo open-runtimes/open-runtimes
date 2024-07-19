@@ -51,7 +51,7 @@ commands = { install = "", start = "src/function/cpp_runtime" }
 [dotnet]
 entry = "Tests.cs"
 versions = ["8.0", "7.0", "6.0"]
-commands = { install = "", start = "dotnet src/function/DotNetRuntime.dll" }
+commands = { install = "", start = "supervisord -c /etc/supervisord.conf -u root" }
 
 [go]
 entry = "tests.go"

@@ -183,6 +183,9 @@ When you can have two!
                     return context.Res.Send(context.Req.BodyRaw);
                 case "deprecatedMethodsUntypedBody":
                     return context.Res.Send("50"); // Send only supported String
+                case "exit":
+                    System.Environment.Exit(0);
+                    return context.Res.Empty(); // Builds fail without this, but code doesnt get here
                 default:
                     throw new Exception("Unknown action");
             }
