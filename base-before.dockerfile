@@ -12,14 +12,15 @@ RUN mkdir -p /usr/local/server
 RUN mkdir -p /usr/local/server/src
 RUN mkdir -p /usr/local/server/src/function
 
-RUN if command -v apk &> /dev/null; then \
+RUN if [ -x "$(command -v apk)" ]; then \
     apk add --update supervisor && \
     rm -rf /tmp/* /var/cache/apk/*; \
   else \
-    apt install supervisor; \
+    apt update && \
+    apt install -y supervisor && \
+    rm -rf /var/lib/apt/lists/*; \
 fi
 
-RUN apk add --update supervisor && rm -rf /tmp/* /var/cache/apk/*
 COPY ./supervisord.conf /etc/supervisord.conf
 
 WORKDIR /usr/local/server
