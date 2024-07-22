@@ -18,10 +18,14 @@ import (
 	"github.com/open-runtimes/types-for-go/v4"
 )
 
-func Main(Context *types.Context) types.ResponseOutput {
-	return Context.Res.Json(map[string]any{
-		"n": rand.Float64(),
-	}, 200, nil)
+type MainResponse struct {
+	N    float    `json:"n"`
+}
+
+func Main(Context types.Context) types.Response {
+	return Context.Res.Json(MainResponse{
+		N: rand.Float64(),
+	})
 }
 
 END
@@ -72,7 +76,7 @@ import (
 	"github.com/open-runtimes/types-for-go/v4"
 )
 
-func Main(Context *types.Context) types.ResponseOutput {
+func Main(Context types.Context) types.Response {
 }
 ```
 
