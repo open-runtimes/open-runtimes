@@ -178,7 +178,7 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	}
 
 	actionPromise := func(ch chan openruntimes.Response) {
-		output = handler.Main(&context)
+		output = handler.Main(context)
 		ch <- output
 	}
 
