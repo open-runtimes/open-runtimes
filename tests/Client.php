@@ -3,7 +3,9 @@
 namespace Tests;
 
 class Client {
-    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], $port = 3000) {
+    public static $port = 3000;
+
+    public static function execute($body = '', $url = '/', $method = 'POST', $headers = []) {
         $ch = \curl_init();
 
         $initHeaders = [];
@@ -26,7 +28,7 @@ class Client {
 
         $responseHeaders = [];
         $optArray = [
-            CURLOPT_URL => 'http://localhost:' . $port . $url,
+            CURLOPT_URL => 'http://localhost:' . self::$port . $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$responseHeaders) {
                 $len = strlen($header);

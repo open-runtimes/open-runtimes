@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/open-runtimes/types-for-go/v4"
+	openruntimes "github.com/open-runtimes/types-for-go/v4"
 )
 
-func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
+func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) error {
 	timeout := r.Header.Get("x-open-runtimes-timeout")
 
 	var safeTimeout int
@@ -146,43 +146,43 @@ func action(w http.ResponseWriter, r *http.Request, logger types.Logger) error {
 
 	requestUrl := scheme + "://" + host + portInUrl + path + queryStringInUrl
 
-	context := types.Context{
-		Logger: logger,
-		Req: types.Request{
-			Headers:     headers,
-			Method:      method,
-			Url:         requestUrl,
-			Scheme:      scheme,
-			Host:        host,
-			Port:        port,
-			Path:        path,
-			QueryString: queryString,
-			Query:       query,
-		},
-		Res: types.Response{},
+	context := openruntimes.NewContext(logger)
+
+	context.Req = openruntimes.ContextRequest{
+		Headers:     headers,
+		Method:      method,
+		Url:         requestUrl,
+		Scheme:      scheme,
+		Host:        host,
+		Port:        port,
+		Path:        path,
+		QueryString: queryString,
+		Query:       query,
 	}
+
+	context.Res = openruntimes.ContextResponse{}
 
 	context.Req.SetBodyBinary(bodyBytes)
 
-	output := types.ResponseOutput{
+	output := openruntimes.Response{
 		StatusCode: 500,
 		Body:       []byte{},
 		Headers:    map[string]string{},
 	}
 
-	timeoutPromise := func(ch chan types.ResponseOutput) {
+	timeoutPromise := func(ch chan openruntimes.Response) {
 		time.Sleep(time.Duration(safeTimeout) * time.Second)
 
 		context.Error("Execution timed out.")
-		ch <- context.Res.Text("", 500, map[string]string{})
+		ch <- context.Res.Text("", context.Res.WithStatusCode(500))
 	}
 
-	actionPromise := func(ch chan types.ResponseOutput) {
+	actionPromise := func(ch chan openruntimes.Response) {
 		output = handler.Main(&context)
 		ch <- output
 	}
 
-	outputChan := make(chan types.ResponseOutput)
+	outputChan := make(chan openruntimes.Response)
 
 	logger.OverrideNativeLogs()
 
@@ -245,12 +245,12 @@ func main() {
 		logging := r.Header.Get("x-open-runtimes-logging")
 		logId := r.Header.Get("x-open-runtimes-log-id")
 
-		logger, loggerErr := types.NewLogger(logging, logId)
+		logger, loggerErr := openruntimes.NewLogger(logging, logId)
 
 		if loggerErr != nil {
 			logger.Write([]string{
 				loggerErr.Error(),
-			}, types.LOGGER_TYPE_ERROR, false)
+			}, openruntimes.LOGGER_TYPE_ERROR, false)
 
 			logger.End()
 
@@ -266,7 +266,7 @@ func main() {
 		if err != nil {
 			logger.Write([]string{
 				err.Error(),
-			}, types.LOGGER_TYPE_ERROR, false)
+			}, openruntimes.LOGGER_TYPE_ERROR, false)
 
 			logger.End()
 

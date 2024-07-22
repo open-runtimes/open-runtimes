@@ -10,28 +10,28 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/open-runtimes/types-for-go/v4"
+	openruntimes "github.com/open-runtimes/types-for-go/v4"
 )
 
-func Main(Context *types.Context) types.ResponseOutput {
+func Main(Context *openruntimes.Context) openruntimes.Response {
 	action := Context.Req.Headers["x-action"]
 
 	switch a := action; a {
 	case "plaintextResponse":
-		return Context.Res.Text("Hello World 👋", 200, nil)
+		return Context.Res.Text("Hello World 👋")
 	case "jsonResponse":
 		return Context.Res.Json(map[string]interface{}{
 			"json":    true,
 			"message": "Developers are awesome.",
-		}, 200, nil)
+		})
 	case "customCharsetResponse":
-		return Context.Res.Text("ÅÆ", 200, map[string]string{
+		return Context.Res.Text("ÅÆ", Context.Res.WithHeaders(map[string]string{
 			"content-type": "text/plain; charset=iso-8859-1",
-		})
+		}))
 	case "uppercaseCharsetResponse":
-		return Context.Res.Text("ÅÆ", 200, map[string]string{
+		return Context.Res.Text("ÅÆ", Context.Res.WithHeaders(map[string]string{
 			"content-type": "TEXT/PLAIN",
-		})
+		}))
 	case "multipartResponse":
 		return Context.Res.Text(`--12345
 Content-Disposition: form-data; name="partOne"
@@ -41,28 +41,28 @@ Why just have one part?
 Content-Disposition: form-data; name="partTwo"
 
 When you can have two!
---12345--`, 200, map[string]string{
+--12345--`, Context.Res.WithHeaders(map[string]string{
 			"content-type": "multipart/form-data; boundary=12345",
-		})
+		}))
 	case "redirectResponse":
-		return Context.Res.Redirect("https://github.com/", 301, nil)
+		return Context.Res.Redirect("https://github.com/", Context.Res.WithStatusCode(301))
 	case "emptyResponse":
 		return Context.Res.Empty()
 	case "noResponse":
-		Context.Res.Text("This should be ignored, as it is not returned.", 200, nil)
+		Context.Res.Text("This should be ignored, as it is not returned.")
 
 		// Simulate test data. Return nessessary in Golang
 		Context.Error("Return statement missing. return context.getRes().empty() if no response is expected.")
-		return Context.Res.Text("", 500, nil)
+		return Context.Res.Text("", Context.Res.WithStatusCode(500))
 	case "doubleResponse":
-		Context.Res.Text("This should be ignored.", 200, nil)
-		return Context.Res.Text("This should be returned.", 200, nil)
+		Context.Res.Text("This should be ignored.")
+		return Context.Res.Text("This should be returned.")
 	case "enforcedHeaders":
 		return Context.Res.Json(map[string]interface{}{
 			"x-custom":               Context.Req.Headers["x-custom"],
 			"x-custom-uppercase":     Context.Req.Headers["x-custom-uppercase"],
 			"x-open-runtimes-custom": Context.Req.Headers["x-open-runtimes-custom"],
-		}, 200, nil)
+		})
 	case "headersResponse":
 		secondHeader, ok := Context.Req.Headers["x-open-runtimes-custom-in-header"]
 		if !ok {
@@ -74,16 +74,16 @@ When you can have two!
 			cookie = "missing"
 		}
 
-		return Context.Res.Text("OK", 200, map[string]string{
+		return Context.Res.Text("OK", Context.Res.WithHeaders(map[string]string{
 			"first-header":                      "first-value",
 			"second-header":                     secondHeader,
 			"cookie":                            cookie,
 			"x-open-runtimes-custom-out-header": "third-value",
-		})
+		}))
 	case "statusResponse":
-		return Context.Res.Text("FAIL", 404, nil)
+		return Context.Res.Text("FAIL", Context.Res.WithStatusCode(404))
 	case "requestMethod":
-		return Context.Res.Text(Context.Req.Method, 200, nil)
+		return Context.Res.Text(Context.Req.Method)
 	case "requestUrl":
 		return Context.Res.Json(map[string]interface{}{
 			"url":         Context.Req.Url,
@@ -93,43 +93,44 @@ When you can have two!
 			"queryString": Context.Req.QueryString,
 			"scheme":      Context.Req.Scheme,
 			"host":        Context.Req.Host,
-		}, 200, nil)
+		})
 	case "requestHeaders":
-		return Context.Res.Json(Context.Req.Headers, 200, nil)
+		return Context.Res.Json(Context.Req.Headers)
 	case "requestBodyText":
-		return Context.Res.Text(Context.Req.BodyText(), 200, nil)
+		return Context.Res.Text(Context.Req.BodyText())
 	case "requestBodyJson":
-		bodyJson, err := Context.Req.BodyJson()
+		var bodyJson map[string]interface{}
+		err := Context.Req.BodyJson(&bodyJson)
 
 		if err != nil {
 			Context.Error("Cannot parse JSON body")
-			return Context.Res.Text("", 500, nil)
+			return Context.Res.Text("", Context.Res.WithStatusCode(500))
 		}
 
-		return Context.Res.Json(bodyJson, 200, nil)
+		return Context.Res.Json(bodyJson)
 	case "requestBodyBinary":
-		return Context.Res.Binary(Context.Req.BodyBinary(), 200, nil)
+		return Context.Res.Binary(Context.Req.BodyBinary())
 	case "requestBodyTextAuto":
-		return Context.Res.Text(Context.Req.Body().(string), 200, nil)
+		return Context.Res.Text(Context.Req.Body().(string))
 	case "requestBodyJsonAuto":
-		return Context.Res.Json(Context.Req.Body().(map[string]interface{}), 200, nil)
+		return Context.Res.Json(Context.Req.Body().(map[string]interface{}))
 	case "requestBodyBinaryAuto":
-		return Context.Res.Binary(Context.Req.Body().([]byte), 200, nil)
+		return Context.Res.Binary(Context.Req.Body().([]byte))
 	case "binaryResponse1":
 		bytes := []byte{0, 10, 255}
-		return Context.Res.Binary(bytes, 200, nil) // []byte
+		return Context.Res.Binary(bytes) // []byte
 	case "binaryResponse2":
 		bytes := []byte{0, 20, 255}
-		return Context.Res.Binary(bytes, 200, nil) // Just a filler
+		return Context.Res.Binary(bytes) // Just a filler
 	case "binaryResponse3":
 		bytes := []byte{0, 30, 255}
-		return Context.Res.Binary(bytes, 200, nil) // Just a filler
+		return Context.Res.Binary(bytes) // Just a filler
 	case "binaryResponse4":
 		bytes := []byte{0, 40, 255}
-		return Context.Res.Binary(bytes, 200, nil) // Just a filler
+		return Context.Res.Binary(bytes) // Just a filler
 	case "binaryResponse5":
 		bytes := []byte{0, 50, 255}
-		return Context.Res.Binary(bytes, 200, nil) // Just a filler
+		return Context.Res.Binary(bytes) // Just a filler
 	case "envVars":
 		var emptyVar *string
 		varValue := os.Getenv("NOT_DEFINED_VAR")
@@ -140,7 +141,7 @@ When you can have two!
 		return Context.Res.Json(map[string]interface{}{
 			"var":      os.Getenv("CUSTOM_ENV_VAR"),
 			"emptyVar": emptyVar,
-		}, 200, nil)
+		})
 	case "logs":
 		fmt.Println("Native log")
 		Context.Log(errors.New("Debug log"))
@@ -155,7 +156,7 @@ When you can have two!
 		Context.Log(map[string]string{"objectKey": "objectValue"})
 		Context.Log([]string{"arrayValue"})
 
-		return Context.Res.Text("", 200, nil)
+		return Context.Res.Text("")
 	case "library":
 		client := resty.New()
 		resp, errResponse := client.R().
@@ -164,7 +165,7 @@ When you can have two!
 
 		if errResponse != nil {
 			Context.Error(errResponse)
-			return Context.Res.Text("", 500, nil)
+			return Context.Res.Text("", Context.Res.WithStatusCode(500))
 		}
 
 		body := resp.String()
@@ -181,12 +182,12 @@ When you can have two!
 
 		if errJson != nil {
 			Context.Error(errJson)
-			return Context.Res.Text("", 500, nil)
+			return Context.Res.Text("", Context.Res.WithStatusCode(500))
 		}
 
 		return Context.Res.Json(map[string]interface{}{
 			"todo": todo,
-		}, 200, nil)
+		})
 	case "timeout":
 		Context.Log("Timeout start.")
 
@@ -194,19 +195,19 @@ When you can have two!
 
 		Context.Log("Timeout end.")
 
-		return Context.Res.Text("Successful response.", 200, nil)
+		return Context.Res.Text("Successful response.")
 	case "deprecatedMethods":
-		return Context.Res.Send(Context.Req.BodyRaw(), 200, nil)
+		return Context.Res.Send(Context.Req.BodyRaw())
 	case "deprecatedMethodsUntypedBody":
-		return Context.Res.Send("50", 200, nil) // Send only supported String
+		return Context.Res.Send("50") // Send only supported String
 	case "binaryResponseLarge":
 		hashBinary := md5.Sum(Context.Req.BodyBinary())
 		hashHex := hex.EncodeToString(hashBinary[:])
-		return Context.Res.Send(hashHex, 200, map[string]string{
+		return Context.Res.Send(hashHex, Context.Res.WithHeaders(map[string]string{
 			"x-method": Context.Req.Method,
-		})
+		}))
 	default:
 		Context.Error("Unknown action in tests.go")
-		return Context.Res.Text("", 500, nil)
+		return Context.Res.Text("", Context.Res.WithStatusCode(500))
 	}
 }
