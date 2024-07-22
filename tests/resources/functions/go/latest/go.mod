@@ -5,7 +5,7 @@ go 1.22.5
 require github.com/go-resty/resty/v2 v2.11.0
 
 require (
-	github.com/open-runtimes/types-for-go/v4 v4.0.3-0.20240718084436-5d6de62fce7a // indirect
+	github.com/open-runtimes/types-for-go/v4 v4.0.3 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect

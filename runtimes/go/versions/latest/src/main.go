@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	openRuntimes "github.com/open-runtimes/types-for-go/v4"
+	openruntimes "github.com/open-runtimes/types-for-go/v4"
 )
 
-func action(w http.ResponseWriter, r *http.Request, logger openRuntimes.Logger) error {
+func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) error {
 	timeout := r.Header.Get("x-open-runtimes-timeout")
 
 	var safeTimeout int
@@ -146,9 +146,9 @@ func action(w http.ResponseWriter, r *http.Request, logger openRuntimes.Logger) 
 
 	requestUrl := scheme + "://" + host + portInUrl + path + queryStringInUrl
 
-	context := openRuntimes.NewContext(logger)
+	context := openruntimes.NewContext(logger)
 
-	context.Req = openRuntimes.ContextRequest{
+	context.Req = openruntimes.ContextRequest{
 		Headers:     headers,
 		Method:      method,
 		Url:         requestUrl,
@@ -160,29 +160,29 @@ func action(w http.ResponseWriter, r *http.Request, logger openRuntimes.Logger) 
 		Query:       query,
 	}
 
-	context.Res = openRuntimes.ContextResponse{}
+	context.Res = openruntimes.ContextResponse{}
 
 	context.Req.SetBodyBinary(bodyBytes)
 
-	output := openRuntimes.Response{
+	output := openruntimes.Response{
 		StatusCode: 500,
 		Body:       []byte{},
 		Headers:    map[string]string{},
 	}
 
-	timeoutPromise := func(ch chan openRuntimes.Response) {
+	timeoutPromise := func(ch chan openruntimes.Response) {
 		time.Sleep(time.Duration(safeTimeout) * time.Second)
 
 		context.Error("Execution timed out.")
 		ch <- context.Res.Text("", context.Res.WithStatusCode(500))
 	}
 
-	actionPromise := func(ch chan openRuntimes.Response) {
+	actionPromise := func(ch chan openruntimes.Response) {
 		output = handler.Main(&context)
 		ch <- output
 	}
 
-	outputChan := make(chan openRuntimes.Response)
+	outputChan := make(chan openruntimes.Response)
 
 	logger.OverrideNativeLogs()
 
@@ -245,12 +245,12 @@ func main() {
 		logging := r.Header.Get("x-open-runtimes-logging")
 		logId := r.Header.Get("x-open-runtimes-log-id")
 
-		logger, loggerErr := openRuntimes.NewLogger(logging, logId)
+		logger, loggerErr := openruntimes.NewLogger(logging, logId)
 
 		if loggerErr != nil {
 			logger.Write([]string{
 				loggerErr.Error(),
-			}, openRuntimes.LOGGER_TYPE_ERROR, false)
+			}, openruntimes.LOGGER_TYPE_ERROR, false)
 
 			logger.End()
 
@@ -266,7 +266,7 @@ func main() {
 		if err != nil {
 			logger.Write([]string{
 				err.Error(),
-			}, openRuntimes.LOGGER_TYPE_ERROR, false)
+			}, openruntimes.LOGGER_TYPE_ERROR, false)
 
 			logger.End()
 

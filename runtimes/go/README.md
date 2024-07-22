@@ -34,7 +34,7 @@ END
 tee -a go.mod << END
 module openruntimes/handler
 
-require github.com/open-runtimes/types-for-go/v4 v4.0.2
+require github.com/open-runtimes/types-for-go/v4 v4.0.3
 
 END
 

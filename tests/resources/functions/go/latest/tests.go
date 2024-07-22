@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	openRuntimes "github.com/open-runtimes/types-for-go/v4"
+	openruntimes "github.com/open-runtimes/types-for-go/v4"
 )
 
-func Main(Context *openRuntimes.Context) openRuntimes.Response {
+func Main(Context *openruntimes.Context) openruntimes.Response {
 	action := Context.Req.Headers["x-action"]
 
 	switch a := action; a {
