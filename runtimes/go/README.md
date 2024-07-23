@@ -15,7 +15,7 @@ package handler
 import (
 	"math/rand"
 	
-	"github.com/open-runtimes/types-for-go/v4"
+	"github.com/open-runtimes/types-for-go/v4/openruntimes"
 )
 
 type MainResponse struct {
@@ -38,7 +38,7 @@ END
 tee -a go.mod << END
 module openruntimes/handler
 
-require github.com/open-runtimes/types-for-go/v4 v4.0.4
+require github.com/open-runtimes/types-for-go/v4 v4.0.5
 
 END
 
@@ -73,10 +73,10 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 package handler
 
 import (
-	"github.com/open-runtimes/types-for-go/v4"
+	"github.com/open-runtimes/types-for-go/v4/openruntimes"
 )
 
-func Main(Context types.Context) types.Response {
+func Main(Context openruntimes.Context) openruntimes.Response {
 }
 ```
 

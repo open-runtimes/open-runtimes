@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	openruntimes "github.com/open-runtimes/types-for-go/v4"
+	"github.com/open-runtimes/types-for-go/v4/openruntimes"
 )
 
 func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) error {
