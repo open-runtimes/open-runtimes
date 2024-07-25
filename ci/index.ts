@@ -7,11 +7,16 @@ interface RuntimeCommands {
     start: string
 }
 
+interface RuntimeFormatter {
+    check: string,
+    write: string
+}
+
 interface Runtime {
     entry: string,
     versions: string[],
     commands: RuntimeCommands,
-    formatter: string
+    formatter: RuntimeFormatter
 }
 
 let perRuntime = true;
@@ -53,7 +58,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             ENTRYPOINT: runtime.entry,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,
-            FORMATTER: runtime.formatter,
+            FORMATTER_CHECK: runtime.formatter.check,
         })
     });
 

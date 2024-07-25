@@ -2,12 +2,13 @@
 entry = "tests.js"
 versions = ["21.0", "20.0", "19.0", "18.0", "16.0", "14.5", "21.0-mjs", "20.0-mjs", "19.0-mjs", "18.0-mjs", "16.0-mjs", "14.5-mjs"]
 commands = { install = "npm install", start = "pm2 start src/server.js --no-daemon" }
-formatter = "npx --y prettier -c ."
+formatter = { check = "npx --y prettier --check .", write = "npx --y prettier --write ." }
 
 [deno]
 entry = "tests.ts"
 versions = ["1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "denon start" }
+formatter = { check = "deno fmt --check", write = "deno fmt" }
 
 [python]
 entry = "tests.py"

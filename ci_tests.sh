@@ -1,16 +1,18 @@
 # Use tests.sh instead, when running locally
 set -e
 
-# Formatter
-
-cd ./runtimes/$RUNTIME
-$FORMATTER
-cd ../../
+echo "Preparing Docker image ..."
 
 sh ci-cleanup.sh
 sh ci-runtime-prepare.sh
 sh ci-runtime-build.sh
 
+echo "Running formatter ..."
+cd ./runtimes/$RUNTIME
+docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:ro open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_CHECK"
+cd ../../
+
+echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 cp -R ./tests/resources/functions/$RUNTIME/latest/* ./tests/.runtime
