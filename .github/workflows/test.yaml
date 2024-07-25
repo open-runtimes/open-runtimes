@@ -62,3 +62,4 @@ jobs:
           VERSION: ${{ matrix.VERSION }}
           INSTALL_COMMAND: ${{ matrix.INSTALL_COMMAND }}
           START_COMMAND: ${{ matrix.START_COMMAND }}
+          FORMATTER: ${{ matrix.FORMATTER }}

@@ -11,6 +11,7 @@ interface Runtime {
     entry: string,
     versions: string[],
     commands: RuntimeCommands,
+    formatter: string
 }
 
 let perRuntime = true;
@@ -52,7 +53,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             ENTRYPOINT: runtime.entry,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,
-
+            FORMATTER: runtime.formatter,
         })
     });
 
