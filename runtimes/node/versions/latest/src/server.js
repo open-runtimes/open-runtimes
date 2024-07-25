@@ -1,11 +1,14 @@
-const micro = require("micro");
-const { buffer, send } = require("micro");
-const Logger = require("./logger");
+const micro = require('micro');
+const { buffer, send } = require('micro');
+const Logger = require('./logger');
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
 const server = micro(async (req, res) => {
-    const logger = new Logger(req.headers[`x-open-runtimes-logging`], req.headers[`x-open-runtimes-log-id`]);
+    const logger = new Logger(
+        req.headers[`x-open-runtimes-logging`],
+        req.headers[`x-open-runtimes-log-id`]
+    );
 
     try {
         await action(logger, req, res);
@@ -24,33 +27,59 @@ const action = async (logger, req, res) => {
     let safeTimeout = null;
     if (timeout) {
         if (isNaN(timeout) || timeout === 0) {
-            return send(res, 500, 'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
+            return send(
+                res,
+                500,
+                'Header "x-open-runtimes-timeout" must be an integer greater than 0.'
+            );
         }
 
         safeTimeout = +timeout;
     }
 
-    if (process.env['OPEN_RUNTIMES_SECRET'] && req.headers[`x-open-runtimes-secret`] !== process.env['OPEN_RUNTIMES_SECRET']) {
-        return send(res, 500, 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
+    if (
+        process.env['OPEN_RUNTIMES_SECRET'] &&
+        req.headers[`x-open-runtimes-secret`] !==
+            process.env['OPEN_RUNTIMES_SECRET']
+    ) {
+        return send(
+            res,
+            500,
+            'Unauthorized. Provide correct "x-open-runtimes-secret" header.'
+        );
     }
 
-    const contentType = (req.headers['content-type'] ?? 'text/plain').toLowerCase();
+    const contentType = (
+        req.headers['content-type'] ?? 'text/plain'
+    ).toLowerCase();
     const bodyBinary = await buffer(req, { limit: '20mb' });
 
     const headers = {};
-    Object.keys(req.headers).filter((header) => !header.toLowerCase().startsWith('x-open-runtimes-')).forEach((header) => {
-        headers[header.toLowerCase()] = req.headers[header];
-    });
+    Object.keys(req.headers)
+        .filter(
+            (header) => !header.toLowerCase().startsWith('x-open-runtimes-')
+        )
+        .forEach((header) => {
+            headers[header.toLowerCase()] = req.headers[header];
+        });
 
-    const enforcedHeaders = JSON.parse(process.env.OPEN_RUNTIMES_HEADERS ? process.env.OPEN_RUNTIMES_HEADERS : '{}');
+    const enforcedHeaders = JSON.parse(
+        process.env.OPEN_RUNTIMES_HEADERS
+            ? process.env.OPEN_RUNTIMES_HEADERS
+            : '{}'
+    );
     for (const header in enforcedHeaders) {
         headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
     }
 
-    const scheme = (req.headers['x-forwarded-proto'] ?? 'http');
+    const scheme = req.headers['x-forwarded-proto'] ?? 'http';
     const defaultPort = scheme === 'https' ? '443' : '80';
-    const host = req.headers['host'].includes(':') ? req.headers['host'].split(':')[0] : req.headers['host'];
-    const port = +(req.headers['host'].includes(':') ? req.headers['host'].split(':')[1] : defaultPort);
+    const host = req.headers['host'].includes(':')
+        ? req.headers['host'].split(':')[0]
+        : req.headers['host'];
+    const port = +(req.headers['host'].includes(':')
+        ? req.headers['host'].split(':')[1]
+        : defaultPort);
     const path = req.url.includes('?') ? req.url.split('?')[0] : req.url;
     const queryString = req.url.includes('?') ? req.url.split('?')[1] : '';
     const query = {};
@@ -68,11 +97,19 @@ const action = async (logger, req, res) => {
     const context = {
         req: {
             get body() {
-                if (contentType.startsWith("application/json")) {
-                    return this.bodyBinary && this.bodyBinary.length > 0 ? this.bodyJson : {};
+                if (contentType.startsWith('application/json')) {
+                    return this.bodyBinary && this.bodyBinary.length > 0
+                        ? this.bodyJson
+                        : {};
                 }
 
-                const binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
+                const binaryTypes = [
+                    'application/',
+                    'audio/',
+                    'font/',
+                    'image/',
+                    'video/',
+                ];
                 for (const type of binaryTypes) {
                     if (contentType.startsWith(type)) {
                         return this.bodyBinary;
@@ -101,21 +138,25 @@ const action = async (logger, req, res) => {
             queryString,
             port,
             url,
-            path
+            path,
         },
         res: {
             send: function (body, statusCode = 200, headers = {}) {
                 return this.text(`${body}`, statusCode, headers);
             },
             text: function (body, statusCode = 200, headers = {}) {
-                return this.binary(Buffer.from(body, 'utf8'), statusCode, headers);
+                return this.binary(
+                    Buffer.from(body, 'utf8'),
+                    statusCode,
+                    headers
+                );
             },
             binary: function (bytes, statusCode = 200, headers = {}) {
                 return {
                     body: bytes,
                     statusCode: statusCode,
-                    headers: headers
-                }
+                    headers: headers,
+                };
             },
             json: function (obj, statusCode = 200, headers = {}) {
                 headers['content-type'] = 'application/json';
@@ -144,22 +185,39 @@ const action = async (logger, req, res) => {
     async function execute() {
         let userFunction;
         try {
-            userFunction = require(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
+            userFunction = require(
+                USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT
+            );
         } catch (err) {
             if (err.code === 'ERR_REQUIRE_ESM') {
-                userFunction = await import(USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT);
+                userFunction = await import(
+                    USER_CODE_PATH + '/' + process.env.OPEN_RUNTIMES_ENTRYPOINT
+                );
             } else {
                 throw err;
             }
         }
 
-        if (!(userFunction || userFunction.constructor || userFunction.call || userFunction.apply)) {
-            throw new Error("User function is not valid.");
+        if (
+            !(
+                userFunction ||
+                userFunction.constructor ||
+                userFunction.call ||
+                userFunction.apply
+            )
+        ) {
+            throw new Error('User function is not valid.');
         }
 
         if (userFunction.default) {
-            if (!(userFunction.default.constructor || userFunction.default.call || userFunction.default.apply)) {
-                throw new Error("User function is not valid.");
+            if (
+                !(
+                    userFunction.default.constructor ||
+                    userFunction.default.call ||
+                    userFunction.default.apply
+                )
+            ) {
+                throw new Error('User function is not valid.');
             }
 
             output = await userFunction.default(context);
@@ -200,7 +258,9 @@ const action = async (logger, req, res) => {
     }
 
     if (output === null || output === undefined) {
-        context.error('Return statement missing. return context.res.empty() if no response is expected.');
+        context.error(
+            'Return statement missing. return context.res.empty() if no response is expected.'
+        );
         output = context.res.text('', 500, {});
     }
 
@@ -215,12 +275,14 @@ const action = async (logger, req, res) => {
         res.setHeader(header.toLowerCase(), output.headers[header]);
     }
 
-    const contentTypeValue = (res.getHeader("content-type") ?? "text/plain").toLowerCase();
+    const contentTypeValue = (
+        res.getHeader('content-type') ?? 'text/plain'
+    ).toLowerCase();
     if (
-        !contentTypeValue.startsWith("multipart/") &&
-        !contentTypeValue.includes("charset=")
+        !contentTypeValue.startsWith('multipart/') &&
+        !contentTypeValue.includes('charset=')
     ) {
-        res.setHeader("content-type", contentTypeValue + "; charset=utf-8");
+        res.setHeader('content-type', contentTypeValue + '; charset=utf-8');
     }
 
     res.setHeader('x-open-runtimes-log-id', logger.id);

@@ -73,3 +73,13 @@ module.exports = (req, res) => {
 For security issues, please email security@appwrite.io instead of posting a public issue in GitHub.
 
 You can refer to the [Contributing Guide](https://github.com/open-runtimes/open-runtimes/blob/main/CONTRIBUTING.md) for more info.
+
+### Formatting
+
+Run following command to run formatter for Node runtime:
+
+```
+npx --y prettier -w .
+```
+
+> Make sure you are in `runtimes/node` directory.
