@@ -83,4 +83,5 @@ Run following command to run formatter for this runtime:
 sh formatter.sh deno
 ```
 
-> Make sure you are in root directory of the repository, and have [yq](https://github.com/mikefarah/yq) installed.
+> Make sure you are in root directory of the repository, and have
+> [yq](https://github.com/mikefarah/yq) installed.
