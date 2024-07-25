@@ -635,7 +635,7 @@ class Base extends TestCase
         \sleep(10);
 
         $msg = "HTTP server successfully started!";
-        $response = \shell_exec('docker logs open-runtimes-test-serve');
+        $response = \shell_exec('docker logs open-runtimes-test-serve-main');
         $occurances = \substr_count($response, $msg);
         self::assertEquals(2, $occurances);
 

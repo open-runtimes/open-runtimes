@@ -205,7 +205,7 @@ When you can have two!
 		hashHex := hex.EncodeToString(hashBinary[:])
 		return Context.Res.Send(hashHex, Context.Res.WithHeaders(map[string]string{
 			"x-method": Context.Req.Method,
-		})
+		}))
 	case "exit":
 		panic("Exit")
 	default:
