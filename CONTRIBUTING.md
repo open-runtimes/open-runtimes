@@ -103,7 +103,7 @@ Before running the tests, make sure to install all required PHP libraries:
 docker run --rm --interactive --tty --volume $PWD:/app composer install
 ```
 
-You also need to install [jq](https://nektosact.com/installation/index.html):
+You also need to install [yq](https://github.com/mikefarah/yq):
 
 ```bash
 brew install yq

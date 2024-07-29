@@ -623,6 +623,16 @@ class Base extends TestCase
         self::assertEquals("248", $body['x-open-runtimes-custom']);
     }
 
+    function testStartLogs(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
+        self::assertEquals(200, $response['code']);
+
+        $msg = "HTTP server successfully started!";
+        $response = \shell_exec('docker logs open-runtimes-test-serve-main');
+        self::assertStringContainsString($msg, $response);
+    }
+
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
         $expected = preg_replace('/\s+/', '', $expected);
         $actual = preg_replace('/\s+/', '', $actual);

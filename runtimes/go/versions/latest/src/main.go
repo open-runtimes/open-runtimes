@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"openruntimes/handler"
@@ -277,8 +278,14 @@ func main() {
 		}
 	}
 
-	err := http.ListenAndServe(":3000", http.HandlerFunc(handler))
+	listener, err := net.Listen("tcp", ":3000")
+	if err != nil {
+		panic(err)
+	}
 
+	fmt.Println("HTTP server successfully started!")
+
+	err = http.Serve(listener, http.HandlerFunc(handler))
 	if err != nil {
 		panic(err)
 	}

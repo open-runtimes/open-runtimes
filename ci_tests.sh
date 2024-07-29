@@ -1,21 +1,17 @@
 # Use tests.sh instead, when running locally
+set -e
 
 sh ci-cleanup.sh
 sh ci-runtime-prepare.sh
 sh ci-runtime-build.sh
 
-# Find test folder (versioned takes presence)
-TEST_FOLDER="./tests/resources/functions/$RUNTIME-$VERSION/"
-if [ -d "$TEST_FOLDER" ]; then
-    TEST_FOLDER="./tests/resources/functions/$RUNTIME-$VERSION"
-else
-    TEST_FOLDER="./tests/resources/functions/$RUNTIME"
-fi
-
 mkdir -p ./tests/.runtime
 
 cp -R ./tests/resources/functions/$RUNTIME/latest/* ./tests/.runtime
-cp -R ./tests/resources/functions/$RUNTIME/$VERSION/* ./tests/.runtime
+
+if [ -d "./tests/resources/functions/$RUNTIME/$VERSION/" ]; then
+    cp -R ./tests/resources/functions/$RUNTIME/$VERSION/* ./tests/.runtime
+fi
 
 # Prevent Docker from creating folder
 cd ./tests/.runtime
