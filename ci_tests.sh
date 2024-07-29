@@ -9,7 +9,6 @@ sh ci-runtime-build.sh
 
 echo "Running formatter ..."
 cd ./runtimes/$RUNTIME
-chmod -R 777 .
 docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:ro open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_CHECK"
 cd ../../
 

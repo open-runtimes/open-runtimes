@@ -5,7 +5,7 @@ const USER_CODE_PATH = "/usr/local/server/src/function";
 
 const app = new Application();
 
-app.addEventListener('listen', () => {
+app.addEventListener("listen", () => {
   console.log(`HTTP server successfully started!`);
 });
 

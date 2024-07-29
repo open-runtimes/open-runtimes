@@ -284,5 +284,5 @@ const action = async (logger, req, res) => {
 };
 
 server.listen(3000, undefined, undefined, () => {
-    console.log("HTTP server successfully started!");
+  console.log("HTTP server successfully started!");
 });
