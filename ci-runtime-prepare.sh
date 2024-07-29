@@ -1,3 +1,5 @@
+set -e
+
 mkdir -p ./runtimes/.test
 
 # Global files (for all runtimes)
