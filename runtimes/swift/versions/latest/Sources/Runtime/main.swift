@@ -237,4 +237,6 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     )
 }
 
+print("HTTP server successfully started!")
+
 try app.run()

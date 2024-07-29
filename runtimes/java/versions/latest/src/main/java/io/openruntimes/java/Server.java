@@ -22,6 +22,7 @@ public class Server {
     private static final ExecutorService executor = Executors.newCachedThreadPool();
 
     public static void main(String[] args) {
+        System.out.println("HTTP server successfully started!");
 
         Javalin
                 .create(config -> {
