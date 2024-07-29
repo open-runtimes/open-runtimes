@@ -17,6 +17,8 @@ val gson: Gson = GsonBuilder().serializeNulls().create()
 val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
 
 suspend fun main() {
+    println("HTTP server successfully started!")
+
     Javalin
         .create { config ->
             config.maxRequestSize = 20L * 1024 * 1024

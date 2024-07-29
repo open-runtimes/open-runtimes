@@ -5,6 +5,10 @@ const USER_CODE_PATH = "/usr/local/server/src/function";
 
 const app = new Application();
 
+app.addEventListener('listen', () => {
+  console.log(`HTTP server successfully started!`);
+});
+
 app.use(async (ctx: any) => {
   const logger = new Logger(
     ctx.request.headers.get("x-open-runtimes-logging"),
