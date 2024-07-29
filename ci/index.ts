@@ -41,7 +41,7 @@ if (perRuntime) {
     });
 }
 
-appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(JSON.stringify({include: matrix}))}`);
+appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include: matrix})}`);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];

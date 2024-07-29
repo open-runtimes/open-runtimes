@@ -30,6 +30,7 @@ commands = { install = "", start = "bundle exec puma -b tcp://0.0.0.0:3000 -e pr
 entry = "tests.php"
 versions = ["8.0", "8.1", "8.2", "8.3"]
 commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "php src/server.php" }
+formatter = { check = "composer require laravel/pint && ./vendor/bin/pint --test", write = "composer require laravel/pint && ./vendor/bin/pint" }
 
 [swift]
 entry = "Tests.swift"
@@ -60,6 +61,7 @@ commands = { install = "", start = "dotnet src/function/DotNetRuntime.dll" }
 entry = "tests.go"
 versions = ["1.22"]
 commands = { install = "", start = "src/function/server" }
+formatter = { check = "if [ \"$(gofmt -s -l . | wc -l)\" -gt 0 ]; then echo 'Formatting errors:' && gofmt -s -l . && exit 1; fi", write = "gofmt -w -s ." }
 
 [bun]
 entry = "tests.ts"
