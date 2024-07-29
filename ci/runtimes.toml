@@ -2,7 +2,7 @@
 entry = "tests.js"
 versions = ["21.0", "20.0", "19.0", "18.0", "16.0", "14.5", "21.0-mjs", "20.0-mjs", "19.0-mjs", "18.0-mjs", "16.0-mjs", "14.5-mjs"]
 commands = { install = "npm install", start = "pm2 start src/server.js --no-daemon" }
-formatter = { check = "npx --y prettier --check .", write = "npx --y prettier --write ." }
+formatter = { check = "npx @biomejs/biome format .", write = "npx @biomejs/biome format --write ." }
 
 [deno]
 entry = "tests.ts"
@@ -61,8 +61,10 @@ commands = { install = "", start = "dotnet src/function/DotNetRuntime.dll" }
 entry = "tests.go"
 versions = ["1.22"]
 commands = { install = "", start = "src/function/server" }
+formatter = { check = "if [ \"$(gofmt -s -l . | wc -l)\" -gt 0 ]; then echo 'Formatting errors:' && gofmt -s -l . && exit 1; fi", write = "gofmt -w -s ." }
 
 [bun]
 entry = "tests.ts"
 versions = ["1.0"]
 commands = { install = "bun install", start = "bun src/server.ts" }
+formatter = { check = "bunx @biomejs/biome format .", write = "bunx @biomejs/biome format --write ." }
