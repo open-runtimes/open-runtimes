@@ -74,14 +74,3 @@ public issue in GitHub.
 You can refer to the
 [Contributing Guide](https://github.com/open-runtimes/open-runtimes/blob/main/CONTRIBUTING.md)
 for more info.
-
-### Formatting
-
-Run following command to run formatter for this runtime:
-
-```
-sh formatter.sh deno
-```
-
-> Make sure you are in root directory of the repository, and have
-> [yq](https://github.com/mikefarah/yq) installed.
