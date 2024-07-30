@@ -1,30 +1,32 @@
 from logger import Logger
 import json
 
+
 class Response:
-    def binary(self, bytes, statusCode = 200, headers = {}):
+    def binary(self, bytes, statusCode=200, headers={}):
         return {
-            'body': bytes,
-            'statusCode': statusCode,
-            'headers': headers,
+            "body": bytes,
+            "statusCode": statusCode,
+            "headers": headers,
         }
-    
-    def text(self, body, statusCode = 200, headers = {}):
+
+    def text(self, body, statusCode=200, headers={}):
         return self.binary(body.encode("utf-8"), statusCode, headers)
 
-    def send(self, body, statusCode = 200, headers = {}):
+    def send(self, body, statusCode=200, headers={}):
         return self.text(str(body), statusCode, headers)
 
-    def json(self, obj, statusCode = 200, headers = {}):
-        headers['content-type'] = 'application/json'
-        return self.text(json.dumps(obj, separators=(',', ':')), statusCode, headers)
-    
-    def empty(self):
-        return self.text('', 204, {})
+    def json(self, obj, statusCode=200, headers={}):
+        headers["content-type"] = "application/json"
+        return self.text(json.dumps(obj, separators=(",", ":")), statusCode, headers)
 
-    def redirect(self, url, statusCode = 301, headers = {}):
-        headers['location'] = url
-        return self.text('', statusCode, headers)
+    def empty(self):
+        return self.text("", 204, {})
+
+    def redirect(self, url, statusCode=301, headers={}):
+        headers["location"] = url
+        return self.text("", statusCode, headers)
+
 
 class Request:
     body_binary = None
@@ -52,9 +54,9 @@ class Request:
 
     @property
     def body(self):
-        content_type = self.headers.get('content-type', 'text/plain').lower()
+        content_type = self.headers.get("content-type", "text/plain").lower()
 
-        if content_type.startswith('application/json'):
+        if content_type.startswith("application/json"):
             if len(self.body_binary) > 0:
                 return self.body_json
             else:
@@ -66,6 +68,7 @@ class Request:
                 return self.body_binary
 
         return self.body_text
+
 
 class Context:
     req = Request()

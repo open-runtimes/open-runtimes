@@ -1,4 +1,4 @@
-# Usage: sh tests.sh node-21.0
+# Usage: sh tests.sh node-21.0 (you can also do node-latest, or just node)
 set -e
 
 # Configurable varaible for different runtimes
@@ -9,5 +9,10 @@ ENTRYPOINT=$(yq ".$RUNTIME.entry" ci/runtimes.toml)
 INSTALL_COMMAND=$(yq ".$RUNTIME.commands.install" ci/runtimes.toml)
 START_COMMAND=$(yq ".$RUNTIME.commands.start" ci/runtimes.toml)
 FORMATTER_CHECK=$(yq ".$RUNTIME.formatter.check" ci/runtimes.toml)
+FORMATTER_PREPARE=$(yq ".$RUNTIME.formatter.prepare" ci/runtimes.toml)
+ 
+if [ "$VERSION" = "latest"  ] || [ "$VERSION" = "$RUNTIME"  ]; then
+    VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
+fi
 
-RUNTIME=$RUNTIME ENTRYPOINT=$ENTRYPOINT VERSION=$VERSION INSTALL_COMMAND=$INSTALL_COMMAND START_COMMAND=$START_COMMAND FORMATTER_CHECK=$FORMATTER_CHECK sh ci_tests.sh
+RUNTIME=$RUNTIME ENTRYPOINT=$ENTRYPOINT VERSION=$VERSION INSTALL_COMMAND=$INSTALL_COMMAND START_COMMAND=$START_COMMAND FORMATTER_CHECK=$FORMATTER_CHECK FORMATTER_PREPARE=$FORMATTER_PREPARE sh ci_tests.sh

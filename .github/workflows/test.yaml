@@ -63,3 +63,4 @@ jobs:
           INSTALL_COMMAND: ${{ matrix.INSTALL_COMMAND }}
           START_COMMAND: ${{ matrix.START_COMMAND }}
           FORMATTER_CHECK: ${{ matrix.FORMATTER_CHECK }}
+          FORMATTER_PREPARE: ${{ matrix.FORMATTER_PREPARE }}

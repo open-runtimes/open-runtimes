@@ -1,25 +1,20 @@
 package io.openruntimes.kotlin
 
-import kotlin.math.floor
-import kotlin.random.Random
-
+import com.google.gson.GsonBuilder
+import java.io.ByteArrayOutputStream
+import java.io.FileWriter
+import java.io.PrintStream
+import java.lang.System
+import java.time.Instant
 import kotlin.collections.List
 import kotlin.collections.Map
 import kotlin.collections.Set
+import kotlin.random.Random
 
-import java.time.Instant
-
-import java.lang.System
-
-import java.io.FileWriter
-import java.io.IOException
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
-
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-
-class RuntimeLogger(var status: String?, var id: String?) {
+class RuntimeLogger(
+    var status: String?,
+    var id: String?,
+) {
     var enabled = false
     var includesNativeInfo = false
 
@@ -48,21 +43,21 @@ class RuntimeLogger(var status: String?, var id: String?) {
             this.id = ""
         }
 
-        if(this.status.equals("enabled") || this.status.equals("")) {
+        if (this.status.equals("enabled") || this.status.equals("")) {
             this.enabled = true
         } else {
             this.enabled = false
             this.id = ""
         }
 
-        if(this.enabled) {
+        if (this.enabled) {
             var serverEnv = System.getenv("OPEN_RUNTIMES_ENV")
             if (serverEnv == null) {
                 serverEnv = ""
             }
 
-            if(this.id.equals("")) {
-                if(serverEnv.equals("development")) {
+            if (this.id.equals("")) {
+                if (serverEnv.equals("development")) {
                     this.id = "dev"
                 } else {
                     this.id = this.generateId()
@@ -74,43 +69,47 @@ class RuntimeLogger(var status: String?, var id: String?) {
         }
     }
 
-    fun write(message: Any, type: String = RuntimeLogger.TYPE_LOG, native: Boolean = false) {
-        if(this.enabled == false) {
+    fun write(
+        message: Any,
+        type: String = RuntimeLogger.TYPE_LOG,
+        native: Boolean = false,
+    ) {
+        if (this.enabled == false) {
             return
         }
 
-        if(native && !this.includesNativeInfo) {
+        if (native && !this.includesNativeInfo) {
             this.includesNativeInfo = true
             this.write("Native logs detected. Use context.log() or context.error() for better experience.", type, native)
         }
 
-        var stream: FileWriter? = this.streamLogs;
+        var stream: FileWriter? = this.streamLogs
 
-        if(type == RuntimeLogger.TYPE_ERROR) {
-            stream = this.streamErrors;
+        if (type == RuntimeLogger.TYPE_ERROR) {
+            stream = this.streamErrors
         }
 
-        var stringLog: String = "";
+        var stringLog: String = ""
         if (message is Map<*, *> || message is List<*> || message is Set<*>) {
             stringLog = gson.toJson(message)
         } else {
             stringLog = message.toString()
         }
 
-        if(stream != null) {
+        if (stream != null) {
             stream.write(stringLog)
         }
     }
 
     fun end() {
-        if(!this.enabled) {
-            return;
+        if (!this.enabled) {
+            return
         }
 
-        this.enabled = false;
+        this.enabled = false
 
-        this.streamLogs?.close();
-        this.streamErrors?.close();
+        this.streamLogs?.close()
+        this.streamErrors?.close()
     }
 
     fun overrideNativeLogs() {
@@ -139,11 +138,11 @@ class RuntimeLogger(var status: String?, var id: String?) {
         val sec = now.epochSecond
         val usec = (System.nanoTime() / 1000) % 1000
         val baseId = "%08x%05x".format(sec, usec)
-        val randomPadding = (1..padding)
-            .map { Random.nextInt(0, 16).toString(16) }
-            .joinToString("")
+        val randomPadding =
+            (1..padding)
+                .map { Random.nextInt(0, 16).toString(16) }
+                .joinToString("")
 
         return baseId + randomPadding
     }
 }
-
