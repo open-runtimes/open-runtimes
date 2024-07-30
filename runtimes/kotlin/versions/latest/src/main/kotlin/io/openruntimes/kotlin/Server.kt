@@ -7,6 +7,8 @@ import io.javalin.Javalin
 import io.javalin.http.Context
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberFunctions

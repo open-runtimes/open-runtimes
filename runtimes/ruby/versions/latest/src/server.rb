@@ -103,6 +103,11 @@ def action(request, response, logger)
   begin
     load(USER_CODE_PATH + '/' + ENV['OPEN_RUNTIMES_ENTRYPOINT'])
 
+    # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression
+    unless defined?(main = ())
+      raise 'User function is not valid.'
+    end
+
     logger.override_native_logs
 
     unless safe_timeout.nil?
@@ -118,8 +123,12 @@ def action(request, response, logger)
       output = main(context)
     end
   rescue StandardError => e
-    context.error(e)
-    context.error(e.backtrace.join("\n"))
+    message = ""
+    message += e.full_message
+    message += "\n"
+    message += e.backtrace.join("\n")
+
+    context.error(message)
     output = context.res.text('', 500, {})
   ensure
     logger.revert_native_logs
@@ -165,10 +174,12 @@ def handle(request, response)
     action(request, response, logger)
     response
   rescue StandardError => e
-    e.full_message
-    e.backtrace.join("\n")
+    message = ""
+    message += e.full_message
+    message += "\n"
+    message += e.backtrace.join("\n")
 
-    logger.write(e, RuntimeLogger::TYPE_ERROR)
+    logger.write(message, RuntimeLogger::TYPE_ERROR)
     logger.end
 
     response.headers['x-open-runtimes-log-id'] = logger.id
