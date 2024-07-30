@@ -103,8 +103,7 @@ def action(request, response, logger)
   begin
     load(USER_CODE_PATH + '/' + ENV['OPEN_RUNTIMES_ENTRYPOINT'])
 
-    # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression
-    unless defined?(main = ())
+    unless defined?(main = ()) # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression
       raise 'User function is not valid.'
     end
 

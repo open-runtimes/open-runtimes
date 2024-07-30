@@ -1,5 +1,4 @@
-# rubocop:disable Lint/UnusedMethodArgument
-def execute(safe_timeout, main, context)
+def execute(safe_timeout, main, context) # rubocop:disable Lint/UnusedMethodArgument
   output = nil
   executed = true
 

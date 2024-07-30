@@ -71,4 +71,4 @@ formatter = { prepare = "echo \"Using native formatter\"", check = "if [ \"$(gof
 entry = "tests.ts"
 versions = ["1.0"]
 commands = { install = "bun install", start = "bun src/server.ts" }
-formatter = { prepare = "bun i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "echo \"Using bunx biome formatter\"", check = "bunx @biomejs/biome biome format .", write = "bunx @biomejs/biome format --write ." }
