@@ -7,10 +7,15 @@ sh ci-cleanup.sh
 sh ci-runtime-prepare.sh
 sh ci-runtime-build.sh
 
-echo "Running formatter ..."
-cd ./runtimes/$RUNTIME
-docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:ro open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_CHECK"
-cd ../../
+LATEST_VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
+if [ "$VERSION" = "$LATEST_VERSION" ]; then
+    echo "Running formatter ..."
+    cd ./runtimes/$RUNTIME
+    docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:ro open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_CHECK"
+    cd ../../
+else
+    echo "Skipping formatter. Formatter runs only in: $RUNTIME-$LATEST_VERSION"
+fi
 
 echo "Running tests ..."
 mkdir -p ./tests/.runtime

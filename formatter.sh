@@ -7,7 +7,6 @@ export VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 export ID="$RUNTIME-$VERSION"
 export FORMATTER_WRITE=$(yq ".$RUNTIME.formatter.write" ci/runtimes.toml)
 
-
 echo "Preparing Docker image ..."
 
 sh ci-cleanup.sh
