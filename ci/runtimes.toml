@@ -55,11 +55,14 @@ formatter = { prepare = "curl -sSLO https://github.com/google/google-java-format
 entry = "tests.cc"
 versions = ["20", "17"]
 commands = { install = "", start = "src/function/cpp_runtime" }
+formatter = { prepare = "apk add coreutils git clang-extra-tools", check = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror --dry-run", write = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror" }
+
 
 [dotnet]
 entry = "Tests.cs"
 versions = ["8.0", "7.0", "6.0"]
 commands = { install = "", start = "dotnet src/function/DotNetRuntime.dll" }
+formatter = { prepare = "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet tool install --global csharpier", check = "dotnet csharpier --check .", write = "dotnet csharpier ." }
 
 [go]
 entry = "tests.go"
