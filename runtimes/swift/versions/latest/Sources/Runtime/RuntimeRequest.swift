@@ -38,9 +38,11 @@ class RuntimeRequest {
 
     var bodyText: String {
         if let text = String(data: bodyBinary, encoding: .utf8) {
-            text
+            // swiftformat:disable:next redundantReturn
+            return text
         } else {
-            ""
+            // swiftformat:disable:next redundantReturn
+            return ""
         }
     }
 
