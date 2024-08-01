@@ -12,7 +12,7 @@ task.executableURL = URL(fileURLWithPath: "/bin/bash")
 try! task.run()
 
 let data = pipe.fileHandleForReading.readDataToEndOfFile()
-let json = try! JSONSerialization.jsonObject(with: data, options : .allowFragments) as! [String: Any]
+let json = try! JSONSerialization.jsonObject(with: data, options: .allowFragments) as! [String: Any]
 
 var packages = [String]()
 var products = [String]()
@@ -26,10 +26,10 @@ func buildPackageStrings() {
             if let scm = dependency["sourceControl"] as? [[String: Any]] {
                 for data in scm {
                     let identity = data["identity"] as? String
-                    let location = ((data["location"] as? [String:Any])?["remote"] as? [[String:Any]])?.first?["urlString"] as? String
-                    let lowerBound = ((data["requirement"] as? [String:Any])?["range"] as? [[String:Any]])?[0]["lowerBound"] as? String
-                    
-                    guard let identity = identity, let location = location, let lowerBound = lowerBound else {
+                    let location = ((data["location"] as? [String: Any])?["remote"] as? [[String: Any]])?.first?["urlString"] as? String
+                    let lowerBound = ((data["requirement"] as? [String: Any])?["range"] as? [[String: Any]])?[0]["lowerBound"] as? String
+
+                    guard let identity, let location, let lowerBound else {
                         continue
                     }
                     if packageBlacklist.contains(identity) {
@@ -53,8 +53,8 @@ func buildProductStrings() {
                     let values = dependency["product"]! as! [Any]
                     let identity = values[0] as? String
                     let package = values[1] as? String
-                
-                    guard let identity = identity, let package = package else {
+
+                    guard let identity, let package else {
                         continue
                     }
                     if productBlacklist.contains(identity) {
@@ -75,14 +75,14 @@ func writePackageStrings() {
     var text = try! String(contentsOfFile: path)
     let pattern = #"(.package\(.*)"#
     let regex = try! NSRegularExpression(pattern: pattern, options: [])
-    let range = NSRange(text.startIndex..<text.endIndex, in: text)
+    let range = NSRange(text.startIndex ..< text.endIndex, in: text)
 
     regex.enumerateMatches(
         in: text,
         options: [],
         range: range
-    ) { (match, _, stop) in
-        guard let match = match else { return }
+    ) { match, _, stop in
+        guard let match else { return }
 
         let lastRange = Range(match.range(at: match.numberOfRanges - 1), in: text)
         let lastMatch = String(text[lastRange!])
@@ -91,7 +91,7 @@ func writePackageStrings() {
             last += ","
         }
         let replacement = last + "\n\t\t" + packages.joined(separator: "\n\t\t")
-        
+
         text = text.replacingOccurrences(of: lastMatch, with: replacement)
 
         // Set bool pointer to true to stop enumeration
@@ -109,15 +109,15 @@ func writeProductStrings() {
     var text = try! String(contentsOfFile: path)
     let pattern = #"(.product\(.*)"#
     let regex = try! NSRegularExpression(pattern: pattern, options: [])
-    let range = NSRange(text.startIndex..<text.endIndex, in: text)
+    let range = NSRange(text.startIndex ..< text.endIndex, in: text)
 
     regex.enumerateMatches(
         in: text,
         options: [],
         range: range
-    ) { (match, _, stop) in
-        guard let match = match else { return }
-        
+    ) { match, _, stop in
+        guard let match else { return }
+
         let lastRange = Range(match.range(at: match.numberOfRanges - 1), in: text)
         let lastMatch = String(text[lastRange!])
         var last = lastMatch
@@ -125,9 +125,9 @@ func writeProductStrings() {
             last += ","
         }
         let replacement = last + "\n\t\t\t\t" + products.joined(separator: "\n\t\t\t\t")
-        
+
         text = text.replacingOccurrences(of: lastMatch, with: replacement)
-        
+
         // Set bool pointer to true to stop enumeration
         stop.pointee = true
     }

@@ -1,13 +1,12 @@
 import Foundation
 
 class RuntimeResponse {
-
     func binary(
         _ bytes: Data,
         statusCode: Int = 200,
         headers: [String: String] = [:]
     ) -> RuntimeOutput {
-        return RuntimeOutput(
+        RuntimeOutput(
             body: bytes,
             statusCode: statusCode,
             headers: headers
@@ -20,9 +19,9 @@ class RuntimeResponse {
         headers: [String: String] = [:]
     ) -> RuntimeOutput {
         if let binaryBody = body.data(using: .utf8) {
-            return self.binary(binaryBody, statusCode: statusCode, headers: headers)
+            binary(binaryBody, statusCode: statusCode, headers: headers)
         } else {
-            return self.binary(Data(), statusCode: statusCode, headers: headers)
+            binary(Data(), statusCode: statusCode, headers: headers)
         }
     }
 
@@ -31,7 +30,7 @@ class RuntimeResponse {
         statusCode: Int = 200,
         headers: [String: String] = [:]
     ) -> RuntimeOutput {
-        return self.text(body, statusCode: statusCode, headers: headers)
+        text(body, statusCode: statusCode, headers: headers)
     }
 
     func json(
@@ -40,11 +39,11 @@ class RuntimeResponse {
         headers: [String: String] = [:]
     ) throws -> RuntimeOutput {
         var outputHeaders = headers
-        
+
         outputHeaders["content-type"] = "application/json"
 
         let data = try JSONSerialization.data(
-          withJSONObject: json
+            withJSONObject: json
         )
 
         let text = String(
@@ -56,7 +55,7 @@ class RuntimeResponse {
     }
 
     func empty() -> RuntimeOutput {
-        return self.text("", statusCode: 204)
+        text("", statusCode: 204)
     }
 
     func redirect(
@@ -68,6 +67,6 @@ class RuntimeResponse {
 
         outputHeaders["location"] = url
 
-        return self.text("", statusCode: statusCode, headers: outputHeaders)
+        return text("", statusCode: statusCode, headers: outputHeaders)
     }
 }
