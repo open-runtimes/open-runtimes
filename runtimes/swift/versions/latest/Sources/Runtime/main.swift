@@ -182,7 +182,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
                     let deadline = Date(timeIntervalSinceNow: Double(safeTimeout))
 
                     group.addTask {
-                        try await annotateError(main(context: context))
+                        // swiftformat:disable:next hoistAwait, hoistTry
+                        try await annotateError(try await main(context: context))
                     }
                     group.addTask {
                         let interval = deadline.timeIntervalSinceNow
@@ -202,7 +203,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
                 output = context.res.text("", statusCode: 500)
             }
         } else {
-            output = try await annotateError(main(context: context))
+            // swiftformat:disable:next hoistAwait, hoistTry
+            output = try await annotateError(try await main(context: context))
         }
     } catch {
         context.error(error)
