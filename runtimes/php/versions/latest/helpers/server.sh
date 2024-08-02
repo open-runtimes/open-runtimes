@@ -1,2 +1,2 @@
 set -e
-php src/server.php
+php -d memory_limit=8G src/server.php

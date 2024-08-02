@@ -1,2 +1,2 @@
 set -e
-src/function/DotNetRuntime.dll
+dotnet src/function/DotNetRuntime.dll
