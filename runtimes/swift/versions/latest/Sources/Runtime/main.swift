@@ -1,5 +1,5 @@
-import Foundation
 import Vapor
+import Foundation
 
 var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
@@ -21,13 +21,13 @@ app.on(.OPTIONS, "**", body: .collect(maxSize: "20mb"), use: execute)
 func execute(req: Request) async throws -> Response {
     let headerLogger = req.headers["x-open-runtimes-logging"]
     var loggerStatus = ""
-    if !headerLogger.isEmpty {
+    if(!headerLogger.isEmpty) {
         loggerStatus = headerLogger.first ?? ""
     }
 
     let headerLogId = req.headers["x-open-runtimes-log-id"]
     var logId = ""
-    if !headerLogId.isEmpty {
+    if(!headerLogId.isEmpty) {
         logId = headerLogId.first ?? ""
     }
 
@@ -35,6 +35,7 @@ func execute(req: Request) async throws -> Response {
     do {
         return try await action(logger: logger, req: req)
     } catch {
+
         logger.write(message: error, type: RuntimeLogger.TYPE_ERROR)
         logger.end()
 
@@ -50,12 +51,13 @@ func execute(req: Request) async throws -> Response {
             body: resBody
         )
     }
+
 }
 
 func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     var safeTimeout = -1
     let timeout = req.headers["x-open-runtimes-timeout"]
-    if !timeout.isEmpty {
+    if (!timeout.isEmpty) {
         let timeoutInt = Int(timeout.first!) ?? 0
         if timeoutInt == 0 {
             return Response(
@@ -68,7 +70,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     }
 
     if let serverSecret = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] {
-        if serverSecret != "" {
+        if(serverSecret != "") {
             if !req.headers.contains(name: "x-open-runtimes-secret") || req.headers["x-open-runtimes-secret"].first != serverSecret {
                 return Response(
                     status: .internalServerError,
@@ -87,7 +89,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     let queryString = req.uri.query
     var query = [String: String]()
 
-    if let queryString {
+    if let queryString = queryString {
         for param in queryString.split(separator: "&") {
             let parts = param.split(separator: "=", maxSplits: 1)
 
@@ -129,7 +131,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     }
 
     if var serverHeadersString = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] {
-        if serverHeadersString == "" {
+        if(serverHeadersString == "") {
             serverHeadersString = "{}"
         }
 
@@ -139,8 +141,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         ) as! [String: Any?]
 
         for (key, value) in serverHeaders {
-            if let value {
-                headers[key.lowercased()] = String(describing: value)
+            if let value = value {
+                headers[key.lowercased()] =  String(describing: value)
             } else {
                 headers[key.lowercased()] = ""
             }
@@ -182,8 +184,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
                     let deadline = Date(timeIntervalSinceNow: Double(safeTimeout))
 
                     group.addTask {
-                        // swiftformat:disable:next hoistAwait, hoistTry
-                        try await annotateError(try await main(context: context))
+                        return try await annotateError(try await main(context: context))
                     }
                     group.addTask {
                         let interval = deadline.timeIntervalSinceNow
@@ -203,7 +204,6 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
                 output = context.res.text("", statusCode: 500)
             }
         } else {
-            // swiftformat:disable:next hoistAwait, hoistTry
             output = try await annotateError(try await main(context: context))
         }
     } catch {
@@ -220,7 +220,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     }
 
     let contentTypeValue = (outputHeaders.first(name: "content-type") ?? "text/plain").lowercased()
-    if !contentTypeValue.starts(with: "multipart/"), !contentTypeValue.contains("charset=") {
+    if !contentTypeValue.starts(with: "multipart/") && !contentTypeValue.contains("charset=") {
         outputHeaders.replaceOrAdd(name: "content-type", value: contentTypeValue + "; charset=utf-8")
     }
 
