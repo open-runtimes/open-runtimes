@@ -1,64 +1,64 @@
 [node]
 entry = "tests.js"
 versions = ["21.0", "20.0", "19.0", "18.0", "16.0", "14.5", "21.0-mjs", "20.0-mjs", "19.0-mjs", "18.0-mjs", "16.0-mjs", "14.5-mjs"]
-commands = { install = "npm install", start = "node src/server.js" }
+commands = { install = "npm install", start = "sh helper/server.sh" }
 
 [deno]
 entry = "tests.ts"
 versions = ["1.40", "1.35", "1.24", "1.21"]
-commands = { install = "deno cache tests.ts", start = "deno run --allow-run --allow-net --allow-write --allow-read --allow-env src/server.ts" }
+commands = { install = "deno cache tests.ts", start = "sh helper/server.sh" }
 
 [python]
 entry = "tests.py"
 versions = ["3.12", "3.11", "3.10", "3.9", "3.8", "ml-3.11"]
-commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "python3 src/server.py" }
+commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "sh helper/server.sh" }
 
 [dart]
 entry = "lib/tests.dart"
 versions = ["3.3", "3.1", "3.0", "2.19", "2.18", "2.17", "2.16", "2.15"]
-commands = { install = "dart pub get", start = "src/function/server" }
+commands = { install = "dart pub get", start = "sh helper/server.sh" }
 
 [ruby]
 entry = "tests.rb"
 versions = ["3.3", "3.2", "3.1", "3.0", ]
-commands = { install = "", start = "bundle exec puma -b tcp://0.0.0.0:3000 -e production" }
+commands = { install = "", start = "sh helper/server.sh" }
 
 [php]
 entry = "tests.php"
 versions = ["8.0", "8.1", "8.2", "8.3"]
-commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "php src/server.php" }
+commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "sh helper/server.sh" }
 
 [swift]
 entry = "Tests.swift"
 versions = ["5.9", "5.8", "5.5", ]
-commands = { install = "", start = "src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000" }
+commands = { install = "", start = "sh helper/server.sh" }
 
 [kotlin]
 entry = "Tests.kt"
 versions = ["1.9", "1.8", "1.6"]
-commands = { install = "", start = "java -jar src/function/kotlin-runtime-1.0.0.jar" }
+commands = { install = "", start = "sh helper/server.sh" }
 
 [java]
 entry = "Tests.java"
 versions = ["21.0", "18.0", "17.0", "11.0", "8.0"]
-commands = { install = "", start = "java -jar src/function/java-runtime-1.0.0.jar" }
+commands = { install = "", start = "sh helper/server.sh" }
 
 [cpp]
 entry = "tests.cc"
 versions = ["20", "17"]
-commands = { install = "", start = "src/function/cpp_runtime" }
+commands = { install = "", start = "sh helper/server.sh" }
 
 [dotnet]
 entry = "Tests.cs"
 versions = ["8.0", "7.0", "6.0"]
-commands = { install = "", start = "dotnet src/function/DotNetRuntime.dll" }
+commands = { install = "", start = "sh helper/server.sh" }
 
 [go]
 entry = "tests.go"
 versions = ["1.22"]
-commands = { install = "", start = "src/function/server" }
+commands = { install = "", start = "sh helper/server.sh" }
 
 [bun]
 entry = "tests.ts"
 versions = ["1.0"]
-commands = { install = "bun install", start = "bun src/server.ts" }
+commands = { install = "bun install", start = "sh helper/server.sh" }
