@@ -14,14 +14,16 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     safeTimeout = int.tryParse(timeout);
     if (safeTimeout == null || safeTimeout == 0) {
       return shelf.Response(500,
-          body: 'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
+          body:
+              'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
     }
   }
 
-  if((Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '') != '' && (req.headers['x-open-runtimes-secret'] ?? '') != Platform.environment['OPEN_RUNTIMES_SECRET']) {
+  if ((Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '') != '' &&
+      (req.headers['x-open-runtimes-secret'] ?? '') !=
+          Platform.environment['OPEN_RUNTIMES_SECRET']) {
     return shelf.Response(500,
-        body:
-            'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
+        body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
   }
 
   Stream<List<int>> bodyStream = await req.read();
@@ -41,7 +43,10 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   }
 
   String? enforcedHeadersString = Platform.environment['OPEN_RUNTIMES_HEADERS'];
-  final enforcedHeaders = jsonDecode((enforcedHeadersString != null && !enforcedHeadersString.isEmpty) ? enforcedHeadersString : '{}');
+  final enforcedHeaders = jsonDecode(
+      (enforcedHeadersString != null && !enforcedHeadersString.isEmpty)
+          ? enforcedHeadersString
+          : '{}');
   enforcedHeaders.forEach((key, value) {
     headers[key.toLowerCase()] = '${value}';
   });
@@ -88,17 +93,16 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   }
 
   RuntimeRequest contextReq = new RuntimeRequest(
-    method: method,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-    queryString: queryString,
-    headers: headers,
-    bodyBinary: bodyBinary,
-    url: url
-  );
+      method: method,
+      scheme: scheme,
+      host: host,
+      port: port,
+      path: path,
+      query: query,
+      queryString: queryString,
+      headers: headers,
+      bodyBinary: bodyBinary,
+      url: url);
   RuntimeResponse contextRes = new RuntimeResponse();
   RuntimeContext context = new RuntimeContext(contextReq, contextRes, logger);
 
@@ -153,7 +157,8 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  String contentTypeValue = (responseHeaders['content-type'] ?? 'text/plain').toLowerCase();
+  String contentTypeValue =
+      (responseHeaders['content-type'] ?? 'text/plain').toLowerCase();
   Encoding? encoding = null;
 
   if (contentTypeValue.contains('charset=')) {
@@ -161,21 +166,20 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   } else if (!contentTypeValue.startsWith('multipart/')) {
     contentTypeValue += '; charset=utf-8';
     encoding = Encoding.getByName('utf-8');
-  } 
+  }
   responseHeaders['content-type'] = contentTypeValue;
 
   responseHeaders['x-open-runtimes-log-id'] = logger.id;
   await logger.end();
 
   return shelf.Response(output['statusCode'],
-      encoding: encoding,
-      body: output['body'],
-      headers: responseHeaders);
+      encoding: encoding, body: output['body'], headers: responseHeaders);
 }
 
 void main() async {
   await shelf_io.serve((req) async {
-    Logger logger = new Logger(req.headers['x-open-runtimes-logging'], req.headers['x-open-runtimes-log-id']);
+    Logger logger = new Logger(req.headers['x-open-runtimes-logging'],
+        req.headers['x-open-runtimes-log-id']);
 
     try {
       return await action(logger, req);

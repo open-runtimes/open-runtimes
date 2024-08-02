@@ -1,16 +1,24 @@
 // @ts-ignore
 import data from './runtimes.toml'
 import {exec} from 'child_process';
+import {appendFileSync} from 'fs';
 
 interface RuntimeCommands {
     install: string,
     start: string
 }
 
+interface RuntimeFormatter {
+    check: string,
+    write: string,
+    prepare: string,
+}
+
 interface Runtime {
     entry: string,
     versions: string[],
     commands: RuntimeCommands,
+    formatter: RuntimeFormatter
 }
 
 let perRuntime = true;
@@ -34,7 +42,7 @@ if (perRuntime) {
     });
 }
 
-exec(`echo "matrix=${JSON.stringify(JSON.stringify({include: matrix}))}" >> $GITHUB_OUTPUT`);
+appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include: matrix})}`);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];
@@ -52,7 +60,8 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             ENTRYPOINT: runtime.entry,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,
-
+            FORMATTER_CHECK: runtime?.formatter?.check, // If question marks are here, it's leftover. Remove them please
+            FORMATTER_PREPARE: runtime?.formatter?.prepare, // If question marks are here, it's leftover. Remove them please
         })
     });
 

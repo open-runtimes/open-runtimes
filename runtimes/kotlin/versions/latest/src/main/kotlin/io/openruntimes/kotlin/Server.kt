@@ -7,7 +7,8 @@ import io.javalin.Javalin
 import io.javalin.http.Context
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import java.io.*
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberFunctions
@@ -22,8 +23,7 @@ suspend fun main() {
     Javalin
         .create { config ->
             config.maxRequestSize = 20L * 1024 * 1024
-        }
-        .start(3000)
+        }.start(3000)
         .get("/*") { runBlocking { execute(it) } }
         .post("/*") { runBlocking { execute(it) } }
         .put("/*") { runBlocking { execute(it) } }
@@ -53,8 +53,11 @@ suspend fun execute(ctx: Context) {
     }
 }
 
-suspend fun action(logger: RuntimeLogger, ctx: Context) {
-    var safeTimeout = -1;
+suspend fun action(
+    logger: RuntimeLogger,
+    ctx: Context,
+) {
+    var safeTimeout = -1
     val timeout = ctx.header("x-open-runtimes-timeout") ?: ""
     if (timeout.isNotEmpty()) {
         var invalid = false
@@ -141,18 +144,19 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         url += "?$queryString"
     }
 
-    val runtimeRequest = RuntimeRequest(
-        method,
-        protoHeader,
-        host,
-        port,
-        path,
-        query,
-        queryString,
-        headers,
-        bodyBinary,
-        url,
-    )
+    val runtimeRequest =
+        RuntimeRequest(
+            method,
+            protoHeader,
+            host,
+            port,
+            path,
+            query,
+            queryString,
+            headers,
+            bodyBinary,
+            url,
+        )
     val runtimeResponse = RuntimeResponse()
     val context = RuntimeContext(runtimeRequest, runtimeResponse, logger)
 
@@ -162,33 +166,36 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
 
     try {
         var entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT")
-        entrypoint = entrypoint
-            .substring(0, entrypoint.length - 3)
-            .replace('/', '.')
+        entrypoint =
+            entrypoint
+                .substring(0, entrypoint.length - 3)
+                .replace('/', '.')
 
         val classToLoad = Class.forName("io.openruntimes.kotlin.$entrypoint").kotlin
         val classMethod = classToLoad.memberFunctions.find { it.name == "main" }!!
         val instance = classToLoad.createInstance()
 
         if (safeTimeout > 0) {
-            output = withTimeoutOrNull(safeTimeout.seconds) {
-                if (classMethod.isSuspend) {
-                    classMethod.callSuspend(instance, context) as RuntimeOutput
-                } else {
-                    classMethod.call(instance, context) as RuntimeOutput
+            output =
+                withTimeoutOrNull(safeTimeout.seconds) {
+                    if (classMethod.isSuspend) {
+                        classMethod.callSuspend(instance, context) as RuntimeOutput
+                    } else {
+                        classMethod.call(instance, context) as RuntimeOutput
+                    }
                 }
-            }
 
             if (output == null) {
                 context.error("Execution timed out.")
                 output = context.res.text("", 500)
             }
         } else {
-            output = if (classMethod.isSuspend) {
-                classMethod.callSuspend(instance, context) as RuntimeOutput
-            } else {
-                classMethod.call(instance, context) as RuntimeOutput
-            }
+            output =
+                if (classMethod.isSuspend) {
+                    classMethod.callSuspend(instance, context) as RuntimeOutput
+                } else {
+                    classMethod.call(instance, context) as RuntimeOutput
+                }
         }
     } catch (e: Exception) {
         val sw = StringWriter()
@@ -206,7 +213,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
         output = context.res.text("", 500, mutableMapOf())
     }
 
-    val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap();
+    val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap()
 
     if (resHeaders["content-type"] == null) {
         resHeaders["content-type"] = "text/plain"
@@ -215,7 +222,7 @@ suspend fun action(logger: RuntimeLogger, ctx: Context) {
     if (!resHeaders["content-type"]!!.startsWith("multipart/")) {
         resHeaders["content-type"] = resHeaders["content-type"]!!.lowercase()
 
-        if(!resHeaders["content-type"]!!.contains("charset=")) {
+        if (!resHeaders["content-type"]!!.contains("charset=")) {
             resHeaders["content-type"] += "; charset=utf-8"
         }
     }

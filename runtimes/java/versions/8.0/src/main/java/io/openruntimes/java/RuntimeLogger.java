@@ -1,168 +1,163 @@
 package io.openruntimes.java;
 
-import java.util.Random; 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import java.time.Instant;  
-
-import java.lang.System;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 public class RuntimeLogger {
-    public static final String TYPE_ERROR = "error";
-    public static final String TYPE_LOG = "log";
+  public static final String TYPE_ERROR = "error";
+  public static final String TYPE_LOG = "log";
 
-    private String id = "";
-    private boolean enabled = false;
-    private boolean includesNativeInfo = false;
+  private String id = "";
+  private boolean enabled = false;
+  private boolean includesNativeInfo = false;
 
-    private FileWriter streamLogs = null;
-    private FileWriter streamErrors = null;
+  private FileWriter streamLogs = null;
+  private FileWriter streamErrors = null;
 
-    private ByteArrayOutputStream customStdStream;
+  private ByteArrayOutputStream customStdStream;
 
-    private PrintStream nativeLogsCache = null;
-    private PrintStream nativeErrorsCache = null;
+  private PrintStream nativeLogsCache = null;
+  private PrintStream nativeErrorsCache = null;
 
-    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+  private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
-    public RuntimeLogger(
-            String status,
-            String id
-    ) throws IOException {
-        this.customStdStream = new ByteArrayOutputStream();
+  public RuntimeLogger(String status, String id) throws IOException {
+    this.customStdStream = new ByteArrayOutputStream();
 
-        if (status == null) {
-            status = "";
-        }
+    if (status == null) {
+      status = "";
+    }
 
-        if (id == null) {
-            id = "";
-        }
-        
-        if(status.equals("enabled") || status.equals("")) {
-            this.enabled = true;
+    if (id == null) {
+      id = "";
+    }
+
+    if (status.equals("enabled") || status.equals("")) {
+      this.enabled = true;
+    } else {
+      this.enabled = false;
+    }
+
+    if (this.enabled) {
+      String serverEnv = System.getenv("OPEN_RUNTIMES_ENV");
+      if (serverEnv == null) {
+        serverEnv = "";
+      }
+
+      if (id.equals("")) {
+        if (serverEnv.equals("development")) {
+          this.id = "dev";
         } else {
-            this.enabled = false;
+          this.id = this.generateId(7);
         }
+      } else {
+        this.id = id;
+      }
 
-        if(this.enabled) {
-            String serverEnv = System.getenv("OPEN_RUNTIMES_ENV");
-            if (serverEnv == null) {
-                serverEnv = "";
-            }
+      this.streamLogs = new FileWriter("/mnt/logs/" + this.id + "_logs.log", true);
+      this.streamErrors = new FileWriter("/mnt/logs/" + this.id + "_errors.log", true);
+    }
+  }
 
-            if(id.equals("")) {
-                if(serverEnv.equals("development")) {
-                    this.id = "dev";
-                } else {
-                    this.id = this.generateId(7);
-                }
-            } else {
-                this.id = id;
-            }
+  public String getId() {
+    return this.id;
+  }
 
-            this.streamLogs = new FileWriter("/mnt/logs/" + this.id + "_logs.log", true);
-            this.streamErrors = new FileWriter("/mnt/logs/" + this.id + "_errors.log", true);
-        }
+  public void write(Object message, String type, Boolean xnative) throws IOException {
+    if (this.enabled == false) {
+      return;
     }
 
-    public String getId() {
-        return this.id;
+    if (type == null) {
+      type = RuntimeLogger.TYPE_LOG;
     }
 
-    public void write(Object message, String type, Boolean xnative) throws IOException {
-        if(this.enabled == false) {
-            return;
-        }
-
-        if(type == null) {
-            type = RuntimeLogger.TYPE_LOG;
-        }
-
-        if(xnative == null) {
-            xnative = false;
-        }
-
-        if(xnative && !this.includesNativeInfo) {
-            this.includesNativeInfo = true;
-            this.write("Native logs detected. Use context.log() or context.error() for better experience.", type, xnative);
-        }
-
-        FileWriter stream = this.streamLogs;
-
-        if(type == RuntimeLogger.TYPE_ERROR) {
-            stream = this.streamErrors;
-        }
-
-        String stringLog = "";
-        if (message instanceof Map || message instanceof List || message instanceof Set) {
-            stringLog = gson.toJson(message);
-        } else {
-            stringLog = message.toString();
-        }
-
-        stream.write(stringLog);
+    if (xnative == null) {
+      xnative = false;
     }
 
-    public void end() throws IOException {
-        if(!this.enabled) {
-            return;
-        }
-
-        this.enabled = false;
-
-        this.streamLogs.close();
-        this.streamErrors.close();
+    if (xnative && !this.includesNativeInfo) {
+      this.includesNativeInfo = true;
+      this.write(
+          "Native logs detected. Use context.log() or context.error() for better experience.",
+          type,
+          xnative);
     }
 
-    public void overrideNativeLogs() {
-        this.nativeLogsCache = System.out;
-        this.nativeErrorsCache = System.err;
+    FileWriter stream = this.streamLogs;
 
-        PrintStream customStd = new PrintStream(this.customStdStream);
-        System.setOut(customStd);
-        System.setErr(customStd);
-    }
-    
-    public void revertNativeLogs() {
-        System.out.flush();
-        System.err.flush();
-
-        System.setOut(this.nativeLogsCache);
-        System.setErr(this.nativeErrorsCache);
-
-        if (!this.customStdStream.toString().isEmpty()) {
-            try {
-                this.write(customStdStream.toString(), RuntimeLogger.TYPE_LOG, true);
-            } catch(IOException e) {
-                // Ignore missing logs
-            }
-        }
+    if (type == RuntimeLogger.TYPE_ERROR) {
+      stream = this.streamErrors;
     }
 
-    private String generateId(int padding) {
-        Instant now = Instant.now();
-        long sec = now.getEpochSecond();
-        long usec = (System.nanoTime() / 1000l) % 1000l;
-
-        String baseId = String.format("%08x%05x", sec, usec);
-
-        Random random = new Random();
-        String randomPadding = "";
-        for(int i = 0; i < padding; i++) {
-            randomPadding = randomPadding + Integer.toHexString(random.nextInt(16));
-        }
-
-        return baseId + randomPadding;
+    String stringLog = "";
+    if (message instanceof Map || message instanceof List || message instanceof Set) {
+      stringLog = gson.toJson(message);
+    } else {
+      stringLog = message.toString();
     }
+
+    stream.write(stringLog);
+  }
+
+  public void end() throws IOException {
+    if (!this.enabled) {
+      return;
+    }
+
+    this.enabled = false;
+
+    this.streamLogs.close();
+    this.streamErrors.close();
+  }
+
+  public void overrideNativeLogs() {
+    this.nativeLogsCache = System.out;
+    this.nativeErrorsCache = System.err;
+
+    PrintStream customStd = new PrintStream(this.customStdStream);
+    System.setOut(customStd);
+    System.setErr(customStd);
+  }
+
+  public void revertNativeLogs() {
+    System.out.flush();
+    System.err.flush();
+
+    System.setOut(this.nativeLogsCache);
+    System.setErr(this.nativeErrorsCache);
+
+    if (!this.customStdStream.toString().isEmpty()) {
+      try {
+        this.write(customStdStream.toString(), RuntimeLogger.TYPE_LOG, true);
+      } catch (IOException e) {
+        // Ignore missing logs
+      }
+    }
+  }
+
+  private String generateId(int padding) {
+    Instant now = Instant.now();
+    long sec = now.getEpochSecond();
+    long usec = (System.nanoTime() / 1000l) % 1000l;
+
+    String baseId = String.format("%08x%05x", sec, usec);
+
+    Random random = new Random();
+    String randomPadding = "";
+    for (int i = 0; i < padding; i++) {
+      randomPadding = randomPadding + Integer.toHexString(random.nextInt(16));
+    }
+
+    return baseId + randomPadding;
+  }
 }

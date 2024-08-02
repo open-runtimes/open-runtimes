@@ -65,7 +65,7 @@ def action(request, response, logger)
       end
     end
   end
-  
+
   body_binary = request.body.read
   method = request.request_method
   headers = {}
@@ -93,24 +93,23 @@ def action(request, response, logger)
     headers[key.downcase] = value.to_s
   end
 
-  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers, body_binary)
+  context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers,
+                                   body_binary)
   context_res = RuntimeResponse.new
   context = RuntimeContext.new(context_req, context_res, logger)
-  
+
   output = nil
 
   begin
     load(USER_CODE_PATH + '/' + ENV['OPEN_RUNTIMES_ENTRYPOINT'])
 
-    unless defined?(main = ())
+    unless defined?(main = ()) # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression
       raise 'User function is not valid.'
     end
 
     logger.override_native_logs
 
     unless safe_timeout.nil?
-      executed = true
-
       results = execute(safe_timeout, main, context)
       executed = results[0]
       output = results[1]
@@ -122,9 +121,13 @@ def action(request, response, logger)
     else
       output = main(context)
     end
-  rescue Exception => e
-    context.error(e)
-    context.error(e.backtrace.join("\n"))
+  rescue StandardError => e
+    message = ""
+    message += e.full_message
+    message += "\n"
+    message += e.backtrace.join("\n")
+
+    context.error(message)
     output = context.res.text('', 500, {})
   ensure
     logger.revert_native_logs
@@ -153,7 +156,9 @@ def action(request, response, logger)
   response.headers['content-type'] = 'text/plain' if response.headers['content-type'].nil?
   response.headers['content-type'] = response.headers['content-type'].downcase
 
-  unless response.headers['content-type'].start_with?('multipart/') || response.headers['content-type'].include?('charset=') 
+  is_multipart = response.headers['content-type'].start_with?('multipart/')
+  has_charset = response.headers['content-type'].include?('charset=')
+  unless is_multipart || has_charset
     response.headers['content-type'] += '; charset=utf-8'
   end
 
@@ -167,13 +172,13 @@ def handle(request, response)
   begin
     action(request, response, logger)
     response
-  rescue Exception => e
+  rescue StandardError => e
     message = ""
     message += e.full_message
     message += "\n"
-    message +=  e.backtrace.join("\n")
+    message += e.backtrace.join("\n")
 
-    logger.write(e, RuntimeLogger::TYPE_ERROR)
+    logger.write(message, RuntimeLogger::TYPE_ERROR)
     logger.end
 
     response.headers['x-open-runtimes-log-id'] = logger.id

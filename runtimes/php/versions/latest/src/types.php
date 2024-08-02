@@ -1,7 +1,9 @@
 <?php
 
-class RuntimeResponse {
-    function binary(string $binary, int $statusCode = 200, array $headers = []): array {
+class RuntimeResponse
+{
+    public function binary(string $binary, int $statusCode = 200, array $headers = []): array
+    {
         return [
             'body' => $binary,
             'statusCode' => $statusCode,
@@ -9,31 +11,37 @@ class RuntimeResponse {
         ];
     }
 
-    function send(string $body, int $statusCode = 200, array $headers = []): array {
-        return $this->text(\strval($body),$statusCode, $headers);
+    public function send(string $body, int $statusCode = 200, array $headers = []): array
+    {
+        return $this->text(\strval($body), $statusCode, $headers);
     }
 
 
-    function text(string $body, int $statusCode = 200, array $headers = []): array {
+    public function text(string $body, int $statusCode = 200, array $headers = []): array
+    {
         return $this->binary($body, $statusCode, $headers);
     }
 
-    function json(array $obj, int $statusCode = 200, array $headers = []): array {
+    public function json(array $obj, int $statusCode = 200, array $headers = []): array
+    {
         $headers['content-type'] = 'application/json';
         return $this->text(\json_encode($obj, JSON_FORCE_OBJECT), $statusCode, $headers);
     }
 
-    function empty(): array {
+    public function empty(): array
+    {
         return $this->text('', 204, []);
     }
 
-    function redirect(string $url, int $statusCode = 301, array $headers = []): array {
+    public function redirect(string $url, int $statusCode = 301, array $headers = []): array
+    {
         $headers['location'] = $url;
         return $this->text('', $statusCode, $headers);
     }
 }
 
-class RuntimeRequest {
+class RuntimeRequest
+{
     public string $bodyBinary = '';
     public array $headers = [];
     public string $method = '';
@@ -59,8 +67,8 @@ class RuntimeRequest {
     {
         $contentType = strtolower($this->headers['content-type'] ?? 'text/plain');
 
-        if(\str_starts_with($contentType, 'application/json')) {
-            if(!empty($this->bodyBinary)) {
+        if (\str_starts_with($contentType, 'application/json')) {
+            if (!empty($this->bodyBinary)) {
                 return $this->getBodyJson();
             } else {
                 return [];
@@ -69,7 +77,7 @@ class RuntimeRequest {
 
         $binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
         foreach ($binaryTypes as $type) {
-            if(\str_starts_with($contentType, $type)) {
+            if (\str_starts_with($contentType, $type)) {
                 return  $this->bodyBinary;
             }
         }
@@ -90,23 +98,25 @@ class RuntimeRequest {
     }
 }
 
-class RuntimeContext {
+class RuntimeContext
+{
     public RuntimeRequest $req;
     public RuntimeResponse $res;
     private Logger $logger;
 
-    function __construct(Logger $logger) {
+    public function __construct(Logger $logger)
+    {
         $this->req = new RuntimeRequest();
         $this->res = new RuntimeResponse();
         $this->logger = $logger;
     }
 
-    function log(mixed $message): void
+    public function log(mixed $message): void
     {
         $this->logger->write($message, Logger::TYPE_LOG);
     }
 
-    function error(mixed $message): void
+    public function error(mixed $message): void
     {
         $this->logger->write($message, Logger::TYPE_ERROR);
     }

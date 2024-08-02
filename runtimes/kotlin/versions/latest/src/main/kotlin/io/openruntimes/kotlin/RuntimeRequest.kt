@@ -23,8 +23,8 @@ data class RuntimeRequest(
             val contentType = headers.getOrDefault("content-type", "text/plain").lowercase()
             val binaryTypes = arrayOf("application/", "audio/", "font/", "image/", "video/")
 
-            if(contentType.startsWith("application/json")) {
-                if(bodyBinary.isEmpty()) {
+            if (contentType.startsWith("application/json")) {
+                if (bodyBinary.isEmpty()) {
                     val emptyBody: MutableMap<String, Any> = mutableMapOf()
                     return emptyBody
                 } else {

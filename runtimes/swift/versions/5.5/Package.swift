@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "swift-runtime",
     platforms: [
-        .macOS(.v10_15)
+        .macOS(.v10_15),
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
@@ -14,8 +14,8 @@ let package = Package(
         .executableTarget(
             name: "Runtime",
             dependencies: [
-                .product(name: "Vapor", package: "vapor")
+                .product(name: "Vapor", package: "vapor"),
             ]
-       )
+        ),
     ]
 )

@@ -14,19 +14,26 @@ class RuntimeRequest {
   Map<String, String> query;
 
   dynamic get body {
-    String contentType = (this.headers['content-type'] ?? 'text/plain').toLowerCase();
+    String contentType =
+        (this.headers['content-type'] ?? 'text/plain').toLowerCase();
 
-    if(contentType.startsWith("application/json")) {
-      if(this.bodyBinary.isEmpty) {
+    if (contentType.startsWith("application/json")) {
+      if (this.bodyBinary.isEmpty) {
         return new Map<String, dynamic>();
       } else {
         return this.bodyJson;
       }
     }
 
-    List<String> binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
-    for(final binaryType in binaryTypes) {
-      if(contentType.startsWith(binaryType)) {
+    List<String> binaryTypes = [
+      "application/",
+      "audio/",
+      "font/",
+      "image/",
+      "video/"
+    ];
+    for (final binaryType in binaryTypes) {
+      if (contentType.startsWith(binaryType)) {
         return this.bodyBinary;
       }
     }
@@ -37,7 +44,7 @@ class RuntimeRequest {
   String get bodyRaw {
     return this.bodyText;
   }
-  
+
   String get bodyText {
     return utf8.decode(this.bodyBinary);
   }
@@ -46,18 +53,18 @@ class RuntimeRequest {
     return jsonDecode(this.bodyText);
   }
 
-  RuntimeRequest(
-      {String method = '',
-      String scheme = '',
-      String host = '',
-      int port = 80,
-      String path = '',
-      Map<String, String> query = const {},
-      String queryString = '',
-      Map<String, dynamic> headers = const {},
-      List<int> bodyBinary = const [],
-      String url = '',})
-      : method = method,
+  RuntimeRequest({
+    String method = '',
+    String scheme = '',
+    String host = '',
+    int port = 80,
+    String path = '',
+    Map<String, String> query = const {},
+    String queryString = '',
+    Map<String, dynamic> headers = const {},
+    List<int> bodyBinary = const [],
+    String url = '',
+  })  : method = method,
         scheme = scheme,
         host = host,
         port = port,

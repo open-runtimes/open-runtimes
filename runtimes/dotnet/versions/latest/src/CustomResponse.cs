@@ -8,7 +8,11 @@ namespace DotNetRuntime
         private readonly int _statusCode;
         private readonly Dictionary<string, string> _headers;
 
-        public CustomResponse(byte[] body, int statusCode, Dictionary<string, string>? headers = null)
+        public CustomResponse(
+            byte[] body,
+            int statusCode,
+            Dictionary<string, string>? headers = null
+        )
         {
             _body = body;
             _statusCode = statusCode;
@@ -18,13 +22,15 @@ namespace DotNetRuntime
         public Task ExecuteAsync(HttpContext httpContext)
         {
             string contentTypeValue = "text/plain";
-            
-            if (_headers.TryGetValue("content-type", out string contentType)) {
-                 contentTypeValue = contentType;
-            } 
 
-            if (!contentTypeValue.StartsWith("multipart/") &&
-                !contentTypeValue.Contains("charset="))
+            if (_headers.TryGetValue("content-type", out string contentType))
+            {
+                contentTypeValue = contentType;
+            }
+
+            if (
+                !contentTypeValue.StartsWith("multipart/") && !contentTypeValue.Contains("charset=")
+            )
             {
                 contentTypeValue = contentTypeValue + "; charset=utf-8";
             }
@@ -38,7 +44,7 @@ namespace DotNetRuntime
             httpContext.Response.ContentType = contentTypeValue;
             httpContext.Response.ContentLength = _body.Length;
 
-            return httpContext.Response.Body.WriteAsync(_body,0 , _body.Length);
+            return httpContext.Response.Body.WriteAsync(_body, 0, _body.Length);
         }
     }
 }

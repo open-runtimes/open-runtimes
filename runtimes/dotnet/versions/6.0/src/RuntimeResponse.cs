@@ -4,36 +4,46 @@ using System.Text.Json;
 
 public class RuntimeResponse
 {
-    public RuntimeOutput Binary(byte[] bytes,int statusCode = 200, Dictionary<string, string>? headers = null ){
-        return new RuntimeOutput(
-            bytes,
-            statusCode,
-            headers ?? new Dictionary<string,string>());
-    }
-
-
-
-    public RuntimeOutput Send(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
+    public RuntimeOutput Binary(
+        byte[] bytes,
+        int statusCode = 200,
+        Dictionary<string, string>? headers = null
+    )
     {
-        return Text(
-            body,
-            statusCode,
-            headers ?? new Dictionary<string,string>());
+        return new RuntimeOutput(bytes, statusCode, headers ?? new Dictionary<string, string>());
     }
 
-    public RuntimeOutput Text(string body, int statusCode = 200, Dictionary<string, string>? headers = null)
+    public RuntimeOutput Send(
+        string body,
+        int statusCode = 200,
+        Dictionary<string, string>? headers = null
+    )
+    {
+        return Text(body, statusCode, headers ?? new Dictionary<string, string>());
+    }
+
+    public RuntimeOutput Text(
+        string body,
+        int statusCode = 200,
+        Dictionary<string, string>? headers = null
+    )
     {
         return Binary(
             System.Text.Encoding.UTF8.GetBytes(body),
             statusCode,
-            headers ?? new Dictionary<string,string>());
+            headers ?? new Dictionary<string, string>()
+        );
     }
 
-    public RuntimeOutput Json(Dictionary<string, object?> json, int statusCode = 200, Dictionary<string, string>? headers = null)
+    public RuntimeOutput Json(
+        Dictionary<string, object?> json,
+        int statusCode = 200,
+        Dictionary<string, string>? headers = null
+    )
     {
-        if(headers == null)
+        if (headers == null)
         {
-            headers = new Dictionary<string,string>();
+            headers = new Dictionary<string, string>();
         }
 
         headers.Add("content-type", "application/json");
@@ -45,10 +55,15 @@ public class RuntimeResponse
         return Text("", 204, new Dictionary<string, string>());
     }
 
-    public RuntimeOutput Redirect(String url, int statusCode = 301, Dictionary<string, string>? headers = null)
+    public RuntimeOutput Redirect(
+        String url,
+        int statusCode = 301,
+        Dictionary<string, string>? headers = null
+    )
     {
-        if(headers == null) {
-            headers = new Dictionary<string,string>();
+        if (headers == null)
+        {
+            headers = new Dictionary<string, string>();
         }
 
         headers.Add("location", url);
