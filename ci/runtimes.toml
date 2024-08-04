@@ -14,7 +14,7 @@ formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --c
 entry = "tests.py"
 versions = ["3.12", "3.11", "3.10", "3.9", "3.8", "ml-3.11"]
 commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "python3 src/server.py" }
-formatter = { prepare = "apk add git && pip install git+https://github.com/psf/black", check = "black --check .", write = "black ." }
+formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
 
 [dart]
 entry = "lib/tests.dart"
