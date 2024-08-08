@@ -1,4 +1,4 @@
-# syntax = devthefuture/dockerfile-x
+# syntax = devthefuture/dockerfile-x:1.4.2
 FROM golang:1.22-alpine
 
 INCLUDE ./base-before
