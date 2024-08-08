@@ -1,4 +1,4 @@
-# syntax = devthefuture/dockerfile-x
+# syntax = devthefuture/dockerfile-x:1.4.2
 FROM node:19.9-alpine3.18
 
 INCLUDE ./base-before
