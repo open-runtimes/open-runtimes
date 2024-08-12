@@ -32,7 +32,7 @@ docker run -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/deno:v4-1.21 sh helpers/start.sh "denon run --allow-net --allow-write --allow-read --allow-env src/server.ts"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key -e OPEN_RUNTIMES_ENTRYPOINT=mod.ts --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/deno:v4-1.21 sh helpers/start.sh "deno run --allow-net --allow-write --allow-read --allow-env src/server.ts"
 ```
 
 4. In new terminal window, execute function:

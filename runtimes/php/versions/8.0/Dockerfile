@@ -1,4 +1,4 @@
-# syntax = devthefuture/dockerfile-x
+# syntax = devthefuture/dockerfile-x:1.4.2
 
 FROM php:8.0-cli-alpine3.16 as step0
 ARG PHP_SWOOLE_VERSION=v4.7.0
