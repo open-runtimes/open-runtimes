@@ -5,6 +5,7 @@ import math
 import os
 from io import StringIO
 
+
 class Logger:
     TYPE_ERROR = "error"
     TYPE_LOG = "log"
@@ -18,7 +19,7 @@ class Logger:
 
     custom_std = None
 
-    def __init__(self, status = None, id = None):
+    def __init__(self, status=None, id=None):
         if status is None or status == "":
             self.enabled = True
         else:
@@ -26,7 +27,7 @@ class Logger:
                 self.enabled = True
             else:
                 self.enabled = False
-    
+
         if self.enabled is True:
             is_development = False
             if os.getenv("OPEN_RUNTIMES_ENV") == "development":
@@ -39,11 +40,11 @@ class Logger:
                     self.id = self.generate_id()
             else:
                 self.id = id
-            
+
             self.stream_logs = open("/mnt/logs/" + self.id + "_logs.log", "a")
             self.stream_errors = open("/mnt/logs/" + self.id + "_errors.log", "a")
-    
-    def write(self, message, xtype = None, is_native = False):
+
+    def write(self, message, xtype=None, is_native=False):
         if xtype is None:
             xtype = Logger.TYPE_LOG
 
@@ -52,7 +53,9 @@ class Logger:
 
         if is_native is True and self.includes_native_info is False:
             self.includes_native_info = True
-            self.write("Native logs detected. Use context.log() or context.error() for better experience.")
+            self.write(
+                "Native logs detected. Use context.log() or context.error() for better experience."
+            )
 
         stream = self.stream_logs
 
@@ -62,7 +65,7 @@ class Logger:
         string_log = ""
 
         if isinstance(message, (list, dict, tuple)):
-            string_log = json.dumps(message, separators=(',', ':'))
+            string_log = json.dumps(message, separators=(",", ":"))
         else:
             string_log = str(message)
 
@@ -71,7 +74,7 @@ class Logger:
     def end(self):
         if self.enabled is False:
             return
-        
+
         self.enabled = False
 
         self.stream_logs.close()
@@ -87,11 +90,11 @@ class Logger:
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
 
-    def generate_id(self, padding = 7):
+    def generate_id(self, padding=7):
         now = datetime.now()
         sec = int(now.timestamp())
-        usec = (now.microsecond % 1000)
-        base_id = f'{sec:08x}{usec:05x}'
+        usec = now.microsecond % 1000
+        base_id = f"{sec:08x}{usec:05x}"
         random_bytes = os.urandom(math.ceil(padding / 2))
         random_padding = random_bytes.hex()[:padding]
         return base_id + random_padding

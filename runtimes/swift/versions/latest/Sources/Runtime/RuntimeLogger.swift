@@ -7,28 +7,28 @@ class RuntimeLogger {
     var enabled = false
     var id = ""
 
-    var streamLogs: FileHandle? = nil
-    var streamErrors: FileHandle? = nil
+    var streamLogs: FileHandle?
+    var streamErrors: FileHandle?
 
     init(status: String, id: String) {
-        if(status == "enabled" || status == "") {
-            self.enabled = true
+        if status == "enabled" || status == "" {
+            enabled = true
         }
 
-        if(self.enabled) {
-            if(id == "") {
+        if enabled {
+            if id == "" {
                 let serverEnv = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_ENV"]
-                if(serverEnv == "development") {
+                if serverEnv == "development" {
                     self.id = "dev"
                 } else {
-                    self.id = self.generateId()
+                    self.id = generateId()
                 }
             } else {
                 self.id = id
             }
 
-            let logsUrl = URL(fileURLWithPath:"/mnt/logs/" + self.id + "_logs.log")
-            let errorsUrl = URL(fileURLWithPath:"/mnt/logs/" + self.id + "_errors.log")
+            let logsUrl = URL(fileURLWithPath: "/mnt/logs/" + self.id + "_logs.log")
+            let errorsUrl = URL(fileURLWithPath: "/mnt/logs/" + self.id + "_errors.log")
 
             if !FileManager.default.fileExists(atPath: logsUrl.path) {
                 FileManager.default.createFile(atPath: logsUrl.path, contents: nil, attributes: nil)
@@ -38,39 +38,40 @@ class RuntimeLogger {
                 FileManager.default.createFile(atPath: errorsUrl.path, contents: nil, attributes: nil)
             }
 
-            self.streamLogs = try! FileHandle(forWritingTo: logsUrl)
-            self.streamErrors = try! FileHandle(forWritingTo: errorsUrl)
+            streamLogs = try! FileHandle(forWritingTo: logsUrl)
+            streamErrors = try! FileHandle(forWritingTo: errorsUrl)
 
-            if let stream = self.streamLogs {
+            if let stream = streamLogs {
                 stream.seekToEndOfFile()
             }
 
-            if let stream = self.streamErrors {
+            if let stream = streamErrors {
                 stream.seekToEndOfFile()
             }
         }
     }
 
     func write(message: Any, type: String = RuntimeLogger.TYPE_LOG) {
-        if(self.enabled == false) {
+        if enabled == false {
             return
         }
 
-        var stream = self.streamLogs;
+        var stream = streamLogs
 
-        if(type == RuntimeLogger.TYPE_ERROR) {
-            stream = self.streamErrors;
+        if type == RuntimeLogger.TYPE_ERROR {
+            stream = streamErrors
         }
 
         var stringLog = ""
         if message is CollectionType {
             if let data = try? JSONSerialization.data(withJSONObject: message),
-                let stringTemp = String(data: data, encoding: .utf8) {
-                    stringLog = stringTemp
+               let stringTemp = String(data: data, encoding: .utf8)
+            {
+                stringLog = stringTemp
             }
         }
-        
-        if(stringLog == "") {
+
+        if stringLog == "" {
             stringLog = String(describing: message)
         }
 
@@ -84,17 +85,17 @@ class RuntimeLogger {
     }
 
     func end() {
-        if(!self.enabled) {
-            return;
+        if !enabled {
+            return
         }
 
-        self.enabled = false;
+        enabled = false
 
-        if let stream = self.streamLogs {
+        if let stream = streamLogs {
             stream.closeFile()
         }
 
-        if let stream = self.streamErrors {
+        if let stream = streamErrors {
             stream.closeFile()
         }
     }
@@ -104,8 +105,8 @@ class RuntimeLogger {
         let secs = Int(now.timeIntervalSince1970)
         let usec = Int((now.timeIntervalSince1970 - Double(secs)) * 1_000_000)
         let baseId = String(format: "%08x%05x", secs, usec)
-        let randomPadding = (1...padding).map {
-            _ in String(format: "%x", Int.random(in: 0..<16))
+        let randomPadding = (1 ... padding).map {
+            _ in String(format: "%x", Int.random(in: 0 ..< 16))
         }.joined()
         return baseId + randomPadding
     }

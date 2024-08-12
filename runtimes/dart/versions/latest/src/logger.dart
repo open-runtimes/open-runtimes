@@ -13,32 +13,40 @@ class Logger {
   IOSink? streamLogs;
   IOSink? streamErrors;
 
-  Logger([ String? status = null, String? id = null ]) {
+  Logger([String? status = null, String? id = null]) {
     this.enabled = (status != null ? status : 'enabled') == 'enabled';
-  
-    if(this.enabled) {
-      this.id = id != null ? id : (Platform.environment['OPEN_RUNTIMES_ENV'] == 'development' ? 'dev' : this.generateId());
 
-      this.streamLogs = File('/mnt/logs/' + this.id + '_logs.log').openWrite(mode: FileMode.append);
-      this.streamErrors = File('/mnt/logs/' + this.id + '_errors.log').openWrite(mode: FileMode.append);
+    if (this.enabled) {
+      this.id = id != null
+          ? id
+          : (Platform.environment['OPEN_RUNTIMES_ENV'] == 'development'
+              ? 'dev'
+              : this.generateId());
+
+      this.streamLogs = File('/mnt/logs/' + this.id + '_logs.log')
+          .openWrite(mode: FileMode.append);
+      this.streamErrors = File('/mnt/logs/' + this.id + '_errors.log')
+          .openWrite(mode: FileMode.append);
     }
   }
 
   void write(dynamic message, [String? type = null, bool isNative = false]) {
     type ??= Logger.TYPE_LOG;
 
-    if(!this.enabled) {
+    if (!this.enabled) {
       return;
     }
 
-    if(isNative && !this.includesNativeInfo) {
+    if (isNative && !this.includesNativeInfo) {
       this.includesNativeInfo = true;
-      this.write('Native logs detected. Use context.log() or context.error() for better experience.');
+      this.write(
+          'Native logs detected. Use context.log() or context.error() for better experience.');
     }
 
-    final stream = type == Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
+    final stream =
+        type == Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
 
-    if(stream == null) {
+    if (stream == null) {
       return;
     }
 
@@ -58,7 +66,7 @@ class Logger {
   }
 
   Future<void> end() async {
-    if(!this.enabled || this.streamLogs == null || this.streamErrors == null) {
+    if (!this.enabled || this.streamLogs == null || this.streamErrors == null) {
       return;
     }
 

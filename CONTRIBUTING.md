@@ -119,6 +119,16 @@ sh tests.sh go-1.22
 
 > Replace `go-1.22` with runtime name that you want to test
 
+## Formatting
+
+Run following command to run formatter for any runtime runtime:
+
+```
+sh formatter.sh node
+```
+
+> Replace `node` with runtime name that you want to test
+
 ## Introducing New Features
 
 We would 💖 for you to contribute to Open Runtimes, but we would also like to make sure Open Runtimes is as great as possible and loyal to its vision and mission statement 🙏.

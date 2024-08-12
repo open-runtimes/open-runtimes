@@ -16,7 +16,7 @@ const USER_CODE_PATH = '/usr/local/server/src/function';
 
 $userFunction = null;
 
-$action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) {
+$action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction) {
     $requestHeaders = $req->header;
 
     $cookieHeaders = [];
@@ -41,7 +41,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
         $safeTimeout = \intval($timeout);
     }
 
-    if((getenv('OPEN_RUNTIMES_SECRET') ?? '') != "" && ($requestHeaders['x-open-runtimes-secret'] ?? '') !== getenv('OPEN_RUNTIMES_SECRET')) {
+    if ((getenv('OPEN_RUNTIMES_SECRET') ?? '') != "" && ($requestHeaders['x-open-runtimes-secret'] ?? '') !== getenv('OPEN_RUNTIMES_SECRET')) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
         return;
@@ -53,7 +53,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $query = [];
 
     $hostHeader = ($requestHeaders['host'] ?? '');
-    if(\str_contains($hostHeader, ':')) {
+    if (\str_contains($hostHeader, ':')) {
         $pair = \explode(':', $hostHeader);
         $host = $pair[0];
         $port = \intval($pair[1]);
@@ -65,20 +65,20 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $queryString = $req->server['query_string'] ?? '';
     foreach (\explode('&', $queryString) as $param) {
         $pair = \explode('=', $param, 2);
-        if(!empty($pair[0])) {
+        if (!empty($pair[0])) {
             $query[$pair[0]] = $pair[1] ?? '';
         }
     }
 
     $url = $scheme . '://' . $host;
 
-    if($port !== \intval($defaultPort)) {
+    if ($port !== \intval($defaultPort)) {
         $url .= ':' . \strval($port);
     }
 
     $url .= $path;
 
-    if(!empty($queryString)) {
+    if (!empty($queryString)) {
         $url .= '?' . $queryString;
     }
 
@@ -95,7 +95,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $context->req->headers = [];
 
     foreach ($requestHeaders as $header => $value) {
-        if(!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
+        if (!(\str_starts_with(\strtolower($header), 'x-open-runtimes-'))) {
             $context->req->headers[\strtolower($header)] = $value;
         }
     }
@@ -109,8 +109,8 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
 
     $output = null;
 
-    $execute = function() use ($userFunction, &$output, $context, $logger) {
-        if($userFunction === null) {
+    $execute = function () use ($userFunction, &$output, $context, $logger) {
+        if ($userFunction === null) {
             $userFunction = include(USER_CODE_PATH . '/' . getenv('OPEN_RUNTIMES_ENTRYPOINT'));
         }
 
@@ -124,16 +124,16 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     };
 
     try {
-        if($safeTimeout !== null) {
+        if ($safeTimeout !== null) {
             $executed = false;
             Swoole\Coroutine\batch([
-                function() use ($execute, &$executed) {
+                function () use ($execute, &$executed) {
                     \call_user_func($execute);
                     $executed = true;
                 }
             ], $safeTimeout);
 
-            if(!$executed) {
+            if (!$executed) {
                 $context->error('Execution timed out.');
                 $output = $context->res->text('', 500);
             }
@@ -146,7 +146,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
         $output = $context->res->text('', 500);
     }
 
-    if($output == null) {
+    if ($output == null) {
         $context->error('Return statement missing. return $context->res->empty() if no response is expected.');
         $output = $context->res->text('', 500);
     }
@@ -157,7 +157,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
 
     $headers = \array_change_key_case($output['headers']);
 
-    if(!empty($headers['content-type'])) {
+    if (!empty($headers['content-type'])) {
         $headers['content-type'] = \strtolower($headers['content-type']);
     }
 
@@ -170,7 +170,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     }
 
     foreach ($headers as $header => $value) {
-        if(!(\str_starts_with($header, 'x-open-runtimes-'))) {
+        if (!(\str_starts_with($header, 'x-open-runtimes-'))) {
             $res->header($header, $value);
         }
     }
@@ -182,7 +182,7 @@ $action = function(Logger $logger, mixed $req, mixed $res) use (&$userFunction) 
     $res->end($output['body']);
 };
 
-$server->on("Request", function($req, $res) use($action) {
+$server->on("Request", function ($req, $res) use ($action) {
     $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '');
 
     try {
@@ -202,7 +202,7 @@ $server->on("Request", function($req, $res) use($action) {
     }
 });
 
-$server->on("Start", function() {
+$server->on("Start", function () {
     echo("HTTP server successfully started!\n");
 });
 

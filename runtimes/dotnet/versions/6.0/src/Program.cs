@@ -1,14 +1,18 @@
-using DotNetRuntime;
-using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Web;
+using DotNetRuntime;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
 var app = WebApplication.Create(args);
 app.Urls.Add("http://0.0.0.0:3000");
-app.MapMethods("/{*path}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE" }, Execute);
+app.MapMethods(
+    "/{*path}",
+    new[] { "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE" },
+    Execute
+);
 
 Console.WriteLine("HTTP server successfully started!");
 
@@ -16,11 +20,17 @@ app.Run();
 
 static async Task<IResult> Execute(HttpRequest request)
 {
-    var loggingHeader = request.Headers.TryGetValue("x-open-runtimes-logging", out var loggingHeaderValue)
+    var loggingHeader = request.Headers.TryGetValue(
+        "x-open-runtimes-logging",
+        out var loggingHeaderValue
+    )
         ? loggingHeaderValue.ToString()
         : string.Empty;
 
-    var logIdHeader = request.Headers.TryGetValue("x-open-runtimes-log-id", out var logIdHeaderValue)
+    var logIdHeader = request.Headers.TryGetValue(
+        "x-open-runtimes-log-id",
+        out var logIdHeaderValue
+    )
         ? logIdHeaderValue.ToString()
         : string.Empty;
 
@@ -29,7 +39,8 @@ static async Task<IResult> Execute(HttpRequest request)
     try
     {
         return await Action(request, logger);
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
         logger.Write(e.ToString(), RuntimeLogger.TYPE_ERROR);
         logger.End();
@@ -48,11 +59,16 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         ? timeoutValue.ToString()
         : string.Empty;
 
-    if(!string.IsNullOrEmpty(timeout))
+    if (!string.IsNullOrEmpty(timeout))
     {
-        if(!Int32.TryParse(timeout, out safeTimout) || safeTimout == 0)
+        if (!Int32.TryParse(timeout, out safeTimout) || safeTimout == 0)
         {
-            return new CustomResponse(System.Text.Encoding.UTF8.GetBytes("Header \"x-open-runtimes-timeout\" must be an integer greater than 0."), 500);
+            return new CustomResponse(
+                System.Text.Encoding.UTF8.GetBytes(
+                    "Header \"x-open-runtimes-timeout\" must be an integer greater than 0."
+                ),
+                500
+            );
         }
     }
 
@@ -60,14 +76,18 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         ? secretValue.ToString()
         : string.Empty;
 
-
     string serverSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET");
     if (!string.IsNullOrEmpty(serverSecret) && secret != serverSecret)
     {
-        return new CustomResponse(System.Text.Encoding.UTF8.GetBytes("Unauthorized. Provide correct \"x-open-runtimes-secret\" header."), 500);
+        return new CustomResponse(
+            System.Text.Encoding.UTF8.GetBytes(
+                "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."
+            ),
+            500
+        );
     }
 
-    byte[] bodyBinary = new byte[] {};
+    byte[] bodyBinary = new byte[] { };
     Stream bodyStream = request.Body;
 
     using (MemoryStream memoryStream = new MemoryStream())
@@ -83,7 +103,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         var header = entry.Key.ToLower();
         var value = entry.Value;
 
-        if(!header.StartsWith("x-open-runtimes-"))
+        if (!header.StartsWith("x-open-runtimes-"))
         {
             headers.Add(header, value);
         }
@@ -95,8 +115,10 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         enforcedHeadersString = "{}";
     }
 
-    Dictionary<string, object> enforcedHeaders = JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString) ?? new Dictionary<string, object>();
-    foreach(KeyValuePair<string, object> entry in enforcedHeaders)
+    Dictionary<string, object> enforcedHeaders =
+        JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString)
+        ?? new Dictionary<string, object>();
+    foreach (KeyValuePair<string, object> entry in enforcedHeaders)
     {
         headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
     }
@@ -109,18 +131,16 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         ? protoHeaderValue.ToString()
         : "http";
 
-    var defaultPort = scheme == "https"
-        ? "443"
-        : "80";
+    var defaultPort = scheme == "https" ? "443" : "80";
 
     var host = string.Empty;
     var port = Int32.Parse(defaultPort);
 
-    if(hostHeader.Contains(":"))
+    if (hostHeader.Contains(":"))
     {
         host = hostHeader.Split(":")[0];
         port = Int32.Parse(hostHeader.Split(":")[1]);
-    } 
+    }
     else
     {
         host = hostHeader;
@@ -130,7 +150,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     var path = request.Path;
 
     var queryString = request.QueryString.Value ?? "";
-    if(queryString.StartsWith("?")) 
+    if (queryString.StartsWith("?"))
     {
         queryString = queryString.Remove(0, 1);
     }
@@ -139,7 +159,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     foreach (var param in queryString.Split("&"))
     {
         var pair = param.Split("=", 2);
-        if(pair.Length >= 1 && !string.IsNullOrEmpty(pair[0])) 
+        if (pair.Length >= 1 && !string.IsNullOrEmpty(pair[0]))
         {
             var value = pair.Length == 2 ? pair[1] : "";
             query.Add(pair[0], value);
@@ -148,7 +168,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
 
     var url = $"{scheme}://{host}";
 
-    if(port != Int32.Parse(defaultPort))
+    if (port != Int32.Parse(defaultPort))
     {
         url += $":{port.ToString()}";
     }
@@ -170,7 +190,8 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         queryString,
         url,
         headers,
-        bodyBinary);
+        bodyBinary
+    );
 
     var contextResponse = new RuntimeResponse();
 
@@ -185,7 +206,8 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         if (safeTimout != -1)
         {
             var result = await await Task.WhenAny<RuntimeOutput?>(
-                Task.Run<RuntimeOutput?>(async () => {
+                Task.Run<RuntimeOutput?>(async () =>
+                {
                     await Task.Delay(safeTimout * 1000);
                     return null;
                 }),
@@ -201,7 +223,8 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
                 context.Error("Execution timed out.");
                 output = context.Res.Text("", 500);
             }
-        } else
+        }
+        else
         {
             output = await new Handler().Main(context);
         }
@@ -209,17 +232,19 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     catch (Exception e)
     {
         context.Error(e.ToString());
-        output = context.Res.Text("", 500, new Dictionary<string,string>());
+        output = context.Res.Text("", 500, new Dictionary<string, string>());
     }
     finally
     {
         logger.RevertNativeLogs();
     }
 
-    if(output == null)
+    if (output == null)
     {
-        context.Error("Return statement missing. return context.Res.Empty() if no response is expected.");
-        output = context.Res.Text("", 500, new Dictionary<string,string>());
+        context.Error(
+            "Return statement missing. return context.Res.Empty() if no response is expected."
+        );
+        output = context.Res.Text("", 500, new Dictionary<string, string>());
     }
 
     var outputHeaders = new Dictionary<string, string>();
