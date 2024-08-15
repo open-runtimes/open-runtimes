@@ -126,6 +126,13 @@ When you can have two!
             return context.res.send(context.req.bodyRaw);
         case 'deprecatedMethodsUntypedBody':
             return context.res.send(50);
+        case 'deprecatedMethodsBytesBody':
+            // Buffer from base64. It's content as MD5 is d3a119080678e92f8a0d7e2547b46291
+            const image = Buffer.from('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', 'base64');
+
+            return context.res.send(image, 200, {
+                'content-type': 'image/png'
+            });
         default:
             throw new Error('Unknown action');
     }
