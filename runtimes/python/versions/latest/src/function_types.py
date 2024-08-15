@@ -14,7 +14,11 @@ class Response:
         return self.binary(body.encode("utf-8"), statusCode, headers)
 
     def send(self, body, statusCode=200, headers={}):
-        return self.text(str(body), statusCode, headers)
+        return {
+            "body": body,
+            "statusCode": statusCode,
+            "headers": headers,
+        }
 
     def json(self, obj, statusCode=200, headers={}):
         headers["content-type"] = "application/json"

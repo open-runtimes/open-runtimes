@@ -150,7 +150,11 @@ const action = async (logger: Logger, ctx: any) => {
     },
     res: {
       send: function (body: any, statusCode = 200, headers: any = {}) {
-        return this.text(body, statusCode, headers);
+        return {
+          body: body,
+          statusCode: statusCode,
+          headers: headers,
+        };
       },
       text: function (body: string, statusCode = 200, headers = {}) {
         const encoder = new TextEncoder();
