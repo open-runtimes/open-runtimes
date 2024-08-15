@@ -542,12 +542,12 @@ class Base extends TestCase
     {
         $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethodsBytesBody']);
 
-        $affectedRuntimes = [ 'node' ];
+        $affectedRuntimes = [ 'node', 'deno', 'bun', 'php', 'ruby', 'python' ];
         if(\in_array($this->runtimeName, $affectedRuntimes)) {
             self::assertEquals(200, $response['code']);
             self::assertIsString($response['body']);
             self::assertStringStartsWith('image/png', $response['headers']['content-type']);
-            self::assertEquals('d3a119080678e92f8a0d7e2547b46291', \md5($response['body']));
+            self::assertEquals('2a8fdeea08e939e9a7c05653544a1374', \md5($response['body']));
         } else {
             self::assertEquals(500, $response['code']);
             self::assertStringContainsString('Unknown action', Client::getErrors($response['headers']['x-open-runtimes-log-id']));

@@ -126,7 +126,11 @@ const action = async (logger: Logger, request: any) => {
     },
     res: {
       send: function (body: any, statusCode = 200, headers = {}) {
-        return this.text(`${body}`, statusCode, headers);
+        return {
+          body: body,
+          statusCode: statusCode,
+          headers: headers,
+        };
       },
       text: function (body: string, statusCode = 200, headers = {}) {
         return this.binary(Buffer.from(body, "utf8"), statusCode, headers);
