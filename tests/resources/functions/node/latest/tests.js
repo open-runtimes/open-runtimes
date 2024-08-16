@@ -133,6 +133,10 @@ When you can have two!
             return context.res.send(image, 200, {
                 'content-type': 'image/png'
             });
+        case 'spreadOperatorLogs':
+            const engine = 'open-runtimes';
+            context.log("engine:", engine);
+            return context.res.text('OK');
         default:
             throw new Error('Unknown action');
     }

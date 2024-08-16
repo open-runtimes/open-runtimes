@@ -33,28 +33,35 @@ class Logger {
     }
   }
 
-  write(message, type = Logger.TYPE_LOG, native = false) {
+  write(messages, type = Logger.TYPE_LOG, native = false) {
     if (!this.enabled) {
       return;
     }
 
     if (native && !this.includesNativeInfo) {
       this.includesNativeInfo = true;
-      this.write(
+      this.write([
         "Native logs detected. Use context.log() or context.error() for better experience.",
-      );
+      ]);
     }
 
     const stream =
       type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
 
     let stringLog = "";
-    if (message instanceof Error) {
-      stringLog = [message.stack || message].join("\n");
-    } else if (message instanceof Object || Array.isArray(message)) {
-      stringLog = JSON.stringify(message);
-    } else {
-      stringLog = `${message}`;
+    for (let i = 0; i < messages.length; i++) {
+      const message = messages[i];
+      if (message instanceof Error) {
+        stringLog += [message.stack || message].join("\n");
+      } else if (message instanceof Object || Array.isArray(message)) {
+        stringLog += JSON.stringify(message);
+      } else {
+        stringLog += `${message}`;
+      }
+
+      if (i < messages.length - 1) {
+        stringLog += " ";
+      }
     }
 
     stream.write(stringLog + "\n");
@@ -94,10 +101,7 @@ class Logger {
       console.warn =
       console.error =
         (...args) => {
-          const formattedArgs = args.map((arg) =>
-            typeof arg === "object" ? JSON.stringify(arg) : arg,
-          );
-          this.write(formattedArgs.join(" "), Logger.TYPE_LOG, true);
+          this.write(args, Logger.TYPE_LOG, true);
         };
   }
 
