@@ -67,7 +67,9 @@ public class Server {
       ctx.header("x-open-runtimes-log-id", logger.getId());
 
       try {
-        logger.write(arrayOf(message), RuntimeLogger.TYPE_ERROR, false);
+        String[] logs = new String[1];
+        logs[0] = message.toString();
+        logger.write(logs, RuntimeLogger.TYPE_ERROR, false);
         logger.end();
       } catch (IOException e2) {
         // Ignore missing logs
