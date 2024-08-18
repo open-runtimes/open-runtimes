@@ -672,6 +672,7 @@ class Base extends TestCase
             self::assertStringContainsString('open-runtimes', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
             self::assertStringContainsString(' ', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
             $spaceOccurances = \substr_count(Client::getLogs($response['headers']['x-open-runtimes-log-id']), ' ');
+            self::assertEquals(1, $spaceOccurances);
             self::assertStringContainsString('engine:', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
             self::assertStringContainsString('open-runtimes', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
             self::assertStringContainsString(' ', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
