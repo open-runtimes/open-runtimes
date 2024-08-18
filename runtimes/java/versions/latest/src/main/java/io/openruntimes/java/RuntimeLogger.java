@@ -72,7 +72,7 @@ public class RuntimeLogger {
     return this.id;
   }
 
-  public void write(Object message, String type, Boolean xnative) throws IOException {
+  public void write(Object[] messages, String type, Boolean xnative) throws IOException {
     if (this.enabled == false) {
       return;
     }
@@ -87,10 +87,10 @@ public class RuntimeLogger {
 
     if (xnative && !this.includesNativeInfo) {
       this.includesNativeInfo = true;
-      this.write(
-          "Native logs detected. Use context.log() or context.error() for better experience.",
-          type,
-          xnative);
+
+      String[] logs = new String[1];
+      logs[0] = "Native logs detected. Use context.log() or context.error() for better experience.";
+      this.write(logs, type, xnative);
     }
 
     FileWriter stream = this.streamLogs;
@@ -100,10 +100,21 @@ public class RuntimeLogger {
     }
 
     String stringLog = "";
-    if (message instanceof Map || message instanceof List || message instanceof Set) {
-      stringLog = gson.toJson(message);
-    } else {
-      stringLog = message.toString();
+
+    int i = 0;
+
+    for (Object message : messages) {
+      if (message instanceof Map || message instanceof List || message instanceof Set) {
+        stringLog += gson.toJson(message);
+      } else {
+        stringLog += message.toString();
+      }
+
+      if (i < messages.length - 1) {
+        stringLog += " ";
+      }
+
+      i += 1;
     }
 
     stream.write(stringLog);
@@ -138,7 +149,9 @@ public class RuntimeLogger {
 
     if (!this.customStdStream.toString().isEmpty()) {
       try {
-        this.write(customStdStream.toString(), RuntimeLogger.TYPE_LOG, true);
+        String[] logs = new String[1];
+        logs[0] = customStdStream.toString();
+        this.write(logs, RuntimeLogger.TYPE_LOG, true);
       } catch (IOException e) {
         // Ignore missing logs
       }

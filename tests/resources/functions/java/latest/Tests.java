@@ -215,6 +215,12 @@ public class Tests {
             case "deprecatedMethodsUntypedBody" -> {
                 return context.getRes().send("50"); // Send only supported String
             }
+            case "spreadOperatorLogs" -> {
+                String engine = "open-runtimes";
+                context.log("engine:", engine);
+                context.error("engine:", engine);
+                return context.getRes().text("OK");
+            }
             default -> throw new Exception("Unknown action");
         }
     }

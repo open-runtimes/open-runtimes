@@ -46,7 +46,7 @@ suspend fun execute(ctx: Context) {
 
         ctx.header("x-open-runtimes-log-id", logger.id ?: "")
 
-        logger.write(message, RuntimeLogger.TYPE_ERROR, false)
+        logger.write(arrayOf(message), RuntimeLogger.TYPE_ERROR, false)
         logger.end()
 
         ctx.status(500).result("")

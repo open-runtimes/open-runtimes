@@ -664,7 +664,7 @@ class Base extends TestCase
     {
         $response = Client::execute(body: '', headers: ['x-action' => 'spreadOperatorLogs']);
 
-        $affectedRuntimes = [ 'node', 'deno', 'bun', 'python', 'ruby', 'php' ];
+        $affectedRuntimes = [ 'node', 'deno', 'bun', 'python', 'ruby', 'php', 'java', 'kotlin' ];
         if(\in_array($this->runtimeName, $affectedRuntimes)) {
             self::assertEquals(200, $response['code']);
             self::assertEquals('OK', $response['body']);

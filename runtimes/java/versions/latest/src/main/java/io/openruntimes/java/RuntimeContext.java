@@ -21,17 +21,23 @@ public class RuntimeContext {
     this.logger = logger;
   }
 
-  public void log(Object message) {
+  public void log(Object... messages) {
     try {
-      this.logger.write(message + "\n", RuntimeLogger.TYPE_LOG, false);
+      this.logger.write(messages, RuntimeLogger.TYPE_LOG, false);
+      String[] linebreak = new String[1];
+      linebreak[0] = "\n";
+      this.logger.write(linebreak, RuntimeLogger.TYPE_LOG, false);
     } catch (IOException e) {
       // Ignore missing logs
     }
   }
 
-  public void error(Object message) {
+  public void error(Object... messages) {
     try {
-      this.logger.write(message + "\n", RuntimeLogger.TYPE_ERROR, false);
+      this.logger.write(messages, RuntimeLogger.TYPE_ERROR, false);
+      String[] linebreak = new String[1];
+      linebreak[0] = "\n";
+      this.logger.write(linebreak, RuntimeLogger.TYPE_ERROR, false);
     } catch (IOException e) {
       // Ignore missing logs
     }
