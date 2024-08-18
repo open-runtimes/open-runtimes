@@ -249,7 +249,7 @@ func main() {
 		logger, loggerErr := openruntimes.NewLogger(logging, logId)
 
 		if loggerErr != nil {
-			logger.Write([]string{
+			logger.Write([]interface{}{
 				loggerErr.Error(),
 			}, openruntimes.LOGGER_TYPE_ERROR, false)
 
@@ -265,7 +265,7 @@ func main() {
 		err := action(w, r, logger)
 
 		if err != nil {
-			logger.Write([]string{
+			logger.Write([]interface{}{
 				err.Error(),
 			}, openruntimes.LOGGER_TYPE_ERROR, false)
 
