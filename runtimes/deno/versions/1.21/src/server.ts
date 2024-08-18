@@ -19,7 +19,7 @@ app.use(async (ctx: any) => {
   try {
     await action(logger, ctx);
   } catch (e) {
-    logger.write(e, Logger.TYPE_ERROR);
+    logger.write([e], Logger.TYPE_ERROR);
 
     ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
     await logger.end();
@@ -179,11 +179,11 @@ const action = async (logger: Logger, ctx: any) => {
         return this.text("", statusCode, headers);
       },
     },
-    log: function (message: any) {
-      logger.write(message, Logger.TYPE_LOG);
+    log: function (...messages: any) {
+      logger.write(messages, Logger.TYPE_LOG);
     },
-    error: function (message: any) {
-      logger.write(message, Logger.TYPE_ERROR);
+    error: function (...messages: any) {
+      logger.write(messages, Logger.TYPE_ERROR);
     },
   };
 

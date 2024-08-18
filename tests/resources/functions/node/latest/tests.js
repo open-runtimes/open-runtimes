@@ -136,6 +136,7 @@ When you can have two!
         case 'spreadOperatorLogs':
             const engine = 'open-runtimes';
             context.log("engine:", engine);
+            context.error("engine:", engine);
             return context.res.text('OK');
         default:
             throw new Error('Unknown action');

@@ -173,7 +173,7 @@ async def handler(u_path):
         return await action(logger, request)
     except Exception as e:
         message = "".join(traceback.TracebackException.from_exception(e).format())
-        logger.write(message, Logger.TYPE_ERROR)
+        logger.write([message], Logger.TYPE_ERROR)
 
     resp = FlaskResponse("", 500)
 

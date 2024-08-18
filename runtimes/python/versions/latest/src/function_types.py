@@ -89,10 +89,10 @@ class Context:
         self.res = Response()
         self.logger = logger
 
-    def log(self, message):
-        self.logger.write(message, Logger.TYPE_LOG)
+    def log(self, *messages):
+        self.logger.write(messages, Logger.TYPE_LOG)
         self.logger.write("\n", Logger.TYPE_LOG)
 
-    def error(self, message):
-        self.logger.write(message, Logger.TYPE_ERROR)
+    def error(self, *messages):
+        self.logger.write(messages, Logger.TYPE_ERROR)
         self.logger.write("\n", Logger.TYPE_ERROR)
