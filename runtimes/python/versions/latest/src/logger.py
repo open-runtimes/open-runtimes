@@ -74,7 +74,7 @@ class Logger:
 
             if i < len(messages) - 1:
                 string_log += " "
-            
+
             i += 1
 
         stream.write(string_log)

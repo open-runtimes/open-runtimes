@@ -91,8 +91,8 @@ class Context:
 
     def log(self, *messages):
         self.logger.write(messages, Logger.TYPE_LOG)
-        self.logger.write("\n", Logger.TYPE_LOG)
+        self.logger.write(["\n"], Logger.TYPE_LOG)
 
     def error(self, *messages):
         self.logger.write(messages, Logger.TYPE_ERROR)
-        self.logger.write("\n", Logger.TYPE_ERROR)
+        self.logger.write(["\n"], Logger.TYPE_ERROR)

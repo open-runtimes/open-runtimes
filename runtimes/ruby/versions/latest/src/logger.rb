@@ -40,14 +40,14 @@ class RuntimeLogger
     end
   end
 
-  def write(message, type = RuntimeLogger::TYPE_LOG, native = false)
+  def write(messages, type = RuntimeLogger::TYPE_LOG, native = false)
     if !@enabled
       return
     end
 
     if native && !@includes_native_info
       @includes_native_info = true
-      self.write("Native logs detected. Use context.log() or context.error() for better experience.", type,
+      self.write(["Native logs detected. Use context.log() or context.error() for better experience."], type,
                  native)
     end
 
@@ -58,10 +58,19 @@ class RuntimeLogger
     end
 
     string_log = ""
-    if message.kind_of?(Array) || message.kind_of?(Hash)
-      string_log = message.to_json
-    else
-      string_log = message.to_s
+    i = 0
+    messages.each do |message|
+      if message.kind_of?(Array) || message.kind_of?(Hash)
+        string_log += message.to_json
+      else
+        string_log += message.to_s
+      end
+
+      if i < messages.length() - 1
+        string_log += " ";
+      end
+
+      i += 1
     end
 
     stream.write(string_log)
@@ -91,7 +100,7 @@ class RuntimeLogger
     $stderr = @native_errors_cache
 
     unless @custom_std_stream.string.nil? || @custom_std_stream.string.empty?
-      self.write(custom_std_stream.string, RuntimeLogger::TYPE_LOG, true)
+      self.write([custom_std_stream.string], RuntimeLogger::TYPE_LOG, true)
     end
   end
 
