@@ -134,5 +134,10 @@ When you can have two!
         return context.res.send(image, 200, {
             'content-type': 'image/png'
         })
+    elif action == 'spreadOperatorLogs':
+        engine = 'open-runtimes'
+        context.log("engine:", engine)
+        context.error("engine:", engine)
+        return context.res.text('OK')
     else:
         raise Exception('Unknown action')
