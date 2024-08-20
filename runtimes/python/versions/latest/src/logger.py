@@ -44,7 +44,7 @@ class Logger:
             self.stream_logs = open("/mnt/logs/" + self.id + "_logs.log", "a")
             self.stream_errors = open("/mnt/logs/" + self.id + "_errors.log", "a")
 
-    def write(self, message, xtype=None, is_native=False):
+    def write(self, messages, xtype=None, is_native=False):
         if xtype is None:
             xtype = Logger.TYPE_LOG
 
@@ -54,7 +54,9 @@ class Logger:
         if is_native is True and self.includes_native_info is False:
             self.includes_native_info = True
             self.write(
-                "Native logs detected. Use context.log() or context.error() for better experience."
+                [
+                    "Native logs detected. Use context.log() or context.error() for better experience."
+                ]
             )
 
         stream = self.stream_logs
@@ -63,11 +65,17 @@ class Logger:
             stream = self.stream_errors
 
         string_log = ""
+        i = 0
+        for message in messages:
+            if isinstance(message, (list, dict, tuple)):
+                string_log += json.dumps(message, separators=(",", ":"))
+            else:
+                string_log += str(message)
 
-        if isinstance(message, (list, dict, tuple)):
-            string_log = json.dumps(message, separators=(",", ":"))
-        else:
-            string_log = str(message)
+            if i < len(messages) - 1:
+                string_log += " "
+
+            i += 1
 
         stream.write(string_log)
 
@@ -85,7 +93,7 @@ class Logger:
 
     def revert_native_logs(self):
         if self.custom_std is not None and self.custom_std.getvalue():
-            self.write(self.custom_std.getvalue(), Logger.TYPE_LOG, True)
+            self.write([self.custom_std.getvalue()], Logger.TYPE_LOG, True)
 
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__

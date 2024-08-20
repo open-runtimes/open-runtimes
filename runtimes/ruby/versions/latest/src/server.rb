@@ -178,7 +178,7 @@ def handle(request, response)
     message += "\n"
     message += e.backtrace.join("\n")
 
-    logger.write(message, RuntimeLogger::TYPE_ERROR)
+    logger.write([message], RuntimeLogger::TYPE_ERROR)
     logger.end
 
     response.headers['x-open-runtimes-log-id'] = logger.id

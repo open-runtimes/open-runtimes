@@ -70,7 +70,7 @@ class RuntimeLogger(
     }
 
     fun write(
-        message: Any,
+        messages: Array<out Any>,
         type: String = RuntimeLogger.TYPE_LOG,
         native: Boolean = false,
     ) {
@@ -80,7 +80,8 @@ class RuntimeLogger(
 
         if (native && !this.includesNativeInfo) {
             this.includesNativeInfo = true
-            this.write("Native logs detected. Use context.log() or context.error() for better experience.", type, native)
+
+            this.write(arrayOf("Native logs detected. Use context.log() or context.error() for better experience."), type, native)
         }
 
         var stream: FileWriter? = this.streamLogs
@@ -90,10 +91,20 @@ class RuntimeLogger(
         }
 
         var stringLog: String = ""
-        if (message is Map<*, *> || message is List<*> || message is Set<*>) {
-            stringLog = gson.toJson(message)
-        } else {
-            stringLog = message.toString()
+
+        var i = 0
+        for (message in messages) {
+            if (message is Map<*, *> || message is List<*> || message is Set<*>) {
+                stringLog += gson.toJson(message)
+            } else {
+                stringLog += message.toString()
+            }
+
+            if (i < messages.size - 1) {
+                stringLog += " "
+            }
+
+            i += 1
         }
 
         if (stream != null) {
@@ -129,7 +140,7 @@ class RuntimeLogger(
         System.setErr(this.nativeErrorsCache)
 
         if (!this.customStdStream.toString().isEmpty()) {
-            this.write(customStdStream.toString(), RuntimeLogger.TYPE_LOG, true)
+            this.write(arrayOf(customStdStream.toString()), RuntimeLogger.TYPE_LOG, true)
         }
     }
 

@@ -192,7 +192,7 @@ $server->on("Request", function ($req, $res) use ($action) {
         $message .= $e->getTraceAsString() . "\n";
         $message .= 'In ' . $e->getFile() . ':' . $e->getLine() . "\n";
 
-        $logger->write($message, Logger::TYPE_ERROR);
+        $logger->write([$message], Logger::TYPE_ERROR);
 
         $res->header('x-open-runtimes-log-id', $logger->id);
         $logger->end();

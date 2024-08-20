@@ -111,13 +111,13 @@ class RuntimeContext
         $this->logger = $logger;
     }
 
-    public function log(mixed $message): void
+    public function log(mixed ...$messages): void
     {
-        $this->logger->write($message, Logger::TYPE_LOG);
+        $this->logger->write($messages, Logger::TYPE_LOG);
     }
 
-    public function error(mixed $message): void
+    public function error(mixed ...$messages): void
     {
-        $this->logger->write($message, Logger::TYPE_ERROR);
+        $this->logger->write($messages, Logger::TYPE_ERROR);
     }
 }

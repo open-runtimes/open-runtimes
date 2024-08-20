@@ -154,11 +154,11 @@ const action = async (logger: Logger, request: any) => {
         return this.text("", statusCode, headers);
       },
     },
-    log: function (message: any) {
-      logger.write(message, Logger.TYPE_LOG);
+    log: function (...messages: any) {
+      logger.write(messages, Logger.TYPE_LOG);
     },
-    error: function (message: any) {
-      logger.write(message, Logger.TYPE_ERROR);
+    error: function (...messages: any) {
+      logger.write(messages, Logger.TYPE_ERROR);
     },
   };
 
@@ -268,7 +268,7 @@ Bun.serve({
     try {
       return await action(logger, request);
     } catch (e) {
-      logger.write(e, Logger.TYPE_ERROR);
+      logger.write([e], Logger.TYPE_ERROR);
 
       const responseHeaders: any = {};
       responseHeaders["x-open-runtimes-log-id"] = logger.id;

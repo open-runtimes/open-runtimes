@@ -206,6 +206,11 @@ When you can have two!
 		return Context.Res.Send(hashHex, Context.Res.WithHeaders(map[string]string{
 			"x-method": Context.Req.Method,
 		}))
+	case "spreadOperatorLogs":
+		engine := "open-runtimes"
+		Context.Log("engine:", engine)
+		Context.Error("engine:", engine)
+		return Context.Res.Text("OK")
 	default:
 		Context.Error("Unknown action in tests.go")
 		return Context.Res.Text("", Context.Res.WithStatusCode(500))

@@ -5,13 +5,13 @@ class RuntimeContext(
     val res: RuntimeResponse,
     val logger: RuntimeLogger,
 ) {
-    fun log(message: Any) {
-        this.logger.write(message, RuntimeLogger.TYPE_LOG)
-        this.logger.write("\n", RuntimeLogger.TYPE_LOG)
+    fun log(vararg messages: Any) {
+        this.logger.write(messages, RuntimeLogger.TYPE_LOG)
+        this.logger.write(arrayOf("\n"), RuntimeLogger.TYPE_LOG)
     }
 
-    fun error(message: Any) {
-        this.logger.write(message, RuntimeLogger.TYPE_ERROR)
-        this.logger.write("\n", RuntimeLogger.TYPE_ERROR)
+    fun error(vararg messages: Any) {
+        this.logger.write(messages, RuntimeLogger.TYPE_ERROR)
+        this.logger.write(arrayOf("\n"), RuntimeLogger.TYPE_ERROR)
     }
 }

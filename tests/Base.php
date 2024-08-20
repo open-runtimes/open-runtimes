@@ -659,4 +659,28 @@ class Base extends TestCase
         $actual = preg_replace('/\s+/', '', $actual);
         self::assertEquals($expected, $actual, $message);
     }
+
+    public function testSpreadOperatorLogs(): void
+    {
+        $response = Client::execute(body: '', headers: ['x-action' => 'spreadOperatorLogs']);
+
+        $affectedRuntimes = [ 'node', 'deno', 'bun', 'python', 'ruby', 'php', 'java', 'kotlin', 'go' ];
+        if(\in_array($this->runtimeName, $affectedRuntimes)) {
+            self::assertEquals(200, $response['code']);
+            self::assertEquals('OK', $response['body']);
+            self::assertStringContainsString('engine:', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+            self::assertStringContainsString('open-runtimes', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+            self::assertStringContainsString(' ', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+            $spaceOccurances = \substr_count(Client::getLogs($response['headers']['x-open-runtimes-log-id']), ' ');
+            self::assertEquals(1, $spaceOccurances);
+            self::assertStringContainsString('engine:', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+            self::assertStringContainsString('open-runtimes', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+            self::assertStringContainsString(' ', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+            $spaceOccurances = \substr_count(Client::getErrors($response['headers']['x-open-runtimes-log-id']), ' ');
+            self::assertEquals(1, $spaceOccurances);
+        } else {
+            self::assertEquals(500, $response['code']);
+            self::assertStringContainsString('Unknown action', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+        }
+    }
 }

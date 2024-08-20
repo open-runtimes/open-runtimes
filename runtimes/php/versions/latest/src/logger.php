@@ -24,7 +24,7 @@ class Logger
         }
     }
 
-    public function write(mixed $message, string $type = Logger::TYPE_LOG, bool $isNative = false): void
+    public function write(array $messages, string $type = Logger::TYPE_LOG, bool $isNative = false): void
     {
         if (!$this->enabled) {
             return;
@@ -32,18 +32,28 @@ class Logger
 
         if ($isNative && !$this->includesNativeInfo) {
             $this->includesNativeInfo = true;
-            $this->write('Native logs detected. Use context.log() or context.error() for better experience.');
+            $this->write(['Native logs detected. Use context.log() or context.error() for better experience.']);
         }
 
         $stream = $type == Logger::TYPE_ERROR ? $this->streamErrors : $this->streamLogs;
 
         $stringLog = "";
 
-        if (\is_array($message) || \is_object($message)) {
-            $stringLog = \json_encode($message);
-        } else {
-            $stringLog = \strval($message);
+        $i = 0;
+        foreach ($messages as $message) {
+            if (\is_array($message) || \is_object($message)) {
+                $stringLog .= \json_encode($message);
+            } else {
+                $stringLog .= \strval($message);
+            }
+
+            if ($i < \count($messages) - 1) {
+                $stringLog .= " ";
+            }
+
+            $i++;
         }
+
 
         \fwrite($stream, $stringLog . "\n");
     }
@@ -79,7 +89,7 @@ class Logger
         $customStd = ob_get_clean();
 
         if (!empty($customStd)) {
-            $this->write($customStd, Logger::TYPE_LOG, true);
+            $this->write([$customStd], Logger::TYPE_LOG, true);
         }
     }
 

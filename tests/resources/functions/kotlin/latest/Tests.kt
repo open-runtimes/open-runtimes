@@ -243,6 +243,12 @@ When you can have two!
             "deprecatedMethodsUntypedBody" -> {
                 return context.res.send("50"); // Send only supported String
             }
+            "spreadOperatorLogs" -> {
+                var engine = "open-runtimes";
+                context.log("engine:", engine);
+                context.error("engine:", engine);
+                return context.res.text("OK");
+            }
             else -> {
                 throw Exception("Unknown action")
             }
