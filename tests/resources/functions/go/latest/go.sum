@@ -14,6 +14,8 @@ github.com/open-runtimes/types-for-go/v4 v4.0.5 h1:Lw82fnOoaEmGgOoQmJhEOsYjs6Gin
 github.com/open-runtimes/types-for-go/v4 v4.0.5/go.mod h1:ab4mDSfgeG4kN8wWpaBSv0Ao3m9P6oEfN5gsXtx+iaI=
 github.com/open-runtimes/types-for-go/v4 v4.0.6-0.20240818164233-b4d5d5df2b30 h1:PuUh8RBMXuQXlk4Mn8/HnnlI+sutXh/K6ImhCfXVviI=
 github.com/open-runtimes/types-for-go/v4 v4.0.6-0.20240818164233-b4d5d5df2b30/go.mod h1:ab4mDSfgeG4kN8wWpaBSv0Ao3m9P6oEfN5gsXtx+iaI=
+github.com/open-runtimes/types-for-go/v4 v4.0.6 h1:0Xf58LMy/vwWkiRN6BvvpWt1mWzcWUWQ5wsWSezG2TU=
+github.com/open-runtimes/types-for-go/v4 v4.0.6/go.mod h1:ab4mDSfgeG4kN8wWpaBSv0Ao3m9P6oEfN5gsXtx+iaI=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
