@@ -67,7 +67,7 @@ formatter = { prepare = "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet too
 
 [go]
 entry = "tests.go"
-versions = ["1.22"]
+versions = ["1.23"]
 commands = { install = "", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "if [ \"$(gofmt -s -l . | wc -l)\" -gt 0 ]; then echo 'Formatting errors:' && gofmt -s -l . && exit 1; fi", write = "gofmt -w -s ." }
 

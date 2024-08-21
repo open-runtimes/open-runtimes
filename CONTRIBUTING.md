@@ -114,10 +114,10 @@ brew install yq
 To run test for a runtime, get runtime name (folder name) and execute below command:
 
 ```bash
-sh tests.sh go-1.22
+sh tests.sh go-1.23
 ```
 
-> Replace `go-1.22` with runtime name that you want to test
+> Replace `go-1.23` with runtime name that you want to test
 
 ## Formatting
 

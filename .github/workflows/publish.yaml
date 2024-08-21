@@ -285,10 +285,10 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Go
-          - ID: go-1.22
+          - ID: go-1.23
             RUNTIME: go
-            VERSION: "1.22"
-            IMAGE: openruntimes/go:v4-1.22
+            VERSION: "1.23"
+            IMAGE: openruntimes/go:v4-1.23
             ARCH: "linux/amd64,linux/arm64"
     name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
