@@ -1,6 +1,6 @@
 module openruntimes/server
 
-go 1.22.5
+go 1.23.0
 
 replace openruntimes/handler v0.0.0 => /usr/local/build
 

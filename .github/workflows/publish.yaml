@@ -285,13 +285,6 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Go
-          - ID: go-1.22
-            RUNTIME: go
-            VERSION: "1.22"
-            IMAGE: openruntimes/go:v4-1.22
-            ARCH: "linux/amd64,linux/arm64"
-
-          # Go
           - ID: go-1.23
             RUNTIME: go
             VERSION: "1.23"
