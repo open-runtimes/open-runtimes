@@ -3,7 +3,6 @@ package io.openruntimes.java;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,12 +88,6 @@ public class RuntimeRequest {
       } else {
         return new HashMap<String, Object>();
       }
-    }
-
-    String[] binaryTypes = {"application/", "audio/", "font/", "image/", "video/"};
-
-    if (Arrays.stream(binaryTypes).anyMatch(contentType::startsWith)) {
-      return getBodyBinary();
     }
 
     return getBodyText();

@@ -72,13 +72,6 @@ class RuntimeRequest {
             return bodyJson
         }
 
-        let binaryTypes = ["application/", "audio/", "font/", "image/", "video/"]
-        for binaryType in binaryTypes {
-            if contentType.hasPrefix(binaryType) {
-                return bodyBinary
-            }
-        }
-
         return bodyText
     }
 }

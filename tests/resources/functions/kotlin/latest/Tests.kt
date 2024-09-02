@@ -116,9 +116,6 @@ When you can have two!
             "requestBodyJsonAuto" -> {
                 return context.res.json(context.req.body as MutableMap<String, Any>);
             }
-            "requestBodyBinaryAuto" -> {
-                return context.res.binary(context.req.body as ByteArray);
-            }
             "binaryResponse1" -> {
                 val bytes: ByteArray = byteArrayOf(
                     0.toByte(),

@@ -100,8 +100,6 @@ public class Tests {
                 return context.getRes().text((String) context.getReq().getBody());
             case "requestBodyJsonAuto":
                 return context.getRes().json((Map<String, Object>) context.getReq().getBody());
-            case "requestBodyBinaryAuto":
-                return context.getRes().binary((byte[]) context.getReq().getBody());
             case "binaryResponse1":
                 bytes = new byte[]{0, 10, (byte) 255};
                 return context.getRes().binary(bytes); // byte[]

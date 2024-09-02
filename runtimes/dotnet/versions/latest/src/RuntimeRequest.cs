@@ -35,13 +35,6 @@ namespace DotNetRuntime
                     }
                 }
 
-                string[] binaryTypes = { "application/", "audio/", "font/", "image/", "video/" };
-
-                if (binaryTypes.Any(binaryType => contentType.StartsWith(binaryType)))
-                {
-                    return BodyBinary;
-                }
-
                 return BodyText;
             }
         }

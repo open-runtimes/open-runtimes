@@ -66,11 +66,6 @@ class Request:
             else:
                 return {}
 
-        binary_types = ["application/", "audio/", "font/", "image/", "video/"]
-        for binary_type in binary_types:
-            if content_type.startswith(binary_type):
-                return self.body_binary
-
         return self.body_text
 
 

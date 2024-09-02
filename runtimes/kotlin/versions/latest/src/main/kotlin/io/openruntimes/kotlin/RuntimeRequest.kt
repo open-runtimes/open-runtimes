@@ -21,7 +21,6 @@ data class RuntimeRequest(
     val body: Any
         get() {
             val contentType = headers.getOrDefault("content-type", "text/plain").lowercase()
-            val binaryTypes = arrayOf("application/", "audio/", "font/", "image/", "video/")
 
             if (contentType.startsWith("application/json")) {
                 if (bodyBinary.isEmpty()) {
@@ -32,9 +31,6 @@ data class RuntimeRequest(
                 }
             }
 
-            return when {
-                binaryTypes.any { contentType.startsWith(it) } -> bodyBinary
-                else -> return bodyText
-            }
+            return bodyText
         }
 }

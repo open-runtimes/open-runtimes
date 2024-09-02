@@ -123,9 +123,6 @@ namespace runtime {
             } else if (action == "requestBodyJsonAuto") {
                 Json::Value body = std::any_cast<Json::Value>(req.body);
                 return res.json(body);
-            } else if (action == "requestBodyBinaryAuto") {
-                std::vector<std::byte> body = std::any_cast<std::vector<std::byte>>(req.body);
-                return res.binary(body);
             } else if (action == "binaryResponse1") {
                 std::vector<std::byte> bytes;
                 bytes.push_back(std::byte{0});

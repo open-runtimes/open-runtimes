@@ -98,8 +98,6 @@ When you can have two!
         return context.res.text(context.req.body as! String)
     case "requestBodyJsonAuto":
         return try context.res.json(context.req.body as! [String: Any?])
-    case "requestBodyBinaryAuto":
-        return context.res.binary(context.req.body as! Data)
     case "binaryResponse1":
         var bytes = Data()
         bytes.append(contentsOf: [0, 10, 255])

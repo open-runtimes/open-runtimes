@@ -71,8 +71,6 @@ When you can have two!
             return context.res.text(context.req.body);
         case 'requestBodyJsonAuto':
             return context.res.json(context.req.body);
-        case 'requestBodyBinaryAuto':
-            return context.res.binary(context.req.body);
         case 'binaryResponse1':
             return context.res.binary(Uint8Array.from([0, 10, 255])); // Uint8Array
         case 'binaryResponse2':

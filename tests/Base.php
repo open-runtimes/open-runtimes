@@ -294,13 +294,45 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals('', $response['body']);
 
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'application/xhtml+xml']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+        self::assertTrue(\mb_check_encoding($response['body'], 'UTF-8'));
+
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'not-application/json']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
+        self::assertTrue(\mb_check_encoding($response['body'], 'UTF-8'));
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'not-video/mp4']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
+        self::assertTrue(\mb_check_encoding($response['body'], 'UTF-8'));
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'application/octet-stream']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+        self::assertTrue(\mb_check_encoding($response['body'], 'UTF-8'));
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'audio/mpeg']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+        self::assertTrue(\mb_check_encoding($response['body'], 'UTF-8'));
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'font/ttf']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+        self::assertTrue(\mb_check_encoding($response['body'], 'UTF-8'));
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'image/png']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+        self::assertTrue(\mb_check_encoding($response['body'], 'UTF-8'));
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyTextAuto', 'content-type' => 'video/mp4']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals($body, $response['body']);
+        self::assertTrue(\mb_check_encoding($response['body'], 'UTF-8'));
     }
 
     public function testRequestBodyJson(): void
@@ -352,28 +384,6 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
 
-        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
-
-        self::assertEquals(200, $response['code']);
-        self::assertEquals($body, $response['body']);
-
-        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'audio/mpeg']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals($body, $response['body']);
-
-
-        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'font/ttf']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals($body, $response['body']);
-
-        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'image/png']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals($body, $response['body']);
-
-        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'video/mp4']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals($body, $response['body']);
-
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
         self::assertEquals(200, $response['code']);
         self::assertEquals($body, $response['body']);
@@ -381,14 +391,6 @@ class Base extends TestCase
         $body = pack('C*', ...[0,10,255]);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinary', 'content-type' => 'text/plain']);
-        self::assertEquals(200, $response['code']);
-        $bytes = \unpack('C*byte', $response['body']);
-        self::assertCount(3, $bytes);
-        self::assertEquals(0, $bytes['byte1']);
-        self::assertEquals(10, $bytes['byte2']);
-        self::assertEquals(255, $bytes['byte3']);
-
-        $response = Client::execute(body: $body, headers: ['x-action' => 'requestBodyBinaryAuto', 'content-type' => 'application/octet-stream']);
         self::assertEquals(200, $response['code']);
         $bytes = \unpack('C*byte', $response['body']);
         self::assertCount(3, $bytes);

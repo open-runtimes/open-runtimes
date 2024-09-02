@@ -101,19 +101,6 @@ const action = async (logger, req, res) => {
             : {};
         }
 
-        const binaryTypes = [
-          "application/",
-          "audio/",
-          "font/",
-          "image/",
-          "video/",
-        ];
-        for (const type of binaryTypes) {
-          if (contentType.startsWith(type)) {
-            return this.bodyBinary;
-          }
-        }
-
         return this.bodyText;
       },
       get bodyRaw() {

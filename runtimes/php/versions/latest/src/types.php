@@ -75,13 +75,6 @@ class RuntimeRequest
             }
         }
 
-        $binaryTypes = ["application/", "audio/", "font/", "image/", "video/"];
-        foreach ($binaryTypes as $type) {
-            if (\str_starts_with($contentType, $type)) {
-                return  $this->bodyBinary;
-            }
-        }
-
         return $this->getBodyText();
     }
     private function getRawBody(): string
