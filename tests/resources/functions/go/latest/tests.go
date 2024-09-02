@@ -114,8 +114,6 @@ When you can have two!
 		return Context.Res.Text(Context.Req.Body().(string))
 	case "requestBodyJsonAuto":
 		return Context.Res.Json(Context.Req.Body().(map[string]interface{}))
-	case "requestBodyBinaryAuto":
-		return Context.Res.Binary(Context.Req.Body().([]byte))
 	case "binaryResponse1":
 		bytes := []byte{0, 10, 255}
 		return Context.Res.Binary(bytes) // []byte

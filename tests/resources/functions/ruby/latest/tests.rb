@@ -76,8 +76,6 @@ When you can have two!
         return context.res.text(context.req.body)
     when 'requestBodyJsonAuto'
         return context.res.json(context.req.body)
-    when 'requestBodyBinaryAuto'
-        return context.res.binary(context.req.body)
     when 'binaryResponse1'
         return context.res.binary([0,10,255].pack('C*')) # bytes array
     when 'binaryResponse2'

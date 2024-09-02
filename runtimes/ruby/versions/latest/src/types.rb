@@ -83,14 +83,6 @@ class RuntimeRequest
       end
     end
 
-    binary_types = ["application/", "audio/", "font/", "image/", "video/"]
-
-    for binary_type in binary_types
-      if content_type.start_with?(binary_type)
-        return self.body_binary
-      end
-    end
-
     return self.body_text
   end
 end

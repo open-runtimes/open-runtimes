@@ -25,19 +25,6 @@ class RuntimeRequest {
       }
     }
 
-    List<String> binaryTypes = [
-      "application/",
-      "audio/",
-      "font/",
-      "image/",
-      "video/"
-    ];
-    for (final binaryType in binaryTypes) {
-      if (contentType.startsWith(binaryType)) {
-        return this.bodyBinary;
-      }
-    }
-
     return this.bodyText;
   }
 

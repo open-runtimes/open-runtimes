@@ -108,8 +108,6 @@ When you can have two!
                     return context.Res.Text((string) context.Req.Body);
                 case "requestBodyJsonAuto":
                     return context.Res.Json((Dictionary<string, object>) context.Req.Body);
-                case "requestBodyBinaryAuto":
-                    return context.Res.Binary((byte[]) context.Req.Body);
                 case "binaryResponse1":
                     byte[] bytes = [0, 10, 255];
                     return context.Res.Binary(bytes); // byte[]

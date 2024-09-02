@@ -91,12 +91,6 @@ public class RuntimeRequest {
       }
     }
 
-    String[] binaryTypes = {"application/", "audio/", "font/", "image/", "video/"};
-
-    if (Arrays.stream(binaryTypes).anyMatch(contentType::startsWith)) {
-      return getBodyBinary();
-    }
-
     return getBodyText();
   }
 

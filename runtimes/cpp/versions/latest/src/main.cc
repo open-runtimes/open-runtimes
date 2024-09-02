@@ -129,20 +129,7 @@ int main()
                             runtimeRequest.body = runtimeRequest.bodyJson;
                         }
                     } else {
-                        bool isBinary = false;
-
-                        std::vector<std::string> binaryTypes = {"application/", "audio/", "font/", "image/", "video/"};
-                        for (const std::string& binaryType : binaryTypes) {
-                            if (contentType.rfind(binaryType, 0) == 0) {
-                                runtimeRequest.body = runtimeRequest.bodyBinary;
-                                isBinary = true;
-                                break;
-                            }
-                        }
-
-                        if(!isBinary) {
-                            runtimeRequest.body = runtimeRequest.bodyText;
-                        }
+                        runtimeRequest.body = runtimeRequest.bodyText;
                     }
 
                     runtimeRequest.path = path;

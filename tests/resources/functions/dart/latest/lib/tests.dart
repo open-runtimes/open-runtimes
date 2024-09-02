@@ -103,9 +103,6 @@ When you can have two!
     case 'requestBodyJsonAuto': {
       return context.res.json(context.req.body);
     }
-    case 'requestBodyBinaryAuto': {
-      return context.res.binary(context.req.body);
-    }
     case 'binaryResponse1': {
       List<int> bytes = [0, 10, 255];
       return context.res.binary(bytes); // List<int>

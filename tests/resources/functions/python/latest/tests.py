@@ -73,8 +73,6 @@ When you can have two!
         return context.res.text(context.req.body)
     elif action == 'requestBodyJsonAuto':
         return context.res.json(context.req.body)
-    elif action == 'requestBodyBinaryAuto':
-        return context.res.binary(context.req.body)
     elif action == 'binaryResponse1':
         return context.res.binary(bytearray([0,10,255])) # bytearray
     elif action == 'binaryResponse2':
