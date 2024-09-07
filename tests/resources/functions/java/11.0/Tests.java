@@ -91,7 +91,7 @@ public class Tests {
                 }
                 return context.getRes().json(json);
             case "requestBodyText":
-                return context.getRes().text((String) context.getReq().getBody());
+                return context.getRes().text((String) context.getReq().getBodyText());
             case "requestBodyJson":
                 return context.getRes().json(context.getReq().getBodyJson());
             case "requestBodyBinary":

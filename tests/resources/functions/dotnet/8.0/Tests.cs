@@ -99,7 +99,7 @@ When you can have two!
 
                     return context.Res.Json(json);
                 case "requestBodyText":
-                    return context.Res.Text((string) context.Req.Body);
+                    return context.Res.Text(context.Req.BodyText);
                 case "requestBodyJson":
                     return context.Res.Json(context.Req.BodyJson);
                 case "requestBodyBinary":

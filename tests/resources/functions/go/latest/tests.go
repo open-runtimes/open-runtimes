@@ -111,7 +111,7 @@ When you can have two!
 	case "requestBodyBinary":
 		return Context.Res.Binary(Context.Req.BodyBinary())
 	case "requestBodyTextAuto":
-		return Context.Res.Text(Context.Req.Body().(string))
+		return Context.Res.Text(Context.Req.BodyText())
 	case "requestBodyJsonAuto":
 		return Context.Res.Json(Context.Req.Body().(map[string]interface{}))
 	case "binaryResponse1":

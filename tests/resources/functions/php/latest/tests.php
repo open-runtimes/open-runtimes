@@ -71,7 +71,7 @@ When you can have two!
         case 'requestHeaders':
             return $context->res->json($context->req->headers);
         case 'requestBodyText':
-            return $context->res->text($context->req->body);
+            return $context->res->text($context->req->bodyText);
         case 'requestBodyJson':
             return $context->res->json($context->req->bodyJson);
         case 'requestBodyBinary':

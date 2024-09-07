@@ -59,6 +59,7 @@ class RuntimeRequest
             'body' => $this->getBody(),
             'bodyRaw' => $this->getRawBody(),
             'bodyJson' => $this->getBodyJson(),
+            'bodyText' => $this->getBodyText(),
             default => ''
         };
     }
