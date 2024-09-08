@@ -17,11 +17,7 @@ jobs:
         uses: tj-actions/changed-files@v44
         with:
           files: |
-            ./runtimes/**
-            ./tests/**
-            ./helpers/**
-            ./.github/workflows/test.yaml
-            ./*.sh
+            ./**
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:

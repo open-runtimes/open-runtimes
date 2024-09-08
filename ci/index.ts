@@ -24,10 +24,22 @@ interface Runtime {
 let perRuntime = true;
 const runtimes: Record<string, Runtime> = data;
 const matrix: Record<string, any>[] = [];
-const folders = getFolders((process.env.ALL_CHANGED_FILES ?? '').split(' '));
+const files = (process.env.ALL_CHANGED_FILES ?? '').split(' ');
+const folders = getFolders(files);
+
+for(const file of files) {
+    if(file.startsWith("runtimes/")) {
+        continue;
+    } else if(file.startsWith("tests/resources/functions/")) {
+        continue;
+    } else {
+        perRuntime = false;
+        break;
+    }
+}
 
 // Test all in case of CI or Test file changes
-if (folders.includes('ci') || folders.includes('.github')) {
+if (folders.includes('ci') || folders.includes('.github') || folders.includes('helpers') || files.includes("tests/Base.php") ||  files.includes("tests/BaseDev.php")) {
     for (const [key, runtime] of Object.entries(runtimes)) {
         matrix.push(...generateRuntimeObject(runtime, key));
         perRuntime = false;
@@ -40,9 +52,13 @@ if (perRuntime) {
             matrix.push(...generateRuntimeObject(runtimes[folder], folder));
         }
     });
+} else {
+    for (const [key, runtime] of Object.entries(runtimes)) {
+        matrix.push(...generateRuntimeObject(runtime, key));
+    }
 }
 
-appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include: matrix})}`);
+appendFileSync(process.env.GITHUB_OUTPU ?? '', `matrix=${JSON.stringify({include: matrix})}`);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];
