@@ -602,7 +602,7 @@ class Base extends TestCase
 
     public function testBinaryResponseLarge(): void
     {
-        $body = \file_get_contents(__DIR__.'/resources/large-file.zip');
+        $body = \file_get_contents(__DIR__.'/resources/large-file-17mb.zip');
         $md5 = \md5($body);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "PUT");
@@ -614,6 +614,39 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals($md5, $response['body']);
         self::assertEquals('POST', $response['headers']['x-method']);
+
+        $body = \file_get_contents(__DIR__.'/resources/large-file-23mb.zip');
+        $md5 = \md5($body);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "PUT");
+        self::assertEquals(500, $response['code']);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "POST");
+        self::assertEquals(500, $response['code']);
+    }
+
+
+    public function testTextResponseLarge(): void
+    {
+        $size = 1024 * 17; // 17 MB
+
+        $response = Client::execute(body: $size, headers: ['x-action' => 'testTextResponseLarge'], method: "GET");
+        self::assertEquals(200, $response['code']); 
+        self::assertEquals(1024 * $size, \strlen($response['body']));
+
+        $response = Client::execute(body: $size, headers: ['x-action' => 'testTextResponseLarge'], method: "PATCH");
+        self::assertEquals(200, $response['code']); 
+        self::assertEquals(1024 * $size, \strlen($response['body']));
+
+        $size = 1024 * 23; // 23 MB
+
+        $response = Client::execute(body: $size, headers: ['x-action' => 'testTextResponseLarge'], method: "GET");
+        self::assertEquals(500, $response['code']); 
+        self::assertStringContainsString("exceeded 20MB", $response['body']);
+
+        $response = Client::execute(body: $size, headers: ['x-action' => 'testTextResponseLarge'], method: "PATCH");
+        self::assertEquals(500, $response['code']); 
+        self::assertStringContainsString("exceeded 20MB", $response['body']);
     }
 
     function testEnforcedHeaders(): void

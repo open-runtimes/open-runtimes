@@ -98,6 +98,20 @@ When you can have two!
 			return context.res.send(hash, 200, {
 				"x-method": context.req.method,
 			});
+		case "testTextResponseLarge":
+			const iterations = +context.req.bodyText;
+
+			let size1KB = "";
+			for (let i = 0; i < 1024; i++) {
+				size1KB += ".";
+			}
+
+			let largeResponse = "";
+			for (let i = 0; i < iterations; i++) {
+				largeResponse += size1KB;
+			}
+
+			return context.res.text(largeResponse);
 		case "envVars":
 			return context.res.json({
 				var: process.env.CUSTOM_ENV_VAR,
