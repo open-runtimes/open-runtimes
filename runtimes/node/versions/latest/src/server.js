@@ -127,10 +127,6 @@ const action = async (logger, req, res) => {
     },
     res: {
       send: function (body, statusCode = 200, headers = {}) {
-        if (typeof body === "boolean" || typeof body === "number") {
-          body = body.toString();
-        }
-
         return {
           body: body,
           statusCode: statusCode,
@@ -276,11 +272,6 @@ const action = async (logger, req, res) => {
 
   res.setHeader("x-open-runtimes-log-id", logger.id);
   await logger.end();
-
-  if (Buffer.byteLength(output.body) > 20971520) {
-    // 20 MB
-    return send(res, 500, "Response body exceeded 20MB limit.");
-  }
 
   return send(res, output.statusCode, output.body);
 };

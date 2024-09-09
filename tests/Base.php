@@ -625,30 +625,6 @@ class Base extends TestCase
         self::assertEquals(500, $response['code']);
     }
 
-
-    public function testTextResponseLarge(): void
-    {
-        $size = 1024 * 17; // 17 MB
-
-        $response = Client::execute(body: $size, headers: ['x-action' => 'testTextResponseLarge'], method: "GET");
-        self::assertEquals(200, $response['code']); 
-        self::assertEquals(1024 * $size, \strlen($response['body']));
-
-        $response = Client::execute(body: $size, headers: ['x-action' => 'testTextResponseLarge'], method: "PATCH");
-        self::assertEquals(200, $response['code']); 
-        self::assertEquals(1024 * $size, \strlen($response['body']));
-
-        $size = 1024 * 23; // 23 MB
-
-        $response = Client::execute(body: $size, headers: ['x-action' => 'testTextResponseLarge'], method: "GET");
-        self::assertEquals(500, $response['code']); 
-        self::assertStringContainsString("exceeded 20MB", $response['body']);
-
-        $response = Client::execute(body: $size, headers: ['x-action' => 'testTextResponseLarge'], method: "PATCH");
-        self::assertEquals(500, $response['code']); 
-        self::assertStringContainsString("exceeded 20MB", $response['body']);
-    }
-
     function testEnforcedHeaders(): void
     {
         $response = Client::execute(headers: ['x-action' => 'enforcedHeaders'], method: "POST");
