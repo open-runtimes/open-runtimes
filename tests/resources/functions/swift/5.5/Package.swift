@@ -11,8 +11,8 @@ let package = Package(
         .executableTarget(
             name: "swift-function",
             dependencies: [
-                .product(name: "AsyncHTTPClient", package: "async-http-client")
+                .product(name: "AsyncHTTPClient", package: "async-http-client"),
             ]
-        )
+        ),
     ]
 )

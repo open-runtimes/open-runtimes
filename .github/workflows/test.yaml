@@ -19,8 +19,9 @@ jobs:
           files: |
             ./runtimes/**
             ./tests/**
+            ./helpers/**
             ./.github/workflows/test.yaml
-            ./ci/**
+            ./*.sh
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:

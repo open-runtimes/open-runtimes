@@ -1,6 +1,6 @@
-import Foundation
 import AsyncHTTPClient
 import Crypto
+import Foundation
 
 func main(context: RuntimeContext) async throws -> RuntimeOutput {
     let action = context.req.headers["x-action"] ?? "default"
@@ -11,29 +11,29 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
     case "jsonResponse":
         return try context.res.json([
             "json": true,
-            "message": "Developers are awesome."
+            "message": "Developers are awesome.",
         ])
     case "customCharsetResponse":
         return context.res.text("ÅÆ", headers: [
-            "content-type": "text/plain; charset=iso-8859-1"
+            "content-type": "text/plain; charset=iso-8859-1",
         ])
     case "uppercaseCharsetResponse":
         return context.res.text("ÅÆ", headers: [
-            "content-type": "TEXT/PLAIN"
+            "content-type": "TEXT/PLAIN",
         ])
     case "multipartResponse":
         return context.res.text("""
---12345
-Content-Disposition: form-data; name=\"partOne\"
+        --12345
+        Content-Disposition: form-data; name=\"partOne\"
 
-Why just have one part?
---12345
-Content-Disposition: form-data; name=\"partTwo\"
+        Why just have one part?
+        --12345
+        Content-Disposition: form-data; name=\"partTwo\"
 
-When you can have two!
---12345--
-""", headers: [
-            "content-type": "multipart/form-data; boundary=12345"
+        When you can have two!
+        --12345--
+        """, headers: [
+            "content-type": "multipart/form-data; boundary=12345",
         ])
     case "redirectResponse":
         return context.res.redirect("https://github.com/")
@@ -60,7 +60,7 @@ When you can have two!
             "first-header": "first-value",
             "second-header": context.req.headers["x-open-runtimes-custom-in-header"] ?? "missing",
             "cookie": context.req.headers["cookie"] ?? "missing",
-            "x-open-runtimes-custom-out-header": "third-value"
+            "x-open-runtimes-custom-out-header": "third-value",
         ])
     case "statusResponse":
         return context.res.text("FAIL", statusCode: 404)
@@ -74,7 +74,7 @@ When you can have two!
             "port": context.req.port,
             "path": context.req.path,
             "queryString": context.req.queryString,
-            "query": context.req.query
+            "query": context.req.query,
         ])
     case "requestHeaders":
         return try context.res.json(context.req.headers)
@@ -122,12 +122,12 @@ When you can have two!
         let bytes = context.req.bodyBinary
         let hex = Insecure.MD5.hash(data: bytes).map { String(format: "%02hhx", $0) }.joined()
         return context.res.send(hex, statusCode: 200, headers: [
-            "x-method": context.req.method
+            "x-method": context.req.method,
         ])
     case "envVars":
         return try context.res.json([
             "var": ProcessInfo.processInfo.environment["CUSTOM_ENV_VAR"],
-            "emptyVar": ProcessInfo.processInfo.environment["NOT_DEFINED_VAR"]
+            "emptyVar": ProcessInfo.processInfo.environment["NOT_DEFINED_VAR"],
         ])
     case "logs":
         context.log("Debug log")
@@ -155,7 +155,7 @@ When you can have two!
         let todo = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
 
         return try context.res.json([
-            "todo": todo
+            "todo": todo,
         ])
     case "timeout":
         context.log("Timeout start.")
