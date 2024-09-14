@@ -162,7 +162,7 @@ namespace runtime {
                 auto bytes = req.bodyBinary;
                 auto hex = Handler::md5HexDigest(bytes);
                 headers["x-method"] = req.method;
-                return context.res.send(hex, 200, headers);
+                return context.res.text(hex, 200, headers);
             } else if (action == "envVars") {
                 auto customEnvVar = std::getenv("CUSTOM_ENV_VAR");
                 auto notDefinedVar = std::getenv("NOT_DEFINED_VAR");

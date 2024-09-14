@@ -121,7 +121,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
     case "binaryResponseLarge":
         let bytes = context.req.bodyBinary
         let hex = Insecure.MD5.hash(data: bytes).map { String(format: "%02hhx", $0) }.joined()
-        return context.res.send(hex, statusCode: 200, headers: [
+        return context.res.text(hex, statusCode: 200, headers: [
             "x-method": context.req.method,
         ])
     case "envVars":

@@ -89,7 +89,7 @@ When you can have two!
     when 'binaryResponseLarge'
         bytes_body = context.req.body_binary
         hex = Digest::MD5.hexdigest bytes_body
-        return context.res.send(hex, 200, {
+        return context.res.text(hex, 200, {
             'x-method': context.req.method
         })
     when 'envVars'

@@ -182,7 +182,7 @@ When you can have two!
                         hash = md5.Hash;
                     }
                     string hex = BitConverter.ToString(hash).Replace("-", "").ToLower();
-                    return context.Res.Send(hex, 200, new() { { "x-method", context.Req.Method } });
+                    return context.Res.Text(hex, 200, new() { { "x-method", context.Req.Method } });
                 case "envVars":
                     return context.Res.Json(
                         new Dictionary<string, object?>()

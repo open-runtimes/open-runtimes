@@ -95,7 +95,7 @@ When you can have two!
 		case "binaryResponseLarge":
 			const buffer = Buffer.from(context.req.bodyBinary);
 			const hash = crypto.createHash("md5").update(buffer).digest("hex");
-			return context.res.send(hash, 200, {
+			return context.res.text(hash, 200, {
 				"x-method": context.req.method,
 			});
 		case "envVars":

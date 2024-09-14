@@ -154,7 +154,7 @@ When you can have two!
         final bytes = Uint8List.fromList(context.req.bodyBinary);
         final hash = md5.convert(bytes);
         return context.res
-            .send(hash.toString(), 200, {'x-method': context.req.method});
+            .text(hash.toString(), 200, {'x-method': context.req.method});
       }
     case 'envVars':
       {
