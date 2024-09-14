@@ -620,9 +620,11 @@ class Base extends TestCase
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "PUT");
         self::assertEquals(500, $response['code']);
+        self::assertEmpty($response['body']);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "POST");
         self::assertEquals(500, $response['code']);
+        self::assertEmpty($response['body']);
     }
 
     function testEnforcedHeaders(): void
