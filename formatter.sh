@@ -15,7 +15,10 @@ sh ci-runtime-prepare.sh
 sh ci-runtime-build.sh
 
 cd "runtimes/$RUNTIME"
+docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
+cd ../../
 
+cd "tests/resources/functions/$RUNTIME"
 docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
 
-cd ../../
+cd ../../../../
