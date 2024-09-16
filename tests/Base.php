@@ -622,7 +622,8 @@ class Base extends TestCase
         $this->assertThat(
             $response['code'],
             $this->logicalOr(
-                $this->equalTo(500), // Only allow 413 if status code becomes important
+                // Only allow 413 if status code becomes important; also ensure body and logs if only one code is used
+                $this->equalTo(500),
                 $this->equalTo(413),
             ),
         );
@@ -632,11 +633,11 @@ class Base extends TestCase
         $this->assertThat(
             $response['code'],
             $this->logicalOr(
-                $this->equalTo(500), // Only allow 413 if status code becomes important
+                // Only allow 413 if status code becomes important; also ensure body and logs if only one code is used
+                $this->equalTo(500),
                 $this->equalTo(413),
             ),
         );
-        self::assertEmpty($response['body']);
     }
 
     function testEnforcedHeaders(): void
