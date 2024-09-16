@@ -103,7 +103,7 @@ When you can have two!
     elif action == "binaryResponseLarge":
         bytes_body = context.req.body_binary
         hex = md5(bytes_body).hexdigest()
-        return context.res.send(hex, 200, {"x-method": context.req.method})
+        return context.res.text(hex, 200, {"x-method": context.req.method})
     elif action == "envVars":
         return context.res.json(
             {

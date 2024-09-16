@@ -111,7 +111,7 @@ When you can have two!
 	case "requestBodyBinary":
 		return Context.Res.Binary(Context.Req.BodyBinary())
 	case "requestBodyTextAuto":
-		return Context.Res.Text(Context.Req.Body().(string))
+		return Context.Res.Text(Context.Req.BodyText())
 	case "requestBodyJsonAuto":
 		return Context.Res.Json(Context.Req.Body().(map[string]interface{}))
 	case "binaryResponse1":
@@ -201,7 +201,7 @@ When you can have two!
 	case "binaryResponseLarge":
 		hashBinary := md5.Sum(Context.Req.BodyBinary())
 		hashHex := hex.EncodeToString(hashBinary[:])
-		return Context.Res.Send(hashHex, Context.Res.WithHeaders(map[string]string{
+		return Context.Res.Text(hashHex, Context.Res.WithHeaders(map[string]string{
 			"x-method": Context.Req.Method,
 		}))
 	case "spreadOperatorLogs":

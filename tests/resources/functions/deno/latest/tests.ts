@@ -97,7 +97,7 @@ When you can have two!
       const buffer = Uint8Array.from(context.req.bodyBinary);
       const md5 = new Md5();
       const hash = md5.update(buffer).toString("hex");
-      return context.res.send(hash, 200, {
+      return context.res.text(hash, 200, {
         "x-method": context.req.method,
       });
     case "envVars":
