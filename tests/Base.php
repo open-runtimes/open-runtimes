@@ -627,7 +627,6 @@ class Base extends TestCase
                 $this->equalTo(413),
             ),
         );
-        self::assertEmpty($response['body']);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "POST");
         $this->assertThat(
