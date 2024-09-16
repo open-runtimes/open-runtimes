@@ -121,7 +121,7 @@ When you can have two!
                 return context.res.json(context.req.headers as MutableMap<String, Any>)
             }
             "requestBodyText" -> {
-                return context.res.text(context.req.body as String)
+                return context.res.text(context.req.bodyText)
             }
             "requestBodyJson" -> {
                 return context.res.json(context.req.bodyJson)
@@ -190,7 +190,7 @@ When you can have two!
                 md5Digest!!.update(bytes)
                 val digestBytes: ByteArray = md5Digest!!.digest()
                 val hex: String = bytesToHex(digestBytes).lowercase()
-                return context.res.send(
+                return context.res.text(
                     hex,
                     200,
                     mapOf(

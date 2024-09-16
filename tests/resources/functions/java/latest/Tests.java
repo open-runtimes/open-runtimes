@@ -120,7 +120,7 @@ public class Tests {
         return context.getRes().json(json);
       }
       case "requestBodyText" -> {
-        return context.getRes().text((String) context.getReq().getBody());
+        return context.getRes().text(context.getReq().getBodyText());
       }
       case "requestBodyJson" -> {
         return context.getRes().json(context.getReq().getBodyJson());
@@ -165,7 +165,7 @@ public class Tests {
         byte[] digestBytes = md5Digest.digest();
         String hex = bytesToHex(digestBytes).toLowerCase();
         headers.put("x-method", context.getReq().getMethod());
-        return context.getRes().send(hex, 200, headers);
+        return context.getRes().text(hex, 200, headers);
       }
       case "envVars" -> {
         json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));

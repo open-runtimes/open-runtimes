@@ -73,7 +73,7 @@ When you can have two!
         case 'requestHeaders':
             return $context->res->json($context->req->headers);
         case 'requestBodyText':
-            return $context->res->text($context->req->body);
+            return $context->res->text($context->req->bodyText);
         case 'requestBodyJson':
             return $context->res->json($context->req->bodyJson);
         case 'requestBodyBinary':
@@ -105,7 +105,7 @@ When you can have two!
         case 'binaryResponseLarge':
             $hash = md5($context->req->bodyBinary);
 
-            return $context->res->send($hash, 200, [
+            return $context->res->text($hash, 200, [
                 'x-method' => $context->req->method,
             ]);
         case 'envVars':
