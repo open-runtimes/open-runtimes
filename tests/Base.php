@@ -619,11 +619,23 @@ class Base extends TestCase
         $md5 = \md5($body);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "PUT");
-        self::assertEquals(500, $response['code']);
+        $this->assertThat(
+            $response['code'],
+            $this->logicalOr(
+                $this->equalTo(500), // Only allow 413 if status code becomes important
+                $this->equalTo(413),
+            ),
+        );
         self::assertEmpty($response['body']);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "POST");
-        self::assertEquals(500, $response['code']);
+        $this->assertThat(
+            $response['code'],
+            $this->logicalOr(
+                $this->equalTo(500), // Only allow 413 if status code becomes important
+                $this->equalTo(413),
+            ),
+        );
         self::assertEmpty($response['body']);
     }
 

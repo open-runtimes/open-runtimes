@@ -1,7 +1,6 @@
 // @ts-ignore
 import data from './runtimes.toml'
-import {exec} from 'child_process';
-import {appendFileSync} from 'fs';
+import { appendFileSync } from 'fs';
 
 interface RuntimeCommands {
     install: string,
@@ -58,7 +57,18 @@ if (perRuntime) {
     }
 }
 
-appendFileSync(process.env.GITHUB_OUTPUT ?? '', `matrix=${JSON.stringify({include: matrix})}`);
+const uniqueMatrix: Record<string, any>[] = [];
+const uniqueKeys: string[] = [];
+for(const entry of matrix) {
+    const key = entry.ID;
+
+    if(!uniqueKeys.includes(key)) {
+        uniqueKeys.push(key);
+        uniqueMatrix.push(entry);
+    }
+}
+
+appendFileSync(process.env.GITHUB_OUTPUT ?? '', `matrix=${JSON.stringify({include: uniqueMatrix})}`);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];

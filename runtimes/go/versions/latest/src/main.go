@@ -285,7 +285,7 @@ func main() {
 
 	fmt.Println("HTTP server successfully started!")
 
-	err = http.Serve(listener, http.HandlerFunc(handler))
+	err = http.Serve(listener, http.MaxBytesHandler(http.HandlerFunc(handler), 20*1024*1024))
 	if err != nil {
 		panic(err)
 	}
