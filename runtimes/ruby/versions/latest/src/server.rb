@@ -66,7 +66,27 @@ def action(request, response, logger)
     end
   end
 
+  unless request.env['CONTENT_LENGTH'].nil?
+    headers['content-length'] = request.env['CONTENT_LENGTH']
+  end
+
+  max_size = 20 * 1024 * 1024
+
+  content_length = request.env['CONTENT_LENGTH']
+  if content_length.nil?
+    content_length = headers['content-length']
+  end
+
+  if content_length.nil? || content_length.to_i > max_size
+    raise 'Request body size exceeds the size limit.'
+  end
+
   body_binary = request.body.read
+
+  if body_binary.length > max_size
+    raise 'Request body size exceeds the size limit.'
+  end
+
   method = request.request_method
   headers = {}
 

@@ -602,7 +602,7 @@ class Base extends TestCase
 
     public function testBinaryResponseLarge(): void
     {
-        $body = \file_get_contents(__DIR__.'/resources/large-file.zip');
+        $body = \file_get_contents(__DIR__.'/resources/large-file-17mb.zip');
         $md5 = \md5($body);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "PUT");
@@ -614,6 +614,29 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
         self::assertEquals($md5, $response['body']);
         self::assertEquals('POST', $response['headers']['x-method']);
+
+        $body = \file_get_contents(__DIR__.'/resources/large-file-23mb.zip');
+        $md5 = \md5($body);
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "PUT");
+        $this->assertThat(
+            $response['code'],
+            $this->logicalOr(
+                // Only allow 413 if status code becomes important; also ensure body and logs if only one code is used
+                $this->equalTo(500),
+                $this->equalTo(413),
+            ),
+        );
+
+        $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "POST");
+        $this->assertThat(
+            $response['code'],
+            $this->logicalOr(
+                // Only allow 413 if status code becomes important; also ensure body and logs if only one code is used
+                $this->equalTo(500),
+                $this->equalTo(413),
+            ),
+        );
     }
 
     function testEnforcedHeaders(): void

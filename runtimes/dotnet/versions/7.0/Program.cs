@@ -7,7 +7,13 @@ namespace DotNetRuntime
     {
         public static void Main(string[] args)
         {
-            var app = WebApplication.Create(args);
+            var builder = WebApplication.CreateBuilder(args);
+            builder.WebHost.ConfigureKestrel(serverOptions =>
+            {
+                serverOptions.Limits.MaxRequestBodySize = 20 * 1024 * 1024;
+            });
+
+            var app = builder.Build();
             app.Urls.Add("http://0.0.0.0:3000");
             app.MapMethods(
                 "/{*path}",
