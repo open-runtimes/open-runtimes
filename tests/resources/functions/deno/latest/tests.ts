@@ -1,5 +1,5 @@
 import axiod from "https://deno.land/x/axiod/mod.ts";
-import { decodeBase64, encodeBase64 } from "jsr:@std/encoding";
+import { decodeBase64, encodeBase64 } from "./deps.ts";
 
 export default async function (context: any) {
   const action = context.req.headers["x-action"];

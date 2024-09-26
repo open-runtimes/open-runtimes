@@ -1,35 +1,9 @@
-import { Application } from "https://deno.land/x/oak@v10.6.0/mod.ts";
 import { Logger } from "./logger.ts";
+import { getContextBody } from "./getContextBody.ts";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
-const app = new Application();
-
-app.addEventListener("listen", () => {
-  console.log(`HTTP server successfully started!`);
-});
-
-app.use(async (ctx: any) => {
-  const logger = new Logger(
-    ctx.request.headers.get("x-open-runtimes-logging"),
-    ctx.request.headers.get("x-open-runtimes-log-id"),
-  );
-  await logger.setup();
-
-  try {
-    await action(logger, ctx);
-  } catch (e) {
-    logger.write([e], Logger.TYPE_ERROR);
-
-    ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
-    await logger.end();
-
-    ctx.response.status = 500;
-    ctx.response.body = "";
-  }
-});
-
-const action = async (logger: Logger, ctx: any) => {
+export const action = async (logger: Logger, ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? "";
   let safeTimeout: number | null = null;
   if (timeout) {
@@ -54,12 +28,21 @@ const action = async (logger: Logger, ctx: any) => {
     return;
   }
 
+  const maxSize = 20 * 1024 * 1024;
+
+  const contentLength = ctx.request.headers.get("content-length") ?? "0";
+  if (+contentLength > maxSize) {
+    throw new Error("Request body size exceeds the size limit.");
+  }
+
   const contentType = (ctx.request.headers.get("content-type") ?? "text/plain")
     .toLowerCase();
-  const bodyBinary: any = await ctx.request.body({
-    type: "bytes",
-    limit: 20 * 1024 * 1024,
-  }).value;
+
+  const bodyBinary: any = await getContextBody(ctx);
+
+  if (bodyBinary.byteLength > maxSize) {
+    throw new Error("Request body size exceeds the size limit.");
+  }
 
   const headers: any = {};
   Array.from(ctx.request.headers.keys()).filter((header: any) =>
@@ -105,7 +88,7 @@ const action = async (logger: Logger, ctx: any) => {
     req: {
       get body() {
         if (contentType.startsWith("application/json")) {
-          return this.bodyBinary && this.bodyBinary.length > 0
+          return this.bodyBinary && this.bodyBinary.byteLength > 0
             ? this.bodyJson
             : {};
         }
@@ -264,5 +247,3 @@ const action = async (logger: Logger, ctx: any) => {
     ctx.response.body = output.body;
   }
 };
-
-await app.listen({ port: 3000 });
