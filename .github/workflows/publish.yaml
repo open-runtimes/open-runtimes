@@ -46,11 +46,12 @@ jobs:
             ARCH: "linux/amd64"
 
           # Deno
-          - ID: deno-2.0
-            RUNTIME: deno
-            VERSION: "2.0"
-            IMAGE: openruntimes/deno:v4-2.0
-            ARCH: "linux/amd64"
+          # Uncomment when Deno 2.0 is released; Update Dockerfile with new image first
+          # - ID: deno-2.0
+          #   RUNTIME: deno
+          #   VERSION: "2.0"
+          #   IMAGE: openruntimes/deno:v4-2.0
+          #   ARCH: "linux/amd64"
           - ID: deno-1.40
             RUNTIME: deno
             VERSION: "1.40"

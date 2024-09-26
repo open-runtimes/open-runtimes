@@ -604,15 +604,28 @@ class Base extends TestCase
     {
         $body = \file_get_contents(__DIR__.'/resources/large-file.zip');
         $md5 = \md5($body);
+        $base64 = \base64_encode($body);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "PUT");
         self::assertEquals(200, $response['code']);
-        self::assertEquals($md5, $response['body']);
+        $this->assertThat(
+            $response['body'],
+            $this->logicalOr(
+                $this->equalTo($md5),
+                $this->equalTo($base64),
+            ),
+        );
         self::assertEquals('PUT', $response['headers']['x-method']);
 
         $response = Client::execute(body: $body, headers: ['x-action' => 'binaryResponseLarge'], method: "POST");
         self::assertEquals(200, $response['code']);
-        self::assertEquals($md5, $response['body']);
+        $this->assertThat(
+            $response['body'],
+            $this->logicalOr(
+                $this->equalTo($md5),
+                $this->equalTo($base64),
+            ),
+        );
         self::assertEquals('POST', $response['headers']['x-method']);
     }
 

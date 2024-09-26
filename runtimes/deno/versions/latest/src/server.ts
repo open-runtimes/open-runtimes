@@ -1,4 +1,4 @@
-import { Application } from "https://deno.land/x/oak@v10.6.0/mod.ts";
+import { Application } from "https://deno.land/x/oak@v17.0.0/mod.ts";
 import { Logger } from "./logger.ts";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
@@ -54,12 +54,20 @@ const action = async (logger: Logger, ctx: any) => {
     return;
   }
 
+  const maxSize = 20 * 1024 * 1024;
+
+  const contentLength = ctx.request.headers.get("content-length") ?? "0";
+  if (+contentLength > maxSize) {
+    throw new Error("Request body size exceeds the size limit.");
+  }
+
   const contentType = (ctx.request.headers.get("content-type") ?? "text/plain")
     .toLowerCase();
-  const bodyBinary: any = await ctx.request.body({
-    type: "bytes",
-    limit: 20 * 1024 * 1024,
-  }).value;
+  const bodyBinary: any = await ctx.request.body.arrayBuffer();
+
+  if (bodyBinary.byteLength > maxSize) {
+    throw new Error("Request body size exceeds the size limit.");
+  }
 
   const headers: any = {};
   Array.from(ctx.request.headers.keys()).filter((header: any) =>
@@ -105,7 +113,7 @@ const action = async (logger: Logger, ctx: any) => {
     req: {
       get body() {
         if (contentType.startsWith("application/json")) {
-          return this.bodyBinary && this.bodyBinary.length > 0
+          return this.bodyBinary && this.bodyBinary.byteLength > 0
             ? this.bodyJson
             : {};
         }
