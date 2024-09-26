@@ -37,8 +37,20 @@ for(const file of files) {
     }
 }
 
+let isGlobal = false;
+
+// Global folders
+if(['ci', '.github', 'helpers'].some(path => folders.includes(path))) {
+    isGlobal = true;
+}
+
+// Global files
+if(['tests/Base.php', 'tests/BaseDev.php'].some(file => files.includes(file))) {
+    isGlobal = true;
+}
+
 // Test all in case of CI or Test file changes
-if (folders.includes('ci') || folders.includes('.github') || folders.includes('helpers') || files.includes("tests/Base.php") ||  files.includes("tests/BaseDev.php")) {
+if (isGlobal) {
     for (const [key, runtime] of Object.entries(runtimes)) {
         matrix.push(...generateRuntimeObject(runtime, key));
         perRuntime = false;

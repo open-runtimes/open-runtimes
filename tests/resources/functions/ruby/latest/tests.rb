@@ -38,32 +38,40 @@ When you can have two!
     context.res.text('This should be ignored.')
     return context.res.text('This should be returned.')
   when 'enforcedHeaders'
-    return context.res.json({
-                              'x-custom': context.req.headers['x-custom'],
-                              'x-custom-uppercase': context.req.headers['x-custom-uppercase'],
-                              'x-open-runtimes-custom': context.req.headers['x-open-runtimes-custom'],
-                            })
+    return context.res.json(
+      {
+        'x-custom': context.req.headers['x-custom'],
+        'x-custom-uppercase': context.req.headers['x-custom-uppercase'],
+        'x-open-runtimes-custom': context.req.headers['x-open-runtimes-custom'],
+      }
+    )
   when 'headersResponse'
-    return context.res.text('OK', 200, {
-                              'first-header': 'first-value',
-                              'second-header': context.req.headers['x-open-runtimes-custom-in-header'] || 'missing',
-                              'cookie': context.req.headers['cookie'] || 'missing',
-                              'x-open-runtimes-custom-out-header': 'third-value'
-                            })
+    return context.res.text(
+      'OK',
+      200,
+      {
+        'first-header': 'first-value',
+        'second-header': context.req.headers['x-open-runtimes-custom-in-header'] || 'missing',
+        'cookie': context.req.headers['cookie'] || 'missing',
+        'x-open-runtimes-custom-out-header': 'third-value'
+      }
+    )
   when 'statusResponse'
     return context.res.text('FAIL', 404)
   when 'requestMethod'
     return context.res.text(context.req.method)
   when 'requestUrl'
-    return context.res.json({
-                              'url': context.req.url,
-                              'port': context.req.port,
-                              'path': context.req.path,
-                              'query': context.req.query,
-                              'queryString': context.req.query_string,
-                              'scheme': context.req.scheme,
-                              'host': context.req.host,
-                            })
+    return context.res.json(
+      {
+        'url': context.req.url,
+        'port': context.req.port,
+        'path': context.req.path,
+        'query': context.req.query,
+        'queryString': context.req.query_string,
+        'scheme': context.req.scheme,
+        'host': context.req.host,
+      }
+    )
   when 'requestHeaders'
     return context.res.json(context.req.headers)
   when 'requestBodyText'
@@ -89,14 +97,20 @@ When you can have two!
   when 'binaryResponseLarge'
     bytes_body = context.req.body_binary
     hex = Digest::MD5.hexdigest bytes_body
-    return context.res.text(hex, 200, {
-                              'x-method': context.req.method
-                            })
+    return context.res.text(
+      hex,
+      200,
+      {
+        'x-method': context.req.method
+      }
+    )
   when 'envVars'
-    return context.res.json({
-                              'var': ENV['CUSTOM_ENV_VAR'] || nil,
-                              'emptyVar': ENV['NOT_DEFINED_VAR'] || nil
-                            })
+    return context.res.json(
+      {
+        'var': ENV['CUSTOM_ENV_VAR'] || nil,
+        'emptyVar': ENV['NOT_DEFINED_VAR'] || nil
+      }
+    )
   when 'logs'
     puts 'Native log'
     context.log('Debug log')
@@ -130,9 +144,13 @@ When you can have two!
     image = Base64.decode64('iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAsSwAALEsBpT2WqQAAAMlQTFRFAAAA/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu+zZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/Tdt/TZv/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZv/TZv/TZu/TZu/TZu/TZu/TZu/TZu/Tdv/TZu/TZuuSxTMwAAAEN0Uk5TABN71PrYkxIu5P/jNyDf60XK3vkOWv11JiVsYazyawE8zInhtgd8bXTitQaw8WcBHMbPXP7pciMWIDLd1yIx5hWA/BXEE2wAAACqSURBVHicXY7PCwFxEMXfkxVKkVDbHrb2YMVBOZM/Xzk52AO1tYpNSdRGfhTzne8qvMM085mZ1yMAiky5wQxAWUZtmSmo8QkrhyeD63J5rxZ5ldvCAWzJoSNfPL+Axhb0jmiSCeCLE2MwSOFyraYdre0M3ko9u5c/EG4U9BL5Xpp2ECsQ04BcAEObjyNG6NvseV5/D1RC5mkl+niX4kuymXD+CzDlozT7gDdmIiQgwIp6VQAAAABJRU5ErkJggg==');
     # rubocop:enable Layout/LineLength
 
-    return context.res.send(image, 200, {
-                              'content-type': 'image/png'
-                            });
+    return context.res.send(
+      image,
+      200,
+      {
+        'content-type': 'image/png'
+      }
+    );
   when 'spreadOperatorLogs'
     engine = 'open-runtimes'
     context.log("engine:", engine)
