@@ -1,7 +1,6 @@
 // @ts-ignore
 import data from './runtimes.toml'
-import {exec} from 'child_process';
-import {appendFileSync} from 'fs';
+import { appendFileSync } from 'fs';
 
 interface RuntimeCommands {
     install: string,
@@ -24,10 +23,34 @@ interface Runtime {
 let perRuntime = true;
 const runtimes: Record<string, Runtime> = data;
 const matrix: Record<string, any>[] = [];
-const folders = getFolders((process.env.ALL_CHANGED_FILES ?? '').split(' '));
+const files = (process.env.ALL_CHANGED_FILES ?? '').split(' ');
+const folders = getFolders(files);
+
+for(const file of files) {
+    if(file.startsWith("runtimes/")) {
+        continue;
+    } else if(file.startsWith("tests/resources/functions/")) {
+        continue;
+    } else {
+        perRuntime = false;
+        break;
+    }
+}
+
+let isGlobal = false;
+
+// Global folders
+if(['ci', '.github', 'helpers'].some(path => folders.includes(path))) {
+    isGlobal = true;
+}
+
+// Global files
+if(['tests/Base.php', 'tests/BaseDev.php'].some(file => files.includes(file))) {
+    isGlobal = true;
+}
 
 // Test all in case of CI or Test file changes
-if (folders.includes('ci') || folders.includes('.github')) {
+if (isGlobal) {
     for (const [key, runtime] of Object.entries(runtimes)) {
         matrix.push(...generateRuntimeObject(runtime, key));
         perRuntime = false;
@@ -40,9 +63,24 @@ if (perRuntime) {
             matrix.push(...generateRuntimeObject(runtimes[folder], folder));
         }
     });
+} else {
+    for (const [key, runtime] of Object.entries(runtimes)) {
+        matrix.push(...generateRuntimeObject(runtime, key));
+    }
 }
 
-appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include: matrix})}`);
+const uniqueMatrix: Record<string, any>[] = [];
+const uniqueKeys: string[] = [];
+for(const entry of matrix) {
+    const key = entry.ID;
+
+    if(!uniqueKeys.includes(key)) {
+        uniqueKeys.push(key);
+        uniqueMatrix.push(entry);
+    }
+}
+
+appendFileSync(process.env.GITHUB_OUTPUT ?? '', `matrix=${JSON.stringify({include: uniqueMatrix})}`);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];

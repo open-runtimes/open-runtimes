@@ -26,10 +26,21 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
         body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
   }
 
+  int maxSize = 20 * 1024 * 1024;
+
+  final contentLength = req.headers['content-length'];
+  if (contentLength == null || int.parse(contentLength) > maxSize) {
+    throw 'Request body size exceeds the size limit.';
+  }
+
   Stream<List<int>> bodyStream = await req.read();
   List<int> bodyBinary = [];
   await for (List<int> data in bodyStream) {
     bodyBinary.addAll(data);
+  }
+
+  if (bodyBinary.length > maxSize) {
+    throw 'Request body size exceeds the size limit.';
   }
 
   String method = req.method;

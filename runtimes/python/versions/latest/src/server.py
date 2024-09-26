@@ -12,6 +12,7 @@ import urllib.parse
 import asyncio
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024
 
 HTTP_METHODS = [
     "GET",
