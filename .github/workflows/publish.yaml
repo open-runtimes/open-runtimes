@@ -14,6 +14,11 @@ jobs:
       matrix:
         include:
           # Node
+          - ID: node-22.js
+            RUNTIME: node
+            VERSION: "22.0"
+            IMAGE: openruntimes/node:v4-22.0
+            ARCH: "linux/amd64,linux/arm64"
           - ID: node-21.js
             RUNTIME: node
             VERSION: "21.0"
