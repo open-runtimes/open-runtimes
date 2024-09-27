@@ -227,6 +227,11 @@ jobs:
             ARCH: "linux/amd64"
 
           # Java
+          - ID: java-22.0
+            RUNTIME: java
+            VERSION: "22.0"
+            IMAGE: openruntimes/java:v4-22.0
+            ARCH: "linux/amd64,linux/arm64"
           - ID: java-21.0
             RUNTIME: java
             VERSION: "21.0"

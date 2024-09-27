@@ -48,7 +48,7 @@ formatter = { prepare = "apk add curl && curl -sSLO https://github.com/pinterest
 
 [java]
 entry = "Tests.java"
-versions = ["21.0", "18.0", "17.0", "11.0", "8.0"]
+versions = ["22.0", "21.0", "18.0", "17.0", "11.0", "8.0"]
 commands = { install = "", start = "sh helpers/server.sh" }
 formatter = { prepare = "curl -sSLO https://github.com/google/google-java-format/releases/download/v1.22.0/google-java-format-1.22.0-all-deps.jar && chmod a+x google-java-format-1.22.0-all-deps.jar && mv google-java-format-1.22.0-all-deps.jar /tmp/google-java-format.jar", check = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --set-exit-if-changed --dry-run", write = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --replace" }
 
