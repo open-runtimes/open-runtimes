@@ -210,6 +210,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Kotlin
+          - ID: kotlin-2.0
+            RUNTIME: kotlin
+            VERSION: "2.0"
+            IMAGE: openruntimes/kotlin:v4-2.0
+            ARCH: "linux/amd64"
           - ID: kotlin-1.9
             RUNTIME: kotlin
             VERSION: "1.9"
