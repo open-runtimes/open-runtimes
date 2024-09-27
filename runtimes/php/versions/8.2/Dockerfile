@@ -1,6 +1,6 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
 
-FROM php:8.2-cli-alpine3.19 as step0
+FROM php:8.2-cli-alpine3.20 as step0
 RUN apk update && apk add --no-cache linux-headers
 ARG PHP_SWOOLE_VERSION=v5.1.2
 ENV PHP_SWOOLE_VERSION=$PHP_SWOOLE_VERSION
