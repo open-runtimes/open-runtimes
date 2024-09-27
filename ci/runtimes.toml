@@ -6,7 +6,7 @@ formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", wri
 
 [deno]
 entry = "tests.ts"
-versions = ["1.40", "1.35", "1.24", "1.21"]
+versions = ["2.0", "1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt" }
 
@@ -30,7 +30,7 @@ formatter = { prepare = "gem install rubocop", check = "rubocop --lint .", write
 
 [php]
 entry = "tests.php"
-versions = ["8.0", "8.1", "8.2", "8.3"]
+versions = ["8.3", "8.2", "8.1", "8.0"]
 commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "sh helpers/server.sh" }
 formatter = { prepare = "composer require laravel/pint", check = "./vendor/bin/pint --test", write = "./vendor/bin/pint" }
 
@@ -73,6 +73,6 @@ formatter = { prepare = "echo \"Using native formatter\"", check = "if [ \"$(gof
 
 [bun]
 entry = "tests.ts"
-versions = ["1.0", "1.1"]
+versions = ["1.1", "1.0"]
 commands = { install = "bun install", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using bunx biome formatter\"", check = "bunx @biomejs/biome format .", write = "bunx @biomejs/biome format --write ." }

@@ -1,3 +1,5 @@
+import { fileStreamReady } from "./fileStreamReady.ts";
+
 export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
@@ -38,8 +40,8 @@ export class Logger {
       ]);
 
       await Promise.all([
-        streamLogs.ready,
-        streamErrors.ready,
+        fileStreamReady(streamLogs),
+        fileStreamReady(streamErrors),
       ]);
 
       this.streamLogs = streamLogs;

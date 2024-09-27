@@ -1,6 +1,5 @@
 import axiod from "https://deno.land/x/axiod/mod.ts";
-import { Md5 } from "https://deno.land/std@0.119.0/hash/md5.ts";
-import { decode as base64Decode } from "https://deno.land/std@0.166.0/encoding/base64.ts";
+import { decodeBase64, encodeBase64 } from "./deps.ts";
 
 export default async function (context: any) {
   const action = context.req.headers["x-action"];
@@ -94,9 +93,7 @@ When you can have two!
     case "binaryResponse5":
       return context.res.binary(Uint8Array.from([0, 50, 255])); // Just a filler
     case "binaryResponseLarge":
-      const buffer = Uint8Array.from(context.req.bodyBinary);
-      const md5 = new Md5();
-      const hash = md5.update(buffer).toString("hex");
+      const hash = encodeBase64(context.req.bodyBinary);
       return context.res.text(hash, 200, {
         "x-method": context.req.method,
       });
@@ -140,7 +137,7 @@ When you can have two!
       return context.res.send(50);
     case "deprecatedMethodsBytesBody":
       // Buffer from base64. It's content as MD5 is 2a8fdeea08e939e9a7c05653544a1374
-      const image = base64Decode(
+      const image = decodeBase64(
         "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAsSwAALEsBpT2WqQAAAMlQTFRFAAAA/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu+zZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/Tdt/TZv/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZv/TZv/TZu/TZu/TZu/TZu/TZu/TZu/Tdv/TZu/TZuuSxTMwAAAEN0Uk5TABN71PrYkxIu5P/jNyDf60XK3vkOWv11JiVsYazyawE8zInhtgd8bXTitQaw8WcBHMbPXP7pciMWIDLd1yIx5hWA/BXEE2wAAACqSURBVHicXY7PCwFxEMXfkxVKkVDbHrb2YMVBOZM/Xzk52AO1tYpNSdRGfhTzne8qvMM085mZ1yMAiky5wQxAWUZtmSmo8QkrhyeD63J5rxZ5ldvCAWzJoSNfPL+Axhb0jmiSCeCLE2MwSOFyraYdre0M3ko9u5c/EG4U9BL5Xpp2ECsQ04BcAEObjyNG6NvseV5/D1RC5mkl+niX4kuymXD+CzDlozT7gDdmIiQgwIp6VQAAAABJRU5ErkJggg==",
       );
 
