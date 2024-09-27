@@ -1,6 +1,6 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM python:3.8-alpine3.20
+FROM denoland/deno:alpine-2.0.0-rc.5
 
 INCLUDE ./base-before
-INCLUDE ./python
+INCLUDE ./deno
 INCLUDE ./base-after

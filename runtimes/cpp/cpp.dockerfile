@@ -1,6 +1,6 @@
 ENV OPEN_RUNTIMES_ENTRYPOINT=index.cc
 ARG DEBIAN_FRONTEND=noninteractive
-ENV DROGON_VERSION=v1.7.5
+ENV DROGON_VERSION=v1.9.7
 
 RUN apk add --no-cache \
     git \
