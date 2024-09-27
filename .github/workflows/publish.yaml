@@ -198,6 +198,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # Swift
+          - ID: swift-5.10
+            RUNTIME: swift
+            VERSION: "5.10"
+            IMAGE: openruntimes/swift:v4-5.10
+            ARCH: "linux/amd64,linux/arm64"
           - ID: swift-5.9
             RUNTIME: swift
             VERSION: "5.9"
