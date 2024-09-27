@@ -14,6 +14,11 @@ jobs:
       matrix:
         include:
           # Node
+          - ID: node-22.js
+            RUNTIME: node
+            VERSION: "22.0"
+            IMAGE: openruntimes/node:v4-22.0
+            ARCH: "linux/amd64,linux/arm64"
           - ID: node-21.js
             RUNTIME: node
             VERSION: "21.0"
@@ -108,6 +113,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Dart
+          - ID: dart-3.5
+            RUNTIME: dart
+            VERSION: "3.5"
+            IMAGE: openruntimes/dart:v4-3.5
+            ARCH: "linux/amd64,linux/arm64"
           - ID: dart-3.3
             RUNTIME: dart
             VERSION: "3.3"
@@ -194,6 +204,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # Swift
+          - ID: swift-5.10
+            RUNTIME: swift
+            VERSION: "5.10"
+            IMAGE: openruntimes/swift:v4-5.10
+            ARCH: "linux/amd64,linux/arm64"
           - ID: swift-5.9
             RUNTIME: swift
             VERSION: "5.9"
@@ -211,6 +226,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Kotlin
+          - ID: kotlin-2.0
+            RUNTIME: kotlin
+            VERSION: "2.0"
+            IMAGE: openruntimes/kotlin:v4-2.0
+            ARCH: "linux/amd64"
           - ID: kotlin-1.9
             RUNTIME: kotlin
             VERSION: "1.9"
@@ -228,6 +248,11 @@ jobs:
             ARCH: "linux/amd64"
 
           # Java
+          - ID: java-22.0
+            RUNTIME: java
+            VERSION: "22.0"
+            IMAGE: openruntimes/java:v4-22.0
+            ARCH: "linux/amd64,linux/arm64"
           - ID: java-21.0
             RUNTIME: java
             VERSION: "21.0"
