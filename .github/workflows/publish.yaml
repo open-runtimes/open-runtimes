@@ -16,8 +16,8 @@ jobs:
           # Node
           - ID: node-22.js
             RUNTIME: node
-            VERSION: "22.0"
-            IMAGE: openruntimes/node:v4-22.0
+            VERSION: "22"
+            IMAGE: openruntimes/node:v4-22
             ARCH: "linux/amd64,linux/arm64"
           - ID: node-21.js
             RUNTIME: node
@@ -252,10 +252,10 @@ jobs:
             ARCH: "linux/amd64"
 
           # Java
-          - ID: java-22.0
+          - ID: java-22
             RUNTIME: java
-            VERSION: "22.0"
-            IMAGE: openruntimes/java:v4-22.0
+            VERSION: "22"
+            IMAGE: openruntimes/java:v4-22
             ARCH: "linux/amd64,linux/arm64"
           - ID: java-21.0
             RUNTIME: java
