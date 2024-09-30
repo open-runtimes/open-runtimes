@@ -102,7 +102,15 @@ class Base extends TestCase
         self::assertEquals('OK', $response['body']);
         self::assertEquals('first-value', $response['headers']['first-header']);
         self::assertEquals('missing', $response['headers']['second-header']);
-        self::assertEquals('cookieName=cookieValue; cookie2=value2; cookie3=value=3; cookie4=val:ue4; cookie5=value5', $response['headers']['cookie']);
+
+        $cookies = \explode('; ', $response['headers']['cookie']);
+        self::assertCount(5, $cookies);
+        self::assertContains("cookieName=cookieValue", $cookies);
+        self::assertContains("cookie2=value2", $cookies);
+        self::assertContains("cookie3=value=3", $cookies);
+        self::assertContains("cookie4=val:ue4", $cookies);
+        self::assertContains("cookie5=value5", $cookies);
+
         self::assertArrayNotHasKey('x-open-runtimes-custom-out-header', $response['headers']);
     }
 
