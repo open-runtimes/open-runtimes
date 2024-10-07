@@ -10,6 +10,7 @@ import os
 import importlib
 import urllib.parse
 import asyncio
+import sys
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024
@@ -27,7 +28,7 @@ HTTP_METHODS = [
 ]
 
 
-async def action(logger, request):
+def action(logger, request):
     timeout = request.headers.get("x-open-runtimes-timeout", "")
     safeTimeout = None
     if timeout:
@@ -119,12 +120,14 @@ async def action(logger, request):
     try:
         if safeTimeout is not None:
             try:
-                output = await asyncio.wait_for(execute(context), timeout=safeTimeout)
+                output = asyncio.run(
+                    asyncio.wait_for(execute(context), timeout=safeTimeout)
+                )
             except asyncio.TimeoutError:
                 context.error("Execution timed out.")
                 output = context.res.text("", 500, {})
         else:
-            output = await execute(context)
+            output = asyncio.run(execute(context))
     except Exception as e:
         context.error("".join(traceback.TracebackException.from_exception(e).format()))
         output = context.res.text("", 500, {})
@@ -140,6 +143,9 @@ async def action(logger, request):
     output["body"] = output.get("body", "")
     output["statusCode"] = output.get("statusCode", 200)
     output["headers"] = output.get("headers", {})
+
+    if isinstance(output["body"], bytearray):
+        output["body"] = bytes(output["body"])
 
     resp = FlaskResponse(output["body"], output["statusCode"])
 
@@ -164,14 +170,14 @@ async def action(logger, request):
 
 @app.route("/", defaults={"u_path": ""}, methods=HTTP_METHODS)
 @app.route("/<path:u_path>", methods=HTTP_METHODS)
-async def handler(u_path):
+def handler(u_path):
     logger = Logger(
         request.headers.get("x-open-runtimes-logging", ""),
         request.headers.get("x-open-runtimes-log-id", ""),
     )
 
     try:
-        return await action(logger, request)
+        return action(logger, request)
     except Exception as e:
         message = "".join(traceback.TracebackException.from_exception(e).format())
         logger.write([message], Logger.TYPE_ERROR)
@@ -185,7 +191,5 @@ async def handler(u_path):
 
 
 if __name__ == "__main__":
-    from waitress import serve
-
-    print("HTTP server successfully started!", flush=True)
-    serve(app, host="0.0.0.0", port=3000)
+    from gunicorn.app.wsgiapp import run
+    sys.exit(run())
