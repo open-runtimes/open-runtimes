@@ -1,5 +1,5 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM ruby:3.1-alpine3.20
+FROM ruby:3.1.6-alpine3.20
 ENV OPEN_RUNTIMES_ENTRYPOINT=index.rb
 
 INCLUDE ./base-before

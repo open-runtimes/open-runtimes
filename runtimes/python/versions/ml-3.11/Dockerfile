@@ -1,5 +1,5 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM python:3.11-bookworm
+FROM python:3.11.10-bookworm
 
 RUN apt-get update && apt-get install -y gcc pkg-config libhdf5-dev
 
