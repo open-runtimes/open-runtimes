@@ -1,40 +1,21 @@
 import json
-from function_types import Context, Request, Response
+from function_types import Context
 from logger import Logger
-from flask import Flask, request, Response as FlaskResponse
-from urllib.parse import urlparse
-from io import StringIO
+from aiohttp import web, web_request, web_exceptions
 import traceback
-import pathlib
 import os
 import importlib
-import urllib.parse
 import asyncio
 
-app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024
 
-HTTP_METHODS = [
-    "GET",
-    "HEAD",
-    "POST",
-    "PUT",
-    "DELETE",
-    "CONNECT",
-    "OPTIONS",
-    "TRACE",
-    "PATCH",
-]
-
-
-async def action(logger, request):
+async def action(logger, request: web_request.Request):
     timeout = request.headers.get("x-open-runtimes-timeout", "")
     safeTimeout = None
     if timeout:
         if not timeout.isdigit() or int(timeout) == 0:
-            return (
-                'Header "x-open-runtimes-timeout" must be an integer greater than 0.',
-                500,
+            return web.Response(
+                text='Header "x-open-runtimes-timeout" must be an integer greater than 0.',
+                status=500,
             )
 
         safeTimeout = int(timeout)
@@ -42,11 +23,14 @@ async def action(logger, request):
     if os.getenv("OPEN_RUNTIMES_SECRET", "") != "" and request.headers.get(
         "x-open-runtimes-secret", ""
     ) != os.getenv("OPEN_RUNTIMES_SECRET", ""):
-        return 'Unauthorized. Provide correct "x-open-runtimes-secret" header.', 500
+        return web.Response(
+            text='Unauthorized. Provide correct "x-open-runtimes-secret" header.',
+            status=500,
+        )
 
     context = Context(logger)
 
-    context.req.body_binary = request.get_data()
+    context.req.body_binary = await request.read()
     context.req.method = request.method
     context.req.headers = {}
 
@@ -55,8 +39,8 @@ async def action(logger, request):
 
     defaultPort = "443" if context.req.scheme == "https" else "80"
 
-    url = urlparse(request.url)
-    context.req.query_string = url.query or ""
+    url = request.url
+    context.req.query_string = url.query_string or ""
     context.req.query = {}
 
     for param in context.req.query_string.split("&"):
@@ -140,8 +124,7 @@ async def action(logger, request):
     output["body"] = output.get("body", "")
     output["statusCode"] = output.get("statusCode", 200)
     output["headers"] = output.get("headers", {})
-
-    resp = FlaskResponse(output["body"], output["statusCode"])
+    resp = web.Response(body=output["body"], status=output["statusCode"])
 
     for key in output["headers"].keys():
         if not key.lower().startswith("x-open-runtimes-"):
@@ -162,9 +145,7 @@ async def action(logger, request):
     return resp
 
 
-@app.route("/", defaults={"u_path": ""}, methods=HTTP_METHODS)
-@app.route("/<path:u_path>", methods=HTTP_METHODS)
-async def handler(u_path):
+async def handler(request) -> web.Response:
     logger = Logger(
         request.headers.get("x-open-runtimes-logging", ""),
         request.headers.get("x-open-runtimes-log-id", ""),
@@ -172,20 +153,17 @@ async def handler(u_path):
 
     try:
         return await action(logger, request)
+    except web_exceptions.HTTPClientError as e:
+        return e
     except Exception as e:
         message = "".join(traceback.TracebackException.from_exception(e).format())
         logger.write([message], Logger.TYPE_ERROR)
 
-    resp = FlaskResponse("", 500)
-
-    resp.headers["x-open-runtimes-log-id"] = logger.id
+    resp = web.Response(status=500, headers={"x-open-runtimes-log-id": logger.id})
     logger.end()
 
     return resp
 
 
-if __name__ == "__main__":
-    from waitress import serve
-
-    print("HTTP server successfully started!", flush=True)
-    serve(app, host="0.0.0.0", port=3000)
+app = web.Application(client_max_size=20 * 1024 * 1024)
+app.router.add_route("*", r"/{handler:.*}", handler)
