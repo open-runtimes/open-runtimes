@@ -5,5 +5,3 @@ COPY requirements.txt .
 # Create a virtual environment for the server dependencies
 RUN python3 -m venv server-env
 RUN server-env/bin/pip install --no-cache-dir -r requirements.txt
-
-ENV FLASK_APP="/usr/local/server/src/server.py"
