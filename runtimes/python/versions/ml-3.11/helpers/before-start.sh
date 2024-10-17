@@ -12,12 +12,9 @@ set -o allexport
 . /usr/local/server/src/function/.open-runtimes
 set +o allexport
 
-# Activate virtual env
-. /usr/local/server/src/function/runtime-env/bin/activate
-export VIRTUAL_ENV="/usr/local/server/src/function/runtime-env"
-export PATH="$VIRTUAL_ENV/bin:$PATH"
-
 # Enter server folder
 cd /usr/local/server
+
+. /usr/local/server/helpers/prepare-start.sh
 
 echo 'Starting ...'
