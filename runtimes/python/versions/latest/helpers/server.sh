@@ -11,4 +11,4 @@ if [ "$workers" -eq 0 ]; then
 fi
 
 echo "HTTP server successfully started!"
-python3 /usr/local/server/src/function/runtime-env/bin/gunicorn -b 0.0.0.0:3000 --log-level='warning' -w $workers --chdir "$(pwd)/src" --worker-class aiohttp.GunicornWebWorker 'server:app'
+python3 /usr/local/server/server-env/bin/gunicorn -b 0.0.0.0:3000 --log-level='warning' -w $workers --chdir "$(pwd)/src" --worker-class aiohttp.GunicornWebWorker 'server:app'
