@@ -27,6 +27,12 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: bun ./ci/index.ts
+      - name: Just a test
+        run: |
+          $SOMETHING="hello"
+      - name: Just second test
+        run: |
+          echo "$SOMETHING"
 
   open-runtimes:
     needs: prepare

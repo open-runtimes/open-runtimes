@@ -355,12 +355,19 @@ jobs:
           VERSION: ${{ matrix.VERSION }}
           INSTALL_COMMAND: ${{ matrix.INSTALL_COMMAND }}
           START_COMMAND: ${{ matrix.START_COMMAND }}
+      - name: Ensure RC release logic
+        run: |
+          if [[ "${{ github.ref }}" == *"RC"* ]]; then
+            $DOCKER_IMAGE="${{ matrix.IMAGE }}-rc"
+          else
+            $DOCKER_IMAGE="${{ matrix.IMAGE }}"
+          fi
       - name: Build & Publish to DockerHub
         uses: docker/build-push-action@v4
         with:
           context: ./runtimes/.test
           platforms: ${{ matrix.ARCH }}
           build-args: |
-            VERSION=${{ matrix.IMAGE }}
+            VERSION=$DOCKER_IMAGE
           push: true
-          tags: ${{ matrix.IMAGE }}
+          tags: $DOCKER_IMAGE
