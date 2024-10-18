@@ -355,7 +355,7 @@ jobs:
           VERSION: ${{ matrix.VERSION }}
           INSTALL_COMMAND: ${{ matrix.INSTALL_COMMAND }}
           START_COMMAND: ${{ matrix.START_COMMAND }}
-      - name: Ensure RC release logic
+      - name: Prepare image name with RC support
         run: |
           if [[ "${{ github.ref }}" == *"RC"* ]]; then
             echo "DOCKER_IMAGE=${{ matrix.IMAGE }}-rc" >> $GITHUB_ENV
