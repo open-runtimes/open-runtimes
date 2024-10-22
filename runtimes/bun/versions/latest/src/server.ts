@@ -250,6 +250,11 @@ Bun.serve({
   idleTimeout: 0,
   async fetch(request) {
     const url = new URL(request.url);
+    if (url.pathname === "/__opr/health") {
+      return new Response("OK", {
+        status: 200,
+      });
+    }
     if (url.pathname === "/__opr/timings") {
       return new Response(Bun.file("/mnt/telemetry/timings.txt"));
     }

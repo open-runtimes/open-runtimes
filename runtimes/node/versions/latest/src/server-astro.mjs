@@ -1,20 +1,13 @@
 import { handler } from "./server/entry.mjs";
 import express from "express";
-import {
-  onInit,
-  getPort,
-  getHost,
-  onAction,
-  onError,
-  telemetryMiddleware,
-} from "./ssr/helpers.mjs";
+import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
+import * as system from "./ssr/system.mjs";
 
 console.log("Astro server starting ...");
 
 const app = express();
 
-app.use(telemetryMiddleware);
-
+app.use(system.routes);
 app.use(onInit);
 
 // framework-specific logic

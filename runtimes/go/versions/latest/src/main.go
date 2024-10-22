@@ -243,6 +243,12 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 
 func main() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/__opr/health" {
+			w.WriteHeader(http.StatusOK)
+			w.Header().Set("content-type", "text/plain")
+			w.Write([]byte("OK"))
+			return
+		}
 		if r.URL.Path == "/__opr/timings" {
 			timings, err := os.ReadFile("/mnt/telemetry/timings.txt")
 			if err != nil {

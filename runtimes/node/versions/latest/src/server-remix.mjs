@@ -1,21 +1,14 @@
 import express from "express";
 import { createRequestHandler } from "@remix-run/express";
 import * as build from "./build/server/index.js";
-import {
-  onInit,
-  getPort,
-  getHost,
-  onAction,
-  onError,
-  telemetryMiddleware,
-} from "./ssr/helpers.mjs";
+import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
+import * as system from "./ssr/system.mjs";
 
 console.log("Remix server starting ...");
 
 const app = express();
 
-app.use(telemetryMiddleware);
-
+app.use(system.routes);
 app.use(onInit);
 
 // framework-specific logic

@@ -34,6 +34,14 @@ int main()
             [](const drogon::HttpRequestPtr &req,
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
+                if (req->getPath() == "/__opr/health")
+                {
+                    const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
+                    res->setStatusCode(drogon::HttpStatusCode::k200OK);
+                    res->setBody("OK");
+                    callback(res);
+                    return;
+                }
                 if (req->getPath() == "/__opr/timings") {
                     std::ifstream timingsFile("/mnt/telemetry/timings.txt");
                     std::string timings((std::istreambuf_iterator<char>(timingsFile)), std::istreambuf_iterator<char>());

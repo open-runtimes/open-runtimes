@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 public class Server {
+
   private static final Gson gson = new GsonBuilder().serializeNulls().create();
   private static final Gson gsonInternal =
       new GsonBuilder()
@@ -43,6 +44,9 @@ public class Server {
   }
 
   public static Context execute(Context ctx) {
+    if (ctx.path().equals("/__opr/health")) {
+      return ctx.status(200).result("OK");
+    }
     if (ctx.path().equals("/__opr/timings")) {
       try {
         String timings = Files.readString(Paths.get("/mnt/telemetry/timings.txt"));
@@ -151,7 +155,6 @@ public class Server {
     String defaultPort = scheme.equals("https") ? "443" : "80";
 
     String hostHeader = (hostHeader = ctx.header("host")) != null ? hostHeader : "";
-    ;
     String host = "";
     int port;
 
@@ -235,7 +238,6 @@ public class Server {
       } else {
         output = (RuntimeOutput) classMethod.invoke(instance, context);
       }
-
     } catch (Exception e) {
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);

@@ -28,6 +28,10 @@ namespace DotNetRuntime
 
         static async Task<IResult> Execute(HttpRequest request)
         {
+            if (request.Path == "/__opr/health")
+            {
+                return new CustomResponse(Encoding.UTF8.GetBytes("OK"), 200);
+            }
             if (request.Path == "/__opr/timings")
             {
                 var timings = await File.ReadAllTextAsync("/mnt/telemetry/timings.txt");
