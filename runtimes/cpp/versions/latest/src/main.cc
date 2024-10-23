@@ -33,6 +33,15 @@ int main()
             [](const drogon::HttpRequestPtr &req,
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
+                if (req->getHeader("x-open-runtimes-health") == "1")
+                {
+                    const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
+                    res->setStatusCode(drogon::HttpStatusCode::k200OK);
+                    res->setBody("OK");
+                    callback(res);
+                    return;
+                }
+
                 std::shared_ptr<runtime::RuntimeLogger> logger = std::make_shared<runtime::RuntimeLogger>(req->getHeader("x-open-runtimes-logging"), req->getHeader("x-open-runtimes-log-id"));
 
                 try {

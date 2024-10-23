@@ -188,6 +188,12 @@ def action(request, response, logger)
 end
 
 def handle(request, response)
+  if request.env['HTTP_X_OPEN_RUNTIMES_HEALTH'] === '1'
+    response.status = 200
+    response.headers['content-type'] = 'text/plain'
+    response.body = 'OK'
+    return response
+  end
   logger = RuntimeLogger.new(request.env['HTTP_X_OPEN_RUNTIMES_LOGGING'], request.env['HTTP_X_OPEN_RUNTIMES_LOG_ID'])
   begin
     action(request, response, logger)

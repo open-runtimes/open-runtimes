@@ -183,6 +183,12 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
 };
 
 $server->on("Request", function ($req, $res) use ($action) {
+    if ($req->header['x-open-runtimes-health'] ?? '' === '1') {
+        $res->status(200);
+        $res->end('OK');
+        return;
+    }
+
     $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '');
 
     try {

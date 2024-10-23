@@ -5,6 +5,10 @@ const Logger = require("./logger");
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
 const server = micro(async (req, res) => {
+  if (req.headers["x-open-runtimes-health"] === "1") {
+    return send(res, 200, "OK");
+  }
+
   const logger = new Logger(
     req.headers[`x-open-runtimes-logging`],
     req.headers[`x-open-runtimes-log-id`],

@@ -34,6 +34,11 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
+    if (ctx.header("x-open-runtimes-health") == "1") {
+        ctx.status(200).result("OK")
+        return
+    }
+
     val logger = RuntimeLogger(ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"))
     try {
         action(logger, ctx)

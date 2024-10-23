@@ -19,6 +19,13 @@ class BaseDev extends TestCase
     {
     }
 
+    public function testHealthCheck(): void
+    {
+        $response = Client::execute(headers: ['x-open-runtimes-health' => '1']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('OK', $response['body']);
+    }
+
     // Keep always first, it tests disabled logging. Must be done first
     public function testDevLogFiles(): void
     {

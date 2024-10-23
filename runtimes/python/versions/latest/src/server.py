@@ -146,6 +146,9 @@ async def action(logger, request: web_request.Request):
 
 
 async def handler(request) -> web.Response:
+    if request.headers.get("x-open-runtimes-health", "") == "1":
+        return web.Response(text="OK", status=200)
+
     logger = Logger(
         request.headers.get("x-open-runtimes-logging", ""),
         request.headers.get("x-open-runtimes-log-id", ""),

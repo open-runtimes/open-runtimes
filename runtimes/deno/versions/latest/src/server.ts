@@ -9,6 +9,12 @@ app.addEventListener("listen", () => {
 });
 
 app.use(async (ctx: any) => {
+  if (ctx.request.headers.get("x-open-runtimes-health") === "1") {
+    ctx.response.status = 200;
+    ctx.response.body = "OK";
+    return;
+  }
+
   const logger = new Logger(
     ctx.request.headers.get("x-open-runtimes-logging"),
     ctx.request.headers.get("x-open-runtimes-log-id"),

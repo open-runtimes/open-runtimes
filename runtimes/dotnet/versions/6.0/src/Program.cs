@@ -26,6 +26,18 @@ app.Run();
 
 static async Task<IResult> Execute(HttpRequest request)
 {
+    var healthHeader = request.Headers.TryGetValue(
+        "x-open-runtimes-health",
+        out var healthHeaderValue
+    )
+        ? healthHeaderValue.ToString()
+        : string.Empty;
+
+    if (healthHeader == "1")
+    {
+        return new CustomResponse(Encoding.UTF8.GetBytes("OK"), 200);
+    }
+
     var loggingHeader = request.Headers.TryGetValue(
         "x-open-runtimes-logging",
         out var loggingHeaderValue

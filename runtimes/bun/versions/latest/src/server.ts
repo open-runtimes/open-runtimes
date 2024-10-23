@@ -248,6 +248,12 @@ Bun.serve({
   port: 3000,
   maxRequestBodySize: 20 * 1024 * 1024,
   async fetch(request) {
+    if (request.headers.get("x-open-runtimes-health") === "1") {
+      return new Response("OK", {
+        status: 200,
+      });
+    }
+
     const logger = new Logger(
       request.headers.get("x-open-runtimes-logging"),
       request.headers.get("x-open-runtimes-log-id"),

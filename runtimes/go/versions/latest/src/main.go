@@ -243,6 +243,13 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 
 func main() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("x-open-runtimes-health") == "1" {
+			w.WriteHeader(http.StatusOK)
+			w.Header().Set("content-type", "text/plain")
+			w.Write([]byte("OK"))
+			return
+		}
+
 		logging := r.Header.Get("x-open-runtimes-logging")
 		logId := r.Header.Get("x-open-runtimes-log-id")
 

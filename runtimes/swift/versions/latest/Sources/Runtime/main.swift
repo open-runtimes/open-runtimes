@@ -19,6 +19,14 @@ app.on(.OPTIONS, "", body: .collect(maxSize: "20mb"), use: execute)
 app.on(.OPTIONS, "**", body: .collect(maxSize: "20mb"), use: execute)
 
 func execute(req: Request) async throws -> Response {
+    let headerHealth = req.headers["x-open-runtimes-health"]
+    if !headerHealth.isEmpty, headerHealth.first == "1" {
+        return Response(
+            status: .ok,
+            body: .init(string: "OK")
+        )
+    }
+
     let headerLogger = req.headers["x-open-runtimes-logging"]
     var loggerStatus = ""
     if !headerLogger.isEmpty {

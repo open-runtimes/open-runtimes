@@ -189,6 +189,10 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 
 void main() async {
   await shelf_io.serve((req) async {
+    if (req.headers['x-open-runtimes-health'] == '1') {
+      return shelf.Response(200, body: 'OK');
+    }
+
     Logger logger = new Logger(req.headers['x-open-runtimes-logging'],
         req.headers['x-open-runtimes-log-id']);
 
