@@ -43,7 +43,7 @@ docker run --rm --name open-runtimes-test-build -v /tmp/.build:/usr/local/server
 if [[ "$RUNTIME" == "static" ]]; then
     docker run -d --name open-runtimes-test-serve-main -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_SECRET=test-secret-key -p 3000:3000 open-runtimes/test-runtime sh -c "sh helpers/start.sh \"$START_COMMAND\""
     cd ../../
-    sleep 20
+    sleep 5
     RUNTIME_NAME="$RUNTIME" RUNTIME_VERSION="$VERSION" OPEN_RUNTIMES_SECRET="test-secret-key" vendor/bin/phpunit --configuration phpunit.xml tests/XStatic.php
     exit 0
 fi
@@ -51,7 +51,7 @@ fi
 # Main tests
 docker run -d --name open-runtimes-test-serve-main -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh helpers/start.sh \"$START_COMMAND\""
 cd ../../
-sleep 5
+sleep 20
 RUNTIME_NAME="$RUNTIME" RUNTIME_VERSION="$VERSION" OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vendor/bin/phpunit --configuration phpunit.xml tests/Base.php
 
 # Dev tests
