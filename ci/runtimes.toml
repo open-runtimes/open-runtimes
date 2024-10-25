@@ -78,7 +78,6 @@ commands = { install = "bun install", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using bunx biome formatter\"", check = "bunx @biomejs/biome format .", write = "bunx @biomejs/biome format --write ." }
 
 [static]
-entry = "tests.php"
 versions = ["1.0"]
-commands = { start = "sh helpers/server.sh" }
-formatter = { prepare = "echo No need.", check = "echo No need.", write = "echo No need." }
+commands = { install = "sh build.sh", start = "sh helpers/server.sh" }
+formatter = { prepare = "echo No formatter.", check = "echo No formatter.", write = "echo No formatter." }
