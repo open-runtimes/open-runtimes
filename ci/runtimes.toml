@@ -78,6 +78,6 @@ commands = { install = "bun install", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using bunx biome formatter\"", check = "bunx @biomejs/biome format .", write = "bunx @biomejs/biome format --write ." }
 
 [static]
-versions = ["1.0"]
+versions = ["1"]
 commands = { install = "sh build.sh", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo No formatter preparations.", check = "echo No formatter checker.", write = "echo No formatter writer." }
