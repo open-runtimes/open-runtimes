@@ -14,10 +14,10 @@ jobs:
       matrix:
         include:
           # Node
-          - ID: static-1.0
+          - ID: static-1
             RUNTIME: static
-            VERSION: "1.0"
-            IMAGE: openruntimes/static:v4-1.0
+            VERSION: "1"
+            IMAGE: openruntimes/static:v4-1
             ARCH: "linux/amd64,linux/arm64"
 
           # Node
