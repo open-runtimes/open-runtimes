@@ -17,6 +17,9 @@ echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" > /usr/local/build/.op
 
 # Finish build by preparing tar to use for starting the runtime
 cd /usr/local/build
-tar -C /usr/local/build --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
+if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"  ]; then
+    cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
+fi
+tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
 
 echo "Build finished."
