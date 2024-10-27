@@ -700,6 +700,16 @@ class Base extends TestCase
         self::assertStringContainsString($msg, $response);
     }
 
+    function testSystemCommands(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
+        self::assertEquals(200, $response['code']);
+
+        // script from Linux utils to allow log watching
+        $response = \shell_exec('docker exec open-runtimes-test-serve-main sh -c "script --help"');
+        self::assertStringContainsString("Usage", $response);
+    }
+
     function assertEqualsIgnoringWhitespace($expected, $actual, $message = '') {
         $expected = preg_replace('/\s+/', '', $expected);
         $actual = preg_replace('/\s+/', '', $actual);
