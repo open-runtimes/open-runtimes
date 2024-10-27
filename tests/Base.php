@@ -706,7 +706,7 @@ class Base extends TestCase
         self::assertEquals(200, $response['code']);
 
         // script from Linux utils to allow log watching
-        $response = \shell_exec('docker exec -it open-runtimes-test-serve-main script --help');
+        $response = \shell_exec('docker exec open-runtimes-test-serve-main sh -c "script --help"');
         self::assertStringContainsString("Usage", $response);
     }
 
