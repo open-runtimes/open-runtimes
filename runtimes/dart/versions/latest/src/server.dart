@@ -29,7 +29,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   int maxSize = 20 * 1024 * 1024;
 
   final contentLength = req.headers['content-length'];
-  if (contentLength == null || int.parse(contentLength) > maxSize) {
+  if (contentLength != null && int.parse(contentLength) > maxSize) {
     throw 'Request body size exceeds the size limit.';
   }
 

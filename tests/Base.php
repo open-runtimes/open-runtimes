@@ -658,6 +658,19 @@ class Base extends TestCase
                 $this->equalTo(413),
             ),
         );
+
+        // Ensure empty bodies remain functional
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'content-length' => '0'], method: 'GET', body: NULL);
+        self::assertEquals(200, $response['code']);
+
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'content-length' => ''], method: 'GET', body: NULL);
+        self::assertEquals(200, $response['code']);
+
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'content-length' => NULL], method: 'GET', body: NULL);
+        self::assertEquals(200, $response['code']);
+
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse'], method: 'GET', body: NULL);
+        self::assertEquals(200, $response['code']);
     }
 
     function testEnforcedHeaders(): void
