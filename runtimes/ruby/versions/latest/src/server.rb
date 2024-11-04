@@ -77,7 +77,7 @@ def action(request, response, logger)
     content_length = headers['content-length']
   end
 
-  if content_length.nil? || content_length.to_i > max_size
+  if !(content_length.nil?) && content_length.to_i > max_size
     raise 'Request body size exceeds the size limit.'
   end
 
