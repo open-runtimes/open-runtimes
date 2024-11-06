@@ -48,6 +48,21 @@ if [[ "$RUNTIME" == "static" ]]; then
     exit 0
 fi
 
+# Tools test
+echo "Testing tools ..."
+OUTPUT=$(docker run --rm --name open-runtimes-test-tools open-runtimes/test-runtime sh -c "$TOOLS")
+EXIT_CODE=$?
+
+echo $OUTPUT
+
+if [[ "$EXIT_CODE" == "0" ]]; then
+    echo "All tools installed properly"
+else
+    echo "Tools are not installed properly"
+    exit 1
+fi
+
+
 # Main tests
 docker run -d --name open-runtimes-test-serve-main -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh helpers/start.sh \"$START_COMMAND\""
 cd ../../
