@@ -10,7 +10,7 @@ entry = "tests.ts"
 versions = ["2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt" }
-tools = "deno --version" # TODO: NPM, PNPM and Yarn dont work in Deno alpine currently: https://github.com/denoland/deno_docker/issues/373
+tools = "denoq --version" # TODO: NPM, PNPM and Yarn dont work in Deno alpine currently: https://github.com/denoland/deno_docker/issues/373
 
 [python]
 entry = "tests.py"
