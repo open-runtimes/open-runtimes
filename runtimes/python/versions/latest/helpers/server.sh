@@ -18,4 +18,5 @@ python3 /usr/local/server/src/function/runtime-env/bin/gunicorn \
   --chdir "$(pwd)/src" \
   --worker-class aiohttp.GunicornWebWorker \
   --preload \
+  --timeout 0 \
   'server:app'
