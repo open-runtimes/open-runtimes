@@ -50,10 +50,10 @@ fi
 
 # Tools test
 echo "Testing tools ..."
-OUTPUT=$(docker run --rm --name open-runtimes-test-tools open-runtimes/test-runtime sh -c "$TOOLS")
-EXIT_CODE=$?
-
-echo $OUTPUT
+docker run --name open-runtimes-test-tools open-runtimes/test-runtime sh -c "$TOOLS"
+OUTPUT=$(docker logs open-runtimes-test-tools)
+EXIT_CODE=$(docker inspect open-runtimes-test-tools --format='{{.State.ExitCode}}')
+docker rm --force open-runtimes-test-tools
 
 if [[ "$EXIT_CODE" == "0" ]]; then
     echo "All tools installed properly"
