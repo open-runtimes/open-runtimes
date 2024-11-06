@@ -10,7 +10,7 @@ entry = "tests.ts"
 versions = ["2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt" }
-tools = "deno --version && npm --version && npx --version && pnpm --version && yarn --version"
+tools = "deno --version" # TODO: NPM, PNPM and Yarn dont work in Deno alpine: https://github.com/denoland/deno_docker/issues/373
 
 [python]
 entry = "tests.py"
@@ -80,7 +80,7 @@ entry = "tests.go"
 versions = ["1.23"]
 commands = { install = "", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "if [ \"$(gofmt -s -l . | wc -l)\" -gt 0 ]; then echo 'Formatting errors:' && gofmt -s -l . && exit 1; fi", write = "gofmt -w -s ." }
-tools = "go --version"
+tools = "go version"
 
 [bun]
 entry = "tests.ts"
