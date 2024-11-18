@@ -525,6 +525,14 @@ class Base extends TestCase
         self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
     }
 
+    public function testTimeoutBlocking(): void 
+    {
+        $response = Client::execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $response['body']);
+        self::assertStringContainsString('Execution timed out.', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
+
     public function testDeprecatedMethods(): void
     {
         $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethods']);

@@ -3,6 +3,7 @@ import requests
 import os
 import asyncio
 import base64
+import time
 
 
 async def main(context):
@@ -138,6 +139,12 @@ When you can have two!
         await asyncio.sleep(3)
         context.log("Timeout end.")
         return context.res.text("Successful response.")
+    elif action == "timeoutBlocking":
+        start = time.time()
+        end = start + 3
+        while True:
+            if time.time() > end:
+                break
     elif action == "deprecatedMethods":
         return context.res.send(context.req.body_raw)
     elif action == "deprecatedMethodsUntypedBody":
