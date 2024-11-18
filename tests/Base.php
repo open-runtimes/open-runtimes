@@ -527,7 +527,7 @@ class Base extends TestCase
 
     public function testTimeoutBlocking(): void 
     {
-        $response = Client::execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
+        $response = Client::execute(headers: ['x-action' => 'timeoutBlocking', 'x-open-runtimes-timeout' => '1']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('', $response['body']);
         self::assertStringContainsString('Execution timed out.', Client::getErrors($response['headers']['x-open-runtimes-log-id']));

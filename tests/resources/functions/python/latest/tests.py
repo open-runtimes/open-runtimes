@@ -141,10 +141,9 @@ When you can have two!
         return context.res.text("Successful response.")
     elif action == "timeoutBlocking":
         start = time.time()
-        end = start + 3
-        while True:
-            if time.time() > end:
-                break
+        while time.time() < start + 3:
+            pass
+        return context.res.text("Successful response.")
     elif action == "deprecatedMethods":
         return context.res.send(context.req.body_raw)
     elif action == "deprecatedMethodsUntypedBody":
