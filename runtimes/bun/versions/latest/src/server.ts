@@ -247,6 +247,7 @@ const action = async (logger: Logger, request: any) => {
 Bun.serve({
   port: 3000,
   maxRequestBodySize: 20 * 1024 * 1024,
+  idleTimeout: 0,
   async fetch(request) {
     const logger = new Logger(
       request.headers.get("x-open-runtimes-logging"),

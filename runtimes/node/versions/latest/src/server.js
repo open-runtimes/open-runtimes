@@ -11,7 +11,7 @@ const server = micro(async (req, res) => {
   );
 
   try {
-    await action(logger, req, res);
+    return await action(logger, req, res);
   } catch (e) {
     logger.write([e], Logger.TYPE_ERROR);
 
@@ -273,7 +273,7 @@ const action = async (logger, req, res) => {
   res.setHeader("x-open-runtimes-log-id", logger.id);
   await logger.end();
 
-  return send(res, output.statusCode, output.body);
+  return output;
 };
 
 server.listen(3000, undefined, undefined, () => {
