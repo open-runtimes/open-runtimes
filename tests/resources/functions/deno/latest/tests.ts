@@ -131,6 +131,12 @@ When you can have two!
 
       context.log("Timeout end.");
       return context.res.text("Successful response.");
+    case "timeoutBlocking":
+      const start = Date.now();
+      while (Date.now() - start < 3000) {
+        continue;
+      }
+      return context.res.text("Successful response.");
     case "deprecatedMethods":
       return context.res.send(context.req.bodyRaw);
     case "deprecatedMethodsUntypedBody":
