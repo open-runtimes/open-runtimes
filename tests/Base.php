@@ -18,6 +18,15 @@ class Base extends TestCase
         $this->runtimeName = \getenv('RUNTIME_NAME');
         $this->runtimeVersion = \getenv('RUNTIME_VERSION');
 
+        Client::$port = 3000;
+        $this->awaitPortOpen();
+    }
+
+    public function tearDown(): void
+    {
+    }
+
+    protected function awaitPortOpen() {
         $attempts = 0;
         while(true) {
             $response = Client::execute();
@@ -35,9 +44,5 @@ class Base extends TestCase
 
         // Getting here means timeout failure
         throw new \Exception("Server did not start on port :3000 within 100 seconds. Check docker container logs");
-    }
-
-    public function tearDown(): void
-    {
     }
 }

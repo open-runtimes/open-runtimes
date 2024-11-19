@@ -4,6 +4,15 @@ namespace Tests;
 
 class Serverless extends Base
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        Client::$port = 3001;
+        $this->awaitPortOpen();
+        Client::$port = 3000;
+    }
+
     public function testPlaintextResponse(): void
     {
         $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
@@ -683,7 +692,7 @@ class Serverless extends Base
         self::assertEquals(200, $response['code']);
 
         $msg = "HTTP server successfully started!";
-        $response = \shell_exec('docker logs open-runtimes-test-serve-main');
+        $response = \shell_exec('docker logs open-runtimes-test-serve');
         self::assertStringContainsString($msg, $response);
     }
 
@@ -693,7 +702,7 @@ class Serverless extends Base
         self::assertEquals(200, $response['code']);
 
         // script from Linux utils to allow log watching
-        $response = \shell_exec('docker exec open-runtimes-test-serve-main sh -c "script --help"');
+        $response = \shell_exec('docker exec open-runtimes-test-serve sh -c "script --help"');
         self::assertStringContainsString("Usage", $response);
     }
 
@@ -719,5 +728,55 @@ class Serverless extends Base
         self::assertStringContainsString(' ', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
         $spaceOccurances = \substr_count(Client::getErrors($response['headers']['x-open-runtimes-log-id']), ' ');
         self::assertEquals(1, $spaceOccurances);
+    }
+
+    public function testEmptyServerSecret(): void
+    {
+        Client::$port = 3001;
+
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Hello World 👋', $response['body']);
+
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => 'wrong-secret']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Hello World 👋', $response['body']);
+
+        Client::$port = 3000;
+    }
+
+     // Keep always first, it tests disabled logging. Must be done first
+     public function testDevLogFiles(): void
+     {
+        Client::$port = 3001;
+
+        // Cleanup
+        $response = \shell_exec('rm -rf /tmp/logs/dev_logs.log && echo $?');
+        self::assertStringEndsWith("0\n", $response); // Exit code 0 means success
+        $response = \shell_exec('rm -rf /tmp/logs/dev_errors.log && echo $?');
+        self::assertStringEndsWith("0\n", $response); // Exit code 0 means success
+
+        $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'disabled' ]);
+        $logs = Client::getLogs('dev');
+        $errors = Client::getErrors('dev');
+        self::assertEmpty($response['headers']['x-open-runtimes-log-id']);
+        self::assertEmpty($logs);
+        self::assertEmpty($errors);
+ 
+        $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'enabled' ]);
+        $logs = Client::getLogs('dev');
+        $errors = Client::getErrors('dev');
+        self::assertEquals('dev', $response['headers']['x-open-runtimes-log-id']);
+        self::assertStringContainsString('Debug log', $logs);
+        self::assertStringContainsString('Error log', $errors);
+ 
+        $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'enabled', 'x-open-runtimes-log-id' => 'myLog' ]);
+        $logs = Client::getLogs('myLog');
+        $errors = Client::getErrors('myLog');
+        self::assertEquals('myLog', $response['headers']['x-open-runtimes-log-id']);
+        self::assertStringContainsString('Debug log', $logs);
+        self::assertStringContainsString('Error log', $errors);
+
+        Client::$port = 3000;
     }
 }
