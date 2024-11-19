@@ -11,6 +11,6 @@ class PythonMl extends Python
         $response = Client::execute(body: 'Hello', headers: ['x-action' => 'tensorflowVersion']);
 
         self::assertEquals(200, $response['code']);
-        self::assertEquals("22", $response['body']);
+        self::assertEquals("2.18.0", $response['body']);
     }
 }

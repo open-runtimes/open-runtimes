@@ -10,7 +10,6 @@ class Serverless extends Base
         self::assertEquals(200, $response['code']);
         self::assertEquals('Hello World 👋', $response['body']);
         self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
-
     }
 
     public function testJsonResponse(): void
