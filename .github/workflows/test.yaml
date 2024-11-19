@@ -61,3 +61,6 @@ jobs:
           START_COMMAND: ${{ matrix.START_COMMAND }}
           FORMATTER_CHECK: ${{ matrix.FORMATTER_CHECK }}
           FORMATTER_PREPARE: ${{ matrix.FORMATTER_PREPARE }}
+          BUILD_SCRIPT: ${{ matrix.BUILD_SCRIPT }}
+          START_SCRIPT: ${{ matrix.START_SCRIPT }}
+          TEST_CLASS: ${{ matrix.TEST_CLASS }}
