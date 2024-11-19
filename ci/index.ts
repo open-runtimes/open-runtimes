@@ -14,6 +14,9 @@ interface RuntimeFormatter {
 }
 
 interface Runtime {
+    build: string,
+    test: string,
+    start: string,
     entry: string,
     versions: string[],
     commands: RuntimeCommands,
@@ -95,7 +98,10 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             ID: `${key}-${version}`,
             RUNTIME: key,
             VERSION: cleanVersion(version),
+            TEST_CLASS: runtime.test,
             ENTRYPOINT: runtime.entry,
+            START_SCRIPT: runtime.start,
+            BUILD_SCRIPT: runtime.build,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,
             FORMATTER_CHECK: runtime?.formatter?.check, // If question marks are here, it's leftover. Remove them please
