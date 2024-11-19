@@ -6,16 +6,13 @@ set -e
 
 # Flutter CLI
 git clone --depth 1 --branch 3.24.4 https://github.com/flutter/flutter.git /tmp/flutter
+chmod -R 777 /tmp/flutter/bin/cache/dart-sdk/bin
 export PATH="/tmp/flutter/bin:/tmp/flutter/bin/cache/dart-sdk/bin:$PATH"
 
 # Flutter Web SDK
 flutter config --enable-web
 
-# Template build
-git clone https://github.com/Meldiron/flutter-web-test.git /tmp/template
-cd /tmp/template
-flutter build web
-ls -al build/web
+flutter doctor
 
 # Custom commands
 sh -c "$1"

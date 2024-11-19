@@ -43,6 +43,14 @@ build = "helpers/build.sh"
 start = "helpers/start.sh"
 test="Serverless/Dart.php"
 
+[dart-flutter]
+versions = ["3.5"]
+commands = { install = "flutter build web", start = "sh helpers/server.sh" }
+formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
+build = "helpers/build-flutter.sh"
+start = "helpers/start.sh"
+test="Flutter.php"
+
 [ruby]
 entry = "tests.rb"
 versions = ["3.3", "3.2", "3.1", "3.0", ]
