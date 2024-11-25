@@ -15,10 +15,15 @@ interface RuntimeFormatter {
 
 interface Runtime {
     test: string,
-    entry: string,
     versions: string[],
     commands: RuntimeCommands,
-    formatter: RuntimeFormatter
+    formatter: RuntimeFormatter,
+
+    // Website metadata
+    output: string,
+
+    // Serverless metadata
+    entry: string,
 }
 
 let perRuntime = true;
@@ -98,6 +103,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             VERSION: cleanVersion(version),
             TEST_CLASS: runtime.test,
             ENTRYPOINT: runtime.entry,
+            OUTPUT_DIRECTORY: runtime.output,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,
             FORMATTER_CHECK: runtime?.formatter?.check, // If question marks are here, it's leftover. Remove them please

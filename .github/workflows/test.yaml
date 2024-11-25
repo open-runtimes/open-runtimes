@@ -62,3 +62,4 @@ jobs:
           FORMATTER_CHECK: ${{ matrix.FORMATTER_CHECK }}
           FORMATTER_PREPARE: ${{ matrix.FORMATTER_PREPARE }}
           TEST_CLASS: ${{ matrix.TEST_CLASS }}
+          OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}

@@ -13,7 +13,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Node
+          # Flutter
+          - ID: flutter-3.24
+            RUNTIME: flutter
+            VERSION: "3.24"
+            IMAGE: openruntimes/flutter:v4-3.24
+            ARCH: "linux/amd64,linux/arm64"
+
+          # Static
           - ID: static-1
             RUNTIME: static
             VERSION: "1"

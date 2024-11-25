@@ -12,7 +12,7 @@ echo "Packing build ..."
 . /usr/local/server/helpers/prepare-packing.sh
 
 # Finish build by preparing tar to use for starting the runtime
-cd /usr/local/build
+cd /usr/local/build/
 if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"  ]; then
     cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
 fi

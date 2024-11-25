@@ -8,22 +8,15 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-class XStatic extends TestCase
+class XStatic extends Base
 {
-    private string $runtimeName = '';
-    private string $runtimeVersion = '';
-    private string $authHeader = '';
+    protected string $authHeader = '';
     
     public function setUp(): void
     {
-        $this->runtimeName = \getenv('RUNTIME_NAME');
-        $this->runtimeVersion = \getenv('RUNTIME_VERSION');
+        parent::setUp();
 
         $this->authHeader = 'Basic ' . \base64_encode('opr:test-secret-key');
-    }
-
-    public function tearDown(): void
-    {
     }
 
     public function testAuth(): void

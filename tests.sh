@@ -26,5 +26,6 @@ export START_COMMAND=$(yq ".$RUNTIME.commands.start" ci/runtimes.toml)
 export FORMATTER_CHECK=$(yq ".$RUNTIME.formatter.check" ci/runtimes.toml)
 export FORMATTER_PREPARE=$(yq ".$RUNTIME.formatter.prepare" ci/runtimes.toml)
 export TEST_CLASS=$(yq ".$RUNTIME.test" ci/runtimes.toml)
+export OUTPUT_DIRECTORY=$(yq ".$RUNTIME.output" ci/runtimes.toml)
 
 bash ci_tests.sh

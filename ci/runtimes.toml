@@ -33,6 +33,15 @@ commands = { install = "dart pub get", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
 test = "Serverless/Dart.php"
 
+[flutter]
+versions = ["3.24"]
+commands = { install = "flutter build web", start = "sh helpers/server.sh" }
+formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
+build = "helpers/build.sh"
+start = "helpers/start.sh"
+test = "Website/Flutter.php"
+output = "./build/web"
+
 [ruby]
 entry = "tests.rb"
 versions = ["3.3", "3.2", "3.1", "3.0", ]
