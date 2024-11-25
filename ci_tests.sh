@@ -40,6 +40,9 @@ cd ./tests/.runtime
 rm -rf code.tar.gz
 touch code.tar.gz
 
+BUILD_SCRIPT="helpers/build.sh"
+START_SCRIPT="helpers/start.sh"
+
 # Build
 docker run --rm --name open-runtimes-test-build -v /tmp/.build:/usr/local/server/.build -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" open-runtimes/test-runtime sh -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 
