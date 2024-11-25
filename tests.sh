@@ -3,16 +3,28 @@ set -e
 
 # Configurable varaible for different runtimes
 ID=$1
-RUNTIME="$(echo $ID | cut -d'-' -f1)"
-VERSION="$(echo $ID | cut -d'-' -f2)"
-ENTRYPOINT=$(yq ".$RUNTIME.entry" ci/runtimes.toml)
-INSTALL_COMMAND=$(yq ".$RUNTIME.commands.install" ci/runtimes.toml)
-START_COMMAND=$(yq ".$RUNTIME.commands.start" ci/runtimes.toml)
-FORMATTER_CHECK=$(yq ".$RUNTIME.formatter.check" ci/runtimes.toml)
-FORMATTER_PREPARE=$(yq ".$RUNTIME.formatter.prepare" ci/runtimes.toml)
- 
+export VERSION="$(echo $ID | sed 's/.*-//')" # Get last section separated by -
+export RUNTIME="$(echo $ID | sed 's/\(.*\)-.*/\1/')" # Get all sections separated by - except last line
+
+# If no numbers in version, merge it with runtime name
+if ! echo "$VERSION" | grep -q '[0-9]'; then
+    # Ignore this logic for 1 word runtimes
+    if ! [ "$VERSION" = "$RUNTIME"  ]; then
+        RUNTIME="$RUNTIME-$VERSION"
+        VERSION="latest"
+    fi
+fi
+
+# If no version, or version latest, get first runtime's version from list
 if [ "$VERSION" = "latest"  ] || [ "$VERSION" = "$RUNTIME"  ]; then
     VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 fi
 
-RUNTIME=$RUNTIME ENTRYPOINT=$ENTRYPOINT VERSION=$VERSION INSTALL_COMMAND=$INSTALL_COMMAND START_COMMAND=$START_COMMAND FORMATTER_CHECK=$FORMATTER_CHECK FORMATTER_PREPARE=$FORMATTER_PREPARE bash ci_tests.sh
+export ENTRYPOINT=$(yq ".$RUNTIME.entry" ci/runtimes.toml)
+export INSTALL_COMMAND=$(yq ".$RUNTIME.commands.install" ci/runtimes.toml)
+export START_COMMAND=$(yq ".$RUNTIME.commands.start" ci/runtimes.toml)
+export FORMATTER_CHECK=$(yq ".$RUNTIME.formatter.check" ci/runtimes.toml)
+export FORMATTER_PREPARE=$(yq ".$RUNTIME.formatter.prepare" ci/runtimes.toml)
+export TEST_CLASS=$(yq ".$RUNTIME.test" ci/runtimes.toml)
+
+bash ci_tests.sh

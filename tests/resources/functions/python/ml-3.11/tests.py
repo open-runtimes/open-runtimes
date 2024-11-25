@@ -7,7 +7,6 @@ import tensorflow as tf
 
 
 async def main(context):
-    assert tf.__version__ is not None
     action = context.req.headers.get("x-action", None)
 
     if action == "plaintextResponse":
@@ -157,5 +156,7 @@ When you can have two!
         context.log("engine:", engine)
         context.error("engine:", engine)
         return context.res.text("OK")
+    elif action == "tensorflowVersion":
+        return context.res.text(tf.__version__)
     else:
         raise Exception("Unknown action")

@@ -14,6 +14,7 @@ interface RuntimeFormatter {
 }
 
 interface Runtime {
+    test: string,
     entry: string,
     versions: string[],
     commands: RuntimeCommands,
@@ -45,7 +46,7 @@ if(['ci', '.github', 'helpers'].some(path => folders.includes(path))) {
 }
 
 // Global files
-if(['tests/Base.php', 'tests/BaseDev.php'].some(file => files.includes(file))) {
+if(['tests/Base.php'].some(file => files.includes(file))) {
     isGlobal = true;
 }
 
@@ -95,6 +96,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             ID: `${key}-${version}`,
             RUNTIME: key,
             VERSION: cleanVersion(version),
+            TEST_CLASS: runtime.test,
             ENTRYPOINT: runtime.entry,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,
