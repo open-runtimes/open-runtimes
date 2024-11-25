@@ -4,6 +4,7 @@ set -e
 
 # Install Dart static server
 dart pub global activate dhttpd
+export PATH="$PATH":"$HOME/.pub-cache/bin"
 
 # Run HTTP server
 # TODO: Port 3000 should be protected if actually used outside of just tests
