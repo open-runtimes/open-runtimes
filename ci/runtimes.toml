@@ -24,7 +24,7 @@ entry = "tests.py"
 versions = ["3.11"]
 commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "sh helpers/server.sh" }
 formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
-test = "Serverless/PythonMl.php"
+test = "Serverless/PythonML.php"
 
 [dart]
 entry = "lib/tests.dart"
@@ -45,7 +45,7 @@ entry = "tests.php"
 versions = ["8.3", "8.2", "8.1", "8.0"]
 commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "sh helpers/server.sh" }
 formatter = { prepare = "composer require laravel/pint", check = "./vendor/bin/pint --test", write = "./vendor/bin/pint" }
-test = "Serverless/Php.php"
+test = "Serverless/PHP.php"
 
 [swift]
 entry = "Tests.swift"
@@ -73,7 +73,7 @@ entry = "tests.cc"
 versions = ["20", "17"]
 commands = { install = "", start = "sh helpers/server.sh" }
 formatter = { prepare = "apk add coreutils git clang-extra-tools", check = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror --dry-run", write = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror" }
-test = "Serverless/Cpp.php"
+test = "Serverless/CPP.php"
 
 
 [dotnet]

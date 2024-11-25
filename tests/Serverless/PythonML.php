@@ -4,7 +4,7 @@ namespace Tests\Serverless;
 
 use Tests\Client;
 
-class PythonMl extends Python
+class PythonML extends Python
 {
     public function testTensorflowVersion(): void
     {

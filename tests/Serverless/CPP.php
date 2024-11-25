@@ -5,7 +5,7 @@ namespace Tests\Serverless;
 use Tests\Client;
 use Tests\Serverless;
 
-class Cpp extends Serverless
+class CPP extends Serverless
 {
     public function testSpreadOperatorLogs(): void
     {

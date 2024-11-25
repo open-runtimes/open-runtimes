@@ -4,6 +4,6 @@ namespace Tests\Serverless;
 
 use Tests\Serverless;
 
-class Php extends Serverless
+class PHP extends Serverless
 {
 }
