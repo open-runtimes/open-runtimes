@@ -49,7 +49,7 @@ commands = { install = "flutter build web", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
 build = "helpers/build.sh"
 start = "helpers/start.sh"
-test="Website/Flutter.php"
+test = "Website/Flutter.php"
 output = "./build/web"
 
 [ruby]
