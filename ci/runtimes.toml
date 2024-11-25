@@ -43,14 +43,14 @@ build = "helpers/build.sh"
 start = "helpers/start.sh"
 test="Serverless/Dart.php"
 
-[dart-flutter]
-versions = ["3.5"]
+[flutter]
+versions = ["3.24"]
 commands = { install = "flutter build web", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
 build = "helpers/build.sh"
 start = "helpers/start.sh"
-test="Flutter.php"
-# TODO: OPEN_RUNTIMES_OUTPUT_DIRECTORY to be ./build/web
+test="Website/Flutter.php"
+output = "./build/web"
 
 [ruby]
 entry = "tests.rb"

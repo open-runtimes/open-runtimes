@@ -17,10 +17,15 @@ interface Runtime {
     build: string,
     test: string,
     start: string,
-    entry: string,
     versions: string[],
     commands: RuntimeCommands,
-    formatter: RuntimeFormatter
+    formatter: RuntimeFormatter,
+
+    // Website metadata
+    output: string,
+
+    // Serverless metadata
+    entry: string,
 }
 
 let perRuntime = true;
@@ -100,6 +105,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             VERSION: cleanVersion(version),
             TEST_CLASS: runtime.test,
             ENTRYPOINT: runtime.entry,
+            OUTPUT_DIRECTORY: runtime.output,
             START_SCRIPT: runtime.start,
             BUILD_SCRIPT: runtime.build,
             INSTALL_COMMAND: runtime.commands.install,

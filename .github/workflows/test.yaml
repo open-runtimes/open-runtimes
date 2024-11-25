@@ -64,3 +64,4 @@ jobs:
           BUILD_SCRIPT: ${{ matrix.BUILD_SCRIPT }}
           START_SCRIPT: ${{ matrix.START_SCRIPT }}
           TEST_CLASS: ${{ matrix.TEST_CLASS }}
+          OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}
