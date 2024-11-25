@@ -1,4 +1,4 @@
-# Flutter Runtime 2.15
+# Flutter Runtime
 
 This is the Open Runtime that builds and serves Flutter web application based on a Dart image.
 
