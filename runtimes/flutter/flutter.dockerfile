@@ -1,0 +1,1 @@
+RUN dart --disable-analytics
