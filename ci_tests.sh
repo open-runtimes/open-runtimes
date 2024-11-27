@@ -46,6 +46,21 @@ START_SCRIPT="helpers/start.sh"
 # Build
 docker run --rm --name open-runtimes-test-build -v /tmp/.build:/usr/local/server/.build -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" open-runtimes/test-runtime sh -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 
+# Tools test
+echo "Testing tools ..."
+docker run --name open-runtimes-test-tools open-runtimes/test-runtime sh -c "$TOOLS"
+OUTPUT=$(docker logs open-runtimes-test-tools)
+EXIT_CODE=$(docker inspect open-runtimes-test-tools --format='{{.State.ExitCode}}')
+docker rm --force open-runtimes-test-tools
+
+if [[ "$EXIT_CODE" == "0" ]]; then
+    echo "All tools installed properly"
+else
+    echo "Tools are not installed properly"
+    exit 1
+fi
+
+
 # Main tests
 docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh $START_SCRIPT \"$START_COMMAND\""
 
