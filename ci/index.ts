@@ -16,6 +16,7 @@ interface RuntimeFormatter {
 interface Runtime {
     test: string,
     versions: string[],
+    tools: string,
     commands: RuntimeCommands,
     formatter: RuntimeFormatter,
 
@@ -106,8 +107,9 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             OUTPUT_DIRECTORY: runtime.output,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,
-            FORMATTER_CHECK: runtime?.formatter?.check, // If question marks are here, it's leftover. Remove them please
-            FORMATTER_PREPARE: runtime?.formatter?.prepare, // If question marks are here, it's leftover. Remove them please
+            TOOLS: runtime.tools,
+            FORMATTER_CHECK: runtime.formatter.check,
+            FORMATTER_PREPARE: runtime.formatter.prepare,
         })
     });
 

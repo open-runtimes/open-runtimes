@@ -20,12 +20,13 @@ if [ "$VERSION" = "latest"  ] || [ "$VERSION" = "$RUNTIME"  ]; then
     VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 fi
 
-export ENTRYPOINT=$(yq ".$RUNTIME.entry" ci/runtimes.toml)
-export INSTALL_COMMAND=$(yq ".$RUNTIME.commands.install" ci/runtimes.toml)
-export START_COMMAND=$(yq ".$RUNTIME.commands.start" ci/runtimes.toml)
-export FORMATTER_CHECK=$(yq ".$RUNTIME.formatter.check" ci/runtimes.toml)
-export FORMATTER_PREPARE=$(yq ".$RUNTIME.formatter.prepare" ci/runtimes.toml)
-export TEST_CLASS=$(yq ".$RUNTIME.test" ci/runtimes.toml)
-export OUTPUT_DIRECTORY=$(yq ".$RUNTIME.output" ci/runtimes.toml)
+export ENTRYPOINT=$(yq ".$RUNTIME.entry" ci/runtimes.toml | sed 's/null//')
+export INSTALL_COMMAND=$(yq ".$RUNTIME.commands.install" ci/runtimes.toml | sed 's/null//')
+export START_COMMAND=$(yq ".$RUNTIME.commands.start" ci/runtimes.toml | sed 's/null//')
+export FORMATTER_CHECK=$(yq ".$RUNTIME.formatter.check" ci/runtimes.toml | sed 's/null//')
+export FORMATTER_PREPARE=$(yq ".$RUNTIME.formatter.prepare" ci/runtimes.toml | sed 's/null//')
+export TEST_CLASS=$(yq ".$RUNTIME.test" ci/runtimes.toml | sed 's/null//')
+export OUTPUT_DIRECTORY=$(yq ".$RUNTIME.output" ci/runtimes.toml | sed 's/null//')
+export TOOLS=$(yq ".$RUNTIME.tools" ci/runtimes.toml | sed 's/null//')
 
 bash ci_tests.sh
