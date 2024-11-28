@@ -165,5 +165,7 @@ async def handler(request) -> web.Response:
     return resp
 
 
-app = web.Application(client_max_size=20 * 1024 * 1024)
-app.router.add_route("*", r"/{handler:.*}", handler)
+if __name__ == '__main__':
+    app = web.Application(client_max_size=20 * 1024 * 1024)
+    app.router.add_route("*", r"/{handler:.*}", handler)
+    web.run_app(app, port=3000)
