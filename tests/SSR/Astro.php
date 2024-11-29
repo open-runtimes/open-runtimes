@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Website;
+namespace Tests\SSR;
 
-use Tests\Website;
+use Tests\SSR;
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-class Flutter extends Website
+class Astro extends SSR
 {
 }

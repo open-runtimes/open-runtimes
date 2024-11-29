@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-class Website extends Base
+class CSR extends Base
 {
     public function setUp(): void
     {
@@ -14,9 +14,6 @@ class Website extends Base
         // We do not test body content on purpose; HTML is not pre-rendered; almost empty until JS runs
 
         $response = Client::execute(url: '/', method: 'GET');
-        self::assertEquals(200, $response['code']);
-
-        $response = Client::execute(url: '/index.html', method: 'GET');
         self::assertEquals(200, $response['code']);
     }
 

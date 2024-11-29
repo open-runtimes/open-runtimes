@@ -14,6 +14,10 @@ interface RuntimeFormatter {
 }
 
 interface Runtime {
+    runtime?: {
+        name: string
+        version: string
+    },
     test: string,
     versions: string[],
     tools: string,
@@ -110,6 +114,8 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             TOOLS: runtime.tools,
             FORMATTER_CHECK: runtime.formatter.check,
             FORMATTER_PREPARE: runtime.formatter.prepare,
+            ENFORCED_RUNTIME: runtime.runtime?.name ?? "",
+            ENFORCED_VERSION: runtime.runtime?.version ?? "",
         })
     });
 
