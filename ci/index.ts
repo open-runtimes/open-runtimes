@@ -19,7 +19,7 @@ interface Runtime {
         version: string
     },
     test: string,
-    versions: string[],
+    versions?: string[],
     tools: string,
     commands: RuntimeCommands,
     formatter: RuntimeFormatter,
@@ -96,7 +96,7 @@ appendFileSync(process.env.GITHUB_OUTPUT ?? '', `matrix=${JSON.stringify({includ
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];
 
-    runtime.versions.forEach((version) => {
+    (runtime.versions ?? []).forEach((version) => {
         if (key === 'node' && version.includes('mjs')) {
             runtime.entry = "tests.mjs";
         }
