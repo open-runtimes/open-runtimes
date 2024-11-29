@@ -56,16 +56,13 @@ if(['ci', '.github', 'helpers'].some(path => folders.includes(path))) {
 }
 
 // Global files
-if(['tests/Base.php'].some(file => files.includes(file))) {
+if(['tests/Base.php', 'tests/CSR.php', 'tests/SSR.php', 'tests/Serverless.php'].some(file => files.includes(file))) {
     isGlobal = true;
 }
 
 // Test all in case of CI or Test file changes
 if (isGlobal) {
-    for (const [key, runtime] of Object.entries(runtimes)) {
-        matrix.push(...generateRuntimeObject(runtime, key));
-        perRuntime = false;
-    }
+    perRuntime = false;
 }
 
 if (perRuntime) {
@@ -96,14 +93,15 @@ appendFileSync(process.env.GITHUB_OUTPUT ?? '', `matrix=${JSON.stringify({includ
 function generateRuntimeObject(runtime: Runtime, key: string) {
     const object: Record<string, any>[] = [];
 
-    (runtime.versions ?? []).forEach((version) => {
+    (runtime.versions ?? ['']).forEach((version) => {
         if (key === 'node' && version.includes('mjs')) {
             runtime.entry = "tests.mjs";
         }
 
+        const id = `${key}${version ? `-${version}` : ''}`;
 
         object.push({
-            ID: `${key}-${version}`,
+            ID: id,
             RUNTIME: key,
             VERSION: cleanVersion(version),
             TEST_CLASS: runtime.test,
