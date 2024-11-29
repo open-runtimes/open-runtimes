@@ -9,6 +9,13 @@ class SSR extends CSR
         parent::setUp();
     }
 
+    public function testHomepagePrerendered(): void
+    {
+        $response = Client::execute(url: '/', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString("Hello Open Runtimes", $response['body']);
+    }
+
     public function testServerAction(): void
     {
         $response = Client::execute(url: '/date', method: 'GET');
