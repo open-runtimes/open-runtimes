@@ -17,3 +17,6 @@ RUN chmod +x /usr/local/server/helpers/next-js/server.sh
 
 RUN chmod +x /usr/local/server/helpers/nuxt/bundle.sh
 RUN chmod +x /usr/local/server/helpers/nuxt/server.sh
+
+RUN chmod +x /usr/local/server/helpers/remix/bundle.sh
+RUN chmod +x /usr/local/server/helpers/remix/server.sh

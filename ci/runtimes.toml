@@ -157,3 +157,19 @@ formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", wri
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Nuxt.php"
 output = "./.output"
+
+[remix]
+runtime = { name = "node", version = "22" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/remix/bundle.sh", start = "sh helpers/remix/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
+test = "SSR/Remix.php"
+output = "./build"
+
+[angular]
+runtime = { name = "node", version = "22" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/angular/bundle.sh", start = "sh helpers/angular/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
+test = "SSR/Angular.php"
+output = "./dist"
