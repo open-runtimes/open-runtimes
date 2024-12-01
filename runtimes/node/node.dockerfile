@@ -8,3 +8,9 @@ RUN npm ci && npm cache clean --force
 
 RUN chmod +x /usr/local/server/helpers/astro/bundle.sh
 RUN chmod +x /usr/local/server/helpers/astro/server.sh
+
+RUN chmod +x /usr/local/server/helpers/sveltekit/bundle.sh
+RUN chmod +x /usr/local/server/helpers/sveltekit/server.sh
+
+RUN chmod +x /usr/local/server/helpers/next-js/bundle.sh
+RUN chmod +x /usr/local/server/helpers/next-js/server.sh
