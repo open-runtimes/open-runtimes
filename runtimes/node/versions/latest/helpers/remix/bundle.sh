@@ -7,6 +7,8 @@ fi
 mkdir -p .build
 mv ./* .build/
 
+mv .build/ build/
+
 if [ -d "/usr/local/build/public/" ]; then
     mv /usr/local/build/public/ ./public/
 fi
