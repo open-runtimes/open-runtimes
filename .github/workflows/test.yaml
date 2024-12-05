@@ -64,3 +64,5 @@ jobs:
           FORMATTER_PREPARE: ${{ matrix.FORMATTER_PREPARE }}
           TEST_CLASS: ${{ matrix.TEST_CLASS }}
           OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}
+          ENFORCED_RUNTIME: ${{ matrix.ENFORCED_RUNTIME }}
+          ENFORCED_VERSION: ${{ matrix.ENFORCED_VERSION }}
