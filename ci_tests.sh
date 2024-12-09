@@ -1,9 +1,7 @@
 # Use tests.sh instead, when running locally
 set -e
 
-export RUNTIME_FOLDER=$(echo $RUNTIME | sed 's/\(.*\)-.*/\1/') # Get first part separated by -
-export VERSION_FOLDER="$RUNTIME-$VERSION"
-export VERSION_FOLDER="${VERSION_FOLDER#*-}" # Remove runtime folder name
+source ci-helpers.sh
 
 echo "Preparing Docker image ..."
 
@@ -29,10 +27,13 @@ fi
 echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
-cp -R ./tests/resources/functions/$RUNTIME_FOLDER/latest/* ./tests/.runtime
-
-if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then
-    cp -R ./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/* ./tests/.runtime
+if ! [ -z "$ENFORCED_RUNTIME" ]; then
+cp -R ./tests/resources/functions/$RUNTIME/* ./tests/.runtime
+else
+    cp -R ./tests/resources/functions/$RUNTIME_FOLDER/latest/* ./tests/.runtime
+        if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then
+        cp -R ./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/* ./tests/.runtime
+    fi
 fi
 
 # Prevent Docker from creating folder
