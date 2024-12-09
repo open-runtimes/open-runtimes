@@ -6,4 +6,4 @@ fi
 
 # Install production dependencies only for SSR
 mv /usr/local/build/package*.json ./
-npm ci --production
+npm ci --production --force
