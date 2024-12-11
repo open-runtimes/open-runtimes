@@ -7,6 +7,24 @@ class CSR extends Base
     public function setUp(): void
     {
         parent::setUp();
+
+        Client::$port = 3001;
+        $this->awaitPortOpen();
+        Client::$port = 3000;
+    }
+
+    public function testAuth(): void
+    {
+        $response = Client::execute(url: '/', method: 'GET');
+        self::assertEquals(401, $response['code']);
+
+        $response = Client::execute(url: '/', method: 'GET', headers: [ 'x-open-runtimes-secret' => 'test-secret-key' ]);
+        self::assertEquals(200, $response['code']);
+
+        Client::$port = 3001;
+        $response = Client::execute(url: '/', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        Client::$port = 3000;
     }
 
     public function testHomepage(): void
