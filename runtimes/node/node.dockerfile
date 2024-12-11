@@ -20,3 +20,6 @@ RUN chmod +x /usr/local/server/helpers/nuxt/server.sh
 
 RUN chmod +x /usr/local/server/helpers/remix/bundle.sh
 RUN chmod +x /usr/local/server/helpers/remix/server.sh
+
+RUN chmod +x /usr/local/server/helpers/angular/bundle.sh
+RUN chmod +x /usr/local/server/helpers/angular/server.sh

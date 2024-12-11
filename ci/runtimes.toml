@@ -172,4 +172,4 @@ commands = { install = "npm install && npm run build && sh /usr/local/server/hel
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Angular.php"
-output = "./dist"
+output = "./dist/angular"
