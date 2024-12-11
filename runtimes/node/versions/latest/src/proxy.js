@@ -17,8 +17,8 @@ const { spawn } = require("child_process");
     process.exit(code);
   });
 
-  // TODO: Only when port is open
-  await new Promise((res) => setTimeout(res, 15000));
+  // TODO: Only when port is opens
+  await new Promise((res) => setTimeout(res, 5000));
 
   const proxy = httpProxy.createProxyServer({
     target: {
