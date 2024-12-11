@@ -13,26 +13,41 @@ class CSR extends Base
         Client::$port = 3000;
     }
 
-    public function testAuth(): void
+    // TODO: Move secret checks to base.php
+    public function testWrongSecret(): void
     {
-        $response = Client::execute(url: '/', method: 'GET');
-        self::assertEquals(401, $response['code']);
+        $response = Client::execute(headers: ['x-open-runtimes-secret' => 'wrongSecret']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
+    }
 
-        $response = Client::execute(url: '/', method: 'GET', headers: [ 'x-open-runtimes-secret' => 'test-secret-key' ]);
-        self::assertEquals(200, $response['code']);
+    public function testEmptySecret(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => '']);
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
+    }
 
+    public function testEmptyServerSecret(): void
+    {
         Client::$port = 3001;
-        $response = Client::execute(url: '/', method: 'GET');
+
+        $response = Client::execute();
         self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
+
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => 'wrong-secret']);
+        self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
+
         Client::$port = 3000;
     }
 
     public function testHomepage(): void
     {
-        // We do not test response body on purpose; HTML is not always pre-rendered (empty <body> until JS runs)
-
         $response = Client::execute(url: '/', method: 'GET');
         self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
     }
 
     public function testFavicon(): void
