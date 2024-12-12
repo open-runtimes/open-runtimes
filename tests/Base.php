@@ -88,7 +88,7 @@ class Base extends TestCase
     {
         Client::$port = 3001;
 
-        $response = Client::execute(method: 'GET', url: '/');
+        $response = Client::execute(method: 'GET', url: '/', headers: ['x-action' => 'plaintextResponse']);
         self::assertEquals(200, $response['code']);
         self::assertNotEmpty($response['body']);
 
