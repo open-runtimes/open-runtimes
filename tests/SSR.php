@@ -4,11 +4,6 @@ namespace Tests;
 
 class SSR extends CSR
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-    }
-
     public function testHomepagePrerendered(): void
     {
         $response = Client::execute(url: '/', method: 'GET');
