@@ -16,14 +16,14 @@ class CSR extends Base
     // TODO: Move secret checks to base.php
     public function testWrongSecret(): void
     {
-        $response = Client::execute(headers: ['x-open-runtimes-secret' => 'wrongSecret']);
+        $response = Client::execute(method: 'GET', url: '/', headers: ['x-open-runtimes-secret' => 'wrongSecret']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
     }
 
     public function testEmptySecret(): void
     {
-        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => '']);
+        $response = Client::execute(method: 'GET', url: '/', headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => '']);
         self::assertEquals(500, $response['code']);
         self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
     }
@@ -32,11 +32,11 @@ class CSR extends Base
     {
         Client::$port = 3001;
 
-        $response = Client::execute();
+        $response = Client::execute(method: 'GET', url: '/');
         self::assertEquals(200, $response['code']);
         self::assertNotEmpty($response['body']);
 
-        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => 'wrong-secret']);
+        $response = Client::execute(method: 'GET', url: '/', headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => 'wrong-secret']);
         self::assertEquals(200, $response['code']);
         self::assertNotEmpty($response['body']);
 
