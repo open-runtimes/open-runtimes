@@ -1,29 +1,21 @@
-const httpProxy = require("http-proxy");
+const { createProxyServer } = require("http-proxy");
 const { spawn } = require("child_process");
+const { Socket } = require("net");
 
 (async () => {
-  const args = process.argv.slice(2);
-  const child = spawn("sh", ["-c", args.join(" ")]);
+  const command = process.argv.slice(2).join(" ");
+  startServerProcess(command);
 
-  child.stdout.on("data", (data) => {
-    console.log(data.toString());
-  });
+  await waitForPort(3001);
 
-  child.stderr.on("data", (data) => {
-    console.error(data.toString());
-  });
+  startProxy(3000, 3001);
+})();
 
-  child.on("close", (code) => {
-    process.exit(code);
-  });
-
-  // TODO: Only when port is opens
-  await new Promise((res) => setTimeout(res, 5000));
-
-  const proxy = httpProxy.createProxyServer({
+function startProxy(portProxy, portTarget) {
+  const proxy = createProxyServer({
     target: {
       host: "127.0.0.1",
-      port: 3001,
+      port: portTarget,
     },
   });
 
@@ -39,5 +31,57 @@ const { spawn } = require("child_process");
     }
   });
 
-  proxy.listen(3000);
-})();
+  proxy.listen(portProxy);
+}
+
+function startServerProcess(command) {
+  const child = spawn("sh", ["-c", command]);
+
+  child.stdout.on("data", (data) => {
+    console.log(data.toString());
+  });
+
+  child.stderr.on("data", (data) => {
+    console.error(data.toString());
+  });
+
+  child.on("close", (code) => {
+    process.exit(code);
+  });
+}
+
+function waitForPort(port, interval = 100, timeout = 900000) {
+  return new Promise((resolve, reject) => {
+    const checkPort = () => {
+      const socket = new Socket();
+      socket.setTimeout(100);
+
+      socket.on("connect", () => {
+        socket.destroy();
+        resolve();
+      });
+
+      socket.on("timeout", () => {
+        socket.destroy();
+      });
+
+      socket.on("error", (err) => {
+        socket.destroy();
+        if (err.code !== "ECONNREFUSED") {
+          reject(err);
+        }
+      });
+
+      socket.connect(port, "127.0.0.1");
+    };
+
+    const intervalId = setInterval(() => {
+      checkPort();
+    }, interval);
+
+    setTimeout(() => {
+      clearInterval(intervalId);
+      reject(new Error(`Port ${port} did not open in time.`));
+    }, timeout);
+  });
+}
