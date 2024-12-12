@@ -4,8 +4,6 @@ RUN npm install pnpm@9 -g
 
 RUN npm ci && npm cache clean --force
 
-RUN apk update && apk add --no-cache traefik
-
 # Framework helpers
 
 RUN chmod +x /usr/local/server/helpers/proxy.sh
