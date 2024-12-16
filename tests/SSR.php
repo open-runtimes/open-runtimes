@@ -39,4 +39,27 @@ class SSR extends CSR
         self::assertNotEquals($body1, $body2);
         self::assertNotEquals($date1, $date2);
     }
+
+    public function testServerLogs(): void
+    {
+        $response = Client::execute(url: '/logs', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString("All logs printed", $response['body']);
+
+        self::assertStringContainsString('A log printed', Client::getLogs('ssr'));
+        self::assertStringContainsString('An error printed', Client::getErrors('ssr'));
+        
+        $response = Client::execute(url: '/logs', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString("All logs printed", $response['body']);
+
+        self::assertEquals(2, \substr_count(Client::getLogs('ssr'), 'A log printed'));
+        self::assertEquals(2, \substr_count(Client::getErrors('ssr'), 'An error printed'));
+
+        $response = Client::execute(url: '/exception', method: 'GET');
+        self::assertEquals(500, $response['code']);
+        self::assertStringNotContainsString("No exceptions", $response['body']);
+        self::assertStringNotContainsString('Code exception occured', Client::getLogs('ssr'));
+        self::assertStringContainsString('Code exception occured', Client::getErrors('ssr'));
+    }
 }
