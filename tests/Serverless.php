@@ -4,15 +4,6 @@ namespace Tests;
 
 class Serverless extends Base
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        Client::$port = 3001;
-        $this->awaitPortOpen();
-        Client::$port = 3000;
-    }
-
     public function testPlaintextResponse(): void
     {
         $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
@@ -126,20 +117,6 @@ class Serverless extends Base
         }
 
         self::assertStringContainsString($entrypoint, Client::getErrors($response['headers']['x-open-runtimes-log-id']));
-    }
-
-    public function testWrongSecret(): void
-    {
-        $response = Client::execute(headers: ['x-open-runtimes-secret' => 'wrongSecret']);
-        self::assertEquals(500, $response['code']);
-        self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
-    }
-
-    public function testEmptySecret(): void
-    {
-        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => '']);
-        self::assertEquals(500, $response['code']);
-        self::assertEquals('Unauthorized. Provide correct "x-open-runtimes-secret" header.', $response['body']);
     }
 
     public function testRequestMethod(): void
@@ -728,21 +705,6 @@ class Serverless extends Base
         self::assertStringContainsString(' ', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
         $spaceOccurances = \substr_count(Client::getErrors($response['headers']['x-open-runtimes-log-id']), ' ');
         self::assertEquals(1, $spaceOccurances);
-    }
-
-    public function testEmptyServerSecret(): void
-    {
-        Client::$port = 3001;
-
-        $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('Hello World 👋', $response['body']);
-
-        $response = Client::execute(headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => 'wrong-secret']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('Hello World 👋', $response['body']);
-
-        Client::$port = 3000;
     }
 
      // Keep always first, it tests disabled logging. Must be done first

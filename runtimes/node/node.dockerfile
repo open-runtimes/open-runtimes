@@ -6,6 +6,8 @@ RUN npm ci && npm cache clean --force
 
 # Framework helpers
 
+RUN chmod +x /usr/local/server/helpers/proxy.sh
+
 RUN chmod +x /usr/local/server/helpers/astro/bundle.sh
 RUN chmod +x /usr/local/server/helpers/astro/server.sh
 
