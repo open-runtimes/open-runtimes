@@ -21,3 +21,5 @@ RUN mkdir -p /usr/local/server/src
 RUN mkdir -p /usr/local/server/src/function
 
 WORKDIR /usr/local/server
+
+COPY . .
