@@ -4,6 +4,7 @@ namespace Tests;
 
 class Client {
     public static $port = 3000;
+    public static $secret = '';
 
     public static function execute($body = '', $url = '/', $method = 'POST', $headers = []) {
         $ch = \curl_init();
@@ -14,8 +15,9 @@ class Client {
             $initHeaders['content-type'] = 'text/plain';
         }
 
-        if(!empty(\getenv('OPEN_RUNTIMES_SECRET'))) {
-            $initHeaders['x-open-runtimes-secret'] = \getenv('OPEN_RUNTIMES_SECRET');
+        if(!empty(self::$secret)) {
+            $initHeaders['x-open-runtimes-secret'] = self::$secret;
+            $initHeaders['Authorization'] = 'Basic ' . \base64_encode('opr:' . self::$secret);
         }
 
         $headers = \array_merge($initHeaders, $headers);

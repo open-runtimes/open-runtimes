@@ -4,17 +4,11 @@ namespace Tests;
 
 class CSR extends Base
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-    }
-
     public function testHomepage(): void
     {
-        // We do not test response body on purpose; HTML is not always pre-rendered (empty <body> until JS runs)
-
         $response = Client::execute(url: '/', method: 'GET');
         self::assertEquals(200, $response['code']);
+        self::assertNotEmpty($response['body']);
     }
 
     public function testFavicon(): void
