@@ -17,6 +17,8 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
     docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
     cd ../../
 
+    echo "Running formatter for tests ..."
+
     cd "tests/resources/functions/$RUNTIME_FOLDER"
     docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
     cd ../../../../

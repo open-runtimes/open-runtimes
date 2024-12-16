@@ -82,7 +82,7 @@ class XStatic extends Base
         $response = Client::execute(url: '/missing.html', method: 'GET');
         self::assertEquals(404, $response['code']);
         self::assertStringContainsString('404', $response['body']);
-        self::assertStringContainsString('Not found', $response['body']);
+        self::assertStringContainsString('Page not found', $response['body']);
         self::assertStringNotContainsString('Website body content', $response['body']);
 
         Client::$port = 3002;
