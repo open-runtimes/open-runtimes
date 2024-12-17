@@ -58,7 +58,6 @@ tests/**/web.config
 **.DS_Store
 *.xcworkspacedata
 tests/resources/functions/swift-5.5/Runtime
-logs
 _.log
 npm-debug.log_
 yarn-debug.log*
