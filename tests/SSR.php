@@ -55,7 +55,10 @@ class SSR extends CSR
 
         self::assertEquals(2, \substr_count(Client::getLogs('ssr'), 'A log printed'));
         self::assertEquals(2, \substr_count(Client::getErrors('ssr'), 'An error printed'));
+    }
 
+    public function testServerException(): void
+    {
         $response = Client::execute(url: '/exception', method: 'GET');
         self::assertEquals(500, $response['code']);
         self::assertStringNotContainsString("No exceptions", $response['body']);
