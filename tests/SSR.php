@@ -15,7 +15,7 @@ class SSR extends CSR
     {
         // Helper for scraping date from the body. Possibly containing irelevant non-dynamic extras.
         // Do not use with Date or DateTime constructors.
-        $scrapeDate = function(string $body) {
+        $scrapeDate = function (string $body) {
             // <p id="date">CONTENT</p>
             $date = \explode('id="date"', $body)[1];
             $date = \explode('</p>', $body)[0];
@@ -48,7 +48,7 @@ class SSR extends CSR
 
         self::assertStringContainsString('A log printed', Client::getLogs('ssr'));
         self::assertStringContainsString('An error printed', Client::getErrors('ssr'));
-        
+
         $response = Client::execute(url: '/logs', method: 'GET');
         self::assertEquals(200, $response['code']);
         self::assertStringContainsString("All logs printed", $response['body']);
