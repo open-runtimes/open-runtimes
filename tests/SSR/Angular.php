@@ -11,11 +11,4 @@ error_reporting(E_ALL);
 
 class Angular extends SSR
 {
-    // TODO: Remove override when we find way to disable Angular SSR cache for /date path
-    public function testServerAction(): void
-    {
-        $response = Client::execute(url: '/date', method: 'GET');
-        self::assertEquals(200, $response['code']);
-        self::assertNotEmpty($response['body']);
-    }
 }
