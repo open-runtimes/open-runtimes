@@ -20,6 +20,13 @@ jobs:
             IMAGE: openruntimes/flutter:v4-3.24
             ARCH: "linux/amd64,linux/arm64"
 
+          # SSR
+          - ID: ssr-22
+            RUNTIME: ssr
+            VERSION: "22"
+            IMAGE: openruntimes/ssr:v4-22
+            ARCH: "linux/amd64,linux/arm64"
+
           # Static
           - ID: static-1
             RUNTIME: static
