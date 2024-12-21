@@ -160,7 +160,7 @@ output = "./.output"
 
 [remix]
 runtime = { name = "ssr", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/remix/bundle.sh", start = "sh helpers/server.sh 'sh helpers/remix/server.sh'" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/remix/bundle.sh", start = "sh helpers/remix/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Remix.php"

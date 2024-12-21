@@ -3,9 +3,9 @@
  * Used when SSR builds to standalone process, to preserve logs and auth check properly
  **/
 
-const { createProxyServer } = require("http-proxy");
-const { spawn } = require("child_process");
-const { Socket } = require("net");
+import { createProxyServer } from "http-proxy";
+import { spawn } from "child_process";
+import { Socket } from "net";
 
 (async () => {
   const command = process.argv.slice(2).join(" ");

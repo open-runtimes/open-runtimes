@@ -1,12 +1,12 @@
-const fs = require("fs");
+import { createWriteStream } from "fs";
 
 console.log("Open Runtimes logging enabled");
 
-const streamLogs = fs.createWriteStream(`/mnt/logs/ssr_logs.log`, {
+const streamLogs = createWriteStream(`/mnt/logs/ssr_logs.log`, {
   flags: "a",
 });
 
-streamErrors = fs.createWriteStream(`/mnt/logs/ssr_errors.log`, {
+const streamErrors = createWriteStream(`/mnt/logs/ssr_errors.log`, {
   flags: "a",
 });
 
