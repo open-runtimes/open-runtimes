@@ -128,7 +128,7 @@ test = "XStatic.php"
 
 [astro]
 runtime = { name = "ssr", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/astro/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/astro/server.sh'" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/astro/bundle.sh", start = "sh helpers/server.sh 'sh helpers/astro/server.sh'" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Astro.php"
@@ -136,7 +136,7 @@ output = "./dist"
 
 [sveltekit]
 runtime = { name = "ssr", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/sveltekit/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/sveltekit/server.sh'" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/sveltekit/bundle.sh", start = "sh helpers/server.sh 'sh helpers/sveltekit/server.sh'" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/SvelteKit.php"
@@ -144,7 +144,7 @@ output = "./build"
 
 [next-js]
 runtime = { name = "ssr", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/next-js/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/next-js/server.sh'" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/next-js/bundle.sh", start = "sh helpers/server.sh 'sh helpers/next-js/server.sh'" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/NextJS.php"
@@ -152,7 +152,7 @@ output = "./.next"
 
 [nuxt]
 runtime = { name = "ssr", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/nuxt/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/nuxt/server.sh'" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/nuxt/bundle.sh", start = "sh helpers/server.sh 'sh helpers/nuxt/server.sh'" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Nuxt.php"
@@ -160,7 +160,7 @@ output = "./.output"
 
 [remix]
 runtime = { name = "ssr", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/remix/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/remix/server.sh'" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/remix/bundle.sh", start = "sh helpers/server.sh 'sh helpers/remix/server.sh'" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Remix.php"
@@ -168,7 +168,7 @@ output = "./build"
 
 [angular]
 runtime = { name = "ssr", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/angular/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/angular/server.sh'" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/angular/bundle.sh", start = "sh helpers/server.sh 'sh helpers/angular/server.sh'" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Angular.php"
@@ -176,7 +176,7 @@ output = "./dist/angular"
 
 [analog]
 runtime = { name = "ssr", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/analog/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/analog/server.sh'" }
+commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/analog/bundle.sh", start = "sh helpers/server.sh 'sh helpers/analog/server.sh'" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Analog.php"

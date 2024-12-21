@@ -2,5 +2,5 @@
 FROM node:22.9.0-alpine3.20
 
 INCLUDE ./base-before
-INCLUDE ./node
+INCLUDE ./ssr
 INCLUDE ./base-after

@@ -1,3 +1,8 @@
+/**
+ * Proxy server used for port-forwarding to SSR server
+ * Used when SSR builds to standalone process, to preserve logs and auth check properly
+ **/
+
 const { createProxyServer } = require("http-proxy");
 const { spawn } = require("child_process");
 const { Socket } = require("net");
