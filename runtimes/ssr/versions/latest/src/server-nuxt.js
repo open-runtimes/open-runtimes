@@ -1,8 +1,8 @@
-import { handler } from "./handler.js";
+import { listener } from "./server/index.mjs";
 import express from "express";
 import "./../logger.js";
 
-console.log("SvelteKit server starting ...");
+console.log("Nuxt server starting ...");
 
 const app = express();
 
@@ -22,12 +22,13 @@ app.use((req, res, next) => {
 });
 
 // SSR handling
-app.use(handler);
+app.use(express.static("public"));
+app.use(listener);
 
 // Port listening
 const port = parseInt(process.env.PORT || "3000", 10);
 const host = process.env.HOST || "0.0.0.0";
 
 app.listen(port, host, () => {
-  console.log(`SvelteKit server started on http://${host}:${port}`);
+  console.log(`Nuxt server started on http://${host}:${port}`);
 });

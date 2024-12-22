@@ -28,3 +28,6 @@ RUN chmod +x /usr/local/server/helpers/angular/server.sh
 # Tell SvelteKit auto adapter to use Node runtime
 # Can be any string, as per https://github.com/sveltejs/kit/blob/main/packages/adapter-auto/adapters.js#L38C29-L39
 ENV GCP_BUILDPACKS="open-runtimes"
+
+# In Nuxt, enforce Node handler build
+ENV NITRO_PRESET="node"

@@ -22,8 +22,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// TODO: Logging
-
 // SSR handling
 app.use(express.static("public"));
 app.all(
