@@ -11,7 +11,5 @@ if [ -d "/usr/local/build/public/" ]; then
     mv /usr/local/build/public/ ./public/
 fi
 
-# TODO: More directories? https://nextjs.org/docs/app/getting-started/project-structure
-
 mv /usr/local/build/package*.json ./
 mv /usr/local/build/node_modules/ ./node_modules/
