@@ -31,3 +31,8 @@ ENV GCP_BUILDPACKS="open-runtimes"
 
 # In Nuxt, enforce Node handler build
 ENV NITRO_PRESET="node"
+
+# Disable CLI tools analytics
+ENV NG_CLI_ANALYTICS="false"
+ENV ASTRO_TELEMETRY_DISABLED="1"
+ENV NEXT_TELEMETRY_DISABLED="1"
