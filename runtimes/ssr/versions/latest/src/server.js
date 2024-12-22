@@ -3,7 +3,7 @@
  * Used when SSR builds to standalone process, to preserve logs and auth check properly
  **/
 
-import { createProxyServer } from "http-proxy";
+import httpProxy from "http-proxy";
 import { spawn } from "child_process";
 import { Socket } from "net";
 
@@ -17,7 +17,7 @@ import { Socket } from "net";
 })();
 
 function startProxy(portProxy, portTarget) {
-  const proxy = createProxyServer({
+  const proxy = httpProxy.createProxyServer({
     target: {
       host: "127.0.0.1",
       port: portTarget,
