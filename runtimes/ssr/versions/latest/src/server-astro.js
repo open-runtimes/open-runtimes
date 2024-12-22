@@ -2,7 +2,7 @@ import { handler } from "./server/entry.mjs";
 import express from "express";
 import "./../logger.js";
 
-console.log("Nuxt server starting ...");
+console.log("Astro server starting ...");
 
 const app = express();
 
@@ -30,5 +30,5 @@ const port = parseInt(process.env.PORT || "3000", 10);
 const host = process.env.HOST || "0.0.0.0";
 
 app.listen(port, host, () => {
-  console.log(`Nuxt server started on http://${host}:${port}`);
+  console.log(`Astro server started on http://${host}:${port}`);
 });
