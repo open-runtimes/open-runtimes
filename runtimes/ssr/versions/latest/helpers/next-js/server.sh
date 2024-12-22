@@ -1,6 +1,7 @@
 set -e
 
-cd /usr/local/server/src/function/
+cd /usr/local/server/src/function
 
-# To be used with server.sh (proxy)
-HOST=127.0.0.1 PORT=3001 npm start
+mv ../server-next-js.js ./server.js
+
+HOST=0.0.0.0 PORT=3000 node ./server.js

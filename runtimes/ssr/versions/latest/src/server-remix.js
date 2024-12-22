@@ -37,8 +37,8 @@ app.all(
 );
 
 // Port listening
-let port = process.env.PORT || 3000;
-let host = process.env.HOST || "0.0.0.0";
+const port = parseInt(process.env.PORT || "3000", 10);
+const host = process.env.HOST || "0.0.0.0";
 
 app.listen(port, host, () => {
   console.log(`Remix server started on http://${host}:${port}`);
