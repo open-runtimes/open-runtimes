@@ -2,5 +2,6 @@ set -e
 
 cd /usr/local/server/src/function/
 
-# To be used with server.sh (proxy)
-HOST=127.0.0.1 PORT=3001 node --import /usr/local/server/src/logger.js server/entry.mjs
+mv ../server-astro.js ./server.js
+
+HOST=0.0.0.0 PORT=3000 node ./server.js
