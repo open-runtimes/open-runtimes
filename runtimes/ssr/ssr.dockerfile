@@ -30,7 +30,8 @@ RUN chmod +x /usr/local/server/helpers/angular/server.sh
 ENV GCP_BUILDPACKS="open-runtimes"
 
 # In Nuxt, enforce Node handler build
-ENV NITRO_PRESET="node"
+# ENV NITRO_PRESET="node"
+# TODO: Only do this in Nuxt, becuase it breaks Analog
 
 # Disable CLI tools analytics
 ENV NG_CLI_ANALYTICS="false"
