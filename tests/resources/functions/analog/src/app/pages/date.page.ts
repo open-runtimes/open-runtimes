@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-date',
   standalone: true,
   template: `
-    <p id="date">{{ date }}</p>
+    <p>[DATE_START]{{ date }}[DATE_END]</p>
   `,
 })
 export default class HomeComponent {

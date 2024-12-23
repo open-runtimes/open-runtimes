@@ -1,6 +1,6 @@
 
 <template>
-    <p id="date">{{ msg }}</p>
+    <p>[DATE_START]{{ msg }}[DATE_END]</p>
 </template>
 
 <script setup>
