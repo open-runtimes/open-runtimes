@@ -93,6 +93,10 @@ const uniqueKeys: string[] = [];
 for(const entry of matrix) {
     const key = entry.ID;
 
+    if(!entry.TEST_CLASS) {
+        continue;
+    }
+
     if(!uniqueKeys.includes(key)) {
         uniqueKeys.push(key);
         uniqueMatrix.push(entry);
