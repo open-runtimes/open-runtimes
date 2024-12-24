@@ -1,5 +1,5 @@
 {
-  "name": "open-runtimes-node",
+  "name": "open-runtimes-ssr",
   "version": "1.0.0",
   "description": "",
   "type": "commonjs",
@@ -11,6 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "micro": "^9.3.4"
+    "http-proxy": "^1.18.1"
   }
 }
