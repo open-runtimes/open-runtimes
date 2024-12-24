@@ -13,7 +13,5 @@ if [ -d "/usr/local/build/public/" ]; then
     mv /usr/local/build/public/ ./public/
 fi
 
-# TODO: More directories? https://remix.run/docs/en/main/file-conventions/asset-imports
-
 mv /usr/local/build/package*.json ./
 mv /usr/local/build/node_modules/ ./node_modules/

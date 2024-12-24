@@ -1,11 +1,10 @@
+import { listener } from "./server/index.mjs";
 import express from "express";
-import { createRequestHandler } from "@remix-run/express";
-import * as build from "./build/server/index.js";
 import "./../logger.js";
 
-console.log("Remix server starting ...");
+console.log("Nuxt server starting ...");
 
-let app = express();
+const app = express();
 
 // Auth check
 app.use((req, res, next) => {
@@ -24,20 +23,12 @@ app.use((req, res, next) => {
 
 // SSR handling
 app.use(express.static("public"));
-app.all(
-  "*",
-  createRequestHandler({
-    build,
-    getLoadContext(req, res) {
-      return {};
-    },
-  }),
-);
+app.use(listener);
 
 // Port listening
 const port = parseInt(process.env.PORT || "3000", 10);
 const host = process.env.HOST || "0.0.0.0";
 
 app.listen(port, host, () => {
-  console.log(`Remix server started on http://${host}:${port}`);
+  console.log(`Nuxt server started on http://${host}:${port}`);
 });

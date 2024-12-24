@@ -126,6 +126,13 @@ formatter = { prepare = "echo No formatter preparations.", check = "echo No form
 tools = "static-web-server --version"
 test = "XStatic.php"
 
+[ssr]
+versions = ["22"]
+commands = { install = "", start = "" }
+formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
+test = ""
+
 [astro]
 runtime = { name = "ssr", version = "22" }
 commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/astro/bundle.sh", start = "sh helpers/server.sh 'sh helpers/astro/server.sh'" }

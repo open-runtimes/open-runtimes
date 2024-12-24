@@ -31,5 +31,5 @@ app.prepare().then(() => {
   const host = process.env.HOST || "0.0.0.0";
   server.listen(port, host);
 
-  console.log(`Remix server started on http://${host}:${port}`);
+  console.log(`Next.js server started on http://${host}:${port}`);
 });
