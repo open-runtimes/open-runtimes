@@ -1,6 +1,7 @@
 set -e
 
-cd /usr/local/server/src/function/
+cd /usr/local/server/src/function
 
-# To be used with server.sh
-HOST=127.0.0.1 PORT=3001 ./node_modules/.bin/remix-serve ./build/server/index.js
+mv ../server-remix.js ./server.js
+
+HOST=0.0.0.0 PORT=3000 node ./server.js
