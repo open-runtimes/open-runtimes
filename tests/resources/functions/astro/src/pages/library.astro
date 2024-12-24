@@ -1,5 +1,9 @@
 ---
-const date = new Date().toISOString()
+import { faker } from '@faker-js/faker';
+
+const id = faker.string.uuid();
+
+const msg = "My UUID is: " + id;
 ---
 
 <html lang="en">
@@ -11,6 +15,6 @@ const date = new Date().toISOString()
 		<title>Astro</title>
 	</head>
 	<body>
-		<p>[DATE_START]{date}[DATE_END]</p>
+		<p>[UUID_START]{msg}[UUID_END]</p>
 	</body>
 </html>

@@ -1,0 +1,3 @@
+set -e
+
+export ASTRO_TELEMETRY_DISABLED="1"

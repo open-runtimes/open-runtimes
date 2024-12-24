@@ -13,12 +13,9 @@ class SSR extends CSR
 
     public function testServerAction(): void
     {
-        // Helper for scraping date from the body. Possibly containing irelevant non-dynamic extras.
-        // Do not use with Date or DateTime constructors.
         $scrapeDate = function (string $body) {
-            // <p id="date">CONTENT</p>
-            $date = \explode('id="date"', $body)[1];
-            $date = \explode('</p>', $body)[0];
+            $date = \explode('[DATE_START]', $body)[1];
+            $date = \explode('[DATE_END]', $body)[0];
             return $date;
         };
 
@@ -64,5 +61,26 @@ class SSR extends CSR
         self::assertStringNotContainsString("No exceptions", $response['body']);
         self::assertStringNotContainsString('Code exception occured', Client::getLogs('ssr'));
         self::assertStringContainsString('Code exception occured', Client::getErrors('ssr'));
+    }
+
+    public function testServerLibrary(): void
+    {
+        $scrapeUuid = function (string $body) {
+            $date = \explode('[UUID_START]', $body)[1];
+            $date = \explode('[UUID_END]', $body)[0];
+            return $date;
+        };
+
+        $response = Client::execute(url: '/library', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString("My UUID is", $response['body']);
+        $uuid1 = $scrapeUuid($response['body']);
+
+        $response = Client::execute(url: '/library', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString("My UUID is", $response['body']);
+        $uuid2 = $scrapeUuid($response['body']);
+
+        self::assertNotEquals($uuid1, $uuid2);
     }
 }

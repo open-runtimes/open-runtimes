@@ -3,4 +3,4 @@
 	let { data } = $props();
 </script>
 
-<p>[DATE_START]{data.date}[DATE_END]</p>
+<p>[UUID_START]{data.msg}[UUID_END]</p>

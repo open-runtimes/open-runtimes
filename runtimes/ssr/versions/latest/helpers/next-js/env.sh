@@ -1,0 +1,3 @@
+set -e
+
+export NEXT_TELEMETRY_DISABLED="1"
