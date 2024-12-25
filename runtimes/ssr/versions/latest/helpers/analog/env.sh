@@ -1,4 +1,3 @@
 set -e
 
-# No env setup nessessary
-# export CI="1"
+export NITRO_PRESET="node"
