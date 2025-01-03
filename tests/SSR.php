@@ -43,15 +43,15 @@ class SSR extends CSR
         self::assertEquals(200, $response['code']);
         self::assertStringContainsString("All logs printed", $response['body']);
 
-        self::assertStringContainsString('A log printed', Client::getLogs('ssr'));
-        self::assertStringContainsString('An error printed', Client::getErrors('ssr'));
+        self::assertStringContainsString('A log printed', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('An error printed', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
 
         $response = Client::execute(url: '/logs', method: 'GET');
         self::assertEquals(200, $response['code']);
         self::assertStringContainsString("All logs printed", $response['body']);
 
-        self::assertEquals(2, \substr_count(Client::getLogs('ssr'), 'A log printed'));
-        self::assertEquals(2, \substr_count(Client::getErrors('ssr'), 'An error printed'));
+        self::assertStringContainsString('A log printed', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('An error printed', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testServerException(): void
@@ -59,8 +59,8 @@ class SSR extends CSR
         $response = Client::execute(url: '/exception', method: 'GET');
         self::assertEquals(500, $response['code']);
         self::assertStringNotContainsString("No exceptions", $response['body']);
-        self::assertStringNotContainsString('Code exception occured', Client::getLogs('ssr'));
-        self::assertStringContainsString('Code exception occured', Client::getErrors('ssr'));
+        self::assertStringNotContainsString('Code exception occured', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('Code exception occured', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testServerLibrary(): void
@@ -83,4 +83,8 @@ class SSR extends CSR
 
         self::assertNotEquals($uuid1, $uuid2);
     }
+
+    // x-open-runtimes-timeout
+    // x-open-runtimes-logging
+    // x-open-runtimes-log-id
 }

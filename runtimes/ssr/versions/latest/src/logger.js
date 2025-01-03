@@ -1,61 +1,127 @@
 import { createWriteStream } from "fs";
 
-console.log("Open Runtimes logging enabled");
+export class Logger {
+  static TYPE_ERROR = "error";
+  static TYPE_LOG = "log";
 
-const streamLogs = createWriteStream(`/mnt/logs/ssr_logs.log`, {
-  flags: "a",
-});
+  id = "";
+  enabled = false;
 
-const streamErrors = createWriteStream(`/mnt/logs/ssr_errors.log`, {
-  flags: "a",
-});
+  streamLogs = null;
+  streamErrors = null;
+  nativeLogsCache = {};
 
-function write(type, messages) {
-  const stream = type === "error" ? streamErrors : streamLogs;
+  constructor(status, id) {
+    this.enabled = (status ? status : "enabled") === "enabled";
 
-  let stringLog = "";
-  for (let i = 0; i < messages.length; i++) {
-    const message = messages[i];
-    if (message instanceof Error) {
-      stringLog += [message.stack || message].join("\n");
-    } else if (message instanceof Object || Array.isArray(message)) {
-      stringLog += JSON.stringify(message);
-    } else {
-      stringLog += `${message}`;
-    }
-
-    if (i < messages.length - 1) {
-      stringLog += " ";
+    if (this.enabled) {
+      this.id = id
+        ? id
+        : process.env.OPEN_RUNTIMES_ENV === "development"
+          ? "dev"
+          : this.generateId();
+      this.streamLogs = createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
+        flags: "a",
+      });
+      this.streamErrors = createWriteStream(`/mnt/logs/${this.id}_errors.log`, {
+        flags: "a",
+      });
     }
   }
 
-  stream.write(stringLog + "\n");
+  write(messages, type = Logger.TYPE_LOG) {
+    if (!this.enabled) {
+      return;
+    }
+
+    const stream =
+      type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
+
+    let stringLog = "";
+    for (let i = 0; i < messages.length; i++) {
+      const message = messages[i];
+      if (message instanceof Error) {
+        stringLog += [message.stack || message].join("\n");
+      } else if (message instanceof Object || Array.isArray(message)) {
+        stringLog += JSON.stringify(message);
+      } else {
+        stringLog += `${message}`;
+      }
+
+      if (i < messages.length - 1) {
+        stringLog += " ";
+      }
+    }
+
+    stream.write(stringLog + "\n");
+  }
+
+  async end() {
+    if (!this.enabled) {
+      return;
+    }
+
+    this.enabled = false;
+
+    await Promise.all([
+      new Promise((res) => {
+        this.streamLogs.end(undefined, undefined, res);
+      }),
+      new Promise((res) => {
+        this.streamErrors.end(undefined, undefined, res);
+      }),
+    ]);
+  }
+
+  overrideNativeLogs() {
+    if (!this.enabled) {
+      return;
+    }
+
+    // TODO: Concurrent bind
+
+    this.nativeLogsCache.stdlog = console.log.bind(console);
+    this.nativeLogsCache.stderror = console.error.bind(console);
+    this.nativeLogsCache.stdinfo = console.info.bind(console);
+    this.nativeLogsCache.stddebug = console.debug.bind(console);
+    this.nativeLogsCache.stdwarn = console.warn.bind(console);
+
+    console.log =
+      console.info =
+      console.debug =
+      console.warn =
+        (...args) => {
+          this.write(args, Logger.TYPE_LOG, true);
+        };
+
+    console.error = (...args) => {
+      this.write(args, Logger.TYPE_ERROR, true);
+    };
+  }
+
+  revertNativeLogs() {
+    if (!this.enabled) {
+      return;
+    }
+
+    console.log = this.nativeLogsCache.stdlog;
+    console.error = this.nativeLogsCache.stderror;
+    console.debug = this.nativeLogsCache.stddebug;
+    console.warn = this.nativeLogsCache.stdwarn;
+    console.info = this.nativeLogsCache.stdinfo;
+  }
+
+  // Recreated from https://www.php.net/manual/en/function.uniqid.php
+  generateId(padding = 7) {
+    const now = new Date();
+    const sec = Math.floor(now.getTime() / 1000);
+    const msec = now.getMilliseconds();
+    const baseId = sec.toString(16) + msec.toString(16).padStart(5, "0");
+    let randomPadding = "";
+    for (let i = 0; i < padding; i++) {
+      const randomHexDigit = Math.floor(Math.random() * 16).toString(16);
+      randomPadding += randomHexDigit;
+    }
+    return baseId + randomPadding;
+  }
 }
-
-const nativeLogsCache = {};
-nativeLogsCache.stdlog = console.log.bind(console);
-nativeLogsCache.stderror = console.error.bind(console);
-nativeLogsCache.stdinfo = console.info.bind(console);
-nativeLogsCache.stddebug = console.debug.bind(console);
-nativeLogsCache.stdwarn = console.warn.bind(console);
-
-console.log = (...args) => {
-  write("log", args);
-  nativeLogsCache.stdlog(...args);
-};
-console.info = (...args) => {
-  write("log", args);
-  nativeLogsCache.stdinfo(...args);
-};
-console.debug = (...args) => {
-  write("log", args);
-  nativeLogsCache.stddebug(...args);
-};
-console.warn = (...args) => {
-  write("log", args);
-  nativeLogsCache.stdwarn(...args);
-};
-console.error = (...args) => {
-  write("error", args);
-  nativeLogsCache.stderror(...args);
-};
