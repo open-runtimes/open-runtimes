@@ -1,4 +1,4 @@
-import { createWriteStream } from "fs";
+import { createWriteStream, writeFileSync, unlinkSync } from "fs";
 
 export class Logger {
   static TYPE_ERROR = "error";
@@ -20,6 +20,10 @@ export class Logger {
         : process.env.OPEN_RUNTIMES_ENV === "development"
           ? "dev"
           : this.generateId();
+
+      writeFileSync(`/mnt/logs/${this.id}_logs.log.lock`, "");
+      writeFileSync(`/mnt/logs/${this.id}_errors.log.lock`, "");
+
       this.streamLogs = createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
         flags: "a",
       });
@@ -71,14 +75,15 @@ export class Logger {
         this.streamErrors.end(undefined, undefined, res);
       }),
     ]);
+
+    unlinkSync(`/mnt/logs/${this.id}_logs.log.lock`);
+    unlinkSync(`/mnt/logs/${this.id}_errors.log.lock`);
   }
 
   overrideNativeLogs() {
     if (!this.enabled) {
       return;
     }
-
-    // TODO: Concurrent bind
 
     this.nativeLogsCache.stdlog = console.log.bind(console);
     this.nativeLogsCache.stderror = console.error.bind(console);
@@ -97,18 +102,6 @@ export class Logger {
     console.error = (...args) => {
       this.write(args, Logger.TYPE_ERROR, true);
     };
-  }
-
-  revertNativeLogs() {
-    if (!this.enabled) {
-      return;
-    }
-
-    console.log = this.nativeLogsCache.stdlog;
-    console.error = this.nativeLogsCache.stderror;
-    console.debug = this.nativeLogsCache.stddebug;
-    console.warn = this.nativeLogsCache.stdwarn;
-    console.info = this.nativeLogsCache.stdinfo;
   }
 
   // Recreated from https://www.php.net/manual/en/function.uniqid.php

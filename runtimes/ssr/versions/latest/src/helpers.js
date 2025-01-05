@@ -1,4 +1,5 @@
 // Use as base for server-X.js (per framework)
+
 import { Logger } from "./logger.js";
 
 export function getPort() {
@@ -77,8 +78,6 @@ export function onAction(callback) {
     } else {
       await callback(...params);
     }
-
-    req.logger.revertNativeLogs();
 
     await req.logger.end();
   };
