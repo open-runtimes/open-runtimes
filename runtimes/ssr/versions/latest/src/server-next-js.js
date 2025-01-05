@@ -10,6 +10,7 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const server = createServer((req, res) => {
+    onInit(req, res);
     // Auth check
     if (
       process.env["OPEN_RUNTIMES_SECRET"] &&
@@ -22,8 +23,14 @@ app.prepare().then(() => {
     }
 
     // SSR handling
-    const parsedUrl = parse(req.url, true);
-    handle(req, res, parsedUrl);
+    try {
+      const parsedUrl = parse(req.url, true);
+      onAction(() => {
+        handle(req, res, parsedUrl);
+      });
+    } catch(err) {
+      onError(err, req, res);
+    }
   });
 
   // Port listening
@@ -33,3 +40,4 @@ app.prepare().then(() => {
 
   console.log(`Next.js server started on http://${host}:${port}`);
 });
+
