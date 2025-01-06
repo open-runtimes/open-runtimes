@@ -2,7 +2,7 @@ import { reqHandler } from "./server/server.mjs";
 import express from "express";
 import { onInit, getPort, getHost, onAction, onError } from "./helpers.js";
 
-console.log("Astro server starting ...");
+console.log("Angular server starting ...");
 
 const app = express();
 app.use(onInit);
@@ -14,5 +14,5 @@ app.use(onAction(reqHandler));
 app.use(onError);
 
 app.listen(getPort(), getHost(), () => {
-  console.log(`Astro server started on http://${getHost()}:${getPort()}`);
+  console.log(`Angular server started on http://${getHost()}:${getPort()}`);
 });

@@ -28,7 +28,7 @@ app.prepare().then(() => {
       onAction(() => {
         handle(req, res, parsedUrl);
       });
-    } catch(err) {
+    } catch (err) {
       onError(err, req, res);
     }
   });
@@ -40,4 +40,3 @@ app.prepare().then(() => {
 
   console.log(`Next.js server started on http://${host}:${port}`);
 });
-

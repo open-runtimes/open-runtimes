@@ -13,17 +13,19 @@ app.use(onInit);
 app.use(express.static("public"));
 app.all(
   "*",
-  onAction(createRequestHandler({
-    build,
-    getLoadContext(req, res) {
-      return {};
-    },
-  })),
+  onAction(
+    createRequestHandler({
+      build,
+      getLoadContext(req, res) {
+        return {};
+      },
+    }),
+  ),
 );
 // End of framework-specific logic
 
 app.use(onError);
 
 app.listen(getPort(), getHost(), () => {
-  console.log(`Astro server started on http://${getHost()}:${getPort()}`);
+  console.log(`Remix server started on http://${getHost()}:${getPort()}`);
 });

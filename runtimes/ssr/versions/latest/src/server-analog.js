@@ -2,7 +2,7 @@ import { handler } from "./server/index.mjs";
 import express from "express";
 import { onInit, getPort, getHost, onAction, onError } from "./helpers.js";
 
-console.log("Astro server starting ...");
+console.log("Analog server starting ...");
 
 const app = express();
 app.use(onInit);
@@ -15,5 +15,5 @@ app.use(onAction(handler));
 app.use(onError);
 
 app.listen(getPort(), getHost(), () => {
-  console.log(`Astro server started on http://${getHost()}:${getPort()}`);
+  console.log(`Analog server started on http://${getHost()}:${getPort()}`);
 });

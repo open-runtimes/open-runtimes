@@ -1,4 +1,8 @@
-import { createWriteStream, writeFileSync, unlinkSync } from "fs";
+import {
+  createWriteStream,
+  writeFileSync,
+  unlinkSync,
+} from "fs";
 
 export class Logger {
   static TYPE_ERROR = "error";
@@ -9,7 +13,6 @@ export class Logger {
 
   streamLogs = null;
   streamErrors = null;
-  nativeLogsCache = {};
 
   constructor(status, id) {
     this.enabled = (status ? status : "enabled") === "enabled";
@@ -21,8 +24,12 @@ export class Logger {
           ? "dev"
           : this.generateId();
 
-      writeFileSync(`/mnt/logs/${this.id}_logs.log.lock`, "");
-      writeFileSync(`/mnt/logs/${this.id}_errors.log.lock`, "");
+      try {
+        writeFileSync(`/mnt/logs/${this.id}_logs.log.lock`, "");
+        writeFileSync(`/mnt/logs/${this.id}_errors.log.lock`, "");
+      } catch (err) {
+        // Cuncurrent dev request, not a big deal
+      }
 
       this.streamLogs = createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
         flags: "a",
@@ -76,20 +83,18 @@ export class Logger {
       }),
     ]);
 
-    unlinkSync(`/mnt/logs/${this.id}_logs.log.lock`);
-    unlinkSync(`/mnt/logs/${this.id}_errors.log.lock`);
+    try {
+      unlinkSync(`/mnt/logs/${this.id}_logs.log.lock`);
+      unlinkSync(`/mnt/logs/${this.id}_errors.log.lock`);
+    } catch (err) {
+      // Cuncurrent dev request, not a big deal
+    }
   }
 
   overrideNativeLogs() {
     if (!this.enabled) {
       return;
     }
-
-    this.nativeLogsCache.stdlog = console.log.bind(console);
-    this.nativeLogsCache.stderror = console.error.bind(console);
-    this.nativeLogsCache.stdinfo = console.info.bind(console);
-    this.nativeLogsCache.stddebug = console.debug.bind(console);
-    this.nativeLogsCache.stdwarn = console.warn.bind(console);
 
     console.log =
       console.info =

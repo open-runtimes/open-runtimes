@@ -30,8 +30,26 @@ export function onInit(req, res, next) {
     req.headers[`x-open-runtimes-logging`],
     req.headers[`x-open-runtimes-log-id`],
   );
-
   res.setHeader("x-open-runtimes-log-id", req.logger.id);
+  res.on("finish", () => {
+    req.logger.end();
+  });
+
+  // Validate safe timeout
+  const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
+  let safeTimeout = null;
+  if (timeout) {
+    if (isNaN(timeout) || timeout === 0) {
+      res.writeHead(500, { "Content-Type": "text/plain" });
+      res.end(
+        'Header "x-open-runtimes-timeout" must be an integer greater than 0.',
+      );
+      return;
+    }
+
+    safeTimeout = +timeout;
+  }
+  req.safeTimeout = safeTimeout;
 
   next();
 }
@@ -41,30 +59,16 @@ export function onAction(callback) {
   return async (...params) => {
     const [req, res, next] = params;
 
-    const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
-    let safeTimeout = null;
-    if (timeout) {
-      if (isNaN(timeout) || timeout === 0) {
-        res.writeHead(500, { "Content-Type": "text/plain" });
-        res.end(
-          'Header "x-open-runtimes-timeout" must be an integer greater than 0.',
-        );
-        return;
-      }
-
-      safeTimeout = +timeout;
-    }
-
     req.logger.overrideNativeLogs();
 
-    if (safeTimeout !== null) {
+    if (req.safeTimeout !== null) {
       let executed = true;
 
       const timeoutPromise = new Promise((promiseRes) => {
         setTimeout(() => {
           executed = false;
           promiseRes(true);
-        }, safeTimeout * 1000);
+        }, req.safeTimeout * 1000);
       });
 
       await Promise.race([callback(...params), timeoutPromise]);
@@ -78,13 +82,11 @@ export function onAction(callback) {
     } else {
       await callback(...params);
     }
-
-    await req.logger.end();
   };
 }
 
 // When error occurs
-export function onError(error, req, res, next) {
+export function onError(error, req, res) {
   req.logger.write([error], Logger.TYPE_ERROR);
   res.writeHead(500, { "Content-Type": "text/plain" });
   res.end("");
