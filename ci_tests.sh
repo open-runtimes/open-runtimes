@@ -30,7 +30,7 @@ echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 if ! [ -z "$ENFORCED_RUNTIME" ]; then
-cp -R ./tests/resources/functions/$RUNTIME/* ./tests/.runtime
+    cp -R ./tests/resources/functions/$RUNTIME/* ./tests/.runtime
 else
     cp -R ./tests/resources/functions/$RUNTIME_FOLDER/latest/* ./tests/.runtime
         if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then

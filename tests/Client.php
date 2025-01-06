@@ -76,19 +76,24 @@ class Client {
         ];
     }
 
-    public static function getErrors(string $id) {
-        if(!\file_exists("/tmp/logs/{$id}_errors.log")) {
-            return "";
+    private static function getFile(string $name, int $attempt = 1) {
+        if(!\file_exists($name) || \file_exists($name . ".lock")) {
+            if($attempt >= 10) {
+                return "";
+            }
+
+            \sleep(1);
+            return self::getFile($name, $attempt + 1);
         }
 
-        return \file_get_contents("/tmp/logs/{$id}_errors.log");
+        return \file_get_contents($name);
+    }
+
+    public static function getErrors(string $id) {
+        return self::getFile("/tmp/logs/{$id}_errors.log");
     }
 
     public static function getLogs(string $id) {
-        if(!\file_exists("/tmp/logs/{$id}_logs.log")) {
-            return "";
-        }
-
-        return \file_get_contents("/tmp/logs/{$id}_logs.log");
+        return self::getFile("/tmp/logs/{$id}_logs.log");
     }
 }
