@@ -707,9 +707,8 @@ class Serverless extends Base
         self::assertEquals(1, $spaceOccurances);
     }
 
-     // Keep always first, it tests disabled logging. Must be done first
-     public function testDevLogFiles(): void
-     {
+    public function testDevLogFiles(): void
+    {
         Client::$port = 3001;
 
         // Cleanup

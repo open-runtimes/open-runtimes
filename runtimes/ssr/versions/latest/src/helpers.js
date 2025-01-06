@@ -74,7 +74,7 @@ export function onAction(callback) {
       await Promise.race([callback(...params), timeoutPromise]);
 
       if (!executed) {
-        context.error("Execution timed out.");
+        console.error("Execution timed out.");
         res.writeHead(500, { "Content-Type": "text/plain" });
         res.end("");
         return;
@@ -86,7 +86,11 @@ export function onAction(callback) {
 }
 
 // When error occurs
-export function onError(error, req, res) {
+export function onError(error, req, res, next) {
+  if (res.headersSent) {
+    return next(err);
+  }
+
   req.logger.write([error], Logger.TYPE_ERROR);
   res.writeHead(500, { "Content-Type": "text/plain" });
   res.end("");

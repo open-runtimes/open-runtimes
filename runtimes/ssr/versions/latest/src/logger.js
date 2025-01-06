@@ -1,8 +1,4 @@
-import {
-  createWriteStream,
-  writeFileSync,
-  unlinkSync,
-} from "fs";
+import { createWriteStream, writeFileSync, unlinkSync } from "fs";
 
 export class Logger {
   static TYPE_ERROR = "error";
