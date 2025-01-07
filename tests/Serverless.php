@@ -709,7 +709,7 @@ class Serverless extends Base
 
     public function testDevLogFiles(): void
     {
-        Client::$port = 3001;
+        Client::$host = 'open-runtimes-test-serve-dev';
 
         // Cleanup
         $response = \shell_exec('rm -rf /tmp/logs/dev_logs.log && echo $?');
@@ -738,6 +738,6 @@ class Serverless extends Base
         self::assertStringContainsString('Debug log', $logs);
         self::assertStringContainsString('Error log', $errors);
 
-        Client::$port = 3000;
+        Client::$host = 'open-runtimes-test-serve';
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Tests;
 
+use Swoole\Coroutine as Co;
+
 class SSR extends CSR
 {
     public function testHomepagePrerendered(): void
@@ -73,9 +75,67 @@ class SSR extends CSR
         self::assertStringContainsString('An error printed', Client::getErrors('customLogs'));
     }
 
+
+    public function testServerLogsConcurrency(): void
+    {
+        $ensureRequestLogs = function() {
+            $response = Client::execute(url: '/concurrency', method: 'GET');
+            self::assertEquals(200, $response['code']);
+            self::assertStringContainsString("OK Response", $response['body']);
+            $logs = Client::getLogs($response['headers']['x-open-runtimes-log-id']);
+            self::assertStringContainsString('Concurrent Log 1', $logs);
+            self::assertStringContainsString('Concurrent Log 2', $logs);
+            self::assertStringContainsString('Concurrent Log 3', $logs);
+            self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    
+            $log1Pos = \strpos($logs, 'Concurrent Log 1');
+            $log2Pos = \strpos($logs, 'Concurrent Log 2');
+            $log3Pos = \strpos($logs, 'Concurrent Log 3');
+    
+            self::assertIsNumeric($log1Pos);
+            self::assertIsNumeric($log2Pos);
+            self::assertIsNumeric($log3Pos);
+    
+            self::assertGreaterThan($log2Pos, $log3Pos); // log 3 larger than log 2
+            self::assertGreaterThan($log1Pos, $log2Pos); // log 2 larger than log 1
+        };
+
+        $finishes = [];
+
+        $ensureRequestLogs();
+
+        Co\run(function () use ($ensureRequestLogs, &$finishes) {
+            Co::join([
+                Co\go(function () use ($ensureRequestLogs, &$finishes) {
+                    $ensureRequestLogs();
+                    \array_push($finishes, 1);
+                }),
+                Co\go(function () use ($ensureRequestLogs, &$finishes) {
+                    $ensureRequestLogs();
+                    \array_push($finishes, 2);
+                }),
+                Co\go(function () use ($ensureRequestLogs, &$finishes) {
+                    $ensureRequestLogs();
+                    \array_push($finishes, 3);
+                }),
+                Co\go(function () use ($ensureRequestLogs, &$finishes) {
+                    $ensureRequestLogs();
+                    \array_push($finishes, 4);
+                }),
+                Co\go(function () use ($ensureRequestLogs, &$finishes) {
+                    $ensureRequestLogs();
+                    \array_push($finishes, 5);
+                }),
+            ]);
+        });
+
+        self::assertCount(5, $finishes);
+        self::assertNotEquals("12345", \implode("", $finishes));
+    }
+
     public function testDevLogFiles(): void
     {
-        Client::$port = 3001;
+        Client::$host = 'open-runtimes-test-serve-dev';
 
         // Cleanup
         $response = \shell_exec('rm -rf /tmp/logs/dev_logs.log && echo $?');
@@ -98,7 +158,7 @@ class SSR extends CSR
         self::assertStringContainsString('A log printed', Client::getLogs('myLog'));
         self::assertStringContainsString('An error printed', Client::getErrors('myLog'));
 
-        Client::$port = 3000;
+        Client::$host = 'open-runtimes-test-serve';
     }
 
     public function testServerException(): void
@@ -130,6 +190,4 @@ class SSR extends CSR
 
         self::assertNotEquals($uuid1, $uuid2);
     }
-
-    // TODO: Concurrency logs
 }

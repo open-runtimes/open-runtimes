@@ -3,6 +3,7 @@
 namespace Tests;
 
 class Client {
+    public static $host = 'open-runtimes-test-serve';
     public static $port = 3000;
     public static $secret = '';
 
@@ -30,7 +31,7 @@ class Client {
 
         $responseHeaders = [];
         $optArray = [
-            CURLOPT_URL => 'http://localhost:' . self::$port . $url,
+            CURLOPT_URL => 'http://' . self::$host . ':' . self::$port . $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$responseHeaders) {
                 $len = strlen($header);
@@ -78,7 +79,7 @@ class Client {
 
     private static function getFile(string $name, int $attempt = 1) {
         if(!\file_exists($name) || \file_exists($name . ".lock")) {
-            if($attempt >= 10) {
+            if($attempt >= 3) {
                 return "";
             }
 

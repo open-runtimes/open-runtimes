@@ -20,17 +20,18 @@ class Base extends TestCase
 
         Client::$secret = \getenv('OPEN_RUNTIMES_SECRET');
 
-        $this->awaitPortOpen();
-        Client::$port = 3001;
-        $this->awaitPortOpen();
-        Client::$port = 3000;
+        Client::$host = 'open-runtimes-test-serve';
+        $this->awaitHostReady();
+        Client::$host = 'open-runtimes-test-serve-dev';
+        $this->awaitHostReady();
+        Client::$host = 'open-runtimes-test-serve';
     }
 
     public function tearDown(): void
     {
     }
 
-    protected function awaitPortOpen() {
+    protected function awaitHostReady() {
         $attempts = 0;
         while(true) {
             $response = Client::execute();
@@ -86,7 +87,7 @@ class Base extends TestCase
 
     public function testEmptyServerSecret(): void
     {
-        Client::$port = 3001;
+        Client::$host = 'open-runtimes-test-serve-dev';
 
         $response = Client::execute(method: 'GET', url: '/', headers: ['x-action' => 'plaintextResponse']);
         self::assertEquals(200, $response['code']);
@@ -99,6 +100,6 @@ class Base extends TestCase
         self::assertNotEmpty($response['body']);
 
         Client::$secret = \getenv('OPEN_RUNTIMES_SECRET');
-        Client::$port = 3000;
+        Client::$host = 'open-runtimes-test-serve';
     }
 }
