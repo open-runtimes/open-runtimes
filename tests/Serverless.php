@@ -160,8 +160,8 @@ class Serverless extends Base
         self::assertEmpty($body['query']);
         self::assertEquals('', $body['queryString']);
         self::assertEquals('http', $body['scheme']);
-        self::assertContains($body['host'], ['localhost', '0.0.0.0', '127.0.0.1']);
-        self::assertContains($body['url'], ['http://localhost:3000/', 'http://0.0.0.0:3000/', 'http://127.0.0.1:3000/']);
+        self::assertContains($body['host'], ['localhost', '0.0.0.0', '127.0.0.1', 'open-runtimes-test-serve-dev', 'open-runtimes-test-serve']);
+        self::assertContains($body['url'], ['http://localhost:3000/', 'http://0.0.0.0:3000/', 'http://127.0.0.1:3000/', 'http://open-runtimes-test-serve-dev:3000/', 'http://open-runtimes-test-serve:3000/']);
 
         $response = Client::execute(url: '/a/b?c=d&e=f#something', headers: [
             'x-action' => 'requestUrl',

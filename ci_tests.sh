@@ -74,4 +74,4 @@ docker run --network openruntimes -d --name open-runtimes-test-serve-dev -v /tmp
 
 cd ../../
 
-docker run --network openruntimes --rm -e RUNTIME_NAME="$RUNTIME" -e RUNTIME_VERSION="$VERSION" -e OPEN_RUNTIMES_SECRET="test-secret-key" -e OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT -v $PWD:/app -v /tmp:/tmp -w /app phpswoole/swoole:5.1.2-php8.3-alpine sh -c "vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS"
+docker run  -v /var/run/docker.sock:/var/run/docker.sock --network openruntimes --rm -e RUNTIME_NAME="$RUNTIME" -e RUNTIME_VERSION="$VERSION" -e OPEN_RUNTIMES_SECRET="test-secret-key" -e OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT -v $PWD:/app -v /tmp:/tmp -w /app phpswoole/swoole:5.1.2-php8.3-alpine sh -c "apk update && apk add docker-cli && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS"
