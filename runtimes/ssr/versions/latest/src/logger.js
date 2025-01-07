@@ -1,19 +1,4 @@
-import {
-  readFileSync,
-  existsSync,
-  createWriteStream,
-  writeFileSync,
-  unlinkSync,
-} from "fs";
-
-// TODO: Temporary
-const stdlog = (log) => {
-  let d = "";
-  if (existsSync("/mnt/logs/local.txt")) {
-    d = readFileSync("/mnt/logs/local.txt").toString();
-  }
-  writeFileSync("/mnt/logs/local.txt", d + "\n" + log);
-};
+import { createWriteStream, writeFileSync, unlinkSync } from "fs";
 
 export class Logger {
   static TYPE_ERROR = "error";
@@ -35,7 +20,7 @@ export class Logger {
           : Logger.generateId();
     }
 
-    if (Logger.stream[id]) {
+    if (Logger.streams[id]) {
       return id;
     }
 
@@ -110,20 +95,18 @@ export class Logger {
     delete Logger.streams[id];
   }
 
-  static overrideNativeLogs(namespace) {
+  static overrideNativeLogs(namespace, rid) {
     console.log =
       console.info =
       console.debug =
       console.warn =
         (...args) => {
           const requestId = namespace.get("id");
-          stdlog(requestId);
           Logger.write(requestId, args, Logger.TYPE_LOG, true);
         };
 
     console.error = (...args) => {
       const requestId = namespace.get("id");
-      stdlog(requestId);
       Logger.write(requestId, args, Logger.TYPE_ERROR, true);
     };
   }
