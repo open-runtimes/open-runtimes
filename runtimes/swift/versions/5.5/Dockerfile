@@ -1,5 +1,5 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM swiftarm/swift:5.5.3-ubuntu-jammy
+FROM swift:5.5.3-focal
 
 INCLUDE ./base-before
 INCLUDE ./swift
