@@ -1,20 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { LoadResult } from '@analogjs/router';
+
+import { load } from './concurrency.server'; // not included in client build
 
 @Component({
   selector: 'app-concurrency',
   standalone: true,
   template: `
-    <p>OK Response</p>
+    @if (data.ok) {
+      <p>OK Response</p>
+    }
+    @else {
+      <p>FAIL</p>
+    }
   `,
 })
-export default class HomeComponent implements OnInit {
-  constructor() {
+export default class HomeComponent {
+  @Input() load(data: LoadResult<typeof load>) {
+    this.data = data;
   }
 
-  async ngOnInit() {
-    for (let i = 1; i <= 3; i++) {
-      console.log("Concurrent Log " + i);
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000));
-    }
-  }
+  data!: LoadResult<typeof load>;
 }
