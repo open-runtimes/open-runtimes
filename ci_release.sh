@@ -1,5 +1,5 @@
 set -e
 
-sh ci-helpers.sh
+source ci-helpers.sh
 sh ci-cleanup.sh
 sh ci-runtime-prepare.sh

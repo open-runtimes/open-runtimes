@@ -369,7 +369,7 @@ jobs:
       - name: Prepare runtime folder
         working-directory: ./
         run: |
-          sh ./ci_release.sh
+          bash ./ci_release.sh
         env:
           RUNTIME: ${{ matrix.RUNTIME }}
           ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
