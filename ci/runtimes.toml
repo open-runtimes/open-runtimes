@@ -24,7 +24,7 @@ test = "Serverless/Python.php"
 
 [python-ml]
 entry = "tests.py"
-versions = ["3.11", "3.12"]
+versions = ["3.12", "3.11"]
 commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "sh helpers/server.sh" }
 formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
 tools = "python --version && pip --version"
