@@ -2,6 +2,8 @@ set -e
 
 cd /usr/local/server/src/function/
 
+source /usr/local/server/helpers/nuxt/env.sh
+
 cp ../server-nuxt.js ./server.js
 cp ../helpers.js ./helpers.js
 cp ../logger.js ./logger.js

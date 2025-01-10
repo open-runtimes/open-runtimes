@@ -2,6 +2,8 @@ set -e
 
 cd /usr/local/server/src/function/
 
+source /usr/local/server/helpers/angular/env.sh
+
 cp ../server-angular.js ./server.js
 cp ../helpers.js ./helpers.js
 cp ../logger.js ./logger.js
