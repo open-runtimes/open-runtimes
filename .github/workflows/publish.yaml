@@ -131,6 +131,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Python ML
+          - ID: python-ml-3.12
+            RUNTIME: python
+            VERSION: "ml-3.12"
+            IMAGE: openruntimes/python-ml:v4-3.12
+            ARCH: "linux/amd64,linux/arm64"
           - ID: python-ml-3.11
             RUNTIME: python
             VERSION: "ml-3.11"
@@ -243,11 +248,6 @@ jobs:
             RUNTIME: swift
             VERSION: "5.8"
             IMAGE: openruntimes/swift:v4rc-5.8
-            ARCH: "linux/amd64,linux/arm64"
-          - ID: swift-5.5
-            RUNTIME: swift
-            VERSION: "5.5"
-            IMAGE: openruntimes/swift:v4rc-5.5
             ARCH: "linux/amd64,linux/arm64"
 
           # Kotlin

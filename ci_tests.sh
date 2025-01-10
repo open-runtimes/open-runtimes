@@ -51,11 +51,11 @@ docker run --rm --name open-runtimes-test-build -v /tmp/.build:/usr/local/server
 
 # Tools test
 echo "Testing tools ..."
-docker run --name open-runtimes-test-tools open-runtimes/test-runtime sh -c "$TOOLS"
+REQUIRED_TOOLS="tar --help && unzip --help"
+docker run --name open-runtimes-test-tools open-runtimes/test-runtime sh -c "$REQUIRED_TOOLS && $TOOLS"
 OUTPUT=$(docker logs open-runtimes-test-tools)
 EXIT_CODE=$(docker inspect open-runtimes-test-tools --format='{{.State.ExitCode}}')
 docker rm --force open-runtimes-test-tools
-
 if [[ "$EXIT_CODE" == "0" ]]; then
     echo "All tools installed properly"
 else
