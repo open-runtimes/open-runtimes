@@ -57,7 +57,6 @@ tests/**/web.config
 **.idea
 **.DS_Store
 *.xcworkspacedata
-tests/resources/functions/swift-5.5/Runtime
 logs
 _.log
 npm-debug.log_

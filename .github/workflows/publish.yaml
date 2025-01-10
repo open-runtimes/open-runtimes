@@ -237,11 +237,6 @@ jobs:
             VERSION: "5.8"
             IMAGE: openruntimes/swift:v4-5.8
             ARCH: "linux/amd64,linux/arm64"
-          - ID: swift-5.5
-            RUNTIME: swift
-            VERSION: "5.5"
-            IMAGE: openruntimes/swift:v4-5.5
-            ARCH: "linux/amd64,linux/arm64"
 
           # Kotlin
           - ID: kotlin-2.0
