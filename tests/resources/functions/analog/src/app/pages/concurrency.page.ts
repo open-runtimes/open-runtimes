@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
-import { LoadResult } from '@analogjs/router';
+import { Component } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { injectLoad } from '@analogjs/router';
 
 import { load } from './concurrency.server'; // not included in client build
 
@@ -7,7 +8,7 @@ import { load } from './concurrency.server'; // not included in client build
   selector: 'app-concurrency',
   standalone: true,
   template: `
-    @if (data.ok) {
+    @if (data().ok) {
       <p>OK Response</p>
     }
     @else {
@@ -16,9 +17,5 @@ import { load } from './concurrency.server'; // not included in client build
   `,
 })
 export default class HomeComponent {
-  @Input() load(data: LoadResult<typeof load>) {
-    this.data = data;
-  }
-
-  data!: LoadResult<typeof load>;
+  data = toSignal(injectLoad<typeof load>(), { requireSync: true });
 }
