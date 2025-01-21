@@ -63,13 +63,15 @@ else
     exit 1
 fi
 
+# Prepare Docker network
+docker network inspect openruntimes || docker network create openruntimes
 
 # Main tests
-docker run -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh $START_SCRIPT \"$START_COMMAND\""
+docker run --network openruntimes -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime sh -c "sh $START_SCRIPT \"$START_COMMAND\""
 
 # Development tests
-docker run -d --name open-runtimes-test-serve-dev -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -e CUSTOM_ENV_VAR=customValue -p 3001:3000 open-runtimes/test-runtime sh -c "sh $START_SCRIPT \"$START_COMMAND\""
+docker run --network openruntimes -d --name open-runtimes-test-serve-dev -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -e CUSTOM_ENV_VAR=customValue -p 3001:3000 open-runtimes/test-runtime sh -c "sh $START_SCRIPT \"$START_COMMAND\""
 
 cd ../../
 
-RUNTIME_NAME="$RUNTIME" RUNTIME_VERSION="$VERSION" OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS
+docker run  -v /var/run/docker.sock:/var/run/docker.sock --network openruntimes --rm -e RUNTIME_NAME="$RUNTIME" -e RUNTIME_VERSION="$VERSION" -e OPEN_RUNTIMES_SECRET="test-secret-key" -e OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT -v $PWD:/app -v /tmp:/tmp -w /app phpswoole/swoole:5.1.2-php8.3-alpine sh -c "apk update && apk add docker-cli && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS"

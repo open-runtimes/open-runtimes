@@ -1,6 +1,9 @@
 // Use as base for server-X.js (per framework)
 
 import { Logger } from "./logger.js";
+import { createNamespace } from "cls-hooked";
+
+const loggingNamespace = createNamespace("logging");
 
 export function getPort() {
   const port = parseInt(process.env.PORT || "3000", 10);
@@ -26,13 +29,13 @@ export function onInit(req, res, next) {
   }
 
   // Setup logging
-  req.logger = new Logger(
+  req.loggerId = Logger.start(
     req.headers[`x-open-runtimes-logging`],
     req.headers[`x-open-runtimes-log-id`],
   );
-  res.setHeader("x-open-runtimes-log-id", req.logger.id);
-  res.on("finish", () => {
-    req.logger.end();
+  res.setHeader("x-open-runtimes-log-id", req.loggerId);
+  res.on("finish", async () => {
+    await Logger.end(req.loggerId);
   });
 
   // Validate safe timeout
@@ -57,31 +60,34 @@ export function onInit(req, res, next) {
 // Wrapper for SSR handling
 export function onAction(callback) {
   return async (...params) => {
-    const [req, res, next] = params;
+    loggingNamespace.run(async () => {
+      const [req, res, next] = params;
 
-    req.logger.overrideNativeLogs();
+      loggingNamespace.set("id", req.loggerId);
+      Logger.overrideNativeLogs(loggingNamespace, req.loggerId);
 
-    if (req.safeTimeout !== null) {
-      let executed = true;
+      if (req.safeTimeout !== null) {
+        let executed = true;
 
-      const timeoutPromise = new Promise((promiseRes) => {
-        setTimeout(() => {
-          executed = false;
-          promiseRes(true);
-        }, req.safeTimeout * 1000);
-      });
+        const timeoutPromise = new Promise((promiseRes) => {
+          setTimeout(() => {
+            executed = false;
+            promiseRes(true);
+          }, req.safeTimeout * 1000);
+        });
 
-      await Promise.race([callback(...params), timeoutPromise]);
+        await Promise.race([callback(...params), timeoutPromise]);
 
-      if (!executed) {
-        console.error("Execution timed out.");
-        res.writeHead(500, { "Content-Type": "text/plain" });
-        res.end("");
-        return;
+        if (!executed) {
+          console.error("Execution timed out.");
+          res.writeHead(500, { "Content-Type": "text/plain" });
+          res.end("");
+          return;
+        }
+      } else {
+        await callback(...params);
       }
-    } else {
-      await callback(...params);
-    }
+    });
   };
 }
 
@@ -91,7 +97,7 @@ export function onError(error, req, res, next) {
     return next(err);
   }
 
-  req.logger.write([error], Logger.TYPE_ERROR);
+  Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);
   res.writeHead(500, { "Content-Type": "text/plain" });
   res.end("");
   return;

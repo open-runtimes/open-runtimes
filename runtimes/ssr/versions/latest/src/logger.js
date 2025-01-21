@@ -4,45 +4,52 @@ export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
 
-  id = "";
-  enabled = false;
+  static streams = [];
 
-  streamLogs = null;
-  streamErrors = null;
+  static start(status, id) {
+    const enabled = (status ? status : "enabled") === "enabled";
 
-  constructor(status, id) {
-    this.enabled = (status ? status : "enabled") === "enabled";
-
-    if (this.enabled) {
-      this.id = id
-        ? id
-        : process.env.OPEN_RUNTIMES_ENV === "development"
-          ? "dev"
-          : this.generateId();
-
-      try {
-        writeFileSync(`/mnt/logs/${this.id}_logs.log.lock`, "");
-        writeFileSync(`/mnt/logs/${this.id}_errors.log.lock`, "");
-      } catch (err) {
-        // Cuncurrent dev request, not a big deal
-      }
-
-      this.streamLogs = createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
-        flags: "a",
-      });
-      this.streamErrors = createWriteStream(`/mnt/logs/${this.id}_errors.log`, {
-        flags: "a",
-      });
+    if (!enabled) {
+      return "";
     }
+
+    if (!id) {
+      id =
+        process.env.OPEN_RUNTIMES_ENV === "development"
+          ? "dev"
+          : Logger.generateId();
+    }
+
+    if (Logger.streams[id]) {
+      return id;
+    }
+
+    Logger.streams[id] = {
+      logs: createWriteStream(`/mnt/logs/${id}_logs.log`, {
+        flags: "a",
+      }),
+      errors: createWriteStream(`/mnt/logs/${id}_errors.log`, {
+        flags: "a",
+      }),
+    };
+
+    try {
+      writeFileSync(`/mnt/logs/${id}_logs.log.lock`, "");
+      writeFileSync(`/mnt/logs/${id}_errors.log.lock`, "");
+    } catch (err) {
+      // Cuncurrent dev request, not a big deal
+    }
+
+    return id;
   }
 
-  write(messages, type = Logger.TYPE_LOG) {
-    if (!this.enabled) {
+  static write(id, messages, type = Logger.TYPE_LOG) {
+    const streams = Logger.streams[id];
+    if (!streams) {
       return;
     }
 
-    const stream =
-      type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
+    const stream = type === Logger.TYPE_ERROR ? streams.errors : streams.logs;
 
     let stringLog = "";
     for (let i = 0; i < messages.length; i++) {
@@ -63,50 +70,49 @@ export class Logger {
     stream.write(stringLog + "\n");
   }
 
-  async end() {
-    if (!this.enabled) {
+  static async end(id) {
+    const streams = Logger.streams[id];
+    if (!streams) {
       return;
     }
 
-    this.enabled = false;
-
     await Promise.all([
       new Promise((res) => {
-        this.streamLogs.end(undefined, undefined, res);
+        streams.logs.end(undefined, undefined, res);
       }),
       new Promise((res) => {
-        this.streamErrors.end(undefined, undefined, res);
+        streams.errors.end(undefined, undefined, res);
       }),
     ]);
 
     try {
-      unlinkSync(`/mnt/logs/${this.id}_logs.log.lock`);
-      unlinkSync(`/mnt/logs/${this.id}_errors.log.lock`);
+      unlinkSync(`/mnt/logs/${id}_logs.log.lock`);
+      unlinkSync(`/mnt/logs/${id}_errors.log.lock`);
     } catch (err) {
       // Cuncurrent dev request, not a big deal
     }
+
+    delete Logger.streams[id];
   }
 
-  overrideNativeLogs() {
-    if (!this.enabled) {
-      return;
-    }
-
+  static overrideNativeLogs(namespace, rid) {
     console.log =
       console.info =
       console.debug =
       console.warn =
         (...args) => {
-          this.write(args, Logger.TYPE_LOG, true);
+          const requestId = namespace.get("id");
+          Logger.write(requestId, args, Logger.TYPE_LOG, true);
         };
 
     console.error = (...args) => {
-      this.write(args, Logger.TYPE_ERROR, true);
+      const requestId = namespace.get("id");
+      Logger.write(requestId, args, Logger.TYPE_ERROR, true);
     };
   }
 
   // Recreated from https://www.php.net/manual/en/function.uniqid.php
-  generateId(padding = 7) {
+  static generateId(padding = 7) {
     const now = new Date();
     const sec = Math.floor(now.getTime() / 1000);
     const msec = now.getMilliseconds();
