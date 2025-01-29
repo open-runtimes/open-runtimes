@@ -1,6 +1,7 @@
 package main
 
 import (
+	gctx "context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,19 +20,19 @@ import (
 
 func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) error {
 	timeout := r.Header.Get("x-open-runtimes-timeout")
-
-	var safeTimeout int
-
+	
+	var safeTimeout int = 30 // Default timeout of 30 seconds
+	
 	if timeout != "" {
 		safeTimeoutInteger, err := strconv.Atoi(timeout)
-
+		
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Header().Set("content-type", "text/plain")
 			w.Write([]byte("Header \"x-open-runtimes-timeout\" must be an integer greater than 0."))
 			return nil
 		}
-
+		
 		safeTimeout = safeTimeoutInteger
 	}
 
@@ -45,8 +46,8 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 		return nil
 	}
 
-	bodyBytes, err := io.ReadAll(r.Body)
-
+	// Use LimitReader to prevent unbounded memory usage
+	bodyBytes, err := io.ReadAll(io.LimitReader(r.Body, 20*1024*1024))
 	if err != nil {
 		return errors.New("Could not parse body into a string.")
 	}
@@ -165,37 +166,35 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 
 	context.Req.SetBodyBinary(bodyBytes)
 
-	output := openruntimes.Response{
-		StatusCode: 500,
-		Body:       []byte{},
-		Headers:    map[string]string{},
-	}
+	// Create a context with timeout
+	ctx, cancel := gctx.WithTimeout(r.Context(), time.Duration(safeTimeout)*time.Second)
+	defer cancel()
 
-	timeoutPromise := func(ch chan openruntimes.Response) {
-		time.Sleep(time.Duration(safeTimeout) * time.Second)
+	// Create buffered channel to prevent goroutine leak
+	outputChan := make(chan openruntimes.Response, 1)
+	defer close(outputChan)
 
+	// Start the handler in a goroutine
+	go func() {
+		output := handler.Main(context)
+		select {
+		case outputChan <- output:
+		case <-ctx.Done():
+			// Context cancelled, do nothing
+		}
+	}()
+
+	// Wait for either completion or timeout
+	var output openruntimes.Response
+	select {
+	case output = <-outputChan:
+	case <-ctx.Done():
 		context.Error("Execution timed out.")
-		ch <- context.Res.Text("", context.Res.WithStatusCode(500))
+		w.WriteHeader(504)
+		w.Header().Set("content-type", "text/plain")
+		w.Write([]byte("Execution timed out."))
+		return nil
 	}
-
-	actionPromise := func(ch chan openruntimes.Response) {
-		output = handler.Main(context)
-		ch <- output
-	}
-
-	outputChan := make(chan openruntimes.Response)
-
-	logger.OverrideNativeLogs()
-
-	if safeTimeout != 0 {
-		go timeoutPromise(outputChan)
-	}
-
-	go actionPromise(outputChan)
-
-	output = <-outputChan
-
-	logger.RevertNativeLogs()
 
 	if output.StatusCode == 0 {
 		output.StatusCode = 200
@@ -215,7 +214,6 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	}
 
 	var contentTypeValue string
-
 	if value, exists := outputHeaders["content-type"]; exists {
 		contentTypeValue = value
 	} else {
@@ -223,8 +221,7 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	}
 
 	contentTypeValue = strings.ToLower(contentTypeValue)
-
-	if strings.HasPrefix(contentTypeValue, "multipart/") == false && strings.Contains(contentTypeValue, "charset=") == false {
+	if !strings.HasPrefix(contentTypeValue, "multipart/") && !strings.Contains(contentTypeValue, "charset=") {
 		outputHeaders["content-type"] = contentTypeValue + "; charset=utf-8"
 	}
 
@@ -285,8 +282,14 @@ func main() {
 
 	fmt.Println("HTTP server successfully started!")
 
-	err = http.Serve(listener, http.MaxBytesHandler(http.HandlerFunc(handler), 20*1024*1024))
-	if err != nil {
+	// Create server with timeouts
+	server := &http.Server{
+		Handler:      http.MaxBytesHandler(http.HandlerFunc(handler), 20*1024*1024),
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+	}
+
+	if err := server.Serve(listener); err != nil {
 		panic(err)
 	}
 }
