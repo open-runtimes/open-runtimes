@@ -20,9 +20,15 @@ class Base extends TestCase
 
         Client::$secret = \getenv('OPEN_RUNTIMES_SECRET');
 
+        Client::$port = 3000;
         $this->awaitPortOpen();
+
         Client::$port = 3001;
         $this->awaitPortOpen();
+        
+        Client::$port = 3002;
+        $this->awaitPortOpen();
+
         Client::$port = 3000;
     }
 
