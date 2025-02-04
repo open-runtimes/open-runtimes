@@ -135,7 +135,7 @@ class SSR extends CSR
 
     public function testDevLogFiles(): void
     {
-        Client::$host = 'open-runtimes-test-serve-dev';
+        Client::$host = 'open-runtimes-test-serve-secondary';
 
         // Cleanup
         $response = \shell_exec('rm -rf /tmp/logs/dev_logs.log && echo $?');

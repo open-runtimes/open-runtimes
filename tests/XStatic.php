@@ -62,4 +62,40 @@ class XStatic extends Base
         self::assertEquals(308, $response['code']);
         self::assertEquals("/about-us/", $response['headers']['location']);
     }
+
+    public function testFallbackFile()
+    {
+        $response = Client::execute(url: '/index.html', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('Website body content', $response['body']);
+
+        $response = Client::execute(url: '/missing.html', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('Website body content', $response['body']);
+
+        Client::$host = 'open-runtimes-test-serve-secondary';
+
+        $response = Client::execute(url: '/index.html', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('Website body content', $response['body']);
+
+        $response = Client::execute(url: '/missing.html', method: 'GET');
+        self::assertEquals(404, $response['code']);
+        self::assertStringContainsString('404', $response['body']);
+        self::assertStringContainsString('Page not found', $response['body']);
+        self::assertStringNotContainsString('Website body content', $response['body']);
+
+        Client::$host = 'open-runtimes-test-serve-teritary';
+
+        $response = Client::execute(url: '/index.html', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('Website body content', $response['body']);
+
+        $response = Client::execute(url: '/missing.html', method: 'GET');
+        self::assertEquals(404, $response['code']);
+        self::assertStringContainsString('Custom-branded 404 page', $response['body']);
+        self::assertStringNotContainsString('Website body content', $response['body']);
+
+        Client::$host = 'open-runtimes-test-serve';
+    }
 }

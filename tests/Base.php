@@ -22,7 +22,9 @@ class Base extends TestCase
 
         Client::$host = 'open-runtimes-test-serve';
         $this->awaitHostReady();
-        Client::$host = 'open-runtimes-test-serve-dev';
+        Client::$host = 'open-runtimes-test-serve-secondary';
+        $this->awaitHostReady();
+        Client::$host = 'open-runtimes-test-serve-teritary';
         $this->awaitHostReady();
         Client::$host = 'open-runtimes-test-serve';
     }
@@ -87,7 +89,7 @@ class Base extends TestCase
 
     public function testEmptyServerSecret(): void
     {
-        Client::$host = 'open-runtimes-test-serve-dev';
+        Client::$host = 'open-runtimes-test-serve-secondary';
 
         $response = Client::execute(method: 'GET', url: '/', headers: ['x-action' => 'plaintextResponse']);
         self::assertEquals(200, $response['code']);
