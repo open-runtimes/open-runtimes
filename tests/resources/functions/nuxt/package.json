@@ -12,6 +12,7 @@
   "dependencies": {
     "nuxt": "^3.14.1592",
     "vue": "latest",
-    "vue-router": "latest"
+    "vue-router": "latest",
+    "@faker-js/faker": "^9.3.0"
   }
 }

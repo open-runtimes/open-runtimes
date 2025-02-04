@@ -1,6 +1,6 @@
 
 <template>
-    <p id="date">{{ date }}</p>
+    <p>[DATE_START]{{ date }}[DATE_END]</p>
 </template>
 
 <script setup>

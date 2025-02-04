@@ -4,6 +4,6 @@ export default function Page() {
   const date = new Date().toISOString();
 
   return (
-    <p id="date">{date}</p>
+    <p>[DATE_START]{date}[DATE_END]</p>
   );
 }
