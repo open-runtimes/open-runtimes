@@ -9,9 +9,5 @@ mv ./* .build/
 
 mv .build/ build/
 
-if [ -d "/usr/local/build/public/" ]; then
-    mv /usr/local/build/public/ ./public/
-fi
-
 mv /usr/local/build/package*.json ./
 mv /usr/local/build/node_modules/ ./node_modules/

@@ -1,5 +1,7 @@
 import { createWriteStream, writeFileSync, unlinkSync } from "fs";
 
+const nativeLog = console.log.bind(console);
+
 export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
@@ -67,7 +69,11 @@ export class Logger {
       }
     }
 
-    stream.write(stringLog + "\n");
+    if (stream.writable) {
+      stream.write(stringLog + "\n");
+    } else {
+      nativeLog(stringLog + "\n");
+    }
   }
 
   static async end(id) {

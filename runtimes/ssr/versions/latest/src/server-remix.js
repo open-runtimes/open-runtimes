@@ -9,7 +9,7 @@ const app = express();
 app.use(onInit);
 
 // framework-specific logic
-app.use(express.static("public"));
+app.use(express.static("build/client"));
 app.all(
   "*",
   onAction(
