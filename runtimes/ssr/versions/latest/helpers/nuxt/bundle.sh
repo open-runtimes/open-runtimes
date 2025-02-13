@@ -6,3 +6,5 @@ fi
 
 mv /usr/local/build/package*.json ./
 mv /usr/local/build/node_modules/ ./node_modules/
+
+rm -rf ./server/node_modules
