@@ -8,12 +8,7 @@ import { load } from './concurrency.server'; // not included in client build
   selector: 'app-concurrency',
   standalone: true,
   template: `
-    @if (data().ok) {
-      <p>OK Response</p>
-    }
-    @else {
-      <p>FAIL</p>
-    }
+    <p>{{ data().msg }}</p>
   `,
 })
 export default class HomeComponent {
