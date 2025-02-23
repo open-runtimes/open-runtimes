@@ -23,11 +23,4 @@ class Analog extends SSR
         self::assertStringNotContainsString('ERROR Error: NG04002: \'exception\'', Client::getLogs($response['headers']['x-open-runtimes-log-id'])); // Added
         self::assertStringContainsString('ERROR Error: NG04002: \'exception\'', Client::getErrors($response['headers']['x-open-runtimes-log-id'])); // Changed
     }
-
-    // TODO: Remove this. Overriden because of failing test
-    // I expect test to be doing SSR wrong, runtime should be working fine
-    public function testServerLogsConcurrency(): void
-    {
-        self::assertTrue(true);
-    }
 }

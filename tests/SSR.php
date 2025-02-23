@@ -79,7 +79,10 @@ class SSR extends CSR
     public function testServerLogsConcurrency(): void
     {
         $ensureRequestLogs = function() {
+            $start = \microtime(true);
             $response = Client::execute(url: '/concurrency', method: 'GET');
+            $end = \microtime(true);
+
             self::assertEquals(200, $response['code']);
             self::assertStringContainsString("OK Response", $response['body']);
             $logs = Client::getLogs($response['headers']['x-open-runtimes-log-id']);
@@ -87,6 +90,7 @@ class SSR extends CSR
             self::assertStringContainsString('Concurrent Log 2', $logs);
             self::assertStringContainsString('Concurrent Log 3', $logs);
             self::assertEmpty(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+            self::assertGreaterThan(1.5, $end - $start); // 3 * 500ms (minimum for each log)
     
             $log1Pos = \strpos($logs, 'Concurrent Log 1');
             $log2Pos = \strpos($logs, 'Concurrent Log 2');
