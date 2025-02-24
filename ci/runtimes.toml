@@ -39,7 +39,7 @@ tools = "dart --version"
 test = "Serverless/Dart.php"
 
 [flutter]
-versions = ["3.24", "3.27"]
+versions = ["3.27", "3.24"]
 commands = { install = "flutter build web", start = "sh helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
 test = "CSR/Flutter.php"
