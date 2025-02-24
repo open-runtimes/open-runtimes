@@ -20,6 +20,13 @@ jobs:
             IMAGE: openruntimes/flutter:v4rc-3.24
             ARCH: "linux/amd64,linux/arm64"
 
+          # Flutter
+          - ID: flutter-3.27
+            RUNTIME: flutter
+            VERSION: "3.27"
+            IMAGE: openruntimes/flutter:v4rc-3.27
+            ARCH: "linux/amd64,linux/arm64"
+
           # SSR
           - ID: ssr-22
             RUNTIME: ssr
