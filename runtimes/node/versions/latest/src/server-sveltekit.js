@@ -1,6 +1,6 @@
 import { handler } from "./handler.js";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError } from "./helpers.js";
+import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.js";
 
 console.log("SvelteKit server starting ...");
 

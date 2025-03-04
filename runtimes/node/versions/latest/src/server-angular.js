@@ -1,6 +1,6 @@
 import { reqHandler } from "./server/server.mjs";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError } from "./helpers.js";
+import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.js";
 
 console.log("Angular server starting ...");
 
