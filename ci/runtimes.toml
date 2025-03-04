@@ -168,7 +168,7 @@ output = "./build"
 
 [angular]
 runtime = { name = "node", version = "22" }
-commands = { install = "source /usr/local/server/helpers/angular/env.sh && npm install && npm run build && sh /usr/local/server/helpers/analog/bundle.sh", start = "sh helpers/angular/server.sh" }
+commands = { install = "source /usr/local/server/helpers/angular/env.sh && npm install && npm run build && sh /usr/local/server/helpers/angular/bundle.sh", start = "sh helpers/angular/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Angular.php"
