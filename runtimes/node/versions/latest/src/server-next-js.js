@@ -1,7 +1,7 @@
 import { parse } from "url";
 import next from "next";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError } from "./helpers.js";
+import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.js";
 
 console.log("Next.js server starting ...");
 
