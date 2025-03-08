@@ -6,6 +6,7 @@ fi
 
 ENTRYPOINT="./server/entry.mjs"
 if [ -e "$ENTRYPOINT" ]; then
+    echo "Bundling with server-side rendering support ..."
     mv /usr/local/build/package*.json ./
     mv /usr/local/build/node_modules/ ./node_modules/
 fi
