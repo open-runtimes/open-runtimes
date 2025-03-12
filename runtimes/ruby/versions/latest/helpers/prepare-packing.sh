@@ -6,4 +6,4 @@ set -e
 mkdir -p /usr/local/build/vendor
 
 # Copy dependencies
-cp -R /usr/local/server/vendor/* /usr/local/build/vendor
+cp -R /usr/local/server/vendor/ /usr/local/build/vendor

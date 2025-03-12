@@ -10,4 +10,4 @@ cd /usr/local/server
 sh gradlew buildJar
 
 # Copy output files
-cp -R /usr/local/server/build/libs/* /usr/local/build/compiled
+cp -R /usr/local/server/build/libs/ /usr/local/build/compiled
