@@ -6,7 +6,7 @@ if [ -f "/usr/local/build/CMakeLists.txt" ]; then
 fi
 
 # Copy user code into server code
-cp -R --no-clobber /usr/local/build/* /usr/local/server/src
+cp -R --no-clobber /usr/local/build/. /usr/local/server/src
 
 # Update dynamic placeholder to import user code
 ESCAPED_OPEN_RUNTIMES_ENTRYPOINT="$(echo "$OPEN_RUNTIMES_ENTRYPOINT" | sed -e 's/[\/&]/\\&/g')"

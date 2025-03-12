@@ -7,7 +7,7 @@ fi
 ENTRYPOINT="./server/index.js"
 if [ -e "$ENTRYPOINT" ]; then
     mkdir -p .build
-    mv ./* .build/
+    mv ./{.*,*} .build/
 
     mv .build/ build/
 
