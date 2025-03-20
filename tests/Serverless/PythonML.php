@@ -14,6 +14,6 @@ class PythonML extends Python
         \var_dump(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
         \var_dump(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
         self::assertEquals(200, $response['code']);
-        self::assertEquals("2.18.0", $response['body']);
+        self::assertEquals("2.19.0", $response['body']);
     }
 }
