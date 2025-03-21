@@ -24,4 +24,11 @@ class CSR extends Base
         self::assertEquals(200, $response['code']);
         self::assertEquals('Sample file', $response['body']);
     }
+
+    public function testHiddenFile(): void
+    {
+        $response = Client::execute(url: '/.config/.file', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('HIDDEN_FILE', $response['body']);
+    }
 }

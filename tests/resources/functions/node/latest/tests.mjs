@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import * as crypto from "crypto";
+import * as fs from "fs";
 
 export default async (context) => {
 	const action = context.req.headers["x-action"];
@@ -151,6 +152,12 @@ When you can have two!
 			context.log("engine:", engine);
 			context.error("engine:", engine);
 			return context.res.text("OK");
+		case "hiddenFile":
+			return context.res.text(
+				fs
+					.readFileSync("/usr/local/server/src/function/.config/.file")
+					.toString(),
+			);
 		default:
 			throw new Error("Unknown action");
 	}
