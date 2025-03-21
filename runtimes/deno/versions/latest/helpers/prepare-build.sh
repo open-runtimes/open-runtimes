@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Prepare Deno cache folder
 mkdir -p /usr/local/build/deno-cache
 

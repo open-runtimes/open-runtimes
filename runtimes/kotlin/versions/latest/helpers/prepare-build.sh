@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copy user code to server code
 mkdir -p /usr/local/server/src/main/java/io/openruntimes/java
 cp -a /usr/local/build/. /usr/local/server/src/main/java/io/openruntimes/java

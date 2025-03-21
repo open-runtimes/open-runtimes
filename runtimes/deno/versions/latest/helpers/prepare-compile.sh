@@ -1,3 +1,3 @@
-#!/bin/sh
+#!/bin/bash
 cd /usr/local/server/src
 deno cache server.ts

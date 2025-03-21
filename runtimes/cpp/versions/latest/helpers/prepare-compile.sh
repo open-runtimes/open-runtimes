@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Append User Function Dependencies
 if [ -f "/usr/local/build/CMakeLists.txt" ]; then

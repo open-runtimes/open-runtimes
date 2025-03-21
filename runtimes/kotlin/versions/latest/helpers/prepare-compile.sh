@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 echo "Compiling ..."
 
 # Prepare folder for compiled build

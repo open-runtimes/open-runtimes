@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copy contents of the server-env virtual env to the runtime-env virtual env
 cp -r /usr/local/server/server-env/* /usr/local/server/src/function/runtime-env
