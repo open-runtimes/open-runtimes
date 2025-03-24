@@ -744,11 +744,6 @@ class Serverless extends Base
     public function testHiddenFile(): void
     {
         $response = Client::execute(body: '', headers: ['x-action' => 'hiddenFile']);
-        \var_dump($response);
-        $logs = Client::getLogs($response['headers']['x-open-runtimes-log-id']);
-        $errors = Client::getErrors($response['headers']['x-open-runtimes-log-id']);
-        \var_dump($logs);
-        \var_dump($errors);
         self::assertEquals(200, $response['code']);
         self::assertEquals('HIDDEN_FILE', $response['body']);
     }

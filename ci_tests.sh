@@ -1,27 +1,28 @@
 # Use tests.sh instead, when running locally
 set -e
+shopt -s dotglob
 
 source ci-helpers.sh
 
 echo "Preparing Docker image ..."
 
-sh ci-cleanup.sh
-sh ci-runtime-prepare.sh
-sh ci-runtime-build.sh
+bash ci-cleanup.sh
+bash ci-runtime-prepare.sh
+bash ci-runtime-build.sh
 
 LATEST_VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 if [ "$VERSION" = "$LATEST_VERSION" ]; then
     echo "Running formatter ..."
 
     cd ./runtimes/$RUNTIME_FOLDER
-    docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
+    docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
     cd ../../
 
     if [ -d "tests/resources/functions/$RUNTIME_FOLDER" ]; then
         echo "Running formatter for tests ..."
 
         cd "tests/resources/functions/$RUNTIME_FOLDER"
-        docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
+        docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
         cd ../../../../
     fi
 else
