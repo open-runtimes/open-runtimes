@@ -740,14 +740,4 @@ class Serverless extends Base
 
         Client::$host = 'open-runtimes-test-serve';
     }
-
-    /**
-     * TODO: Add hidden file test
-     * public function testHiddenFile(): void
-     * {
-     *   $response = Client::execute(body: '', headers: ['x-action' => 'hiddenFile']);
-     *   self::assertEquals(200, $response['code']);
-     *   self::assertEquals('HIDDEN_FILE', $response['body']);
-     * }
-     */
 }
