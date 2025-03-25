@@ -1,4 +1,6 @@
+#!/bin/bash
 set -e
+shopt -s dotglob
 
 if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
     cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY

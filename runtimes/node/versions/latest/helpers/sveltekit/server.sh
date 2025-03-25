@@ -1,4 +1,6 @@
+#!/bin/bash
 set -e
+shopt -s dotglob
 
 cd /usr/local/server/src/function/
 
