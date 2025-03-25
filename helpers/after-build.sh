@@ -13,11 +13,8 @@ echo "Packing build ..."
 
 # Finish build by preparing tar to use for starting the runtime
 cd /usr/local/build/
-if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ] && [ -d "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
-    cd "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"
-else
-    echo "Error: Output directory is either not set or does not exist."
-    exit 1
+if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"  ]; then
+    cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
 fi
 
 # Check if the output directory is empty
