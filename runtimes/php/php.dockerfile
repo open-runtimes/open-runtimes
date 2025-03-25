@@ -9,6 +9,7 @@ RUN \
   gcc \
   g++ \
   curl-dev \
+  bash \
   && apk add --no-cache \
   libstdc++ \
   certbot \
