@@ -1,3 +1,11 @@
+RUN <<EOR
+    if [ -f /etc/alpine-release ]; then
+        apk update && apk add bash
+    else
+        apt-get update && apt-get install -y bash
+    fi
+EOR
+
 ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
 
 COPY requirements.txt .

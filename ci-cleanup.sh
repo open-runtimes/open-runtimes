@@ -1,4 +1,5 @@
 set -e
+shopt -s dotglob
 
 if [ "$(docker ps -aq)" ]; then
     docker rm --force $(docker ps -aq)

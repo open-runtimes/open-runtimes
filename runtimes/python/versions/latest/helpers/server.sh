@@ -1,4 +1,7 @@
+#!/bin/bash
+# Fail build if any command fails
 set -e
+shopt -s dotglob
 
 # Parse float-like string to integer with trick to round-up
 cpu_cores=$(echo "$OPEN_RUNTIMES_CPUS" | awk '{print int($1 + 0.999999)}')

@@ -98,4 +98,11 @@ class XStatic extends Base
 
         Client::$host = 'open-runtimes-test-serve';
     }
+
+    // TODO: Improve in future, to also ensure build step sees hidden files
+    public function testHiddenFile(): void
+    {
+        $response = Client::execute(url: '/.config/.file', method: 'GET');
+        self::assertStringNotContainsString("HIDDEN_FILE", $response['body']);
+    }
 }
