@@ -9,8 +9,14 @@ fi
 
 ENTRYPOINT="./server/webpack-runtime.js"
 if [ -e "$ENTRYPOINT" ]; then
-    mkdir -p .next
-    mv ./* .next/
+    cd /usr/local/build
+
+    mkdir -p /tmp/.opr-tmp
+    mv $OPEN_RUNTIMES_OUTPUT_DIRECTORY /tmp/.opr-tmp
+
+    mkdir -p $OPEN_RUNTIMES_OUTPUT_DIRECTORY
+    cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
+    mv /tmp/.opr-tmp/* .next/
 
     if [ -d "/usr/local/build/public/" ]; then
         mv /usr/local/build/public/ ./public/

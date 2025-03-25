@@ -9,10 +9,14 @@ fi
 
 ENTRYPOINT="./server/index.js"
 if [ -e "$ENTRYPOINT" ]; then
-    mkdir -p .build
-    mv ./* .build/
+    cd /usr/local/build
 
-    mv .build/ build/
+    mkdir -p /tmp/.opr-tmp
+    mv $OPEN_RUNTIMES_OUTPUT_DIRECTORY /tmp/.opr-tmp
+
+    mkdir -p $OPEN_RUNTIMES_OUTPUT_DIRECTORY
+    cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
+    mv /tmp/.opr-tmp/* build/
 
     mv /usr/local/build/package*.json ./
     mv /usr/local/build/node_modules/ ./node_modules/
