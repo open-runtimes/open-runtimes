@@ -1,4 +1,7 @@
 #!/bin/bash
+# Fail build if any command fails
+set -e
+shopt -s dotglob
 
 # Append User Function Dependencies
 if [ -f "/usr/local/build/CMakeLists.txt" ]; then

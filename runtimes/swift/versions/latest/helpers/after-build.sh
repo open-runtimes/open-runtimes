@@ -1,6 +1,7 @@
 #!/bin/bash
 # Fail build if any command fails
 set -e
+shopt -s dotglob
 
 # Prepare dependencies
 cp -a /usr/local/build/. /usr/local/server/Sources/Runtime
