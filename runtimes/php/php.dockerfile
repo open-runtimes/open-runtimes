@@ -9,7 +9,6 @@ RUN \
   gcc \
   g++ \
   curl-dev \
-  bash \
   && apk add --no-cache \
   libstdc++ \
   certbot \
@@ -17,6 +16,7 @@ RUN \
   yaml-dev \
   libmaxminddb-dev \
   libgomp \
+  bash \
   && docker-php-ext-install opcache \
   && apk del .deps \
   && rm -rf /var/cache/apk/*

@@ -1,3 +1,3 @@
-RUN apt-get update && apt-get install -y bash
+RUN apk update && apk add bash
 
 ENV OPEN_RUNTIMES_ENTRYPOINT=Index.kt
