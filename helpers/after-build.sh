@@ -8,7 +8,7 @@ cd /usr/local/server
 
 . /usr/local/server/helpers/prepare-compile.sh
 
-echo "Packing build ..."
+echo "[37mPacking build .. [0m"
 
 . /usr/local/server/helpers/prepare-packing.sh
 
@@ -24,4 +24,4 @@ echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" > .open-runtimes
 
 tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
 
-echo "Build finished."
+echo "[37mBuild finished. [0m"

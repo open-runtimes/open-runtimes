@@ -3,7 +3,7 @@
 set -e
 shopt -s dotglob
 
-echo "Preparing for start ..."
+echo "[37mPreparing for start ... [0m"
 
 # Extract gzipped code from mounted volume to function folder
 tar -zxf /mnt/code/code.tar.gz -C /usr/local/server/src/function
@@ -18,4 +18,4 @@ cd /usr/local/server
 
 . /usr/local/server/helpers/prepare-start.sh
 
-echo 'Starting ...'
+echo "[37mStarting ... [0m"

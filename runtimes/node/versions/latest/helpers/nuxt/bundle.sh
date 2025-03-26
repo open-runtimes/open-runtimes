@@ -9,6 +9,8 @@ fi
 
 ENTRYPOINT="./server/index.mjs"
 if [ -e "$ENTRYPOINT" ]; then
+    echo "[37mBundling with server-side rendering support .. [0m"
+    
     mv /usr/local/build/package*.json ./
     mv /usr/local/build/node_modules/ ./node_modules/
     rm -rf ./server/node_modules

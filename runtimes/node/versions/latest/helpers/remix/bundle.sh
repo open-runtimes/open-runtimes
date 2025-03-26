@@ -9,6 +9,8 @@ fi
 
 ENTRYPOINT="./server/index.js"
 if [ -e "$ENTRYPOINT" ]; then
+    echo "[37mBundling with server-side rendering support .. [0m"
+    
     cd /usr/local/build
 
     mkdir -p /tmp/.opr-tmp

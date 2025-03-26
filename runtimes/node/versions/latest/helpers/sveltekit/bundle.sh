@@ -9,7 +9,7 @@ fi
 
 ENTRYPOINT="./handler.js"
 if [ -e "$ENTRYPOINT" ]; then
-    echo "Bundling with server-side rendering support ..."
+    echo "[37mBundling with server-side rendering support .. [0m"
     mv /usr/local/build/package*.json ./
     mv /usr/local/build/node_modules/ ./node_modules/
 fi

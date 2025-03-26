@@ -3,7 +3,8 @@
 set -e
 shopt -s dotglob
 
-echo "Preparing for build ..."
+
+echo "[37mPreparing for build ... [0m"
 
 # Copy from mounted volume to temporary folder
 cp -R /mnt/code/* /usr/local/build
@@ -16,4 +17,4 @@ cd /usr/local/build
 # Enter build folder
 cd /usr/local/build
 
-echo 'Building ...'
+echo "[37mBuilding ... [0m"
