@@ -1,0 +1,19 @@
+{
+  "name": "open-runtimes-workspace",
+  "version": "1.0.0",
+  "description": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@xterm/xterm": "^5.5.0",
+    "http-proxy": "^1.18.1",
+    "micro": "^9.3.4",
+    "synapse": "github:appwrite/synapse#init-sdk"
+  }
+}
