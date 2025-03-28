@@ -15,16 +15,16 @@ printf "module.exports = async (req, res) => {\n    res.json({ n: Math.random() 
 
 2. Build the code:
 
-> Examples use Node 21.0, but you can use any from `versions` directory.
+> Examples use Node 22, but you can use any from `versions` directory.
 
 ```bash
-docker run --rm --interactive --tty --volume $PWD:/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT=index.js openruntimes/workspace:v4-21.0 sh helpers/build.sh "npm install"
+docker run --rm --interactive --tty --volume $PWD:/mnt/code:rw -e OPEN_RUNTIMES_ENTRYPOINT=index.js openruntimes/workspace:v4-22 sh helpers/build.sh "npm install"
 ```
 
 3. Spin-up workspace runtime:
 
 ```bash
-docker run -p 3000:3000 -p 8080:8080 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/workspace:v4-21.0 sh helpers/start.sh
+docker run -p 3000:3000 -p 8080:8080 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/workspace:v4-22 sh helpers/start.sh
 ```
 
 4. Connect to the workspace:
@@ -72,10 +72,8 @@ module.exports = (req, res) => {
 
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.js`.
 
-- The workspace runtime exposes WebSocket endpoints through Synapse:
+- The workspace runtime exposes WebSocket endpoint through Synapse:
   - `ws://localhost:8080/terminal` - For terminal sessions
-  - `ws://localhost:8080/fs` - For file operations
-  - `ws://localhost:8080/monitor` - For system monitoring
 
 ## Contributing
 

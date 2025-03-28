@@ -63,6 +63,13 @@ jobs:
             VERSION: "14.5"
             IMAGE: openruntimes/node:v4-14.5
             ARCH: "linux/amd64"
+        
+          # Workspace
+          - ID: workspace-22.js
+            RUNTIME: workspace
+            VERSION: "22"
+            IMAGE: openruntimes/workspace:v4-22
+            ARCH: "linux/amd64,linux/arm64"
 
           # Deno
           - ID: deno-2.0
