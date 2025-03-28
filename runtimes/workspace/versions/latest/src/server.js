@@ -1,281 +1,150 @@
-const micro = require("micro");
-const { buffer, send } = require("micro");
-const Logger = require("./logger");
+const micro = require('micro');
+const { send } = require('micro');
+const { Synapse, Terminal, Filesystem, System } = require('@appwrite.io/synapse');
 
-const USER_CODE_PATH = "/usr/local/server/src/function";
+const workdir = '/usr/local/server/src/artifact';
 
-const server = micro(async (req, res) => {
-  const logger = new Logger(
-    req.headers[`x-open-runtimes-logging`],
-    req.headers[`x-open-runtimes-log-id`],
-  );
+const synapse = new Synapse();
 
-  try {
-    await action(logger, req, res);
-  } catch (e) {
-    logger.write([e], Logger.TYPE_ERROR);
+synapse.connect('/terminal')
+    .then(synapse => {
+        console.log('Synapse connected');
 
-    res.setHeader("x-open-runtimes-log-id", logger.id);
-    await logger.end();
+        const terminal = new Terminal(synapse);
+        const fs = new Filesystem(synapse);
+        const system = new System(synapse);
 
-    return send(res, 500, "");
-  }
-});
+        const router = {
+            terminal: async (message) => {
+                const { operation, params } = message;
+                switch (operation) {
+                    case 'updateSize':
+                        terminal.updateSize(params.cols, params.rows);
+                        break;
+                    case 'createCommand':
+                        terminal.createCommand(params.command);
+                        break;
+                    default:
+                        throw new Error('Invalid terminal operation');
+                }
+                return null;
+            },
 
-const action = async (logger, req, res) => {
-  const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
-  let safeTimeout = null;
-  if (timeout) {
-    if (isNaN(timeout) || timeout === 0) {
-      return send(
-        res,
-        500,
-        'Header "x-open-runtimes-timeout" must be an integer greater than 0.',
-      );
-    }
+            fs: async (message) => {
+                const { operation, params } = message;
+                let result;
 
-    safeTimeout = +timeout;
-  }
+                switch (operation) {
+                    case 'createFile':
+                        result = await fs.createFile(workdir + '/' + params.filepath, params.content);
+                        break;
+                    case 'getFile':
+                        result = await fs.getFile(workdir + '/' + params.filepath);
+                        break;
+                    case 'updateFile':
+                        result = await fs.updateFile(workdir + '/' + params.filepath, params.content);
+                        break;
+                    case 'updateFilePath':
+                        result = await fs.updateFilePath(
+                            workdir + '/' + params.filepath,
+                            workdir + '/' + params.newPath
+                        );
+                        break;
+                    case 'deleteFile':
+                        result = await fs.deleteFile(workdir + '/' + params.filepath);
+                        break;
+                    case 'createFolder':
+                        result = await fs.createFolder(workdir + '/' + params.folderpath);
+                        break;
+                    case 'getFolder':
+                        result = await fs.getFolder(workdir + '/' + params.folderpath);
+                        break;
+                    case 'updateFolderName':
+                        result = await fs.updateFolderName(
+                            workdir + '/' + params.folderpath,
+                            params.name
+                        );
+                        break;
+                    case 'updateFolderPath':
+                        result = await fs.updateFolderPath(
+                            workdir + '/' + params.folderpath,
+                            workdir + '/' + params.newPath
+                        );
+                        break;
+                    case 'deleteFolder':
+                        result = await fs.deleteFolder(workdir + '/' + params.folderpath);
+                        break;
+                    default:
+                        throw new Error('Invalid operation');
+                }
+                return result;
+            },
 
-  if (
-    process.env["OPEN_RUNTIMES_SECRET"] &&
-    req.headers[`x-open-runtimes-secret`] !==
-      process.env["OPEN_RUNTIMES_SECRET"]
-  ) {
-    return send(
-      res,
-      500,
-      'Unauthorized. Provide correct "x-open-runtimes-secret" header.',
-    );
-  }
+            system: async (message) => {
+                const { operation } = message;
+                let result;
 
-  const contentType = (
-    req.headers["content-type"] ?? "text/plain"
-  ).toLowerCase();
-  const bodyBinary = await buffer(req, { limit: "20mb" });
+                switch (operation) {
+                    case 'getUsage':
+                        result = await system.getUsage();
+                        break;
+                    default:
+                        throw new Error('Invalid system operation');
+                }
+                return result;
+            }
+        };
 
-  const headers = {};
-  Object.keys(req.headers)
-    .filter((header) => !header.toLowerCase().startsWith("x-open-runtimes-"))
-    .forEach((header) => {
-      headers[header.toLowerCase()] = req.headers[header];
+        Object.keys(router).forEach(type => {
+            synapse.onMessageType(type, async (message) => {
+                try {
+                    const result = await router[type](message);
+                    if (result !== null) {
+                        synapse.send(`${type}_response`, {
+                            requestId: message.requestId,
+                            ...result
+                        });
+                    }
+                } catch (error) {
+                    synapse.send(`${type}_response`, {
+                        requestId: message.requestId,
+                        success: false,
+                        error: error.message
+                    });
+                }
+            });
+        });
+
+        synapse.onMessageType('terminal_input', (message) => {
+            terminal.createCommand(message.data);
+        });
+
+        terminal.onData((data) => {
+            synapse.send('terminal_output', { data });
+        });
+
+        synapse.onClose(() => {
+            terminal.kill();
+            console.log('Terminal connection closed');
+        });
+    })
+    .catch(error => {
+        console.error('Failed to connect Synapse:', error);
     });
 
-  const enforcedHeaders = JSON.parse(
-    process.env.OPEN_RUNTIMES_HEADERS
-      ? process.env.OPEN_RUNTIMES_HEADERS
-      : "{}",
-  );
-  for (const header in enforcedHeaders) {
-    headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
-  }
-
-  const scheme = req.headers["x-forwarded-proto"] ?? "http";
-  const defaultPort = scheme === "https" ? "443" : "80";
-  const host = req.headers["host"].includes(":")
-    ? req.headers["host"].split(":")[0]
-    : req.headers["host"];
-  const port = +(req.headers["host"].includes(":")
-    ? req.headers["host"].split(":")[1]
-    : defaultPort);
-  const path = req.url.includes("?") ? req.url.split("?")[0] : req.url;
-  const queryString = req.url.includes("?") ? req.url.split("?")[1] : "";
-  const query = {};
-  for (const param of queryString.split("&")) {
-    let [key, ...valueArr] = param.split("=");
-    const value = valueArr.join("=");
-
-    if (key) {
-      query[key] = value ?? "";
+const server = micro(async (req, res) => {
+    if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
+        synapse.handleUpgrade(req, req.socket, Buffer.alloc(0));
+        return;
     }
-  }
+    return send(res, 404, 'Not found');
+});
 
-  const url = `${scheme}://${host}${port.toString() === defaultPort ? "" : `:${port}`}${path}${queryString === "" ? "" : `?${queryString}`}`;
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+    console.log(`Terminal server running on port ${port}`);
+});
 
-  const context = {
-    req: {
-      get body() {
-        if (contentType.startsWith("application/json")) {
-          return this.bodyBinary && this.bodyBinary.length > 0
-            ? this.bodyJson
-            : {};
-        }
-
-        return this.bodyText;
-      },
-      get bodyRaw() {
-        return this.bodyText;
-      },
-      get bodyText() {
-        return this.bodyBinary.toString();
-      },
-      get bodyJson() {
-        return JSON.parse(this.bodyText);
-      },
-      get bodyBinary() {
-        return bodyBinary;
-      },
-      headers,
-      method: req.method,
-      host,
-      scheme,
-      query,
-      queryString,
-      port,
-      url,
-      path,
-    },
-    res: {
-      send: function (body, statusCode = 200, headers = {}) {
-        return {
-          body: body,
-          statusCode: statusCode,
-          headers: headers,
-        };
-      },
-      text: function (body, statusCode = 200, headers = {}) {
-        return this.binary(Buffer.from(body, "utf8"), statusCode, headers);
-      },
-      binary: function (bytes, statusCode = 200, headers = {}) {
-        return {
-          body: bytes,
-          statusCode: statusCode,
-          headers: headers,
-        };
-      },
-      json: function (obj, statusCode = 200, headers = {}) {
-        headers["content-type"] = "application/json";
-        return this.text(JSON.stringify(obj), statusCode, headers);
-      },
-      empty: function () {
-        return this.text("", 204, {});
-      },
-      redirect: function (url, statusCode = 301, headers = {}) {
-        headers["location"] = url;
-        return this.text("", statusCode, headers);
-      },
-    },
-    log: function (...messages) {
-      logger.write(messages, Logger.TYPE_LOG);
-    },
-    error: function (...messages) {
-      logger.write(messages, Logger.TYPE_ERROR);
-    },
-  };
-
-  logger.overrideNativeLogs();
-
-  let output = null;
-
-  async function execute() {
-    let userFunction;
-    try {
-      userFunction = require(
-        USER_CODE_PATH + "/" + process.env.OPEN_RUNTIMES_ENTRYPOINT,
-      );
-    } catch (err) {
-      if (err.code === "ERR_REQUIRE_ESM") {
-        userFunction = await import(
-          USER_CODE_PATH + "/" + process.env.OPEN_RUNTIMES_ENTRYPOINT
-        );
-      } else {
-        throw err;
-      }
-    }
-
-    if (
-      !(
-        userFunction ||
-        userFunction.constructor ||
-        userFunction.call ||
-        userFunction.apply
-      )
-    ) {
-      throw new Error("User function is not valid.");
-    }
-
-    if (userFunction.default) {
-      if (
-        !(
-          userFunction.default.constructor ||
-          userFunction.default.call ||
-          userFunction.default.apply
-        )
-      ) {
-        throw new Error("User function is not valid.");
-      }
-
-      output = await userFunction.default(context);
-    } else {
-      output = await userFunction(context);
-    }
-  }
-
-  try {
-    if (safeTimeout !== null) {
-      let executed = true;
-
-      const timeoutPromise = new Promise((promiseRes) => {
-        setTimeout(() => {
-          executed = false;
-          promiseRes(true);
-        }, safeTimeout * 1000);
-      });
-
-      await Promise.race([execute(), timeoutPromise]);
-
-      if (!executed) {
-        context.error("Execution timed out.");
-        output = context.res.text("", 500, {});
-      }
-    } else {
-      await execute();
-    }
-  } catch (e) {
-    if (e.code === "MODULE_NOT_FOUND") {
-      context.error("Could not load code file.");
-    }
-
-    context.error(e.stack || e);
-    output = context.res.text("", 500, {});
-  } finally {
-    logger.revertNativeLogs();
-  }
-
-  if (output === null || output === undefined) {
-    context.error(
-      "Return statement missing. return context.res.empty() if no response is expected.",
-    );
-    output = context.res.text("", 500, {});
-  }
-
-  output.body = output.body ?? "";
-  output.statusCode = output.statusCode ?? 200;
-  output.headers = output.headers ?? {};
-
-  for (const header in output.headers) {
-    if (header.toLowerCase().startsWith("x-open-runtimes-")) {
-      continue;
-    }
-    res.setHeader(header.toLowerCase(), output.headers[header]);
-  }
-
-  const contentTypeValue = (
-    res.getHeader("content-type") ?? "text/plain"
-  ).toLowerCase();
-  if (
-    !contentTypeValue.startsWith("multipart/") &&
-    !contentTypeValue.includes("charset=")
-  ) {
-    res.setHeader("content-type", contentTypeValue + "; charset=utf-8");
-  }
-
-  res.setHeader("x-open-runtimes-log-id", logger.id);
-  await logger.end();
-
-  return send(res, output.statusCode, output.body);
-};
-
-server.listen(3000, undefined, undefined, () => {
-  console.log("HTTP server successfully started!");
+server.on('connection', (socket) => {
+    console.log(`New connection from ${socket.remoteAddress}`);
 });
