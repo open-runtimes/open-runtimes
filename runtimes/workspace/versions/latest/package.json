@@ -11,9 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@appwrite.io/synapse": "^0.1.0",
     "@xterm/xterm": "^5.5.0",
     "http-proxy": "^1.18.1",
-    "micro": "^9.3.4",
-    "synapse": "github:appwrite/synapse#init-sdk"
+    "micro": "^9.3.4"
   }
 }
