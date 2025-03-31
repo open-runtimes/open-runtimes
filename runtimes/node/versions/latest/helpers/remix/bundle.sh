@@ -9,7 +9,7 @@ fi
 
 ENTRYPOINT="./server/index.js"
 if [ -e "$ENTRYPOINT" ]; then
-    echo "[37mBundling with server-side rendering support .. [0m"
+    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][37m Bundling for SSR started. [0m"
     
     cd /usr/local/build
 
@@ -22,4 +22,6 @@ if [ -e "$ENTRYPOINT" ]; then
 
     mv /usr/local/build/package*.json ./
     mv /usr/local/build/node_modules/ ./node_modules/
+
+    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][37m Bundling for SSR finished. [0m"
 fi
