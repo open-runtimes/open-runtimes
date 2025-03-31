@@ -1,5 +1,7 @@
 COPY package* /usr/local/server/
 
+RUN apt-get update && apt-get install -y python3
+
 RUN npm install pnpm@9 -g
 
 RUN npm ci && npm cache clean --force
