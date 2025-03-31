@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Serverless;
+namespace Tests\Workspace;
 
-use Tests\Serverless;
+use Tests\Websockets;
 
-class Workspace extends Serverless
+class Workspace extends Websockets
 {
 }

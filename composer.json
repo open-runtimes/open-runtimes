@@ -10,7 +10,8 @@
         "psr-4": {"Tests\\": "tests"}
     },
     "require": {
-        "php": ">=8.0"
+        "php": ">=8.0",
+        "utopia-php/websocket": "^0.3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5.13",
