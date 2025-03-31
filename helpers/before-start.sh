@@ -5,8 +5,6 @@ shopt -s dotglob
 
 echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][37m Code extraction started. [0m"
 
-echo "[37mPreparing for start ... [0m"
-
 # Extract gzipped code from mounted volume to function folder
 tar -zxf /mnt/code/code.tar.gz -C /usr/local/server/src/function
 
@@ -27,5 +25,3 @@ echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][37m Environment p
 echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][37m Environment preparation finished. [0m"
 
 echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][32m Runtime started. [0m"
-
-echo "[37mStarting ... [0m"
