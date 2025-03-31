@@ -1,2 +1,2 @@
 requests==2.27.1
-tensorflow
+tensorflow==2.18.0
