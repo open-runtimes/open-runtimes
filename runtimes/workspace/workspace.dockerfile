@@ -7,8 +7,8 @@ RUN apk add --no-cache \
     gcc \
     g++
 
-RUN npm install pnpm@9 -g
+RUN npm install pnpm@10 -g
 
-RUN npm ci && npm cache clean --force
+RUN pnpm install
 
 RUN chmod +x /usr/local/server/helpers/proxy.sh
