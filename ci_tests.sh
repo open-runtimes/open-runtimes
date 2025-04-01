@@ -9,6 +9,9 @@ sh ci-cleanup.sh
 sh ci-runtime-prepare.sh
 sh ci-runtime-build.sh
 
+# Create Docker network if it doesn't exist
+docker network inspect executor_runtimes >/dev/null 2>&1 || docker network create executor_runtimes
+
 LATEST_VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 if [ "$VERSION" = "$LATEST_VERSION" ]; then
     echo "Running formatter ..."
@@ -81,4 +84,19 @@ docker run -d --name open-runtimes-test-serve-teritary -v $(pwd)/resources:/mnt/
 
 cd ../../
 
-RUNTIME_NAME="$RUNTIME" RUNTIME_VERSION="$VERSION" OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS
+if [ "$RUNTIME" = "workspace" ]; then
+  docker run --rm \
+    -v $PWD:/app \
+    -v /tmp:/tmp \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    --network executor_runtimes \
+    -w /app \
+    -e RUNTIME_NAME="$RUNTIME" \
+    -e RUNTIME_VERSION="$VERSION" \
+    -e OPEN_RUNTIMES_SECRET="test-secret-key" \
+    -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
+    phpswoole/swoole:5.1.2-php8.3-alpine \
+    sh -c "apk update && apk add docker-cli zip unzip && composer install --profile --ignore-platform-reqs && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS"
+else
+  RUNTIME_NAME="$RUNTIME" RUNTIME_VERSION="$VERSION" OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS
+fi

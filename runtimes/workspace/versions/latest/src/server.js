@@ -12,7 +12,7 @@ const workdir = "/usr/local/server/src/artifact";
 const synapse = new Synapse();
 
 synapse
-  .connect("/terminal")
+  .connect("ws://localhost:3000/terminal")
   .then((synapse) => {
     console.log("Synapse connected");
 
@@ -149,7 +149,7 @@ const server = micro(async (req, res) => {
     req.headers.upgrade &&
     req.headers.upgrade.toLowerCase() === "websocket"
   ) {
-    synapse.handleUpgrade(req, req.socket, Buffer.alloc(0));
+    // synapse.handleUpgrade(req, req.socket, Buffer.alloc(0));
     return;
   }
   return send(res, 404, "Not found");
