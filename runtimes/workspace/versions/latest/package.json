@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@appwrite.io/synapse": "^0.1.1",
+    "@appwrite.io/synapse": "https://github.com/appwrite/synapse.git#feat-handle-upgrade",
     "@xterm/xterm": "^5.5.0",
     "http-proxy": "^1.18.1",
     "micro": "^9.3.4",

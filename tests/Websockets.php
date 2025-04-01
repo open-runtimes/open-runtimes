@@ -2,11 +2,14 @@
 
 namespace Tests;
 
-use Utopia\WebSocket;
-use PHPUnit\Framework\TestCase;
-
-class Websockets extends TestCase
+class Websockets extends Base
 {
+    public function setUp(): void
+    {
+        Client::$port = 3000;
+        $this->awaitPortOpen();
+    }
+
     public function testWebsocketConnection(): void
     {
         $response = Client::execute(headers: ['x-action' => 'websocketConnection']);
