@@ -16,5 +16,10 @@
     "http-proxy": "^1.18.1",
     "micro": "^9.3.4",
     "update": "^0.7.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "node-pty"
+    ]
   }
 }

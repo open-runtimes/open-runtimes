@@ -9,7 +9,7 @@ class Websockets extends Base
     private WebSocket\Server $server;
     private WebSocket\Client $client;
     
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
         
