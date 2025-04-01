@@ -14,6 +14,7 @@
         "utopia-php/websocket": "^0.3.0"
     },
     "require-dev": {
+        "swoole/ide-helper": "^6.0",
         "phpunit/phpunit": "^9.5.13",
         "ext-curl": "*"
     },

@@ -137,7 +137,7 @@ class Websockets extends Base
         }
     }
 
-    protected function tearDown(): void
+    public function tearDown(): void
     {
         parent::tearDown();
         // Cleanup and stop server

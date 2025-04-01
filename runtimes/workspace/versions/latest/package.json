@@ -18,8 +18,6 @@
     "update": "^0.7.4"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "node-pty"
-    ]
+    "onlyBuiltDependencies": ["node-pty"]
   }
 }
