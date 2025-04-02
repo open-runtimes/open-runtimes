@@ -14,7 +14,7 @@ class Websockets extends TestCase
     public function setUp(): void
     {
         $this->client = new WebsocketClient(
-            "ws://localhost:3000",
+            "ws://172.17.0.1:3000",
             [
                 "timeout" => 10,
             ]
@@ -28,6 +28,15 @@ class Websockets extends TestCase
             $this->client->send('ping');
             $this->assertEquals('pong', $this->client->receive());
             $this->assertTrue($this->client->isConnected());
+        });
+    }
+
+    public function testWebsocketDisconnect(): void
+    {
+        run(function () {
+            $this->client->connect();
+            $this->client->close();
+            $this->assertFalse($this->client->isConnected());
         });
     }
 }
