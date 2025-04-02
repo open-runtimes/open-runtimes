@@ -163,10 +163,10 @@ class Workspace extends Websockets
             $this->client->connect();
             
             /**
-             * Test for FAILURE
+             * Test for FAILURE scenarios first (no git repo)
              */
 
-            // Repository not found
+            // Repository not found - getCurrentBranch
             $message = [
                 'type' => 'git',
                 'operation' => 'getCurrentBranch',
@@ -177,6 +177,51 @@ class Workspace extends Websockets
             $this->assertEquals('git1', $response['requestId']);
             $this->assertFalse($response['success']);
             $this->assertStringContainsString('not a git repository', $response['data']);
+
+            /**
+             * Test SUCCESS scenarios after initializing repo
+             */
+
+            // Test git init
+            $message = [
+                'type' => 'git',
+                'operation' => 'init',
+                'requestId' => 'git2'
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('git2', $response['requestId']);
+            $this->assertTrue($response['success']);
+
+            // Create a test file to commit
+            $message = [
+                'type' => 'fs',
+                'operation' => 'createFile',
+                'requestId' => 'git2.1',
+                'params' => [
+                    'filepath' => 'test.txt',
+                    'content' => 'Test content'
+                ]
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('git2.1', $response['requestId']);
+
+            // Test git add
+            $message = [
+                'type' => 'git',
+                'operation' => 'add',
+                'requestId' => 'git3',
+                'params' => [
+                    'files' => ['.']
+                ]
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('git3', $response['requestId']);
+            $this->assertTrue($response['success']);
+
+            $this->client->close();
         });
     }
 

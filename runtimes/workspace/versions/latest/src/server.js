@@ -116,6 +116,12 @@ synapse
         let result;
 
         switch (operation) {
+          case "init":
+            result = await git.init();
+            break;
+          case "addRemote":
+            result = await git.addRemote(params.name, params.url);
+            break;
           case "getCurrentBranch":
             result = await git.getCurrentBranch();
             break;
@@ -173,7 +179,7 @@ synapse
           synapse.send(`${type}_response`, {
             requestId: message.requestId,
             success: false,
-            error: error.message,
+            data: { error: error.message },
           });
         }
       });
