@@ -15,6 +15,7 @@ synapse
   .connect("/terminal")
   .then((synapse) => {
     console.log("Synapse connected");
+    console.log("Is synapse connected?", synapse.isConnected());
 
     const terminal = new Terminal(synapse);
     const fs = new Filesystem(synapse);
@@ -109,6 +110,7 @@ synapse
 
     Object.keys(router).forEach((type) => {
       synapse.onMessageType(type, async (message) => {
+        console.log("Message received:", message);
         try {
           const result = await router[type](message);
           if (result !== null) {
@@ -128,10 +130,12 @@ synapse
     });
 
     synapse.onMessageType("terminal_input", (message) => {
+      console.log("Received terminal input:", message);
       terminal.createCommand(message.data);
     });
 
     terminal.onData((data) => {
+      console.log("Sending terminal output:", data);
       synapse.send("terminal_output", { data });
     });
 
@@ -145,6 +149,7 @@ synapse
   });
 
 const server = micro(async (req, res) => {
+  console.log("Request received:", req.headers);
   if (
     req.headers.upgrade &&
     req.headers.upgrade.toLowerCase() === "websocket"

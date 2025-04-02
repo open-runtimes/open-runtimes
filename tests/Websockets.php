@@ -2,12 +2,14 @@
 
 namespace Tests;
 
-class Websockets extends Base
+use PHPUnit\Framework\TestCase;
+
+class Websockets extends TestCase
 {
     public function setUp(): void
     {
         Client::$port = 3000;
-        $this->awaitPortOpen();
+        sleep(10);
     }
 
     public function testWebsocketConnection(): void
