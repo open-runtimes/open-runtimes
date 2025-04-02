@@ -22,9 +22,13 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
 
     echo "Running formatter for tests ..."
 
-    cd "tests/resources/functions/$RUNTIME_FOLDER"
-    docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
-    cd ../../../../
+    if [ -d "./tests/resources/functions/$RUNTIME_FOLDER" ]; then
+        cd "tests/resources/functions/$RUNTIME_FOLDER"
+        docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
+        cd ../../../../
+    else
+        echo "Skipping formatter for tests as runtime folder $RUNTIME_FOLDER does not exist"
+    fi
 else
     echo "Skipping formatter. Formatter runs only in: $RUNTIME-$LATEST_VERSION"
 fi
@@ -32,12 +36,14 @@ fi
 echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
-if ! [ -z "$ENFORCED_RUNTIME" ]; then
-cp -R ./tests/resources/functions/$RUNTIME/* ./tests/.runtime
-else
-    cp -R ./tests/resources/functions/$RUNTIME_FOLDER/latest/* ./tests/.runtime
-        if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then
-        cp -R ./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/* ./tests/.runtime
+if [ -d "./tests/resources/functions/$RUNTIME_FOLDER" ]; then
+    if ! [ -z "$ENFORCED_RUNTIME" ]; then
+    cp -R ./tests/resources/functions/$RUNTIME/* ./tests/.runtime
+    else
+        cp -R ./tests/resources/functions/$RUNTIME_FOLDER/latest/* ./tests/.runtime
+            if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then
+            cp -R ./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/* ./tests/.runtime
+        fi
     fi
 fi
 

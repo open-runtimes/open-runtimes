@@ -10,13 +10,13 @@
         "psr-4": {"Tests\\": "tests"}
     },
     "require": {
-        "php": ">=8.0",
-        "utopia-php/websocket": "^0.3.0"
+        "php": ">=8.0"
     },
     "require-dev": {
         "swoole/ide-helper": "^6.0",
         "phpunit/phpunit": "^9.5.13",
-        "ext-curl": "*"
+        "ext-curl": "*",
+        "utopia-php/websocket": "^0.3.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

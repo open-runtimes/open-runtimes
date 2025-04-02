@@ -12,7 +12,7 @@ const workdir = "/usr/local/server/src/artifact";
 const synapse = new Synapse();
 
 synapse
-  .connect("/terminal")
+  .connect("/")
   .then((synapse) => {
     console.log("Synapse connected");
     console.log("Is synapse connected?", synapse.isConnected());
