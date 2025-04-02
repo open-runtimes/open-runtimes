@@ -102,7 +102,7 @@ if [ "$RUNTIME" = "workspace" ]; then
     -e OPEN_RUNTIMES_SECRET="test-secret-key" \
     -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
     phpswoole/swoole:5.1.2-php8.3-alpine \
-    sh -c "apk update && apk add docker-cli zip unzip && composer install --profile --ignore-platform-reqs && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS"
+    sh -c "apk update && apk add docker-cli zip unzip && composer install --profile --ignore-platform-reqs && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS" --debug
 else
-  RUNTIME_NAME="$RUNTIME" RUNTIME_VERSION="$VERSION" OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS
+  RUNTIME_NAME="$RUNTIME" RUNTIME_VERSION="$VERSION" OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS --debug
 fi

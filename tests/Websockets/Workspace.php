@@ -156,4 +156,83 @@ class Workspace extends Websockets
             $this->client->close();
         });
     }
+
+    public function testGitOperations(): void
+    {
+        run(function () {
+            $this->client->connect();
+            
+            /**
+             * Test for FAILURE
+             */
+
+            // Repository not found
+            $message = [
+                'type' => 'git',
+                'operation' => 'getCurrentBranch',
+                'requestId' => 'git1'
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('git1', $response['requestId']);
+            $this->assertFalse($response['success']);
+            $this->assertStringContainsString('not a git repository', $response['data']);
+        });
+    }
+
+    public function testCodeStyleOperations(): void
+    {
+        run(function () {
+            $this->client->connect();
+            
+            // Test code formatting
+            $message = [
+                'type' => 'codeStyle',
+                'operation' => 'format',
+                'requestId' => 'style1',
+                'params' => [
+                    'code' => 'function test(){return true;}',
+                    'options' => [
+                        'language' => 'javascript',
+                        'indent' => 2,
+                        'useTabs' => false,
+                        'semi' => true,
+                        'singleQuote' => false,
+                        'printWidth' => 80
+                    ]
+                ]
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('style1', $response['requestId']);
+            $this->assertTrue($response['success']);
+            $this->assertNotEmpty($response['data']);
+            $this->assertStringContainsString('function test() {', $response['data']);
+
+            // Test code linting
+            $message = [
+                'type' => 'codeStyle',
+                'operation' => 'lint',
+                'requestId' => 'style2',
+                'params' => [
+                    'code' => 'function test() { const x = 1; return x; }',
+                    'options' => [
+                        'language' => 'javascript',
+                        'rules' => [
+                            'semi' => 'error',
+                            'no-unused-vars' => 'warn'
+                        ]
+                    ]
+                ]
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('style2', $response['requestId']);
+            $this->assertTrue($response['success']);
+            $this->assertArrayHasKey('issues', $response['data']);
+            $this->assertIsArray($response['data']['issues']);
+            
+            $this->client->close();
+        });
+    }
 }

@@ -5,9 +5,11 @@ const {
   Terminal,
   Filesystem,
   System,
+  Git,
+  CodeStyle,
 } = require("@appwrite.io/synapse");
 
-const workdir = "/usr/local/server/src/artifact";
+const workdir = "/tmp/workspace";
 
 const synapse = new Synapse();
 
@@ -20,6 +22,8 @@ synapse
     const terminal = new Terminal(synapse);
     const fs = new Filesystem(synapse);
     const system = new System(synapse);
+    const git = new Git(synapse);
+    const codeStyle = new CodeStyle(synapse);
 
     const router = {
       terminal: async (message) => {
@@ -103,6 +107,52 @@ synapse
             break;
           default:
             throw new Error("Invalid system operation");
+        }
+        return result;
+      },
+
+      git: async (message) => {
+        const { operation, params } = message;
+        let result;
+
+        switch (operation) {
+          case "getCurrentBranch":
+            result = await git.getCurrentBranch();
+            break;
+          case "status":
+            result = await git.status();
+            break;
+          case "add":
+            result = await git.add(params.files);
+            break;
+          case "commit":
+            result = await git.commit(params.message);
+            break;
+          case "pull":
+            result = await git.pull();
+            break;
+          case "push":
+            result = await git.push();
+            break;
+          default:
+            throw new Error("Invalid git operation");
+        }
+        return result;
+      },
+
+      codeStyle: async (message) => {
+        const { operation, params } = message;
+        let result;
+
+        switch (operation) {
+          case "format":
+            result = await codeStyle.format(params.code, params.options);
+            break;
+          case "lint":
+            result = await codeStyle.lint(params.code, params.options);
+            break;
+          default:
+            throw new Error("Invalid code style operation");
         }
         return result;
       },

@@ -5,7 +5,8 @@ RUN apk add --no-cache \
     python3 \
     make \
     gcc \
-    g++
+    g++ \
+    git
 
 RUN npm install pnpm@10 -g
 
