@@ -40,6 +40,7 @@ class Workspace extends TestCase
             $message = [
                 'type' => 'terminal',
                 'operation' => 'updateSize',
+                'requestId' => 'test1',
                 'params' => [
                     'cols' => 80,
                     'rows' => 24
@@ -48,12 +49,14 @@ class Workspace extends TestCase
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertTrue($response['success']);
+            $this->assertEquals('test1', $response['requestId']);
             $this->assertEquals('Terminal size updated successfully', $response['data']);
 
             // Test terminal create command new file
             $message = [
                 'type' => 'terminal',
                 'operation' => 'createCommand',
+                'requestId' => 'test2',
                 'params' => [
                     'command' => 'touch test.txt'
                 ]
@@ -61,11 +64,17 @@ class Workspace extends TestCase
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertTrue($response['success']);
+            $this->assertEquals('test2', $response['requestId']);
+            $this->assertEquals('Command executed successfully', $response['data']);
+
+            $response = json_decode($this->client->receive(), true); // terminal response
+            $this->assertEmpty($response['data']);
 
             // Test terminal create command list files
             $message = [
                 'type' => 'terminal',
                 'operation' => 'createCommand',
+                'requestId' => 'test3',
                 'params' => [
                     'command' => 'ls -la'
                 ]
@@ -73,7 +82,12 @@ class Workspace extends TestCase
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertTrue($response['success']);
-            
+            $this->assertEquals('test3', $response['requestId']);
+            $this->assertEquals('Command executed successfully', $response['data']);
+
+            $response = json_decode($this->client->receive(), true); // terminal response
+            $this->assertEmpty($response['data']);
+
             $this->client->close();
         });
     }
