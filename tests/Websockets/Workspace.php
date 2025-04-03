@@ -236,6 +236,30 @@ class Workspace extends Websockets
             $this->assertEquals('git2', $response['requestId']);
             $this->assertTrue($response['success']);
 
+            // Test set user name
+            $message = [
+                'type' => 'git',
+                'operation' => 'setUserName',
+                'requestId' => 'git2',
+                'params' => ['name' => 'John Doe']
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('git2', $response['requestId']);
+            $this->assertTrue($response['success']);
+
+            // Test set user email
+            $message = [
+                'type' => 'git',
+                'operation' => 'setUserEmail',
+                'requestId' => 'git3',
+                'params' => ['email' => 'john.doe@example.com']
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('git3', $response['requestId']);
+            $this->assertTrue($response['success']);
+
             // Create a test file to commit
             $message = [
                 'type' => 'fs',
@@ -262,6 +286,43 @@ class Workspace extends Websockets
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('git3', $response['requestId']);
+            $this->assertTrue($response['success']);
+
+            // Test git status
+            $message = [
+                'type' => 'git',
+                'operation' => 'status',
+                'requestId' => 'git4'
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('git4', $response['requestId']);
+            $this->assertTrue($response['success']);
+            $this->assertStringContainsString('No commits yet', $response['data']);
+
+            // Test git commit
+            $message = [
+                'type' => 'git',
+                'operation' => 'commit',
+                'requestId' => 'git4',
+                'params' => ['message' => 'Initial commit']
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('git4', $response['requestId']);
+            $this->assertTrue($response['success']);
+            $this->assertStringContainsString('Initial commit', $response['data']);
+
+            // Test add remote
+            $message = [
+                'type' => 'git',
+                'operation' => 'addRemote',
+                'requestId' => 'git5',
+                'params' => ['name' => 'origin', 'url' => 'https://github.com/user/repo.git']
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('git5', $response['requestId']);
             $this->assertTrue($response['success']);
 
             $this->client->close();

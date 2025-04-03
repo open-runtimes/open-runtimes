@@ -22,7 +22,7 @@ synapse
     const terminal = new Terminal(synapse);
     const fs = new Filesystem(synapse);
     const system = new System(synapse);
-    const git = new Git(synapse);
+    const git = new Git(synapse, workdir);
     const codeStyle = new CodeStyle(synapse);
 
     const router = {
@@ -121,6 +121,12 @@ synapse
             break;
           case "addRemote":
             result = await git.addRemote(params.name, params.url);
+            break;
+          case "setUserName":
+            result = await git.setUserName(params.name);
+            break;
+          case "setUserEmail":
+            result = await git.setUserEmail(params.email);
             break;
           case "getCurrentBranch":
             result = await git.getCurrentBranch();
