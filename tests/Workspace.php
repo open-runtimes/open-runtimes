@@ -68,7 +68,7 @@ class Workspace extends TestCase
             $this->assertEquals('Command executed successfully', $response['data']);
 
             $response = json_decode($this->client->receive(), true); // terminal response
-            $this->assertEmpty($response['data']);
+            $this->assertTrue($response['success']);
 
             // Test terminal create command list files
             $message = [
@@ -86,7 +86,7 @@ class Workspace extends TestCase
             $this->assertEquals('Command executed successfully', $response['data']);
 
             $response = json_decode($this->client->receive(), true); // terminal response
-            $this->assertEmpty($response['data']);
+            $this->assertTrue($response['success']);
 
             $this->client->close();
         });
