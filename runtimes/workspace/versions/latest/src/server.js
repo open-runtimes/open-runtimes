@@ -20,7 +20,7 @@ synapse
     console.log("Is synapse connected?", synapse.isConnected());
 
     const terminal = new Terminal(synapse);
-    const fs = new Filesystem(synapse);
+    const fs = new Filesystem(synapse, workdir);
     const system = new System(synapse);
     const git = new Git(synapse, workdir);
     const codeStyle = new CodeStyle(synapse);
@@ -47,49 +47,37 @@ synapse
 
         switch (operation) {
           case "createFile":
-            result = await fs.createFile(
-              workdir + "/" + params.filepath,
-              params.content,
-            );
+            result = await fs.createFile(params.filepath, params.content);
             break;
           case "getFile":
-            result = await fs.getFile(workdir + "/" + params.filepath);
+            result = await fs.getFile(params.filepath);
             break;
           case "updateFile":
-            result = await fs.updateFile(
-              workdir + "/" + params.filepath,
-              params.content,
-            );
+            result = await fs.updateFile(params.filepath, params.content);
             break;
           case "updateFilePath":
-            result = await fs.updateFilePath(
-              workdir + "/" + params.filepath,
-              workdir + "/" + params.newPath,
-            );
+            result = await fs.updateFilePath(params.filepath, params.newPath);
             break;
           case "deleteFile":
-            result = await fs.deleteFile(workdir + "/" + params.filepath);
+            result = await fs.deleteFile(params.filepath);
             break;
           case "createFolder":
-            result = await fs.createFolder(workdir + "/" + params.folderpath);
+            result = await fs.createFolder(params.folderpath);
             break;
           case "getFolder":
-            result = await fs.getFolder(workdir + "/" + params.folderpath);
+            result = await fs.getFolder(params.folderpath);
             break;
           case "updateFolderName":
-            result = await fs.updateFolderName(
-              workdir + "/" + params.folderpath,
-              params.name,
-            );
+            result = await fs.updateFolderName(params.folderpath, params.name);
             break;
           case "updateFolderPath":
             result = await fs.updateFolderPath(
-              workdir + "/" + params.folderpath,
-              workdir + "/" + params.newPath,
+              params.folderpath,
+              params.newPath,
             );
             break;
           case "deleteFolder":
-            result = await fs.deleteFolder(workdir + "/" + params.folderpath);
+            result = await fs.deleteFolder(params.folderpath);
             break;
           default:
             throw new Error("Invalid operation");

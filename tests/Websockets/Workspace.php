@@ -119,6 +119,7 @@ class Workspace extends Websockets
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('test4', $response['requestId']);
             $this->assertTrue($response['success']);
+
             // Test delete file
             $message = [
                 'type' => 'fs',
