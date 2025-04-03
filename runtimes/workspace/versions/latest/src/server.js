@@ -1,17 +1,22 @@
 const micro = require("micro");
 const { send } = require("micro");
+const fs = require("fs");
 const {
   Synapse,
   Terminal,
   Filesystem,
   System,
   Git,
-  CodeStyle,
+  Code,
 } = require("@appwrite.io/synapse");
 
 const workdir = "/tmp/workspace";
 
-const synapse = new Synapse();
+if (!fs.existsSync(workdir)) {
+  fs.mkdirSync(workdir, { recursive: true });
+}
+
+const synapse = new Synapse("localhost", 3000, workdir);
 
 synapse
   .connect("/")
@@ -20,20 +25,21 @@ synapse
     console.log("Is synapse connected?", synapse.isConnected());
 
     const terminal = new Terminal(synapse);
-    const fs = new Filesystem(synapse, workdir);
+    const fs = new Filesystem(synapse);
     const system = new System(synapse);
-    const git = new Git(synapse, workdir);
-    const codeStyle = new CodeStyle(synapse);
+    const git = new Git(synapse);
+    const code = new Code(synapse);
 
     const router = {
       terminal: async (message) => {
         const { operation, params } = message;
+
         switch (operation) {
           case "updateSize":
-            terminal.updateSize(params.cols, params.rows, message.requestId);
+            terminal.updateSize(params.cols, params.rows);
             break;
           case "createCommand":
-            terminal.createCommand(params.command, message.requestId);
+            terminal.createCommand(params.command);
             break;
           default:
             throw new Error("Invalid terminal operation");
@@ -140,19 +146,19 @@ synapse
         return result;
       },
 
-      codeStyle: async (message) => {
+      code: async (message) => {
         const { operation, params } = message;
         let result;
 
         switch (operation) {
           case "format":
-            result = await codeStyle.format(params.code, params.options);
+            result = await code.format(params.code, params.options);
             break;
           case "lint":
-            result = await codeStyle.lint(params.code, params.options);
+            result = await code.lint(params.code, params.options);
             break;
           default:
-            throw new Error("Invalid code style operation");
+            throw new Error("Invalid code operation");
         }
         return result;
       },
@@ -179,24 +185,17 @@ synapse
       });
     });
 
-    terminal.onData((success, data, messageId) => {
+    terminal.onData((success, data) => {
       if (synapse.isConnected()) {
         console.log("Sending terminal output:", data);
-        const response = {
+        synapse.send("terminalResponse", {
           success: success,
           data: data,
-        };
-
-        if (messageId != null) {
-          response.requestId = messageId;
-        }
-
-        synapse.send("terminalResponse", response);
+        });
       }
     });
 
     synapse.onClose(() => {
-      terminal.kill();
       console.log("Terminal connection closed");
     });
   })

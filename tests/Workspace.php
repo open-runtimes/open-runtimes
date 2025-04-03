@@ -46,11 +46,7 @@ class Workspace extends TestCase
                     'rows' => 24
                 ]
             ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertTrue($response['success']);
-            $this->assertEquals('test1', $response['requestId']);
-            $this->assertEquals('Terminal size updated successfully', $response['data']);
+            $this->client->send(json_encode($message)); // no response expected
 
             // Test terminal create command new file
             $message = [
@@ -64,11 +60,27 @@ class Workspace extends TestCase
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertTrue($response['success']);
-            $this->assertEquals('test2', $response['requestId']);
-            $this->assertEquals('Command executed successfully', $response['data']);
+            $this->assertStringContainsString('touch test.txt', $response['data']); // command is added to the terminal history
 
-            $response = json_decode($this->client->receive(), true); // terminal response
+            // We can't really test the command output here as it's sent in chunks by the node-pty library,
+            // and it can be random. For eg. it can send touch test.txt\r\n\ as well as touch test.txt\r\n\u001b[?2004l\r
+            
+            $this->client->receive(); // ansi escape codes added by the server
+            $this->client->receive();
+
+            // Test terminal list files
+            $message = [
+                'type' => 'terminal',
+                'operation' => 'createCommand',
+                'requestId' => 'test3',
+                'params' => [
+                    'command' => 'ls'
+                ]
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
             $this->assertTrue($response['success']);
+            $this->assertStringContainsString('ls', $response['data']); // command is added to the terminal history
 
             $this->client->close();
         });
@@ -95,7 +107,6 @@ class Workspace extends TestCase
             ];
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('test1', $response['requestId']);
             $this->assertTrue($response['success']);
             
             // Test get file
@@ -352,14 +363,14 @@ class Workspace extends TestCase
         });
     }
 
-    public function testCodeStyleOperations(): void
+    public function testCodeOperations(): void
     {
         run(function () {
             $this->client->connect();
             
             // Test code formatting
             $message = [
-                'type' => 'codeStyle',
+                'type' => 'code',
                 'operation' => 'format',
                 'requestId' => 'style1',
                 'params' => [
@@ -383,7 +394,7 @@ class Workspace extends TestCase
 
             // Test code linting
             $message = [
-                'type' => 'codeStyle',
+                'type' => 'code',
                 'operation' => 'lint',
                 'requestId' => 'style2',
                 'params' => [
