@@ -170,29 +170,27 @@ synapse
         try {
           const result = await router[type](message);
           if (result !== null) {
-            synapse.send(`${type}_response`, {
+            synapse.send(`${type}Response`, {
               requestId: message.requestId,
               ...result,
             });
           }
         } catch (error) {
-          synapse.send(`${type}_response`, {
+          synapse.send(`${type}Response`, {
             requestId: message.requestId,
             success: false,
-            data: { error: error.message },
+            error: error.message,
           });
         }
       });
     });
 
-    synapse.onMessageType("terminal_input", (message) => {
-      console.log("Received terminal input:", message);
-      terminal.createCommand(message.data);
-    });
-
-    terminal.onData((data) => {
+    terminal.onData((success, data) => {
       console.log("Sending terminal output:", data);
-      synapse.send("terminal_output", { data });
+      synapse.send("terminalResponse", {
+        success: success,
+        data: data,
+      });
     });
 
     synapse.onClose(() => {

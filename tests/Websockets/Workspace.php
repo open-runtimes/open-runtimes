@@ -23,7 +23,7 @@ class Workspace extends Websockets
                 ]
             ];
             $this->client->send(json_encode($message));
-            
+
             // Test terminal command creation
             $message = [
                 'type' => 'terminal',
@@ -36,8 +36,11 @@ class Workspace extends Websockets
             
             // Test terminal input
             $message = [
-                'type' => 'terminal_input',
-                'data' => 'echo "hello world"'
+                'type' => 'terminal',
+                'operation' => 'input',
+                'params' => [
+                    'command' => 'echo "hello world"'
+                ]
             ];
             $this->client->send(json_encode($message));
             
@@ -53,6 +56,10 @@ class Workspace extends Websockets
     {
         run(function () {
             $this->client->connect();
+
+            /**
+             * Test for SUCCESS
+             */
             
             // Test file creation
             $message = [
@@ -67,6 +74,7 @@ class Workspace extends Websockets
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('test1', $response['requestId']);
+            $this->assertTrue($response['success']);
             
             // Test get file
             $message = [
@@ -80,6 +88,8 @@ class Workspace extends Websockets
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('test2', $response['requestId']);
+            $this->assertTrue($response['success']);
+            $this->assertEquals('Hello World', $response['data']);
             
             // Test update file
             $message = [
@@ -94,6 +104,7 @@ class Workspace extends Websockets
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('test3', $response['requestId']);
+            $this->assertTrue($response['success']);
             
             // Test create folder
             $message = [
@@ -107,7 +118,7 @@ class Workspace extends Websockets
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('test4', $response['requestId']);
-            
+            $this->assertTrue($response['success']);
             // Test delete file
             $message = [
                 'type' => 'fs',
@@ -120,7 +131,8 @@ class Workspace extends Websockets
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('test5', $response['requestId']);
-            
+            $this->assertTrue($response['success']);
+
             // Test delete folder
             $message = [
                 'type' => 'fs',
@@ -133,7 +145,27 @@ class Workspace extends Websockets
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('test6', $response['requestId']);
-            
+            $this->assertTrue($response['success']);
+
+            /**
+             * Test for FAILURE
+             */
+
+            // Test delete non-existent file
+            $message = [
+                'type' => 'fs',
+                'operation' => 'deleteFile',
+                'requestId' => 'test7',
+                'params' => [
+                    'filepath' => 'nonexistent.txt'
+                ]
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertEquals('test7', $response['requestId']);
+            $this->assertFalse($response['success']);
+            $this->assertStringContainsString('no such file or directory', $response['error']);
+
             $this->client->close();
         });
     }
@@ -152,6 +184,17 @@ class Workspace extends Websockets
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('test1', $response['requestId']);
+            $this->assertTrue($response['success']);
+            $this->assertArrayHasKey('cpuCores', $response['data']);
+            $this->assertArrayHasKey('cpuUsagePerCore', $response['data']);
+            $this->assertArrayHasKey('cpuUsagePercent', $response['data']);
+            $this->assertArrayHasKey('loadAverage1m', $response['data']);
+            $this->assertArrayHasKey('loadAverage5m', $response['data']);
+            $this->assertArrayHasKey('loadAverage15m', $response['data']);
+            $this->assertArrayHasKey('memoryTotalBytes', $response['data']);
+            $this->assertArrayHasKey('memoryUsedBytes', $response['data']);
+            $this->assertArrayHasKey('memoryFreeBytes', $response['data']);
+            $this->assertArrayHasKey('memoryUsagePercent', $response['data']);
             
             $this->client->close();
         });
@@ -176,7 +219,7 @@ class Workspace extends Websockets
             $response = json_decode($this->client->receive(), true);
             $this->assertEquals('git1', $response['requestId']);
             $this->assertFalse($response['success']);
-            $this->assertStringContainsString('not a git repository', $response['data']);
+            $this->assertStringContainsString('not a git repository', $response['error']);
 
             /**
              * Test SUCCESS scenarios after initializing repo
