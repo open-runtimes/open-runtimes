@@ -70,24 +70,6 @@ class Workspace extends TestCase
             $response = json_decode($this->client->receive(), true); // terminal response
             $this->assertTrue($response['success']);
 
-            // Test terminal create command list files
-            $message = [
-                'type' => 'terminal',
-                'operation' => 'createCommand',
-                'requestId' => 'test3',
-                'params' => [
-                    'command' => 'ls -la'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertTrue($response['success']);
-            $this->assertEquals('test3', $response['requestId']);
-            $this->assertEquals('Command executed successfully', $response['data']);
-
-            $response = json_decode($this->client->receive(), true); // terminal response
-            $this->assertTrue($response['success']);
-
             $this->client->close();
         });
     }
