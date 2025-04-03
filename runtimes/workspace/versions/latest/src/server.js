@@ -30,10 +30,10 @@ synapse
         const { operation, params } = message;
         switch (operation) {
           case "updateSize":
-            terminal.updateSize(params.cols, params.rows);
+            terminal.updateSize(params.cols, params.rows, message.requestId);
             break;
           case "createCommand":
-            terminal.createCommand(params.command);
+            terminal.createCommand(params.command, message.requestId);
             break;
           default:
             throw new Error("Invalid terminal operation");
@@ -179,12 +179,20 @@ synapse
       });
     });
 
-    terminal.onData((success, data) => {
-      console.log("Sending terminal output:", data);
-      synapse.send("terminalResponse", {
-        success: success,
-        data: data,
-      });
+    terminal.onData((success, data, messageId) => {
+      if (synapse.isConnected()) {
+        console.log("Sending terminal output:", data);
+        const response = {
+          success: success,
+          data: data,
+        };
+
+        if (messageId != null) {
+          response.requestId = messageId;
+        }
+
+        synapse.send("terminalResponse", response);
+      }
     });
 
     synapse.onClose(() => {

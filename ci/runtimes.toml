@@ -12,7 +12,7 @@ versions = ["22"]
 commands = { install = "", start = "sh helpers/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
-test = "Websockets/Workspace.php"
+test = "Workspace.php"
 
 [deno]
 entry = "tests.ts"

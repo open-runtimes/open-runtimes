@@ -1,13 +1,36 @@
 <?php
 
-namespace Tests\Websockets;
+namespace Tests;
 
-use Tests\Websockets;
+use PHPUnit\Framework\TestCase;
+use Utopia\WebSocket\Client as WebsocketClient;
 
 use function Swoole\Coroutine\run;
 
-class Workspace extends Websockets
+class Workspace extends TestCase
 {
+    protected $client;
+
+    public function setUp(): void
+    {
+        $this->client = new WebsocketClient(
+            "ws://172.17.0.1:3000",
+            [
+                "timeout" => 10,
+            ]
+        );
+    }
+
+    public function testWebsocketConnection(): void
+    {
+        run(function () {
+            $this->client->connect();
+            $this->client->send('ping');
+            $this->assertEquals('pong', $this->client->receive());
+            $this->assertTrue($this->client->isConnected());
+        });
+    }
+
     public function testTerminalOperations(): void
     {
         run(function () {
@@ -23,8 +46,23 @@ class Workspace extends Websockets
                 ]
             ];
             $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertTrue($response['success']);
+            $this->assertEquals('Terminal size updated successfully', $response['data']);
 
-            // Test terminal command creation
+            // Test terminal create command new file
+            $message = [
+                'type' => 'terminal',
+                'operation' => 'createCommand',
+                'params' => [
+                    'command' => 'touch test.txt'
+                ]
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertTrue($response['success']);
+
+            // Test terminal create command list files
             $message = [
                 'type' => 'terminal',
                 'operation' => 'createCommand',
@@ -33,20 +71,8 @@ class Workspace extends Websockets
                 ]
             ];
             $this->client->send(json_encode($message));
-            
-            // Test terminal input
-            $message = [
-                'type' => 'terminal',
-                'operation' => 'input',
-                'params' => [
-                    'command' => 'echo "hello world"'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            
-            // Verify we receive terminal output
-            $response = $this->client->receive();
-            $this->assertNotEmpty($response);
+            $response = json_decode($this->client->receive(), true);
+            $this->assertTrue($response['success']);
             
             $this->client->close();
         });
@@ -383,6 +409,15 @@ class Workspace extends Websockets
             $this->assertIsArray($response['data']['issues']);
             
             $this->client->close();
+        });
+    }
+
+    public function testWebsocketDisconnect(): void
+    {
+        run(function () {
+            $this->client->connect();
+            $this->client->close();
+            $this->assertFalse($this->client->isConnected());
         });
     }
 }
