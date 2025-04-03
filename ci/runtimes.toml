@@ -8,7 +8,7 @@ test = "Serverless/Node.php"
 
 [workspace]
 entry = "tests.js"
-versions = ["22"]
+versions = ["1"]
 commands = { install = "", start = "sh helpers/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"

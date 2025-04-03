@@ -65,10 +65,10 @@ jobs:
             ARCH: "linux/amd64"
         
           # Workspace
-          - ID: workspace-22.js
+          - ID: workspace-1
             RUNTIME: workspace
-            VERSION: "22"
-            IMAGE: openruntimes/workspace:v4-22
+            VERSION: "1"
+            IMAGE: openruntimes/workspace:v4-1
             ARCH: "linux/amd64,linux/arm64"
 
           # Deno

@@ -63,10 +63,6 @@ class Workspace extends TestCase
 
             // We can't really test the command output here as it's sent in chunks by the node-pty library,
             // and it can be random. For eg. it can send touch test.txt\r\n\ as well as touch test.txt\r\n\u001b[?2004l\r
-            
-            $this->client->receive(); // "touch test.txt" command itself
-            $this->client->receive(); // ansi escape codes added by the server
-            $this->client->receive();
 
             // Test terminal list files
             $message = [
@@ -80,10 +76,6 @@ class Workspace extends TestCase
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertTrue($response['success']);
-
-            $this->client->receive(); // "ls" command itself
-            $this->client->receive(); // ansi escape codes added by the server
-            $this->client->receive();
 
             $this->client->close();
         });
