@@ -16,6 +16,148 @@ if (!fs.existsSync(workdir)) {
   fs.mkdirSync(workdir, { recursive: true });
 }
 
+// Initialize services
+let terminal, filesystem, system, git, code;
+const router = {
+  terminal: async (message) => {
+    const { operation, params } = message;
+
+    switch (operation) {
+      case "updateSize":
+        terminal.updateSize(params.cols, params.rows);
+        break;
+      case "createCommand":
+        terminal.createCommand(params.command);
+        break;
+      default:
+        throw new Error("Invalid terminal operation");
+    }
+    return null;
+  },
+
+  fs: async (message) => {
+    const { operation, params } = message;
+    let result;
+
+    switch (operation) {
+      case "createFile":
+        result = await filesystem.createFile(params.filepath, params.content);
+        break;
+      case "getFile":
+        result = await filesystem.getFile(params.filepath);
+        break;
+      case "updateFile":
+        result = await filesystem.updateFile(params.filepath, params.content);
+        break;
+      case "updateFilePath":
+        result = await filesystem.updateFilePath(
+          params.filepath,
+          params.newPath,
+        );
+        break;
+      case "deleteFile":
+        result = await filesystem.deleteFile(params.filepath);
+        break;
+      case "createFolder":
+        result = await filesystem.createFolder(params.folderpath);
+        break;
+      case "getFolder":
+        result = await filesystem.getFolder(params.folderpath);
+        break;
+      case "updateFolderName":
+        result = await filesystem.updateFolderName(
+          params.folderpath,
+          params.name,
+        );
+        break;
+      case "updateFolderPath":
+        result = await filesystem.updateFolderPath(
+          params.folderpath,
+          params.newPath,
+        );
+        break;
+      case "deleteFolder":
+        result = await filesystem.deleteFolder(params.folderpath);
+        break;
+      default:
+        throw new Error("Invalid operation");
+    }
+    return result;
+  },
+
+  system: async (message) => {
+    const { operation } = message;
+    let result;
+
+    switch (operation) {
+      case "getUsage":
+        result = await system.getUsage();
+        break;
+      default:
+        throw new Error("Invalid system operation");
+    }
+    return result;
+  },
+
+  git: async (message) => {
+    const { operation, params } = message;
+    let result;
+
+    switch (operation) {
+      case "init":
+        result = await git.init();
+        break;
+      case "addRemote":
+        result = await git.addRemote(params.name, params.url);
+        break;
+      case "setUserName":
+        result = await git.setUserName(params.name);
+        break;
+      case "setUserEmail":
+        result = await git.setUserEmail(params.email);
+        break;
+      case "getCurrentBranch":
+        result = await git.getCurrentBranch();
+        break;
+      case "status":
+        result = await git.status();
+        break;
+      case "add":
+        result = await git.add(params.files);
+        break;
+      case "commit":
+        result = await git.commit(params.message);
+        break;
+      case "pull":
+        result = await git.pull();
+        break;
+      case "push":
+        result = await git.push();
+        break;
+      default:
+        throw new Error("Invalid git operation");
+    }
+    return result;
+  },
+
+  code: async (message) => {
+    const { operation, params } = message;
+    let result;
+
+    switch (operation) {
+      case "format":
+        result = await code.format(params.code, params.options);
+        break;
+      case "lint":
+        result = await code.lint(params.code, params.options);
+        break;
+      default:
+        throw new Error("Invalid code operation");
+    }
+    return result;
+  },
+};
+
 const synapse = new Synapse("localhost", 3000, workdir);
 
 synapse
@@ -24,145 +166,12 @@ synapse
     console.log("Synapse connected");
     console.log("Is synapse connected?", synapse.isConnected());
 
-    const terminal = new Terminal(synapse);
-    const fs = new Filesystem(synapse);
-    const system = new System(synapse);
-    const git = new Git(synapse);
-    const code = new Code(synapse);
-
-    const router = {
-      terminal: async (message) => {
-        const { operation, params } = message;
-
-        switch (operation) {
-          case "updateSize":
-            terminal.updateSize(params.cols, params.rows);
-            break;
-          case "createCommand":
-            terminal.createCommand(params.command);
-            break;
-          default:
-            throw new Error("Invalid terminal operation");
-        }
-        return null;
-      },
-
-      fs: async (message) => {
-        const { operation, params } = message;
-        let result;
-
-        switch (operation) {
-          case "createFile":
-            result = await fs.createFile(params.filepath, params.content);
-            break;
-          case "getFile":
-            result = await fs.getFile(params.filepath);
-            break;
-          case "updateFile":
-            result = await fs.updateFile(params.filepath, params.content);
-            break;
-          case "updateFilePath":
-            result = await fs.updateFilePath(params.filepath, params.newPath);
-            break;
-          case "deleteFile":
-            result = await fs.deleteFile(params.filepath);
-            break;
-          case "createFolder":
-            result = await fs.createFolder(params.folderpath);
-            break;
-          case "getFolder":
-            result = await fs.getFolder(params.folderpath);
-            break;
-          case "updateFolderName":
-            result = await fs.updateFolderName(params.folderpath, params.name);
-            break;
-          case "updateFolderPath":
-            result = await fs.updateFolderPath(
-              params.folderpath,
-              params.newPath,
-            );
-            break;
-          case "deleteFolder":
-            result = await fs.deleteFolder(params.folderpath);
-            break;
-          default:
-            throw new Error("Invalid operation");
-        }
-        return result;
-      },
-
-      system: async (message) => {
-        const { operation } = message;
-        let result;
-
-        switch (operation) {
-          case "getUsage":
-            result = await system.getUsage();
-            break;
-          default:
-            throw new Error("Invalid system operation");
-        }
-        return result;
-      },
-
-      git: async (message) => {
-        const { operation, params } = message;
-        let result;
-
-        switch (operation) {
-          case "init":
-            result = await git.init();
-            break;
-          case "addRemote":
-            result = await git.addRemote(params.name, params.url);
-            break;
-          case "setUserName":
-            result = await git.setUserName(params.name);
-            break;
-          case "setUserEmail":
-            result = await git.setUserEmail(params.email);
-            break;
-          case "getCurrentBranch":
-            result = await git.getCurrentBranch();
-            break;
-          case "status":
-            result = await git.status();
-            break;
-          case "add":
-            result = await git.add(params.files);
-            break;
-          case "commit":
-            result = await git.commit(params.message);
-            break;
-          case "pull":
-            result = await git.pull();
-            break;
-          case "push":
-            result = await git.push();
-            break;
-          default:
-            throw new Error("Invalid git operation");
-        }
-        return result;
-      },
-
-      code: async (message) => {
-        const { operation, params } = message;
-        let result;
-
-        switch (operation) {
-          case "format":
-            result = await code.format(params.code, params.options);
-            break;
-          case "lint":
-            result = await code.lint(params.code, params.options);
-            break;
-          default:
-            throw new Error("Invalid code operation");
-        }
-        return result;
-      },
-    };
+    // Initialize service instances
+    terminal = new Terminal(synapse);
+    filesystem = new Filesystem(synapse);
+    system = new System(synapse);
+    git = new Git(synapse);
+    code = new Code(synapse);
 
     Object.keys(router).forEach((type) => {
       synapse.onMessageType(type, async (message) => {
@@ -205,6 +214,8 @@ synapse
 
 const server = micro(async (req, res) => {
   console.log("Request received:", req.headers);
+
+  // Handle WebSocket upgrade requests
   if (
     req.headers.upgrade &&
     req.headers.upgrade.toLowerCase() === "websocket"
@@ -212,7 +223,95 @@ const server = micro(async (req, res) => {
     synapse.handleUpgrade(req, req.socket, Buffer.alloc(0));
     return;
   }
-  return send(res, 404, "Not found");
+
+  // Check if services are initialized
+  if (!terminal || !filesystem || !system || !git || !code) {
+    return send(res, 503, {
+      success: false,
+      error: "Services not yet initialized. Please try again in a moment.",
+    });
+  }
+
+  // Basic routing for HTTP requests
+  try {
+    const { method, url } = req;
+
+    // Parse request body for POST requests
+    let body = {};
+    if (method === "POST") {
+      body = await micro.json(req);
+    }
+
+    // Terminal endpoints
+    if (url.startsWith("/terminal/")) {
+      const operation = url.split("/")[2];
+      if (method === "POST") {
+        try {
+          await router.terminal({ operation, params: body });
+          return send(res, 200, { success: true });
+        } catch (error) {
+          return send(res, 400, { success: false, error: error.message });
+        }
+      }
+    }
+
+    // Filesystem endpoints
+    if (url.startsWith("/fs/")) {
+      const operation = url.split("/")[2];
+      if (method === "POST") {
+        try {
+          const result = await router.fs({ operation, params: body });
+          return send(res, 200, { success: true, ...result });
+        } catch (error) {
+          return send(res, 400, { success: false, error: error.message });
+        }
+      }
+    }
+
+    // System endpoints
+    if (url.startsWith("/system/")) {
+      const operation = url.split("/")[2];
+      if (method === "GET" && operation === "getUsage") {
+        try {
+          const result = await router.system({ operation });
+          return send(res, 200, { success: true, ...result });
+        } catch (error) {
+          return send(res, 400, { success: false, error: error.message });
+        }
+      }
+    }
+
+    // Git endpoints
+    if (url.startsWith("/git/")) {
+      const operation = url.split("/")[2];
+      if (method === "POST") {
+        try {
+          const result = await router.git({ operation, params: body });
+          return send(res, 200, { success: true, ...result });
+        } catch (error) {
+          return send(res, 400, { success: false, error: error.message });
+        }
+      }
+    }
+
+    // Code endpoints
+    if (url.startsWith("/code/")) {
+      const operation = url.split("/")[2];
+      if (method === "POST") {
+        try {
+          const result = await router.code({ operation, params: body });
+          return send(res, 200, { success: true, ...result });
+        } catch (error) {
+          return send(res, 400, { success: false, error: error.message });
+        }
+      }
+    }
+
+    return send(res, 404, { success: false, error: "Not found" });
+  } catch (error) {
+    console.error("Error handling request:", error);
+    return send(res, 500, { success: false, error: "Internal server error" });
+  }
 });
 
 const port = process.env.PORT || 3000;
