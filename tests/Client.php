@@ -3,6 +3,7 @@
 namespace Tests;
 
 class Client {
+    public static $host = 'localhost';
     public static $port = 3000;
     public static $secret = '';
 
@@ -30,7 +31,7 @@ class Client {
 
         $responseHeaders = [];
         $optArray = [
-            CURLOPT_URL => 'http://localhost:' . self::$port . $url,
+            CURLOPT_URL => 'http://' . self::$host . ':' . self::$port . $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$responseHeaders) {
                 $len = strlen($header);

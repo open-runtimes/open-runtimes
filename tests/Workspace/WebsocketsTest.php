@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests;
+namespace Tests\Workspace;
 
 use PHPUnit\Framework\TestCase;
 use Utopia\WebSocket\Client as WebsocketClient;
 
 use function Swoole\Coroutine\run;
-
-class Workspace extends TestCase
+    
+class WebsocketsTest extends TestCase
 {
     protected $client;
 
@@ -103,6 +103,7 @@ class Workspace extends TestCase
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
             $this->assertTrue($response['success']);
+            $this->assertEquals('test1', $response['requestId']);
             
             // Test get file
             $message = [

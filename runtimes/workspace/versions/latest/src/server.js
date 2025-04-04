@@ -239,7 +239,53 @@ const server = micro(async (req, res) => {
     // Parse request body for POST requests
     let body = {};
     if (method === "POST") {
-      body = await micro.json(req);
+      const contentType = (req.headers["content-type"] || "").toLowerCase();
+
+      if (contentType.includes("application/json")) {
+        try {
+          const rawBody = await micro.text(req);
+          if (!rawBody || rawBody.trim() === "") {
+            return send(res, 400, {
+              success: false,
+              error:
+                "Request body is empty. Please provide a valid JSON payload.",
+            });
+          }
+
+          try {
+            body = JSON.parse(rawBody);
+          } catch (parseError) {
+            return send(res, 400, {
+              success: false,
+              error:
+                "Invalid JSON syntax. Please check your request body format.",
+              details: parseError.message,
+            });
+          }
+        } catch (error) {
+          return send(res, 500, {
+            success: false,
+            error: "Error reading request body",
+            details: error.message,
+          });
+        }
+      } else {
+        try {
+          // For non-JSON content types, get raw body
+          body = await micro.text(req);
+        } catch (error) {
+          return send(res, 400, {
+            success: false,
+            error: "Error reading request body",
+            details: error.message,
+          });
+        }
+      }
+    }
+
+    // Health endpoint
+    if (url === "/health") {
+      return send(res, 200, { success: true, data: "OK" });
     }
 
     // Terminal endpoints
