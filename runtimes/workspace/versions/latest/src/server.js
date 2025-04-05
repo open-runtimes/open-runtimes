@@ -176,6 +176,9 @@ synapse
     Object.keys(router).forEach((type) => {
       synapse.onMessageType(type, async (message) => {
         console.log("Message received:", message);
+        if (!synapse.isConnected()) {
+          return;
+        }
         try {
           const result = await router[type](message);
           if (result !== null) {
@@ -293,8 +296,8 @@ const server = micro(async (req, res) => {
       const operation = url.split("/")[2];
       if (method === "POST") {
         try {
-          await router.terminal({ operation, params: body });
-          return send(res, 200, { success: true });
+          const result = await router.terminal({ operation, params: body });
+          return send(res, 200, { success: true, ...result });
         } catch (error) {
           return send(res, 400, { success: false, error: error.message });
         }
@@ -307,7 +310,11 @@ const server = micro(async (req, res) => {
       if (method === "POST") {
         try {
           const result = await router.fs({ operation, params: body });
-          return send(res, 200, { success: true, ...result });
+          if (result.success) {
+            return send(res, 200, { success: true, ...result });
+          } else {
+            return send(res, 400, { success: false, error: result.error });
+          }
         } catch (error) {
           return send(res, 400, { success: false, error: error.message });
         }
@@ -320,7 +327,11 @@ const server = micro(async (req, res) => {
       if (method === "GET" && operation === "getUsage") {
         try {
           const result = await router.system({ operation });
-          return send(res, 200, { success: true, ...result });
+          if (result.success) {
+            return send(res, 200, { success: true, ...result });
+          } else {
+            return send(res, 400, { success: false, error: result.error });
+          }
         } catch (error) {
           return send(res, 400, { success: false, error: error.message });
         }
@@ -333,7 +344,11 @@ const server = micro(async (req, res) => {
       if (method === "POST") {
         try {
           const result = await router.git({ operation, params: body });
-          return send(res, 200, { success: true, ...result });
+          if (result.success) {
+            return send(res, 200, { success: true, ...result });
+          } else {
+            return send(res, 400, { success: false, error: result.error });
+          }
         } catch (error) {
           return send(res, 400, { success: false, error: error.message });
         }
@@ -346,7 +361,11 @@ const server = micro(async (req, res) => {
       if (method === "POST") {
         try {
           const result = await router.code({ operation, params: body });
-          return send(res, 200, { success: true, ...result });
+          if (result.success) {
+            return send(res, 200, { success: true, ...result });
+          } else {
+            return send(res, 400, { success: false, error: result.error });
+          }
         } catch (error) {
           return send(res, 400, { success: false, error: error.message });
         }

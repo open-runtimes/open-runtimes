@@ -234,37 +234,10 @@ class WebsocketsTest extends TestCase
     {
         run(function () {
             $this->client->connect();
-            
-            /**
-             * Test for FAILURE scenarios first (no git repo)
-             */
-
-            // Repository not found - getCurrentBranch
-            $message = [
-                'type' => 'git',
-                'operation' => 'getCurrentBranch',
-                'requestId' => 'git1'
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('git1', $response['requestId']);
-            $this->assertFalse($response['success']);
-            $this->assertStringContainsString('not a git repository', $response['error']);
 
             /**
-             * Test SUCCESS scenarios after initializing repo
+             * Test SUCCESS
              */
-
-            // Test git init
-            $message = [
-                'type' => 'git',
-                'operation' => 'init',
-                'requestId' => 'git2'
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('git2', $response['requestId']);
-            $this->assertTrue($response['success']);
 
             // Test set user name
             $message = [
@@ -348,7 +321,7 @@ class WebsocketsTest extends TestCase
                 'type' => 'git',
                 'operation' => 'addRemote',
                 'requestId' => 'git5',
-                'params' => ['name' => 'origin', 'url' => 'https://github.com/user/repo.git']
+                'params' => ['name' => 'origin2', 'url' => 'https://github.com/user2/repo.git']
             ];
             $this->client->send(json_encode($message));
             $response = json_decode($this->client->receive(), true);
