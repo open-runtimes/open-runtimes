@@ -93,47 +93,54 @@ docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm -it openruntimes
 
 ## HTTP Endpoints
 
-The workspace runtime also exposes HTTP endpoints for all operations:
+The workspace runtime exposes a single HTTP endpoint for all operations, along with a health check endpoint:
 
-### Terminal Endpoints
-- `POST /terminal/updateSize` - Update terminal size
-- `POST /terminal/createCommand` - Execute a command
-
-### Filesystem Endpoints
-- `POST /fs/createFile` - Create a new file
-- `POST /fs/getFile` - Get file contents
-- `POST /fs/updateFile` - Update file contents
-- `POST /fs/updateFilePath` - Move/rename file
-- `POST /fs/deleteFile` - Delete a file
-- `POST /fs/createFolder` - Create a new folder
-- `POST /fs/getFolder` - Get folder contents
-- `POST /fs/updateFolderName` - Rename folder
-- `POST /fs/updateFolderPath` - Move folder
-- `POST /fs/deleteFolder` - Delete folder
-
-### System Endpoints
-- `GET /system/getUsage` - Get system usage statistics
-
-### Git Endpoints
-- `POST /git/init` - Initialize git repository
-- `POST /git/addRemote` - Add git remote
-- `POST /git/setUserName` - Set git user name
-- `POST /git/setUserEmail` - Set git user email
-- `POST /git/getCurrentBranch` - Get current branch
-- `POST /git/status` - Get git status
-- `POST /git/add` - Stage files
-- `POST /git/commit` - Create commit
-- `POST /git/pull` - Pull changes
-- `POST /git/push` - Push changes
-
-### Code Endpoints
-- `POST /code/format` - Format code
-- `POST /code/lint` - Lint code
-
-### Health Check
+- `POST /` - Main endpoint for all operations
 - `GET /health` - Check server health
 
-All POST endpoints expect a JSON body with the same parameters as their WebSocket counterparts.
+The POST endpoint accepts JSON payloads with the following structure:
+```json
+{
+    "type": "<operation_type>",
+    "operation": "<operation_name>",
+    "params": {
+        // operation-specific parameters
+    }
+}
+```
+
+Where `type` can be one of: `terminal`, `fs`, `system`, `git`, or `code`.
+
+Example requests:
+
+```json
+// Execute a terminal command
+{
+    "type": "terminal",
+    "operation": "createCommand",
+    "params": {
+        "command": "ls"
+    }
+}
+
+// Create a file
+{
+    "type": "fs",
+    "operation": "createFile",
+    "params": {
+        "filepath": "test.txt",
+        "content": "Hello"
+    }
+}
+
+// Get system usage
+{
+    "type": "system",
+    "operation": "getUsage"
+}
+```
+
+All operations that were previously available as separate endpoints are now handled through this single endpoint with the appropriate payload type and operation.
 
 ## Notes
 
