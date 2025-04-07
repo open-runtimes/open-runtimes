@@ -1,6 +1,6 @@
 tasks:
   - init: docker run --rm --interactive --tty --volume $PWD:/app composer install
-  - command: brew update && brew install yq
+  - command: curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
 ports:
   - port: 3000
     onOpen: notify

@@ -19,6 +19,24 @@ class WebsocketsTest extends TestCase
                 "timeout" => 10,
             ]
         );
+
+        run(function () {
+            $this->client->connect();
+
+            $message = [
+                'type' => 'synapse',
+                'operation' => 'updateWorkDir',
+                'params' => [
+                    'workdir' => '/tmp/workspace/websocket-test'
+                ]
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertTrue($response['success']);
+            $this->assertEquals('Work directory updated successfully', $response['data']);
+
+            $this->client->close();
+        });
     }
 
     public function testWebsocketConnection(): void
@@ -238,6 +256,17 @@ class WebsocketsTest extends TestCase
             /**
              * Test SUCCESS
              */
+
+            // test git init
+            $message = [
+                'type' => 'git',
+                'operation' => 'init',
+                'requestId' => 'git1'
+            ];
+            $this->client->send(json_encode($message));
+            $response = json_decode($this->client->receive(), true);
+            $this->assertTrue($response['success']);
+            $this->assertEquals('git1', $response['requestId']);
 
             // Test set user name
             $message = [

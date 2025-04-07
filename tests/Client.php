@@ -12,7 +12,7 @@ class Client {
 
         $initHeaders = [];
 
-        if(!(\array_key_exists('content-type', $headers))) {
+        if(!(\array_key_exists('content-type', $headers)) && !(\array_key_exists('Content-Type', $headers))) {
             $initHeaders['content-type'] = 'text/plain';
         }
 

@@ -16,9 +16,24 @@ if (!fs.existsSync(workdir)) {
   fs.mkdirSync(workdir, { recursive: true });
 }
 
-// Initialize services
-let terminal, filesystem, system, git, code;
+const synapse = new Synapse("localhost", 3000, workdir);
+let terminal, filesystem, system, git, code; // initialize services
+
 const router = {
+  synapse: async (message) => {
+    const { operation, params } = message;
+    let result;
+
+    switch (operation) {
+      case "updateWorkDir":
+        result = await synapse.updateWorkDir(params.workdir);
+        break;
+      default:
+        throw new Error("Invalid synapse operation");
+    }
+    return result;
+  },
+
   terminal: async (message) => {
     const { operation, params } = message;
 
@@ -158,8 +173,6 @@ const router = {
   },
 };
 
-const synapse = new Synapse("localhost", 3000, workdir);
-
 synapse
   .connect("/")
   .then((synapse) => {
@@ -235,148 +248,76 @@ const server = micro(async (req, res) => {
     });
   }
 
-  // Basic routing for HTTP requests
-  try {
-    const { method, url } = req;
+  // Handle HTTP requests
+  const { method, url } = req;
 
-    // Parse request body for POST requests
-    let body = {};
-    if (method === "POST") {
-      const contentType = (req.headers["content-type"] || "").toLowerCase();
-
-      if (contentType.includes("application/json")) {
-        try {
-          const rawBody = await micro.text(req);
-          if (!rawBody || rawBody.trim() === "") {
-            return send(res, 400, {
-              success: false,
-              error:
-                "Request body is empty. Please provide a valid JSON payload.",
-            });
-          }
-
-          try {
-            body = JSON.parse(rawBody);
-          } catch (parseError) {
-            return send(res, 400, {
-              success: false,
-              error:
-                "Invalid JSON syntax. Please check your request body format.",
-              details: parseError.message,
-            });
-          }
-        } catch (error) {
-          return send(res, 500, {
-            success: false,
-            error: "Error reading request body",
-            details: error.message,
-          });
-        }
-      } else {
-        try {
-          // For non-JSON content types, get raw body
-          body = await micro.text(req);
-        } catch (error) {
-          return send(res, 400, {
-            success: false,
-            error: "Error reading request body",
-            details: error.message,
-          });
-        }
-      }
-    }
-
-    // Health endpoint
-    if (url === "/health") {
-      return send(res, 200, { success: true, data: "OK" });
-    }
-
-    // Terminal endpoints
-    if (url.startsWith("/terminal/")) {
-      const operation = url.split("/")[2];
-      if (method === "POST") {
-        try {
-          const result = await router.terminal({ operation, params: body });
-          return send(res, 200, { success: true, ...result });
-        } catch (error) {
-          return send(res, 400, { success: false, error: error.message });
-        }
-      }
-    }
-
-    // Filesystem endpoints
-    if (url.startsWith("/fs/")) {
-      const operation = url.split("/")[2];
-      if (method === "POST") {
-        try {
-          const result = await router.fs({ operation, params: body });
-          if (result.success) {
-            return send(res, 200, { success: true, ...result });
-          } else {
-            return send(res, 400, { success: false, error: result.error });
-          }
-        } catch (error) {
-          return send(res, 400, { success: false, error: error.message });
-        }
-      }
-    }
-
-    // System endpoints
-    if (url.startsWith("/system/")) {
-      const operation = url.split("/")[2];
-      if (method === "GET" && operation === "getUsage") {
-        try {
-          const result = await router.system({ operation });
-          if (result.success) {
-            return send(res, 200, { success: true, ...result });
-          } else {
-            return send(res, 400, { success: false, error: result.error });
-          }
-        } catch (error) {
-          return send(res, 400, { success: false, error: error.message });
-        }
-      }
-    }
-
-    // Git endpoints
-    if (url.startsWith("/git/")) {
-      const operation = url.split("/")[2];
-      if (method === "POST") {
-        try {
-          const result = await router.git({ operation, params: body });
-          if (result.success) {
-            return send(res, 200, { success: true, ...result });
-          } else {
-            return send(res, 400, { success: false, error: result.error });
-          }
-        } catch (error) {
-          return send(res, 400, { success: false, error: error.message });
-        }
-      }
-    }
-
-    // Code endpoints
-    if (url.startsWith("/code/")) {
-      const operation = url.split("/")[2];
-      if (method === "POST") {
-        try {
-          const result = await router.code({ operation, params: body });
-          if (result.success) {
-            return send(res, 200, { success: true, ...result });
-          } else {
-            return send(res, 400, { success: false, error: result.error });
-          }
-        } catch (error) {
-          return send(res, 400, { success: false, error: error.message });
-        }
-      }
-    }
-
-    return send(res, 404, { success: false, error: "Not found" });
-  } catch (error) {
-    console.error("Error handling request:", error);
-    return send(res, 500, { success: false, error: "Internal server error" });
+  if (url === "/health") {
+    return send(res, 200, { success: true, data: "OK" });
   }
+
+  if (method === "GET" && url === "/") {
+    return send(res, 200, {
+      success: true,
+      data: "Workspace runtime is running",
+    });
+  }
+
+  if (method === "POST" && url === "/") {
+    try {
+      const contentType = (req.headers["content-type"] || "").toLowerCase();
+      if (!contentType.includes("application/json")) {
+        return send(res, 400, {
+          success: false,
+          error: "Content-Type must be application/json",
+        });
+      }
+
+      const rawBody = await micro.text(req);
+      if (!rawBody || rawBody.trim() === "") {
+        return send(res, 400, {
+          success: false,
+          error: "Request body is empty. Please provide a valid JSON payload.",
+        });
+      }
+
+      let body;
+      try {
+        body = JSON.parse(rawBody);
+      } catch (parseError) {
+        return send(res, 400, {
+          success: false,
+          error: "Invalid JSON syntax. Please check your request body format.",
+          details: parseError.message,
+        });
+      }
+
+      const { type, operation, params } = body;
+
+      if (!type || !operation) {
+        return send(res, 400, {
+          success: false,
+          error: "Request must include 'type' and 'operation' fields",
+        });
+      }
+
+      if (!router[type]) {
+        return send(res, 400, {
+          success: false,
+          error: `Invalid type: ${type}`,
+        });
+      }
+
+      const result = await router[type]({ operation, params });
+      if (result && result.success === false) {
+        return send(res, 400, { success: false, error: result.error });
+      }
+      return send(res, 200, { success: true, ...result });
+    } catch (error) {
+      return send(res, 400, { success: false, error: error.message });
+    }
+  }
+
+  return send(res, 404, { success: false, error: "Not found" });
 });
 
 const port = process.env.PORT || 3000;

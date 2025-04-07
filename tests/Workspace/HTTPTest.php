@@ -21,6 +21,22 @@ class HTTPTest extends TestCase
         $this->awaitPortOpen();
 
         Client::$port = 3000;
+
+        // set workDir
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'synapse',
+            'operation' => 'updateWorkDir',
+            'params' => [
+                'workdir' => '/tmp/workspace/http-test'
+            ]
+        ], headers: [
+            'content-type' => 'application/json'
+        ]);
+        $json = json_decode($response['body'], true);
+
+        $this->assertEquals(200, $response['code']);
+        $this->assertTrue($json['success']);
+        $this->assertEquals('Work directory updated successfully', $json['data']);
     }
 
     protected function awaitPortOpen() {
@@ -56,21 +72,39 @@ class HTTPTest extends TestCase
     public function testTerminalOperations(): void
     {
         // test update size
-        $response = Client::execute(url: '/terminal/updateSize', method: 'POST', body: [
-            'cols' => 80,
-            'rows' => 24
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'terminal',
+            'operation' => 'updateSize',
+            'params' => [
+                'cols' => 80,
+                'rows' => 24
+            ]
+        ], headers: [
+            'content-type' => 'application/json'
         ]);
         $this->assertEquals(200, $response['code']);
 
-        // test create file
-        $response = Client::execute(url: '/terminal/createCommand', method: 'POST', body: [
-            'command' => 'touch test.txt'
+        // test create command
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'terminal',
+            'operation' => 'createCommand',
+            'params' => [
+                'command' => 'touch test.txt'
+            ]
+        ], headers: [
+            'content-type' => 'application/json'
         ]);
         $this->assertEquals(200, $response['code']);
         
         // test list files
-        $response = Client::execute(url: '/terminal/createCommand', method: 'POST', body: [
-            'command' => 'ls'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'terminal',
+            'operation' => 'createCommand',
+            'params' => [
+                'command' => 'ls'
+            ]
+        ], headers: [
+            'content-type' => 'application/json'
         ]);
         $this->assertEquals(200, $response['code']);
     }
@@ -82,9 +116,13 @@ class HTTPTest extends TestCase
          */
 
         // test create file
-        $response = Client::execute(url: '/fs/createFile', method: 'POST', body: [
-            'filepath' => 'test.txt',
-            'content' => 'Hello World',
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'fs',
+            'operation' => 'createFile',
+            'params' => [
+                'filepath' => 'test.txt',
+                'content' => 'Hello World',
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -94,8 +132,12 @@ class HTTPTest extends TestCase
         $this->assertTrue($json['success']);
 
         // test get file
-        $response = Client::execute(url: '/fs/getFile', method: 'POST', body: [
-            'filepath' => 'test.txt',
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'fs',
+            'operation' => 'getFile',
+            'params' => [
+                'filepath' => 'test.txt',
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -106,9 +148,13 @@ class HTTPTest extends TestCase
         $this->assertEquals('Hello World', $json['data']);
 
         // test update file
-        $response = Client::execute(url: '/fs/updateFile', method: 'POST', body: [
-            'filepath' => 'test.txt',
-            'content' => 'Hello World 2'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'fs',
+            'operation' => 'updateFile',
+            'params' => [
+                'filepath' => 'test.txt',
+                'content' => 'Hello World 2'
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -118,8 +164,12 @@ class HTTPTest extends TestCase
         $this->assertTrue($json['success']);
 
         // test create folder
-        $response = Client::execute(url: '/fs/createFolder', method: 'POST', body: [
-            'folderpath' => 'testfolder'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'fs',
+            'operation' => 'createFolder',
+            'params' => [
+                'folderpath' => 'testfolder'
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -129,8 +179,12 @@ class HTTPTest extends TestCase
         $this->assertTrue($json['success']);
 
         // test delete file
-        $response = Client::execute(url: '/fs/deleteFile', method: 'POST', body: [
-            'filepath' => 'test.txt'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'fs',
+            'operation' => 'deleteFile',
+            'params' => [
+                'filepath' => 'test.txt'
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -140,8 +194,12 @@ class HTTPTest extends TestCase
         $this->assertTrue($json['success']);
 
         // test delete folder
-        $response = Client::execute(url: '/fs/deleteFolder', method: 'POST', body: [
-            'folderpath' => 'testfolder'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'fs',
+            'operation' => 'deleteFolder',
+            'params' => [
+                'folderpath' => 'testfolder'
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -155,8 +213,12 @@ class HTTPTest extends TestCase
          */
 
         // test delete non-existent file
-        $response = Client::execute(url: '/fs/deleteFile', method: 'POST', body: [
-            'filepath' => 'nonexistent.txt'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'fs',
+            'operation' => 'deleteFile',
+            'params' => [
+                'filepath' => 'nonexistent.txt'
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -174,7 +236,12 @@ class HTTPTest extends TestCase
          */
 
         // test get usage
-        $response = Client::execute(url: '/system/getUsage', method: 'GET');
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'system',
+            'operation' => 'getUsage'
+        ], headers: [
+            'content-type' => 'application/json'
+        ]);
         $json = json_decode($response['body'], true);
 
         $this->assertEquals(200, $response['code']);
@@ -199,7 +266,12 @@ class HTTPTest extends TestCase
          */
 
         // test get current branch
-        $response = Client::execute(url: '/git/getCurrentBranch', method: 'POST');
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'git',
+            'operation' => 'getCurrentBranch'
+        ], headers: [
+            'content-type' => 'application/json'
+        ]);
         $json = json_decode($response['body'], true);
 
         $this->assertEquals(400, $response['code']);
@@ -211,15 +283,24 @@ class HTTPTest extends TestCase
          */
 
         // test git init
-        $response = Client::execute(url: '/git/init', method: 'POST');
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'git',
+            'operation' => 'init'
+        ], headers: [
+            'content-type' => 'application/json'
+        ]);
         $json = json_decode($response['body'], true);
 
         $this->assertEquals(200, $response['code']);
         $this->assertTrue($json['success']);
         
         // test set user name
-        $response = Client::execute(url: '/git/setUserName', method: 'POST', body: [
-            'name' => 'John Doe'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'git',
+            'operation' => 'setUserName',
+            'params' => [
+                'name' => 'John Doe'
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -229,8 +310,12 @@ class HTTPTest extends TestCase
         $this->assertTrue($json['success']);
         
         // test set user email
-        $response = Client::execute(url: '/git/setUserEmail', method: 'POST', body: [
-            'email' => 'john.doe@example.com'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'git',
+            'operation' => 'setUserEmail',
+            'params' => [
+                'email' => 'john.doe@example.com'
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -240,9 +325,13 @@ class HTTPTest extends TestCase
         $this->assertTrue($json['success']);
         
         // create a test file to commit
-        $response = Client::execute(url: '/fs/createFile', method: 'POST', body: [
-            'filepath' => 'test.txt',
-            'content' => 'Test content'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'fs',
+            'operation' => 'createFile',
+            'params' => [
+                'filepath' => 'test.txt',
+                'content' => 'Test content'
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -252,8 +341,9 @@ class HTTPTest extends TestCase
         $this->assertTrue($json['success']);
 
         // test git status
-        $response = Client::execute(url: '/git/status', method: 'POST', body: [
-            'files' => ['.']
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'git',
+            'operation' => 'status'
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -264,9 +354,13 @@ class HTTPTest extends TestCase
         $this->assertStringContainsString('No commits yet', $json['data']);
         
         // test add remote
-        $response = Client::execute(url: '/git/addRemote', method: 'POST', body: [
-            'name' => 'origin',
-            'url' => 'https://github.com/user/repo.git'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'git',
+            'operation' => 'addRemote',
+            'params' => [
+                'name' => 'origin',
+                'url' => 'https://github.com/user/repo.git'
+            ]
         ], headers: [
             'content-type' => 'application/json'
         ]);
@@ -285,15 +379,19 @@ class HTTPTest extends TestCase
          */
 
         // test code formatting
-        $response = Client::execute(url: '/code/format', method: 'POST', body: [
-            'code' => 'function test(){return true;}',
-            'options' => [
-                'language' => 'javascript',
-                'indent' => 2,
-                'useTabs' => false,
-                'semi' => true,
-                'singleQuote' => false,
-                'printWidth' => 80
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'code',
+            'operation' => 'format',
+            'params' => [
+                'code' => 'function test(){return true;}',
+                'options' => [
+                    'language' => 'javascript',
+                    'indent' => 2,
+                    'useTabs' => false,
+                    'semi' => true,
+                    'singleQuote' => false,
+                    'printWidth' => 80
+                ]
             ]
         ], headers: [
             'content-type' => 'application/json'
@@ -305,13 +403,17 @@ class HTTPTest extends TestCase
         $this->assertEquals("function test() {\n  return true;\n}\n", $json['data']);
         
         // test code linting
-        $response = Client::execute(url: '/code/lint', method: 'POST', body: [
-            'code' => 'function test(){return true;}',
-            'options' => [
-                'language' => 'javascript',
-                'rules' => [
-                    'semi' => 'error',
-                    'no-unused-vars' => 'warn'
+        $response = Client::execute(url: '/', method: 'POST', body: [
+            'type' => 'code',
+            'operation' => 'lint',
+            'params' => [
+                'code' => 'function test(){return true;}',
+                'options' => [
+                    'language' => 'javascript',
+                    'rules' => [
+                        'semi' => 'error',
+                        'no-unused-vars' => 'warn'
+                    ]
                 ]
             ]
         ], headers: [
