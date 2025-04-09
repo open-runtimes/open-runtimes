@@ -50,10 +50,11 @@ class WebsocketsTest extends Workspace
         }
         
         $this->client->send(json_encode($message));
+        $response = [];
         if ($waitForResponse) {
-            $response = json_decode($this->client->receive(), true);
-        } else {
-            $response = [];
+            do {
+                $response = json_decode($this->client->receive(), true);
+            } while (isset($response['type']) && $response['type'] === 'terminalResponse');
         }
         
         return $response;

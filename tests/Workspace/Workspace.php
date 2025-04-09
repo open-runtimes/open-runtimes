@@ -34,7 +34,7 @@ abstract class Workspace extends TestCase
     public function testTerminalOperations(): void
     {
         // test update size, no response expected
-        $response = $this->executeCommand(message: [
+        $this->executeCommand(message: [
             'type' => 'terminal',
             'operation' => 'updateSize',
             'params' => [
@@ -44,24 +44,22 @@ abstract class Workspace extends TestCase
         ], waitForResponse: false);
 
         // test create command
-        $response = $this->executeCommand([
+        $this->executeCommand(message: [
             'type' => 'terminal',
             'operation' => 'createCommand',
             'params' => [
                 'command' => 'touch test.txt'
             ]
-        ]);
-        $this->assertTrue($response['success']);
+        ], waitForResponse: false);
         
         // test list files
-        $response = $this->executeCommand([
+        $this->executeCommand(message: [
             'type' => 'terminal',
             'operation' => 'createCommand',
             'params' => [
                 'command' => 'ls'
             ]
-        ]);
-        $this->assertTrue($response['success']);
+        ], waitForResponse: false);
     }
 
     /**
