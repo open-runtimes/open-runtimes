@@ -2,16 +2,14 @@
 
 namespace Tests\Workspace;
 
-use PHPUnit\Framework\TestCase;
 use Utopia\WebSocket\Client as WebsocketClient;
-
 use function Swoole\Coroutine\run;
-    
-class WebsocketsTest extends TestCase
+
+class WebsocketsTest extends Workspace
 {
     protected $client;
 
-    public function setUp(): void
+    public function initialize(): void
     {
         $this->client = new WebsocketClient(
             "ws://172.17.0.1:3000",
@@ -23,15 +21,14 @@ class WebsocketsTest extends TestCase
         run(function () {
             $this->client->connect();
 
-            $message = [
+            $response = $this->executeCommand([
                 'type' => 'synapse',
                 'operation' => 'updateWorkDir',
                 'params' => [
                     'workdir' => '/tmp/workspace/websocket-test'
                 ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
+            ]);
+
             $this->assertTrue($response['success']);
             $this->assertEquals('Work directory updated successfully', $response['data']);
 
@@ -39,6 +36,32 @@ class WebsocketsTest extends TestCase
         });
     }
 
+    /**
+     * Execute a command via WebSocket and return the response
+     * 
+     * @param array $message The message to send
+     * @return array The response with 'success', 'data', 'error', etc.
+     */
+    protected function executeCommand(array $message, bool $waitForResponse = true): array
+    {
+        // Add a requestId if not present
+        if (!isset($message['requestId'])) {
+            $message['requestId'] = uniqid('test_');
+        }
+        
+        $this->client->send(json_encode($message));
+        if ($waitForResponse) {
+            $response = json_decode($this->client->receive(), true);
+        } else {
+            $response = [];
+        }
+        
+        return $response;
+    }
+
+    /**
+     * Test WebSocket connection with ping/pong
+     */
     public function testWebsocketConnection(): void
     {
         run(function () {
@@ -46,55 +69,18 @@ class WebsocketsTest extends TestCase
             $this->client->send('ping');
             $this->assertEquals('pong', $this->client->receive());
             $this->assertTrue($this->client->isConnected());
+            $this->client->close();
         });
     }
 
+    /**
+     * Override parent tests to run them within coroutines
+     */
     public function testTerminalOperations(): void
     {
         run(function () {
             $this->client->connect();
-            
-            // Test terminal size update
-            $message = [
-                'type' => 'terminal',
-                'operation' => 'updateSize',
-                'requestId' => 'test1',
-                'params' => [
-                    'cols' => 80,
-                    'rows' => 24
-                ]
-            ];
-            $this->client->send(json_encode($message)); // no response expected
-
-            // Test terminal create command new file
-            $message = [
-                'type' => 'terminal',
-                'operation' => 'createCommand',
-                'requestId' => 'test2',
-                'params' => [
-                    'command' => 'touch test.txt'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertTrue($response['success']);
-
-            // We can't really test the command output here as it's sent in chunks by the node-pty library,
-            // and it can be random. For eg. it can send touch test.txt\r\n\ as well as touch test.txt\r\n\u001b[?2004l\r
-
-            // Test terminal list files
-            $message = [
-                'type' => 'terminal',
-                'operation' => 'createCommand',
-                'requestId' => 'test3',
-                'params' => [
-                    'command' => 'ls'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertTrue($response['success']);
-
+            parent::testTerminalOperations();
             $this->client->close();
         });
     }
@@ -103,117 +89,7 @@ class WebsocketsTest extends TestCase
     {
         run(function () {
             $this->client->connect();
-
-            /**
-             * Test for SUCCESS
-             */
-            
-            // Test file creation
-            $message = [
-                'type' => 'fs',
-                'operation' => 'createFile',
-                'requestId' => 'test1',
-                'params' => [
-                    'filepath' => 'test.txt',
-                    'content' => 'Hello World'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertTrue($response['success']);
-            $this->assertEquals('test1', $response['requestId']);
-            
-            // Test get file
-            $message = [
-                'type' => 'fs',
-                'operation' => 'getFile',
-                'requestId' => 'test2',
-                'params' => [
-                    'filepath' => 'test.txt'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('test2', $response['requestId']);
-            $this->assertTrue($response['success']);
-            $this->assertEquals('Hello World', $response['data']);
-            
-            // Test update file
-            $message = [
-                'type' => 'fs',
-                'operation' => 'updateFile',
-                'requestId' => 'test3',
-                'params' => [
-                    'filepath' => 'test.txt',
-                    'content' => 'Updated content'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('test3', $response['requestId']);
-            $this->assertTrue($response['success']);
-            
-            // Test create folder
-            $message = [
-                'type' => 'fs',
-                'operation' => 'createFolder',
-                'requestId' => 'test4',
-                'params' => [
-                    'folderpath' => 'testfolder'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('test4', $response['requestId']);
-            $this->assertTrue($response['success']);
-
-            // Test delete file
-            $message = [
-                'type' => 'fs',
-                'operation' => 'deleteFile',
-                'requestId' => 'test5',
-                'params' => [
-                    'filepath' => 'test.txt'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('test5', $response['requestId']);
-            $this->assertTrue($response['success']);
-
-            // Test delete folder
-            $message = [
-                'type' => 'fs',
-                'operation' => 'deleteFolder',
-                'requestId' => 'test6',
-                'params' => [
-                    'folderpath' => 'testfolder'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('test6', $response['requestId']);
-            $this->assertTrue($response['success']);
-
-            /**
-             * Test for FAILURE
-             */
-
-            // Test delete non-existent file
-            $message = [
-                'type' => 'fs',
-                'operation' => 'deleteFile',
-                'requestId' => 'test7',
-                'params' => [
-                    'filepath' => 'nonexistent.txt'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('test7', $response['requestId']);
-            $this->assertFalse($response['success']);
-            $this->assertStringContainsString('no such file or directory', $response['error']);
-
+            parent::testFilesystemOperations();
             $this->client->close();
         });
     }
@@ -222,28 +98,7 @@ class WebsocketsTest extends TestCase
     {
         run(function () {
             $this->client->connect();
-            
-            // Test system usage
-            $message = [
-                'type' => 'system',
-                'operation' => 'getUsage',
-                'requestId' => 'test1'
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('test1', $response['requestId']);
-            $this->assertTrue($response['success']);
-            $this->assertArrayHasKey('cpuCores', $response['data']);
-            $this->assertArrayHasKey('cpuUsagePerCore', $response['data']);
-            $this->assertArrayHasKey('cpuUsagePercent', $response['data']);
-            $this->assertArrayHasKey('loadAverage1m', $response['data']);
-            $this->assertArrayHasKey('loadAverage5m', $response['data']);
-            $this->assertArrayHasKey('loadAverage15m', $response['data']);
-            $this->assertArrayHasKey('memoryTotalBytes', $response['data']);
-            $this->assertArrayHasKey('memoryUsedBytes', $response['data']);
-            $this->assertArrayHasKey('memoryFreeBytes', $response['data']);
-            $this->assertArrayHasKey('memoryUsagePercent', $response['data']);
-            
+            parent::testSystemOperations();
             $this->client->close();
         });
     }
@@ -252,111 +107,7 @@ class WebsocketsTest extends TestCase
     {
         run(function () {
             $this->client->connect();
-
-            /**
-             * Test SUCCESS
-             */
-
-            // test git init
-            $message = [
-                'type' => 'git',
-                'operation' => 'init',
-                'requestId' => 'git1'
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertTrue($response['success']);
-            $this->assertEquals('git1', $response['requestId']);
-
-            // Test set user name
-            $message = [
-                'type' => 'git',
-                'operation' => 'setUserName',
-                'requestId' => 'git2',
-                'params' => ['name' => 'John Doe']
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('git2', $response['requestId']);
-            $this->assertTrue($response['success']);
-
-            // Test set user email
-            $message = [
-                'type' => 'git',
-                'operation' => 'setUserEmail',
-                'requestId' => 'git3',
-                'params' => ['email' => 'john.doe@example.com']
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('git3', $response['requestId']);
-            $this->assertTrue($response['success']);
-
-            // Create a test file to commit
-            $message = [
-                'type' => 'fs',
-                'operation' => 'createFile',
-                'requestId' => 'git2.1',
-                'params' => [
-                    'filepath' => 'test.txt',
-                    'content' => 'Test content'
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('git2.1', $response['requestId']);
-
-            // Test git add
-            $message = [
-                'type' => 'git',
-                'operation' => 'add',
-                'requestId' => 'git3',
-                'params' => [
-                    'files' => ['.']
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('git3', $response['requestId']);
-            $this->assertTrue($response['success']);
-
-            // Test git status
-            $message = [
-                'type' => 'git',
-                'operation' => 'status',
-                'requestId' => 'git4'
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('git4', $response['requestId']);
-            $this->assertTrue($response['success']);
-            $this->assertStringContainsString('No commits yet', $response['data']);
-
-            // Test git commit
-            $message = [
-                'type' => 'git',
-                'operation' => 'commit',
-                'requestId' => 'git4',
-                'params' => ['message' => 'Initial commit']
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('git4', $response['requestId']);
-            $this->assertTrue($response['success']);
-            $this->assertStringContainsString('Initial commit', $response['data']);
-
-            // Test add remote
-            $message = [
-                'type' => 'git',
-                'operation' => 'addRemote',
-                'requestId' => 'git5',
-                'params' => ['name' => 'origin2', 'url' => 'https://github.com/user2/repo.git']
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('git5', $response['requestId']);
-            $this->assertTrue($response['success']);
-
+            parent::testGitOperations();
             $this->client->close();
         });
     }
@@ -365,58 +116,14 @@ class WebsocketsTest extends TestCase
     {
         run(function () {
             $this->client->connect();
-            
-            // Test code formatting
-            $message = [
-                'type' => 'code',
-                'operation' => 'format',
-                'requestId' => 'style1',
-                'params' => [
-                    'code' => 'function test(){return true;}',
-                    'options' => [
-                        'language' => 'javascript',
-                        'indent' => 2,
-                        'useTabs' => false,
-                        'semi' => true,
-                        'singleQuote' => false,
-                        'printWidth' => 80
-                    ]
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('style1', $response['requestId']);
-            $this->assertTrue($response['success']);
-            $this->assertNotEmpty($response['data']);
-            $this->assertStringContainsString('function test() {', $response['data']);
-
-            // Test code linting
-            $message = [
-                'type' => 'code',
-                'operation' => 'lint',
-                'requestId' => 'style2',
-                'params' => [
-                    'code' => 'function test() { const x = 1; return x; }',
-                    'options' => [
-                        'language' => 'javascript',
-                        'rules' => [
-                            'semi' => 'error',
-                            'no-unused-vars' => 'warn'
-                        ]
-                    ]
-                ]
-            ];
-            $this->client->send(json_encode($message));
-            $response = json_decode($this->client->receive(), true);
-            $this->assertEquals('style2', $response['requestId']);
-            $this->assertTrue($response['success']);
-            $this->assertArrayHasKey('issues', $response['data']);
-            $this->assertIsArray($response['data']['issues']);
-            
+            parent::testCodeOperations();
             $this->client->close();
         });
     }
 
+    /**
+     * Test WebSocket disconnect
+     */
     public function testWebsocketDisconnect(): void
     {
         run(function () {
