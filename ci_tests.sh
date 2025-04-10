@@ -101,4 +101,4 @@ docker run --rm \
     -e OPEN_RUNTIMES_SECRET="test-secret-key" \
     -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
     "$TEST_IMAGE" \
-    sh -c "apk add --no-cache zip unzip docker-cli composer && composer install --profile --ignore-platform-reqs && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS --process-isolation --debug"
+    sh -c "apk add --no-cache zip unzip docker-cli composer && composer install --profile --ignore-platform-reqs && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS --debug"
