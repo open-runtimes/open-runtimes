@@ -8,8 +8,6 @@ class HTTPTest extends Workspace
 {
     public function initialize(): void
     {
-        Client::$host = '172.17.0.1';
-
         Client::$port = 3000;
         $this->awaitPortOpen();
 

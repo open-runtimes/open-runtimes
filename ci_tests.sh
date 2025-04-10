@@ -90,8 +90,7 @@ docker run -d --name open-runtimes-test-serve-teritary -v $(pwd)/resources:/mnt/
 
 cd ../../
 
-if [ "$RUNTIME" = "workspace" ]; then
-  docker run --rm \
+docker run --rm \
     -v $PWD:/app \
     -v /tmp:/tmp \
     -v /var/run/docker.sock:/var/run/docker.sock \
@@ -101,8 +100,5 @@ if [ "$RUNTIME" = "workspace" ]; then
     -e RUNTIME_VERSION="$VERSION" \
     -e OPEN_RUNTIMES_SECRET="test-secret-key" \
     -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
-    phpswoole/swoole:5.1.2-php8.3-alpine \
-    sh -c "apk update && apk add docker-cli zip unzip && composer install --profile --ignore-platform-reqs && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS" --process-isolation --debug
-else
-  RUNTIME_NAME="$RUNTIME" RUNTIME_VERSION="$VERSION" OPEN_RUNTIMES_SECRET="test-secret-key" OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS --debug
-fi
+    "$TEST_IMAGE" \
+    sh -c "apk add --no-cache zip unzip docker-cli composer && composer install --profile --ignore-platform-reqs && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS --process-isolation --debug"

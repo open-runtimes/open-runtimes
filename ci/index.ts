@@ -1,6 +1,6 @@
 // @ts-ignore
-import data from './runtimes.toml'
 import { appendFileSync } from 'fs';
+import data from './runtimes.toml';
 
 interface RuntimeCommands {
     install: string,
@@ -23,6 +23,7 @@ interface Runtime {
     tools: string,
     commands: RuntimeCommands,
     formatter: RuntimeFormatter,
+    testImage: string,
 
     // Website metadata
     output: string,
@@ -114,6 +115,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             FORMATTER_PREPARE: runtime.formatter.prepare,
             ENFORCED_RUNTIME: runtime.runtime?.name ?? "",
             ENFORCED_VERSION: runtime.runtime?.version ?? "",
+            TEST_IMAGE: runtime.testImage ?? "",
         })
     });
 
