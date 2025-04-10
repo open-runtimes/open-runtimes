@@ -51,7 +51,7 @@ class Client {
         ];
 
         if($body !== NULL) {
-            $optArray[CURLOPT_POSTFIELDS] = \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body;
+            $optArray[CURLOPT_POSTFIELDS] = \is_array($body) ? \json_encode($body) : $body;
         }
         
         \curl_setopt_array($ch, $optArray);

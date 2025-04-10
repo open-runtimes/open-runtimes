@@ -24,6 +24,7 @@ abstract class Workspace extends TestCase
      * Execute a command via HTTP or WebSocket and return the response
      * 
      * @param array $message The message to send
+     * @param bool $waitForResponse Whether to wait for a response from the server
      * @return array The response with 'success', 'data', 'error', etc.
      */
     abstract protected function executeCommand(array $message, bool $waitForResponse = true): array;
@@ -48,7 +49,7 @@ abstract class Workspace extends TestCase
             'type' => 'terminal',
             'operation' => 'createCommand',
             'params' => [
-                'command' => 'touch test.txt'
+                'command' => 'touch terminal_test.txt'
             ]
         ], waitForResponse: false);
         
@@ -81,6 +82,19 @@ abstract class Workspace extends TestCase
             ]
         ]);
         $this->assertTrue($response['success']);
+        $this->assertEquals('File created successfully', $response['data']);
+
+        // test cannot create duplicate file
+        $response = $this->executeCommand([
+            'type' => 'fs',
+            'operation' => 'createFile',
+            'params' => [
+                'filepath' => 'test.txt',
+                'content' => 'Hello World'
+            ]
+        ]);
+        $this->assertFalse($response['success']);
+        $this->assertEquals('File already exists at path: test.txt', $response['error']);
 
         // test get file
         $response = $this->executeCommand([
@@ -144,6 +158,17 @@ abstract class Workspace extends TestCase
             'operation' => 'deleteFile',
             'params' => [
                 'filepath' => 'nonexistent.txt'
+            ]
+        ]);
+        $this->assertFalse($response['success']);
+        $this->assertStringContainsString('no such file or directory', $response['error']);
+
+        // test delete non-existent folder
+        $response = $this->executeCommand([
+            'type' => 'fs',
+            'operation' => 'deleteFolder',
+            'params' => [
+                'folderpath' => 'nonexistentfolder'
             ]
         ]);
         $this->assertFalse($response['success']);
@@ -235,15 +260,14 @@ abstract class Workspace extends TestCase
         $this->assertTrue($response['success']);
 
         // test git add
-        // TODO: fix git add for HTTP
-        // $response = $this->executeCommand([
-        //     'type' => 'git',
-        //     'operation' => 'add',
-        //     'params' => [
-        //         'files' => ['.']
-        //     ]
-        // ]);
-        // $this->assertTrue($response['success']);
+        $response = $this->executeCommand([
+            'type' => 'git',
+            'operation' => 'add',
+            'params' => [
+                'files' => ['.']
+            ]
+        ]);
+        $this->assertTrue($response['success']);
 
         // test git status
         $response = $this->executeCommand([
@@ -265,15 +289,15 @@ abstract class Workspace extends TestCase
         $this->assertTrue($response['success']);
 
         // Test git commit
-        // TODO: fix after git add is fixed
-        // $response = $this->executeCommand([
-        //     'type' => 'git',
-        //     'operation' => 'commit',
-        //     'params' => [
-        //         'message' => 'Initial commit'
-        //     ]
-        // ]);
-        // $this->assertTrue($response['success']);
+        $response = $this->executeCommand([
+            'type' => 'git',
+            'operation' => 'commit',
+            'params' => [
+                'message' => 'Initial commit'
+            ]
+        ]);
+        $this->assertTrue($response['success']);
+        $this->assertStringContainsString('Initial commit', $response['data']);
     }
 
     /**

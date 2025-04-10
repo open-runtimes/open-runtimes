@@ -1,6 +1,5 @@
 const micro = require("micro");
 const { send } = require("micro");
-const fs = require("fs");
 const {
   Synapse,
   Terminal,
@@ -11,10 +10,6 @@ const {
 } = require("@appwrite.io/synapse");
 
 const workdir = "/tmp/workspace";
-
-if (!fs.existsSync(workdir)) {
-  fs.mkdirSync(workdir, { recursive: true });
-}
 
 const synapse = new Synapse("localhost", 3000, workdir);
 let terminal, filesystem, system, git, code; // initialize services
