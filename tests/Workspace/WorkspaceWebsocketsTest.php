@@ -5,7 +5,7 @@ namespace Tests\Workspace;
 use Utopia\WebSocket\Client as WebsocketClient;
 use function Swoole\Coroutine\run;
 
-class WebsocketsTest extends Workspace
+class WorkspaceWebsocketsTest extends Base
 {
     protected $client;
 
