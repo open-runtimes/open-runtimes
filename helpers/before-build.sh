@@ -7,7 +7,7 @@ echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Environment p
 
 # Check if source directory exists and has files
 if [ ! -d "/mnt/code" ] || [ -z "$(ls -A /mnt/code 2>/dev/null)" ]; then
-    echo "ERROR: No source code found. Ensure your source directory exists and isn't empty."
+    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][31m Error: No source code found. Ensure your source isn't empty. [0m"
     exit 1
 fi
 
