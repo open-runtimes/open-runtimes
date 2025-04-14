@@ -23,7 +23,7 @@ fi
 
 # Check if the output directory is empty
 if [ -z "$(ls -A /mnt/code 2>/dev/null)" ]; then
-    echo "Error: Build output directory is empty. Ensure your output directory is configured correctly."
+    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][31m Error: No build output found. Ensure your output directory isn't empty. [0m"
     exit 1
 fi
 
