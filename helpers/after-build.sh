@@ -21,6 +21,12 @@ if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"  ]; then
     cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
 fi
 
+# Check if the output directory is empty
+if [ -z "$(ls -A /mnt/code 2>/dev/null)" ]; then
+    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][31m Error: No build output found. Ensure your output directory isn't empty. [0m"
+    exit 1
+fi
+
 # Store entrypoint into build. Will be used during start process
 touch .open-runtimes
 echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" > .open-runtimes
