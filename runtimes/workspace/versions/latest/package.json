@@ -18,8 +18,6 @@
     "ws": "^8.16.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "node-pty"
-    ]
+    "onlyBuiltDependencies": ["node-pty"]
   }
 }
