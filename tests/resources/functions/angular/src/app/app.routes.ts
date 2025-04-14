@@ -5,6 +5,7 @@ import { LogsComponent } from './logs/logs.component';
 import { ExceptionComponent } from './exception/exception.component';
 import { LibraryComponent } from './library/library.component';
 import { ConcurrencyComponent } from './concurrency/concurrency.component';
+import { HiddenComponent } from './hidden/hidden.component';
 
 export const routes: Routes = [
     {path: '', component: HomepageComponent},
@@ -13,4 +14,5 @@ export const routes: Routes = [
     {path: 'exception', component: ExceptionComponent},
     {path: 'library', component: LibraryComponent},
     {path: 'concurrency', component: ConcurrencyComponent},
+    {path: 'hidden', component: HiddenComponent},
 ];

@@ -49,7 +49,7 @@ cd open-runtimes/runtimes/flutter
 3. Run tests to generate new image:
 
 ```bash
-sh tests.sh
+bash tests.sh
 ```
 
 4. Run commands mentioned in usage section, but use `open-runtimes/test-runtime` as image

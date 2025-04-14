@@ -1,3 +1,8 @@
+#!/bin/bash
+# Fail build if any command fails
+set -e
+shopt -s dotglob
+
 # Get server dependencies
 dart pub get
 

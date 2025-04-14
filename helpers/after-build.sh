@@ -1,13 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 # Fail build if any command fails
 set -e
+shopt -s dotglob
+
+
+echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Build command execution finished. [0m"
 
 # Install dependencies
 cd /usr/local/server
 
 . /usr/local/server/helpers/prepare-compile.sh
 
-echo "Packing build ..."
+echo "[90m$(date +[%H:%M:%S]) [31m[[0mopen-runtimes[31m][97m Build packaging started. [0m"
 
 . /usr/local/server/helpers/prepare-packing.sh
 
@@ -18,14 +22,16 @@ if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"  ]; then
 fi
 
 # Check if the output directory is empty
-if [ "$(ls -A .)" ]; then
+if [ -z "$(ls -A /mnt/code 2>/dev/null)" ]; then
     # Store entrypoint into build. Will be used during start process
     touch .open-runtimes
     echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" > .open-runtimes
 
     tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
 
-    echo "Build finished."
+    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Build packaging finished. [0m"
+
+    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][32m Build finished. [0m"
 else
     echo "Error: Build output directory is empty. Ensure your output directory is configured correctly."
     exit 1
