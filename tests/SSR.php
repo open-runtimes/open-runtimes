@@ -194,4 +194,12 @@ class SSR extends CSR
 
         self::assertNotEquals($uuid1, $uuid2);
     }
+
+
+    public function testHiddenFile(): void
+    {
+        $response = Client::execute(url: '/hidden', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('HIDDEN_FILE', $response['body']);
+    }
 }

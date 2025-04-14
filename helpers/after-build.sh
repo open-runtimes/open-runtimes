@@ -1,13 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 # Fail build if any command fails
 set -e
+shopt -s dotglob
+
+
+echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Build command execution finished. [0m"
 
 # Install dependencies
 cd /usr/local/server
 
 . /usr/local/server/helpers/prepare-compile.sh
 
-echo "Packing build ..."
+echo "[90m$(date +[%H:%M:%S]) [31m[[0mopen-runtimes[31m][97m Build packaging started. [0m"
 
 . /usr/local/server/helpers/prepare-packing.sh
 
@@ -23,4 +27,6 @@ echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" > .open-runtimes
 
 tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
 
-echo "Build finished."
+echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Build packaging finished. [0m"
+
+echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][32m Build finished. [0m"

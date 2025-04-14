@@ -14,7 +14,8 @@ RUN apk add --no-cache \
     openssl-dev \
     zlib-dev \
     curl-dev \
-    util-linux-dev
+    util-linux-dev \
+    bash
 
 RUN git clone --depth 1 --branch $DROGON_VERSION https://github.com/drogonframework/drogon \
     && cd drogon \
