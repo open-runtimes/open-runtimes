@@ -4,7 +4,7 @@ namespace Tests\Workspace;
 
 use Tests\Client;
 
-class WorkspaceHTTPTest extends Base
+class WorkspaceHTTPTest extends WorkspaceBase
 {
     public function initialize(): void
     {

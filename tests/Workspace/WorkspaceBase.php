@@ -4,7 +4,7 @@ namespace Tests\Workspace;
 
 use PHPUnit\Framework\TestCase;
 
-abstract class Base extends TestCase
+abstract class WorkspaceBase extends TestCase
 {
     /**
      * Set up method called by PHPUnit before each test
