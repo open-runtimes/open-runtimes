@@ -3,7 +3,7 @@
 namespace Tests;
 
 class Client {
-    public static $host = 'open-runtimes-test-serve';
+    public static $host = '172.17.0.1';
     public static $port = 3000;
     public static $secret = '';
 
