@@ -78,7 +78,7 @@ jobs:
           - ID: workspace-1
             RUNTIME: workspace
             VERSION: "1"
-            IMAGE: openruntimes/workspace:v4-1
+            IMAGE: openruntimes/workspace:v5-1
             ARCH: "linux/amd64,linux/arm64"
 
           # Deno
@@ -144,7 +144,7 @@ jobs:
           - ID: python-ml-3.12
             RUNTIME: python
             VERSION: "ml-3.12"
-            IMAGE: openruntimes/python-ml:v4-3.12
+            IMAGE: openruntimes/python-ml:v5-3.12
             ARCH: "linux/amd64,linux/arm64"
           - ID: python-ml-3.11
             RUNTIME: python

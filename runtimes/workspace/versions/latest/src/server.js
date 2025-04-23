@@ -171,8 +171,7 @@ const router = {
 synapse
   .connect("/")
   .then((synapse) => {
-    console.log("Synapse connected");
-    console.log("Is synapse connected?", synapse.isConnected());
+    console.info("Synapse connected");
 
     // Initialize service instances
     terminal = new Terminal(synapse);
@@ -183,7 +182,6 @@ synapse
 
     Object.keys(router).forEach((type) => {
       synapse.onMessageType(type, async (message) => {
-        console.log("Message received:", message);
         if (!synapse.isConnected()) {
           return;
         }
@@ -207,7 +205,6 @@ synapse
 
     terminal.onData((success, data) => {
       if (synapse.isConnected()) {
-        console.log("Sending terminal output:", data);
         synapse.send("terminalResponse", {
           success: success,
           data: data,
@@ -216,7 +213,7 @@ synapse
     });
 
     synapse.onClose(() => {
-      console.log("Terminal connection closed");
+      console.info("Terminal connection closed");
     });
   })
   .catch((error) => {
@@ -224,8 +221,6 @@ synapse
   });
 
 const server = micro(async (req, res) => {
-  console.log("Request received:", req.headers);
-
   // Handle WebSocket upgrade requests
   if (
     req.headers.upgrade &&
@@ -317,9 +312,9 @@ const server = micro(async (req, res) => {
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
-  console.log(`Terminal server running on port ${port}`);
+  console.success(`Terminal server running on port ${port}`);
 });
 
 server.on("connection", (socket) => {
-  console.log(`New connection from ${socket.remoteAddress}`);
+  console.info(`New connection from ${socket.remoteAddress}`);
 });
