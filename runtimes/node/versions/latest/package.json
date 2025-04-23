@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "http-proxy": "^1.18.1",
-    "micro": "^9.3.4"
+    "micro": "^9.3.4",
+    "cls-hooked": "^4.2.2",
+    "express": "^4.21.2"
   }
 }

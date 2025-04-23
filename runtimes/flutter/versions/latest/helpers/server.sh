@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 # Fail build if any command fails
 set -e
+shopt -s dotglob
 
 # Install Dart static server
 dart pub global activate dhttpd

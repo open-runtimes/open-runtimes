@@ -71,6 +71,17 @@ if (perRuntime) {
         if (runtimes[folder] !== undefined) {
             matrix.push(...generateRuntimeObject(runtimes[folder], folder));
         }
+
+        const dependingRuntimes: string[] = [];
+        Object.keys(runtimes).forEach((name) => {
+            if((runtimes[name].runtime?.name ?? '') === folder) {
+                dependingRuntimes.push(name);
+            }
+        });
+
+        for(const runtime of dependingRuntimes) {
+            matrix.push(...generateRuntimeObject(runtimes[runtime], runtime));
+        }
     });
 } else {
     for (const [key, runtime] of Object.entries(runtimes)) {
@@ -83,12 +94,15 @@ const uniqueKeys: string[] = [];
 for(const entry of matrix) {
     const key = entry.ID;
 
+    if(!entry.TEST_CLASS) {
+        continue;
+    }
+
     if(!uniqueKeys.includes(key)) {
         uniqueKeys.push(key);
         uniqueMatrix.push(entry);
     }
 }
-
 appendFileSync(process.env.GITHUB_OUTPUT ?? '', `matrix=${JSON.stringify({include: uniqueMatrix})}`);
 
 function generateRuntimeObject(runtime: Runtime, key: string) {

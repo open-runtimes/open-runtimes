@@ -24,4 +24,11 @@ class CSR extends Base
         self::assertEquals(200, $response['code']);
         self::assertEquals('Sample file', $response['body']);
     }
+
+    // TODO: Improve in future, to also ensure build step sees hidden files
+    public function testHiddenFile(): void
+    {
+        $response = Client::execute(url: '/.config/.file', method: 'GET');
+        self::assertStringNotContainsString("HIDDEN_FILE", $response['body']);
+    }
 }
