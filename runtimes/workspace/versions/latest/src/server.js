@@ -312,7 +312,7 @@ const server = micro(async (req, res) => {
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
-  console.success(`Terminal server running on port ${port}`);
+  console.log(`Terminal server running on port ${port}`);
 });
 
 server.on("connection", (socket) => {

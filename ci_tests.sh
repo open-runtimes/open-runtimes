@@ -23,8 +23,6 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
 
     if [ -d "tests/resources/functions/$RUNTIME_FOLDER" ]; then
         echo "Running formatter for tests ..."
-
-    if [ -d "./tests/resources/functions/$RUNTIME_FOLDER" ]; then
         cd "tests/resources/functions/$RUNTIME_FOLDER"
         docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
         cd ../../../../
