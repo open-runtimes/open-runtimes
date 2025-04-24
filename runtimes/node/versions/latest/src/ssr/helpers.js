@@ -28,13 +28,6 @@ export function onInit(req, res, next) {
     return;
   }
 
-  // Setup logging
-  req.loggerId = Logger.start(
-    req.headers[`x-open-runtimes-logging`],
-    req.headers[`x-open-runtimes-log-id`],
-  );
-  res.setHeader("x-open-runtimes-log-id", req.loggerId);
-
   // Validate safe timeout
   const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
   let safeTimeout = null;
@@ -52,6 +45,23 @@ export function onInit(req, res, next) {
   req.safeTimeout = safeTimeout;
 
   next();
+}
+
+// Start logging
+export function beforeAction(req, res, next) {
+  const loggerId = Logger.start(
+    req.headers[`x-open-runtimes-logging`],
+    req.headers[`x-open-runtimes-log-id`],
+  );
+  req.loggerId = loggerId;
+  res.setHeader("x-open-runtimes-log-id", loggerId);
+  next();
+}
+
+// End logging
+export async function afterAction(req, res, next) {
+  Logger.nativeLog("After action for path: " + req.url);
+  await Logger.end(req.loggerId);
 }
 
 // Wrapper for SSR handling
@@ -75,17 +85,18 @@ export function onAction(callback) {
 
         await Promise.race([callback(...params), timeoutPromise]);
 
-        await Logger.end(req.loggerId);
-        
         if (!executed) {
           console.error("Execution timed out.");
           res.writeHead(500, { "Content-Type": "text/plain" });
           res.end("");
+          next();
           return;
         }
+        next();
+        Logger.nativeLog("Going next for path: " + req.url);
       } else {
         await callback(...params);
-        await Logger.end(req.loggerId);
+        next();
       }
     });
   };
@@ -100,5 +111,5 @@ export function onError(error, req, res, next) {
   Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);
   res.writeHead(500, { "Content-Type": "text/plain" });
   res.end("");
-  return;
+  next();
 }

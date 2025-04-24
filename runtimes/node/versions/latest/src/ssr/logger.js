@@ -8,6 +8,10 @@ export class Logger {
 
   static streams = [];
 
+  static nativeLog(message) {
+    nativeLog(message);
+  }
+
   static start(status, id) {
     const enabled = (status ? status : "enabled") === "enabled";
 
