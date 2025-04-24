@@ -7,7 +7,7 @@ export class Logger {
   static TYPE_LOG = "log";
 
   static streams = [];
-  
+
   static nativeLog(message) {
     nativeLog(message);
   }

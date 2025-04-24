@@ -1,7 +1,14 @@
 import { handler } from "./server/index.mjs";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError, beforeAction, afterAction } from "./ssr/helpers.js";
-import { Logger } from "./ssr/logger.js";
+import {
+  onInit,
+  getPort,
+  getHost,
+  onAction,
+  onError,
+  beforeAction,
+  afterAction,
+} from "./ssr/helpers.js";
 
 console.log("Analog server starting ...");
 

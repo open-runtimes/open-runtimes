@@ -60,7 +60,6 @@ export function beforeAction(req, res, next) {
 
 // End logging
 export async function afterAction(req, res, next) {
-  Logger.nativeLog('Writing logs');
   await Logger.end(req.loggerId);
   next();
 }

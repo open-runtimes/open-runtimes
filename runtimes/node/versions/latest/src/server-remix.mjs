@@ -1,8 +1,15 @@
 import express from "express";
 import { createRequestHandler } from "@remix-run/express";
 import * as build from "./build/server/index.js";
-import { onInit, getPort, getHost, onAction, onError, beforeAction, afterAction } from "./ssr/helpers.js";
-import { Logger } from "./ssr/logger.js";
+import {
+  onInit,
+  getPort,
+  getHost,
+  onAction,
+  onError,
+  beforeAction,
+  afterAction,
+} from "./ssr/helpers.js";
 
 console.log("Remix server starting ...");
 
