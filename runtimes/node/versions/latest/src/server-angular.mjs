@@ -16,8 +16,8 @@ const app = express();
 app.use(onInit);
 app.use(beforeAction);
 app.use(onAction(reqHandler)); // Framework-specific
-app.use(afterAction);
 app.use(onError);
+app.use(afterAction);
 
 app.listen(getPort(), getHost(), () => {
   console.log(`Angular server started on http://${getHost()}:${getPort()}`);

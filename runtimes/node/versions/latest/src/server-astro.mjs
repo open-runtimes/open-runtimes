@@ -17,8 +17,8 @@ app.use(onInit);
 app.use(express.static("client")); // Framework-specific
 app.use(beforeAction);
 app.use(onAction(handler)); // Framework-specific
-app.use(afterAction);
 app.use(onError);
+app.use(afterAction);
 
 app.listen(getPort(), getHost(), () => {
   console.log(`Astro server started on http://${getHost()}:${getPort()}`);

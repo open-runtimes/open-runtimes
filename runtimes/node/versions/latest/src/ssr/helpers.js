@@ -60,8 +60,8 @@ export function beforeAction(req, res, next) {
 
 // End logging
 export async function afterAction(req, res, next) {
+  Logger.nativeLog("After action for path: " + req.url);
   await Logger.end(req.loggerId);
-  next();
 }
 
 // Wrapper for SSR handling
@@ -93,6 +93,7 @@ export function onAction(callback) {
           return;
         }
         next();
+        Logger.nativeLog("Going next for path: " + req.url);
       } else {
         await callback(...params);
         next();
@@ -110,5 +111,5 @@ export function onError(error, req, res, next) {
   Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);
   res.writeHead(500, { "Content-Type": "text/plain" });
   res.end("");
-  return;
+  next();
 }

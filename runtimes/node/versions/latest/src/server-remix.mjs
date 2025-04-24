@@ -28,9 +28,8 @@ app.all(
     }),
   ),
 ); // Framework-specific
-app.use(afterAction);
-
 app.use(onError);
+app.use(afterAction);
 
 app.listen(getPort(), getHost(), () => {
   console.log(`Remix server started on http://${getHost()}:${getPort()}`);

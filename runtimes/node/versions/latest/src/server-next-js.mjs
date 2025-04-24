@@ -22,10 +22,11 @@ app.use(
   onAction((req, res, next) => {
     const parsedUrl = parse(req.url, true);
     handle(req, res, parsedUrl);
+    next();
   }),
 ); // Framework-specific
-app.use(afterAction);
 app.use(onError);
+app.use(afterAction);
 
 nextApp.prepare().then(() => {
   app.listen(getPort(), getHost(), () => {
