@@ -28,14 +28,6 @@ export function onInit(req, res, next) {
     return;
   }
 
-  // Setup logging
-  const loggerId = Logger.start(
-    req.headers[`x-open-runtimes-logging`],
-    req.headers[`x-open-runtimes-log-id`],
-  );
-  req.loggerId = loggerId;
-  res.setHeader("x-open-runtimes-log-id", loggerId);
-
   // Validate safe timeout
   const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
   let safeTimeout = null;
@@ -52,6 +44,24 @@ export function onInit(req, res, next) {
   }
   req.safeTimeout = safeTimeout;
 
+  next();
+}
+
+// Start logging
+export function beforeAction(req, res, next) {
+  const loggerId = Logger.start(
+    req.headers[`x-open-runtimes-logging`],
+    req.headers[`x-open-runtimes-log-id`],
+  );
+  req.loggerId = loggerId;
+  res.setHeader("x-open-runtimes-log-id", loggerId);
+  next();
+}
+
+// End logging
+export async function afterAction(req, res, next) {
+  Logger.nativeLog('Writing logs');
+  await Logger.end(req.loggerId);
   next();
 }
 
