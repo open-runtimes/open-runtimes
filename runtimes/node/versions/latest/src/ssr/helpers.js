@@ -29,11 +29,15 @@ export function onInit(req, res, next) {
   }
 
   // Setup logging
-  req.loggerId = Logger.start(
+  const loggerId = Logger.start(
     req.headers[`x-open-runtimes-logging`],
     req.headers[`x-open-runtimes-log-id`],
   );
-  res.setHeader("x-open-runtimes-log-id", req.loggerId);
+  req.loggerId = loggerId;
+  res.setHeader("x-open-runtimes-log-id", loggerId);
+  res.on("finish", async () => {
+    await Logger.end(loggerId);
+  });
 
   // Validate safe timeout
   const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
@@ -75,8 +79,6 @@ export function onAction(callback) {
 
         await Promise.race([callback(...params), timeoutPromise]);
 
-        await Logger.end(req.loggerId);
-        
         if (!executed) {
           console.error("Execution timed out.");
           res.writeHead(500, { "Content-Type": "text/plain" });
@@ -85,7 +87,6 @@ export function onAction(callback) {
         }
       } else {
         await callback(...params);
-        await Logger.end(req.loggerId);
       }
     });
   };
