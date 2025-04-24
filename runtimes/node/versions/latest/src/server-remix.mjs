@@ -2,6 +2,7 @@ import express from "express";
 import { createRequestHandler } from "@remix-run/express";
 import * as build from "./build/server/index.js";
 import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.js";
+import { Logger } from "./ssr/logger.js";
 
 console.log("Remix server starting ...");
 
@@ -22,6 +23,10 @@ app.all(
   ),
 );
 // End of framework-specific logic
+
+app.use(async (req, res, next) => {
+  await Logger.end(req.loggerId);
+});
 
 app.use(onError);
 

@@ -1,6 +1,7 @@
 import { handler } from "./handler.js";
 import express from "express";
 import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.js";
+import { Logger } from "./ssr/logger.js";
 
 console.log("SvelteKit server starting ...");
 
@@ -10,6 +11,10 @@ app.use(onInit);
 // framework-specific logic
 app.use(onAction(handler));
 // End of framework-specific logic
+
+app.use(async (req, res, next) => {
+  await Logger.end(req.loggerId);
+});
 
 app.use(onError);
 
