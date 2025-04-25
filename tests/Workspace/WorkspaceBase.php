@@ -3,7 +3,7 @@
 namespace Tests\Workspace;
 
 use PHPUnit\Framework\TestCase;
-
+use Tests\Client;
 abstract class WorkspaceBase extends TestCase
 {
     /**
@@ -12,7 +12,29 @@ abstract class WorkspaceBase extends TestCase
      */
     public function setUp(): void
     {
+        Client::$host = '172.17.0.1';
+        $this->awaitHostReady();
         $this->initialize();
+    }
+
+    protected function awaitHostReady() {
+        $attempts = 0;
+        while(true) {
+            $response = Client::execute();
+            if($response['code'] != 0) {
+                return;
+            }
+
+            if($attempts >= 100) {
+                break;
+            }
+
+            sleep(1);
+            $attempts++;
+        }
+
+        // Getting here means timeout failure
+        throw new \Exception("Server did not start on port :3000 within 100 seconds. Check docker container logs");
     }
 
     /**

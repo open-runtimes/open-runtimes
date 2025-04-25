@@ -10,9 +10,6 @@ bash ci-cleanup.sh
 bash ci-runtime-prepare.sh
 bash ci-runtime-build.sh
 
-# Create Docker network if it doesn't exist
-docker network inspect executor_runtimes >/dev/null 2>&1 || docker network create executor_runtimes
-
 LATEST_VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 if [ "$VERSION" = "$LATEST_VERSION" ]; then
     echo "Running formatter ..."
@@ -98,7 +95,7 @@ docker run --rm \
     -v $PWD:/app \
     -v /tmp:/tmp \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    --network executor_runtimes \
+    --network openruntimes \
     -w /app \
     -e RUNTIME_NAME="$RUNTIME" \
     -e RUNTIME_VERSION="$VERSION" \
