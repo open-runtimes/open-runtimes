@@ -57,7 +57,7 @@ docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm -it openruntimes
 ```javascript
 // Terminal Operations
 { type: 'terminal', operation: 'updateSize', params: { cols: 80, rows: 24 } }
-{ type: 'terminal', operation: 'createCommand', params: { command: 'ls' } }
+{ type: 'terminal', operation: 'createCommand', params: { command: 'ls\n' } }
 
 // Filesystem Operations
 { type: 'fs', operation: 'createFile', params: { filepath: 'test.txt', content: 'Hello' } }
@@ -119,7 +119,7 @@ Example requests:
     "type": "terminal",
     "operation": "createCommand",
     "params": {
-        "command": "ls"
+        "command": "ls\n"
     }
 }
 

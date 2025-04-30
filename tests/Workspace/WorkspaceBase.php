@@ -71,7 +71,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'terminal',
             'operation' => 'createCommand',
             'params' => [
-                'command' => 'touch terminal_test.txt'
+                'command' => 'touch terminal_test.txt\n'
             ]
         ], waitForResponse: false);
         
@@ -80,7 +80,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'terminal',
             'operation' => 'createCommand',
             'params' => [
-                'command' => 'ls'
+                'command' => 'ls\n'
             ]
         ], waitForResponse: false);
     }
