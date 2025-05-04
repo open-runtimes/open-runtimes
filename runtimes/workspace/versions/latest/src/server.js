@@ -227,11 +227,12 @@ synapse
       );
 
       const urlParams = synapse.getParams(connectionId);
+      if (urlParams?.workDir && urlParams.workDir !== synapse.workDir) {
+        synapse.updateWorkDir(urlParams.workDir);
+      }
 
       // Create new service instances for this connection
-      const terminal = new Terminal(synapse, {
-        workDir: urlParams?.workDir || synapse.workDir,
-      });
+      const terminal = new Terminal(synapse);
       const filesystem = new Filesystem(synapse);
       const system = new System(synapse);
       const git = new Git(synapse);
