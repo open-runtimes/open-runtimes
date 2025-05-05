@@ -12,7 +12,26 @@ const {
 const workdir = "/tmp/workspace";
 
 const synapse = new Synapse("localhost", 3000, workdir);
-let terminal, filesystem, system, git, code; // initialize services
+
+let globalTerminal, globalFilesystem, globalSystem, globalGit, globalCode; // initialize global services (for HTTP requests)
+const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
+
+function parseUrl(url) {
+  const [path, query] = url.split("?");
+
+  const params = {};
+  if (query) {
+    query.split("&").forEach((param) => {
+      const [key, value] = param.split("=");
+      params[key] = value;
+    });
+  }
+
+  return {
+    path,
+    params,
+  };
+}
 
 const router = {
   synapse: async (message) => {
@@ -29,7 +48,14 @@ const router = {
     return result;
   },
 
-  terminal: async (message) => {
+  terminal: async (message, connectionId) => {
+    let terminal;
+    if (connectionId) {
+      terminal = (connections.get(connectionId) || {}).terminal;
+    } else {
+      terminal = globalTerminal;
+    }
+    if (!terminal) throw new Error("Terminal not initialized");
     const { operation, params } = message;
 
     switch (operation) {
@@ -45,7 +71,14 @@ const router = {
     return null;
   },
 
-  fs: async (message) => {
+  fs: async (message, connectionId) => {
+    let filesystem;
+    if (connectionId) {
+      filesystem = (connections.get(connectionId) || {}).filesystem;
+    } else {
+      filesystem = globalFilesystem;
+    }
+    if (!filesystem) throw new Error("Filesystem not initialized");
     const { operation, params } = message;
     let result;
 
@@ -95,7 +128,14 @@ const router = {
     return result;
   },
 
-  system: async (message) => {
+  system: async (message, connectionId) => {
+    let system;
+    if (connectionId) {
+      system = (connections.get(connectionId) || {}).system;
+    } else {
+      system = globalSystem;
+    }
+    if (!system) throw new Error("System not initialized");
     const { operation } = message;
     let result;
 
@@ -109,7 +149,14 @@ const router = {
     return result;
   },
 
-  git: async (message) => {
+  git: async (message, connectionId) => {
+    let git;
+    if (connectionId) {
+      git = (connections.get(connectionId) || {}).git;
+    } else {
+      git = globalGit;
+    }
+    if (!git) throw new Error("Git not initialized");
     const { operation, params } = message;
     let result;
 
@@ -150,7 +197,14 @@ const router = {
     return result;
   },
 
-  code: async (message) => {
+  code: async (message, connectionId) => {
+    let code;
+    if (connectionId) {
+      code = (connections.get(connectionId) || {}).code;
+    } else {
+      code = globalCode;
+    }
+    if (!code) throw new Error("Code not initialized");
     const { operation, params } = message;
     let result;
 
@@ -170,31 +224,71 @@ const router = {
 
 synapse
   .connect("/")
-  .then((synapse) => {
+  .then(() => {
     console.info("Synapse connected");
 
-    // Initialize service instances
-    terminal = new Terminal(synapse);
-    filesystem = new Filesystem(synapse);
-    system = new System(synapse);
-    git = new Git(synapse);
-    code = new Code(synapse);
+    // Initialize global service instances
+    globalTerminal = new Terminal(synapse);
+    globalFilesystem = new Filesystem(synapse);
+    globalSystem = new System(synapse);
+    globalGit = new Git(synapse);
+    globalCode = new Code(synapse);
+
+    synapse.onConnection((connectionId) => {
+      console.info(`New Synapse connection: ${connectionId}`);
+      console.info(
+        `New Synapse connection: ${JSON.stringify(synapse.getConnection(connectionId))}`,
+      );
+      console.info(
+        `All connections: ${JSON.stringify(synapse.getConnections())}`,
+      );
+
+      const urlParams = synapse.getParams(connectionId);
+      if (urlParams?.workDir && urlParams.workDir !== synapse.workDir) {
+        synapse.updateWorkDir(urlParams.workDir);
+      }
+
+      // Create new service instances for this connection
+      const terminal = new Terminal(synapse);
+      const filesystem = new Filesystem(synapse);
+      const system = new System(synapse);
+      const git = new Git(synapse);
+      const code = new Code(synapse);
+
+      connections.set(connectionId, {
+        terminal,
+        filesystem,
+        system,
+        git,
+        code,
+      });
+
+      // Setup terminal data handler
+      terminal.onData((success, data) => {
+        if (synapse.isConnected(connectionId)) {
+          synapse.send(connectionId, "terminalResponse", {
+            success,
+            data,
+          });
+        }
+      });
+    });
 
     Object.keys(router).forEach((type) => {
-      synapse.onMessageType(type, async (message) => {
-        if (!synapse.isConnected()) {
+      synapse.onMessageType(type, async (message, connectionId) => {
+        if (!synapse.isConnected(connectionId)) {
           return;
         }
         try {
-          const result = await router[type](message);
+          const result = await router[type](message, connectionId);
           if (result !== null) {
-            synapse.send(`${type}Response`, {
+            synapse.send(connectionId, `${type}Response`, {
               requestId: message.requestId,
               ...result,
             });
           }
         } catch (error) {
-          synapse.send(`${type}Response`, {
+          synapse.send(connectionId, `${type}Response`, {
             requestId: message.requestId,
             success: false,
             error: error.message,
@@ -203,17 +297,13 @@ synapse
       });
     });
 
-    terminal.onData((success, data) => {
-      if (synapse.isConnected()) {
-        synapse.send("terminalResponse", {
-          success: success,
-          data: data,
-        });
+    synapse.onClose((connectionId) => {
+      console.info(`Connection closed: ${connectionId}`);
+      const conn = connections.get(connectionId);
+      if (conn && conn.terminal && conn.terminal.isTerminalAlive()) {
+        conn.terminal.kill();
       }
-    });
-
-    synapse.onClose(() => {
-      console.info("Terminal connection closed");
+      connections.delete(connectionId);
     });
   })
   .catch((error) => {
@@ -231,7 +321,13 @@ const server = micro(async (req, res) => {
   }
 
   // Check if services are initialized
-  if (!terminal || !filesystem || !system || !git || !code) {
+  if (
+    !globalTerminal ||
+    !globalFilesystem ||
+    !globalSystem ||
+    !globalGit ||
+    !globalCode
+  ) {
     return send(res, 503, {
       success: false,
       error: "Services not yet initialized. Please try again in a moment.",
@@ -240,19 +336,24 @@ const server = micro(async (req, res) => {
 
   // Handle HTTP requests
   const { method, url } = req;
+  const { path, params } = parseUrl(url);
 
-  if (url === "/health") {
+  if (path === "/health") {
     return send(res, 200, { success: true, data: "OK" });
   }
 
-  if (method === "GET" && url === "/") {
+  if (method === "GET" && path === "/") {
     return send(res, 200, {
       success: true,
       data: "Workspace runtime is running",
     });
   }
 
-  if (method === "POST" && url === "/") {
+  if (params?.workDir) {
+    synapse.updateWorkDir(params.workDir);
+  }
+
+  if (method === "POST" && path === "/") {
     try {
       const contentType = (req.headers["content-type"] || "").toLowerCase();
       if (!contentType.includes("application/json")) {
