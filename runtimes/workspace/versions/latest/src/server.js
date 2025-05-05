@@ -318,7 +318,7 @@ const server = micro(async (req, res) => {
   }
 
   // Handle HTTP requests
-  const { method, url } = req;
+  const { method, url, params } = req;
 
   if (url === "/health") {
     return send(res, 200, { success: true, data: "OK" });
@@ -329,6 +329,10 @@ const server = micro(async (req, res) => {
       success: true,
       data: "Workspace runtime is running",
     });
+  }
+
+  if (params?.workDir) {
+    synapse.updateWorkDir(params.workDir);
   }
 
   if (method === "POST" && url === "/") {
