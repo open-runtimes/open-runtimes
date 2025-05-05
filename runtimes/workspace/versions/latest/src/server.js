@@ -16,6 +16,23 @@ const synapse = new Synapse("localhost", 3000, workdir);
 let globalTerminal, globalFilesystem, globalSystem, globalGit, globalCode; // initialize global services (for HTTP requests)
 const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
 
+function parseUrl(url) {
+  const [path, query] = url.split("?");
+
+  const params = {};
+  if (query) {
+    query.split("&").forEach((param) => {
+      const [key, value] = param.split("=");
+      params[key] = value;
+    });
+  }
+
+  return {
+    path,
+    params,
+  };
+}
+
 const router = {
   synapse: async (message) => {
     const { operation, params } = message;
@@ -318,13 +335,14 @@ const server = micro(async (req, res) => {
   }
 
   // Handle HTTP requests
-  const { method, url, params } = req;
+  const { method, url } = req;
+  const { path, params } = parseUrl(url);
 
-  if (url === "/health") {
+  if (path === "/health") {
     return send(res, 200, { success: true, data: "OK" });
   }
 
-  if (method === "GET" && url === "/") {
+  if (method === "GET" && path === "/") {
     return send(res, 200, {
       success: true,
       data: "Workspace runtime is running",
@@ -335,7 +353,7 @@ const server = micro(async (req, res) => {
     synapse.updateWorkDir(params.workDir);
   }
 
-  if (method === "POST" && url === "/") {
+  if (method === "POST" && path === "/") {
     try {
       const contentType = (req.headers["content-type"] || "").toLowerCase();
       if (!contentType.includes("application/json")) {
