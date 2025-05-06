@@ -300,8 +300,10 @@ synapse
       });
     });
 
-    synapse.onClose((connectionId) => {
-      console.info(`Connection closed: ${connectionId}`);
+    synapse.onClose((connectionId, code, reason, wasClean) => {
+      console.info(
+        `Connection closed:\n  connectionId: ${connectionId}\n  code: ${code}\n  reason: ${reason || "N/A"}\n  wasClean: ${wasClean}`,
+      );
       const conn = connections.get(connectionId);
       if (conn && conn.terminal && conn.terminal.isTerminalAlive()) {
         conn.terminal.kill();
