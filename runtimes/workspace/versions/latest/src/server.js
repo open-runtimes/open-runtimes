@@ -266,6 +266,7 @@ synapse
       // Setup terminal data handler
       terminal.onData((success, data) => {
         if (synapse.isConnected(connectionId)) {
+          console.log("terminal.onData", data);
           synapse.send(connectionId, "terminalResponse", {
             success,
             data,
@@ -282,12 +283,14 @@ synapse
         try {
           const result = await router[type](message, connectionId);
           if (result !== null) {
+            console.log(`${type}Response`, result);
             synapse.send(connectionId, `${type}Response`, {
               requestId: message.requestId,
               ...result,
             });
           }
         } catch (error) {
+          console.error(`${type}Response error`, error);
           synapse.send(connectionId, `${type}Response`, {
             requestId: message.requestId,
             success: false,
