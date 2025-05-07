@@ -12,3 +12,6 @@ RUN apk add --no-cache \
 RUN npm install pnpm@10 -g
 
 RUN npm ci && npm cache clean --force
+
+# removes hostname from prompt
+RUN echo 'PS1="\w \$ "' >> /root/.bashrc

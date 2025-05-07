@@ -267,7 +267,17 @@ synapse
       terminal.onData((success, data) => {
         if (synapse.isConnected(connectionId)) {
           console.log("terminal.onData", data);
-          synapse.send(connectionId, "terminalResponse", {
+          synapse.send(connectionId, "terminal", {
+            success,
+            data,
+          });
+        }
+      });
+
+      // Setup watch for workdir changes
+      filesystem.watchWorkDir((success, data) => {
+        if (synapse.isConnected(connectionId)) {
+          synapse.send(connectionId, "syncWorkDir", {
             success,
             data,
           });
@@ -283,15 +293,15 @@ synapse
         try {
           const result = await router[type](message, connectionId);
           if (result !== null) {
-            console.log(`${type}Response`, result);
-            synapse.send(connectionId, `${type}Response`, {
+            console.log(type, result);
+            synapse.send(connectionId, type, {
               requestId: message.requestId,
               ...result,
             });
           }
         } catch (error) {
-          console.error(`${type}Response error`, error);
-          synapse.send(connectionId, `${type}Response`, {
+          console.error(type, error);
+          synapse.send(connectionId, type, {
             requestId: message.requestId,
             success: false,
             error: error.message,
