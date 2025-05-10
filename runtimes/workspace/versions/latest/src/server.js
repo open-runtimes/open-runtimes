@@ -326,15 +326,6 @@ synapse
   });
 
 const server = micro(async (req, res) => {
-  // Handle WebSocket upgrade requests
-  if (
-    req.headers.upgrade &&
-    req.headers.upgrade.toLowerCase() === "websocket"
-  ) {
-    synapse.handleUpgrade(req, req.socket, Buffer.alloc(0));
-    return;
-  }
-
   // Check if services are initialized
   if (
     !globalTerminal ||
@@ -426,13 +417,16 @@ const server = micro(async (req, res) => {
   return send(res, 404, { success: false, error: "Not found" });
 });
 
-server.timeout = 0;
 const port = process.env.PORT || 3000;
-
 server.listen(port, () => {
   console.log(`Terminal server running on port ${port}`);
 });
 
 server.on("connection", (socket) => {
   console.info(`New connection from ${socket.remoteAddress}`);
+});
+
+server.on("upgrade", (req, socket, head) => {
+  console.info(`New upgrade request from ${req.remoteAddress}`);
+  synapse.handleUpgrade(req, socket, head);
 });
