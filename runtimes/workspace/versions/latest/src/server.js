@@ -426,7 +426,9 @@ const server = micro(async (req, res) => {
   return send(res, 404, { success: false, error: "Not found" });
 });
 
+server.timeout = 0;
 const port = process.env.PORT || 3000;
+
 server.listen(port, () => {
   console.log(`Terminal server running on port ${port}`);
 });
