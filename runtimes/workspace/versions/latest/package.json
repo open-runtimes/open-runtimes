@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@appwrite.io/synapse": "^0.4.2",
+    "@appwrite.io/synapse": "^0.4.3",
     "http-proxy": "^1.18.1",
     "micro": "^9.3.4",
     "update": "^0.7.4",

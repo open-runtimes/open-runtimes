@@ -118,6 +118,17 @@ abstract class WorkspaceBase extends TestCase
         $this->assertFalse($response['success']);
         $this->assertEquals('File already exists at path: test.txt', $response['error']);
 
+        // test append file
+        $response = $this->executeCommand([
+            'type' => 'fs',
+            'operation' => 'appendFile',
+            'params' => [
+                'filepath' => 'test.txt',
+                'content' => 'Hello World 2'
+            ]
+        ]);
+        $this->assertTrue($response['success']);
+        
         // test get file
         $response = $this->executeCommand([
             'type' => 'fs',
@@ -127,7 +138,7 @@ abstract class WorkspaceBase extends TestCase
             ]
         ]);
         $this->assertTrue($response['success']);
-        $this->assertEquals('Hello World', $response['data']);
+        $this->assertEquals('Hello WorldHello World 2', $response['data']);
 
         // test update file
         $response = $this->executeCommand([

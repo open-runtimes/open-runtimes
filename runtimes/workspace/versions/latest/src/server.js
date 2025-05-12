@@ -86,6 +86,9 @@ const router = {
       case "createFile":
         result = await filesystem.createFile(params.filepath, params.content);
         break;
+      case "appendFile":
+        result = await filesystem.appendFile(params.filepath, params.content);
+        break;
       case "getFile":
         result = await filesystem.getFile(params.filepath);
         break;
@@ -261,27 +264,29 @@ synapse
         system,
         git,
         code,
+        cleanupHandlers: [],
       });
 
-      // Setup terminal data handler
-      terminal.onData((success, data) => {
+      // Terminal onData
+      const terminalHandler = (success, data) => {
         if (synapse.isConnected(connectionId)) {
-          console.log("terminal.onData", data);
-          synapse.send(connectionId, "terminal", {
-            success,
-            data,
-          });
+          synapse.send(connectionId, "terminal", { success, data });
         }
-      });
+      };
+      terminal.onData(terminalHandler);
 
-      // Setup watch for workdir changes
-      filesystem.watchWorkDir((success, data) => {
+      // Watch workdir
+      const fsHandler = (success, data) => {
         if (synapse.isConnected(connectionId)) {
-          synapse.send(connectionId, "syncWorkDir", {
-            success,
-            data,
-          });
+          synapse.send(connectionId, "syncWorkDir", { success, data });
         }
+      };
+      filesystem.watchWorkDir(fsHandler);
+
+      // Store handlers for cleanup
+      connections.get(connectionId).cleanupHandlers.push(() => {
+        terminal.kill();
+        filesystem.unwatchWorkDir();
       });
     });
 
@@ -315,9 +320,16 @@ synapse
         `Connection closed:\n  connectionId: ${connectionId}\n  code: ${code}\n  reason: ${reason || "N/A"}\n  wasClean: ${wasClean}`,
       );
       const conn = connections.get(connectionId);
-      if (conn && conn.terminal && conn.terminal.isTerminalAlive()) {
+      if (!conn) return;
+
+      if (conn.terminal && conn.terminal.isTerminalAlive()) {
         conn.terminal.kill();
       }
+
+      if (conn.cleanupHandlers) {
+        conn.cleanupHandlers.forEach((fn) => fn());
+      }
+
       connections.delete(connectionId);
     });
   })
