@@ -21,10 +21,10 @@ class WorkspaceHTTPTest extends WorkspaceBase
 
         // set workDir
         $response = $this->executeCommand([
-            'type' => 'synapse',
+            'type' => 'terminal',
             'operation' => 'updateWorkDir',
             'params' => [
-                'workdir' => '/tmp/workspace/http-test'
+                'workDir' => '/tmp/workspace/http-test'
             ]
         ]);
 

@@ -8,10 +8,14 @@ const {
   Git,
   Code,
 } = require("@appwrite.io/synapse");
+const fs = require("fs");
 
-const workdir = "/tmp/workspace";
+const WORK_DIR = "/tmp/workspace";
+if (!fs.existsSync(WORK_DIR)) {
+  fs.mkdirSync(WORK_DIR, { recursive: true });
+}
 
-const synapse = new Synapse("localhost", 3000, workdir);
+const synapse = new Synapse("localhost", 3000);
 
 let globalTerminal, globalFilesystem, globalSystem, globalGit, globalCode; // initialize global services (for HTTP requests)
 const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
@@ -34,20 +38,6 @@ function parseUrl(url) {
 }
 
 const router = {
-  synapse: async (message) => {
-    const { operation, params } = message;
-    let result;
-
-    switch (operation) {
-      case "updateWorkDir":
-        result = await synapse.updateWorkDir(params.workdir);
-        break;
-      default:
-        throw new Error("Invalid synapse operation");
-    }
-    return result;
-  },
-
   terminal: async (message, connectionId) => {
     let terminal;
     if (connectionId) {
@@ -231,10 +221,12 @@ synapse
     console.info("Synapse connected");
 
     // Initialize global service instances
-    globalTerminal = new Terminal(synapse);
-    globalFilesystem = new Filesystem(synapse);
+    globalTerminal = new Terminal(synapse, {
+      workDir: WORK_DIR,
+    });
+    globalFilesystem = new Filesystem(synapse, WORK_DIR);
     globalSystem = new System(synapse);
-    globalGit = new Git(synapse);
+    globalGit = new Git(synapse, WORK_DIR);
     globalCode = new Code(synapse);
 
     synapse.onConnection((connectionId) => {
@@ -247,15 +239,21 @@ synapse
       );
 
       const urlParams = synapse.getParams(connectionId);
-      if (urlParams?.workDir && urlParams.workDir !== synapse.workDir) {
-        synapse.updateWorkDir(urlParams.workDir);
+      let workDir = WORK_DIR;
+      if (urlParams?.workDir && urlParams.workDir) {
+        if (!fs.existsSync(urlParams.workDir)) {
+          fs.mkdirSync(urlParams.workDir, { recursive: true });
+        }
+        workDir = urlParams.workDir;
       }
 
       // Create new service instances for this connection
-      const terminal = new Terminal(synapse);
-      const filesystem = new Filesystem(synapse);
+      const terminal = new Terminal(synapse, {
+        workDir,
+      });
+      const filesystem = new Filesystem(synapse, workDir);
       const system = new System(synapse);
-      const git = new Git(synapse);
+      const git = new Git(synapse, workDir);
       const code = new Code(synapse);
 
       connections.set(connectionId, {
@@ -368,7 +366,16 @@ const server = micro(async (req, res) => {
   }
 
   if (params?.workDir) {
-    synapse.updateWorkDir(params.workDir);
+    if (!fs.existsSync(params.workDir)) {
+      fs.mkdirSync(params.workDir, { recursive: true });
+    }
+
+    // reinitialize global services with new workdir
+    globalTerminal = new Terminal(synapse, {
+      workDir: params.workDir,
+    });
+    globalFilesystem = new Filesystem(synapse, params.workDir);
+    globalGit = new Git(synapse, params.workDir);
   }
 
   if (method === "POST" && path === "/") {
@@ -413,6 +420,22 @@ const server = micro(async (req, res) => {
         return send(res, 400, {
           success: false,
           error: `Invalid type: ${type}`,
+        });
+      }
+
+      // special case for updateWorkDir
+      if (type === "terminal" && operation === "updateWorkDir") {
+        if (!fs.existsSync(params.workDir)) {
+          fs.mkdirSync(params.workDir, { recursive: true });
+        }
+        globalTerminal = new Terminal(synapse, {
+          workDir: params.workDir,
+        });
+        globalFilesystem = new Filesystem(synapse, params.workDir);
+        globalGit = new Git(synapse, params.workDir);
+        return send(res, 200, {
+          success: true,
+          data: "Work directory updated successfully",
         });
       }
 

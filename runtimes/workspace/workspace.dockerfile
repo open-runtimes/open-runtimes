@@ -15,3 +15,5 @@ RUN npm ci && npm cache clean --force
 
 # removes hostname from prompt
 RUN echo 'PS1="\w \$ "' >> /root/.bashrc
+
+ENV __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=preview.torsten.work
