@@ -66,7 +66,6 @@ class WorkspaceWebsocketsTest extends WorkspaceBase
             $this->client->connect();
             parent::testTerminalOperations();
             $this->client->close();
-            $this->assertTrue(true); // temporarily added
         });
     }
 

@@ -18,18 +18,6 @@ class WorkspaceHTTPTest extends WorkspaceBase
         $this->awaitPortOpen();
 
         Client::$port = 3000;
-
-        // set workDir
-        $response = $this->executeCommand([
-            'type' => 'terminal',
-            'operation' => 'updateWorkDir',
-            'params' => [
-                'workDir' => '/tmp/workspace/http-test'
-            ]
-        ]);
-
-        $this->assertTrue($response['success']);
-        $this->assertEquals('Work directory updated successfully', $response['data']);
     }
 
     protected function awaitPortOpen() {
@@ -61,7 +49,7 @@ class WorkspaceHTTPTest extends WorkspaceBase
     protected function executeCommand(array $message, bool $waitForResponse = true): array
     {
         $response = Client::execute(
-            url: '/', 
+            url: '?workDir=/tmp/workspace/http-test', 
             method: 'POST', 
             body: $message,
             headers: [

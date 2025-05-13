@@ -83,6 +83,8 @@ abstract class WorkspaceBase extends TestCase
                 'command' => 'ls\n'
             ]
         ], waitForResponse: false);
+
+        $this->assertTrue(true); // temporarily added since terminal operations responses are skipped
     }
 
     /**

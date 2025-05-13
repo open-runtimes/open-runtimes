@@ -8,12 +8,8 @@ const {
   Git,
   Code,
 } = require("@appwrite.io/synapse");
-const fs = require("fs");
 
 const WORK_DIR = "/tmp/workspace";
-if (!fs.existsSync(WORK_DIR)) {
-  fs.mkdirSync(WORK_DIR, { recursive: true });
-}
 
 const synapse = new Synapse("localhost", 3000);
 
@@ -38,6 +34,31 @@ function parseUrl(url) {
 }
 
 const router = {
+  synapse: async (message, connectionId) => {
+    if (!connectionId) {
+      throw new Error("Method not allowed");
+    }
+
+    const connectionTerminal = (connections.get(connectionId) || {}).terminal;
+    const connectionFilesystem = (connections.get(connectionId) || {})
+      .filesystem;
+    const connectionSystem = (connections.get(connectionId) || {}).system;
+
+    const { operation, params } = message;
+    switch (operation) {
+      case "updateWorkDir":
+        if (!params.workDir) {
+          throw new Error("Work directory not provided");
+        }
+
+        connectionTerminal.updateWorkDir(params.workDir);
+        connectionFilesystem.updateWorkDir(params.workDir);
+        connectionSystem.updateWorkDir(params.workDir);
+
+        return { success: true, data: "Work directory updated successfully" };
+    }
+  },
+
   terminal: async (message, connectionId) => {
     let terminal;
     if (connectionId) {
@@ -241,9 +262,6 @@ synapse
       const urlParams = synapse.getParams(connectionId);
       let workDir = WORK_DIR;
       if (urlParams?.workDir && urlParams.workDir) {
-        if (!fs.existsSync(urlParams.workDir)) {
-          fs.mkdirSync(urlParams.workDir, { recursive: true });
-        }
         workDir = urlParams.workDir;
       }
 
@@ -366,16 +384,10 @@ const server = micro(async (req, res) => {
   }
 
   if (params?.workDir) {
-    if (!fs.existsSync(params.workDir)) {
-      fs.mkdirSync(params.workDir, { recursive: true });
-    }
-
-    // reinitialize global services with new workdir
-    globalTerminal = new Terminal(synapse, {
-      workDir: params.workDir,
-    });
-    globalFilesystem = new Filesystem(synapse, params.workDir);
-    globalGit = new Git(synapse, params.workDir);
+    // update global services with new workdir
+    globalTerminal.updateWorkDir(params.workDir);
+    globalFilesystem.updateWorkDir(params.workDir);
+    globalGit.updateWorkDir(params.workDir);
   }
 
   if (method === "POST" && path === "/") {
@@ -424,15 +436,11 @@ const server = micro(async (req, res) => {
       }
 
       // special case for updateWorkDir
-      if (type === "terminal" && operation === "updateWorkDir") {
-        if (!fs.existsSync(params.workDir)) {
-          fs.mkdirSync(params.workDir, { recursive: true });
-        }
-        globalTerminal = new Terminal(synapse, {
-          workDir: params.workDir,
-        });
-        globalFilesystem = new Filesystem(synapse, params.workDir);
-        globalGit = new Git(synapse, params.workDir);
+      if (type === "synapse" && operation === "updateWorkDir") {
+        globalTerminal.updateWorkDir(params.workDir);
+        globalFilesystem.updateWorkDir(params.workDir);
+        globalGit.updateWorkDir(params.workDir);
+
         return send(res, 200, {
           success: true,
           data: "Work directory updated successfully",
@@ -462,6 +470,6 @@ server.on("connection", (socket) => {
 });
 
 server.on("upgrade", (req, socket, head) => {
-  console.info(`New upgrade request from ${req.remoteAddress}`);
+  console.info(`New upgrade request from ${socket.remoteAddress}`);
   synapse.handleUpgrade(req, socket, head);
 });
