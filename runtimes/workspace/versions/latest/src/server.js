@@ -136,6 +136,9 @@ const router = {
       case "deleteFolder":
         result = await filesystem.deleteFolder(params.folderpath);
         break;
+      case "searchFiles":
+        result = await filesystem.searchFiles(params.query);
+        break;
       default:
         throw new Error("Invalid operation");
     }
@@ -290,6 +293,18 @@ synapse
         }
       };
       terminal.onData(terminalHandler);
+
+      // Terminal onExit
+      const terminalExitHandler = (success, exitCode, signal) => {
+        if (synapse.isConnected(connectionId)) {
+          synapse.send(connectionId, "terminalExit", {
+            success,
+            exitCode,
+            signal,
+          });
+        }
+      };
+      terminal.onExit(terminalExitHandler);
 
       // Watch workdir
       const fsHandler = (success, data) => {
