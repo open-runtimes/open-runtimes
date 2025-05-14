@@ -130,7 +130,21 @@ abstract class WorkspaceBase extends TestCase
             ]
         ]);
         $this->assertTrue($response['success']);
-        
+
+        // test search files
+        $response = $this->executeCommand([
+            'type' => 'fs',
+            'operation' => 'searchFiles',
+            'params' => [
+                'query' => 'test'
+            ]
+        ]);
+        $this->assertTrue($response['success']);
+        $this->assertArrayHasKey('results', $response['data']);
+        $this->assertIsArray($response['data']['results']);
+        $this->assertCount(1, $response['data']['results']);
+        $this->assertEquals('test.txt', $response['data']['results'][0]);
+
         // test get file
         $response = $this->executeCommand([
             'type' => 'fs',

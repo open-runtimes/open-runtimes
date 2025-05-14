@@ -2,8 +2,6 @@ name: "Build and Deploy OpenRuntimes Images"
 
 on:
   workflow_dispatch:
-    branches:
-      - main
   release:
     types: [ published ]
 
