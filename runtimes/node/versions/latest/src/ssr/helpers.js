@@ -76,7 +76,7 @@ export function onAction(callback) {
         await Promise.race([callback(...params), timeoutPromise]);
 
         await Logger.end(req.loggerId);
-        
+
         if (!executed) {
           console.error("Execution timed out.");
           res.writeHead(500, { "Content-Type": "text/plain" });
