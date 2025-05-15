@@ -99,7 +99,7 @@ test = "Serverless/CPP.php"
 entry = "Tests.cs"
 versions = ["8.0", "7.0", "6.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
-formatter = { prepare = "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet tool install --global csharpier", check = "dotnet csharpier --check .", write = "dotnet csharpier ." }
+formatter = { prepare = "dotnet tool install --global csharpier", check = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier check .'", write = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier format .'" }
 tools = "dotnet --version"
 test = "Serverless/Dotnet.php"
 
