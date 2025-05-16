@@ -306,13 +306,22 @@ synapse
       };
       terminal.onExit(terminalExitHandler);
 
-      // Watch workdir
-      const fsHandler = (success, data) => {
-        if (synapse.isConnected(connectionId)) {
-          synapse.send(connectionId, "syncWorkDir", { success, data });
-        }
-      };
-      filesystem.watchWorkDir(fsHandler);
+      // Watch workdir if urlParams.syncWorkDir is true
+      if (urlParams?.syncWorkDir && urlParams.syncWorkDir === "true") {
+        const fsHandler = ({ path, event, content }) => {
+          if (synapse.isConnected(connectionId)) {
+            synapse.send(connectionId, "syncWorkDir", {
+              success: true,
+              data: {
+                path,
+                event,
+                content,
+              },
+            });
+          }
+        };
+        filesystem.watchWorkDir(fsHandler);
+      }
 
       // Store handlers for cleanup
       connections.get(connectionId).cleanupHandlers.push(() => {
