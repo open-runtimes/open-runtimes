@@ -1,6 +1,6 @@
 import { createWriteStream, writeFileSync, unlinkSync } from "fs";
 
-const nativeLog = console.log.bind(console);
+export const nativeLog = console.log.bind(console);
 
 export class Logger {
   static TYPE_ERROR = "error";
