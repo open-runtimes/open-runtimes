@@ -73,7 +73,7 @@ class XStatic extends Base
         self::assertEquals(200, $response['code']);
         self::assertStringContainsString('Website body content', $response['body']);
 
-        Client::$port = 3001;
+        Client::$host = 'open-runtimes-test-serve-secondary';
 
         $response = Client::execute(url: '/index.html', method: 'GET');
         self::assertEquals(200, $response['code']);
@@ -85,7 +85,7 @@ class XStatic extends Base
         self::assertStringContainsString('Page not found', $response['body']);
         self::assertStringNotContainsString('Website body content', $response['body']);
 
-        Client::$port = 3002;
+        Client::$host = 'open-runtimes-test-serve-teritary';
 
         $response = Client::execute(url: '/index.html', method: 'GET');
         self::assertEquals(200, $response['code']);
@@ -96,6 +96,13 @@ class XStatic extends Base
         self::assertStringContainsString('Custom-branded 404 page', $response['body']);
         self::assertStringNotContainsString('Website body content', $response['body']);
 
-        Client::$port = 3000;
+        Client::$host = 'open-runtimes-test-serve';
+    }
+
+    // TODO: Improve in future, to also ensure build step sees hidden files
+    public function testHiddenFile(): void
+    {
+        $response = Client::execute(url: '/.config/.file', method: 'GET');
+        self::assertStringNotContainsString("HIDDEN_FILE", $response['body']);
     }
 }

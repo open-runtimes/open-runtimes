@@ -1,5 +1,6 @@
 set -e
+shopt -s dotglob
 
-sh ci-helpers.sh
-sh ci-cleanup.sh
-sh ci-runtime-prepare.sh
+source ci-helpers.sh
+bash ci-cleanup.sh
+bash ci-runtime-prepare.sh

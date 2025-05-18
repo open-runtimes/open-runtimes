@@ -1,4 +1,6 @@
+#!/bin/bash
 set -e
+shopt -s dotglob
 
 # Basic auth
 if [ -z "$OPEN_RUNTIMES_SECRET" ]; then

@@ -10,6 +10,6 @@ export default function Index() {
   const { date } = data;
 
   return (
-    <p id="date">{date}</p>
+    <p>[DATE_START]{date}[DATE_END]</p>
   );
 }

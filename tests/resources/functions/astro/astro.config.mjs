@@ -8,6 +8,6 @@ export default defineConfig({
   output: 'server',
 
   adapter: node({
-    mode: 'standalone'
+    mode: 'standalone' // correct is 'middleware', but we want to test that standaloen also works
   })
 });

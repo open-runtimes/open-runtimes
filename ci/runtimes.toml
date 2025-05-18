@@ -1,7 +1,7 @@
 [node]
 entry = "tests.js"
 versions = ["22", "21.0", "20.0", "19.0", "18.0", "16.0", "14.5", "22-mjs", "21.0-mjs", "20.0-mjs", "19.0-mjs", "18.0-mjs", "16.0-mjs", "14.5-mjs"]
-commands = { install = "npm install", start = "sh helpers/server.sh" }
+commands = { install = "npm install", start = "bash helpers/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "Serverless/Node.php"
@@ -9,7 +9,7 @@ test = "Serverless/Node.php"
 [deno]
 entry = "tests.ts"
 versions = ["2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
-commands = { install = "deno cache tests.ts", start = "sh helpers/server.sh" }
+commands = { install = "deno cache tests.ts", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt" }
 tools = "deno --version" # TODO: NPM, PNPM and Yarn dont work in Deno alpine currently: https://github.com/denoland/deno_docker/issues/373
 test = "Serverless/Deno.php"
@@ -17,7 +17,7 @@ test = "Serverless/Deno.php"
 [python]
 entry = "tests.py"
 versions = ["3.12", "3.11", "3.10", "3.9", "3.8"]
-commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "sh helpers/server.sh" }
+commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "bash helpers/server.sh" }
 formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
 tools = "python --version && pip --version"
 test = "Serverless/Python.php"
@@ -25,7 +25,7 @@ test = "Serverless/Python.php"
 [python-ml]
 entry = "tests.py"
 versions = ["3.12", "3.11"]
-commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "sh helpers/server.sh" }
+commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "bash helpers/server.sh" }
 formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
 tools = "python --version && pip --version"
 test = "Serverless/PythonML.php"
@@ -33,14 +33,14 @@ test = "Serverless/PythonML.php"
 [dart]
 entry = "lib/tests.dart"
 versions = ["3.5", "3.3", "3.1", "3.0", "2.19", "2.18", "2.17", "2.16", "2.15"]
-commands = { install = "dart pub get", start = "sh helpers/server.sh" }
+commands = { install = "dart pub get", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
 tools = "dart --version"
 test = "Serverless/Dart.php"
 
 [flutter]
-versions = ["3.24"]
-commands = { install = "flutter build web", start = "sh helpers/server.sh" }
+versions = ["3.29", "3.27", "3.24"]
+commands = { install = "flutter build web", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
 test = "CSR/Flutter.php"
 output = "./build/web"
@@ -49,7 +49,7 @@ tools = "dart --version && flutter --version"
 [ruby]
 entry = "tests.rb"
 versions = ["3.3", "3.2", "3.1", "3.0", ]
-commands = { install = "", start = "sh helpers/server.sh" }
+commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "gem install rubocop", check = "rubocop --lint .", write = "rubocop --fix-layout --lint ." }
 tools = "ruby --version && gem --version"
 test = "Serverless/Ruby.php"
@@ -57,7 +57,7 @@ test = "Serverless/Ruby.php"
 [php]
 entry = "tests.php"
 versions = ["8.3", "8.2", "8.1", "8.0"]
-commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "sh helpers/server.sh" }
+commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "bash helpers/server.sh" }
 formatter = { prepare = "composer require laravel/pint", check = "./vendor/bin/pint --test", write = "./vendor/bin/pint" }
 tools = "php --version && composer --version"
 test = "Serverless/PHP.php"
@@ -65,7 +65,7 @@ test = "Serverless/PHP.php"
 [swift]
 entry = "Tests.swift"
 versions = ["5.10", "5.9", "5.8"]
-commands = { install = "", start = "sh helpers/server.sh" }
+commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "rm -rf SwiftFormat && git clone https://github.com/nicklockwood/SwiftFormat && cd SwiftFormat && swift build -c release && mv /mnt/code/SwiftFormat/.build/x86_64-unknown-linux-gnu/release/swiftformat /tmp/swiftformat && cd .. && rm -rf SwiftFormat", check = "/tmp/swiftformat . --lint --swiftversion 5.5", write = "/tmp/swiftformat . --verbose --swiftversion 5.8" }
 tools = "swift --version"
 test = "Serverless/Swift.php"
@@ -73,23 +73,23 @@ test = "Serverless/Swift.php"
 [kotlin]
 entry = "Tests.kt"
 versions = ["2.0", "1.9", "1.8", "1.6"]
-commands = { install = "", start = "sh helpers/server.sh" }
+commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "apk add curl && curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.3.1/ktlint && chmod a+x ktlint && mv ktlint /usr/local/bin/", check = "ktlint .", write = "ktlint --format ." }
-tools = "sh gradlew --version"
+tools = "bash gradlew --version"
 test = "Serverless/Kotlin.php"
 
 [java]
 entry = "Tests.java"
 versions = ["22", "21.0", "18.0", "17.0", "11.0", "8.0"]
-commands = { install = "", start = "sh helpers/server.sh" }
+commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "curl -sSLO https://github.com/google/google-java-format/releases/download/v1.22.0/google-java-format-1.22.0-all-deps.jar && chmod a+x google-java-format-1.22.0-all-deps.jar && mv google-java-format-1.22.0-all-deps.jar /tmp/google-java-format.jar", check = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --set-exit-if-changed --dry-run", write = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --replace" }
-tools = "sh gradlew --version"
+tools = "bash gradlew --version"
 test = "Serverless/Java.php"
 
 [cpp]
 entry = "tests.cc"
 versions = ["20", "17"]
-commands = { install = "", start = "sh helpers/server.sh" }
+commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "apk add coreutils git clang-extra-tools", check = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror --dry-run", write = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror" }
 tools = "cmake --version && make --version"
 test = "Serverless/CPP.php"
@@ -98,15 +98,15 @@ test = "Serverless/CPP.php"
 [dotnet]
 entry = "Tests.cs"
 versions = ["8.0", "7.0", "6.0"]
-commands = { install = "", start = "sh helpers/server.sh" }
-formatter = { prepare = "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet tool install --global csharpier", check = "dotnet csharpier --check .", write = "dotnet csharpier ." }
+commands = { install = "", start = "bash helpers/server.sh" }
+formatter = { prepare = "dotnet tool install --global csharpier", check = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier check .'", write = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier format .'" }
 tools = "dotnet --version"
 test = "Serverless/Dotnet.php"
 
 [go]
 entry = "tests.go"
 versions = ["1.23"]
-commands = { install = "", start = "sh helpers/server.sh" }
+commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "if [ \"$(gofmt -s -l . | wc -l)\" -gt 0 ]; then echo 'Formatting errors:' && gofmt -s -l . && exit 1; fi", write = "gofmt -w -s ." }
 tools = "go version"
 test = "Serverless/Go.php"
@@ -114,21 +114,21 @@ test = "Serverless/Go.php"
 [bun]
 entry = "tests.ts"
 versions = ["1.1", "1.0"]
-commands = { install = "bun install", start = "sh helpers/server.sh" }
+commands = { install = "bun install", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using bunx biome formatter\"", check = "bunx @biomejs/biome format .", write = "bunx @biomejs/biome format --write ." }
 tools = "bun --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "Serverless/Bun.php"
 
 [static]
 versions = ["1"]
-commands = { install = "sh build.sh", start = "sh helpers/server.sh" }
+commands = { install = "bash build.sh", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo No formatter preparations.", check = "echo No formatter checker.", write = "echo No formatter writer." }
 tools = "static-web-server --version"
 test = "XStatic.php"
 
 [astro]
 runtime = { name = "node", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/astro/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/astro/server.sh'" }
+commands = { install = "source /usr/local/server/helpers/astro/env.sh && npm install && npm run build && bash /usr/local/server/helpers/astro/bundle.sh", start = "bash helpers/astro/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Astro.php"
@@ -136,7 +136,7 @@ output = "./dist"
 
 [sveltekit]
 runtime = { name = "node", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/sveltekit/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/sveltekit/server.sh'" }
+commands = { install = "source /usr/local/server/helpers/sveltekit/env.sh && npm install && npm run build && bash /usr/local/server/helpers/sveltekit/bundle.sh", start = "bash helpers/sveltekit/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/SvelteKit.php"
@@ -144,7 +144,7 @@ output = "./build"
 
 [next-js]
 runtime = { name = "node", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/next-js/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/next-js/server.sh'" }
+commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/NextJS.php"
@@ -152,7 +152,7 @@ output = "./.next"
 
 [nuxt]
 runtime = { name = "node", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/nuxt/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/nuxt/server.sh'" }
+commands = { install = "source /usr/local/server/helpers/nuxt/env.sh && npm install && npm run build && bash /usr/local/server/helpers/nuxt/bundle.sh", start = "bash helpers/nuxt/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Nuxt.php"
@@ -160,7 +160,7 @@ output = "./.output"
 
 [remix]
 runtime = { name = "node", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/remix/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/remix/server.sh'" }
+commands = { install = "source /usr/local/server/helpers/remix/env.sh && npm install && npm run build && bash /usr/local/server/helpers/remix/bundle.sh", start = "bash helpers/remix/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Remix.php"
@@ -168,8 +168,16 @@ output = "./build"
 
 [angular]
 runtime = { name = "node", version = "22" }
-commands = { install = "npm install && npm run build && sh /usr/local/server/helpers/angular/bundle.sh", start = "sh helpers/proxy.sh 'sh helpers/angular/server.sh'" }
+commands = { install = "source /usr/local/server/helpers/angular/env.sh && npm install && npm run build && bash /usr/local/server/helpers/angular/bundle.sh", start = "bash helpers/angular/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "SSR/Angular.php"
 output = "./dist/angular"
+
+[analog]
+runtime = { name = "node", version = "22" }
+commands = { install = "source /usr/local/server/helpers/analog/env.sh && npm install && npm run build && bash /usr/local/server/helpers/analog/bundle.sh", start = "bash helpers/analog/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
+test = "SSR/Analog.php"
+output = "./dist/analog"

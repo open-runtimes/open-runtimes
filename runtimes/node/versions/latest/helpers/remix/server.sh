@@ -1,6 +1,14 @@
+#!/bin/bash
+# Fail build if any command fails
 set -e
+shopt -s dotglob
 
-cd /usr/local/server/src/function/
+cd /usr/local/server/src/function
 
-# To be used with proxy.sh
-HOST=127.0.0.1 PORT=3001 ./node_modules/.bin/remix-serve ./build/server/index.js
+source /usr/local/server/helpers/remix/env.sh
+
+cp ../server-remix.mjs ./server.mjs
+mkdir -p ./ssr
+cp -R ../ssr/* ./ssr/
+
+HOST=0.0.0.0 PORT=3000 node ./server.mjs

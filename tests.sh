@@ -1,5 +1,6 @@
-# Usage: sh tests.sh node-21.0 (you can also do node-latest, or just node)
+# Usage: bash tests.sh node-21.0 (you can also do node-latest, or just node)
 set -e
+shopt -s dotglob
 
 # Configurable varaible for different runtimes
 ID=$1

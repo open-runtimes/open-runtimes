@@ -1,4 +1,5 @@
 set -e
+shopt -s dotglob
 
 export RUNTIME_FOLDER=$(echo $RUNTIME | sed 's/\(.*\)-.*/\1/') # Get first part separated by -
 export VERSION_FOLDER="$RUNTIME-$VERSION"

@@ -1,5 +1,6 @@
 # Usage: sh formatter.sh node
 set -e
+shopt -s dotglob
 
 # Configurable varaible for different runtimes
 export RUNTIME=$1
@@ -12,15 +13,16 @@ export VERSION_FOLDER=$VERSION
 
 echo "Preparing Docker image ..."
 
-sh ci-cleanup.sh
-sh ci-runtime-prepare.sh
-sh ci-runtime-build.sh
+bash ci-cleanup.sh
+bash ci-runtime-prepare.sh
+bash ci-runtime-build.sh
 
 cd "runtimes/$RUNTIME"
-docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
+docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
 cd ../../
 
-cd "tests/resources/functions/$RUNTIME"
-docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime sh -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
-
-cd ../../../../
+if [ -d "tests/resources/functions/$RUNTIME" ]; then
+    cd "tests/resources/functions/$RUNTIME"
+    docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
+    cd ../../../../
+fi

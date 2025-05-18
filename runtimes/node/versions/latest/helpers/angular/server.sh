@@ -1,6 +1,14 @@
+#!/bin/bash
+# Fail build if any command fails
 set -e
+shopt -s dotglob
 
 cd /usr/local/server/src/function/
 
-# To be used with proxy.sh
-HOST=127.0.0.1 PORT=3001 node server/server.mjs
+source /usr/local/server/helpers/angular/env.sh
+
+cp ../server-angular.mjs ./server.mjs
+mkdir -p ./ssr
+cp -R ../ssr/* ./ssr/
+
+HOST=0.0.0.0 PORT=3000 node ./server.mjs

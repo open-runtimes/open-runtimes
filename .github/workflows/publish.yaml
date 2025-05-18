@@ -17,110 +17,120 @@ jobs:
           - ID: flutter-3.24
             RUNTIME: flutter
             VERSION: "3.24"
-            IMAGE: openruntimes/flutter:v4-3.24
+            IMAGE: openruntimes/flutter:v5-3.24
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: flutter-3.27
+            RUNTIME: flutter
+            VERSION: "3.27"
+            IMAGE: openruntimes/flutter:v5-3.27
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: flutter-3.29
+            RUNTIME: flutter
+            VERSION: "3.29"
+            IMAGE: openruntimes/flutter:v5-3.29
             ARCH: "linux/amd64,linux/arm64"
 
           # Static
           - ID: static-1
             RUNTIME: static
             VERSION: "1"
-            IMAGE: openruntimes/static:v4-1
+            IMAGE: openruntimes/static:v5-1
             ARCH: "linux/amd64,linux/arm64"
 
           # Node
           - ID: node-22.js
             RUNTIME: node
             VERSION: "22"
-            IMAGE: openruntimes/node:v4-22
+            IMAGE: openruntimes/node:v5-22
             ARCH: "linux/amd64,linux/arm64"
           - ID: node-21.js
             RUNTIME: node
             VERSION: "21.0"
-            IMAGE: openruntimes/node:v4-21.0
+            IMAGE: openruntimes/node:v5-21.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: node-20.js
             RUNTIME: node
             VERSION: "20.0"
-            IMAGE: openruntimes/node:v4-20.0
+            IMAGE: openruntimes/node:v5-20.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: node-19.js
             RUNTIME: node
             VERSION: "19.0"
-            IMAGE: openruntimes/node:v4-19.0
+            IMAGE: openruntimes/node:v5-19.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: node-18.js
             RUNTIME: node
             VERSION: "18.0"
-            IMAGE: openruntimes/node:v4-18.0
+            IMAGE: openruntimes/node:v5-18.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
           - ID: node-16.js
             RUNTIME: node
             VERSION: "16.0"
-            IMAGE: openruntimes/node:v4-16.0
+            IMAGE: openruntimes/node:v5-16.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
           - ID: node-14.5.js
             RUNTIME: node
             VERSION: "14.5"
-            IMAGE: openruntimes/node:v4-14.5
+            IMAGE: openruntimes/node:v5-14.5
             ARCH: "linux/amd64"
 
           # Deno
           - ID: deno-2.0
             RUNTIME: deno
             VERSION: "2.0"
-            IMAGE: openruntimes/deno:v4-2.0
+            IMAGE: openruntimes/deno:v5-2.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: deno-1.46
             RUNTIME: deno
             VERSION: "1.46"
-            IMAGE: openruntimes/deno:v4-1.46
+            IMAGE: openruntimes/deno:v5-1.46
             ARCH: "linux/amd64,linux/arm64"
           - ID: deno-1.40
             RUNTIME: deno
             VERSION: "1.40"
-            IMAGE: openruntimes/deno:v4-1.40
+            IMAGE: openruntimes/deno:v5-1.40
             ARCH: "linux/amd64,linux/arm64"
           - ID: deno-1.35
             RUNTIME: deno
             VERSION: "1.35"
-            IMAGE: openruntimes/deno:v4-1.35
+            IMAGE: openruntimes/deno:v5-1.35
             ARCH: "linux/amd64"
           - ID: deno-1.24
             RUNTIME: deno
             VERSION: "1.24"
-            IMAGE: openruntimes/deno:v4-1.24
+            IMAGE: openruntimes/deno:v5-1.24
             ARCH: "linux/amd64"
           - ID: deno-1.21
             RUNTIME: deno
             VERSION: "1.21"
-            IMAGE: openruntimes/deno:v4-1.21
+            IMAGE: openruntimes/deno:v5-1.21
             ARCH: "linux/amd64"
 
           # Python
           - ID: python-3.12
             RUNTIME: python
             VERSION: "3.12"
-            IMAGE: openruntimes/python:v4-3.12
+            IMAGE: openruntimes/python:v5-3.12
             ARCH: "linux/amd64,linux/arm64"
           - ID: python-3.11
             RUNTIME: python
             VERSION: "3.11"
-            IMAGE: openruntimes/python:v4-3.11
+            IMAGE: openruntimes/python:v5-3.11
             ARCH: "linux/amd64,linux/arm64"
           - ID: python-3.10
             RUNTIME: python
             VERSION: "3.10"
-            IMAGE: openruntimes/python:v4-3.10
+            IMAGE: openruntimes/python:v5-3.10
             ARCH: "linux/amd64,linux/arm64"
           - ID: python-3.9
             RUNTIME: python
             VERSION: "3.9"
-            IMAGE: openruntimes/python:v4-3.9
+            IMAGE: openruntimes/python:v5-3.9
             ARCH: "linux/amd64,linux/arm64"
           - ID: python-3.8
             RUNTIME: python
             VERSION: "3.8"
-            IMAGE: openruntimes/python:v4-3.8
+            IMAGE: openruntimes/python:v5-3.8
             ARCH: "linux/amd64,linux/arm64"
 
           # Python ML
@@ -132,217 +142,217 @@ jobs:
           - ID: python-ml-3.11
             RUNTIME: python
             VERSION: "ml-3.11"
-            IMAGE: openruntimes/python-ml:v4-3.11
+            IMAGE: openruntimes/python-ml:v5-3.11
             ARCH: "linux/amd64,linux/arm64"
 
           # Dart
           - ID: dart-3.5
             RUNTIME: dart
             VERSION: "3.5"
-            IMAGE: openruntimes/dart:v4-3.5
+            IMAGE: openruntimes/dart:v5-3.5
             ARCH: "linux/amd64,linux/arm64"
           - ID: dart-3.3
             RUNTIME: dart
             VERSION: "3.3"
-            IMAGE: openruntimes/dart:v4-3.3
+            IMAGE: openruntimes/dart:v5-3.3
             ARCH: "linux/amd64,linux/arm64"
           - ID: dart-3.1
             RUNTIME: dart
             VERSION: "3.1"
-            IMAGE: openruntimes/dart:v4-3.1
+            IMAGE: openruntimes/dart:v5-3.1
             ARCH: "linux/amd64,linux/arm64"
           - ID: dart-3.0
             RUNTIME: dart
             VERSION: "3.0"
-            IMAGE: openruntimes/dart:v4-3.0
+            IMAGE: openruntimes/dart:v5-3.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: dart-2.19
             RUNTIME: dart
             VERSION: "2.19"
-            IMAGE: openruntimes/dart:v4-2.19
+            IMAGE: openruntimes/dart:v5-2.19
             ARCH: "linux/amd64,linux/arm64"
           - ID: dart-2.18
             RUNTIME: dart
             VERSION: "2.18"
-            IMAGE: openruntimes/dart:v4-2.18
+            IMAGE: openruntimes/dart:v5-2.18
             ARCH: "linux/amd64,linux/arm64"
           - ID: dart-2.17
             RUNTIME: dart
             VERSION: "2.17"
-            IMAGE: openruntimes/dart:v4-2.17
+            IMAGE: openruntimes/dart:v5-2.17
             ARCH: "linux/amd64,linux/arm64"
           - ID: dart-2.16
             RUNTIME: dart
             VERSION: "2.16"
-            IMAGE: openruntimes/dart:v4-2.16
+            IMAGE: openruntimes/dart:v5-2.16
             ARCH: "linux/amd64,linux/arm64"
           - ID: dart-2.15
             RUNTIME: dart
             VERSION: "2.15"
-            IMAGE: openruntimes/dart:v4-2.15
+            IMAGE: openruntimes/dart:v5-2.15
             ARCH: "linux/amd64,linux/arm64"
 
           # Ruby
           - ID: ruby-3.3
             RUNTIME: ruby
             VERSION: "3.3"
-            IMAGE: openruntimes/ruby:v4-3.3
+            IMAGE: openruntimes/ruby:v5-3.3
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
           - ID: ruby-3.2
             RUNTIME: ruby
             VERSION: "3.2"
-            IMAGE: openruntimes/ruby:v4-3.2
+            IMAGE: openruntimes/ruby:v5-3.2
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
           - ID: ruby-3.1
             RUNTIME: ruby
             VERSION: "3.1"
-            IMAGE: openruntimes/ruby:v4-3.1
+            IMAGE: openruntimes/ruby:v5-3.1
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
           - ID: ruby-3.0
             RUNTIME: ruby
             VERSION: "3.0"
-            IMAGE: openruntimes/ruby:v4-3.0
+            IMAGE: openruntimes/ruby:v5-3.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # PHP
           - ID: php-8.3
             RUNTIME: php
             VERSION: "8.3"
-            IMAGE: openruntimes/php:v4-8.3
+            IMAGE: openruntimes/php:v5-8.3
             ARCH: "linux/amd64,linux/arm64"
           - ID: php-8.2
             RUNTIME: php
             VERSION: "8.2"
-            IMAGE: openruntimes/php:v4-8.2
+            IMAGE: openruntimes/php:v5-8.2
             ARCH: "linux/amd64,linux/arm64"
           - ID: php-8.1
             RUNTIME: php
             VERSION: "8.1"
-            IMAGE: openruntimes/php:v4-8.1
+            IMAGE: openruntimes/php:v5-8.1
             ARCH: "linux/amd64,linux/arm64"
           - ID: php-8.0
             RUNTIME: php
             VERSION: "8.0"
-            IMAGE: openruntimes/php:v4-8.0
+            IMAGE: openruntimes/php:v5-8.0
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # Swift
           - ID: swift-5.10
             RUNTIME: swift
             VERSION: "5.10"
-            IMAGE: openruntimes/swift:v4-5.10
+            IMAGE: openruntimes/swift:v5-5.10
             ARCH: "linux/amd64,linux/arm64"
           - ID: swift-5.9
             RUNTIME: swift
             VERSION: "5.9"
-            IMAGE: openruntimes/swift:v4-5.9
+            IMAGE: openruntimes/swift:v5-5.9
             ARCH: "linux/amd64,linux/arm64"
           - ID: swift-5.8
             RUNTIME: swift
             VERSION: "5.8"
-            IMAGE: openruntimes/swift:v4-5.8
+            IMAGE: openruntimes/swift:v5-5.8
             ARCH: "linux/amd64,linux/arm64"
 
           # Kotlin
           - ID: kotlin-2.0
             RUNTIME: kotlin
             VERSION: "2.0"
-            IMAGE: openruntimes/kotlin:v4-2.0
+            IMAGE: openruntimes/kotlin:v5-2.0
             ARCH: "linux/amd64"
           - ID: kotlin-1.9
             RUNTIME: kotlin
             VERSION: "1.9"
-            IMAGE: openruntimes/kotlin:v4-1.9
+            IMAGE: openruntimes/kotlin:v5-1.9
             ARCH: "linux/amd64"
           - ID: kotlin-1.8
             RUNTIME: kotlin
             VERSION: "1.8"
-            IMAGE: openruntimes/kotlin:v4-1.8
+            IMAGE: openruntimes/kotlin:v5-1.8
             ARCH: "linux/amd64"
           - ID: kotlin-1.6
             RUNTIME: kotlin
             VERSION: "1.6"
-            IMAGE: openruntimes/kotlin:v4-1.6
+            IMAGE: openruntimes/kotlin:v5-1.6
             ARCH: "linux/amd64"
 
           # Java
           - ID: java-22
             RUNTIME: java
             VERSION: "22"
-            IMAGE: openruntimes/java:v4-22
+            IMAGE: openruntimes/java:v5-22
             ARCH: "linux/amd64,linux/arm64"
           - ID: java-21.0
             RUNTIME: java
             VERSION: "21.0"
-            IMAGE: openruntimes/java:v4-21.0
+            IMAGE: openruntimes/java:v5-21.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: java-18.0
             RUNTIME: java
             VERSION: "18.0"
-            IMAGE: openruntimes/java:v4-18.0
+            IMAGE: openruntimes/java:v5-18.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: java-17.0
             RUNTIME: java
             VERSION: "17.0"
-            IMAGE: openruntimes/java:v4-17.0
+            IMAGE: openruntimes/java:v5-17.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: java-11.0
             RUNTIME: java
             VERSION: "11.0"
-            IMAGE: openruntimes/java:v4-11.0
+            IMAGE: openruntimes/java:v5-11.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: java-8.0
             RUNTIME: java
             VERSION: "8.0"
-            IMAGE: openruntimes/java:v4-8.0
+            IMAGE: openruntimes/java:v5-8.0
             ARCH: "linux/amd64,linux/arm64"
 
           # C++
           - ID: cpp-20
             RUNTIME: cpp
             VERSION: "20"
-            IMAGE: openruntimes/cpp:v4-20
+            IMAGE: openruntimes/cpp:v5-20
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
           - ID: cpp-17
             RUNTIME: cpp
             VERSION: "17"
-            IMAGE: openruntimes/cpp:v4-17
+            IMAGE: openruntimes/cpp:v5-17
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # Dotnet
           - ID: dotnet-8.0
             RUNTIME: dotnet
             VERSION: "8.0"
-            IMAGE: openruntimes/dotnet:v4-8.0
+            IMAGE: openruntimes/dotnet:v5-8.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: dotnet-7.0
             RUNTIME: dotnet
             VERSION: "7.0"
-            IMAGE: openruntimes/dotnet:v4-7.0
+            IMAGE: openruntimes/dotnet:v5-7.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: dotnet-6.0
             RUNTIME: dotnet
             VERSION: "6.0"
-            IMAGE: openruntimes/dotnet:v4-6.0
+            IMAGE: openruntimes/dotnet:v5-6.0
             ARCH: "linux/amd64,linux/arm64"
 
           # Bun
           - ID: bun-1.1
             RUNTIME: bun
             VERSION: "1.1"
-            IMAGE: openruntimes/bun:v4-1.1
+            IMAGE: openruntimes/bun:v5-1.1
             ARCH: "linux/amd64,linux/arm64"
           - ID: bun-1.0
             RUNTIME: bun
             VERSION: "1.0"
-            IMAGE: openruntimes/bun:v4-1.0
+            IMAGE: openruntimes/bun:v5-1.0
             ARCH: "linux/amd64,linux/arm64"
 
           # Go
           - ID: go-1.23
             RUNTIME: go
             VERSION: "1.23"
-            IMAGE: openruntimes/go:v4-1.23
+            IMAGE: openruntimes/go:v5-1.23
             ARCH: "linux/amd64,linux/arm64"
     name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
@@ -362,7 +372,7 @@ jobs:
       - name: Prepare runtime folder
         working-directory: ./
         run: |
-          sh ./ci_release.sh
+          bash ./ci_release.sh
         env:
           RUNTIME: ${{ matrix.RUNTIME }}
           ENTRYPOINT: ${{ matrix.ENTRYPOINT }}

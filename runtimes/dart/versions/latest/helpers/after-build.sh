@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 # Fail build if any command fails
 set -e
+shopt -s dotglob
 
 # Get server dependencies
 cd /usr/local/server
