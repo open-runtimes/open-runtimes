@@ -131,7 +131,7 @@ abstract class WorkspaceBase extends TestCase
         ]);
         $this->assertTrue($response['success']);
 
-        // test search files
+        // test search files (by name)
         $response = $this->executeCommand([
             'type' => 'fs',
             'operation' => 'searchFiles',
@@ -143,7 +143,23 @@ abstract class WorkspaceBase extends TestCase
         $this->assertArrayHasKey('results', $response['data']);
         $this->assertIsArray($response['data']['results']);
         $this->assertCount(1, $response['data']['results']);
-        $this->assertEquals('test.txt', $response['data']['results'][0]);
+        $this->assertEquals('test.txt', $response['data']['results'][0]['path']);
+        $this->assertEquals([], $response['data']['results'][0]['matches']); // since it matches the file name, not the content
+
+        // test search files (by content)
+        $response = $this->executeCommand([
+            'type' => 'fs',
+            'operation' => 'searchFiles',
+            'params' => [
+                'query' => 'Hello World'
+            ]
+        ]);
+        $this->assertTrue($response['success']);
+        $this->assertArrayHasKey('results', $response['data']);
+        $this->assertIsArray($response['data']['results']);
+        $this->assertCount(1, $response['data']['results']);
+        $this->assertEquals('test.txt', $response['data']['results'][0]['path']);
+        $this->assertCount(2, $response['data']['results'][0]['matches']); // there are two "Hello World" in the file
 
         // test get file
         $response = $this->executeCommand([
@@ -154,7 +170,8 @@ abstract class WorkspaceBase extends TestCase
             ]
         ]);
         $this->assertTrue($response['success']);
-        $this->assertEquals('Hello WorldHello World 2', $response['data']);
+        $this->assertEquals('Hello WorldHello World 2', $response['data']['content']);
+        $this->assertEquals('text/plain', $response['data']['mimeType']);
 
         // test update file
         $response = $this->executeCommand([

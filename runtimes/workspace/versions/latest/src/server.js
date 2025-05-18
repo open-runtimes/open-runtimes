@@ -414,6 +414,25 @@ const server = micro(async (req, res) => {
     globalGit.updateWorkDir(params.workDir);
   }
 
+  if (method === "GET" && path === "/zip") {
+    const zipResult = await globalFilesystem.createZipFile();
+
+    if (!zipResult.success) {
+      return send(res, 500, {
+        success: false,
+        error: zipResult.error,
+      });
+    }
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", 'attachment; filename="download.zip"');
+    res.setHeader("Content-Length", zipResult.data.buffer.length);
+
+    res.statusCode = 200;
+    res.end(zipResult.data.buffer);
+    return;
+  }
+
   if (method === "POST" && path === "/") {
     try {
       const contentType = (req.headers["content-type"] || "").toLowerCase();
