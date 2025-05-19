@@ -13,6 +13,7 @@
   "dependencies": {
     "micro": "^9.3.4",
     "cls-hooked": "^4.2.2",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "pino": "^9.7.0"
   }
 }

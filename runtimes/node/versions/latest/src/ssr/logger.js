@@ -1,4 +1,4 @@
-import { createWriteStream, writeFileSync, unlinkSync } from "fs";
+import pino from 'pino';
 
 export const nativeLog = console.log.bind(console);
 
@@ -22,35 +22,30 @@ export class Logger {
           : Logger.generateId();
     }
 
-    if (Logger.streams[id]) {
-      return id;
-    }
-
-    Logger.streams[id] = {
-      logs: createWriteStream(`/mnt/logs/${id}_logs.log`, {
-        flags: "a",
-      }),
-      errors: createWriteStream(`/mnt/logs/${id}_errors.log`, {
-        flags: "a",
-      }),
-    };
-
-    try {
-      writeFileSync(`/mnt/logs/${id}_logs.log.lock`, "");
-      writeFileSync(`/mnt/logs/${id}_errors.log.lock`, "");
-    } catch (err) {
-      // Cuncurrent dev request, not a big deal
-    }
-
     return id;
   }
 
   static write(id, messages, type = Logger.TYPE_LOG) {
-    const streams = Logger.streams[id];
-    if (!streams) {
-      return;
+    if(!Logger.streams[id]) {
+      const logsDestination = pino.destination({
+        dest: `/mnt/logs/${id}_logs.log`,
+        sync: true,
+        minLength: 1
+      });
+      const errorsDestination = pino.destination({
+        dest: `/mnt/logs/${id}_errors.log`,
+        sync: true,
+        minLength: 1
+      });
+      Logger.streams[id] = {
+        logsDestination,
+        errorsDestination,
+        logs: pino(logsDestination),
+        errors: pino(errorsDestination)
+      }
     }
-
+    
+    const streams = Logger.streams[id];
     const stream = type === Logger.TYPE_ERROR ? streams.errors : streams.logs;
 
     let stringLog = "";
@@ -69,11 +64,7 @@ export class Logger {
       }
     }
 
-    if (stream.writable) {
-      stream.write(stringLog + "\n");
-    } else {
-      nativeLog(stringLog + "\n");
-    }
+    stream.log(stringLog);
   }
 
   static async end(id) {
@@ -81,23 +72,10 @@ export class Logger {
     if (!streams) {
       return;
     }
-
-    await Promise.all([
-      new Promise((res) => {
-        streams.logs.end(undefined, undefined, res);
-      }),
-      new Promise((res) => {
-        streams.errors.end(undefined, undefined, res);
-      }),
-    ]);
-
-    try {
-      unlinkSync(`/mnt/logs/${id}_logs.log.lock`);
-      unlinkSync(`/mnt/logs/${id}_errors.log.lock`);
-    } catch (err) {
-      // Cuncurrent dev request, not a big deal
-    }
-
+    
+    streams.logsDestination.end();
+    streams.errorsDestination.end();
+    
     delete Logger.streams[id];
   }
 
