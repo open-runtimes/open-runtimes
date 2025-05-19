@@ -1,12 +1,10 @@
-import pino from "pino";
+import { appendFileSync } from "fs";
 
 export const nativeLog = console.log.bind(console);
 
 export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
-
-  static streams = [];
 
   static start(status, id) {
     const enabled = (status ? status : "enabled") === "enabled";
@@ -26,57 +24,6 @@ export class Logger {
   }
 
   static write(id, messages, type = Logger.TYPE_LOG) {
-    if (!Logger.streams[id]) {
-      const logsDestination = pino.transport({
-        targets: [{
-          target: 'pino-pretty',
-          options: {
-            colorizeObjects: false,
-            colorize: false,
-            include: '',
-            sync: true,
-          }
-        }, {
-          target: 'pino/file',
-          options: { destination: `/mnt/logs/${id}_logs.log` }
-        }]
-      });
-      const errorsDestination = pino.transport({
-        targets: [{
-          target: 'pino-pretty',
-          options: {
-            colorizeObjects: false,
-            colorize: false,
-            include: '',
-            sync: true,
-          }
-        }, {
-          target: 'pino/file',
-          options: { destination: `/mnt/logs/${id}_errors.log` }
-        }]
-      });
-      
-      Logger.streams[id] = {
-        logsDestination,
-        errorsDestination,
-        logs: pino(
-          {
-            timestamp: false,
-          },
-          logsDestination,
-        ),
-        errors: pino(
-          {
-            timestamp: false,
-          },
-          errorsDestination,
-        ),
-      };
-    }
-
-    const streams = Logger.streams[id];
-    const stream = type === Logger.TYPE_ERROR ? streams.errors : streams.logs;
-
     let stringLog = "";
     for (let i = 0; i < messages.length; i++) {
       const message = messages[i];
@@ -93,20 +40,12 @@ export class Logger {
       }
     }
 
-    stream.info("My info");
-    stream.info(stringLog);
+    const path = `/mnt/logs/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`;
+    appendFileSync(path, stringLog + "\n");
   }
 
   static async end(id) {
-    const streams = Logger.streams[id];
-    if (!streams) {
-      return;
-    }
-
-    streams.logsDestination.end();
-    streams.errorsDestination.end();
-
-    delete Logger.streams[id];
+    // No custom logic
   }
 
   static overrideNativeLogs(namespace, rid) {
