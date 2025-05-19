@@ -1,4 +1,4 @@
-import pino from 'pino';
+import pino from "pino";
 
 export const nativeLog = console.log.bind(console);
 
@@ -26,25 +26,25 @@ export class Logger {
   }
 
   static write(id, messages, type = Logger.TYPE_LOG) {
-    if(!Logger.streams[id]) {
+    if (!Logger.streams[id]) {
       const logsDestination = pino.destination({
         dest: `/mnt/logs/${id}_logs.log`,
         sync: true,
-        minLength: 1
+        minLength: 1,
       });
       const errorsDestination = pino.destination({
         dest: `/mnt/logs/${id}_errors.log`,
         sync: true,
-        minLength: 1
+        minLength: 1,
       });
       Logger.streams[id] = {
         logsDestination,
         errorsDestination,
         logs: pino(logsDestination),
-        errors: pino(errorsDestination)
-      }
+        errors: pino(errorsDestination),
+      };
     }
-    
+
     const streams = Logger.streams[id];
     const stream = type === Logger.TYPE_ERROR ? streams.errors : streams.logs;
 
@@ -72,10 +72,10 @@ export class Logger {
     if (!streams) {
       return;
     }
-    
+
     streams.logsDestination.end();
     streams.errorsDestination.end();
-    
+
     delete Logger.streams[id];
   }
 
