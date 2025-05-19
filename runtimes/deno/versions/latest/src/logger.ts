@@ -1,154 +1,145 @@
-import { fileStreamReady } from "./fileStreamReady.ts";
+export const nativeLog = console.log.bind(console);
 
 export class Logger {
-  static TYPE_ERROR = "error";
-  static TYPE_LOG = "log";
+    static TYPE_ERROR = "error";
+    static TYPE_LOG = "log";
 
-  writePromises: Promise<any>[] = [];
+    static buffers: Map<string, { logs: string[]; errors: string[] }> =
+        new Map();
+    static #savedConsole: any = null;
 
-  id = "";
-  enabled = false;
-  includesNativeInfo = false;
+    id: string;
 
-  streamLogs: Deno.FsFile | null = null;
-  streamErrors: Deno.FsFile | null = null;
-  nativeLogsCache: { [key: string]: any } = {};
-
-  constructor(status: string | null = null, id: string | null = null) {
-    this.enabled = (status ? status : "enabled") === "enabled";
-
-    if (this.enabled) {
-      this.id = id
-        ? id
-        : (Deno.env.get("OPEN_RUNTIMES_ENV") === "development"
-          ? "dev"
-          : this.generateId());
-    }
-  }
-
-  async setup() {
-    if (this.enabled) {
-      const [streamLogs, streamErrors] = await Promise.all([
-        Deno.open(`/mnt/logs/${this.id}_logs.log`, {
-          create: true,
-          append: true,
-        }),
-        Deno.open(`/mnt/logs/${this.id}_errors.log`, {
-          create: true,
-          append: true,
-        }),
-      ]);
-
-      await Promise.all([
-        fileStreamReady(streamLogs),
-        fileStreamReady(streamErrors),
-      ]);
-
-      this.streamLogs = streamLogs;
-      this.streamErrors = streamErrors;
-    }
-  }
-
-  write(messages: any[], type = Logger.TYPE_LOG, native = false) {
-    if (!this.enabled) {
-      return;
+    constructor(status?: string, id?: string) {
+        this.id = Logger.start(status, id);
     }
 
-    if (native && !this.includesNativeInfo) {
-      this.includesNativeInfo = true;
-      this.write([
-        "Native logs detected. Use context.log() or context.error() for better experience.",
-      ]);
+    write(messages: unknown[], type = Logger.TYPE_LOG) {
+        Logger.write(this.id, messages, type);
     }
 
-    const stream = type === Logger.TYPE_ERROR
-      ? this.streamErrors
-      : this.streamLogs;
-
-    if (!stream) {
-      return;
+    end() {
+        return Logger.end(this.id);
     }
 
-    let stringLog = "";
-    for (let i = 0; i < messages.length; i++) {
-      const message = messages[i];
-      if (message instanceof Error) {
-        stringLog += [message.stack || message].join("\n");
-      } else if (message instanceof Object || Array.isArray(message)) {
-        stringLog += JSON.stringify(message);
-      } else {
-        stringLog += `${message}`;
-      }
-      if (i < messages.length - 1) {
-        stringLog += " ";
-      }
+    overrideNativeLogs(
+        namespace: { get: (key: string) => string } | null = null,
+    ) {
+        Logger.overrideNativeLogs(namespace);
     }
 
-    const encoded = new TextEncoder().encode(stringLog + "\n");
-    this.writePromises.push(stream.write(encoded));
-  }
-
-  async end() {
-    if (!this.enabled || !this.streamLogs || !this.streamErrors) {
-      return;
+    revertNativeLogs() {
+        Logger.revertNativeLogs();
     }
 
-    this.enabled = false;
-
-    for (const promise of this.writePromises) {
-      await promise;
+    // lifecycle
+    static start(status?: string, id?: string) {
+        if ((status ?? "enabled") !== "enabled") return "";
+        if (!id) id = Logger.#generateId();
+        if (!Logger.buffers.has(id))
+            Logger.buffers.set(id, { logs: [], errors: [] });
+        return id;
     }
 
-    await Promise.all([
-      this.streamLogs.close(),
-      this.streamErrors.close(),
-    ]);
-  }
+    static write(id: string, messages: unknown[], type = Logger.TYPE_LOG) {
+        const entry = Logger.buffers.get(id);
+        if (!entry) return;
 
-  overrideNativeLogs() {
-    if (!this.enabled) {
-      return;
+        const parts = messages.map((m) =>
+            m instanceof Error
+                ? (m.stack ?? m).toString()
+                : typeof m === "object"
+                  ? JSON.stringify(m)
+                  : String(m),
+        );
+
+        (type === Logger.TYPE_ERROR ? entry.errors : entry.logs).push(
+            parts.join(" "),
+        );
     }
 
-    this.nativeLogsCache.stdlog = console.log.bind(console);
-    this.nativeLogsCache.stderror = console.error.bind(console);
-    this.nativeLogsCache.stdinfo = console.info.bind(console);
-    this.nativeLogsCache.stddebug = console.debug.bind(console);
-    this.nativeLogsCache.stdwarn = console.warn.bind(console);
+    static async end(id: string) {
+        const entry = Logger.buffers.get(id);
+        if (!entry) return;
 
-    console.log =
-      console.info =
-      console.debug =
-      console.warn =
-      console.error =
-        (...args: any[]) => {
-          this.write(args, Logger.TYPE_LOG, true);
-        };
-  }
+        await Promise.all([
+            Logger.#flush(
+                id,
+                entry.logs.join("\n") + (entry.logs.length ? "\n" : ""),
+                "logs",
+            ),
+            Logger.#flush(
+                id,
+                entry.errors.join("\n") + (entry.errors.length ? "\n" : ""),
+                "errors",
+            ),
+        ]);
 
-  revertNativeLogs() {
-    if (!this.enabled) {
-      return;
+        Logger.buffers.delete(id);
     }
 
-    console.log = this.nativeLogsCache.stdlog;
-    console.error = this.nativeLogsCache.stderror;
-    console.debug = this.nativeLogsCache.stddebug;
-    console.warn = this.nativeLogsCache.stdwarn;
-    console.info = this.nativeLogsCache.stdinfo;
-  }
+    // console override
+    static overrideNativeLogs(
+        namespace: { get: (key: string) => string } | null = null,
+    ) {
+        if (Logger.#savedConsole) return;
 
-  // Recreated from https://www.php.net/manual/en/function.uniqid.php
-  generateId(padding = 7) {
-    const now = new Date();
-    const sec = Math.floor(now.getTime() / 1000);
-    const msec = now.getMilliseconds();
-    const baseId = sec.toString(16) + msec.toString(16).padStart(5, "0");
-    let randomPadding = "";
-    for (let i = 0; i < padding; i++) {
-      const randomHexDigit = Math.floor(Math.random() * 16).toString(16);
-      randomPadding += randomHexDigit;
+        Logger.#savedConsole = { ...console } as any;
+
+        const proxy =
+            (type: string) =>
+            (...args: unknown[]) => {
+                const id = namespace?.get("id") ?? "dev";
+                Logger.write(id, args, type);
+            };
+
+        console.log =
+            console.info =
+            console.debug =
+            console.warn =
+                proxy(Logger.TYPE_LOG);
+        console.error = proxy(Logger.TYPE_ERROR);
     }
-    return baseId + randomPadding;
-  }
+
+    static revertNativeLogs() {
+        if (!Logger.#savedConsole) return;
+        console.log = Logger.#savedConsole.log;
+        console.info = Logger.#savedConsole.info;
+        console.debug = Logger.#savedConsole.debug;
+        console.warn = Logger.#savedConsole.warn;
+        console.error = Logger.#savedConsole.error;
+        Logger.#savedConsole = null;
+    }
+
+    // internals
+    static async #flush(id: string, data: string, suffix: string) {
+        if (!data.trim()) return;
+        const tmpPath = `/mnt/logs/${id}_${suffix}.tmp`;
+        const finalPath = `/mnt/logs/${id}_${suffix}.log`;
+
+        const encoder = new TextEncoder();
+        const file = await Deno.open(tmpPath, {
+            write: true,
+            create: true,
+            truncate: true,
+        });
+        try {
+            await file.write(encoder.encode(data));
+            await file.sync();
+        } finally {
+            file.close();
+        }
+
+        await Deno.rename(tmpPath, finalPath);
+    }
+
+    static #generateId(padding = 7) {
+        const now = Date.now();
+        const sec = Math.floor(now / 1000).toString(16);
+        const msec = (now % 1000).toString(16).padStart(5, "0");
+        let rnd = "";
+        for (let i = 0; i < padding; i++)
+            rnd += Math.floor(Math.random() * 16).toString(16);
+        return sec + msec + rnd;
+    }
 }

@@ -1,136 +1,134 @@
-const fs = require("node:fs");
+import { rename } from "fs/promises";
+
+export const nativeLog = console.log.bind(console);
 
 export class Logger {
-  static TYPE_ERROR = "error";
-  static TYPE_LOG = "log";
+    static TYPE_ERROR = "error" as const;
+    static TYPE_LOG = "log" as const;
 
-  id = "";
-  enabled = false;
-  includesNativeInfo = false;
+    static buffers = new Map<string, { logs: string[]; errors: string[] }>();
+    static #savedConsole: any = null;
 
-  streamLogs: null | fs.WriteStream = null;
-  streamErrors: null | fs.WriteStream = null;
-  nativeLogsCache: { [key: string]: any } = {};
+    id: string;
 
-  constructor(status, id) {
-    this.enabled = (status ? status : "enabled") === "enabled";
-
-    if (this.enabled) {
-      this.id = id
-        ? id
-        : process.env.OPEN_RUNTIMES_ENV === "development"
-          ? "dev"
-          : this.generateId();
-      this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
-        flags: "a",
-      });
-      this.streamErrors = fs.createWriteStream(
-        `/mnt/logs/${this.id}_errors.log`,
-        {
-          flags: "a",
-        },
-      );
-    }
-  }
-
-  write(messages: any[], type = Logger.TYPE_LOG, native = false) {
-    if (!this.enabled) {
-      return;
+    constructor(status?: string, id?: string) {
+        this.id = Logger.start(status, id);
     }
 
-    if (native && !this.includesNativeInfo) {
-      this.includesNativeInfo = true;
-      this.write([
-        "Native logs detected. Use context.log() or context.error() for better experience.",
-      ]);
+    write(messages: unknown[], type = Logger.TYPE_LOG) {
+        Logger.write(this.id, messages, type);
     }
 
-    const stream =
-      type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
-
-    if (!stream) {
-      return;
+    end() {
+        return Logger.end(this.id);
     }
 
-    let stringLog = "";
-    for (let i = 0; i < messages.length; i++) {
-      const message = messages[i];
-      if (message instanceof Error) {
-        stringLog += [message.stack || message].join("\n");
-      } else if (message instanceof Object || Array.isArray(message)) {
-        stringLog += JSON.stringify(message);
-      } else {
-        stringLog += `${message}`;
-      }
-      if (i < messages.length - 1) {
-        stringLog += " ";
-      }
+    overrideNativeLogs(
+        namespace: { get: (key: string) => string } | null = null,
+    ) {
+        Logger.overrideNativeLogs(namespace);
     }
 
-    stream.write(stringLog + "\n");
-  }
-
-  async end() {
-    if (!this.enabled) {
-      return;
+    revertNativeLogs() {
+        Logger.revertNativeLogs();
     }
 
-    this.enabled = false;
-
-    await Promise.all([
-      new Promise((res) => {
-        this.streamLogs?.end(undefined, undefined, res);
-      }),
-      new Promise((res) => {
-        this.streamErrors?.end(undefined, undefined, res);
-      }),
-    ]);
-  }
-
-  overrideNativeLogs() {
-    if (!this.enabled) {
-      return;
+    /* lifecycle */
+    static start(status?: string, id?: string) {
+        if ((status ?? "enabled") !== "enabled") return "";
+        if (!id) id = Logger.#generateId();
+        if (!Logger.buffers.has(id))
+            Logger.buffers.set(id, { logs: [], errors: [] });
+        return id;
     }
 
-    this.nativeLogsCache.stdlog = console.log.bind(console);
-    this.nativeLogsCache.stderror = console.error.bind(console);
-    this.nativeLogsCache.stdinfo = console.info.bind(console);
-    this.nativeLogsCache.stddebug = console.debug.bind(console);
-    this.nativeLogsCache.stdwarn = console.warn.bind(console);
+    static write(id: string, messages: unknown[], type = Logger.TYPE_LOG) {
+        const entry = Logger.buffers.get(id);
+        if (!entry) return;
 
-    console.log =
-      console.info =
-      console.debug =
-      console.warn =
-      console.error =
-        (...args: any[]) => {
-          this.write(args, Logger.TYPE_LOG, true);
-        };
-  }
+        const text = messages
+            .map((m) =>
+                m instanceof Error
+                    ? (m.stack ?? m).toString()
+                    : typeof m === "object"
+                      ? JSON.stringify(m)
+                      : String(m),
+            )
+            .join(" ");
 
-  revertNativeLogs() {
-    if (!this.enabled) {
-      return;
+        (type === Logger.TYPE_ERROR ? entry.errors : entry.logs).push(text);
     }
 
-    console.log = this.nativeLogsCache.stdlog;
-    console.error = this.nativeLogsCache.stderror;
-    console.debug = this.nativeLogsCache.stddebug;
-    console.warn = this.nativeLogsCache.stdwarn;
-    console.info = this.nativeLogsCache.stdinfo;
-  }
+    static async end(id: string) {
+        const entry = Logger.buffers.get(id);
+        if (!entry) return;
 
-  // Recreated from https://www.php.net/manual/en/function.uniqid.php
-  generateId(padding = 7) {
-    const now = new Date();
-    const sec = Math.floor(now.getTime() / 1000);
-    const msec = now.getMilliseconds();
-    const baseId = sec.toString(16) + msec.toString(16).padStart(5, "0");
-    let randomPadding = "";
-    for (let i = 0; i < padding; i++) {
-      const randomHexDigit = Math.floor(Math.random() * 16).toString(16);
-      randomPadding += randomHexDigit;
+        await Promise.all([
+            Logger.#flush(
+                id,
+                entry.logs.join("\n") + (entry.logs.length ? "\n" : ""),
+                "logs",
+            ),
+            Logger.#flush(
+                id,
+                entry.errors.join("\n") + (entry.errors.length ? "\n" : ""),
+                "errors",
+            ),
+        ]);
+
+        Logger.buffers.delete(id);
     }
-    return baseId + randomPadding;
-  }
+
+    /* console override */
+    static overrideNativeLogs(
+        namespace: { get: (key: string) => string } | null = null,
+    ) {
+        if (Logger.#savedConsole) return;
+
+        Logger.#savedConsole = { ...console } as any;
+
+        const proxy =
+            (type: string) =>
+            (...args: unknown[]) => {
+                const id = namespace?.get("id") ?? "dev";
+                Logger.write(id, args, type);
+            };
+
+        console.log =
+            console.info =
+            console.debug =
+            console.warn =
+                proxy(Logger.TYPE_LOG);
+        console.error = proxy(Logger.TYPE_ERROR);
+    }
+
+    static revertNativeLogs() {
+        if (!Logger.#savedConsole) return;
+        console.log = Logger.#savedConsole.log;
+        console.info = Logger.#savedConsole.info;
+        console.debug = Logger.#savedConsole.debug;
+        console.warn = Logger.#savedConsole.warn;
+        console.error = Logger.#savedConsole.error;
+        Logger.#savedConsole = null;
+    }
+
+    /* internals */
+    static async #flush(id: string, data: string, suffix: string) {
+        if (!data.trim()) return;
+        const tmpPath = `/mnt/logs/${id}_${suffix}.tmp`;
+        const finalPath = `/mnt/logs/${id}_${suffix}.log`;
+
+        await Bun.write(tmpPath, data);
+        await rename(tmpPath, finalPath);
+    }
+
+    static #generateId(padding = 7) {
+        const now = Date.now();
+        const sec = Math.floor(now / 1000).toString(16);
+        const msec = (now % 1000).toString(16).padStart(5, "0");
+        let rnd = "";
+        for (let i = 0; i < padding; i++)
+            rnd += Math.floor(Math.random() * 16).toString(16);
+        return sec + msec + rnd;
+    }
 }
