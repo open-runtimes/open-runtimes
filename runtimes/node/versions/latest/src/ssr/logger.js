@@ -27,21 +27,50 @@ export class Logger {
 
   static write(id, messages, type = Logger.TYPE_LOG) {
     if (!Logger.streams[id]) {
-      const logsDestination = pino.destination({
-        dest: `/mnt/logs/${id}_logs.log`,
-        sync: true,
-        minLength: 1,
+      const logsDestination = pino.transport({
+        targets: [{
+          target: 'pino-pretty',
+          options: {
+            colorizeObjects: false,
+            colorize: false,
+            include: '',
+            sync: true,
+          }
+        }, {
+          target: 'pino/file',
+          options: { destination: `/mnt/logs/${id}_logs.log` }
+        }]
       });
-      const errorsDestination = pino.destination({
-        dest: `/mnt/logs/${id}_errors.log`,
-        sync: true,
-        minLength: 1,
+      const errorsDestination = pino.transport({
+        targets: [{
+          target: 'pino-pretty',
+          options: {
+            colorizeObjects: false,
+            colorize: false,
+            include: '',
+            sync: true,
+          }
+        }, {
+          target: 'pino/file',
+          options: { destination: `/mnt/logs/${id}_errors.log` }
+        }]
       });
+      
       Logger.streams[id] = {
         logsDestination,
         errorsDestination,
-        logs: pino(logsDestination),
-        errors: pino(errorsDestination),
+        logs: pino(
+          {
+            timestamp: false,
+          },
+          logsDestination,
+        ),
+        errors: pino(
+          {
+            timestamp: false,
+          },
+          errorsDestination,
+        ),
       };
     }
 
@@ -64,7 +93,8 @@ export class Logger {
       }
     }
 
-    stream.log(stringLog);
+    stream.info("My info");
+    stream.info(stringLog);
   }
 
   static async end(id) {
