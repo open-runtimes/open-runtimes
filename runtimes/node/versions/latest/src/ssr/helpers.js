@@ -34,12 +34,6 @@ export function onInit(req, res, next) {
     req.headers[`x-open-runtimes-log-id`],
   );
   res.setHeader("x-open-runtimes-log-id", req.loggerId);
-  res.on("finish", async () => {
-    await Logger.end(req.loggerId);
-  });
-  res.on("close", async () => {
-    await Logger.end(req.loggerId);
-  });
 
   // Validate safe timeout
   const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";

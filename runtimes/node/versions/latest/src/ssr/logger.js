@@ -44,10 +44,6 @@ export class Logger {
     appendFileSync(path, stringLog + "\n");
   }
 
-  static async end(id) {
-    // No custom logic
-  }
-
   static overrideNativeLogs(namespace, rid) {
     console.log =
       console.info =
