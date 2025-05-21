@@ -7,27 +7,6 @@ export class Logger {
   static TYPE_LOG = "log";
 
   static buffers = new Map();
-  static #savedConsole = null;
-
-  constructor(status, id) {
-    this.id = Logger.start(status, id);
-  }
-
-  write(messages, type = Logger.TYPE_LOG) {
-    Logger.write(this.id, messages, type);
-  }
-
-  end() {
-    return Logger.end(this.id);
-  }
-
-  overrideNativeLogs() {
-    Logger.overrideNativeLogs(this.id);
-  }
-
-  revertNativeLogs() {
-    Logger.revertNativeLogs();
-  }
 
   static start(status, id) {
     if ((status ?? "enabled") !== "enabled") return "";
@@ -74,20 +53,12 @@ export class Logger {
     Logger.buffers.delete(id);
   }
 
-  static overrideNativeLogs(id) {
-    if (Logger.#savedConsole) return;
-    Logger.#savedConsole = { ...console };
+  static overrideNativeLogs(namespace) {
     const proxy =
       (type) =>
       (...args) => {
+        const id = namespace.get("id");
         Logger.write(id, args, type);
-        Logger.write(
-          id,
-          [
-            "Native logs detected. Use context.log() or context.error() for better experience.",
-          ],
-          type,
-        );
       };
     console.log =
       console.info =
@@ -97,24 +68,14 @@ export class Logger {
     console.error = proxy(Logger.TYPE_ERROR);
   }
 
-  static revertNativeLogs() {
-    if (!Logger.#savedConsole) return;
-    Object.assign(console, Logger.#savedConsole);
-    Logger.#savedConsole = null;
-  }
-
   static async #flush(id, data, suffix) {
     if (!data.trim()) return;
-    const tmp = `/mnt/logs/${id}_${suffix}.tmp`;
-    const final = `/mnt/logs/${id}_${suffix}.log`;
-    const fd = await fs.open(tmp, "w");
-    try {
-      await fd.writeFile(data, "utf8");
-      await fd.sync();
-    } finally {
-      await fd.close();
-    }
-    await fs.rename(tmp, final);
+
+    const tmpPath = `/mnt/logs/${id}_${suffix}.tmp`;
+    const finalPath = `/mnt/logs/${id}_${suffix}.log`;
+
+    await fs.writeFile(tmpPath, data);
+    await fs.rename(tmpPath, finalPath);
   }
 
   // Recreated from https://www.php.net/manual/en/function.uniqid.php

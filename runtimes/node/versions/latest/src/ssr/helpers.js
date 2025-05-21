@@ -67,7 +67,7 @@ export function onAction(callback) {
       const [req, res, next] = params;
 
       loggingNamespace.set("id", req.loggerId);
-      Logger.overrideNativeLogs(req.loggerId);
+      Logger.overrideNativeLogs(loggingNamespace);
 
       if (req.safeTimeout !== null) {
         let executed = true;
