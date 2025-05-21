@@ -1,4 +1,4 @@
-import { createWriteStream, writeFileSync, unlinkSync } from "fs";
+import { promises as fs } from "fs";
 
 export const nativeLog = console.log.bind(console);
 
@@ -6,119 +6,80 @@ export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
 
-  static streams = [];
+  static buffers = new Map();
 
   static start(status, id) {
-    const enabled = (status ? status : "enabled") === "enabled";
-
-    if (!enabled) {
-      return "";
-    }
-
-    if (!id) {
+    if ((status ?? "enabled") !== "enabled") return "";
+    if (!id)
       id =
         process.env.OPEN_RUNTIMES_ENV === "development"
           ? "dev"
-          : Logger.generateId();
-    }
-
-    if (Logger.streams[id]) {
-      return id;
-    }
-
-    Logger.streams[id] = {
-      logs: createWriteStream(`/mnt/logs/${id}_logs.log`, {
-        flags: "a",
-      }),
-      errors: createWriteStream(`/mnt/logs/${id}_errors.log`, {
-        flags: "a",
-      }),
-    };
-
-    try {
-      writeFileSync(`/mnt/logs/${id}_logs.log.lock`, "");
-      writeFileSync(`/mnt/logs/${id}_errors.log.lock`, "");
-    } catch (err) {
-      // Cuncurrent dev request, not a big deal
-    }
-
+          : Logger.#generateId();
+    if (!Logger.buffers.has(id))
+      Logger.buffers.set(id, { logs: [], errors: [] });
     return id;
   }
 
   static write(id, messages, type = Logger.TYPE_LOG) {
-    const streams = Logger.streams[id];
-    if (!streams) {
-      return;
-    }
-
-    const stream = type === Logger.TYPE_ERROR ? streams.errors : streams.logs;
-
-    let stringLog = "";
-    for (let i = 0; i < messages.length; i++) {
-      const message = messages[i];
-      if (message instanceof Error) {
-        stringLog += [message.stack || message].join("\n");
-      } else if (message instanceof Object || Array.isArray(message)) {
-        stringLog += JSON.stringify(message);
-      } else {
-        stringLog += `${message}`;
-      }
-
-      if (i < messages.length - 1) {
-        stringLog += " ";
-      }
-    }
-
-    if (stream.writable) {
-      stream.write(stringLog + "\n");
-    } else {
-      nativeLog(stringLog + "\n");
-    }
+    const entry = Logger.buffers.get(id);
+    if (!entry) return;
+    const line = messages
+      .map((m) =>
+        m instanceof Error
+          ? (m.stack ?? m).toString()
+          : typeof m === "object"
+            ? JSON.stringify(m)
+            : String(m),
+      )
+      .join(" ");
+    (type === Logger.TYPE_ERROR ? entry.errors : entry.logs).push(line);
   }
 
   static async end(id) {
-    const streams = Logger.streams[id];
-    if (!streams) {
-      return;
-    }
-
+    const entry = Logger.buffers.get(id);
+    if (!entry) return;
     await Promise.all([
-      new Promise((res) => {
-        streams.logs.end(undefined, undefined, res);
-      }),
-      new Promise((res) => {
-        streams.errors.end(undefined, undefined, res);
-      }),
+      Logger.#flush(
+        id,
+        entry.logs.join("\n") + (entry.logs.length ? "\n" : ""),
+        "logs",
+      ),
+      Logger.#flush(
+        id,
+        entry.errors.join("\n") + (entry.errors.length ? "\n" : ""),
+        "errors",
+      ),
     ]);
-
-    try {
-      unlinkSync(`/mnt/logs/${id}_logs.log.lock`);
-      unlinkSync(`/mnt/logs/${id}_errors.log.lock`);
-    } catch (err) {
-      // Cuncurrent dev request, not a big deal
-    }
-
-    delete Logger.streams[id];
+    Logger.buffers.delete(id);
   }
 
-  static overrideNativeLogs(namespace, rid) {
+  static overrideNativeLogs(namespace) {
+    const proxy =
+      (type) =>
+      (...args) => {
+        const id = namespace.get("id");
+        Logger.write(id, args, type);
+      };
     console.log =
       console.info =
       console.debug =
       console.warn =
-        (...args) => {
-          const requestId = namespace.get("id");
-          Logger.write(requestId, args, Logger.TYPE_LOG, true);
-        };
+        proxy(Logger.TYPE_LOG);
+    console.error = proxy(Logger.TYPE_ERROR);
+  }
 
-    console.error = (...args) => {
-      const requestId = namespace.get("id");
-      Logger.write(requestId, args, Logger.TYPE_ERROR, true);
-    };
+  static async #flush(id, data, suffix) {
+    if (!data.trim()) return;
+
+    const tmpPath = `/mnt/logs/${id}_${suffix}.tmp`;
+    const finalPath = `/mnt/logs/${id}_${suffix}.log`;
+
+    await fs.writeFile(tmpPath, data);
+    await fs.rename(tmpPath, finalPath);
   }
 
   // Recreated from https://www.php.net/manual/en/function.uniqid.php
-  static generateId(padding = 7) {
+  static #generateId(padding = 7) {
     const now = new Date();
     const sec = Math.floor(now.getTime() / 1000);
     const msec = now.getMilliseconds();
