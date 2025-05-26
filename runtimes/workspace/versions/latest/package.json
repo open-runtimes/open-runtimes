@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@appwrite.io/synapse": "https://try-module.cloud/module/@appwrite/@appwrite.io/synapse@28f361c",
+    "@appwrite.io/synapse": "https://try-module.cloud/module/@appwrite/@appwrite.io/synapse~add-appwrite-tools",
     "micro": "^9.3.4"
   },
   "pnpm": {
