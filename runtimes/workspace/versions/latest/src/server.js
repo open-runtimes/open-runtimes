@@ -21,7 +21,8 @@ let globalTerminal,
   globalGit,
   globalCode,
   globalAppwrite; // initialize global services (for HTTP requests)
-const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
+
+const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code, appwrite }
 
 function parseUrl(url) {
   const [path, query] = url.split("?");
@@ -245,7 +246,7 @@ const router = {
     return result;
   },
 
-  appwrite: async (message, connectionId) => {
+  appwrite: async (message, connectionId, headers) => {
     let appwrite;
     if (connectionId) {
       appwrite = (connections.get(connectionId) || {}).appwrite;
@@ -253,7 +254,7 @@ const router = {
       appwrite = globalAppwrite;
     }
     if (!appwrite) throw new Error("Appwrite not initialized");
-    const { operation, params, headers } = message;
+    const { operation, params } = message;
     let result;
 
     if (headers) {
@@ -265,6 +266,10 @@ const router = {
       }
       if (headers["x-appwrite-key"]) {
         appwrite.setKey(headers["x-appwrite-key"]);
+      }
+
+      if (headers["x-appwrite-project"]) {
+        appwrite.setProject(headers["x-appwrite-project"]);
       }
     }
 
@@ -280,7 +285,7 @@ const router = {
       case "createDeployment":
         result = await appwrite.call("deployments", "create", {
           siteId: params.siteId,
-          code: InputFile.fromPath(appwrite.getWorkDir()),
+          code: InputFile.fromPath(appwrite.getWorkDir() ?? WORK_DIR),
         });
       default:
         throw new Error("Invalid appwrite operation");
@@ -516,7 +521,7 @@ const server = micro(async (req, res) => {
         });
       }
 
-      const { type, operation, params, headers } = body;
+      const { type, operation, params } = body;
 
       if (!type || !operation) {
         return send(res, 400, {
@@ -544,7 +549,14 @@ const server = micro(async (req, res) => {
         });
       }
 
-      const result = await router[type]({ operation, params, headers });
+      const result = await router[type](
+        {
+          operation,
+          params,
+        },
+        null,
+        req.headers,
+      );
       if (result && result.success === false) {
         return send(res, 400, { success: false, error: result.error });
       }
