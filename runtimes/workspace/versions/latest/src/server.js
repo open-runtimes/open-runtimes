@@ -7,13 +7,20 @@ const {
   System,
   Git,
   Code,
+  Appwrite,
 } = require("@appwrite.io/synapse");
+const { InputFile } = require("node-appwrite/file");
 
 const WORK_DIR = "/tmp/workspace";
 
 const synapse = new Synapse("localhost", 3000);
 
-let globalTerminal, globalFilesystem, globalSystem, globalGit, globalCode; // initialize global services (for HTTP requests)
+let globalTerminal,
+  globalFilesystem,
+  globalSystem,
+  globalGit,
+  globalCode,
+  globalAppwrite; // initialize global services (for HTTP requests)
 const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
 
 function parseUrl(url) {
@@ -237,6 +244,49 @@ const router = {
     }
     return result;
   },
+
+  appwrite: async (message, connectionId) => {
+    let appwrite;
+    if (connectionId) {
+      appwrite = (connections.get(connectionId) || {}).appwrite;
+    } else {
+      appwrite = globalAppwrite;
+    }
+    if (!appwrite) throw new Error("Appwrite not initialized");
+    const { operation, params, headers } = message;
+    let result;
+
+    if (headers) {
+      if (headers["x-appwrite-jwt"]) {
+        appwrite.setJWT(headers["x-appwrite-jwt"]);
+      }
+      if (headers["x-appwrite-session"]) {
+        appwrite.setSession(headers["x-appwrite-session"]);
+      }
+      if (headers["x-appwrite-key"]) {
+        appwrite.setKey(headers["x-appwrite-key"]);
+      }
+    }
+
+    switch (operation) {
+      case "createSite":
+        result = await appwrite.call("sites", "create", {
+          siteId: params.siteId,
+          name: params.name,
+          framework: params.framework,
+          buildRuntime: params.buildRuntime,
+        });
+        break;
+      case "createDeployment":
+        result = await appwrite.call("deployments", "create", {
+          siteId: params.siteId,
+          code: InputFile.fromPath(appwrite.getWorkDir()),
+        });
+      default:
+        throw new Error("Invalid appwrite operation");
+    }
+    return result;
+  },
 };
 
 synapse
@@ -252,6 +302,7 @@ synapse
     globalSystem = new System(synapse);
     globalGit = new Git(synapse, WORK_DIR);
     globalCode = new Code(synapse);
+    globalAppwrite = new Appwrite(synapse, WORK_DIR);
 
     synapse.onConnection((connectionId) => {
       console.info(`New Synapse connection: ${connectionId}`);
@@ -276,6 +327,7 @@ synapse
       const system = new System(synapse);
       const git = new Git(synapse, workDir);
       const code = new Code(synapse);
+      const appwrite = new Appwrite(synapse, workDir);
 
       connections.set(connectionId, {
         terminal,
@@ -283,6 +335,7 @@ synapse
         system,
         git,
         code,
+        appwrite,
         cleanupHandlers: [],
       });
 
@@ -384,7 +437,8 @@ const server = micro(async (req, res) => {
     !globalFilesystem ||
     !globalSystem ||
     !globalGit ||
-    !globalCode
+    !globalCode ||
+    !globalAppwrite
   ) {
     return send(res, 503, {
       success: false,
@@ -462,7 +516,7 @@ const server = micro(async (req, res) => {
         });
       }
 
-      const { type, operation, params } = body;
+      const { type, operation, params, headers } = body;
 
       if (!type || !operation) {
         return send(res, 400, {
@@ -490,7 +544,7 @@ const server = micro(async (req, res) => {
         });
       }
 
-      const result = await router[type]({ operation, params });
+      const result = await router[type]({ operation, params, headers });
       if (result && result.success === false) {
         return send(res, 400, { success: false, error: result.error });
       }
