@@ -13,17 +13,21 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   if (timeout.isNotEmpty) {
     safeTimeout = int.tryParse(timeout);
     if (safeTimeout == null || safeTimeout == 0) {
-      return shelf.Response(500,
-          body:
-              'Header "x-open-runtimes-timeout" must be an integer greater than 0.');
+      return shelf.Response(
+        500,
+        body:
+            'Header "x-open-runtimes-timeout" must be an integer greater than 0.',
+      );
     }
   }
 
   if ((Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '') != '' &&
       (req.headers['x-open-runtimes-secret'] ?? '') !=
           Platform.environment['OPEN_RUNTIMES_SECRET']) {
-    return shelf.Response(500,
-        body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.');
+    return shelf.Response(
+      500,
+      body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.',
+    );
   }
 
   int maxSize = 20 * 1024 * 1024;
@@ -55,9 +59,10 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 
   String? enforcedHeadersString = Platform.environment['OPEN_RUNTIMES_HEADERS'];
   final enforcedHeaders = jsonDecode(
-      (enforcedHeadersString != null && !enforcedHeadersString.isEmpty)
-          ? enforcedHeadersString
-          : '{}');
+    (enforcedHeadersString != null && !enforcedHeadersString.isEmpty)
+        ? enforcedHeadersString
+        : '{}',
+  );
   enforcedHeaders.forEach((key, value) {
     headers[key.toLowerCase()] = '${value}';
   });
@@ -104,16 +109,17 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   }
 
   RuntimeRequest contextReq = new RuntimeRequest(
-      method: method,
-      scheme: scheme,
-      host: host,
-      port: port,
-      path: path,
-      query: query,
-      queryString: queryString,
-      headers: headers,
-      bodyBinary: bodyBinary,
-      url: url);
+    method: method,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+    queryString: queryString,
+    headers: headers,
+    bodyBinary: bodyBinary,
+    url: url,
+  );
   RuntimeResponse contextRes = new RuntimeResponse();
   RuntimeContext context = new RuntimeContext(contextReq, contextRes, logger);
 
@@ -124,7 +130,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
         if (safeTimeout != null) {
           dynamic result = await Future.any(<Future<dynamic>>[
             Future.delayed(Duration(seconds: safeTimeout)),
-            user_code.main(context)
+            user_code.main(context),
           ]);
 
           if (result != null) {
@@ -151,7 +157,8 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 
   if (output == null) {
     context.error(
-        'Return statement missing. return context.res.empty() if no response is expected.');
+      'Return statement missing. return context.res.empty() if no response is expected.',
+    );
     output = context.res.text('', 500, const {});
   }
 
@@ -168,8 +175,8 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  String contentTypeValue =
-      (responseHeaders['content-type'] ?? 'text/plain').toLowerCase();
+  String contentTypeValue = (responseHeaders['content-type'] ?? 'text/plain')
+      .toLowerCase();
   Encoding? encoding = null;
 
   if (contentTypeValue.contains('charset=')) {
@@ -183,31 +190,43 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   responseHeaders['x-open-runtimes-log-id'] = logger.id;
   await logger.end();
 
-  return shelf.Response(output['statusCode'],
-      encoding: encoding, body: output['body'], headers: responseHeaders);
+  return shelf.Response(
+    output['statusCode'],
+    encoding: encoding,
+    body: output['body'],
+    headers: responseHeaders,
+  );
 }
 
 void main() async {
-  await shelf_io.serve((req) async {
-    Logger logger = new Logger(req.headers['x-open-runtimes-logging'],
-        req.headers['x-open-runtimes-log-id']);
+  await shelf_io.serve(
+    (req) async {
+      Logger logger = new Logger(
+        req.headers['x-open-runtimes-logging'],
+        req.headers['x-open-runtimes-log-id'],
+      );
 
-    try {
-      return await action(logger, req);
-    } catch (e, s) {
-      logger.write(e, Logger.TYPE_ERROR);
-      logger.write(s, Logger.TYPE_ERROR);
+      try {
+        return await action(logger, req);
+      } catch (e, s) {
+        logger.write(e, Logger.TYPE_ERROR);
+        logger.write(s, Logger.TYPE_ERROR);
 
-      Map<String, String> responseHeaders = {};
-      responseHeaders['x-open-runtimes-log-id'] = logger.id;
-      await logger.end();
+        Map<String, String> responseHeaders = {};
+        responseHeaders['x-open-runtimes-log-id'] = logger.id;
+        await logger.end();
 
-      return shelf.Response(500,
+        return shelf.Response(
+          500,
           encoding: Encoding.getByName('utf-8'),
           body: '',
-          headers: responseHeaders);
-    }
-  }, '0.0.0.0', 3000);
+          headers: responseHeaders,
+        );
+      }
+    },
+    '0.0.0.0',
+    3000,
+  );
 
   print("HTTP server successfully started!");
 }
