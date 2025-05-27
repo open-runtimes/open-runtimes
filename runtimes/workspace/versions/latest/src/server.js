@@ -7,14 +7,22 @@ const {
   System,
   Git,
   Code,
+  Appwrite,
 } = require("@appwrite.io/synapse");
+const { InputFile } = require("node-appwrite/file");
 
 const WORK_DIR = "/tmp/workspace";
 
 const synapse = new Synapse("localhost", 3000);
 
-let globalTerminal, globalFilesystem, globalSystem, globalGit, globalCode; // initialize global services (for HTTP requests)
-const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
+let globalTerminal,
+  globalFilesystem,
+  globalSystem,
+  globalGit,
+  globalCode,
+  globalAppwrite; // initialize global services (for HTTP requests)
+
+const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code, appwrite }
 
 function parseUrl(url) {
   const [path, query] = url.split("?");
@@ -237,6 +245,71 @@ const router = {
     }
     return result;
   },
+
+  appwrite: async (message, connectionId, headers) => {
+    let appwrite;
+    if (connectionId) {
+      appwrite = (connections.get(connectionId) || {}).appwrite;
+    } else {
+      appwrite = globalAppwrite;
+    }
+    if (!appwrite) throw new Error("Appwrite not initialized");
+    const { operation, params } = message;
+    let result;
+
+    if (headers) {
+      if (headers["x-appwrite-jwt"]) {
+        appwrite.setJWT(headers["x-appwrite-jwt"]);
+      }
+      if (headers["x-appwrite-session"]) {
+        appwrite.setSession(headers["x-appwrite-session"]);
+      }
+      if (headers["x-appwrite-key"]) {
+        appwrite.setKey(headers["x-appwrite-key"]);
+      }
+
+      if (headers["x-appwrite-project"]) {
+        appwrite.setProject(headers["x-appwrite-project"]);
+      }
+    }
+
+    switch (operation) {
+      case "createSite":
+        result = await appwrite.call("sites", "create", {
+          siteId: params.siteId ?? "unique()",
+          name: params.name,
+          framework: params.framework ?? "react",
+          buildRuntime: params.buildRuntime ?? "node-21.0",
+        });
+        break;
+      case "createDeployment":
+        await globalFilesystem.createGzipFile("code.tar.gz");
+        const path = `${appwrite.getWorkDir() ?? WORK_DIR}/code.tar.gz`;
+        const file = InputFile.fromPath(path, "code.tar.gz");
+        result = await appwrite.call("sites", "createDeployment", {
+          siteId: params.siteId,
+          code: file,
+          activate: params.activate ?? false,
+        });
+        break;
+      case "getDeployment":
+        result = await appwrite.call("sites", "getDeployment", {
+          siteId: params.siteId,
+          deploymentId: params.deploymentId,
+        });
+        break;
+      case "listDeployments":
+        result = await appwrite.call("sites", "listDeployments", {
+          siteId: params.siteId,
+        });
+        break;
+      default:
+        throw new Error("Invalid appwrite operation");
+    }
+    return {
+      data: result,
+    };
+  },
 };
 
 synapse
@@ -252,6 +325,11 @@ synapse
     globalSystem = new System(synapse);
     globalGit = new Git(synapse, WORK_DIR);
     globalCode = new Code(synapse);
+    globalAppwrite = new Appwrite(
+      synapse,
+      WORK_DIR,
+      "https://qa17.appwrite.org/v1",
+    );
 
     synapse.onConnection((connectionId) => {
       console.info(`New Synapse connection: ${connectionId}`);
@@ -276,6 +354,11 @@ synapse
       const system = new System(synapse);
       const git = new Git(synapse, workDir);
       const code = new Code(synapse);
+      const appwrite = new Appwrite(
+        synapse,
+        workDir,
+        "https://qa17.appwrite.org/v1",
+      );
 
       connections.set(connectionId, {
         terminal,
@@ -283,6 +366,7 @@ synapse
         system,
         git,
         code,
+        appwrite,
         cleanupHandlers: [],
       });
 
@@ -384,7 +468,8 @@ const server = micro(async (req, res) => {
     !globalFilesystem ||
     !globalSystem ||
     !globalGit ||
-    !globalCode
+    !globalCode ||
+    !globalAppwrite
   ) {
     return send(res, 503, {
       success: false,
@@ -412,24 +497,31 @@ const server = micro(async (req, res) => {
     globalTerminal.updateWorkDir(params.workDir);
     globalFilesystem.updateWorkDir(params.workDir);
     globalGit.updateWorkDir(params.workDir);
+  } else {
+    globalTerminal.updateWorkDir(WORK_DIR);
+    globalFilesystem.updateWorkDir(WORK_DIR);
+    globalGit.updateWorkDir(WORK_DIR);
   }
 
-  if (method === "GET" && path === "/zip") {
-    const zipResult = await globalFilesystem.createZipFile();
+  if (method === "GET" && path === "/targz") {
+    const tarGzResult = await globalFilesystem.createGzipFile();
 
-    if (!zipResult.success) {
+    if (!tarGzResult.success) {
       return send(res, 500, {
         success: false,
-        error: zipResult.error,
+        error: tarGzResult.error,
       });
     }
 
-    res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", 'attachment; filename="download.zip"');
-    res.setHeader("Content-Length", zipResult.data.buffer.length);
+    res.setHeader("Content-Type", "application/gzip");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="download.tar.gz"',
+    );
+    res.setHeader("Content-Length", tarGzResult.data.buffer.length);
 
     res.statusCode = 200;
-    res.end(zipResult.data.buffer);
+    res.end(tarGzResult.data.buffer);
     return;
   }
 
@@ -490,7 +582,14 @@ const server = micro(async (req, res) => {
         });
       }
 
-      const result = await router[type]({ operation, params });
+      const result = await router[type](
+        {
+          operation,
+          params,
+        },
+        null,
+        req.headers,
+      );
       if (result && result.success === false) {
         return send(res, 400, { success: false, error: result.error });
       }
