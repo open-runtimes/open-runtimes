@@ -15,13 +15,16 @@ Future<dynamic> main(final context) async {
       }
     case 'jsonResponse':
       {
-        return context.res
-            .json({'json': true, 'message': 'Developers are awesome.'});
+        return context.res.json({
+          'json': true,
+          'message': 'Developers are awesome.',
+        });
       }
     case 'customCharsetResponse':
       {
-        return context.res.text(
-            'ÅÆ', 200, {'content-type': 'text/plain; charset=iso-8859-1'});
+        return context.res.text('ÅÆ', 200, {
+          'content-type': 'text/plain; charset=iso-8859-1',
+        });
       }
     case 'uppercaseCharsetResponse':
       {
@@ -30,7 +33,7 @@ Future<dynamic> main(final context) async {
     case 'multipartResponse':
       {
         return context.res.text(
-            """--12345
+          """--12345
 Content-Disposition: form-data; name=\"partOne\"
 
 Why just have one part?
@@ -39,8 +42,9 @@ Content-Disposition: form-data; name=\"partTwo\"
 
 When you can have two!
 --12345--""",
-            200,
-            {'content-type': 'multipart/form-data; boundary=12345'});
+          200,
+          {'content-type': 'multipart/form-data; boundary=12345'},
+        );
       }
     case 'redirectResponse':
       {
@@ -66,7 +70,7 @@ When you can have two!
           'x-custom': context.req.headers['x-custom'],
           'x-custom-uppercase': context.req.headers['x-custom-uppercase'],
           'x-open-runtimes-custom':
-              context.req.headers['x-open-runtimes-custom']
+              context.req.headers['x-open-runtimes-custom'],
         });
       }
     case 'headersResponse':
@@ -75,9 +79,9 @@ When you can have two!
           'first-header': 'first-value',
           'second-header':
               context.req.headers['x-open-runtimes-custom-in-header'] ??
-                  'missing',
+              'missing',
           'cookie': context.req.headers['cookie'] ?? 'missing',
-          'x-open-runtimes-custom-out-header': 'third-value'
+          'x-open-runtimes-custom-out-header': 'third-value',
         });
       }
     case 'statusResponse':
@@ -153,14 +157,15 @@ When you can have two!
       {
         final bytes = Uint8List.fromList(context.req.bodyBinary);
         final hash = md5.convert(bytes);
-        return context.res
-            .text(hash.toString(), 200, {'x-method': context.req.method});
+        return context.res.text(hash.toString(), 200, {
+          'x-method': context.req.method,
+        });
       }
     case 'envVars':
       {
         return context.res.json({
           'var': Platform.environment['CUSTOM_ENV_VAR'],
-          'emptyVar': Platform.environment['NOT_DEFINED_VAR'] ?? null
+          'emptyVar': Platform.environment['NOT_DEFINED_VAR'] ?? null,
         });
       }
     case 'logs':
@@ -183,8 +188,8 @@ When you can have two!
     case 'library':
       {
         final todo = await Dio().get(
-            'https://jsonplaceholder.typicode.com/todos/' +
-                context.req.bodyRaw);
+          'https://jsonplaceholder.typicode.com/todos/' + context.req.bodyRaw,
+        );
         return context.res.json({'todo': todo.data});
       }
     case 'timeout':

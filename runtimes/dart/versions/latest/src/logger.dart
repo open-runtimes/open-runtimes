@@ -20,13 +20,15 @@ class Logger {
       this.id = id != null
           ? id
           : (Platform.environment['OPEN_RUNTIMES_ENV'] == 'development'
-              ? 'dev'
-              : this.generateId());
+                ? 'dev'
+                : this.generateId());
 
-      this.streamLogs = File('/mnt/logs/' + this.id + '_logs.log')
-          .openWrite(mode: FileMode.append);
-      this.streamErrors = File('/mnt/logs/' + this.id + '_errors.log')
-          .openWrite(mode: FileMode.append);
+      this.streamLogs = File(
+        '/mnt/logs/' + this.id + '_logs.log',
+      ).openWrite(mode: FileMode.append);
+      this.streamErrors = File(
+        '/mnt/logs/' + this.id + '_errors.log',
+      ).openWrite(mode: FileMode.append);
     }
   }
 
@@ -40,11 +42,13 @@ class Logger {
     if (isNative && !this.includesNativeInfo) {
       this.includesNativeInfo = true;
       this.write(
-          'Native logs detected. Use context.log() or context.error() for better experience.');
+        'Native logs detected. Use context.log() or context.error() for better experience.',
+      );
     }
 
-    final stream =
-        type == Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
+    final stream = type == Logger.TYPE_ERROR
+        ? this.streamErrors
+        : this.streamLogs;
 
     if (stream == null) {
       return;

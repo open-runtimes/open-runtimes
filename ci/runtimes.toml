@@ -32,14 +32,14 @@ test = "Serverless/PythonML.php"
 
 [dart]
 entry = "lib/tests.dart"
-versions = ["3.5", "3.3", "3.1", "3.0", "2.19", "2.18", "2.17", "2.16", "2.15"]
+versions = ["3.8", "3.5", "3.3", "3.1", "3.0", "2.19", "2.18", "2.17", "2.16", "2.15"]
 commands = { install = "dart pub get", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
 tools = "dart --version"
 test = "Serverless/Dart.php"
 
 [flutter]
-versions = ["3.29", "3.27", "3.24"]
+versions = ["3.32", "3.29", "3.27", "3.24"]
 commands = { install = "flutter build web", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
 test = "CSR/Flutter.php"
