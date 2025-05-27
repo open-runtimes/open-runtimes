@@ -276,24 +276,39 @@ const router = {
     switch (operation) {
       case "createSite":
         result = await appwrite.call("sites", "create", {
-          siteId: params.siteId,
+          siteId: params.siteId ?? "unique()",
           name: params.name,
-          framework: params.framework,
-          buildRuntime: params.buildRuntime,
+          framework: params.framework ?? "react",
+          buildRuntime: params.buildRuntime ?? "node-21.0",
         });
         break;
       case "createDeployment":
         await globalFilesystem.createGzipFile("code.tar.gz");
         const path = `${appwrite.getWorkDir() ?? WORK_DIR}/code.tar.gz`;
+        const file = InputFile.fromPath(path, "code.tar.gz");
         result = await appwrite.call("sites", "createDeployment", {
           siteId: params.siteId,
-          code: InputFile.fromPath(path),
+          code: file,
           activate: params.activate ?? false,
         });
+        break;
+      case "getDeployment":
+        result = await appwrite.call("sites", "getDeployment", {
+          siteId: params.siteId,
+          deploymentId: params.deploymentId,
+        });
+        break;
+      case "listDeployments":
+        result = await appwrite.call("sites", "listDeployments", {
+          siteId: params.siteId,
+        });
+        break;
       default:
         throw new Error("Invalid appwrite operation");
     }
-    return result;
+    return {
+      data: result,
+    };
   },
 };
 
@@ -482,6 +497,10 @@ const server = micro(async (req, res) => {
     globalTerminal.updateWorkDir(params.workDir);
     globalFilesystem.updateWorkDir(params.workDir);
     globalGit.updateWorkDir(params.workDir);
+  } else {
+    globalTerminal.updateWorkDir(WORK_DIR);
+    globalFilesystem.updateWorkDir(WORK_DIR);
+    globalGit.updateWorkDir(WORK_DIR);
   }
 
   if (method === "GET" && path === "/targz") {
