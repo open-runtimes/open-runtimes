@@ -154,7 +154,7 @@ jobs:
           - ID: dart-3.8
             RUNTIME: dart
             VERSION: "3.8"
-            IMAGE: openruntimes/dart:v5-3.5
+            IMAGE: openruntimes/dart:v5-3.8
             ARCH: "linux/amd64,linux/arm64"
           - ID: dart-3.5
             RUNTIME: dart
