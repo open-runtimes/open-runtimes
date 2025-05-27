@@ -283,9 +283,12 @@ const router = {
         });
         break;
       case "createDeployment":
-        result = await appwrite.call("deployments", "create", {
+        await globalFilesystem.createGzipFile("code.tar.gz");
+        const path = `${appwrite.getWorkDir() ?? WORK_DIR}/code.tar.gz`;
+        result = await appwrite.call("sites", "createDeployment", {
           siteId: params.siteId,
-          code: InputFile.fromPath(appwrite.getWorkDir() ?? WORK_DIR),
+          code: InputFile.fromPath(path),
+          activate: params.activate ?? false,
         });
       default:
         throw new Error("Invalid appwrite operation");
@@ -307,7 +310,11 @@ synapse
     globalSystem = new System(synapse);
     globalGit = new Git(synapse, WORK_DIR);
     globalCode = new Code(synapse);
-    globalAppwrite = new Appwrite(synapse, WORK_DIR);
+    globalAppwrite = new Appwrite(
+      synapse,
+      WORK_DIR,
+      "https://qa17.appwrite.org/v1",
+    );
 
     synapse.onConnection((connectionId) => {
       console.info(`New Synapse connection: ${connectionId}`);
@@ -332,7 +339,11 @@ synapse
       const system = new System(synapse);
       const git = new Git(synapse, workDir);
       const code = new Code(synapse);
-      const appwrite = new Appwrite(synapse, workDir);
+      const appwrite = new Appwrite(
+        synapse,
+        workDir,
+        "https://qa17.appwrite.org/v1",
+      );
 
       connections.set(connectionId, {
         terminal,
@@ -473,22 +484,25 @@ const server = micro(async (req, res) => {
     globalGit.updateWorkDir(params.workDir);
   }
 
-  if (method === "GET" && path === "/zip") {
-    const zipResult = await globalFilesystem.createZipFile();
+  if (method === "GET" && path === "/targz") {
+    const tarGzResult = await globalFilesystem.createGzipFile();
 
-    if (!zipResult.success) {
+    if (!tarGzResult.success) {
       return send(res, 500, {
         success: false,
-        error: zipResult.error,
+        error: tarGzResult.error,
       });
     }
 
-    res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", 'attachment; filename="download.zip"');
-    res.setHeader("Content-Length", zipResult.data.buffer.length);
+    res.setHeader("Content-Type", "application/gzip");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="download.tar.gz"',
+    );
+    res.setHeader("Content-Length", tarGzResult.data.buffer.length);
 
     res.statusCode = 200;
-    res.end(zipResult.data.buffer);
+    res.end(tarGzResult.data.buffer);
     return;
   }
 
