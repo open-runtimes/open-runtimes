@@ -107,6 +107,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 | Swift | 5.10    | [openruntimes/swift:v4-5.10](https://hub.docker.com/r/openruntimes/swift)      | [Examples](/runtimes/swift-5.10/example)     | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/swift?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/swift) |
 | Bun | 1.0     | [openruntimes/bun:v4-1.0](https://hub.docker.com/r/openruntimes/bun)           | [Examples](/runtimes/bun-1.0/example)        | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/bun?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/bun) |
 | Bun | 1.1     | [openruntimes/bun:v4-1.1](https://hub.docker.com/r/openruntimes/bun)           | [Examples](/runtimes/bun-1.0/example)        | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/bun?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/bun) |
+| Bun | 1.2     | [openruntimes/bun:v4-1.2](https://hub.docker.com/r/openruntimes/bun)           | [Examples](/runtimes/bun-1.0/example)        | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/bun?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/bun) |
 
 ## Architecture
 
