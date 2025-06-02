@@ -246,7 +246,7 @@ const router = {
     return result;
   },
 
-  appwrite: async (message, connectionId, headers) => {
+  appwrite: async (message, connectionId) => {
     let appwrite;
     if (connectionId) {
       appwrite = (connections.get(connectionId) || {}).appwrite;
@@ -254,59 +254,43 @@ const router = {
       appwrite = globalAppwrite;
     }
     if (!appwrite) throw new Error("Appwrite not initialized");
-    const { operation, params } = message;
+    const { operation, service, params, headers } = message;
     let result;
 
+    // Set Appwrite headers from either headers parameter or message.headers
     if (headers) {
-      if (headers["x-appwrite-jwt"]) {
-        appwrite.setJWT(headers["x-appwrite-jwt"]);
-      }
-      if (headers["x-appwrite-session"]) {
-        appwrite.setSession(headers["x-appwrite-session"]);
-      }
-      if (headers["x-appwrite-key"]) {
-        appwrite.setKey(headers["x-appwrite-key"]);
-      }
+      const headerMappings = {
+        "x-appwrite-jwt": "setJWT",
+        "x-appwrite-session": "setSession",
+        "x-appwrite-key": "setKey",
+        "x-appwrite-project": "setProject",
+      };
 
-      if (headers["x-appwrite-project"]) {
-        appwrite.setProject(headers["x-appwrite-project"]);
-      }
+      Object.entries(headerMappings).forEach(([headerName, methodName]) => {
+        if (headers[headerName]) {
+          appwrite[methodName](headers[headerName]);
+        }
+      });
     }
 
-    switch (operation) {
-      case "createSite":
-        result = await appwrite.call("sites", "create", {
-          siteId: params.siteId ?? "unique()",
-          name: params.name,
-          framework: params.framework ?? "react",
-          buildRuntime: params.buildRuntime ?? "node-21.0",
-        });
-        break;
-      case "createDeployment":
-        await globalFilesystem.createGzipFile("code.tar.gz");
-        const path = `${appwrite.getWorkDir() ?? WORK_DIR}/code.tar.gz`;
-        const file = InputFile.fromPath(path, "code.tar.gz");
-        result = await appwrite.call("sites", "createDeployment", {
-          siteId: params.siteId,
-          code: file,
-          activate: params.activate ?? false,
-        });
-        break;
-      case "getDeployment":
-        result = await appwrite.call("sites", "getDeployment", {
-          siteId: params.siteId,
-          deploymentId: params.deploymentId,
-        });
-        break;
-      case "listDeployments":
-        result = await appwrite.call("sites", "listDeployments", {
-          siteId: params.siteId,
-        });
-        break;
-      default:
-        throw new Error("Invalid appwrite operation");
+    if (service === "sites" && operation === "createDeployment") {
+      await globalFilesystem.createGzipFile("code.tar.gz");
+      const path = `${appwrite.getWorkDir() ?? WORK_DIR}/code.tar.gz`;
+      const file = InputFile.fromPath(path, "code.tar.gz");
+      result = await appwrite.call("sites", "createDeployment", {
+        siteId: params.siteId,
+        code: file,
+        activate: params.activate ?? false,
+      });
+      return {
+        success: true,
+        data: result,
+      };
     }
+
+    result = await appwrite.call(service, operation, params);
     return {
+      success: true,
       data: result,
     };
   },
@@ -582,14 +566,11 @@ const server = micro(async (req, res) => {
         });
       }
 
-      const result = await router[type](
-        {
-          operation,
-          params,
-        },
-        null,
-        req.headers,
-      );
+      const result = await router[type]({
+        operation,
+        params,
+        headers: req.headers,
+      });
       if (result && result.success === false) {
         return send(res, 400, { success: false, error: result.error });
       }
