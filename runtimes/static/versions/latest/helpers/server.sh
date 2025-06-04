@@ -23,8 +23,8 @@ fi
 
 # Start server
 static-web-server \
-    -p 3000 - \
-    -log-level info \
+    -p 3000 \
+    --log-level info \
     --basic-auth="$AUTH" \
     --page404="/mnt/resources/404.html" \
     --page-fallback="$PAGE_FALLBACK" \
