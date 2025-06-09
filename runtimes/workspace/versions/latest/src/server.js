@@ -8,6 +8,7 @@ const {
   Git,
   Code,
   Appwrite,
+  Embeddings,
 } = require("@appwrite.io/synapse");
 const { InputFile } = require("node-appwrite/file");
 
@@ -20,7 +21,8 @@ let globalTerminal,
   globalSystem,
   globalGit,
   globalCode,
-  globalAppwrite; // initialize global services (for HTTP requests)
+  globalAppwrite,
+  globalEmbeddings; // initialize global services (for HTTP requests)
 
 const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code, appwrite }
 
@@ -294,6 +296,30 @@ const router = {
       data: result,
     };
   },
+
+  embeddings: async (message, connectionId) => {
+    let embeddings;
+    if (connectionId) {
+      embeddings = (connections.get(connectionId) || {}).embeddings;
+    } else {
+      embeddings = globalEmbeddings;
+    }
+    if (!embeddings) throw new Error("Embeddings not initialized");
+    const { operation, params } = message;
+    let result;
+
+    switch (operation) {
+      case "generateEmbeddings":
+        result = await embeddings.generateEmbeddings();
+        break;
+      case "findRelevantDocuments":
+        result = await embeddings.findRelevantDocuments(params.query);
+        break;
+      default:
+        throw new Error("Invalid embeddings operation");
+    }
+    return result;
+  },
 };
 
 synapse
@@ -314,6 +340,7 @@ synapse
       WORK_DIR,
       "https://qa17.appwrite.org/v1",
     );
+    globalEmbeddings = new Embeddings(synapse);
 
     synapse.onConnection((connectionId) => {
       console.info(`New Synapse connection: ${connectionId}`);
@@ -343,6 +370,7 @@ synapse
         workDir,
         "https://qa17.appwrite.org/v1",
       );
+      const embeddings = new Embeddings(synapse);
 
       connections.set(connectionId, {
         terminal,
@@ -351,6 +379,7 @@ synapse
         git,
         code,
         appwrite,
+        embeddings,
         cleanupHandlers: [],
       });
 
@@ -453,7 +482,8 @@ const server = micro(async (req, res) => {
     !globalSystem ||
     !globalGit ||
     !globalCode ||
-    !globalAppwrite
+    !globalAppwrite ||
+    !globalEmbeddings
   ) {
     return send(res, 503, {
       success: false,
