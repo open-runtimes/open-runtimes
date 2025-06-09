@@ -3,7 +3,7 @@ entry = "tests.js"
 versions = ["22", "21.0", "20.0", "19.0", "18.0", "16.0", "14.5", "22-mjs", "21.0-mjs", "20.0-mjs", "19.0-mjs", "18.0-mjs", "16.0-mjs", "14.5-mjs"]
 commands = { install = "npm install", start = "bash helpers/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version"
+tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "Serverless/Node.php"
 
 [deno]
