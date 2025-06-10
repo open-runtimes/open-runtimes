@@ -1,7 +1,7 @@
 COPY package* /usr/local/server/
 
-RUN apk add --no-cache \
-    build-base \
+RUN apt update && apt install -y \
+    build-essential \
     python3 \
     make \
     gcc \
