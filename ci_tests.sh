@@ -49,7 +49,7 @@ touch code.tar.gz
 BUILD_SCRIPT="helpers/build.sh"
 START_SCRIPT="helpers/start.sh"
 
-# Build
+# Main build
 docker run --rm --name open-runtimes-test-build -v /tmp/.build:/usr/local/server/.build -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" open-runtimes/test-runtime bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 
 # Tools test
@@ -70,19 +70,21 @@ fi
 docker network inspect openruntimes || docker network create openruntimes
 
 # Main tests
-docker run --network openruntimes -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_STATIC_FALLBACK="index.html" -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+docker run --network openruntimes -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_STATIC_FALLBACK="index.html" -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
 
 # Secondary tests
 # 1. Empty enforced headers
 # 2. Development mode (for logs)
 # 3. Empty auth secret
 # 4. No custom env variable
-docker run --network openruntimes -d --name open-runtimes-test-serve-secondary -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3001:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+# 5. Uncompressed builds
+PREPARE_UNCOMPRESSED_FILE="gunzip /mnt/code/code.tar.gz && rm -rf /mnt/code/code.tar.gz"
+docker run --network openruntimes -d --name open-runtimes-test-serve-secondary -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3001:3000 open-runtimes/test-runtime bash -c "bash $PREPARE_UNCOMPRESSED_FILE && $START_SCRIPT \"$START_COMMAND\""
 
 # Teritary tests
 # 1. Same as secondary
 # 2. Mounted resource folder (static 404 page)
-docker run --network openruntimes -d --name open-runtimes-test-serve-teritary -v $(pwd)/resources:/mnt/resources -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:rw -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3002:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+docker run --network openruntimes -d --name open-runtimes-test-serve-teritary -v $(pwd)/resources:/mnt/resources -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3002:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
 
 cd ../../
 
