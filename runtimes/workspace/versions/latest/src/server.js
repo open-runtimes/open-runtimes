@@ -10,11 +10,15 @@ const {
   Appwrite,
   Embeddings,
 } = require("@appwrite.io/synapse");
+const {
+  HuggingFaceEmbeddingAdapter,
+} = require("@appwrite.io/synapse/dist/adapters");
 const { InputFile } = require("node-appwrite/file");
 
 const WORK_DIR = "/tmp/workspace";
 
 const synapse = new Synapse("localhost", 3000);
+const huggingFaceAdapter = new HuggingFaceEmbeddingAdapter();
 
 let globalTerminal,
   globalFilesystem,
@@ -340,7 +344,7 @@ synapse
       WORK_DIR,
       "https://qa17.appwrite.org/v1",
     );
-    globalEmbeddings = new Embeddings(synapse);
+    globalEmbeddings = new Embeddings(synapse, WORK_DIR, huggingFaceAdapter);
 
     synapse.onConnection((connectionId) => {
       console.info(`New Synapse connection: ${connectionId}`);
@@ -370,7 +374,7 @@ synapse
         workDir,
         "https://qa17.appwrite.org/v1",
       );
-      const embeddings = new Embeddings(synapse);
+      const embeddings = new Embeddings(synapse, workDir, huggingFaceAdapter);
 
       connections.set(connectionId, {
         terminal,
