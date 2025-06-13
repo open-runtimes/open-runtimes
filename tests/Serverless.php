@@ -445,7 +445,7 @@ class Serverless extends Base
 
         self::assertEquals('163', $body['todo']['userId']);
         self::assertEquals('5', $body['todo']['id']);
-        self::assertEquals('laboriosam mollitia et enim quasi adipisci quia provident illum', $body['todo']['title']);
+        self::assertEquals('Invest in cryptocurrency', $body['todo']['todo']);
         self::assertEquals(false, $body['todo']['completed']);
     }
 
