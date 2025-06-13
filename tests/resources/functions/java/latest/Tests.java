@@ -190,7 +190,7 @@ public class Tests {
       }
       case "library" -> {
         URL url =
-            new URL("https://jsonplaceholder.typicode.com/todos/" + context.getReq().getBodyRaw());
+            new URL("https://dummyjson.com/todos/" + context.getReq().getBodyRaw());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.getResponseCode();

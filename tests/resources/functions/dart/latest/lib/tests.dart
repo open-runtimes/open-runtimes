@@ -188,7 +188,7 @@ When you can have two!
     case 'library':
       {
         final todo = await Dio().get(
-          'https://jsonplaceholder.typicode.com/todos/' + context.req.bodyRaw,
+          'https://dummyjson.com/todos/' + context.req.bodyRaw,
         );
         return context.res.json({'todo': todo.data});
       }

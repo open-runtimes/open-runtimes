@@ -234,7 +234,7 @@ When you can have two!
             "library" -> {
                 val gson = Gson()
 
-                val url = URL("https://jsonplaceholder.typicode.com/todos/" + context.req.bodyRaw)
+                val url = URL("https://dummyjson.com/todos/" + context.req.bodyRaw)
                 val con =
                     (url.openConnection() as HttpURLConnection).apply {
                         requestMethod = "GET"
