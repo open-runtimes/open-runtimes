@@ -57,6 +57,8 @@ const router = {
     const connectionFilesystem = (connections.get(connectionId) || {})
       .filesystem;
     const connectionSystem = (connections.get(connectionId) || {}).system;
+    const connectionEmbeddings = (connections.get(connectionId) || {})
+      .embeddings;
 
     const { operation, params } = message;
     switch (operation) {
@@ -68,6 +70,7 @@ const router = {
         connectionTerminal.updateWorkDir(params.workDir);
         connectionFilesystem.updateWorkDir(params.workDir);
         connectionSystem.updateWorkDir(params.workDir);
+        connectionEmbeddings.updateWorkDir(params.workDir);
 
         return { success: true, data: "Work directory updated successfully" };
     }
@@ -313,11 +316,14 @@ const router = {
     let result;
 
     switch (operation) {
-      case "generateEmbeddings":
-        result = await embeddings.generateEmbeddings();
+      case "getStats":
+        result = {
+          success: true,
+          data: embeddings.getStats(),
+        };
         break;
-      case "findRelevantDocuments":
-        result = await embeddings.findRelevantDocuments(params.query);
+      case "findDocuments":
+        result = await embeddings.findDocuments(params.query, params.limit);
         break;
       default:
         throw new Error("Invalid embeddings operation");
@@ -422,12 +428,14 @@ synapse
           }
         };
         filesystem.watchWorkDir(fsHandler);
+        embeddings.startWatching();
       }
 
       // Store handlers for cleanup
       connections.get(connectionId).cleanupHandlers.push(() => {
         terminal.kill();
         filesystem.unwatchWorkDir();
+        embeddings.dispose();
       });
     });
 
@@ -515,10 +523,12 @@ const server = micro(async (req, res) => {
     globalTerminal.updateWorkDir(params.workDir);
     globalFilesystem.updateWorkDir(params.workDir);
     globalGit.updateWorkDir(params.workDir);
+    globalEmbeddings.updateWorkDir(params.workDir);
   } else {
     globalTerminal.updateWorkDir(WORK_DIR);
     globalFilesystem.updateWorkDir(WORK_DIR);
     globalGit.updateWorkDir(WORK_DIR);
+    globalEmbeddings.updateWorkDir(WORK_DIR);
   }
 
   if (method === "GET" && path === "/targz") {
@@ -593,6 +603,7 @@ const server = micro(async (req, res) => {
         globalTerminal.updateWorkDir(params.workDir);
         globalFilesystem.updateWorkDir(params.workDir);
         globalGit.updateWorkDir(params.workDir);
+        globalEmbeddings.updateWorkDir(params.workDir);
 
         return send(res, 200, {
           success: true,
