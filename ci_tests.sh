@@ -78,8 +78,8 @@ docker run --network openruntimes -d --name open-runtimes-test-serve -v /tmp/log
 # 3. Empty auth secret
 # 4. No custom env variable
 # 5. Uncompressed builds
-PREPARE_UNCOMPRESSED_FILE="gunzip /mnt/code/code.tar.gz && rm -rf /mnt/code/code.tar.gz"
-docker run --network openruntimes -d --name open-runtimes-test-serve-secondary -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3001:3000 open-runtimes/test-runtime bash -c "bash $PREPARE_UNCOMPRESSED_FILE && $START_SCRIPT \"$START_COMMAND\""
+PREPARE_UNCOMPRESSED_FILE="gunzip -ck /mnt/code/code.tar.gz > /mnt/code/code.tar"
+docker run --network openruntimes -d --name open-runtimes-test-serve-secondary -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3001:3000 open-runtimes/test-runtime bash -c "$PREPARE_UNCOMPRESSED_FILE && $START_SCRIPT \"$START_COMMAND\""
 
 # Teritary tests
 # 1. Same as secondary
