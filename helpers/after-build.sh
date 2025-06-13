@@ -33,7 +33,7 @@ touch .open-runtimes
 echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" > .open-runtimes
 
 if [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "none" ]; then
-    tar --exclude code.tar.gz -cf /mnt/code/code.tar.gz .
+    tar --exclude code.tar -cf /mnt/code/code.tar .
 else
     # Default to gzip
     tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
