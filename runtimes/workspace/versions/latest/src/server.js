@@ -8,19 +8,25 @@ const {
   Git,
   Code,
   Appwrite,
+  Embeddings,
 } = require("@appwrite.io/synapse");
+const {
+  HuggingFaceEmbeddingAdapter,
+} = require("@appwrite.io/synapse/dist/adapters");
 const { InputFile } = require("node-appwrite/file");
 
 const WORK_DIR = "/tmp/workspace";
 
 const synapse = new Synapse("localhost", 3000);
+const huggingFaceAdapter = new HuggingFaceEmbeddingAdapter();
 
 let globalTerminal,
   globalFilesystem,
   globalSystem,
   globalGit,
   globalCode,
-  globalAppwrite; // initialize global services (for HTTP requests)
+  globalAppwrite,
+  globalEmbeddings; // initialize global services (for HTTP requests)
 
 const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code, appwrite }
 
@@ -51,6 +57,8 @@ const router = {
     const connectionFilesystem = (connections.get(connectionId) || {})
       .filesystem;
     const connectionSystem = (connections.get(connectionId) || {}).system;
+    const connectionEmbeddings = (connections.get(connectionId) || {})
+      .embeddings;
 
     const { operation, params } = message;
     switch (operation) {
@@ -62,6 +70,7 @@ const router = {
         connectionTerminal.updateWorkDir(params.workDir);
         connectionFilesystem.updateWorkDir(params.workDir);
         connectionSystem.updateWorkDir(params.workDir);
+        connectionEmbeddings.updateWorkDir(params.workDir);
 
         return { success: true, data: "Work directory updated successfully" };
     }
@@ -294,6 +303,33 @@ const router = {
       data: result,
     };
   },
+
+  embeddings: async (message, connectionId) => {
+    let embeddings;
+    if (connectionId) {
+      embeddings = (connections.get(connectionId) || {}).embeddings;
+    } else {
+      embeddings = globalEmbeddings;
+    }
+    if (!embeddings) throw new Error("Embeddings not initialized");
+    const { operation, params } = message;
+    let result;
+
+    switch (operation) {
+      case "getStats":
+        result = {
+          success: true,
+          data: embeddings.getStats(),
+        };
+        break;
+      case "findDocuments":
+        result = await embeddings.findDocuments(params.query, params.limit);
+        break;
+      default:
+        throw new Error("Invalid embeddings operation");
+    }
+    return result;
+  },
 };
 
 synapse
@@ -314,6 +350,7 @@ synapse
       WORK_DIR,
       "https://qa17.appwrite.org/v1",
     );
+    globalEmbeddings = new Embeddings(synapse, WORK_DIR, huggingFaceAdapter);
 
     synapse.onConnection((connectionId) => {
       console.info(`New Synapse connection: ${connectionId}`);
@@ -343,6 +380,7 @@ synapse
         workDir,
         "https://qa17.appwrite.org/v1",
       );
+      const embeddings = new Embeddings(synapse, workDir, huggingFaceAdapter);
 
       connections.set(connectionId, {
         terminal,
@@ -351,6 +389,7 @@ synapse
         git,
         code,
         appwrite,
+        embeddings,
         cleanupHandlers: [],
       });
 
@@ -389,12 +428,14 @@ synapse
           }
         };
         filesystem.watchWorkDir(fsHandler);
+        embeddings.startWatching();
       }
 
       // Store handlers for cleanup
       connections.get(connectionId).cleanupHandlers.push(() => {
         terminal.kill();
         filesystem.unwatchWorkDir();
+        embeddings.dispose();
       });
     });
 
@@ -453,7 +494,8 @@ const server = micro(async (req, res) => {
     !globalSystem ||
     !globalGit ||
     !globalCode ||
-    !globalAppwrite
+    !globalAppwrite ||
+    !globalEmbeddings
   ) {
     return send(res, 503, {
       success: false,
@@ -481,10 +523,12 @@ const server = micro(async (req, res) => {
     globalTerminal.updateWorkDir(params.workDir);
     globalFilesystem.updateWorkDir(params.workDir);
     globalGit.updateWorkDir(params.workDir);
+    globalEmbeddings.updateWorkDir(params.workDir);
   } else {
     globalTerminal.updateWorkDir(WORK_DIR);
     globalFilesystem.updateWorkDir(WORK_DIR);
     globalGit.updateWorkDir(WORK_DIR);
+    globalEmbeddings.updateWorkDir(WORK_DIR);
   }
 
   if (method === "GET" && path === "/targz") {
@@ -559,6 +603,7 @@ const server = micro(async (req, res) => {
         globalTerminal.updateWorkDir(params.workDir);
         globalFilesystem.updateWorkDir(params.workDir);
         globalGit.updateWorkDir(params.workDir);
+        globalEmbeddings.updateWorkDir(params.workDir);
 
         return send(res, 200, {
           success: true,
