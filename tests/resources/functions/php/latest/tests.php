@@ -5,7 +5,7 @@ require 'vendor/autoload.php';
 use GuzzleHttp\Client;
 
 $client = new Client([
-    'base_uri' => 'https://jsonplaceholder.typicode.com',
+    'base_uri' => 'https://dummyjson.com',
 ]);
 
 return function ($context) use ($client) {
