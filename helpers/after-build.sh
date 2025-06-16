@@ -32,7 +32,12 @@ fi
 touch .open-runtimes
 echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" > .open-runtimes
 
-tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
+if [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "none" ]; then
+    tar --exclude code.tar -cf /mnt/code/code.tar .
+else
+    # Default to gzip
+    tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
+fi
 
 echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Build packaging finished. [0m"
 
