@@ -312,6 +312,12 @@ const router = {
       embeddings = globalEmbeddings;
     }
     if (!embeddings) throw new Error("Embeddings not initialized");
+
+    const urlParams = synapse.getParams(connectionId);
+    if (!urlParams?.syncWorkDir || urlParams.syncWorkDir !== "true") {
+      throw new Error("syncWorkDir must be enabled to use embeddings service");
+    }
+
     const { operation, params } = message;
     let result;
 
