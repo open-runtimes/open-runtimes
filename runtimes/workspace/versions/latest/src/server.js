@@ -20,15 +20,16 @@ const WORK_DIR = "/tmp/workspace";
 const synapse = new Synapse("localhost", 3000);
 const huggingFaceAdapter = new HuggingFaceEmbeddingAdapter();
 
+const appwrite = new Appwrite(synapse);
+
 let globalTerminal,
   globalFilesystem,
   globalSystem,
   globalGit,
   globalCode,
-  globalAppwrite,
   globalEmbeddings; // initialize global services (for HTTP requests)
 
-const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code, appwrite }
+const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
 
 function parseUrl(url) {
   const [path, query] = url.split("?");
@@ -255,38 +256,26 @@ const router = {
     return result;
   },
 
-  appwrite: async (message, connectionId) => {
-    let appwrite;
-    if (connectionId) {
-      appwrite = (connections.get(connectionId) || {}).appwrite;
-    } else {
-      appwrite = globalAppwrite;
-    }
-    if (!appwrite) throw new Error("Appwrite not initialized");
-    const { operation, service, params, headers } = message;
-    let result;
+  appwrite: async (message) => {
+    const { operation, service, params } = message;
 
-    // Set Appwrite headers from either headers parameter or message.headers
-    if (headers) {
-      const headerMappings = {
-        "x-appwrite-jwt": "setJWT",
-        "x-appwrite-session": "setSession",
-        "x-appwrite-key": "setKey",
-        "x-appwrite-project": "setProject",
+    if (operation === "init") {
+      if (!params.projectId || !params.jwt) {
+        throw new Error("Endpoint, projectId, and jwt are required");
+      }
+
+      appwrite.init(params.endpoint, params.projectId, params.jwt);
+      return {
+        success: true,
+        data: "Appwrite initialized successfully",
       };
-
-      Object.entries(headerMappings).forEach(([headerName, methodName]) => {
-        if (headers[headerName]) {
-          appwrite[methodName](headers[headerName]);
-        }
-      });
     }
 
     if (service === "sites" && operation === "createDeployment") {
       await globalFilesystem.createGzipFile("code.tar.gz");
       const path = `${appwrite.getWorkDir() ?? WORK_DIR}/code.tar.gz`;
       const file = InputFile.fromPath(path, "code.tar.gz");
-      result = await appwrite.call("sites", "createDeployment", {
+      const result = await appwrite.call("sites", "createDeployment", {
         siteId: params.siteId,
         code: file,
         activate: params.activate ?? false,
@@ -297,7 +286,7 @@ const router = {
       };
     }
 
-    result = await appwrite.call(service, operation, params);
+    const result = await appwrite.call(service, operation, params);
     return {
       success: true,
       data: result,
@@ -351,11 +340,6 @@ synapse
     globalSystem = new System(synapse);
     globalGit = new Git(synapse, WORK_DIR);
     globalCode = new Code(synapse);
-    globalAppwrite = new Appwrite(
-      synapse,
-      WORK_DIR,
-      "https://qa17.appwrite.org/v1",
-    );
     globalEmbeddings = new Embeddings(synapse, WORK_DIR, huggingFaceAdapter);
 
     synapse.onConnection((connectionId) => {
@@ -381,11 +365,6 @@ synapse
       const system = new System(synapse);
       const git = new Git(synapse, workDir);
       const code = new Code(synapse);
-      const appwrite = new Appwrite(
-        synapse,
-        workDir,
-        "https://qa17.appwrite.org/v1",
-      );
       const embeddings = new Embeddings(synapse, workDir, huggingFaceAdapter);
 
       connections.set(connectionId, {
@@ -394,7 +373,6 @@ synapse
         system,
         git,
         code,
-        appwrite,
         embeddings,
         cleanupHandlers: [],
       });
@@ -500,7 +478,6 @@ const server = micro(async (req, res) => {
     !globalSystem ||
     !globalGit ||
     !globalCode ||
-    !globalAppwrite ||
     !globalEmbeddings
   ) {
     return send(res, 503, {
@@ -620,7 +597,6 @@ const server = micro(async (req, res) => {
       const result = await router[type]({
         operation,
         params,
-        headers: req.headers,
       });
       if (result && result.success === false) {
         return send(res, 400, { success: false, error: result.error });
