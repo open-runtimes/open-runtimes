@@ -10,7 +10,7 @@ testImage = "php:8.3-cli-alpine"
 [workspace]
 entry = "tests.js"
 versions = ["1"]
-commands = { install = "", start = "sh helpers/server.sh" }
+commands = { install = "", start = bash helpers/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version"
 test = "Workspace"
