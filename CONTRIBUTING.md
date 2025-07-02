@@ -125,6 +125,8 @@ Run following command to run formatter for any runtime runtime:
 
 ```
 sh formatter.sh node
+go install mvdan.cc/sh/v3/cmd/gosh@latest
+shfmt -l -w .
 ```
 
 > Replace `node` with runtime name that you want to test
