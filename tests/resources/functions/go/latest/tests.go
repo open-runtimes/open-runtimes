@@ -171,7 +171,7 @@ When you can have two!
 		type TodoObject struct {
 			UserId    int    `json:"userId"`
 			Id        int    `json:"id"`
-			Title     string `json:"title"`
+			Todo     string `json:"todo"`
 			Completed bool   `json:"completed"`
 		}
 
