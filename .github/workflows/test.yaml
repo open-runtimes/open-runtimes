@@ -50,6 +50,10 @@ jobs:
         run: composer install
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - name: Install shfmt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shfmt
       - name: Run tests
         working-directory: ./
         run: bash ci_tests.sh
@@ -66,3 +70,5 @@ jobs:
           OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}
           ENFORCED_RUNTIME: ${{ matrix.ENFORCED_RUNTIME }}
           ENFORCED_VERSION: ${{ matrix.ENFORCED_VERSION }}
+      - name: Check shell script formatting
+        run: shfmt -d .

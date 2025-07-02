@@ -4,28 +4,28 @@ set -e
 shopt -s dotglob
 
 if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
-    cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
+	cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
 fi
 
 ENTRYPOINT="./server/webpack-runtime.js"
 if [ -e "$ENTRYPOINT" ]; then
-    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Bundling for SSR started. [0m"
-    
-    cd /usr/local/build
+	echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Bundling for SSR started. [0m"
 
-    mkdir -p /tmp/.opr-tmp
-    mv $OPEN_RUNTIMES_OUTPUT_DIRECTORY /tmp/.opr-tmp
+	cd /usr/local/build
 
-    mkdir -p $OPEN_RUNTIMES_OUTPUT_DIRECTORY
-    cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
-    mv /tmp/.opr-tmp/* .next/
+	mkdir -p /tmp/.opr-tmp
+	mv $OPEN_RUNTIMES_OUTPUT_DIRECTORY /tmp/.opr-tmp
 
-    if [ -d "/usr/local/build/public/" ]; then
-        mv /usr/local/build/public/ ./public/
-    fi
+	mkdir -p $OPEN_RUNTIMES_OUTPUT_DIRECTORY
+	cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
+	mv /tmp/.opr-tmp/* .next/
 
-    mv /usr/local/build/package*.json ./
-    mv /usr/local/build/node_modules/ ./node_modules/
+	if [ -d "/usr/local/build/public/" ]; then
+		mv /usr/local/build/public/ ./public/
+	fi
 
-    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Bundling for SSR finished. [0m"
+	mv /usr/local/build/package*.json ./
+	mv /usr/local/build/node_modules/ ./node_modules/
+
+	echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Bundling for SSR finished. [0m"
 fi
