@@ -50,6 +50,10 @@ jobs:
         run: composer install
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - name: Install shfmt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shfmt
       - name: Run tests
         working-directory: ./
         run: bash ci_tests.sh
