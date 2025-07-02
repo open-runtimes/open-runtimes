@@ -2,7 +2,7 @@ set -e
 shopt -s dotglob
 
 if [ "$(docker ps -aq)" ]; then
-    docker rm --force $(docker ps -aq)
+	docker rm --force $(docker ps -aq)
 fi
 
 rm -rf /tmp/logs

@@ -22,7 +22,7 @@ docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runti
 cd ../../
 
 if [ -d "tests/resources/functions/$RUNTIME" ]; then
-    cd "tests/resources/functions/$RUNTIME"
-    docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
-    cd ../../../../
+	cd "tests/resources/functions/$RUNTIME"
+	docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
+	cd ../../../../
 fi
