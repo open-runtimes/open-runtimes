@@ -334,6 +334,7 @@ synapse
 
     // Initialize global service instances
     globalTerminal = new Terminal(synapse, {
+      shell: "bash",
       workDir: WORK_DIR,
     });
     globalFilesystem = new Filesystem(synapse, WORK_DIR);
@@ -359,6 +360,7 @@ synapse
 
       // Create new service instances for this connection
       const terminal = new Terminal(synapse, {
+        shell: "bash",
         workDir,
       });
       const filesystem = new Filesystem(synapse, workDir);
