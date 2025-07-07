@@ -146,6 +146,13 @@ async def action(logger, request: web_request.Request):
 
 
 async def handler(request) -> web.Response:
+    if request.headers.get("x-open-runtimes-timings"):
+        with open("/usr/local/telemetry/timings.txt", "r") as f:
+            timings = f.read()
+        return web.Response(
+            text=timings, headers={"content-type": "text/plain; charset=utf-8"}
+        )
+
     logger = Logger(
         request.headers.get("x-open-runtimes-logging", ""),
         request.headers.get("x-open-runtimes-log-id", ""),

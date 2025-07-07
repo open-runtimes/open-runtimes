@@ -249,6 +249,10 @@ Bun.serve({
   maxRequestBodySize: 20 * 1024 * 1024,
   idleTimeout: 0,
   async fetch(request) {
+    if (request.headers.get("x-open-runtimes-timings")) {
+      return new Response(Bun.file("/usr/local/telemetry/timings.txt"));
+    }
+
     const logger = new Logger(
       request.headers.get("x-open-runtimes-logging"),
       request.headers.get("x-open-runtimes-log-id"),

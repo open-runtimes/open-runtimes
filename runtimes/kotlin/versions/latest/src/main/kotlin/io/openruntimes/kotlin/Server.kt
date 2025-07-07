@@ -34,6 +34,12 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
+    if (ctx.header("x-open-runtimes-timings") != null) {
+        val timings = java.io.File("/usr/local/telemetry/timings.txt").readText()
+        ctx.contentType("text/plain; charset=utf-8").result(timings)
+        return
+    }
+
     val logger = RuntimeLogger(ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"))
     try {
         action(logger, ctx)

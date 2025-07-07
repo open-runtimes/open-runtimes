@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import '{entrypoint}' as user_code;
-import 'dart:io' show Platform;
 import 'function_types.dart';
 import 'logger.dart';
 
@@ -201,6 +201,16 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 void main() async {
   await shelf_io.serve(
     (req) async {
+      if (req.headers['x-open-runtimes-timings'] != null) {
+        String timings = await File(
+          '/usr/local/telemetry/timings.txt',
+        ).readAsString();
+        return shelf.Response.ok(
+          timings,
+          headers: {'content-type': 'text/plain; charset=utf-8'},
+        );
+      }
+
       Logger logger = new Logger(
         req.headers['x-open-runtimes-logging'],
         req.headers['x-open-runtimes-log-id'],
