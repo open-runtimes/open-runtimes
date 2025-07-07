@@ -212,7 +212,7 @@ Within the folder you will need to create a function for your runtime that will 
 
 2. Set a variable called `id` to the value of the `id` key in the payload or to `1` if it doesn't exist. This `id` will be of type string.
 
-3. Fetch `https://jsonplaceholder.typicode.com/todos/$id` using a HTTP Client that you got from your language's package manager (This is to test your dependency installation stage is working). Make sure to replace `$id` with the ID provided from payload.
+3. Fetch `https://dummyjson.com/todos/$id` using a HTTP Client that you got from your language's package manager (This is to test your dependency installation stage is working). Make sure to replace `$id` with the ID provided from payload.
 
 4. Return res.json with the following Schema:
 

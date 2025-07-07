@@ -121,7 +121,7 @@ When you can have two!
 			return context.res.text("");
 		case "library":
 			const todo = await fetch(
-				`https://jsonplaceholder.typicode.com/todos/${context.req.bodyRaw}`,
+				`https://dummyjson.com/todos/${context.req.bodyRaw}`,
 			).then((r) => r.json());
 			return context.res.json({ todo });
 		case "timeout":

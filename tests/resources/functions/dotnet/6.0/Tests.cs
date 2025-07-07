@@ -209,7 +209,7 @@ When you can have two!
                 return context.Res.Text("");
             case "library":
                 var response = await http.GetStringAsync(
-                    $"https://jsonplaceholder.typicode.com/todos/{context.Req.BodyRaw}"
+                    $"https://dummyjson.com/todos/{context.Req.BodyRaw}"
                 );
                 var todo =
                     JsonSerializer.Deserialize<Dictionary<string, object>>(response)
