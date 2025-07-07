@@ -1,6 +1,6 @@
 import { handler } from "./server/entry.mjs";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.js";
+import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
 
 console.log("Astro server starting ...");
 

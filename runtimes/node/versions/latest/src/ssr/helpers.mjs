@@ -1,6 +1,6 @@
 // Use as base for server-X.js (per framework)
 
-import { Logger } from "./logger.js";
+import { Logger } from "./logger.mjs";
 import { createNamespace } from "cls-hooked";
 
 const loggingNamespace = createNamespace("logging");
