@@ -1,5 +1,6 @@
 const micro = require("micro");
 const { send } = require("micro");
+const path = require("path");
 const {
   Synapse,
   Terminal,
@@ -10,14 +11,12 @@ const {
   Appwrite,
   Embeddings,
 } = require("@appwrite.io/synapse");
-const {
-  HuggingFaceEmbeddingAdapter,
-} = require("@appwrite.io/synapse/dist/adapters");
+const { HuggingFaceEmbeddingAdapter } = require("@appwrite.io/synapse/dist/adapters");
 const { InputFile } = require("node-appwrite/file");
 
-const WORK_DIR = "/tmp/workspace";
+const WORK_DIR = process.env.WORK_DIR || "/tmp/workspace";
 
-const synapse = new Synapse("localhost", 3000);
+const synapse = new Synapse("localhost", process.env.PORT || 3000);
 const huggingFaceAdapter = new HuggingFaceEmbeddingAdapter();
 
 const appwrite = new Appwrite(synapse);
@@ -94,6 +93,10 @@ const router = {
       case "createCommand":
         terminal.createCommand(params.command);
         break;
+      case "executeCommand":
+        const safeCwd = path.join(WORK_DIR, params.cwd);
+        const result = await terminal.executeCommand(params.command, safeCwd, params.timeout);
+        return { success: true, data: result };
       default:
         throw new Error("Invalid terminal operation");
     }
@@ -128,6 +131,14 @@ const router = {
         result = await filesystem.updateFilePath(
           params.filepath,
           params.newPath,
+        );
+        break;
+      case "listFilesInDir":
+        const safeDirpath = path.join(WORK_DIR, params.dirPath);
+        result = await filesystem.listFilesInDir(
+          safeDirpath,
+          params.withContent,
+          params.recursive,
         );
         break;
       case "deleteFile":
