@@ -8,6 +8,7 @@
 #include "{entrypointFile}"
 #include <vector>
 #include <numeric>
+#include <fstream>
 
 std::vector<std::string> split(const std::string &s, const char delim) {
     std::vector<std::string> result;
@@ -33,6 +34,16 @@ int main()
             [](const drogon::HttpRequestPtr &req,
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
+                if (!req->getHeader("x-open-runtimes-timings").empty()) {
+                    std::ifstream timingsFile("/usr/local/telemetry/timings.txt");
+                    std::string timings((std::istreambuf_iterator<char>(timingsFile)), std::istreambuf_iterator<char>());
+                    const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
+                    res->addHeader("content-type", "text/plain; charset=utf-8");
+                    res->setBody(timings);
+                    callback(res);
+                    return;
+                }
+
                 std::shared_ptr<runtime::RuntimeLogger> logger = std::make_shared<runtime::RuntimeLogger>(req->getHeader("x-open-runtimes-logging"), req->getHeader("x-open-runtimes-log-id"));
 
                 try {

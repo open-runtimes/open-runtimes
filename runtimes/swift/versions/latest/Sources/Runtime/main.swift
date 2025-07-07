@@ -19,6 +19,17 @@ app.on(.OPTIONS, "", body: .collect(maxSize: "20mb"), use: execute)
 app.on(.OPTIONS, "**", body: .collect(maxSize: "20mb"), use: execute)
 
 func execute(req: Request) async throws -> Response {
+    if !req.headers["x-open-runtimes-timings"].isEmpty {
+        let timings = try String(contentsOfFile: "/usr/local/telemetry/timings.txt")
+        var outputHeaders = HTTPHeaders()
+        outputHeaders.add(name: "content-type", value: "text/plain; charset=utf-8")
+        return Response(
+            status: .ok,
+            headers: outputHeaders,
+            body: .init(string: timings)
+        )
+    }
+
     let headerLogger = req.headers["x-open-runtimes-logging"]
     var loggerStatus = ""
     if !headerLogger.isEmpty {
