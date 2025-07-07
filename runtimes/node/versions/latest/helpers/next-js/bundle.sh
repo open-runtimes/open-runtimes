@@ -25,6 +25,7 @@ if [ -e "$ENTRYPOINT" ]; then
     fi
 
     mv /usr/local/build/package*.json ./
+    mv /usr/local/build/next.config.* ./
     mv /usr/local/build/node_modules/ ./node_modules/
 
     echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Bundling for SSR finished. [0m"
