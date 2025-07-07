@@ -1,22 +1,22 @@
 // Use as base for server-X.js (per framework)
 
-const { Logger } = require("./logger.js");
-const { createNamespace } = require("cls-hooked");
+import { Logger } from "./logger.mjs";
+import { createNamespace } from "cls-hooked";
 
 const loggingNamespace = createNamespace("logging");
 
-function getPort() {
+export function getPort() {
   const port = parseInt(process.env.PORT || "3000", 10);
   return port;
 }
 
-function getHost() {
+export function getHost() {
   const host = process.env.HOST || "0.0.0.0";
   return host;
 }
 
 // Before request starts
-function onInit(req, res, next) {
+export function onInit(req, res, next) {
   // Ensure auth headers
   if (
     process.env["OPEN_RUNTIMES_SECRET"] &&
@@ -55,7 +55,7 @@ function onInit(req, res, next) {
 }
 
 // Wrapper for SSR handling
-function onAction(callback) {
+export function onAction(callback) {
   return async (...params) => {
     loggingNamespace.run(async () => {
       const [req, res, next] = params;
@@ -89,9 +89,9 @@ function onAction(callback) {
 }
 
 // When error occurs
-function onError(error, req, res, next) {
+export function onError(error, req, res, next) {
   if (res.headersSent) {
-    return next(error);
+    return next(err);
   }
 
   Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);
@@ -99,11 +99,3 @@ function onError(error, req, res, next) {
   res.end("");
   return;
 }
-
-module.exports = {
-  getPort,
-  getHost,
-  onInit,
-  onAction,
-  onError,
-};
