@@ -1,8 +1,8 @@
-const { appendFileSync } = require("fs");
+import { appendFileSync } from "fs";
 
-const nativeLog = console.log.bind(console);
+export const nativeLog = console.log.bind(console);
 
-class Logger {
+export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
 
@@ -74,8 +74,3 @@ class Logger {
     return baseId + randomPadding;
   }
 }
-
-module.exports = {
-  Logger,
-  nativeLog,
-};
