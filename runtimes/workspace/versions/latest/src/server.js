@@ -100,7 +100,7 @@ const router = {
         const result = await terminal.executeCommand(
           params.command,
           safeCwd,
-          params.timeout
+          params.timeout,
         );
         return { success: true, data: result };
       default:
@@ -136,7 +136,7 @@ const router = {
       case "updateFilePath":
         result = await filesystem.updateFilePath(
           params.filepath,
-          params.newPath
+          params.newPath,
         );
         break;
       case "listFilesInDir":
@@ -144,7 +144,7 @@ const router = {
         result = await filesystem.listFilesInDir(
           safeDirpath,
           params.withContent,
-          params.recursive
+          params.recursive,
         );
         break;
       case "deleteFile":
@@ -159,13 +159,13 @@ const router = {
       case "updateFolderName":
         result = await filesystem.updateFolderName(
           params.folderpath,
-          params.name
+          params.name,
         );
         break;
       case "updateFolderPath":
         result = await filesystem.updateFolderPath(
           params.folderpath,
-          params.newPath
+          params.newPath,
         );
         break;
       case "deleteFolder":
@@ -363,10 +363,10 @@ synapse
     synapse.onConnection((connectionId) => {
       console.info(`New Synapse connection: ${connectionId}`);
       console.info(
-        `New Synapse connection: ${JSON.stringify(synapse.getConnection(connectionId))}`
+        `New Synapse connection: ${JSON.stringify(synapse.getConnection(connectionId))}`,
       );
       console.info(
-        `All connections: ${JSON.stringify(synapse.getConnections())}`
+        `All connections: ${JSON.stringify(synapse.getConnections())}`,
       );
 
       const urlParams = synapse.getParams(connectionId);
@@ -469,7 +469,7 @@ synapse
 
     synapse.onClose((connectionId, code, reason, wasClean) => {
       console.info(
-        `Connection closed:\n  connectionId: ${connectionId}\n  code: ${code}\n  reason: ${reason || "N/A"}\n  wasClean: ${wasClean}`
+        `Connection closed:\n  connectionId: ${connectionId}\n  code: ${code}\n  reason: ${reason || "N/A"}\n  wasClean: ${wasClean}`,
       );
       const conn = connections.get(connectionId);
       if (!conn) return;
@@ -546,7 +546,7 @@ const server = micro(async (req, res) => {
     res.setHeader("Content-Type", "application/gzip");
     res.setHeader(
       "Content-Disposition",
-      'attachment; filename="download.tar.gz"'
+      'attachment; filename="download.tar.gz"',
     );
     res.setHeader("Content-Length", tarGzResult.data.buffer.length);
 
