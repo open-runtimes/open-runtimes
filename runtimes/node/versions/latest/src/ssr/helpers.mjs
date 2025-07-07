@@ -91,7 +91,7 @@ export function onAction(callback) {
 // When error occurs
 export function onError(error, req, res, next) {
   if (res.headersSent) {
-    return next(err);
+    return next(error);
   }
 
   Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);
