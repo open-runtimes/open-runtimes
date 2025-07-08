@@ -129,9 +129,7 @@ When you can have two!
         return context.res.text("")
     elif action == "library":
         todo = (
-            requests.get(
-                "https://jsonplaceholder.typicode.com/todos/" + context.req.body_raw
-            )
+            requests.get("https://dummyjson.com/todos/" + context.req.body_raw)
         ).json()
         return context.res.json({"todo": todo})
     elif action == "timeout":

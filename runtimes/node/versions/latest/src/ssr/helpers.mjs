@@ -1,6 +1,6 @@
 // Use as base for server-X.js (per framework)
 
-import { Logger } from "./logger.js";
+import { Logger } from "./logger.mjs";
 import { createNamespace } from "cls-hooked";
 
 const loggingNamespace = createNamespace("logging");
@@ -91,7 +91,7 @@ export function onAction(callback) {
 // When error occurs
 export function onError(error, req, res, next) {
   if (res.headersSent) {
-    return next(err);
+    return next(error);
   }
 
   Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);

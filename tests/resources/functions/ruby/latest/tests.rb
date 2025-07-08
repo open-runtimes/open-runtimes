@@ -127,7 +127,7 @@ When you can have two!
 
     return context.res.text('')
   when 'library'
-    todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_raw).body)
+    todo = JSON.parse(HTTParty.get('https://dummyjson.com/todos/' + context.req.body_raw).body)
     return context.res.json({ 'todo': todo })
   when 'timeout'
     context.log('Timeout start.')

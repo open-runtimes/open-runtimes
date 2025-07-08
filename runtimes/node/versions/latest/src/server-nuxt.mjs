@@ -1,6 +1,6 @@
 import { listener } from "./server/index.mjs";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.js";
+import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
 
 console.log("Nuxt server starting ...");
 

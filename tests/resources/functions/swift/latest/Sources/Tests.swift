@@ -149,7 +149,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return context.res.text("")
     case "library":
         let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-        let request = HTTPClientRequest(url: "https://jsonplaceholder.typicode.com/todos/\(context.req.bodyRaw)")
+        let request = HTTPClientRequest(url: "https://dummyjson.com/todos/\(context.req.bodyRaw)")
         let response = try await httpClient.execute(request, timeout: .seconds(30))
         let data = try await response.body.collect(upTo: 1024 * 1024)
         let todo = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]

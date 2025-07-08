@@ -204,7 +204,7 @@ namespace runtime {
 
                 curl = curl_easy_init();
                 if (curl) {
-                    std::string url = "https://jsonplaceholder.typicode.com/todos/" + req.bodyRaw;
+                    std::string url = "https://dummyjson.com/todos/" + req.bodyRaw;
                     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
                     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
                                      +[](void *contents, size_t size, size_t nmemb, void *userp) {

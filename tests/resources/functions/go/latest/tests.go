@@ -159,7 +159,7 @@ When you can have two!
 		client := resty.New()
 		resp, errResponse := client.R().
 			SetHeader("Accept", "application/json").
-			Get("https://jsonplaceholder.typicode.com/todos/" + Context.Req.BodyText())
+			Get("https://dummyjson.com/todos/" + Context.Req.BodyText())
 
 		if errResponse != nil {
 			Context.Error(errResponse)
@@ -171,7 +171,7 @@ When you can have two!
 		type TodoObject struct {
 			UserId    int    `json:"userId"`
 			Id        int    `json:"id"`
-			Title     string `json:"title"`
+			Todo      string `json:"todo"`
 			Completed bool   `json:"completed"`
 		}
 
