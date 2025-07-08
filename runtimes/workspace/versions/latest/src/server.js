@@ -140,12 +140,12 @@ const router = {
         );
         break;
       case "listFilesInDir":
-        const safeDirpath = path.join(WORK_DIR, params.dirPath);
-        result = await filesystem.listFilesInDir(
-          safeDirpath,
-          params.withContent,
-          params.recursive,
-        );
+        result = await filesystem.listFilesInDir({
+          dirPath: params.dirPath,
+          withContent: params.withContent ?? false,
+          recursive: params.recursive ?? false,
+          additionalIgnorePatterns: params.additionalIgnorePatterns ?? [],
+        });
         break;
       case "deleteFile":
         result = await filesystem.deleteFile(params.filepath);

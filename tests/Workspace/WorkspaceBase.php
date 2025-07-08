@@ -74,7 +74,18 @@ abstract class WorkspaceBase extends TestCase
                 'command' => 'touch terminal.txt\n'
             ]
         ], waitForResponse: false);
-        
+
+        // test execute command
+        $this->executeCommand(message: [
+            'type' => 'terminal',
+            'operation' => 'executeCommand',
+            'params' => [
+                'cwd' => '/tmp/workspace',
+                'command' => 'touch terminal.txt\n',
+                'timeout' => 10000
+            ]
+        ], waitForResponse: false);
+
         // test list files
         $this->executeCommand(message: [
             'type' => 'terminal',
@@ -183,6 +194,32 @@ abstract class WorkspaceBase extends TestCase
             ]
         ]);
         $this->assertTrue($response['success']);
+        
+        // test list files in dir
+        $response = $this->executeCommand([
+            'type' => 'fs',
+            'operation' => 'listFilesInDir',
+            'params' => [
+                'dirPath' => '.'
+            ]
+        ]);
+        $this->assertTrue($response['success']);
+        $this->assertIsArray($response['data']);
+        $this->assertContains('test.txt', array_column($response['data'], 'path'));
+
+        // test list files in dir with content
+        $response = $this->executeCommand([
+            'type' => 'fs',
+            'operation' => 'listFilesInDir',
+            'params' => [
+                'dirPath' => '.',
+                'withContent' => true
+            ]
+        ]);
+        $this->assertTrue($response['success']);
+        $this->assertIsArray($response['data']);
+        $this->assertContains('test.txt', array_column($response['data'], 'path'));
+        $this->assertContains('Hello World 2', array_column($response['data'], 'content'));
 
         // test create folder
         $response = $this->executeCommand([
