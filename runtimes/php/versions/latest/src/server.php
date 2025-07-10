@@ -184,7 +184,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
 
 $server->on("Request", function ($req, $res) use ($action) {
     if (isset($req->header['x-open-runtimes-timings'])) {
-        $timings = file_get_contents('/usr/local/telemetry/timings.txt');
+        $timings = file_get_contents('/mnt/telemetry/timings.txt');
         $res->header('content-type', 'text/plain; charset=utf-8');
         $res->status(200);
         $res->end($timings);

@@ -22,7 +22,7 @@ fi
 
 elapsed_ms=$(( $(date +%s%3N) - start_ms ))
 printf 'extract=%d.%03d\n' $((elapsed_ms/1000)) $((elapsed_ms%1000)) \
-    >> /usr/local/telemetry/timings.txt
+    >> /mnt/telemetry/timings.txt
 
 # Enter server folder
 cd /usr/local/server

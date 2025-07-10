@@ -30,7 +30,7 @@ namespace DotNetRuntime
         {
             if (request.Headers.TryGetValue("x-open-runtimes-timings", out var timingsHeaderValue))
             {
-                var timings = await File.ReadAllTextAsync("/usr/local/telemetry/timings.txt");
+                var timings = await File.ReadAllTextAsync("/mnt/telemetry/timings.txt");
                 var outputHeaders = new Dictionary<string, string>();
                 outputHeaders.Add("content-type", "text/plain; charset=utf-8");
                 return new CustomResponse(Encoding.UTF8.GetBytes(timings), 200, outputHeaders);

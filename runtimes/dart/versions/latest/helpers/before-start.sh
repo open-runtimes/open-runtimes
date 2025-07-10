@@ -6,8 +6,7 @@ shopt -s dotglob
 echo "Preparing for start ..."
 
 # Setup
-mkdir -p /usr/local/telemetry/
-[ -d "/mnt/telemetry" ] && cp /mnt/telemetry/* /usr/local/telemetry/ 2>/dev/null || true
+mkdir -p /mnt/telemetry
 
 # Extract gzipped code from mounted volume to function folder
 start_ms=$(date +%s%3N)
@@ -22,7 +21,7 @@ fi
 
 elapsed_ms=$(( $(date +%s%3N) - start_ms ))
 printf 'extract=%d.%03d\n' $((elapsed_ms/1000)) $((elapsed_ms%1000)) \
-    >> /usr/local/telemetry/timings.txt
+    >> /mnt/telemetry/timings.txt
 
 # Apply env vars from build step
 set -o allexport

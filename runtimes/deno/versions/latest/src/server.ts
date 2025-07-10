@@ -10,7 +10,7 @@ app.addEventListener("listen", () => {
 
 app.use(async (ctx: any) => {
   if (ctx.request.headers.get("x-open-runtimes-timings")) {
-    const timings = await Deno.readTextFile("/usr/local/telemetry/timings.txt");
+    const timings = await Deno.readTextFile("/mnt/telemetry/timings.txt");
     ctx.response.headers.set("content-type", "text/plain; charset=utf-8");
     ctx.response.status = 200;
     ctx.response.body = timings;

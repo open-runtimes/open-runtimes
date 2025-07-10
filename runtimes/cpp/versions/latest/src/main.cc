@@ -24,7 +24,7 @@ std::vector<std::string> split(const std::string &s, const char delim) {
 
 int main()
 {
-    std::cout << "HTTP server successfully started!" << std::endl; 
+    std::cout << "HTTP server successfully started!" << std::endl;
 
     drogon::app()
         .setClientMaxBodySize(20 * 1024 * 1024)
@@ -35,7 +35,7 @@ int main()
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
                 if (!req->getHeader("x-open-runtimes-timings").empty()) {
-                    std::ifstream timingsFile("/usr/local/telemetry/timings.txt");
+                    std::ifstream timingsFile("/mnt/telemetry/timings.txt");
                     std::string timings((std::istreambuf_iterator<char>(timingsFile)), std::istreambuf_iterator<char>());
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
                     res->addHeader("content-type", "text/plain; charset=utf-8");
@@ -441,4 +441,3 @@ int main()
 
     return 0;
 }
-

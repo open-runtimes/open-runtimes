@@ -45,7 +45,7 @@ public class Server {
   public static Context execute(Context ctx) {
     if (ctx.header("x-open-runtimes-timings") != null) {
       try {
-        String timings = Files.readString(Paths.get("/usr/local/telemetry/timings.txt"));
+        String timings = Files.readString(Paths.get("/mnt/telemetry/timings.txt"));
         return ctx.contentType("text/plain; charset=utf-8").result(timings);
       } catch (IOException e) {
         return ctx.status(500).result("Error reading timings");
