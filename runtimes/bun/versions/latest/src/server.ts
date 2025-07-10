@@ -249,7 +249,8 @@ Bun.serve({
   maxRequestBodySize: 20 * 1024 * 1024,
   idleTimeout: 0,
   async fetch(request) {
-    if (request.headers.get("x-open-runtimes-timings")) {
+    const url = new URL(request.url);
+    if (url.pathname === "/__opr/timings") {
       return new Response(Bun.file("/mnt/telemetry/timings.txt"));
     }
 

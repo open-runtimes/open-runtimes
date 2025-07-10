@@ -19,7 +19,7 @@ app.on(.OPTIONS, "", body: .collect(maxSize: "20mb"), use: execute)
 app.on(.OPTIONS, "**", body: .collect(maxSize: "20mb"), use: execute)
 
 func execute(req: Request) async throws -> Response {
-    if !req.headers["x-open-runtimes-timings"].isEmpty {
+    if req.uri.path == "/__opr/timings" {
         let timings = try String(contentsOfFile: "/mnt/telemetry/timings.txt")
         var outputHeaders = HTTPHeaders()
         outputHeaders.add(name: "content-type", value: "text/plain; charset=utf-8")

@@ -147,7 +147,7 @@ async def action(logger, request: web_request.Request):
 
 
 async def handler(request) -> web.Response:
-    if request.headers.get("x-open-runtimes-timings"):
+    if request.path == "/__opr/timings":
         with open("/mnt/telemetry/timings.txt", "r") as f:
             timings = f.read()
         return web.Response(

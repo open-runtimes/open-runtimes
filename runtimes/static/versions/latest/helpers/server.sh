@@ -1,18 +1,19 @@
 #!/bin/bash
 set -e
+shopt -s dotglob
 
 # Basic auth
-if [ -n "$OPEN_RUNTIMES_SECRET" ]; then
-    export AUTH=$(caddy hash-password --plaintext "$OPEN_RUNTIMES_SECRET")
+if [ -z "$OPEN_RUNTIMES_SECRET" ]; then
+    AUTH=""
 else
-    export AUTH="disabled"
+    AUTH=$(echo -e "$OPEN_RUNTIMES_SECRET" | htpasswd -inBC10 "opr")
 fi
 
 # SPA behaviour
-if [ -n "$OPEN_RUNTIMES_STATIC_FALLBACK" ]; then
-    export PAGE_FALLBACK="/$OPEN_RUNTIMES_STATIC_FALLBACK"
+if [ -z "$OPEN_RUNTIMES_STATIC_FALLBACK" ]; then
+    PAGE_FALLBACK=""
 else
-    export PAGE_FALLBACK="/404.html"
+    PAGE_FALLBACK="/usr/local/server/src/function/$OPEN_RUNTIMES_STATIC_FALLBACK"
 fi
 
 # 404 page design fallback
@@ -20,5 +21,5 @@ if [ ! -e "/mnt/resources/404.html" ]; then
     cp /usr/local/server/404.html /mnt/resources/404.html
 fi
 
-# Start Caddy
-caddy run --config /usr/local/server/Caddyfile
+# Start server
+static-web-server --config-file ./config.toml
