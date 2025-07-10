@@ -6,6 +6,9 @@ RUN <<EOR
     fi
 EOR
 
+# Install Poetry package manager
+RUN pip3 install --no-cache-dir poetry
+
 ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
 
 COPY requirements.txt .
