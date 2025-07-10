@@ -11,12 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@appwrite.io/synapse": "^0.6.3",
+    "@appwrite.io/synapse": "https://pkg.vc/-/@appwrite/@appwrite.io/synapse@34e3b47",
     "micro": "^9.3.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "node-pty"
-    ]
   }
 }
