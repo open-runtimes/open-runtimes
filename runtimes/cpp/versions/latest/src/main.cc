@@ -34,7 +34,7 @@ int main()
             [](const drogon::HttpRequestPtr &req,
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
-                if (!req->getHeader("x-open-runtimes-timings").empty()) {
+                if (req->getPath() == "/__opr/timings") {
                     std::ifstream timingsFile("/mnt/telemetry/timings.txt");
                     std::string timings((std::istreambuf_iterator<char>(timingsFile)), std::istreambuf_iterator<char>());
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();

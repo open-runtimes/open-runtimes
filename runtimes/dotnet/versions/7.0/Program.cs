@@ -28,7 +28,7 @@ namespace DotNetRuntime
 
         static async Task<IResult> Execute(HttpRequest request)
         {
-            if (request.Headers.TryGetValue("x-open-runtimes-timings", out var timingsHeaderValue))
+            if (request.Path == "/__opr/timings")
             {
                 var timings = await File.ReadAllTextAsync("/mnt/telemetry/timings.txt");
                 var outputHeaders = new Dictionary<string, string>();

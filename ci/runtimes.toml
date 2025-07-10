@@ -149,7 +149,7 @@ test = "Serverless/Bun.php"
 versions = ["1"]
 commands = { install = "bash build.sh", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo No formatter preparations.", check = "echo No formatter checker.", write = "echo No formatter writer." }
-tools = "caddy --version"
+tools = "static-web-server --version"
 test = "XStatic.php"
 
 [astro]

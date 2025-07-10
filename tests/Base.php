@@ -107,7 +107,7 @@ class Base extends TestCase
 
     public function testTimings(): void
     {
-        $response = Client::execute(headers: ['x-open-runtimes-timings' => '1']);
+        $response = Client::execute(method: 'GET', url: '/__opr/timings');
         self::assertEquals(200, $response['code']);
         self::assertStringContainsString('text/plain', $response['headers']['content-type']);
 

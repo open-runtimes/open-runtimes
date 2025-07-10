@@ -201,7 +201,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 void main() async {
   await shelf_io.serve(
     (req) async {
-      if (req.headers['x-open-runtimes-timings'] != null) {
+      if (req.url.path == '__opr/timings') {
         String timings = await File(
           '/mnt/telemetry/timings.txt',
         ).readAsString();
