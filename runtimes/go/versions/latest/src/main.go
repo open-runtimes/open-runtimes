@@ -244,7 +244,7 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 func main() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("x-open-runtimes-timings") != "" {
-			timings, err := os.ReadFile("/usr/local/telemetry/timings.txt")
+			timings, err := os.ReadFile("/mnt/telemetry/timings.txt")
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				return

@@ -250,7 +250,7 @@ Bun.serve({
   idleTimeout: 0,
   async fetch(request) {
     if (request.headers.get("x-open-runtimes-timings")) {
-      return new Response(Bun.file("/usr/local/telemetry/timings.txt"));
+      return new Response(Bun.file("/mnt/telemetry/timings.txt"));
     }
 
     const logger = new Logger(

@@ -35,7 +35,7 @@ suspend fun main() {
 
 suspend fun execute(ctx: Context) {
     if (ctx.header("x-open-runtimes-timings") != null) {
-        val timings = java.io.File("/usr/local/telemetry/timings.txt").readText()
+        val timings = java.io.File("/mnt/telemetry/timings.txt").readText()
         ctx.contentType("text/plain; charset=utf-8").result(timings)
         return
     }

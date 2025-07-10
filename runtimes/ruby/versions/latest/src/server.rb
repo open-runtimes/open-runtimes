@@ -211,7 +211,7 @@ end
 
 before do
   if request.env['HTTP_X_OPEN_RUNTIMES_TIMINGS']
-    timings = File.read('/usr/local/telemetry/timings.txt')
+    timings = File.read('/mnt/telemetry/timings.txt')
     headers['content-type'] = 'text/plain; charset=utf-8'
     halt 200, timings
   end

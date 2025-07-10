@@ -203,7 +203,7 @@ void main() async {
     (req) async {
       if (req.headers['x-open-runtimes-timings'] != null) {
         String timings = await File(
-          '/usr/local/telemetry/timings.txt',
+          '/mnt/telemetry/timings.txt',
         ).readAsString();
         return shelf.Response.ok(
           timings,

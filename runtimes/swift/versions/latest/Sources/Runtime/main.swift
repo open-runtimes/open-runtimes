@@ -20,7 +20,7 @@ app.on(.OPTIONS, "**", body: .collect(maxSize: "20mb"), use: execute)
 
 func execute(req: Request) async throws -> Response {
     if !req.headers["x-open-runtimes-timings"].isEmpty {
-        let timings = try String(contentsOfFile: "/usr/local/telemetry/timings.txt")
+        let timings = try String(contentsOfFile: "/mnt/telemetry/timings.txt")
         var outputHeaders = HTTPHeaders()
         outputHeaders.add(name: "content-type", value: "text/plain; charset=utf-8")
         return Response(
@@ -71,7 +71,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         if timeoutInt == 0 {
             return Response(
                 status: .internalServerError,
-                body: .init(string: "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.")
+                body: .init(
+                    string: "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.")
             )
         }
 
@@ -80,10 +81,13 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
 
     if let serverSecret = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] {
         if serverSecret != "" {
-            if !req.headers.contains(name: "x-open-runtimes-secret") || req.headers["x-open-runtimes-secret"].first != serverSecret {
+            if !req.headers.contains(name: "x-open-runtimes-secret")
+                || req.headers["x-open-runtimes-secret"].first != serverSecret
+            {
                 return Response(
                     status: .internalServerError,
-                    body: .init(string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
+                    body: .init(
+                        string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
                 )
             }
         }
@@ -144,10 +148,11 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
             serverHeadersString = "{}"
         }
 
-        let serverHeaders = try JSONSerialization.jsonObject(
-            with: serverHeadersString.data(using: .utf8)!,
-            options: .allowFragments
-        ) as! [String: Any?]
+        let serverHeaders =
+            try JSONSerialization.jsonObject(
+                with: serverHeadersString.data(using: .utf8)!,
+                options: .allowFragments
+            ) as! [String: Any?]
 
         for (key, value) in serverHeaders {
             if let value = value {
@@ -232,7 +237,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
 
     let contentTypeValue = (outputHeaders.first(name: "content-type") ?? "text/plain").lowercased()
     if !contentTypeValue.starts(with: "multipart/"), !contentTypeValue.contains("charset=") {
-        outputHeaders.replaceOrAdd(name: "content-type", value: contentTypeValue + "; charset=utf-8")
+        outputHeaders.replaceOrAdd(
+            name: "content-type", value: contentTypeValue + "; charset=utf-8")
     }
 
     logger.end()

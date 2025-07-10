@@ -10,7 +10,7 @@ const app = express();
 
 app.use((req, res, next) => {
   if (req.headers["x-open-runtimes-timings"]) {
-    const timings = readFileSync("/usr/local/telemetry/timings.txt", "utf8");
+    const timings = readFileSync("/mnt/telemetry/timings.txt", "utf8");
     res.setHeader("content-type", "text/plain; charset=utf-8");
     return res.status(200).send(timings);
   }
