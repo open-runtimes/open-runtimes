@@ -9,7 +9,7 @@ mkdir -p /mnt/telemetry
 echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Code extraction started. [0m"
 
 # Extract code from mounted volume to function folder
-start_ms=$(date +%s%3N)
+start=$(awk '{print $1}' /proc/uptime)
 if [ -f /mnt/code/code.tar ]; then
     tar -xf /mnt/code/code.tar -C /usr/local/server/src/function
 elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
@@ -19,9 +19,9 @@ else
     exit 1
 fi
 
-elapsed_ms=$(( $(date +%s%3N) - start_ms ))
-printf 'extract=%d.%03d\n' $((elapsed_ms/1000)) $((elapsed_ms%1000)) \
-    >> /mnt/telemetry/timings.txt
+end=$(awk '{print $1}' /proc/uptime)
+elapsed=$(awk "BEGIN{printf \"%.3f\", $end - $start}")
+echo "extract=$elapsed" >> /mnt/telemetry/timings.txt
 
 # Apply env vars from build step
 set -o allexport
