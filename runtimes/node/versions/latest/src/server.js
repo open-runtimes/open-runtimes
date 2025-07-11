@@ -1,6 +1,6 @@
 const micro = require("micro");
 const { buffer, send } = require("micro");
-const fs = require("fs").promises;
+const fs = require("node:fs/promises");
 const Logger = require("./logger");
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
