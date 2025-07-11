@@ -1,6 +1,5 @@
 import { handler } from "./handler.js";
 import express from "express";
-import { readFileSync } from "fs";
 import {
   onInit,
   getPort,

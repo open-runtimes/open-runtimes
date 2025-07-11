@@ -1,2 +1,0 @@
-local_download=0.200
-remote_download=10.560
