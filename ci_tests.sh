@@ -41,7 +41,10 @@ else
     fi
 fi
 
+# Setup telemetry folder
 TELEMETRY_FOLDER="$(pwd)/tests/resources/telemetry"
+mkdir -p "$TELEMETRY_FOLDER"
+echo -e "local_download=0.200\nremote_download=10.560" > "$TELEMETRY_FOLDER/timings.txt"
 
 # Prevent Docker from creating folder
 cd ./tests/.runtime

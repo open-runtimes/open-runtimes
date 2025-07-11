@@ -1,13 +1,15 @@
 const micro = require("micro");
 const { buffer, send } = require("micro");
-const fs = require("node:fs/promises");
+const fs = require("fs");
 const Logger = require("./logger");
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
 const server = micro(async (req, res) => {
   if (req.url === "/__opr/timings") {
-    const timings = await fs.readFile("/mnt/telemetry/timings.txt", "utf8");
+    const timings = fs.readFileSync("/mnt/telemetry/timings.txt", {
+      encoding: "utf8",
+    });
     res.setHeader("content-type", "text/plain; charset=utf-8");
     return send(res, 200, timings);
   }
