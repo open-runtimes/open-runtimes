@@ -102,7 +102,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     let queryString = req.uri.query
     var query = [String: String]()
 
-    if let queryString = queryString {
+    if let queryString {
         for param in queryString.split(separator: "&") {
             let parts = param.split(separator: "=", maxSplits: 1)
 
@@ -155,7 +155,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
             ) as! [String: Any?]
 
         for (key, value) in serverHeaders {
-            if let value = value {
+            if let value {
                 headers[key.lowercased()] = String(describing: value)
             } else {
                 headers[key.lowercased()] = ""
@@ -238,7 +238,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     let contentTypeValue = (outputHeaders.first(name: "content-type") ?? "text/plain").lowercased()
     if !contentTypeValue.starts(with: "multipart/"), !contentTypeValue.contains("charset=") {
         outputHeaders.replaceOrAdd(
-            name: "content-type", value: contentTypeValue + "; charset=utf-8")
+            name: "content-type", value: contentTypeValue + "; charset=utf-8"
+        )
     }
 
     logger.end()

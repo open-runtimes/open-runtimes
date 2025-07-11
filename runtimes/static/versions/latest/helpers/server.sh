@@ -22,4 +22,15 @@ if [ ! -e "/mnt/resources/404.html" ]; then
 fi
 
 # Start server
-static-web-server --config-file ./config.toml
+static-web-server \
+    -p 3000 \
+    --log-level info \
+    --basic-auth="$AUTH" \
+    --page404="/mnt/resources/404.html" \
+    --page-fallback="$PAGE_FALLBACK" \
+    --ignore-hidden-files true \
+    --disable-symlinks \
+    --compression false \
+    --cache-control-headers false \
+    --config-file ./config.toml
+    -d /usr/local/server/src/function

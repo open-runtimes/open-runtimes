@@ -109,7 +109,7 @@ testImage = "php:8.3-cli-alpine"
 entry = "Tests.swift"
 versions = ["5.10", "5.9", "5.8"]
 commands = { install = "", start = "bash helpers/server.sh" }
-formatter = { prepare = "rm -rf SwiftFormat && git clone https://github.com/nicklockwood/SwiftFormat && cd SwiftFormat && swift build -c release && mv /mnt/code/SwiftFormat/.build/x86_64-unknown-linux-gnu/release/swiftformat /tmp/swiftformat && cd .. && rm -rf SwiftFormat", check = "/tmp/swiftformat . --lint --swiftversion 5.5", write = "/tmp/swiftformat . --verbose --swiftversion 5.8" }
+formatter = { prepare = "rm -rf SwiftFormat && git clone https://github.com/nicklockwood/SwiftFormat && cd SwiftFormat && swift build -c release && mv /mnt/code/SwiftFormat/.build/release/swiftformat /tmp/swiftformat && cd .. && rm -rf SwiftFormat", check = "/tmp/swiftformat . --lint --swiftversion 5.8", write = "/tmp/swiftformat . --verbose --swiftversion 5.8" }
 tools = "swift --version"
 test = "Serverless/Swift.php"
 testImage = "php:8.3-cli-alpine"
