@@ -1,11 +1,21 @@
 import { parse } from "url";
 import next from "next";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
+import {
+  onInit,
+  getPort,
+  getHost,
+  onAction,
+  onError,
+  telemetryMiddleware,
+} from "./ssr/helpers.mjs";
 
 console.log("Next.js server starting ...");
 
 const app = express();
+
+app.use(telemetryMiddleware);
+
 app.use(onInit);
 
 // framework-specific logic

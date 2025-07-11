@@ -15,6 +15,7 @@ EOR
 
 RUN mkdir -p /mnt/code
 RUN mkdir -p /mnt/logs
+RUN mkdir -p /mnt/telemetry
 RUN mkdir -p /usr/local/build
 RUN mkdir -p /usr/local/server
 RUN mkdir -p /usr/local/server/src

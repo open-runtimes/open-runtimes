@@ -12,7 +12,7 @@ class Base extends TestCase
 {
     protected string $runtimeName = '';
     protected string $runtimeVersion = '';
-    
+
     public function setUp(): void
     {
         $this->runtimeName = \getenv('RUNTIME_NAME');
@@ -103,5 +103,26 @@ class Base extends TestCase
 
         Client::$secret = \getenv('OPEN_RUNTIMES_SECRET');
         Client::$host = 'open-runtimes-test-serve';
+    }
+
+    public function testTimings(): void
+    {
+        $response = Client::execute(method: 'GET', url: '/__opr/timings');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('text/plain', $response['headers']['content-type']);
+
+        // Parse key=value format
+        $timings = [];
+        foreach (explode("\n", trim($response['body'])) as $line) {
+            if (empty($line)) continue;
+            [$key, $value] = explode('=', $line, 2);
+            $timings[$key] = (float)$value;
+        }
+
+        // Timings should contain existing data from mounted file
+        self::assertArrayHasKey('local_download', $timings);
+        self::assertIsFloat($timings['local_download']);
+        self::assertArrayHasKey('remote_download', $timings);
+        self::assertIsFloat($timings['remote_download']);
     }
 }

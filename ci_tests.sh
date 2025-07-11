@@ -41,6 +41,11 @@ else
     fi
 fi
 
+# Setup telemetry folder
+TELEMETRY_FOLDER="$(pwd)/tests/resources/telemetry"
+mkdir -p "$TELEMETRY_FOLDER"
+echo -e "local_download=0.200\nremote_download=10.560" > "$TELEMETRY_FOLDER/timings.txt"
+
 # Prevent Docker from creating folder
 cd ./tests/.runtime
 rm -rf code.tar.gz
@@ -70,7 +75,7 @@ fi
 docker network inspect openruntimes || docker network create openruntimes
 
 # Main tests
-docker run --network openruntimes -d --name open-runtimes-test-serve -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_STATIC_FALLBACK="index.html" -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+docker run --network openruntimes -d --name open-runtimes-test-serve -v $TELEMETRY_FOLDER:/mnt/telemetry -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_STATIC_FALLBACK="index.html" -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
 
 # Secondary tests
 # 1. Empty enforced headers
@@ -79,12 +84,12 @@ docker run --network openruntimes -d --name open-runtimes-test-serve -v /tmp/log
 # 4. No custom env variable
 # 5. Uncompressed builds
 PREPARE_UNCOMPRESSED_FILE="gunzip -ck /mnt/code/code.tar.gz > /mnt/code/code.tar"
-docker run --network openruntimes -d --name open-runtimes-test-serve-secondary -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3001:3000 open-runtimes/test-runtime bash -c "$PREPARE_UNCOMPRESSED_FILE && $START_SCRIPT \"$START_COMMAND\""
+docker run --network openruntimes -d --name open-runtimes-test-serve-secondary -v $TELEMETRY_FOLDER:/mnt/telemetry -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3001:3000 open-runtimes/test-runtime bash -c "$PREPARE_UNCOMPRESSED_FILE && $START_SCRIPT \"$START_COMMAND\""
 
 # Teritary tests
 # 1. Same as secondary
 # 2. Mounted resource folder (static 404 page)
-docker run --network openruntimes -d --name open-runtimes-test-serve-teritary -v $(pwd)/resources:/mnt/resources -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3002:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+docker run --network openruntimes -d --name open-runtimes-test-serve-teritary -v $TELEMETRY_FOLDER:/mnt/telemetry -v $(pwd)/resources:/mnt/resources -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3002:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
 
 cd ../../
 

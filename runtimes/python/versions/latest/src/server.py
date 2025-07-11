@@ -1,11 +1,12 @@
+import asyncio
+import importlib
 import json
+import os
+import traceback
+
+from aiohttp import web, web_exceptions, web_request
 from function_types import Context
 from logger import Logger
-from aiohttp import web, web_request, web_exceptions
-import traceback
-import os
-import importlib
-import asyncio
 
 
 async def action(logger, request: web_request.Request):
@@ -135,7 +136,7 @@ async def action(logger, request: web_request.Request):
     )
     if (
         not resp.headers["content-type"].startswith("multipart/")
-        and not "charset=" in resp.headers["content-type"]
+        and "charset=" not in resp.headers["content-type"]
     ):
         resp.headers["content-type"] += "; charset=utf-8"
 
@@ -146,6 +147,13 @@ async def action(logger, request: web_request.Request):
 
 
 async def handler(request) -> web.Response:
+    if request.path == "/__opr/timings":
+        with open("/mnt/telemetry/timings.txt", "r") as f:
+            timings = f.read()
+        return web.Response(
+            text=timings, headers={"content-type": "text/plain; charset=utf-8"}
+        )
+
     logger = Logger(
         request.headers.get("x-open-runtimes-logging", ""),
         request.headers.get("x-open-runtimes-log-id", ""),

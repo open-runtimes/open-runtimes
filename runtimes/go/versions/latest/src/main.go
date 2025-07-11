@@ -243,6 +243,18 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 
 func main() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/__opr/timings" {
+			timings, err := os.ReadFile("/mnt/telemetry/timings.txt")
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("content-type", "text/plain; charset=utf-8")
+			w.WriteHeader(http.StatusOK)
+			w.Write(timings)
+			return
+		}
+
 		logging := r.Header.Get("x-open-runtimes-logging")
 		logId := r.Header.Get("x-open-runtimes-log-id")
 
