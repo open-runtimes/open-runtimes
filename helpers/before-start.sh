@@ -15,7 +15,7 @@ if [ -f /mnt/code/code.tar ]; then
 elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
     tar -zxf /mnt/code/code.tar.gz -C /usr/local/server/src/function
 else
-    echo -e "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Code archive not found. [0m"
+    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Code archive not found. [0m"
     exit 1
 fi
 
