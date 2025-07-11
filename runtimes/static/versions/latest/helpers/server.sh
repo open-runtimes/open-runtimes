@@ -2,6 +2,12 @@
 set -e
 shopt -s dotglob
 
+# Copy telemetry file to be accessible
+if [ -f "/mnt/telemetry/timings.txt" ]; then
+    mkdir -p /usr/local/server/src/function/__opr
+    cp /mnt/telemetry/timings.txt /usr/local/server/src/function/__opr/timings.txt
+fi
+
 # Basic auth
 if [ -z "$OPEN_RUNTIMES_SECRET" ]; then
     AUTH=""
@@ -32,5 +38,5 @@ static-web-server \
     --disable-symlinks \
     --compression false \
     --cache-control-headers false \
-    --config-file ./config.toml
+    --config-file /usr/local/server/helpers/config.toml \
     -d /usr/local/server/src/function

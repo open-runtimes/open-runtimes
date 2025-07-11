@@ -2,4 +2,4 @@
 
 [[advanced.rewrites]]
 source = "/__opr/timings"
-destination = "/mnt/telemetry/timings.txt"
+destination = "/__opr/timings.txt"
