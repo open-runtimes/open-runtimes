@@ -1,6 +1,6 @@
 RUN <<EOR
     if [ -f /etc/alpine-release ]; then
-        apk update && apk add bash
+        apk update && apk add bash alpine-sdk libffi-dev
     else
         apt-get update && apt-get install -y bash
     fi
