@@ -18,20 +18,52 @@ const { InputFile } = require("node-appwrite/file");
 
 const WORK_DIR = process.env.WORK_DIR || "/tmp/workspace";
 
+/**
+ * @typedef {Object} Connection
+ * @property {Terminal} terminal
+ * @property {Filesystem} filesystem
+ * @property {System} system
+ * @property {Git} git
+ * @property {Code} code
+ * @property {Embeddings} embeddings
+ * @property {Function[]} cleanupHandlers
+ */
+
 const synapse = new Synapse("localhost", process.env.PORT || 3000);
 const huggingFaceAdapter = new HuggingFaceEmbeddingAdapter();
 
 const appwrite = new Appwrite(synapse);
 
-let globalTerminal,
-  globalFilesystem,
-  globalSystem,
-  globalGit,
-  globalCode,
-  globalEmbeddings; // initialize global services (for HTTP requests)
+/** @type {Terminal} */
+let globalTerminal;
+/** @type {Filesystem} */
+let globalFilesystem;
+/** @type {System} */
+let globalSystem;
+/** @type {Git} */
+let globalGit;
+/** @type {Code} */
+let globalCode;
+/** @type {Embeddings} */
+let globalEmbeddings;
 
+/** @type {Map<string, Connection>} */
 const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
 
+/**
+ * Get connection services for a given connection ID
+ * @param {string} connectionId
+ * @returns {Connection | null}
+ */
+function getConnection(connectionId) {
+  return connections.get(connectionId) || null;
+}
+
+/**
+ * Parse the URL and return the path and query parameters
+ * @param {string} url
+ * @returns {{ path: string, params: Record<string, string> }}
+ */
 function parseUrl(url) {
   const [path, query] = url.split("?");
 
@@ -55,12 +87,17 @@ const router = {
       throw new Error("Method not allowed");
     }
 
-    const connectionTerminal = (connections.get(connectionId) || {}).terminal;
-    const connectionFilesystem = (connections.get(connectionId) || {})
-      .filesystem;
-    const connectionSystem = (connections.get(connectionId) || {}).system;
-    const connectionEmbeddings = (connections.get(connectionId) || {})
-      .embeddings;
+    const connection = getConnection(connectionId);
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const {
+      terminal: connectionTerminal,
+      filesystem: connectionFilesystem,
+      embeddings: connectionEmbeddings,
+      git: connectionGit,
+    } = connection;
 
     const { operation, params } = message;
     switch (operation) {
@@ -71,8 +108,8 @@ const router = {
 
         connectionTerminal.updateWorkDir(params.workDir);
         connectionFilesystem.updateWorkDir(params.workDir);
-        connectionSystem.updateWorkDir(params.workDir);
         connectionEmbeddings.updateWorkDir(params.workDir);
+        connectionGit.updateWorkDir(params.workDir);
 
         return { success: true, data: "Work directory updated successfully" };
     }
@@ -81,7 +118,8 @@ const router = {
   terminal: async (message, connectionId) => {
     let terminal;
     if (connectionId) {
-      terminal = (connections.get(connectionId) || {}).terminal;
+      const connection = getConnection(connectionId);
+      terminal = connection?.terminal;
     } else {
       terminal = globalTerminal;
     }
@@ -97,11 +135,11 @@ const router = {
         break;
       case "executeCommand":
         const safeCwd = path.join(WORK_DIR, params.cwd);
-        const result = await terminal.executeCommand(
-          params.command,
-          safeCwd,
-          params.timeout,
-        );
+        const result = await terminal.executeCommand({
+          command: params.command,
+          cwd: safeCwd,
+          timeout: params.timeout,
+        });
         return { success: true, data: result };
       default:
         throw new Error("Invalid terminal operation");
@@ -112,7 +150,8 @@ const router = {
   fs: async (message, connectionId) => {
     let filesystem;
     if (connectionId) {
-      filesystem = (connections.get(connectionId) || {}).filesystem;
+      const connection = getConnection(connectionId);
+      filesystem = connection?.filesystem;
     } else {
       filesystem = globalFilesystem;
     }
@@ -122,22 +161,33 @@ const router = {
 
     switch (operation) {
       case "createFile":
-        result = await filesystem.createFile(params.filepath, params.content);
+        result = await filesystem.createFile({
+          filePath: params.filePath,
+          content: params.content,
+        });
         break;
       case "appendFile":
-        result = await filesystem.appendFile(params.filepath, params.content);
+        result = await filesystem.appendFile({
+          filePath: params.filePath,
+          content: params.content,
+        });
         break;
       case "getFile":
-        result = await filesystem.getFile(params.filepath);
+        result = await filesystem.getFile({
+          filePath: params.filePath,
+        });
         break;
       case "updateFile":
-        result = await filesystem.updateFile(params.filepath, params.content);
+        result = await filesystem.updateFile({
+          filePath: params.filePath,
+          content: params.content,
+        });
         break;
-      case "updateFilePath":
-        result = await filesystem.updateFilePath(
-          params.filepath,
-          params.newPath,
-        );
+      case "updatefilePath":
+        result = await filesystem.updatefilePath({
+          oldPath: params.filePath,
+          newPath: params.newPath,
+        });
         break;
       case "listFilesInDir":
         result = await filesystem.listFilesInDir({
@@ -148,31 +198,41 @@ const router = {
         });
         break;
       case "deleteFile":
-        result = await filesystem.deleteFile(params.filepath);
+        result = await filesystem.deleteFile({
+          filePath: params.filePath,
+        });
         break;
       case "createFolder":
-        result = await filesystem.createFolder(params.folderpath);
+        result = await filesystem.createFolder({
+          dirPath: params.folderPath,
+        });
         break;
       case "getFolder":
-        result = await filesystem.getFolder(params.folderpath);
+        result = await filesystem.getFolder({
+          dirPath: params.folderPath,
+        });
         break;
       case "updateFolderName":
-        result = await filesystem.updateFolderName(
-          params.folderpath,
-          params.name,
-        );
+        result = await filesystem.updateFolderName({
+          dirPath: params.folderPath,
+          name: params.name,
+        });
         break;
-      case "updateFolderPath":
-        result = await filesystem.updateFolderPath(
-          params.folderpath,
-          params.newPath,
-        );
+      case "updatefolderPath":
+        result = await filesystem.updatefolderPath({
+          oldPath: params.folderPath,
+          newPath: params.newPath,
+        });
         break;
       case "deleteFolder":
-        result = await filesystem.deleteFolder(params.folderpath);
+        result = await filesystem.deleteFolder({
+          dirPath: params.folderPath,
+        });
         break;
       case "searchFiles":
-        result = await filesystem.searchFiles(params.query);
+        result = await filesystem.searchFiles({
+          term: params.query,
+        });
         break;
       default:
         throw new Error("Invalid operation");
@@ -183,7 +243,8 @@ const router = {
   system: async (message, connectionId) => {
     let system;
     if (connectionId) {
-      system = (connections.get(connectionId) || {}).system;
+      const connection = getConnection(connectionId);
+      system = connection?.system;
     } else {
       system = globalSystem;
     }
@@ -204,7 +265,8 @@ const router = {
   git: async (message, connectionId) => {
     let git;
     if (connectionId) {
-      git = (connections.get(connectionId) || {}).git;
+      const connection = getConnection(connectionId);
+      git = connection?.git;
     } else {
       git = globalGit;
     }
@@ -217,13 +279,20 @@ const router = {
         result = await git.init();
         break;
       case "addRemote":
-        result = await git.addRemote(params.name, params.url);
+        result = await git.addRemote({
+          name: params.name,
+          url: params.url,
+        });
         break;
       case "setUserName":
-        result = await git.setUserName(params.name);
+        result = await git.setUserName({
+          name: params.name,
+        });
         break;
       case "setUserEmail":
-        result = await git.setUserEmail(params.email);
+        result = await git.setUserEmail({
+          email: params.email,
+        });
         break;
       case "getCurrentBranch":
         result = await git.getCurrentBranch();
@@ -232,16 +301,24 @@ const router = {
         result = await git.status();
         break;
       case "add":
-        result = await git.add(params.files);
+        result = await git.add({
+          files: params.files,
+        });
         break;
       case "commit":
-        result = await git.commit(params.message);
+        result = await git.commit({
+          message: params.message,
+        });
         break;
       case "pull":
-        result = await git.pull();
+        result = await git.pull({
+          branch: params.branch,
+        });
         break;
       case "push":
-        result = await git.push();
+        result = await git.push({
+          branch: params.branch,
+        });
         break;
       default:
         throw new Error("Invalid git operation");
@@ -252,7 +329,8 @@ const router = {
   code: async (message, connectionId) => {
     let code;
     if (connectionId) {
-      code = (connections.get(connectionId) || {}).code;
+      const connection = getConnection(connectionId);
+      code = connection?.code;
     } else {
       code = globalCode;
     }
@@ -262,10 +340,16 @@ const router = {
 
     switch (operation) {
       case "format":
-        result = await code.format(params.code, params.options);
+        result = await code.format({
+          code: params.code,
+          options: params.options,
+        });
         break;
       case "lint":
-        result = await code.lint(params.code, params.options);
+        result = await code.lint({
+          code: params.code,
+          options: params.options,
+        });
         break;
       default:
         throw new Error("Invalid code operation");
@@ -290,12 +374,16 @@ const router = {
 
     if (service === "sites" && operation === "createDeployment") {
       await globalFilesystem.createGzipFile("code.tar.gz");
-      const path = `${appwrite.getWorkDir() ?? WORK_DIR}/code.tar.gz`;
+      const path = `${WORK_DIR}/code.tar.gz`;
       const file = InputFile.fromPath(path, "code.tar.gz");
-      const result = await appwrite.call("sites", "createDeployment", {
-        siteId: params.siteId,
-        code: file,
-        activate: params.activate ?? false,
+      const result = await appwrite.call({
+        service: "sites",
+        method: "createDeployment",
+        args: {
+          siteId: params.siteId,
+          code: file,
+          activate: params.activate ?? false,
+        },
       });
       return {
         success: true,
@@ -303,7 +391,11 @@ const router = {
       };
     }
 
-    const result = await appwrite.call(service, operation, params);
+    const result = await appwrite.call({
+      service,
+      method: operation,
+      args: params,
+    });
     return {
       success: true,
       data: result,
@@ -313,7 +405,8 @@ const router = {
   embeddings: async (message, connectionId) => {
     let embeddings;
     if (connectionId) {
-      embeddings = (connections.get(connectionId) || {}).embeddings;
+      const connection = getConnection(connectionId);
+      embeddings = connection?.embeddings;
     } else {
       embeddings = globalEmbeddings;
     }
@@ -399,7 +492,11 @@ synapse
       // Terminal onData
       const terminalHandler = (success, data) => {
         if (synapse.isConnected(connectionId)) {
-          synapse.send(connectionId, "terminal", { success, data });
+          synapse.send({
+            connectionId,
+            type: "terminal",
+            payload: { success, data },
+          });
         }
       };
       terminal.onData(terminalHandler);
@@ -407,10 +504,14 @@ synapse
       // Terminal onExit
       const terminalExitHandler = (success, exitCode, signal) => {
         if (synapse.isConnected(connectionId)) {
-          synapse.send(connectionId, "terminalExit", {
-            success,
-            exitCode,
-            signal,
+          synapse.send({
+            connectionId,
+            type: "terminalExit",
+            payload: {
+              success,
+              exitCode,
+              signal,
+            },
           });
         }
       };
@@ -420,12 +521,16 @@ synapse
       if (urlParams?.syncWorkDir && urlParams.syncWorkDir === "true") {
         const fsHandler = ({ path, event, content }) => {
           if (synapse.isConnected(connectionId)) {
-            synapse.send(connectionId, "syncWorkDir", {
-              success: true,
-              data: {
-                path,
-                event,
-                content,
+            synapse.send({
+              connectionId,
+              type: "syncWorkDir",
+              payload: {
+                success: true,
+                data: {
+                  path,
+                  event,
+                  content,
+                },
               },
             });
           }
@@ -451,17 +556,25 @@ synapse
           const result = await router[type](message, connectionId);
           if (result !== null) {
             console.log(type, result);
-            synapse.send(connectionId, type, {
-              requestId: message.requestId,
-              ...result,
+            synapse.send({
+              connectionId,
+              type,
+              payload: {
+                requestId: message.requestId,
+                ...result,
+              },
             });
           }
         } catch (error) {
           console.error(type, error);
-          synapse.send(connectionId, type, {
-            requestId: message.requestId,
-            success: false,
-            error: error.message,
+          synapse.send({
+            connectionId,
+            type,
+            payload: {
+              requestId: message.requestId,
+              success: false,
+              error: error.message,
+            },
           });
         }
       });
