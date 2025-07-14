@@ -209,6 +209,14 @@ def handle(request, response)
   end
 end
 
+before do
+  if request.path == '/__opr/timings'
+    timings = File.read('/mnt/telemetry/timings.txt')
+    headers['content-type'] = 'text/plain; charset=utf-8'
+    halt 200, timings
+  end
+end
+
 get '*' do
   handle(request, response)
 end

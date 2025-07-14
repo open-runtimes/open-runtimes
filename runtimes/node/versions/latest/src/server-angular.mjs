@@ -1,10 +1,20 @@
 import { reqHandler } from "./server/server.mjs";
+import {
+  onInit,
+  getPort,
+  getHost,
+  onAction,
+  onError,
+  telemetryMiddleware,
+} from "./ssr/helpers.mjs";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
 
 console.log("Angular server starting ...");
 
 const app = express();
+
+app.use(telemetryMiddleware);
+
 app.use(onInit);
 
 // framework-specific logic
