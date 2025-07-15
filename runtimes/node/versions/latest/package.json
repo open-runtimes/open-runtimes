@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vercel/nft": "^0.29.4",
     "cls-hooked": "^4.2.2",
     "express": "^4.21.2",
     "micro": "^9.3.4"
