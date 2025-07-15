@@ -25,4 +25,3 @@ echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Environment p
 cd /usr/local/build
 
 echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Build command execution started. [0m"
-

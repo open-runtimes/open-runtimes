@@ -29,7 +29,7 @@ func buildPackageStrings() {
                     let location = ((data["location"] as? [String: Any])?["remote"] as? [[String: Any]])?.first?["urlString"] as? String
                     let lowerBound = ((data["requirement"] as? [String: Any])?["range"] as? [[String: Any]])?[0]["lowerBound"] as? String
 
-                    guard let identity = identity, let location = location, let lowerBound = lowerBound else {
+                    guard let identity, let location, let lowerBound else {
                         continue
                     }
                     if packageBlacklist.contains(identity) {
@@ -54,7 +54,7 @@ func buildProductStrings() {
                     let identity = values[0] as? String
                     let package = values[1] as? String
 
-                    guard let identity = identity, let package = package else {
+                    guard let identity, let package else {
                         continue
                     }
                     if productBlacklist.contains(identity) {
@@ -82,7 +82,7 @@ func writePackageStrings() {
         options: [],
         range: range
     ) { match, _, stop in
-        guard let match = match else { return }
+        guard let match else { return }
 
         let lastRange = Range(match.range(at: match.numberOfRanges - 1), in: text)
         let lastMatch = String(text[lastRange!])
@@ -116,7 +116,7 @@ func writeProductStrings() {
         options: [],
         range: range
     ) { match, _, stop in
-        guard let match = match else { return }
+        guard let match else { return }
 
         let lastRange = Range(match.range(at: match.numberOfRanges - 1), in: text)
         let lastMatch = String(text[lastRange!])

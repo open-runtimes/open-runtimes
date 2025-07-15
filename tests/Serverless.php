@@ -723,14 +723,14 @@ class Serverless extends Base
         self::assertEmpty($response['headers']['x-open-runtimes-log-id']);
         self::assertEmpty($logs);
         self::assertEmpty($errors);
- 
+
         $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'enabled' ]);
         $logs = Client::getLogs('dev');
         $errors = Client::getErrors('dev');
         self::assertEquals('dev', $response['headers']['x-open-runtimes-log-id']);
         self::assertStringContainsString('Debug log', $logs);
         self::assertStringContainsString('Error log', $errors);
- 
+
         $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'enabled', 'x-open-runtimes-log-id' => 'myLog' ]);
         $logs = Client::getLogs('myLog');
         $errors = Client::getErrors('myLog');

@@ -1,4 +1,5 @@
 tests/.runtime
+tests/resources/telemetry
 runtimes/.release
 runtimes/.test
 code.tar.gz
