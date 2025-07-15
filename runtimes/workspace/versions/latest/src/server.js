@@ -8,6 +8,7 @@ const {
   System,
   Git,
   Code,
+  Ports,
   Appwrite,
   Embeddings,
 } = require("@appwrite.io/synapse");
@@ -46,6 +47,8 @@ let globalGit;
 let globalCode;
 /** @type {Embeddings} */
 let globalEmbeddings;
+/** @type {Ports} */
+let globalPorts;
 
 /** @type {Map<string, Connection>} */
 const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
@@ -451,7 +454,10 @@ synapse
     globalSystem = new System(synapse);
     globalGit = new Git(synapse, WORK_DIR);
     globalCode = new Code(synapse);
+    globalPorts = new Ports(synapse);
     globalEmbeddings = new Embeddings(synapse, WORK_DIR, huggingFaceAdapter);
+
+    globalPorts.startMonitoring();
 
     synapse.onConnection((connectionId) => {
       console.info(`New Synapse connection: ${connectionId}`);

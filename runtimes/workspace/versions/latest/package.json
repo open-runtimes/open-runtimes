@@ -13,10 +13,5 @@
   "dependencies": {
     "@appwrite.io/synapse": "^0.6.5",
     "micro": "^9.3.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "node-pty"
-    ]
   }
 }
