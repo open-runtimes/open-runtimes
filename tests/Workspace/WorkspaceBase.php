@@ -112,7 +112,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'createFile',
             'params' => [
-                'filepath' => 'test.txt',
+                'filePath' => 'test.txt',
                 'content' => 'Hello World',
             ]
         ]);
@@ -124,7 +124,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'createFile',
             'params' => [
-                'filepath' => 'test.txt',
+                'filePath' => 'test.txt',
                 'content' => 'Hello World'
             ]
         ]);
@@ -136,7 +136,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'appendFile',
             'params' => [
-                'filepath' => 'test.txt',
+                'filePath' => 'test.txt',
                 'content' => 'Hello World 2'
             ]
         ]);
@@ -177,7 +177,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'getFile',
             'params' => [
-                'filepath' => 'test.txt',
+                'filePath' => 'test.txt',
             ]
         ]);
         $this->assertTrue($response['success']);
@@ -189,7 +189,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'updateFile',
             'params' => [
-                'filepath' => 'test.txt',
+                'filePath' => 'test.txt',
                 'content' => 'Hello World 2'
             ]
         ]);
@@ -226,7 +226,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'createFolder',
             'params' => [
-                'folderpath' => 'testfolder'
+                'folderPath' => 'testfolder'
             ]
         ]);
         $this->assertTrue($response['success']);
@@ -236,7 +236,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'deleteFile',
             'params' => [
-                'filepath' => 'test.txt'
+                'filePath' => 'test.txt'
             ]
         ]);
         $this->assertTrue($response['success']);
@@ -246,7 +246,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'deleteFolder',
             'params' => [
-                'folderpath' => 'testfolder'
+                'folderPath' => 'testfolder'
             ]
         ]);
         $this->assertTrue($response['success']);
@@ -260,7 +260,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'deleteFile',
             'params' => [
-                'filepath' => 'nonexistent.txt'
+                'filePath' => 'nonexistent.txt'
             ]
         ]);
         $this->assertFalse($response['success']);
@@ -271,7 +271,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'deleteFolder',
             'params' => [
-                'folderpath' => 'nonexistentfolder'
+                'folderPath' => 'nonexistentfolder'
             ]
         ]);
         $this->assertFalse($response['success']);
@@ -356,7 +356,7 @@ abstract class WorkspaceBase extends TestCase
             'type' => 'fs',
             'operation' => 'createFile',
             'params' => [
-                'filepath' => 'test.txt',
+                'filePath' => 'test.txt',
                 'content' => 'Test content'
             ]
         ]);
