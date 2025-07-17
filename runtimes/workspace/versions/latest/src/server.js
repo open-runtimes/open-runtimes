@@ -8,7 +8,6 @@ const {
   System,
   Git,
   Code,
-  Ports,
   Appwrite,
   Embeddings,
 } = require("@appwrite.io/synapse");
@@ -19,54 +18,20 @@ const { InputFile } = require("node-appwrite/file");
 
 const WORK_DIR = process.env.WORK_DIR || "/tmp/workspace";
 
-/**
- * @typedef {Object} Connection
- * @property {Terminal} terminal
- * @property {Filesystem} filesystem
- * @property {System} system
- * @property {Git} git
- * @property {Code} code
- * @property {Embeddings} embeddings
- * @property {Function[]} cleanupHandlers
- */
-
 const synapse = new Synapse("localhost", process.env.PORT || 3000);
 const huggingFaceAdapter = new HuggingFaceEmbeddingAdapter();
 
 const appwrite = new Appwrite(synapse);
 
-/** @type {Terminal} */
-let globalTerminal;
-/** @type {Filesystem} */
-let globalFilesystem;
-/** @type {System} */
-let globalSystem;
-/** @type {Git} */
-let globalGit;
-/** @type {Code} */
-let globalCode;
-/** @type {Embeddings} */
-let globalEmbeddings;
-/** @type {Ports} */
-let globalPorts;
+let globalTerminal,
+  globalFilesystem,
+  globalSystem,
+  globalGit,
+  globalCode,
+  globalEmbeddings; // initialize global services (for HTTP requests)
 
-/** @type {Map<string, Connection>} */
 const connections = new Map(); // connectionId -> { terminal, filesystem, system, git, code }
 
-/**
- * Get connection services for a given connection ID
- * @param {string} connectionId
- * @returns {Connection | null}
- */
-function getConnection(connectionId) {
-  return connections.get(connectionId) || null;
-}
-
-/**
- * Parse the URL and return the path and query parameters
- * @param {string} url
- * @returns {{ path: string, params: Record<string, string> }}
- */
 function parseUrl(url) {
   const [path, query] = url.split("?");
 
@@ -90,17 +55,12 @@ const router = {
       throw new Error("Method not allowed");
     }
 
-    const connection = getConnection(connectionId);
-    if (!connection) {
-      throw new Error("Connection not found");
-    }
-
-    const {
-      terminal: connectionTerminal,
-      filesystem: connectionFilesystem,
-      embeddings: connectionEmbeddings,
-      git: connectionGit,
-    } = connection;
+    const connectionTerminal = (connections.get(connectionId) || {}).terminal;
+    const connectionFilesystem = (connections.get(connectionId) || {})
+      .filesystem;
+    const connectionSystem = (connections.get(connectionId) || {}).system;
+    const connectionEmbeddings = (connections.get(connectionId) || {})
+      .embeddings;
 
     const { operation, params } = message;
     switch (operation) {
@@ -111,8 +71,8 @@ const router = {
 
         connectionTerminal.updateWorkDir(params.workDir);
         connectionFilesystem.updateWorkDir(params.workDir);
+        connectionSystem.updateWorkDir(params.workDir);
         connectionEmbeddings.updateWorkDir(params.workDir);
-        connectionGit.updateWorkDir(params.workDir);
 
         return { success: true, data: "Work directory updated successfully" };
     }
@@ -121,8 +81,7 @@ const router = {
   terminal: async (message, connectionId) => {
     let terminal;
     if (connectionId) {
-      const connection = getConnection(connectionId);
-      terminal = connection?.terminal;
+      terminal = (connections.get(connectionId) || {}).terminal;
     } else {
       terminal = globalTerminal;
     }
@@ -136,25 +95,30 @@ const router = {
       case "createCommand":
         terminal.createCommand(params.command);
         break;
-      case "executeCommand":
-        const safeCwd = path.join(WORK_DIR, params.cwd);
-        const result = await terminal.executeCommand({
-          command: params.command,
-          cwd: safeCwd,
-          timeout: params.timeout,
-        });
-        return { success: true, data: result };
       default:
         throw new Error("Invalid terminal operation");
     }
     return null;
   },
 
+  stateless: async (message) => {
+    const { operation, params } = message;
+
+    switch (operation) {
+      case "executeCommand":
+        console.log("params", params);
+        const result = await globalFilesystem.executeCommand({
+          command: params.command,
+          cwd: params.cwd,
+          timeout: params.timeout,
+        });
+        return { success: true, data: result };
+    }
+  },
   fs: async (message, connectionId) => {
     let filesystem;
     if (connectionId) {
-      const connection = getConnection(connectionId);
-      filesystem = connection?.filesystem;
+      filesystem = (connections.get(connectionId) || {}).filesystem;
     } else {
       filesystem = globalFilesystem;
     }
@@ -164,78 +128,57 @@ const router = {
 
     switch (operation) {
       case "createFile":
-        result = await filesystem.createFile({
-          filePath: params.filePath,
-          content: params.content,
-        });
+        result = await filesystem.createFile(params.filepath, params.content);
         break;
       case "appendFile":
-        result = await filesystem.appendFile({
-          filePath: params.filePath,
-          content: params.content,
-        });
+        result = await filesystem.appendFile(params.filepath, params.content);
         break;
       case "getFile":
-        result = await filesystem.getFile({
-          filePath: params.filePath,
-        });
+        result = await filesystem.getFile(params.filepath);
         break;
       case "updateFile":
-        result = await filesystem.updateFile({
-          filePath: params.filePath,
-          content: params.content,
-        });
+        result = await filesystem.updateFile(params.filepath, params.content);
         break;
-      case "updatefilePath":
-        result = await filesystem.updatefilePath({
-          oldPath: params.filePath,
-          newPath: params.newPath,
-        });
+      case "updateFilePath":
+        result = await filesystem.updateFilePath(
+          params.filepath,
+          params.newPath
+        );
         break;
       case "listFilesInDir":
         result = await filesystem.listFilesInDir({
           dirPath: params.dirPath,
-          withContent: params.withContent ?? false,
-          recursive: params.recursive ?? false,
-          additionalIgnorePatterns: params.additionalIgnorePatterns ?? [],
+          withContent: params.withContent,
+          recursive: params.recursive,
+          additionalIgnorePatterns: params.additionalIgnorePatterns,
         });
         break;
       case "deleteFile":
-        result = await filesystem.deleteFile({
-          filePath: params.filePath,
-        });
+        result = await filesystem.deleteFile(params.filepath);
         break;
       case "createFolder":
-        result = await filesystem.createFolder({
-          dirPath: params.folderPath,
-        });
+        result = await filesystem.createFolder(params.folderpath);
         break;
       case "getFolder":
-        result = await filesystem.getFolder({
-          dirPath: params.folderPath,
-        });
+        result = await filesystem.getFolder(params.folderpath);
         break;
       case "updateFolderName":
-        result = await filesystem.updateFolderName({
-          dirPath: params.folderPath,
-          name: params.name,
-        });
+        result = await filesystem.updateFolderName(
+          params.folderpath,
+          params.name
+        );
         break;
-      case "updatefolderPath":
-        result = await filesystem.updatefolderPath({
-          oldPath: params.folderPath,
-          newPath: params.newPath,
-        });
+      case "updateFolderPath":
+        result = await filesystem.updateFolderPath(
+          params.folderpath,
+          params.newPath
+        );
         break;
       case "deleteFolder":
-        result = await filesystem.deleteFolder({
-          dirPath: params.folderPath,
-        });
+        result = await filesystem.deleteFolder(params.folderpath);
         break;
       case "searchFiles":
-        result = await filesystem.searchFiles({
-          term: params.query,
-        });
+        result = await filesystem.searchFiles(params.query);
         break;
       default:
         throw new Error("Invalid operation");
@@ -246,8 +189,7 @@ const router = {
   system: async (message, connectionId) => {
     let system;
     if (connectionId) {
-      const connection = getConnection(connectionId);
-      system = connection?.system;
+      system = (connections.get(connectionId) || {}).system;
     } else {
       system = globalSystem;
     }
@@ -268,8 +210,7 @@ const router = {
   git: async (message, connectionId) => {
     let git;
     if (connectionId) {
-      const connection = getConnection(connectionId);
-      git = connection?.git;
+      git = (connections.get(connectionId) || {}).git;
     } else {
       git = globalGit;
     }
@@ -282,20 +223,13 @@ const router = {
         result = await git.init();
         break;
       case "addRemote":
-        result = await git.addRemote({
-          name: params.name,
-          url: params.url,
-        });
+        result = await git.addRemote(params.name, params.url);
         break;
       case "setUserName":
-        result = await git.setUserName({
-          name: params.name,
-        });
+        result = await git.setUserName(params.name);
         break;
       case "setUserEmail":
-        result = await git.setUserEmail({
-          email: params.email,
-        });
+        result = await git.setUserEmail(params.email);
         break;
       case "getCurrentBranch":
         result = await git.getCurrentBranch();
@@ -304,24 +238,16 @@ const router = {
         result = await git.status();
         break;
       case "add":
-        result = await git.add({
-          files: params.files,
-        });
+        result = await git.add(params.files);
         break;
       case "commit":
-        result = await git.commit({
-          message: params.message,
-        });
+        result = await git.commit(params.message);
         break;
       case "pull":
-        result = await git.pull({
-          branch: params.branch,
-        });
+        result = await git.pull();
         break;
       case "push":
-        result = await git.push({
-          branch: params.branch,
-        });
+        result = await git.push();
         break;
       default:
         throw new Error("Invalid git operation");
@@ -332,8 +258,7 @@ const router = {
   code: async (message, connectionId) => {
     let code;
     if (connectionId) {
-      const connection = getConnection(connectionId);
-      code = connection?.code;
+      code = (connections.get(connectionId) || {}).code;
     } else {
       code = globalCode;
     }
@@ -343,16 +268,10 @@ const router = {
 
     switch (operation) {
       case "format":
-        result = await code.format({
-          code: params.code,
-          options: params.options,
-        });
+        result = await code.format(params.code, params.options);
         break;
       case "lint":
-        result = await code.lint({
-          code: params.code,
-          options: params.options,
-        });
+        result = await code.lint(params.code, params.options);
         break;
       default:
         throw new Error("Invalid code operation");
@@ -377,16 +296,12 @@ const router = {
 
     if (service === "sites" && operation === "createDeployment") {
       await globalFilesystem.createGzipFile("code.tar.gz");
-      const path = `${WORK_DIR}/code.tar.gz`;
+      const path = `${appwrite.getWorkDir() ?? WORK_DIR}/code.tar.gz`;
       const file = InputFile.fromPath(path, "code.tar.gz");
-      const result = await appwrite.call({
-        service: "sites",
-        method: "createDeployment",
-        args: {
-          siteId: params.siteId,
-          code: file,
-          activate: params.activate ?? false,
-        },
+      const result = await appwrite.call("sites", "createDeployment", {
+        siteId: params.siteId,
+        code: file,
+        activate: params.activate ?? false,
       });
       return {
         success: true,
@@ -394,11 +309,7 @@ const router = {
       };
     }
 
-    const result = await appwrite.call({
-      service,
-      method: operation,
-      args: params,
-    });
+    const result = await appwrite.call(service, operation, params);
     return {
       success: true,
       data: result,
@@ -408,8 +319,7 @@ const router = {
   embeddings: async (message, connectionId) => {
     let embeddings;
     if (connectionId) {
-      const connection = getConnection(connectionId);
-      embeddings = connection?.embeddings;
+      embeddings = (connections.get(connectionId) || {}).embeddings;
     } else {
       embeddings = globalEmbeddings;
     }
@@ -454,18 +364,15 @@ synapse
     globalSystem = new System(synapse);
     globalGit = new Git(synapse, WORK_DIR);
     globalCode = new Code(synapse);
-    globalPorts = new Ports(synapse);
     globalEmbeddings = new Embeddings(synapse, WORK_DIR, huggingFaceAdapter);
-
-    globalPorts.startMonitoring();
 
     synapse.onConnection((connectionId) => {
       console.info(`New Synapse connection: ${connectionId}`);
       console.info(
-        `New Synapse connection: ${JSON.stringify(synapse.getConnection(connectionId))}`,
+        `New Synapse connection: ${JSON.stringify(synapse.getConnection(connectionId))}`
       );
       console.info(
-        `All connections: ${JSON.stringify(synapse.getConnections())}`,
+        `All connections: ${JSON.stringify(synapse.getConnections())}`
       );
 
       const urlParams = synapse.getParams(connectionId);
@@ -498,11 +405,7 @@ synapse
       // Terminal onData
       const terminalHandler = (success, data) => {
         if (synapse.isConnected(connectionId)) {
-          synapse.send({
-            connectionId,
-            type: "terminal",
-            payload: { success, data },
-          });
+          synapse.send(connectionId, "terminal", { success, data });
         }
       };
       terminal.onData(terminalHandler);
@@ -510,14 +413,10 @@ synapse
       // Terminal onExit
       const terminalExitHandler = (success, exitCode, signal) => {
         if (synapse.isConnected(connectionId)) {
-          synapse.send({
-            connectionId,
-            type: "terminalExit",
-            payload: {
-              success,
-              exitCode,
-              signal,
-            },
+          synapse.send(connectionId, "terminalExit", {
+            success,
+            exitCode,
+            signal,
           });
         }
       };
@@ -527,16 +426,12 @@ synapse
       if (urlParams?.syncWorkDir && urlParams.syncWorkDir === "true") {
         const fsHandler = ({ path, event, content }) => {
           if (synapse.isConnected(connectionId)) {
-            synapse.send({
-              connectionId,
-              type: "syncWorkDir",
-              payload: {
-                success: true,
-                data: {
-                  path,
-                  event,
-                  content,
-                },
+            synapse.send(connectionId, "syncWorkDir", {
+              success: true,
+              data: {
+                path,
+                event,
+                content,
               },
             });
           }
@@ -562,25 +457,17 @@ synapse
           const result = await router[type](message, connectionId);
           if (result !== null) {
             console.log(type, result);
-            synapse.send({
-              connectionId,
-              type,
-              payload: {
-                requestId: message.requestId,
-                ...result,
-              },
+            synapse.send(connectionId, type, {
+              requestId: message.requestId,
+              ...result,
             });
           }
         } catch (error) {
           console.error(type, error);
-          synapse.send({
-            connectionId,
-            type,
-            payload: {
-              requestId: message.requestId,
-              success: false,
-              error: error.message,
-            },
+          synapse.send(connectionId, type, {
+            requestId: message.requestId,
+            success: false,
+            error: error.message,
           });
         }
       });
@@ -588,7 +475,7 @@ synapse
 
     synapse.onClose((connectionId, code, reason, wasClean) => {
       console.info(
-        `Connection closed:\n  connectionId: ${connectionId}\n  code: ${code}\n  reason: ${reason || "N/A"}\n  wasClean: ${wasClean}`,
+        `Connection closed:\n  connectionId: ${connectionId}\n  code: ${code}\n  reason: ${reason || "N/A"}\n  wasClean: ${wasClean}`
       );
       const conn = connections.get(connectionId);
       if (!conn) return;
@@ -628,6 +515,8 @@ const server = micro(async (req, res) => {
   const { method, url } = req;
   const { path, params } = parseUrl(url);
 
+  let skipWorkDirUpdate = false;
+
   if (path === "/health") {
     return send(res, 200, { success: true, data: "OK" });
   }
@@ -639,17 +528,27 @@ const server = micro(async (req, res) => {
     });
   }
 
-  if (params?.workDir) {
-    // update global services with new workdir
-    globalTerminal.updateWorkDir(params.workDir);
-    globalFilesystem.updateWorkDir(params.workDir);
-    globalGit.updateWorkDir(params.workDir);
-    globalEmbeddings.updateWorkDir(params.workDir);
-  } else {
-    globalTerminal.updateWorkDir(WORK_DIR);
-    globalFilesystem.updateWorkDir(WORK_DIR);
-    globalGit.updateWorkDir(WORK_DIR);
-    globalEmbeddings.updateWorkDir(WORK_DIR);
+  if (method === "POST" && path === "/") {
+    const rawBody = await micro.text(req);
+    const body = JSON.parse(rawBody);
+    if (body.type === "stateless") {
+      skipWorkDirUpdate = true;
+    }
+  }
+
+  if (!skipWorkDirUpdate) {
+    if (params?.workDir) {
+      // update global services with new workdir
+      globalTerminal.updateWorkDir(params.workDir);
+      globalFilesystem.updateWorkDir(params.workDir);
+      globalGit.updateWorkDir(params.workDir);
+      globalEmbeddings.updateWorkDir(params.workDir);
+    } else {
+      globalTerminal.updateWorkDir(WORK_DIR);
+      globalFilesystem.updateWorkDir(WORK_DIR);
+      globalGit.updateWorkDir(WORK_DIR);
+      globalEmbeddings.updateWorkDir(WORK_DIR);
+    }
   }
 
   if (method === "GET" && path === "/targz") {
@@ -665,7 +564,7 @@ const server = micro(async (req, res) => {
     res.setHeader("Content-Type", "application/gzip");
     res.setHeader(
       "Content-Disposition",
-      'attachment; filename="download.tar.gz"',
+      'attachment; filename="download.tar.gz"'
     );
     res.setHeader("Content-Length", tarGzResult.data.buffer.length);
 
