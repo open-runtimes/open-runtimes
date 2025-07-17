@@ -12,6 +12,7 @@ RUN apt update && apt install -y \
 RUN ln -sf /bin/bash /bin/sh
 
 RUN npm install pnpm@10 -g
+RUN npm install -g bun
 
 RUN npm ci && npm cache clean --force
 
