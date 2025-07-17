@@ -15,5 +15,7 @@ if [ -e "$ENTRYPOINT" ]; then
     mv /usr/local/build/node_modules/ ./node_modules/
     rm -rf ./server/node_modules
 
+    modclean --patterns default:safe --no-progress --run
+
     echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Bundling for SSR finished. [0m"
 fi
