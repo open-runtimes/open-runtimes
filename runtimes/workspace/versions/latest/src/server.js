@@ -131,28 +131,39 @@ const router = {
     }
     if (!filesystem) throw new Error("Filesystem not initialized");
     const { operation, params } = message;
+    console.log("fs", { operation, params });
     let result;
 
     switch (operation) {
       case "createFile":
-        result = await filesystem.createFile(params.filepath, params.content);
+        result = await filesystem.createFile({
+          filePath: params.filepath,
+          content: params.content,
+        });
         break;
       case "appendFile":
-        result = await filesystem.appendFile(params.filepath, params.content);
+        result = await filesystem.appendFile({
+          filePath: params.filepath,
+          content: params.content,
+        });
         break;
       case "getFile":
-        result = await filesystem.getFile(params.filepath);
+        result = await filesystem.getFile({ filePath: params.filepath });
         break;
       case "updateFile":
-        result = await filesystem.updateFile(params.filepath, params.content);
+        result = await filesystem.updateFile({
+          filePath: params.filepath,
+          content: params.content,
+        });
         break;
       case "updateFilePath":
-        result = await filesystem.updateFilePath(
-          params.filepath,
-          params.newPath
-        );
+        result = await filesystem.updateFilePath({
+          oldPath: params.filepath,
+          newPath: params.newPath
+        });
         break;
       case "listFilesInDir":
+        console.log("listFilesInDir", params);
         result = await filesystem.listFilesInDir({
           dirPath: params.dirPath,
           withContent: params.withContent,
@@ -161,31 +172,31 @@ const router = {
         });
         break;
       case "deleteFile":
-        result = await filesystem.deleteFile(params.filepath);
+        result = await filesystem.deleteFile({ filePath: params.filepath });
         break;
       case "createFolder":
-        result = await filesystem.createFolder(params.folderpath);
+        result = await filesystem.createFolder({ dirPath: params.folderpath });
         break;
       case "getFolder":
-        result = await filesystem.getFolder(params.folderpath);
+        result = await filesystem.getFolder({ dirPath: params.folderpath });
         break;
       case "updateFolderName":
-        result = await filesystem.updateFolderName(
-          params.folderpath,
-          params.name
-        );
+        result = await filesystem.updateFolderName({
+          dirPath: params.folderpath,
+          name: params.name,
+        });
         break;
       case "updateFolderPath":
-        result = await filesystem.updateFolderPath(
-          params.folderpath,
-          params.newPath
-        );
+        result = await filesystem.updateFolderPath({
+          dirPath: params.folderpath,
+          newPath: params.newPath,
+        });
         break;
       case "deleteFolder":
-        result = await filesystem.deleteFolder(params.folderpath);
+        result = await filesystem.deleteFolder({ dirPath: params.folderpath });
         break;
       case "searchFiles":
-        result = await filesystem.searchFiles(params.query);
+        result = await filesystem.searchFiles({ term: params.query });
         break;
       default:
         throw new Error("Invalid operation");
@@ -536,11 +547,9 @@ const server = micro(async (req, res) => {
   }
 
   if (method === "POST" && path === "/") {
+    skipWorkDirUpdate = true;
     const rawBody = await micro.text(req);
     const body = JSON.parse(rawBody);
-    if (body.type === "stateless") {
-      skipWorkDirUpdate = true;
-    }
   }
 
   if (!skipWorkDirUpdate) {

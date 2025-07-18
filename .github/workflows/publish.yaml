@@ -81,7 +81,7 @@ jobs:
           - ID: workspace-1
             RUNTIME: workspace
             VERSION: "1"
-            IMAGE: openruntimes/workspace:v5-1
+            IMAGE: openruntimes/workspace:v5-2
             ARCH: "linux/amd64,linux/arm64"
 
           # Deno
