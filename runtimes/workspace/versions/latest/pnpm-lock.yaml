@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       '@appwrite.io/synapse':
-        specifier: https://pkg.vc/-/@appwrite/@appwrite.io/synapse@2b0a9e8
-        version: https://pkg.vc/-/@appwrite/@appwrite.io/synapse@2b0a9e8
+        specifier: https://pkg.vc/-/@appwrite/@appwrite.io/synapse@402b447
+        version: https://pkg.vc/-/@appwrite/@appwrite.io/synapse@402b447
       micro:
         specifier: ^9.3.4
         version: 9.4.1
 
 packages:
 
-  '@appwrite.io/synapse@https://pkg.vc/-/@appwrite/@appwrite.io/synapse@2b0a9e8':
-    resolution: {tarball: https://pkg.vc/-/@appwrite/@appwrite.io/synapse@2b0a9e8}
-    version: 0.6.5
+  '@appwrite.io/synapse@https://pkg.vc/-/@appwrite/@appwrite.io/synapse@402b447':
+    resolution: {tarball: https://pkg.vc/-/@appwrite/@appwrite.io/synapse@402b447}
+    version: 0.6.6
 
   '@emnapi/runtime@1.4.4':
     resolution: {integrity: sha512-hHyapA4A3gPaDCNfiqyZUStTMqIkKRshqPIuDOXv1hcBnD4U3l8cP0T1HMCfGRxQ6V64TGCcoswChANyOAwbQg==}
@@ -1007,7 +1007,7 @@ packages:
 
 snapshots:
 
-  '@appwrite.io/synapse@https://pkg.vc/-/@appwrite/@appwrite.io/synapse@2b0a9e8':
+  '@appwrite.io/synapse@https://pkg.vc/-/@appwrite/@appwrite.io/synapse@402b447':
     dependencies:
       '@huggingface/transformers': 3.6.3
       archiver: 7.0.1
