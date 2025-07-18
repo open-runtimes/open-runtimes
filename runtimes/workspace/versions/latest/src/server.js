@@ -106,13 +106,20 @@ const router = {
 
     switch (operation) {
       case "executeCommand":
-        console.log("params", params);
-        const result = await globalFilesystem.executeCommand({
+        const executeCommandResult = await globalFilesystem.executeCommand({
           command: params.command,
           cwd: params.cwd,
           timeout: params.timeout,
         });
-        return { success: true, data: result };
+        return { success: true, data: executeCommandResult };
+
+      case "startBackgroundProcess":
+        const startBackgroundProcessResult = await globalFilesystem.startBackgroundProcess({
+          command: params.command,
+          args: params.args,
+          cwd: params.cwd,
+        });
+        return startBackgroundProcessResult;
     }
   },
   fs: async (message, connectionId) => {
