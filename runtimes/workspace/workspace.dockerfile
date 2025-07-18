@@ -9,7 +9,11 @@ RUN apt update && apt install -y \
     git \
     bash
 
+RUN ln -sf /bin/bash /bin/sh
+
 RUN npm install pnpm@10 -g
+RUN npm install -g bun
+RUN bunx giget --version
 
 RUN npm ci && npm cache clean --force
 
