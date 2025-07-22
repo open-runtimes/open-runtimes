@@ -6,6 +6,9 @@ const Logger = require("./logger");
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
 const server = micro(async (req, res) => {
+  if (req.url === "/__opr/health") {
+    return send(res, 200, "OK");
+  }
   if (req.url === "/__opr/timings") {
     const timings = fs.readFileSync("/mnt/telemetry/timings.txt", {
       encoding: "utf8",

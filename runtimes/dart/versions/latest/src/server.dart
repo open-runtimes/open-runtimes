@@ -201,6 +201,9 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 void main() async {
   await shelf_io.serve(
     (req) async {
+      if (req.url.path == '__opr/health') {
+        return shelf.Response(200, body: 'OK');
+      }
       if (req.url.path == '__opr/timings') {
         String timings = await File(
           '/mnt/telemetry/timings.txt',

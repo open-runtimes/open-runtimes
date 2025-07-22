@@ -42,6 +42,9 @@ public class Server {
   }
 
   public static Context execute(Context ctx) {
+    if (ctx.path().equals("/__opr/health")) {
+      return ctx.status(200).result("OK");
+    }
     if (ctx.path().equals("/__opr/timings")) {
       try {
         String timings = new String(Files.readAllBytes(Paths.get("/mnt/telemetry/timings.txt")));

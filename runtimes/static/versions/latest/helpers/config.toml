@@ -3,3 +3,7 @@
 [[advanced.rewrites]]
 source = "/__opr/timings"
 destination = "/__opr/timings.txt"
+
+[[advanced.rewrites]]
+source = "/__opr/health"
+destination = "/__opr/health.txt"

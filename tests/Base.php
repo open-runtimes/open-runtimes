@@ -105,6 +105,13 @@ class Base extends TestCase
         Client::$host = 'open-runtimes-test-serve';
     }
 
+    public function testHealth(): void
+    {
+        $response = Client::execute(method: 'GET', url: '/__opr/health');
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('OK', $response['body']);
+    }
+
     public function testTimings(): void
     {
         $response = Client::execute(method: 'GET', url: '/__opr/timings');

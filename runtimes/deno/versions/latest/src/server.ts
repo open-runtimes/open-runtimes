@@ -9,6 +9,11 @@ app.addEventListener("listen", () => {
 });
 
 app.use(async (ctx: any) => {
+  if (ctx.request.url.pathname === "/__opr/health") {
+    ctx.response.status = 200;
+    ctx.response.body = "OK";
+    return;
+  }
   if (ctx.request.url.pathname === "/__opr/timings") {
     const timings = await Deno.readTextFile("/mnt/telemetry/timings.txt");
     ctx.response.headers.set("content-type", "text/plain; charset=utf-8");

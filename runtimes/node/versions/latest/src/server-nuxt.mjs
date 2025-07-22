@@ -1,21 +1,13 @@
 import { listener } from "./server/index.mjs";
 import express from "express";
-import {
-  onInit,
-  getPort,
-  getHost,
-  onAction,
-  onError,
-  telemetryMiddleware,
-} from "./ssr/helpers.mjs";
-import { readFileSync } from "fs";
+import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
+import * as system from "./ssr/system.mjs";
 
 console.log("Nuxt server starting ...");
 
 const app = express();
 
-app.use(telemetryMiddleware);
-
+app.use(system.routes);
 app.use(onInit);
 
 // framework-specific logic

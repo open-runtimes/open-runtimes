@@ -2,9 +2,10 @@
 set -e
 shopt -s dotglob
 
-# Copy telemetry file to be accessible
+# Write files to serve system routes
+mkdir -p /usr/local/server/src/function/__opr
+echo -n "OK" > /usr/local/server/src/function/__opr/health.txt
 if [ -f "/mnt/telemetry/timings.txt" ]; then
-    mkdir -p /usr/local/server/src/function/__opr
     cp /mnt/telemetry/timings.txt /usr/local/server/src/function/__opr/timings.txt
 fi
 
