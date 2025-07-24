@@ -282,4 +282,5 @@ Bun.serve({
   },
 });
 
+Bun.spawn(["/usr/local/server/helpers/timings.sh", "stop", "listen"]);
 console.log("HTTP server successfully started!");
