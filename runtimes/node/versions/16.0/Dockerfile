@@ -5,6 +5,6 @@ INCLUDE ./base-before
 INCLUDE ./node
 
 # Override PNPM version: https://pnpm.io/installation#compatibility
-RUN npm install pnpm@8 -g
+RUN npm install pnpm@7 -g
 
 INCLUDE ./base-after
