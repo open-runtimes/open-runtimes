@@ -4,14 +4,14 @@ set -e
 shopt -s dotglob
 
 
-echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Build command execution finished. [0m"
+echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Build command execution finished. \e[0m"
 
 # Install dependencies
 cd /usr/local/server
 
 . /usr/local/server/helpers/prepare-compile.sh
 
-echo "[90m$(date +[%H:%M:%S]) [31m[[0mopen-runtimes[31m][97m Build packaging started. [0m"
+echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Build packaging started. \e[0m"
 
 . /usr/local/server/helpers/prepare-packing.sh
 
@@ -20,7 +20,7 @@ cd /usr/local/build/
 
 # Check if the output directory is empty
 if [ -z "$(ls -A $OPEN_RUNTIMES_OUTPUT_DIRECTORY 2>/dev/null)" ]; then
-    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][31m Error: No build output found. Ensure your output directory isn't empty. [0m"
+    echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[31m Error: No build output found. Ensure your output directory isn't empty. \e[0m"
     exit 1
 fi
 
@@ -39,6 +39,6 @@ else
     tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
 fi
 
-echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Build packaging finished. [0m"
+echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Build packaging finished. \e[0m"
 
-echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][32m Build finished. [0m"
+echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[32m Build finished. \e[0m"
