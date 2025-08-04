@@ -9,7 +9,7 @@ fi
 
 ENTRYPOINT="./server/webpack-runtime.js"
 if [ -e "$ENTRYPOINT" ]; then
-    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Bundling for SSR started. [0m"
+    echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR started. \e[0m"
     
     cd /usr/local/build
 
@@ -30,5 +30,5 @@ if [ -e "$ENTRYPOINT" ]; then
 
     modclean --patterns default:safe --no-progress --run
 
-    echo "[90m$(date +[%H:%M:%S]) [31m[[00mopen-runtimes[31m][97m Bundling for SSR finished. [0m"
+    echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR finished. \e[0m"
 fi
