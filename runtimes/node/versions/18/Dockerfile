@@ -1,5 +1,5 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM node:21.0.0-alpine3.18
+FROM node:18-alpine
 
 INCLUDE ./base-before
 INCLUDE ./node
