@@ -284,6 +284,10 @@ When you can have two!
                 context.error("engine:", engine)
                 return context.res.text("OK")
             }
+            "errorTest" -> {
+                context.log("Before error...")
+                throw Exception("Error!")
+            }
             else -> {
                 throw Exception("Unknown action")
             }

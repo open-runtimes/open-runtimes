@@ -156,6 +156,9 @@ When you can have two!
     context.log("engine:", engine)
     context.error("engine:", engine)
     return context.res.text('OK')
+  when 'errorTest'
+    context.log('Before error...')
+    raise 'Error!'
   else
     raise 'Unknown action'
   end

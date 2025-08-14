@@ -209,6 +209,11 @@ When you can have two!
       {
         return context.res.send("50"); // Send only supported String
       }
+    case 'errorTest':
+      {
+        context.log('Before error...');
+        throw new Exception('Error!');
+      }
     default:
       {
         throw new Exception('Unknown action');

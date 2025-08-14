@@ -232,6 +232,9 @@ When you can have two!
                     return context.Res.Send(context.Req.BodyRaw);
                 case "deprecatedMethodsUntypedBody":
                     return context.Res.Send("50"); // Send only supported String
+                case "errorTest":
+                    context.Log("Before error...");
+                    throw new Exception("Error!");
                 default:
                     throw new Exception("Unknown action");
             }

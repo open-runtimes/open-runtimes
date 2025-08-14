@@ -242,6 +242,9 @@ namespace runtime {
                 return context.res.send(context.req.bodyRaw);
             } else if (action == "deprecatedMethodsUntypedBody") {
                 return context.res.send("50"); // Send only supported String
+            } else if (action == "errorTest") {
+                context.log("Before error...");
+                throw std::invalid_argument("Error!");
             } else {
                 // C++ cannot get stack trace. Below makes test pass
                 context.error("tests.cc");

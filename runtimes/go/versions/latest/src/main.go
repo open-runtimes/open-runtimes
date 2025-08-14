@@ -179,6 +179,12 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	}
 
 	actionPromise := func(ch chan openruntimes.Response) {
+		defer func() {
+			if r := recover(); r != nil {
+				context.Error(fmt.Sprintf("%v", r))
+				ch <- context.Res.Text("", context.Res.WithStatusCode(500))
+			}
+		}()
 		output = handler.Main(context)
 		ch <- output
 	}

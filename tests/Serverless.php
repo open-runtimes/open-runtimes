@@ -119,6 +119,19 @@ class Serverless extends Base
         self::assertStringContainsString($entrypoint, Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
+    public function testErrorHandling(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'errorTest']);
+        $logId = $response['headers']['x-open-runtimes-log-id'];
+        $logs = Client::getLogs($logId);
+        $errors = Client::getErrors($logId);
+        
+        self::assertEquals(500, $response['code']);
+        self::assertEmpty($response['body']);
+        self::assertStringContainsString('Before error...', $logs);
+        self::assertStringContainsString('Error!', $errors);
+    }
+
     public function testRequestMethod(): void
     {
         $response = Client::execute(method: 'GET', headers: ['x-action' => 'requestMethod']);
