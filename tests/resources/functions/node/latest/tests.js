@@ -158,6 +158,9 @@ When you can have two!
 					.readFileSync("/usr/local/server/src/function/.config/.file")
 					.toString(),
 			);
+		case "errorTest":
+			context.log("Before error...");
+			throw new Error("Error!");
 		default:
 			throw new Error("Unknown action");
 	}

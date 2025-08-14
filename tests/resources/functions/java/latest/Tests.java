@@ -235,6 +235,10 @@ public class Tests {
         context.error("engine:", engine);
         return context.getRes().text("OK");
       }
+      case "errorTest" -> {
+        context.log("Before error...");
+        throw new Exception("Error!");
+      }
       default -> throw new Exception("Unknown action");
     }
   }

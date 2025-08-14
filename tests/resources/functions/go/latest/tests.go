@@ -209,6 +209,10 @@ When you can have two!
 		Context.Log("engine:", engine)
 		Context.Error("engine:", engine)
 		return Context.Res.Text("OK")
+	case "errorTest":
+		Context.Log("Before error...")
+		panic("Error!")
+		return Context.Res.Text("This should never be reached")
 	default:
 		Context.Error("Unknown action in tests.go")
 		return Context.Res.Text("", Context.Res.WithStatusCode(500))

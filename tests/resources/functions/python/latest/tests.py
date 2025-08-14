@@ -153,5 +153,8 @@ When you can have two!
         context.log("engine:", engine)
         context.error("engine:", engine)
         return context.res.text("OK")
+    elif action == "errorTest":
+        context.log("Before error...")
+        raise Exception("Error!")
     else:
         raise Exception("Unknown action")

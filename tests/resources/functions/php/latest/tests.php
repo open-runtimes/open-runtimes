@@ -160,6 +160,9 @@ When you can have two!
             $context->error('engine:', $engine);
 
             return $context->res->text('OK');
+        case 'errorTest':
+            $context->log('Before error...');
+            throw new Exception('Error!');
         default:
             throw new Exception('Unknown action');
     }

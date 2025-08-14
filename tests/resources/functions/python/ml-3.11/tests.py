@@ -156,5 +156,8 @@ When you can have two!
         return context.res.text("OK")
     elif action == "tensorflowVersion":
         return context.res.text(tf.__version__)
+    elif action == "errorTest":
+        context.log("Before error...")
+        raise Exception("Error!")
     else:
         raise Exception("Unknown action")

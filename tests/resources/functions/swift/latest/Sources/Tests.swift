@@ -169,6 +169,9 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return context.res.send(context.req.bodyRaw)
     case "deprecatedMethodsUntypedBody":
         return context.res.send("50") // Send only supported String
+    case "errorTest":
+        context.log("Before error...")
+        throw annotatedError(NSError(domain: "Error!", code: 500))
     default:
         throw annotatedError(NSError(domain: "Unknown action", code: 500))
     }

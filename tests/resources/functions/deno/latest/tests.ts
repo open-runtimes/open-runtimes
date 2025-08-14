@@ -149,6 +149,9 @@ When you can have two!
       context.log("engine:", engine);
       context.error("engine:", engine);
       return context.res.text("OK");
+    case "errorTest":
+      context.log("Before error...");
+      throw new Error("Error!");
     default:
       throw new Error("Unknown action");
   }
