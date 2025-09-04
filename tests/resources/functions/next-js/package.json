@@ -5,13 +5,14 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build-turbopack": "next build --turbopack",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106",
-    "next": "15.0.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "next": "15.5.2",
     "@faker-js/faker": "^9.3.0"
   }
 }
