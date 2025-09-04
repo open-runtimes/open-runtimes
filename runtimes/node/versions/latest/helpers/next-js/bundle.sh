@@ -7,8 +7,10 @@ if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
     cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
 fi
 
-ENTRYPOINT="./server/webpack-runtime.js"
-if [ -e "$ENTRYPOINT" ]; then
+WEBPACK_ENTRYPOINT="./server/webpack-runtime.js"
+TURBOPACK_ENTRYPOINT="turbopack"
+
+if [ -e "$WEBPACK_ENTRYPOINT" ] || [ -e "$TURBOPACK_ENTRYPOINT" ]; then
     echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR started. \e[0m"
     
     cd /usr/local/build
