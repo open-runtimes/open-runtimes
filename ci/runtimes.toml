@@ -59,6 +59,7 @@ versions = [
     "2.17",
     "2.16",
     "2.15",
+    "3.9.3"
 ]
 commands = { install = "dart pub get", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
