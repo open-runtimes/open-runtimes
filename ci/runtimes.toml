@@ -178,6 +178,14 @@ tools = "node --version && npm --version && npx --version && pnpm --version && y
 test = "SSR/NextJS.php"
 output = "./.next"
 
+[next-js-turbopack]
+runtime = { name = "node", version = "22" }
+commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
+test = "SSR/NextJS.php"
+output = "./.next"
+
 [nuxt]
 runtime = { name = "node", version = "22" }
 commands = { install = "source /usr/local/server/helpers/nuxt/env.sh && npm install && npm run build && bash /usr/local/server/helpers/nuxt/bundle.sh", start = "bash helpers/nuxt/server.sh" }
