@@ -118,8 +118,8 @@ When you can have two!
 			context.log({ objectKey: "objectValue" });
 			context.log(["arrayValue"]);
 
-			context.log(String(new Array(9000).fill('A')));
-			context.error(String(new Array(9000).fill('B')));
+			context.log(String(new Array(9000).fill("A")));
+			context.error(String(new Array(9000).fill("B")));
 
 			return context.res.text("");
 		case "library":
