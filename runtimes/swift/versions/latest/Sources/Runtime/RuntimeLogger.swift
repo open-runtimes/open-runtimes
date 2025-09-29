@@ -39,8 +39,8 @@ class RuntimeLogger {
             }
 
             do {
-            streamLogs = try FileHandle(forWritingTo: logsUrl)
-            streamErrors = try FileHandle(forWritingTo: errorsUrl)
+                streamLogs = try FileHandle(forWritingTo: logsUrl)
+                streamErrors = try FileHandle(forWritingTo: errorsUrl)
 
                 if let stream = streamLogs {
                     stream.seekToEndOfFile()
