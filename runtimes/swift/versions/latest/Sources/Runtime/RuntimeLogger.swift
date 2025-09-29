@@ -38,15 +38,20 @@ class RuntimeLogger {
                 FileManager.default.createFile(atPath: errorsUrl.path, contents: nil, attributes: nil)
             }
 
-            streamLogs = try! FileHandle(forWritingTo: logsUrl)
-            streamErrors = try! FileHandle(forWritingTo: errorsUrl)
+            do {
+            streamLogs = try FileHandle(forWritingTo: logsUrl)
+            streamErrors = try FileHandle(forWritingTo: errorsUrl)
 
-            if let stream = streamLogs {
-                stream.seekToEndOfFile()
-            }
+                if let stream = streamLogs {
+                    stream.seekToEndOfFile()
+                }
 
-            if let stream = streamErrors {
-                stream.seekToEndOfFile()
+                if let stream = streamErrors {
+                    stream.seekToEndOfFile()
+                }
+            } catch {
+                // Silently fail to prevent 500 errors in runtime
+                // Log write failures should not crash the runtime
             }
         }
     }
@@ -79,12 +84,7 @@ class RuntimeLogger {
 
         if let stringLogTemp = stringLog.data(using: .utf8) {
             if let streamTemp = stream {
-                do {
-                    try streamTemp.write(contentsOf: stringLogTemp)
-                } catch {
-                    // Silently fail to prevent 500 errors in runtime
-                    // Log write failures should not crash the runtime
-                }
+                streamTemp.write(stringLogTemp)
             }
         }
     }
