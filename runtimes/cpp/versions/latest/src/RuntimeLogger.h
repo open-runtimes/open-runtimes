@@ -77,7 +77,8 @@ public:
     std::string truncatedMessage = message;
     if (truncatedMessage.length() > 8000) {
       truncatedMessage = truncatedMessage.substr(0, 8000);
-      truncatedMessage += "... Log truncated due to size limit (8000 characters)";
+      truncatedMessage +=
+          "... Log truncated due to size limit (8000 characters)";
     }
 
     try {
