@@ -66,7 +66,12 @@ class Logger {
       stringLog = message.toString();
     }
 
-    stream.write(stringLog + "\n");
+    try {
+      stream.write(stringLog + "\n");
+    } catch (e) {
+      // Silently fail to prevent 500 errors in runtime
+      // Log write failures should not crash the runtime
+    }
   }
 
   Future<void> end() async {

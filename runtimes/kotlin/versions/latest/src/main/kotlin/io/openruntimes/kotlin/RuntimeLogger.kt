@@ -108,7 +108,12 @@ class RuntimeLogger(
         }
 
         if (stream != null) {
-            stream.write(stringLog)
+            try {
+                stream.write(stringLog)
+            } catch (e: IOException) {
+                // Silently fail to prevent 500 errors in runtime
+                // Log write failures should not crash the runtime
+            }
         }
     }
 

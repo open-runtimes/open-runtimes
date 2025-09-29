@@ -74,7 +74,12 @@ public:
     std::shared_ptr<std::ofstream> stream =
         type == "error" ? streamErrors : streamLogs;
 
-    *(stream) << (message + "\n");
+    try {
+      *(stream) << (message + "\n");
+    } catch (const std::exception &e) {
+      // Silently fail to prevent 500 errors in runtime
+      // Log write failures should not crash the runtime
+    }
   }
 
   void end() {

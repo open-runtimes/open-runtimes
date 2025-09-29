@@ -79,7 +79,12 @@ class RuntimeLogger {
 
         if let stringLogTemp = stringLog.data(using: .utf8) {
             if let streamTemp = stream {
-                streamTemp.write(stringLogTemp)
+                do {
+                    try streamTemp.write(contentsOf: stringLogTemp)
+                } catch {
+                    // Silently fail to prevent 500 errors in runtime
+                    // Log write failures should not crash the runtime
+                }
             }
         }
     }

@@ -100,7 +100,15 @@ namespace DotNetRuntime
 
             if (stream != null)
             {
-                stream.WriteLine(stringLog);
+                try
+                {
+                    stream.WriteLine(stringLog);
+                }
+                catch (Exception e)
+                {
+                    // Silently fail to prevent 500 errors in runtime
+                    // Log write failures should not crash the runtime
+                }
             }
         }
 

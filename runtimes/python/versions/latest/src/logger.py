@@ -77,7 +77,12 @@ class Logger:
 
             i += 1
 
-        stream.write(string_log)
+        try:
+            stream.write(string_log)
+        except Exception as e:
+            # Silently fail to prevent 500 errors in runtime
+            # Log write failures should not crash the runtime
+            pass
 
     def end(self):
         if self.enabled is False:

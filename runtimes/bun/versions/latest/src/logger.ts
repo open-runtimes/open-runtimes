@@ -67,7 +67,12 @@ export class Logger {
       }
     }
 
-    stream.write(stringLog + "\n");
+    try {
+      stream.write(stringLog + "\n");
+    } catch (error) {
+      // Silently fail to prevent 500 errors in runtime
+      // Log write failures should not crash the runtime
+    }
   }
 
   async end() {

@@ -55,7 +55,12 @@ class Logger
         }
 
 
-        \fwrite($stream, $stringLog . "\n");
+        try {
+            \fwrite($stream, $stringLog . "\n");
+        } catch (Exception $e) {
+            // Silently fail to prevent 500 errors in runtime
+            // Log write failures should not crash the runtime
+        }
     }
 
     public function end(): void

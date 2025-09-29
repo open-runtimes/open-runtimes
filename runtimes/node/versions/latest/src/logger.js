@@ -64,7 +64,12 @@ class Logger {
       }
     }
 
-    stream.write(stringLog + "\n");
+    try {
+      stream.write(stringLog + "\n");
+    } catch (err) {
+      // Silently ignore write failures to prevent runtime crashes
+      // The logging system should not cause the main execution to fail
+    }
   }
 
   async end() {

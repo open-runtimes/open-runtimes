@@ -85,7 +85,12 @@ export class Logger {
     }
 
     const encoded = new TextEncoder().encode(stringLog + "\n");
-    this.writePromises.push(stream.write(encoded));
+    try {
+      this.writePromises.push(stream.write(encoded));
+    } catch (error) {
+      // Silently fail to prevent 500 errors in runtime
+      // Log write failures should not crash the runtime
+    }
   }
 
   async end() {

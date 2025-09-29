@@ -117,7 +117,12 @@ public class RuntimeLogger {
       i += 1;
     }
 
-    stream.write(stringLog);
+    try {
+      stream.write(stringLog);
+    } catch (IOException e) {
+      // Silently fail to prevent 500 errors in runtime
+      // Log write failures should not crash the runtime
+    }
   }
 
   public void end() throws IOException {
