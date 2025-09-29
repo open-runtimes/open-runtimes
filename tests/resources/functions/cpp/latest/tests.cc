@@ -193,6 +193,9 @@ namespace runtime {
                 context.log("{\"objectKey\":\"objectValue\"}");
                 context.log("[\"arrayValue\"]");
 
+                context.log(std::string(9000, 'A'));
+                context.error(std::string(9000, 'B'));
+
                 return context.res.text("");
             } else if (action == "library") {
                 Json::CharReaderBuilder builder;

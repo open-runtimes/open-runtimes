@@ -126,6 +126,9 @@ When you can have two!
         context.log({"objectKey": "objectValue"})
         context.log(["arrayValue"])
 
+        context.log("A" * 9000)
+        context.error("B" * 9000)
+
         return context.res.text("")
     elif action == "library":
         todo = (

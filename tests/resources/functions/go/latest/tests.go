@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -153,6 +154,9 @@ When you can have two!
 
 		Context.Log(map[string]string{"objectKey": "objectValue"})
 		Context.Log([]string{"arrayValue"})
+
+		Context.Log(strings.Repeat("A", 9000))
+		Context.Error(strings.Repeat("B", 9000))
 
 		return Context.Res.Text("")
 	case "library":
