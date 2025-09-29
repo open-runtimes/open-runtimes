@@ -73,12 +73,12 @@ class RuntimeLogger
       i += 1
     end
 
-    try {
+    begin
       stream.write(string_log)
-    } catch (Exception e) {
+    rescue
       # Silently fail to prevent 500 errors in runtime
       # Log write failures should not crash the runtime
-    }
+    end
   end
 
   def end()

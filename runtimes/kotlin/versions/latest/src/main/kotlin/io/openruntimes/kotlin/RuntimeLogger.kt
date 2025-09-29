@@ -3,6 +3,7 @@ package io.openruntimes.kotlin
 import com.google.gson.GsonBuilder
 import java.io.ByteArrayOutputStream
 import java.io.FileWriter
+import java.io.IOException
 import java.io.PrintStream
 import java.lang.System
 import java.time.Instant
