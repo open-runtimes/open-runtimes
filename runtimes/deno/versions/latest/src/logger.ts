@@ -84,6 +84,11 @@ export class Logger {
       }
     }
 
+    if (stringLog.length > 8000) {
+      stringLog = stringLog.substring(0, 8000);
+      stringLog += "... Log truncated due to size limit (8000 characters)";
+    }
+
     const encoded = new TextEncoder().encode(stringLog + "\n");
     try {
       this.writePromises.push(stream.write(encoded));

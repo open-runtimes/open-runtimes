@@ -82,6 +82,11 @@ class RuntimeLogger {
 
         stringLog += "\n"
 
+        if stringLog.count > 8000 {
+            stringLog = String(stringLog.prefix(8000))
+            stringLog += "... Log truncated due to size limit (8000 characters)"
+        }
+
         if let stringLogTemp = stringLog.data(using: .utf8) {
             if let streamTemp = stream {
                 streamTemp.write(stringLogTemp)

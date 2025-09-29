@@ -77,6 +77,10 @@ class Logger:
 
             i += 1
 
+        if len(string_log) > 8000:
+            string_log = string_log[:8000]
+            string_log += "... Log truncated due to size limit (8000 characters)"
+
         try:
             stream.write(string_log)
         except Exception as e:

@@ -64,6 +64,11 @@ class Logger {
       }
     }
 
+    if (stringLog.length > 8000) {
+      stringLog = stringLog.substring(0, 8000);
+      stringLog += "... Log truncated due to size limit (8000 characters)";
+    }
+
     try {
       stream.write(stringLog + "\n");
     } catch (err) {

@@ -73,6 +73,11 @@ class RuntimeLogger
       i += 1
     end
 
+    if string_log.length > 8000
+      string_log = string_log[0...8000]
+      string_log += "... Log truncated due to size limit (8000 characters)"
+    end
+
     begin
       stream.write(string_log)
     rescue
