@@ -20,9 +20,10 @@ export function bootstrap(context: BootstrapContext) {
 export default async function render(
   url: string,
   document: string,
-  serverContext: ServerContext
+  serverContext: ServerContext,
+  bootstrapContext: BootstrapContext
 ) {
-  const html = await renderApplication(bootstrap(serverContext), {
+  const html = await renderApplication(() => bootstrap(bootstrapContext), {
     document,
     url,
     platformProviders: [provideServerContext(serverContext)],
