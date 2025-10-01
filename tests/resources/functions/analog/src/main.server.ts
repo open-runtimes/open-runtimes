@@ -23,7 +23,11 @@ export default async function render(
   serverContext: ServerContext,
   bootstrapContext: BootstrapContext
 ) {
+<<<<<<< Updated upstream
   const html = await renderApplication(() => bootstrap(bootstrapContext), {
+=======
+  const html = await renderApplication((bootstrapContext: BootstrapContext) => bootstrap(bootstrapContext), {
+>>>>>>> Stashed changes
     document,
     url,
     platformProviders: [provideServerContext(serverContext)],
