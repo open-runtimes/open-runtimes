@@ -54,10 +54,6 @@ jobs:
         run: composer install
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Install sol
-        run: |
-          go install -v github.com/noperator/sol/cmd/sol@latest
-          echo "$HOME/go/bin" >> $GITHUB_PATH
       - name: Run tests
         timeout-minutes: 15
         working-directory: ./
@@ -75,6 +71,16 @@ jobs:
           OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}
           ENFORCED_RUNTIME: ${{ matrix.ENFORCED_RUNTIME }}
           ENFORCED_VERSION: ${{ matrix.ENFORCED_VERSION }}
+
+  shell-formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install sol
+        run: |
+          go install -v github.com/noperator/sol/cmd/sol@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
       - name: Check shell script formatting with sol
         run: |
           if ! git ls-files '*.sh' '*.bash' '*.zsh' | grep -q .; then
