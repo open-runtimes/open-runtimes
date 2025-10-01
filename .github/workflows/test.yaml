@@ -54,6 +54,10 @@ jobs:
         run: composer install
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - name: Install sol
+        run: |
+          go install -v github.com/noperator/sol/cmd/sol@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
       - name: Run tests
         timeout-minutes: 15
         working-directory: ./
@@ -71,3 +75,17 @@ jobs:
           OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}
           ENFORCED_RUNTIME: ${{ matrix.ENFORCED_RUNTIME }}
           ENFORCED_VERSION: ${{ matrix.ENFORCED_VERSION }}
+      - name: Check shell script formatting with sol
+        run: |
+          if ! git ls-files '*.sh' '*.bash' '*.zsh' | grep -q .; then
+            echo "No shell files found to check"
+            exit 0
+          fi
+          
+          for f in $(git ls-files '*.sh' '*.bash' '*.zsh'); do
+            if ! diff -u "$f" <(sol -b -w 100 -f "$f") >/dev/null; then
+              echo "Shell script formatting failed. Run 'sol -b -w 100 -f <file>' to format files."
+              exit 1
+            fi
+          done
+          echo "All shell files are properly formatted"
