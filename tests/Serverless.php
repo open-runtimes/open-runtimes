@@ -419,6 +419,8 @@ class Serverless extends Base
         self::assertStringContainsString('arrayValue', $logs);
         self::assertStringContainsString('Log+With+Plus+Symbol', $logs);
         self::assertStringContainsString("\n", $logs);
+        self::assertStringContainsString('... Log truncated due to size limit (8000 characters)', $logs);
+        self::assertStringContainsString('... Log truncated due to size limit (8000 characters)', $errors);
         self::assertGreaterThanOrEqual(9, \count(\explode("\n", $logs))); // Ensures each logs is on new line
         self::assertGreaterThanOrEqual(1, \count(\explode("\n", $errors))); // Ensures each error is on new line
 

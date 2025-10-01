@@ -100,7 +100,21 @@ namespace DotNetRuntime
 
             if (stream != null)
             {
-                stream.WriteLine(stringLog);
+                if (stringLog.Length > 8000)
+                {
+                    stringLog = stringLog.Substring(0, 8000);
+                    stringLog += "... Log truncated due to size limit (8000 characters)";
+                }
+
+                try
+                {
+                    stream.WriteLine(stringLog);
+                }
+                catch (Exception e)
+                {
+                    // Silently fail to prevent 500 errors in runtime
+                    // Log write failures should not crash the runtime
+                }
             }
         }
 

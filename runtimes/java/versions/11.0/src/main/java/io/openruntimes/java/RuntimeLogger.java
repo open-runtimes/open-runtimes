@@ -117,7 +117,17 @@ public class RuntimeLogger {
       i += 1;
     }
 
-    stream.write(stringLog);
+    if (stringLog.length() > 8000) {
+      stringLog = stringLog.substring(0, 8000);
+      stringLog += "... Log truncated due to size limit (8000 characters)";
+    }
+
+    try {
+      stream.write(stringLog);
+    } catch (IOException e) {
+      // Silently fail to prevent 500 errors in runtime
+      // Log write failures should not crash the runtime
+    }
   }
 
   public void end() throws IOException {

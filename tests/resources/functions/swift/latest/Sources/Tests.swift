@@ -141,6 +141,9 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         context.log(["objectKey": "objectValue"])
         context.log(["arrayValue"])
 
+        context.log(String(repeating: "A", count: 9000))
+        context.error(String(repeating: "B", count: 9000))
+
         // TODO: Implement as soon as possible
         // Swift doesn't support native log capturing
         context.log("Native log")

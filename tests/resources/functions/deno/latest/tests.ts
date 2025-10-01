@@ -116,6 +116,9 @@ When you can have two!
       context.log({ objectKey: "objectValue" });
       context.log(["arrayValue"]);
 
+      context.log("A".repeat(9000));
+      context.error("B".repeat(9000));
+
       return context.res.text("");
     case "library":
       const todo = (await axiod.get(

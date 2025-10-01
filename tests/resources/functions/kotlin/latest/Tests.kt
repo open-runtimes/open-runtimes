@@ -229,6 +229,9 @@ When you can have two!
                     ),
                 )
 
+                context.log(String(CharArray(9000) { 'A' }))
+                context.error(String(CharArray(9000) { 'B' }))
+
                 return context.res.text("")
             }
             "library" -> {

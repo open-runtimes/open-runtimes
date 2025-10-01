@@ -54,8 +54,17 @@ class Logger
             $i++;
         }
 
+        if (strlen($stringLog) > 8000) {
+            $stringLog = substr($stringLog, 0, 8000);
+            $stringLog .= "... Log truncated due to size limit (8000 characters)";
+        }
 
-        \fwrite($stream, $stringLog . "\n");
+        try {
+            \fwrite($stream, $stringLog . "\n");
+        } catch (Exception $e) {
+            // Silently fail to prevent 500 errors in runtime
+            // Log write failures should not crash the runtime
+        }
     }
 
     public function end(): void

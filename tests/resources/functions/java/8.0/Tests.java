@@ -159,6 +159,8 @@ public class Tests {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("objectKey", "objectValue");
         context.log(map);
+        context.log(new String(new char[9000]).replace('\0', 'A'));
+        context.error(new String(new char[9000]).replace('\0', 'B'));
         return context.getRes().text("");
       case "library":
         URL url = new URL("https://dummyjson.com/todos/" + context.getReq().getBodyRaw());

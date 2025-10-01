@@ -41,7 +41,12 @@ export class Logger {
     }
 
     const path = `/mnt/logs/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`;
-    appendFileSync(path, stringLog + "\n");
+    try {
+      appendFileSync(path, stringLog + "\n");
+    } catch (err) {
+      // Silently ignore write failures to prevent runtime crashes
+      // The logging system should not cause the main execution to fail
+    }
   }
 
   static overrideNativeLogs(namespace, rid) {
