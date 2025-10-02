@@ -176,7 +176,7 @@ When you can have two!
 			await page.goto("https://astro.build/");
 			const screenshotBuffer = await page.screenshot({ type: "png" });
 			return context.res.binary(screenshotBuffer, 200, {
-				"Content-Type": "image/png",
+				"Content-Type": "image/png; charset=utf-8",
 			});
 		default:
 			throw new Error("Unknown action");

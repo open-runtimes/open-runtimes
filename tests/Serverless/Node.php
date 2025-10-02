@@ -22,12 +22,9 @@ class Node extends Serverless
      
      public function testHeadlessBrowser(): void
      {
-         $response = Client::execute(body: '', headers: ['x-action' => 'headlessBrowser']);
-         \var_dump($response);
-         \var_dump(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
-         \var_dump(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+         $response = Client::execute(body: '', headers: ['x-action' => 'headlessBrowser'], timeout: 15);
          self::assertEquals(200, $response['code']);
-         self::assertEquals('image/png', $response['headers']['content-type']);
-         self::assertGreaterThanOrEqual(10000, \mb_strlen($response['body']));
+         self::assertEquals('image/png; charset=utf-8', $response['headers']['content-type']);
+         self::assertGreaterThanOrEqual(100000, \mb_strlen($response['body'])); // Should be 1.355MB
      }
 }
