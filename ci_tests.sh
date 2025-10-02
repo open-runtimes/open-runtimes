@@ -20,10 +20,11 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
 
     if [ -d "tests/resources/functions/$RUNTIME_FOLDER" ]; then
         echo "Running formatter for tests ..."
-
         cd "tests/resources/functions/$RUNTIME_FOLDER"
         docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
         cd ../../../../
+    else
+        echo "Skipping formatter for tests as runtime folder $RUNTIME_FOLDER does not exist"
     fi
 else
     echo "Skipping formatter. Formatter runs only in: $RUNTIME-$LATEST_VERSION"
@@ -33,11 +34,15 @@ echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 if ! [ -z "$ENFORCED_RUNTIME" ]; then
-    cp -R ./tests/resources/functions/$RUNTIME/* ./tests/.runtime
+    if [ -d "./tests/resources/functions/$RUNTIME" ]; then
+        cp -R ./tests/resources/functions/$RUNTIME/* ./tests/.runtime
+    fi
 else
-    cp -R ./tests/resources/functions/$RUNTIME_FOLDER/latest/* ./tests/.runtime
+    if [ -d "./tests/resources/functions/$RUNTIME_FOLDER" ]; then
+        cp -R ./tests/resources/functions/$RUNTIME_FOLDER/latest/* ./tests/.runtime
         if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then
-        cp -R ./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/* ./tests/.runtime
+            cp -R ./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/* ./tests/.runtime
+        fi
     fi
 fi
 
@@ -93,4 +98,15 @@ docker run --network openruntimes -d --name open-runtimes-test-serve-teritary -v
 
 cd ../../
 
-docker run  -v /var/run/docker.sock:/var/run/docker.sock --network openruntimes --rm -e RUNTIME_NAME="$RUNTIME" -e RUNTIME_VERSION="$VERSION" -e OPEN_RUNTIMES_SECRET="test-secret-key" -e OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT -v $PWD:/app -v /tmp:/tmp -w /app phpswoole/swoole:5.1.2-php8.3-alpine sh -c "apk update && apk add docker-cli && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS"
+docker run --rm \
+    -v $PWD:/app \
+    -v /tmp:/tmp \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    --network openruntimes \
+    -w /app \
+    -e RUNTIME_NAME="$RUNTIME" \
+    -e RUNTIME_VERSION="$VERSION" \
+    -e OPEN_RUNTIMES_SECRET="test-secret-key" \
+    -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
+    "$TEST_IMAGE" \
+    sh -c "apk update && apk add --no-cache zip unzip docker-cli composer && composer install --profile --ignore-platform-reqs && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS --debug"

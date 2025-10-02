@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7b0704bff3e0ea87ed435aa7907c6bb3",
+    "content-hash": "d5bc70410ccf30dd4734087e66b4ef9d",
     "packages": [],
     "packages-dev": [
         {
@@ -1707,6 +1707,38 @@
             "time": "2020-09-28T06:39:44+00:00"
         },
         {
+            "name": "swoole/ide-helper",
+            "version": "6.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/swoole/ide-helper.git",
+                "reference": "6f12243dce071714c5febe059578d909698f9a52"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/6f12243dce071714c5febe059578d909698f9a52",
+                "reference": "6f12243dce071714c5febe059578d909698f9a52",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Team Swoole",
+                    "email": "team@swoole.com"
+                }
+            ],
+            "description": "IDE help files for Swoole.",
+            "support": {
+                "issues": "https://github.com/swoole/ide-helper/issues",
+                "source": "https://github.com/swoole/ide-helper/tree/6.0.2"
+            },
+            "time": "2025-03-23T07:31:41+00:00"
+        },
+        {
             "name": "theseer/tokenizer",
             "version": "1.2.3",
             "source": {
@@ -1755,6 +1787,55 @@
                 }
             ],
             "time": "2024-03-03T12:36:25+00:00"
+        },
+        {
+            "name": "utopia-php/websocket",
+            "version": "0.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/utopia-php/websocket.git",
+                "reference": "629e53640b108eab43c7cc9ab375efade8622d43"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/utopia-php/websocket/zipball/629e53640b108eab43c7cc9ab375efade8622d43",
+                "reference": "629e53640b108eab43c7cc9ab375efade8622d43",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.15",
+                "phpstan/phpstan": "^1.12",
+                "phpunit/phpunit": "^9.5.5",
+                "swoole/ide-helper": "5.1.2",
+                "textalk/websocket": "1.5.2",
+                "workerman/workerman": "4.1.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Utopia\\WebSocket\\": "src/WebSocket"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A simple abstraction for WebSocket servers.",
+            "keywords": [
+                "framework",
+                "php",
+                "upf",
+                "utopia",
+                "websocket"
+            ],
+            "support": {
+                "issues": "https://github.com/utopia-php/websocket/issues",
+                "source": "https://github.com/utopia-php/websocket/tree/0.3.0"
+            },
+            "time": "2025-03-28T01:11:13+00:00"
         }
     ],
     "aliases": [],

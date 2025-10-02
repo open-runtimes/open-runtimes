@@ -7,12 +7,12 @@ class Client {
     public static $port = 3000;
     public static $secret = '';
 
-    public static function execute($body = '', $url = '/', $method = 'POST', $headers = []) {
+    public static function execute($body = '', $url = '/', $method = 'POST', $headers = []): array {
         $ch = \curl_init();
 
         $initHeaders = [];
 
-        if(!(\array_key_exists('content-type', $headers))) {
+        if(!(\array_key_exists('content-type', $headers)) && !(\array_key_exists('Content-Type', $headers))) {
             $initHeaders['content-type'] = 'text/plain';
         }
 
@@ -51,7 +51,7 @@ class Client {
         ];
 
         if($body !== NULL) {
-            $optArray[CURLOPT_POSTFIELDS] = \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body;
+            $optArray[CURLOPT_POSTFIELDS] = \is_array($body) ? \json_encode($body) : $body;
         }
         
         \curl_setopt_array($ch, $optArray);
