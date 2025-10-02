@@ -169,10 +169,10 @@ When you can have two!
 			const chromium = await import("@sparticuz/chromium");
 			const puppeteer = await import("puppeteer-core");
 
-			const path = await chromium.executablePath();
+			const path = await chromium.default.executablePath();
 			execSync(`chmod +x ${path}`);
-			const browser = await puppeteer.launch({
-				args: [...chromium.args, "--disable-gpu"],
+			const browser = await puppeteer.default.launch({
+				args: [...chromium.default.args, "--disable-gpu"],
 				executablePath: path,
 				headless: true,
 			});
