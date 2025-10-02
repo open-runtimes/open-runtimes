@@ -3,6 +3,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
+import { execSync } from "child_process";
 
 export default async (context) => {
 	const action = context.req.headers["x-action"];
@@ -167,9 +168,11 @@ When you can have two!
 			context.log("Before error...");
 			throw new Error("Error!");
 		case "headlessBrowser":
+			const path = await chromium.executablePath();
+			execSync(`chmod +x ${path}`);
 			const browser = await puppeteer.launch({
 				args: [...chromium.args, "--disable-gpu"],
-				executablePath: await chromium.executablePath(),
+				executablePath: path,
 				headless: true,
 			});
 			const page = await browser.newPage();
