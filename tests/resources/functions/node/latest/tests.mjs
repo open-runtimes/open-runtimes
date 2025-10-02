@@ -175,7 +175,7 @@ When you can have two!
 			const page = await browser.newPage();
 			await page.goto("https://astro.build/");
 			const screenshotBuffer = await page.screenshot({ type: "png" });
-			return res.binary(screenshotBuffer, 200, {
+			return context.res.binary(screenshotBuffer, 200, {
 				"Content-Type": "image/png",
 			});
 		default:
