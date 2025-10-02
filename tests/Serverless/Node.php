@@ -23,6 +23,9 @@ class Node extends Serverless
      public function testHeadlessBrowser(): void
      {
          $response = Client::execute(body: '', headers: ['x-action' => 'headlessBrowser']);
+         \var_dump($response);
+         \var_dump(Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+         \var_dump(Client::getErrors($response['headers']['x-open-runtimes-log-id']));
          self::assertEquals(200, $response['code']);
          self::assertEquals('image/png', $response['headers']['content-type']);
          self::assertGreaterThanOrEqual(10000, \mb_strlen($response['body']));
