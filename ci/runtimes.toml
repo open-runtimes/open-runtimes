@@ -48,6 +48,7 @@ test = "Serverless/PythonML.php"
 [dart]
 entry = "lib/tests.dart"
 versions = [
+    "3.9",
     "3.8",
     "3.5",
     "3.3",
