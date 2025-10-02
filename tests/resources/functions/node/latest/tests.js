@@ -1,5 +1,3 @@
-const puppeteer = require("puppeteer-core");
-const chromium = require("@sparticuz/chromium");
 const fetch = require("node-fetch");
 const crypto = require("crypto");
 const fs = require("fs");
@@ -168,6 +166,8 @@ When you can have two!
 			context.log("Before error...");
 			throw new Error("Error!");
 		case "headlessBrowser":
+			const puppeteer = require("puppeteer-core");
+			const chromium = require("@sparticuz/chromium");
 			const path = await chromium.executablePath();
 			execSync(`chmod +x ${path}`);
 			const browser = await puppeteer.launch({

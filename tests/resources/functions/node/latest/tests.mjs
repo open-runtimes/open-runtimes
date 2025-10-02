@@ -1,8 +1,6 @@
 import fetch from "node-fetch";
 import * as crypto from "crypto";
 import * as fs from "fs";
-import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
 import { execSync } from "child_process";
 
 export default async (context) => {
@@ -168,6 +166,9 @@ When you can have two!
 			context.log("Before error...");
 			throw new Error("Error!");
 		case "headlessBrowser":
+			const chromium = await import("@sparticuz/chromium");
+			const puppeteer = await import("puppeteer-core");
+
 			const path = await chromium.executablePath();
 			execSync(`chmod +x ${path}`);
 			const browser = await puppeteer.launch({
