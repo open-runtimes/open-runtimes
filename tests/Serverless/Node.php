@@ -2,6 +2,7 @@
 
 namespace Tests\Serverless;
 
+use Tests\Client;
 use Tests\Serverless;
 
 class Node extends Serverless
@@ -18,4 +19,12 @@ class Node extends Serverless
      *   self::assertEquals('HIDDEN_FILE', $response['body']);
      * }
      */
+     
+     public function testHeadlessBrowser(): void
+     {
+         $response = Client::execute(body: '', headers: ['x-action' => 'headlessBrowser']);
+         self::assertEquals(200, $response['code']);
+         self::assertEquals('image/png', $response['headers']['content-type']);
+         self::assertGreaterThanOrEqual(10000, \mb_strlen($response['body']));
+     }
 }

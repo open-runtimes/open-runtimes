@@ -1,6 +1,8 @@
 import fetch from "node-fetch";
 import * as crypto from "crypto";
 import * as fs from "fs";
+import chromium from "@sparticuz/chromium";
+import puppeteer from "puppeteer-core";
 
 export default async (context) => {
 	const action = context.req.headers["x-action"];
@@ -164,6 +166,18 @@ When you can have two!
 		case "errorTest":
 			context.log("Before error...");
 			throw new Error("Error!");
+		case "headlessBrowser":
+			const browser = await puppeteer.launch({
+				args: [...chromium.args, "--disable-gpu"],
+				executablePath: await chromium.executablePath(),
+				headless: true,
+			});
+			const page = await browser.newPage();
+			await page.goto("https://astro.build/");
+			const screenshotBuffer = await page.screenshot({ type: "png" });
+			return res.binary(screenshotBuffer, 200, {
+				"Content-Type": "image/png",
+			});
 		default:
 			throw new Error("Unknown action");
 	}
