@@ -7,7 +7,7 @@ class Client {
     public static $port = 3000;
     public static $secret = '';
 
-    public static function execute($body = '', $url = '/', $method = 'POST', $headers = []) {
+    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], int $timeout = 5) {
         $ch = \curl_init();
 
         $initHeaders = [];
@@ -47,7 +47,7 @@ class Client {
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
             CURLOPT_HTTPHEADER => $headersParsed,
-            CURLOPT_TIMEOUT => 5
+            CURLOPT_TIMEOUT => $timeout
         ];
 
         if($body !== NULL) {

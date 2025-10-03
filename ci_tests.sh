@@ -15,14 +15,14 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
     echo "Running formatter ..."
 
     cd ./runtimes/$RUNTIME_FOLDER
-    docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
+    docker run --platform linux/x86_64 --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
     cd ../../
 
     if [ -d "tests/resources/functions/$RUNTIME_FOLDER" ]; then
         echo "Running formatter for tests ..."
 
         cd "tests/resources/functions/$RUNTIME_FOLDER"
-        docker run --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
+        docker run --platform linux/x86_64 --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
         cd ../../../../
     fi
 else
@@ -55,12 +55,12 @@ BUILD_SCRIPT="helpers/build.sh"
 START_SCRIPT="helpers/start.sh"
 
 # Main build
-docker run --rm --name open-runtimes-test-build -v /tmp/.build:/usr/local/server/.build -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" open-runtimes/test-runtime bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
+docker run --platform linux/x86_64 --rm --name open-runtimes-test-build -v /tmp/.build:/usr/local/server/.build -v $(pwd):/mnt/code:rw -e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" open-runtimes/test-runtime bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 
 # Tools test
 echo "Testing tools ..."
 REQUIRED_TOOLS="tar --help && unzip --help"
-docker run --name open-runtimes-test-tools open-runtimes/test-runtime bash -c "$REQUIRED_TOOLS && $TOOLS"
+docker run --platform linux/x86_64 --name open-runtimes-test-tools open-runtimes/test-runtime bash -c "$REQUIRED_TOOLS && $TOOLS"
 OUTPUT=$(docker logs open-runtimes-test-tools)
 EXIT_CODE=$(docker inspect open-runtimes-test-tools --format='{{.State.ExitCode}}')
 docker rm --force open-runtimes-test-tools
@@ -75,7 +75,7 @@ fi
 docker network inspect openruntimes || docker network create openruntimes
 
 # Main tests
-docker run --network openruntimes -d --name open-runtimes-test-serve -v $TELEMETRY_FOLDER:/mnt/telemetry -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_STATIC_FALLBACK="index.html" -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+docker run --platform linux/x86_64 --network openruntimes -d --name open-runtimes-test-serve -v $TELEMETRY_FOLDER:/mnt/telemetry -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_STATIC_FALLBACK="index.html" -e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET=test-secret-key -e CUSTOM_ENV_VAR=customValue -p 3000:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
 
 # Secondary tests
 # 1. Empty enforced headers
@@ -84,13 +84,13 @@ docker run --network openruntimes -d --name open-runtimes-test-serve -v $TELEMET
 # 4. No custom env variable
 # 5. Uncompressed builds
 PREPARE_UNCOMPRESSED_FILE="gunzip -ck /mnt/code/code.tar.gz > /mnt/code/code.tar"
-docker run --network openruntimes -d --name open-runtimes-test-serve-secondary -v $TELEMETRY_FOLDER:/mnt/telemetry -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3001:3000 open-runtimes/test-runtime bash -c "$PREPARE_UNCOMPRESSED_FILE && $START_SCRIPT \"$START_COMMAND\""
+docker run --platform linux/x86_64 --network openruntimes -d --name open-runtimes-test-serve-secondary -v $TELEMETRY_FOLDER:/mnt/telemetry -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3001:3000 open-runtimes/test-runtime bash -c "$PREPARE_UNCOMPRESSED_FILE && $START_SCRIPT \"$START_COMMAND\""
 
 # Teritary tests
 # 1. Same as secondary
 # 2. Mounted resource folder (static 404 page)
-docker run --network openruntimes -d --name open-runtimes-test-serve-teritary -v $TELEMETRY_FOLDER:/mnt/telemetry -v $(pwd)/resources:/mnt/resources -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3002:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+docker run --platform linux/x86_64 --network openruntimes -d --name open-runtimes-test-serve-teritary -v $TELEMETRY_FOLDER:/mnt/telemetry -v $(pwd)/resources:/mnt/resources -v /tmp/logs:/mnt/logs -v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro -e OPEN_RUNTIMES_HEADERS= -e OPEN_RUNTIMES_ENV=development -e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" -e OPEN_RUNTIMES_SECRET= -p 3002:3000 open-runtimes/test-runtime bash -c "bash $START_SCRIPT \"$START_COMMAND\""
 
 cd ../../
 
-docker run  -v /var/run/docker.sock:/var/run/docker.sock --network openruntimes --rm -e RUNTIME_NAME="$RUNTIME" -e RUNTIME_VERSION="$VERSION" -e OPEN_RUNTIMES_SECRET="test-secret-key" -e OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT -v $PWD:/app -v /tmp:/tmp -w /app phpswoole/swoole:5.1.2-php8.3-alpine sh -c "apk update && apk add docker-cli && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS"
+docker run --platform linux/x86_64 -v /var/run/docker.sock:/var/run/docker.sock --network openruntimes --rm -e RUNTIME_NAME="$RUNTIME" -e RUNTIME_VERSION="$VERSION" -e OPEN_RUNTIMES_SECRET="test-secret-key" -e OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT -v $PWD:/app -v /tmp:/tmp -w /app phpswoole/swoole:5.1.2-php8.3-alpine sh -c "apk update && apk add docker-cli && vendor/bin/phpunit --configuration phpunit.xml tests/$TEST_CLASS"

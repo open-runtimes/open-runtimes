@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import * as crypto from "crypto";
 import * as fs from "fs";
+import { execSync } from "child_process";
 
 export default async (context) => {
 	const action = context.req.headers["x-action"];
@@ -164,6 +165,23 @@ When you can have two!
 		case "errorTest":
 			context.log("Before error...");
 			throw new Error("Error!");
+		case "headlessBrowser":
+			const chromium = await import("@sparticuz/chromium");
+			const puppeteer = await import("puppeteer-core");
+
+			const path = await chromium.default.executablePath();
+			execSync(`chmod +x ${path}`);
+			const browser = await puppeteer.default.launch({
+				args: [...chromium.default.args, "--disable-gpu"],
+				executablePath: path,
+				headless: true,
+			});
+			const page = await browser.newPage();
+			await page.goto("https://astro.build/");
+			const screenshotBuffer = await page.screenshot({ type: "png" });
+			return context.res.binary(screenshotBuffer, 200, {
+				"Content-Type": "image/png; charset=utf-8",
+			});
 		default:
 			throw new Error("Unknown action");
 	}
