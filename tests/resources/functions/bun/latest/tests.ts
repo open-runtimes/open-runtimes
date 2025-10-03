@@ -1,5 +1,4 @@
 const fetch = require("node-fetch");
-const fs = require("fs");
 
 export default async function (context: any) {
 	const action = context.req.headers["x-action"];
