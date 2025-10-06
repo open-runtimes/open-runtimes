@@ -119,6 +119,19 @@ class Serverless extends Base
         self::assertStringContainsString($entrypoint, Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
+    public function testErrorHandling(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'errorTest']);
+        $logId = $response['headers']['x-open-runtimes-log-id'];
+        $logs = Client::getLogs($logId);
+        $errors = Client::getErrors($logId);
+        
+        self::assertEquals(500, $response['code']);
+        self::assertEmpty($response['body']);
+        self::assertStringContainsString('Before error...', $logs);
+        self::assertStringContainsString('Error!', $errors);
+    }
+
     public function testRequestMethod(): void
     {
         $response = Client::execute(method: 'GET', headers: ['x-action' => 'requestMethod']);
@@ -406,6 +419,8 @@ class Serverless extends Base
         self::assertStringContainsString('arrayValue', $logs);
         self::assertStringContainsString('Log+With+Plus+Symbol', $logs);
         self::assertStringContainsString("\n", $logs);
+        self::assertStringContainsString('... Log truncated due to size limit (8000 characters)', $logs);
+        self::assertStringContainsString('... Log truncated due to size limit (8000 characters)', $errors);
         self::assertGreaterThanOrEqual(9, \count(\explode("\n", $logs))); // Ensures each logs is on new line
         self::assertGreaterThanOrEqual(1, \count(\explode("\n", $errors))); // Ensures each error is on new line
 
@@ -443,9 +458,9 @@ class Serverless extends Base
 
         $body = \json_decode($response['body'], true);
 
-        self::assertEquals('1', $body['todo']['userId']);
+        self::assertEquals('163', $body['todo']['userId']);
         self::assertEquals('5', $body['todo']['id']);
-        self::assertEquals('laboriosam mollitia et enim quasi adipisci quia provident illum', $body['todo']['title']);
+        self::assertEquals('Invest in cryptocurrency', $body['todo']['todo']);
         self::assertEquals(false, $body['todo']['completed']);
     }
 
@@ -723,14 +738,14 @@ class Serverless extends Base
         self::assertEmpty($response['headers']['x-open-runtimes-log-id']);
         self::assertEmpty($logs);
         self::assertEmpty($errors);
- 
+
         $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'enabled' ]);
         $logs = Client::getLogs('dev');
         $errors = Client::getErrors('dev');
         self::assertEquals('dev', $response['headers']['x-open-runtimes-log-id']);
         self::assertStringContainsString('Debug log', $logs);
         self::assertStringContainsString('Error log', $errors);
- 
+
         $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'enabled', 'x-open-runtimes-log-id' => 'myLog' ]);
         $logs = Client::getLogs('myLog');
         $errors = Client::getErrors('myLog');

@@ -193,6 +193,9 @@ namespace runtime {
                 context.log("{\"objectKey\":\"objectValue\"}");
                 context.log("[\"arrayValue\"]");
 
+                context.log(std::string(9000, 'A'));
+                context.error(std::string(9000, 'B'));
+
                 return context.res.text("");
             } else if (action == "library") {
                 Json::CharReaderBuilder builder;
@@ -204,7 +207,7 @@ namespace runtime {
 
                 curl = curl_easy_init();
                 if (curl) {
-                    std::string url = "https://jsonplaceholder.typicode.com/todos/" + req.bodyRaw;
+                    std::string url = "https://dummyjson.com/todos/" + req.bodyRaw;
                     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
                     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
                                      +[](void *contents, size_t size, size_t nmemb, void *userp) {
@@ -242,6 +245,9 @@ namespace runtime {
                 return context.res.send(context.req.bodyRaw);
             } else if (action == "deprecatedMethodsUntypedBody") {
                 return context.res.send("50"); // Send only supported String
+            } else if (action == "errorTest") {
+                context.log("Before error...");
+                throw std::invalid_argument("Error!");
             } else {
                 // C++ cannot get stack trace. Below makes test pass
                 context.error("tests.cc");

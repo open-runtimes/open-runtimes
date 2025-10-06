@@ -141,6 +141,9 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         context.log(["objectKey": "objectValue"])
         context.log(["arrayValue"])
 
+        context.log(String(repeating: "A", count: 9000))
+        context.error(String(repeating: "B", count: 9000))
+
         // TODO: Implement as soon as possible
         // Swift doesn't support native log capturing
         context.log("Native log")
@@ -149,7 +152,7 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return context.res.text("")
     case "library":
         let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-        let request = HTTPClientRequest(url: "https://jsonplaceholder.typicode.com/todos/\(context.req.bodyRaw)")
+        let request = HTTPClientRequest(url: "https://dummyjson.com/todos/\(context.req.bodyRaw)")
         let response = try await httpClient.execute(request, timeout: .seconds(30))
         let data = try await response.body.collect(upTo: 1024 * 1024)
         let todo = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
@@ -169,6 +172,9 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return context.res.send(context.req.bodyRaw)
     case "deprecatedMethodsUntypedBody":
         return context.res.send("50") // Send only supported String
+    case "errorTest":
+        context.log("Before error...")
+        throw annotatedError(NSError(domain: "Error!", code: 500))
     default:
         throw annotatedError(NSError(domain: "Unknown action", code: 500))
     }

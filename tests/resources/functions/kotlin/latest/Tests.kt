@@ -229,12 +229,15 @@ When you can have two!
                     ),
                 )
 
+                context.log(String(CharArray(9000) { 'A' }))
+                context.error(String(CharArray(9000) { 'B' }))
+
                 return context.res.text("")
             }
             "library" -> {
                 val gson = Gson()
 
-                val url = URL("https://jsonplaceholder.typicode.com/todos/" + context.req.bodyRaw)
+                val url = URL("https://dummyjson.com/todos/" + context.req.bodyRaw)
                 val con =
                     (url.openConnection() as HttpURLConnection).apply {
                         requestMethod = "GET"
@@ -283,6 +286,10 @@ When you can have two!
                 context.log("engine:", engine)
                 context.error("engine:", engine)
                 return context.res.text("OK")
+            }
+            "errorTest" -> {
+                context.log("Before error...")
+                throw Exception("Error!")
             }
             else -> {
                 throw Exception("Unknown action")

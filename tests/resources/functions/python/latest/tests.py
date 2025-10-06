@@ -125,12 +125,13 @@ When you can have two!
         context.log({"objectKey": "objectValue"})
         context.log(["arrayValue"])
 
+        context.log("A" * 9000)
+        context.error("B" * 9000)
+
         return context.res.text("")
     elif action == "library":
         todo = (
-            requests.get(
-                "https://jsonplaceholder.typicode.com/todos/" + context.req.body_raw
-            )
+            requests.get("https://dummyjson.com/todos/" + context.req.body_raw)
         ).json()
         return context.res.json({"todo": todo})
     elif action == "timeout":
@@ -155,5 +156,8 @@ When you can have two!
         context.log("engine:", engine)
         context.error("engine:", engine)
         return context.res.text("OK")
+    elif action == "errorTest":
+        context.log("Before error...")
+        raise Exception("Error!")
     else:
         raise Exception("Unknown action")

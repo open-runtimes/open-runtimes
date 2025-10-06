@@ -3,6 +3,7 @@ package io.openruntimes.kotlin
 import com.google.gson.GsonBuilder
 import java.io.ByteArrayOutputStream
 import java.io.FileWriter
+import java.io.IOException
 import java.io.PrintStream
 import java.lang.System
 import java.time.Instant
@@ -108,7 +109,17 @@ class RuntimeLogger(
         }
 
         if (stream != null) {
-            stream.write(stringLog)
+            if (stringLog.length > 8000) {
+                stringLog = stringLog.substring(0, 8000)
+                stringLog += "... Log truncated due to size limit (8000 characters)"
+            }
+
+            try {
+                stream.write(stringLog)
+            } catch (e: IOException) {
+                // Silently fail to prevent 500 errors in runtime
+                // Log write failures should not crash the runtime
+            }
         }
     }
 

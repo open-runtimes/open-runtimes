@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -154,12 +155,15 @@ When you can have two!
 		Context.Log(map[string]string{"objectKey": "objectValue"})
 		Context.Log([]string{"arrayValue"})
 
+		Context.Log(strings.Repeat("A", 9000))
+		Context.Error(strings.Repeat("B", 9000))
+
 		return Context.Res.Text("")
 	case "library":
 		client := resty.New()
 		resp, errResponse := client.R().
 			SetHeader("Accept", "application/json").
-			Get("https://jsonplaceholder.typicode.com/todos/" + Context.Req.BodyText())
+			Get("https://dummyjson.com/todos/" + Context.Req.BodyText())
 
 		if errResponse != nil {
 			Context.Error(errResponse)
@@ -171,7 +175,7 @@ When you can have two!
 		type TodoObject struct {
 			UserId    int    `json:"userId"`
 			Id        int    `json:"id"`
-			Title     string `json:"title"`
+			Todo      string `json:"todo"`
 			Completed bool   `json:"completed"`
 		}
 
@@ -209,6 +213,10 @@ When you can have two!
 		Context.Log("engine:", engine)
 		Context.Error("engine:", engine)
 		return Context.Res.Text("OK")
+	case "errorTest":
+		Context.Log("Before error...")
+		panic("Error!")
+		return Context.Res.Text("This should never be reached")
 	default:
 		Context.Error("Unknown action in tests.go")
 		return Context.Res.Text("", Context.Res.WithStatusCode(500))

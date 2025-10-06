@@ -2,6 +2,10 @@ name: "Testing OpenRuntimes"
 
 on: [ pull_request ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -51,6 +55,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Run tests
+        timeout-minutes: 15
         working-directory: ./
         run: bash ci_tests.sh
         env:

@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 const crypto = require("crypto");
+const fs = require("fs");
 
 module.exports = async (context) => {
 	const action = context.req.headers["x-action"];
@@ -117,10 +118,13 @@ When you can have two!
 			context.log({ objectKey: "objectValue" });
 			context.log(["arrayValue"]);
 
+			context.log(String(new Array(9000).fill("A")));
+			context.error(String(new Array(9000).fill("B")));
+
 			return context.res.text("");
 		case "library":
 			const todo = await fetch(
-				`https://jsonplaceholder.typicode.com/todos/${context.req.bodyRaw}`,
+				`https://dummyjson.com/todos/${context.req.bodyRaw}`,
 			).then((r) => r.json());
 			return context.res.json({ todo });
 		case "timeout":
@@ -151,6 +155,15 @@ When you can have two!
 			context.log("engine:", engine);
 			context.error("engine:", engine);
 			return context.res.text("OK");
+		case "hiddenFile":
+			return context.res.text(
+				fs
+					.readFileSync("/usr/local/server/src/function/.config/.file")
+					.toString(),
+			);
+		case "errorTest":
+			context.log("Before error...");
+			throw new Error("Error!");
 		default:
 			throw new Error("Unknown action");
 	}

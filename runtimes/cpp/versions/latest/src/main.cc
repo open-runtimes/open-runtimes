@@ -8,6 +8,7 @@
 #include "{entrypointFile}"
 #include <vector>
 #include <numeric>
+#include <fstream>
 
 std::vector<std::string> split(const std::string &s, const char delim) {
     std::vector<std::string> result;
@@ -23,7 +24,7 @@ std::vector<std::string> split(const std::string &s, const char delim) {
 
 int main()
 {
-    std::cout << "HTTP server successfully started!" << std::endl; 
+    std::cout << "HTTP server successfully started!" << std::endl;
 
     drogon::app()
         .setClientMaxBodySize(20 * 1024 * 1024)
@@ -33,6 +34,24 @@ int main()
             [](const drogon::HttpRequestPtr &req,
                std::function<void(const drogon::HttpResponsePtr &)> &&callback)
             {
+                if (req->getPath() == "/__opr/health")
+                {
+                    const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
+                    res->setStatusCode(drogon::HttpStatusCode::k200OK);
+                    res->setBody("OK");
+                    callback(res);
+                    return;
+                }
+                if (req->getPath() == "/__opr/timings") {
+                    std::ifstream timingsFile("/mnt/telemetry/timings.txt");
+                    std::string timings((std::istreambuf_iterator<char>(timingsFile)), std::istreambuf_iterator<char>());
+                    const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
+                    res->addHeader("content-type", "text/plain; charset=utf-8");
+                    res->setBody(timings);
+                    callback(res);
+                    return;
+                }
+
                 std::shared_ptr<runtime::RuntimeLogger> logger = std::make_shared<runtime::RuntimeLogger>(req->getHeader("x-open-runtimes-logging"), req->getHeader("x-open-runtimes-log-id"));
 
                 try {
@@ -430,4 +449,3 @@ int main()
 
     return 0;
 }
-

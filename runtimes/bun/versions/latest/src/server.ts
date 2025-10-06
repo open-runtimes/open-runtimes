@@ -249,6 +249,16 @@ Bun.serve({
   maxRequestBodySize: 20 * 1024 * 1024,
   idleTimeout: 0,
   async fetch(request) {
+    const url = new URL(request.url);
+    if (url.pathname === "/__opr/health") {
+      return new Response("OK", {
+        status: 200,
+      });
+    }
+    if (url.pathname === "/__opr/timings") {
+      return new Response(Bun.file("/mnt/telemetry/timings.txt"));
+    }
+
     const logger = new Logger(
       request.headers.get("x-open-runtimes-logging"),
       request.headers.get("x-open-runtimes-log-id"),

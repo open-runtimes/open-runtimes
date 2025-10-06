@@ -5,7 +5,7 @@ require 'vendor/autoload.php';
 use GuzzleHttp\Client;
 
 $client = new Client([
-    'base_uri' => 'https://jsonplaceholder.typicode.com',
+    'base_uri' => 'https://dummyjson.com',
 ]);
 
 return function ($context) use ($client) {
@@ -130,6 +130,9 @@ When you can have two!
             $context->log(['objectKey' => 'objectValue']);
             $context->log(['arrayValue']);
 
+            $context->log(\str_repeat('A', 9000));
+            $context->error(\str_repeat('B', 9000));
+
             return $context->res->text('');
         case 'library':
             $response = $client->request('GET', '/todos/'.$context->req->bodyRaw);
@@ -160,6 +163,9 @@ When you can have two!
             $context->error('engine:', $engine);
 
             return $context->res->text('OK');
+        case 'errorTest':
+            $context->log('Before error...');
+            throw new Exception('Error!');
         default:
             throw new Exception('Unknown action');
     }

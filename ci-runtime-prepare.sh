@@ -1,4 +1,5 @@
 set -e
+shopt -s dotglob
 
 mkdir -p ./runtimes/.test
 

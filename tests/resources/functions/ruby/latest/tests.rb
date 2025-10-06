@@ -125,9 +125,12 @@ When you can have two!
     context.log({ 'objectKey': 'objectValue' })
     context.log(['arrayValue'])
 
+    context.log('A' * 9000)
+    context.error('B' * 9000)
+
     return context.res.text('')
   when 'library'
-    todo = JSON.parse(HTTParty.get('https://jsonplaceholder.typicode.com/todos/' + context.req.body_raw).body)
+    todo = JSON.parse(HTTParty.get('https://dummyjson.com/todos/' + context.req.body_raw).body)
     return context.res.json({ 'todo': todo })
   when 'timeout'
     context.log('Timeout start.')
@@ -156,6 +159,9 @@ When you can have two!
     context.log("engine:", engine)
     context.error("engine:", engine)
     return context.res.text('OK')
+  when 'errorTest'
+    context.log('Before error...')
+    raise 'Error!'
   else
     raise 'Unknown action'
   end

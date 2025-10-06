@@ -9,11 +9,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 
 public class Server {
+
   private static final Gson gson = new GsonBuilder().serializeNulls().create();
   private static final Gson gsonInternal =
       new GsonBuilder()
@@ -41,6 +44,18 @@ public class Server {
   }
 
   public static Context execute(Context ctx) {
+    if (ctx.path().equals("/__opr/health")) {
+      return ctx.status(200).result("OK");
+    }
+    if (ctx.path().equals("/__opr/timings")) {
+      try {
+        String timings = Files.readString(Paths.get("/mnt/telemetry/timings.txt"));
+        return ctx.contentType("text/plain; charset=utf-8").result(timings);
+      } catch (IOException e) {
+        return ctx.status(500).result("Error reading timings");
+      }
+    }
+
     RuntimeLogger logger = null;
 
     try {
@@ -140,7 +155,6 @@ public class Server {
     String defaultPort = scheme.equals("https") ? "443" : "80";
 
     String hostHeader = (hostHeader = ctx.header("host")) != null ? hostHeader : "";
-    ;
     String host = "";
     int port;
 
@@ -224,7 +238,6 @@ public class Server {
       } else {
         output = (RuntimeOutput) classMethod.invoke(instance, context);
       }
-
     } catch (Exception e) {
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);

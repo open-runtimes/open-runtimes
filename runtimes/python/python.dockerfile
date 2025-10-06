@@ -1,3 +1,14 @@
+RUN <<EOR
+    if [ -f /etc/alpine-release ]; then
+        apk update && apk add bash alpine-sdk libffi-dev
+    else
+        apt-get update && apt-get install -y bash
+    fi
+EOR
+
+# Install Poetry package manager
+RUN pip3 install --no-cache-dir poetry
+
 ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
 
 COPY requirements.txt .

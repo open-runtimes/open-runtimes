@@ -1,12 +1,10 @@
-import { createWriteStream, writeFileSync, unlinkSync } from "fs";
+import { appendFileSync } from "fs";
 
-const nativeLog = console.log.bind(console);
+export const nativeLog = console.log.bind(console);
 
 export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
-
-  static streams = [];
 
   static start(status, id) {
     const enabled = (status ? status : "enabled") === "enabled";
@@ -22,37 +20,10 @@ export class Logger {
           : Logger.generateId();
     }
 
-    if (Logger.streams[id]) {
-      return id;
-    }
-
-    Logger.streams[id] = {
-      logs: createWriteStream(`/mnt/logs/${id}_logs.log`, {
-        flags: "a",
-      }),
-      errors: createWriteStream(`/mnt/logs/${id}_errors.log`, {
-        flags: "a",
-      }),
-    };
-
-    try {
-      writeFileSync(`/mnt/logs/${id}_logs.log.lock`, "");
-      writeFileSync(`/mnt/logs/${id}_errors.log.lock`, "");
-    } catch (err) {
-      // Cuncurrent dev request, not a big deal
-    }
-
     return id;
   }
 
   static write(id, messages, type = Logger.TYPE_LOG) {
-    const streams = Logger.streams[id];
-    if (!streams) {
-      return;
-    }
-
-    const stream = type === Logger.TYPE_ERROR ? streams.errors : streams.logs;
-
     let stringLog = "";
     for (let i = 0; i < messages.length; i++) {
       const message = messages[i];
@@ -69,36 +40,13 @@ export class Logger {
       }
     }
 
-    if (stream.writable) {
-      stream.write(stringLog + "\n");
-    } else {
-      nativeLog(stringLog + "\n");
-    }
-  }
-
-  static async end(id) {
-    const streams = Logger.streams[id];
-    if (!streams) {
-      return;
-    }
-
-    await Promise.all([
-      new Promise((res) => {
-        streams.logs.end(undefined, undefined, res);
-      }),
-      new Promise((res) => {
-        streams.errors.end(undefined, undefined, res);
-      }),
-    ]);
-
+    const path = `/mnt/logs/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`;
     try {
-      unlinkSync(`/mnt/logs/${id}_logs.log.lock`);
-      unlinkSync(`/mnt/logs/${id}_errors.log.lock`);
+      appendFileSync(path, stringLog + "\n");
     } catch (err) {
-      // Cuncurrent dev request, not a big deal
+      // Silently ignore write failures to prevent runtime crashes
+      // The logging system should not cause the main execution to fail
     }
-
-    delete Logger.streams[id];
   }
 
   static overrideNativeLogs(namespace, rid) {

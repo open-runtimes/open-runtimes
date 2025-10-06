@@ -1,4 +1,13 @@
+#!/bin/bash
 set -e
+shopt -s dotglob
+
+# Write files to serve system routes
+mkdir -p /usr/local/server/src/function/__opr
+echo -n "OK" > /usr/local/server/src/function/__opr/health.txt
+if [ -f "/mnt/telemetry/timings.txt" ]; then
+    cp /mnt/telemetry/timings.txt /usr/local/server/src/function/__opr/timings.txt
+fi
 
 # Basic auth
 if [ -z "$OPEN_RUNTIMES_SECRET" ]; then

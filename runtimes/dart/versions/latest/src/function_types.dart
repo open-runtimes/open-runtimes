@@ -14,8 +14,8 @@ class RuntimeRequest {
   Map<String, String> query;
 
   dynamic get body {
-    String contentType =
-        (this.headers['content-type'] ?? 'text/plain').toLowerCase();
+    String contentType = (this.headers['content-type'] ?? 'text/plain')
+        .toLowerCase();
 
     if (contentType.startsWith("application/json")) {
       if (this.bodyBinary.isEmpty) {
@@ -51,40 +51,48 @@ class RuntimeRequest {
     Map<String, dynamic> headers = const {},
     List<int> bodyBinary = const [],
     String url = '',
-  })  : method = method,
-        scheme = scheme,
-        host = host,
-        port = port,
-        path = path,
-        query = query,
-        queryString = queryString,
-        headers = headers,
-        bodyBinary = bodyBinary,
-        url = url {}
+  }) : method = method,
+       scheme = scheme,
+       host = host,
+       port = port,
+       path = path,
+       query = query,
+       queryString = queryString,
+       headers = headers,
+       bodyBinary = bodyBinary,
+       url = url {}
 }
 
 class RuntimeResponse {
-  dynamic binary(List<int> bytes,
-      [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
-    return {
-      'body': bytes,
-      'statusCode': statusCode,
-      'headers': headers,
-    };
+  dynamic binary(
+    List<int> bytes, [
+    int statusCode = 200,
+    Map<String, dynamic> headers = const {},
+  ]) {
+    return {'body': bytes, 'statusCode': statusCode, 'headers': headers};
   }
 
-  dynamic send(String body,
-      [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
+  dynamic send(
+    String body, [
+    int statusCode = 200,
+    Map<String, dynamic> headers = const {},
+  ]) {
     return this.text(body, statusCode, headers);
   }
 
-  dynamic text(String body,
-      [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
+  dynamic text(
+    String body, [
+    int statusCode = 200,
+    Map<String, dynamic> headers = const {},
+  ]) {
     return this.binary(utf8.encode(body), statusCode, headers);
   }
 
-  dynamic json(Map<String, dynamic> json,
-      [int statusCode = 200, Map<String, dynamic> headers = const {}]) {
+  dynamic json(
+    Map<String, dynamic> json, [
+    int statusCode = 200,
+    Map<String, dynamic> headers = const {},
+  ]) {
     var headersMerged = {...headers, 'content-type': 'application/json'};
     return this.text(jsonEncode(json), statusCode, headersMerged);
   }
@@ -93,8 +101,11 @@ class RuntimeResponse {
     return this.text('', 204, const {});
   }
 
-  dynamic redirect(String url,
-      [int statusCode = 301, Map<String, dynamic> headers = const {}]) {
+  dynamic redirect(
+    String url, [
+    int statusCode = 301,
+    Map<String, dynamic> headers = const {},
+  ]) {
     var headersMerged = {...headers, 'location': url};
     return this.text('', statusCode, headersMerged);
   }
@@ -106,9 +117,9 @@ class RuntimeContext {
   Logger logger;
 
   RuntimeContext(RuntimeRequest req, RuntimeResponse res, Logger logger)
-      : req = req,
-        res = res,
-        logger = logger {}
+    : req = req,
+      res = res,
+      logger = logger {}
 
   void log(dynamic message) {
     this.logger.write(message, Logger.TYPE_LOG);

@@ -159,10 +159,11 @@ public class Tests {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("objectKey", "objectValue");
         context.log(map);
+        context.log(new String(new char[9000]).replace('\0', 'A'));
+        context.error(new String(new char[9000]).replace('\0', 'B'));
         return context.getRes().text("");
       case "library":
-        URL url =
-            new URL("https://jsonplaceholder.typicode.com/todos/" + context.getReq().getBodyRaw());
+        URL url = new URL("https://dummyjson.com/todos/" + context.getReq().getBodyRaw());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.getResponseCode();
@@ -203,6 +204,9 @@ public class Tests {
         context.log("engine:", engine);
         context.error("engine:", engine);
         return context.getRes().text("OK");
+      case "errorTest":
+        context.log("Before error...");
+        throw new Exception("Error!");
       default:
         throw new Exception("Unknown action");
     }

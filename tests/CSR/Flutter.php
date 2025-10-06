@@ -26,4 +26,14 @@ class Flutter extends CSR
     {
         $this->assertTrue(true);
     }
+
+    public function testHealth(): void
+    {
+        $this->assertTrue(true);
+    }
+
+    public function testTimings(): void
+    {
+        $this->assertTrue(true);
+    }
 }

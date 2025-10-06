@@ -1,7 +1,7 @@
 // Use as base for server-X.js (per framework)
-
-import { Logger } from "./logger.js";
+import { readFile } from "node:fs/promises";
 import { createNamespace } from "cls-hooked";
+import { Logger } from "./logger.mjs";
 
 const loggingNamespace = createNamespace("logging");
 
@@ -13,6 +13,15 @@ export function getPort() {
 export function getHost() {
   const host = process.env.HOST || "0.0.0.0";
   return host;
+}
+
+export async function telemetryMiddleware(req, res, next) {
+  if (req.path === "/__opr/timings") {
+    const timings = await readFile("/mnt/telemetry/timings.txt", "utf8");
+    res.setHeader("content-type", "text/plain; charset=utf-8");
+    return res.status(200).send(timings);
+  }
+  next();
 }
 
 // Before request starts
@@ -34,9 +43,6 @@ export function onInit(req, res, next) {
     req.headers[`x-open-runtimes-log-id`],
   );
   res.setHeader("x-open-runtimes-log-id", req.loggerId);
-  res.on("finish", async () => {
-    await Logger.end(req.loggerId);
-  });
 
   // Validate safe timeout
   const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
@@ -94,7 +100,7 @@ export function onAction(callback) {
 // When error occurs
 export function onError(error, req, res, next) {
   if (res.headersSent) {
-    return next(err);
+    return next(error);
   }
 
   Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);

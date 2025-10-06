@@ -211,10 +211,13 @@ When you can have two!
 
                     context.Log(Arr);
 
+                    context.Log(new string('A', 9000));
+                    context.Error(new string('B', 9000));
+
                     return context.Res.Text("");
                 case "library":
                     var response = await http.GetStringAsync(
-                        $"https://jsonplaceholder.typicode.com/todos/{context.Req.BodyRaw}"
+                        $"https://dummyjson.com/todos/{context.Req.BodyRaw}"
                     );
                     var todo =
                         JsonSerializer.Deserialize<Dictionary<string, object>>(response)
@@ -232,6 +235,9 @@ When you can have two!
                     return context.Res.Send(context.Req.BodyRaw);
                 case "deprecatedMethodsUntypedBody":
                     return context.Res.Send("50"); // Send only supported String
+                case "errorTest":
+                    context.Log("Before error...");
+                    throw new Exception("Error!");
                 default:
                     throw new Exception("Unknown action");
             }

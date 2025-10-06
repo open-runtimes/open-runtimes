@@ -183,6 +183,19 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
 };
 
 $server->on("Request", function ($req, $res) use ($action) {
+    if ($req->server['path_info'] === '/__opr/health') {
+        $res->status(200);
+        $res->end('OK');
+        return;
+    }
+    if ($req->server['path_info'] === '/__opr/timings') {
+        $timings = file_get_contents('/mnt/telemetry/timings.txt');
+        $res->header('content-type', 'text/plain; charset=utf-8');
+        $res->status(200);
+        $res->end($timings);
+        return;
+    }
+
     $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '');
 
     try {

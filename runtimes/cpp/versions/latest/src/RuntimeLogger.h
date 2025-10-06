@@ -74,7 +74,19 @@ public:
     std::shared_ptr<std::ofstream> stream =
         type == "error" ? streamErrors : streamLogs;
 
-    *(stream) << (message + "\n");
+    std::string truncatedMessage = message;
+    if (truncatedMessage.length() > 8000) {
+      truncatedMessage = truncatedMessage.substr(0, 8000);
+      truncatedMessage +=
+          "... Log truncated due to size limit (8000 characters)";
+    }
+
+    try {
+      *(stream) << (truncatedMessage + "\n");
+    } catch (const std::exception &e) {
+      // Silently fail to prevent 500 errors in runtime
+      // Log write failures should not crash the runtime
+    }
   }
 
   void end() {

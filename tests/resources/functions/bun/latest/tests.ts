@@ -117,10 +117,13 @@ When you can have two!
 			context.log({ objectKey: "objectValue" });
 			context.log(["arrayValue"]);
 
+			context.log("A".repeat(9000));
+			context.error("B".repeat(9000));
+
 			return context.res.text("");
 		case "library":
 			const todo = await fetch(
-				`https://jsonplaceholder.typicode.com/todos/${context.req.bodyRaw}`,
+				`https://dummyjson.com/todos/${context.req.bodyRaw}`,
 			).then((r) => r.json());
 			return context.res.json({ todo });
 		case "timeout":
@@ -151,6 +154,9 @@ When you can have two!
 			context.log("engine:", engine);
 			context.error("engine:", engine);
 			return context.res.text("OK");
+		case "errorTest":
+			context.log("Before error...");
+			throw new Error("Error!");
 		default:
 			throw new Error("Unknown action.");
 	}

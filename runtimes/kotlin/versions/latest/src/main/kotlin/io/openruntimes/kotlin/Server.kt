@@ -34,6 +34,16 @@ suspend fun main() {
 }
 
 suspend fun execute(ctx: Context) {
+    if (ctx.path() == "/__opr/health") {
+        ctx.status(200).result("OK")
+        return
+    }
+    if (ctx.path() == "/__opr/timings") {
+        val timings = java.io.File("/mnt/telemetry/timings.txt").readText()
+        ctx.contentType("text/plain; charset=utf-8").result(timings)
+        return
+    }
+
     val logger = RuntimeLogger(ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"))
     try {
         action(logger, ctx)

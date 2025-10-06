@@ -1,3 +1,8 @@
+#!/bin/bash
+# Fail build if any command fails
+set -e
+shopt -s dotglob
+
 # Merge dependencies
 # Apply a (cs|fs|vb)proj file to the root project if found
 cp -a /usr/local/build/. /usr/local/server/
