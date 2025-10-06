@@ -35,7 +35,7 @@ static-web-server \
     --basic-auth="$AUTH" \
     --page404="/mnt/resources/404.html" \
     --page-fallback="$PAGE_FALLBACK" \
-    --ignore-hidden-files true \
+    --ignore-hidden-files false \
     --disable-symlinks \
     --compression false \
     --cache-control-headers false \
