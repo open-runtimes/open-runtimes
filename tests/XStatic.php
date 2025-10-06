@@ -98,4 +98,48 @@ class XStatic extends Base
 
         Client::$host = 'open-runtimes-test-serve';
     }
+
+    // TODO: Improve in future, to also ensure build step sees hidden files
+    public function testHiddenFile(): void
+    {
+         Client::$host = 'open-runtimes-test-serve-secondary';
+         
+        $response = Client::execute(url: '/.config/.file', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('VISIBLE=yes', $response['body']);
+
+        $response = Client::execute(url: '/.hidden', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('VISIBLE=yes', $response['body']);
+
+        $response = Client::execute(url: '/.gitignore', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('!.env', $response['body']);
+
+        $response = Client::execute(url: '/.well-known/apple-app-site-association', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('ABCDE12345.com.example.myapp', $response['body']);
+
+        $response = Client::execute(url: '/.well-known/assetlinks.json', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('com.example.myapp', $response['body']);
+
+        $response = Client::execute(url: '/.env', method: 'GET');
+        self::assertEquals(404, $response['code']);
+        self::assertStringContainsString('Page not found', $response['body']);
+
+        $response = Client::execute(url: '/.env.dev', method: 'GET');
+        self::assertEquals(404, $response['code']);
+        self::assertStringContainsString('Page not found', $response['body']);
+
+        $response = Client::execute(url: '/.env.anysuffix', method: 'GET');
+        self::assertEquals(404, $response['code']);
+        self::assertStringContainsString('Page not found', $response['body']);
+
+        $response = Client::execute(url: '/.config/.env', method: 'GET');
+        self::assertEquals(404, $response['code']);
+        self::assertStringContainsString('Page not found', $response['body']);
+        
+        Client::$host = 'open-runtimes-test-serve';
+    }
 }

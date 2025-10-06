@@ -1,0 +1,29 @@
+{
+    "applinks": {
+        "details": [
+            {
+                "appIDs": ["ABCDE12345.com.example.myapp"],
+                "components": [
+                    {
+                        "/": "/app/*",
+                        "comment": "Matches any URL whose path starts with /app/"
+                    },
+                    {
+                        "/": "/product/*",
+                        "comment": "Matches any URL whose path starts with /product/"
+                    },
+                    {
+                        "/": "/user/*/profile",
+                        "comment": "Matches URLs like /user/123/profile"
+                    }
+                ]
+            }
+        ]
+    },
+    "webcredentials": {
+        "apps": ["ABCDE12345.com.example.myapp"]
+    },
+    "appclips": {
+        "apps": ["ABCDE12345.com.example.myapp.Clip"]
+    }
+}
