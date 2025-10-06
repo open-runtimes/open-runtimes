@@ -7,3 +7,7 @@ destination = "/__opr/timings.txt"
 [[advanced.rewrites]]
 source = "/__opr/health"
 destination = "/__opr/health.txt"
+
+[[advanced.rewrites]]
+source = "**/.env*"
+destination = "/tmp/__opr/empty"
