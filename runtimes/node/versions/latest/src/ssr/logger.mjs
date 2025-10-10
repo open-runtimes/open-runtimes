@@ -1,4 +1,7 @@
 import { appendFileSync } from "fs";
+import { createNamespace } from "cls-hooked";
+
+export const loggingNamespace = createNamespace("logging");
 
 export const nativeLog = console.log.bind(console);
 
@@ -39,6 +42,8 @@ export class Logger {
         stringLog += " ";
       }
     }
+
+    nativeLog(stringLog);
 
     const path = `/mnt/logs/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`;
     try {
