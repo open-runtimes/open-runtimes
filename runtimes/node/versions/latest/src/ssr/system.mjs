@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 
-export async function addOprEndpoints(req, res) {
+export function addOprEndpoints(req, res) {
   if (req.method === "GET" && req.url === "/__opr/health") {
     const body = "OK";
 
@@ -8,17 +8,23 @@ export async function addOprEndpoints(req, res) {
     res.setHeader("Content-Type", "text/plain");
     res.setHeader("Content-Length", Buffer.byteLength(body));
     res.end(body);
+    return true;
   } else if (req.method === "GET" && req.url === "/__opr/timings") {
-    const body = await readFile("/mnt/telemetry/timings.txt", "utf8");
+    (async () => {
+      const body = await readFile("/mnt/telemetry/timings.txt", "utf8");
 
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "text/plain");
-    res.setHeader("Content-Length", Buffer.byteLength(body));
-    res.end(body);
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "text/plain");
+      res.setHeader("Content-Length", Buffer.byteLength(body));
+      res.end(body);
+    })();
+    return true;
   }
+
+  return false;
 }
 
-export async function addAuthenticationCheck(req, res) {
+export function addAuthenticationCheck(req, res) {
   const serverSecret = process.env["OPEN_RUNTIMES_SECRET"];
   const headerSecret = req.headers["x-open-runtimes-secret"];
 
@@ -29,11 +35,13 @@ export async function addAuthenticationCheck(req, res) {
     res.setHeader("Content-Type", "text/plain");
     res.setHeader("Content-Length", Buffer.byteLength(body));
     res.end(body);
-    return;
+    return true;
   }
+
+  return false;
 }
 
-export async function addSafeTimeout(req, res) {
+export function addSafeTimeout(req, res) {
   const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
   let safeTimeout = null;
   if (timeout) {
@@ -44,11 +52,13 @@ export async function addSafeTimeout(req, res) {
       res.setHeader("Content-Type", "text/plain");
       res.setHeader("Content-Length", Buffer.byteLength(body));
       res.end(body);
-      return;
+      return true;
     }
 
     safeTimeout = +timeout;
   }
 
   req.safeTimeout = safeTimeout;
+
+  return false;
 }

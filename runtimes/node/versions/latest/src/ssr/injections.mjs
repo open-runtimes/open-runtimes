@@ -6,7 +6,7 @@ import {
   addAuthenticationCheck,
   addSafeTimeout,
 } from "./system.mjs";
-import { Logger } from "./logger.mjs";
+import { Logger, loggingNamespace } from "./logger.mjs";
 
 console.log(`Preparing SSR runtime ...`);
 
@@ -51,16 +51,17 @@ function overrideEmit(originalEmit) {
     }
 
     const [req, res] = emitArgs;
+    let handled = false;
 
     // internal health check, telemetry, etc.
-    addOprEndpoints(req, res);
-    if (res.writableEnded) {
+    handled = addOprEndpoints(req, res);
+    if (handled) {
       return;
     }
 
     // Ensure auth headers
-    addAuthenticationCheck(req, res);
-    if (res.writableEnded) {
+    handled = addAuthenticationCheck(req, res);
+    if (handled) {
       return;
     }
 
@@ -72,10 +73,34 @@ function overrideEmit(originalEmit) {
     res.setHeader("x-open-runtimes-log-id", req.loggerId);
 
     // Validate and prepare safe timeout duration
-    addSafeTimeout(req, res);
+    handled = addSafeTimeout(req, res);
+    if (handled) {
+      return;
+    }
 
-    // Forward to original handler
-    originalEmit.call(this, event, ...emitArgs);
+    // Wrap rest of the logic in namespace for proper log reporting
+    loggingNamespace.run(async () => {
+      loggingNamespace.set("id", req.loggerId);
+      Logger.overrideNativeLogs(loggingNamespace, req.loggerId);
+
+      // Apply safe timeout, when relevant
+      if (req.safeTimeout !== null) {
+        setTimeout(() => {
+          if (!res.headersSent) {
+            console.error("Execution timed out.");
+            res.statusCode = 500;
+            res.setHeader("Content-Type", "text/plain");
+            res.setHeader("Content-Length", 0);
+            res.end("");
+          }
+        }, req.safeTimeout * 1000);
+
+        originalEmit.call(this, event, ...emitArgs);
+      } else {
+        // Forward to original handler
+        originalEmit.call(this, event, ...emitArgs);
+      }
+    });
   };
 }
 

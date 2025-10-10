@@ -1,7 +1,7 @@
 import express from "express";
 import { createRequestHandler } from "@remix-run/express";
 import * as build from "./build/server/index.js";
-import { onAction, onError } from "./ssr/helpers.mjs";
+import { onError } from "./ssr/helpers.mjs";
 
 console.log("Remix server starting ...");
 
@@ -11,19 +11,17 @@ const app = express();
 app.use(express.static("build/client"));
 app.all(
   "*",
-  onAction(
-    createRequestHandler({
-      build,
-      getLoadContext(req, res) {
-        return {};
-      },
-    }),
-  ),
+  createRequestHandler({
+    build,
+    getLoadContext(req, res) {
+      return {};
+    },
+  }),
 );
 // End of framework-specific logic
 
 app.use(onError);
 
-app.listen(process.env.PORT, process.env.HOST, () => {
-  console.log(`Remix server started on http://${getHost()}:${getPort()}`);
+app.listen(+(process.env.PORT || "3000"), process.env.HOST || "0.0.0.0", () => {
+  console.log(`Remix server started.`);
 });
