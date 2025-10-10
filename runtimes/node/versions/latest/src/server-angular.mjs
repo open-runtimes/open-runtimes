@@ -1,13 +1,11 @@
 import { reqHandler } from "./server/server.mjs";
 import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
 import express from "express";
-import * as system from "./ssr/system.mjs";
 
 console.log("Angular server starting ...");
 
 const app = express();
 
-app.use(system.routes);
 app.use(onInit);
 
 // framework-specific logic
