@@ -17,4 +17,4 @@ else
     START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi
 
-HOST=0.0.0.0 PORT=3000 $START_COMMAND
+NODE_OPTIONS='--import "/usr/local/server/src/ssr/injections.mjs"' HOST=0.0.0.0 PORT=3000 $START_COMMAND
