@@ -11,4 +11,10 @@ cp ../server-sveltekit.mjs ./server.mjs
 mkdir -p ./ssr
 cp -R ../ssr/* ./ssr/
 
-HOST=0.0.0.0 PORT=3000 node ./server.mjs
+if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
+    START_COMMAND="node ./server.mjs"
+else
+    START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
+fi
+
+HOST=0.0.0.0 PORT=3000 $START_COMMAND
