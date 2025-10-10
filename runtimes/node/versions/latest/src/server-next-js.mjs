@@ -1,7 +1,6 @@
 import { parse } from "url";
 import next from "next";
 import express from "express";
-import { onError } from "./ssr/helpers.mjs";
 
 console.log("Next.js server starting ...");
 
@@ -15,8 +14,6 @@ app.use((req, res, next) => {
   handle(req, res, parsedUrl);
 });
 // End of framework-specific logic
-
-app.use(onError);
 
 nextApp.prepare().then(() => {
   app.listen(

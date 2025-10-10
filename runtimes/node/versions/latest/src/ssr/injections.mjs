@@ -95,10 +95,29 @@ function overrideEmit(originalEmit) {
           }
         }, req.safeTimeout * 1000);
 
-        originalEmit.call(this, event, ...emitArgs);
+        try {
+          // Forward to original handler
+          originalEmit.call(this, event, ...emitArgs);
+        } catch (error) {
+          // Write errors into logger
+          if (!res.headersSent) {
+            Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);
+            res.writeHead(500, { "Content-Type": "text/plain" });
+            res.end("");
+          }
+        }
       } else {
-        // Forward to original handler
-        originalEmit.call(this, event, ...emitArgs);
+        try {
+          // Forward to original handler
+          originalEmit.call(this, event, ...emitArgs);
+        } catch (error) {
+          // Write errors into logger
+          if (!res.headersSent) {
+            Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);
+            res.writeHead(500, { "Content-Type": "text/plain" });
+            res.end("");
+          }
+        }
       }
     });
   };

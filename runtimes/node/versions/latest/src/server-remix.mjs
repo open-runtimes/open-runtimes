@@ -1,7 +1,6 @@
 import express from "express";
 import { createRequestHandler } from "@remix-run/express";
 import * as build from "./build/server/index.js";
-import { onError } from "./ssr/helpers.mjs";
 
 console.log("Remix server starting ...");
 
@@ -19,8 +18,6 @@ app.all(
   }),
 );
 // End of framework-specific logic
-
-app.use(onError);
 
 app.listen(+(process.env.PORT || "3000"), process.env.HOST || "0.0.0.0", () => {
   console.log(`Remix server started.`);
