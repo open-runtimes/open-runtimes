@@ -1,5 +1,5 @@
 local_download=0.200
 remote_download=10.560
-extract=2.940
-extract=1.830
-extract=2.700
+extract=2.880
+extract=1.750
+extract=2.720

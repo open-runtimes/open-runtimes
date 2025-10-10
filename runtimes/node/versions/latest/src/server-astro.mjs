@@ -1,12 +1,10 @@
 import { handler } from "./server/entry.mjs";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
+import { onAction, onError } from "./ssr/helpers.mjs";
 
 console.log("Astro server starting ...");
 
 const app = express();
-
-app.use(onInit);
 
 // framework-specific logic
 app.use(express.static("client"));
@@ -15,6 +13,6 @@ app.use(onAction(handler));
 
 app.use(onError);
 
-app.listen(getPort(), getHost(), () => {
+app.listen(process.env.PORT, process.env.HOST, () => {
   console.log(`Astro server started on http://${getHost()}:${getPort()}`);
 });

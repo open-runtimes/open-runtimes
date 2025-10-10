@@ -1,12 +1,10 @@
 import { reqHandler } from "./server/server.mjs";
-import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
+import { onAction, onError } from "./ssr/helpers.mjs";
 import express from "express";
 
 console.log("Angular server starting ...");
 
 const app = express();
-
-app.use(onInit);
 
 // framework-specific logic
 app.use(onAction(reqHandler));
@@ -14,6 +12,6 @@ app.use(onAction(reqHandler));
 
 app.use(onError);
 
-app.listen(getPort(), getHost(), () => {
+app.listen(process.env.PORT, process.env.HOST, () => {
   console.log(`Angular server started on http://${getHost()}:${getPort()}`);
 });
