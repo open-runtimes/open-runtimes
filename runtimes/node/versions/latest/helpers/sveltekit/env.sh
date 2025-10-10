@@ -3,4 +3,4 @@
 set -e
 shopt -s dotglob
 
-export GCP_BUILDPACKS="open-runtimes"
+export GCP_BUILDPACKS="open-runtimes" # Ensures "node" adapter in adapter-auto

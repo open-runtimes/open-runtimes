@@ -131,5 +131,5 @@ ritm(["http", "https"], wrapHttp);
 await waitForAllMessagesAcknowledged();
 
 console.log(
-  `Nuxt server starting on PORT=${process.env.PORT} and HOST=${process.env.HOST}`,
+  `SSR runtime prepared with configuration PORT=${process.env.PORT} and HOST=${process.env.HOST}`,
 );

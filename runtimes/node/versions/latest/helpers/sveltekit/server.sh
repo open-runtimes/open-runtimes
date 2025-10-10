@@ -7,12 +7,8 @@ cd /usr/local/server/src/function/
 
 source /usr/local/server/helpers/sveltekit/env.sh
 
-cp ../server-sveltekit.mjs ./server.mjs
-mkdir -p ./ssr
-cp -R ../ssr/* ./ssr/
-
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
-    START_COMMAND="node ./server.mjs"
+    START_COMMAND="node ./index.js"
 else
     START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi
