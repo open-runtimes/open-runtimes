@@ -1,0 +1,29 @@
+name: Version auditor
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  analyze-runtimes:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      
+      - name: Install dependencies
+        run: |
+          cd .github/workflows/version-audit
+          bun install
+      
+      - name: Run runtime analysis
+        run: |
+          cd .github/workflows/version-audit
+          bun run start
