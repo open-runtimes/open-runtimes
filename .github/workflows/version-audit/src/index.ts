@@ -29,8 +29,11 @@ async function main() {
     const { namespace, prefix, suffix, major, minor, patch, tag } =
       Semantics.parseVersion(image);
 
-    const { lastUpdated: currentUpdatedAt, digest: currentDigest } =
-      await DockerHub.getTagHash(namespace, tag);
+    const {
+      lastUpdated: currentUpdatedAt,
+      digest: currentDigest,
+      name: currentName,
+    } = await DockerHub.getTagHash(namespace, tag);
 
     // Major version scan (run only once)
     if (!fullScan && major) {
@@ -38,6 +41,7 @@ async function main() {
       const updatedName = await getNewerVersion(
         currentUpdatedAt,
         currentDigest,
+        currentName,
         namespace,
         search,
         suffix,
@@ -58,6 +62,7 @@ async function main() {
       const updatedName = await getNewerVersion(
         currentUpdatedAt,
         currentDigest,
+        currentName,
         namespace,
         search,
         suffix,
@@ -78,6 +83,7 @@ async function main() {
       const updatedName = await getNewerVersion(
         currentUpdatedAt,
         currentDigest,
+        currentName,
         namespace,
         search,
         suffix,

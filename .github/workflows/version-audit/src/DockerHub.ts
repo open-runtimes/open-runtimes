@@ -38,12 +38,21 @@ export class DockerHub {
       const response = await fetch(path);
       const json = await response.json();
 
+      if (json.message) {
+        throw new Error(json.message);
+      }
+
       const results = json.results;
 
       const result = results.find((r: any) => {
-        const matchesSuffix = r.name.endsWith(suffix);
-        const hasSemanticVersion = r.name.split(".").length >= 3;
-        const isNotRc = !r.name.toLowerCase().includes("rc") && !r.name.toLowerCase().includes("beta");
+        const matchesSuffix = r.name.includes(suffix);
+
+        const nameWithoutSuffix = suffix ? r.name.split(suffix)[0] : r.name;
+        const hasSemanticVersion = nameWithoutSuffix.split(".").length >= 3;
+
+        const isNotRc =
+          !r.name.toLowerCase().includes("rc") &&
+          !r.name.toLowerCase().includes("beta");
 
         const isValid = matchesSuffix && hasSemanticVersion && isNotRc;
         return isValid;
@@ -90,6 +99,10 @@ export class DockerHub {
       `/namespaces/${namespace}/repositories/${tag}/tags/${version}`;
     const response = await fetch(path);
     const json = await response.json();
+
+    if (json.message) {
+      throw new Error(json.message);
+    }
 
     const name = json.name;
     const lastUpdated = json.last_updated;

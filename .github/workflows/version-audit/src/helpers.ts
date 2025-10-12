@@ -3,6 +3,7 @@ import { DockerHub } from "./DockerHub";
 export async function getNewerVersion(
   currentUpdatedAt: string,
   currentDigest: string,
+  currentName: string,
 
   namespace: string,
 
@@ -15,10 +16,26 @@ export async function getNewerVersion(
     digest: latestDigest,
   } = await DockerHub.getLatestTag(namespace, search, suffix);
 
-  const _datesMatching = areDatesSame(currentUpdatedAt, latestUpdatedAt);
   const digestMatching = currentDigest === latestDigest;
 
-  return digestMatching ? "" : latestName;
+  if (digestMatching) {
+    return "";
+  }
+
+  const currentSemantics = currentName.split("-")[0];
+  const latestSemantics = latestName.split("-")[0];
+
+  try {
+    const compareResult = Bun.semver.order(currentSemantics, latestSemantics);
+    // Current is greater or equal
+    if (compareResult === 1 || compareResult === 0) {
+      return "";
+    }
+  } catch (_err) {}
+
+  const _isOlder = new Date(currentUpdatedAt) < new Date(latestUpdatedAt);
+
+  return latestName;
 }
 
 export function areDatesSame(

@@ -4,5 +4,12 @@
   "type": "module",
   "scripts": {
     "start": "bun run src/index.ts"
+  },
+  "module": "src/index.ts",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
   }
 }

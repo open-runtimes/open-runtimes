@@ -55,11 +55,22 @@ export class Semantics {
       tag: "",
     };
 
+    let suffixOriginal = response.suffix;
+
+    // Prevent pinning (possibly old) alpine version
+    if (response.suffix.includes(".")) {
+      if (response.suffix.includes("-alpine3.")) {
+        response.suffix = "-alpine3.";
+      } else {
+        throw new Error(`Unexpected Alpine version: ${response.suffix}`);
+      }
+    }
+
     const semantics = [major, minor, patch].filter(
       (item) => item !== undefined && item !== null && item !== "",
     );
-    response.tag = `${response.prefix}${semantics.join(".")}${response.suffix}`;
-    
+    response.tag = `${response.prefix}${semantics.join(".")}${suffixOriginal}`;
+
     return response;
   }
 }
