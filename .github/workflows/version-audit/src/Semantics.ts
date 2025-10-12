@@ -59,7 +59,7 @@ export class Semantics {
       (item) => item !== undefined && item !== null && item !== "",
     );
     response.tag = `${response.prefix}${semantics.join(".")}${response.suffix}`;
-
+    
     return response;
   }
 }

@@ -80,6 +80,11 @@ jobs:
             ARCH: "linux/amd64"
 
           # Deno
+          - ID: deno-2.5
+            RUNTIME: deno
+            VERSION: "2.5"
+            IMAGE: openruntimes/deno:v5-2.5
+            ARCH: "linux/amd64,linux/arm64"
           - ID: deno-2.0
             RUNTIME: deno
             VERSION: "2.0"
@@ -203,6 +208,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Ruby
+          - ID: ruby-3.4
+            RUNTIME: ruby
+            VERSION: "3.4"
+            IMAGE: openruntimes/ruby:v5-3.4
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
           - ID: ruby-3.3
             RUNTIME: ruby
             VERSION: "3.3"
@@ -225,6 +235,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # PHP
+          - ID: php-8.4
+            RUNTIME: php
+            VERSION: "8.4"
+            IMAGE: openruntimes/php:v5-8.4
+            ARCH: "linux/amd64,linux/arm64"
           - ID: php-8.3
             RUNTIME: php
             VERSION: "8.3"
@@ -369,6 +384,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Go
+          - ID: go-1.24
+            RUNTIME: go
+            VERSION: "1.24"
+            IMAGE: openruntimes/go:v5-1.24
+            ARCH: "linux/amd64,linux/arm64"
           - ID: go-1.23
             RUNTIME: go
             VERSION: "1.23"

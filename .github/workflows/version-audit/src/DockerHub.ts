@@ -43,7 +43,7 @@ export class DockerHub {
       const result = results.find((r: any) => {
         const matchesSuffix = r.name.endsWith(suffix);
         const hasSemanticVersion = r.name.split(".").length >= 3;
-        const isNotRc = !r.name.toLowerCase().includes("rc");
+        const isNotRc = !r.name.toLowerCase().includes("rc") && !r.name.toLowerCase().includes("beta");
 
         const isValid = matchesSuffix && hasSemanticVersion && isNotRc;
         return isValid;
