@@ -1,39 +1,95 @@
-// @ts-ignore
-import data from "../../../../ci/runtimes.toml";
-import {
-  getLatestVersions,
-  getDockerImages,
-  isNonDockerHub,
-  parseVersion,
-  getCurrentInfo,
-  checkPatch,
-  checkMinor,
-  checkMajor
-} from "./helpers.js";
+import { getNewerVersion } from "./helpers.ts";
+
+import { DockerHub } from "./DockerHub.ts";
+import { Semantics } from "./Semantics.ts";
+import { Local } from "./Local.ts";
 
 async function main() {
-  const runtimeVersions = getLatestVersions(data);
-  const dockerVersions = getDockerImages(runtimeVersions);
+  const runtimesVersions = Local.getRuntimesVersions();
+  const runtimeImages = Local.getDockerImages(runtimesVersions);
 
-  for (const [runtimeName, dockerImage] of Object.entries(dockerVersions)) {
-    if (isNonDockerHub(dockerImage)) {
-      console.info(`🔴 Skipping ${dockerImage} because it's not a Docker Hub image`);
+  // Name of runtimes that already had full scan
+  // Prevents re-runing same checks
+  let fullScans: string[] = [];
+
+  for (const entries of Object.entries(runtimeImages)) {
+    const runtime: string = entries[0] ?? "";
+    const image: string = entries[1] ?? "";
+
+    const fullScan = fullScans.includes(runtime.split("/")[0]);
+    if (!fullScan) {
+      fullScans.push(runtime.split("/")[0]);
+    }
+
+    if (!DockerHub.isValid(image)) {
+      console.info(`🔴 Skipping ${image} because it's not a Docker Hub image`);
       continue;
     }
 
-    const { namespace, suffix, major, minor, patch, current } = parseVersion(dockerImage);
-    const { lastUpdated: currentUpdated } = await getCurrentInfo(namespace, current, suffix);
+    const { namespace, prefix, suffix, major, minor, patch, tag } =
+      Semantics.parseVersion(image);
 
+    const { lastUpdated: currentUpdatedAt, digest: currentDigest } =
+      await DockerHub.getTagHash(namespace, tag);
+
+    // Major version scan (run only once)
+    if (!fullScan && major) {
+      const search = `${prefix}`;
+      const updatedName = await getNewerVersion(
+        currentUpdatedAt,
+        currentDigest,
+        namespace,
+        search,
+        suffix,
+      );
+
+      if (updatedName) {
+        console.info(
+          `🟣 ${runtime} major version update is available (${tag} -> ${updatedName})`,
+        );
+      } else {
+        console.info(`🟢 ${runtime} major version is up to date (${tag})`);
+      }
+    }
+
+    // Minor version scan (run once, and when OPR doesnt specify minor)
+    if ((!fullScan && minor) || (runtime.split(".").length < 2 && minor)) {
+      const search = `${prefix}${major}.`;
+      const updatedName = await getNewerVersion(
+        currentUpdatedAt,
+        currentDigest,
+        namespace,
+        search,
+        suffix,
+      );
+
+      if (updatedName) {
+        console.info(
+          `🟠 ${runtime} minor version update is available (${tag} -> ${updatedName})`,
+        );
+      } else {
+        console.info(`🟢 ${runtime} minor version is up to date (${tag})`);
+      }
+    }
+
+    // Patch version scan (run always)
     if (patch) {
-      await checkPatch(runtimeName, namespace, major, minor, currentUpdated, current);
-    }
+      const search = `${prefix}${major}.${minor}.`;
+      const updatedName = await getNewerVersion(
+        currentUpdatedAt,
+        currentDigest,
+        namespace,
+        search,
+        suffix,
+      );
 
-    if (minor) {
-      await checkMinor(runtimeName, namespace, major, currentUpdated, current);
-    }
-
-    if (major) {
-      await checkMajor(runtimeName, namespace, currentUpdated, current);
+      if (updatedName) {
+        console.info(
+          `🟠 ${runtime} patch version update is available (${tag} -> ${updatedName})`,
+        );
+      } else {
+        console.info(`🟢 ${runtime} patch version is up to date (${tag})`);
+      }
     }
   }
 }
