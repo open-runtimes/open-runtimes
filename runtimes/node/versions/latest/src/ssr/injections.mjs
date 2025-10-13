@@ -34,6 +34,8 @@ function wrapHttp(moduleExports) {
       );
     }
   }
+
+  return moduleExports;
 }
 
 // Override for methods used by Nitro
