@@ -86,7 +86,7 @@ class Logger {
 
     try {
       await Promise.race([
-        await Promise.all([
+        Promise.all([
           new Promise((res) => {
             this.streamLogs.end(undefined, undefined, res);
           }),
