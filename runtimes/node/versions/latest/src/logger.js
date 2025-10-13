@@ -84,14 +84,26 @@ class Logger {
 
     this.enabled = false;
 
-    await Promise.all([
-      new Promise((res) => {
-        this.streamLogs.end(undefined, undefined, res);
-      }),
-      new Promise((res) => {
-        this.streamErrors.end(undefined, undefined, res);
-      }),
-    ]);
+    try {
+      await Promise.race([
+        await Promise.all([
+          new Promise((res) => {
+            this.streamLogs.end(undefined, undefined, res);
+          }),
+          new Promise((res) => {
+            this.streamErrors.end(undefined, undefined, res);
+          }),
+        ]),
+        new Promise((res) => {
+          setTimeout(() => {
+            reject(new Error("Logger end timeout"));
+          }, 5000); // 5 seconds timeout
+        }),
+      ]);
+    } catch (err) {
+      // Silently fail to prevent 500 errors in runtime
+      // Log write failures should not crash the runtime
+    }
   }
 
   overrideNativeLogs() {
