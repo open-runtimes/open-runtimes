@@ -94,7 +94,7 @@ class Logger {
             this.streamErrors.end(undefined, undefined, res);
           }),
         ]),
-        new Promise((res) => {
+        new Promise((_, reject) => {
           setTimeout(() => {
             reject(new Error("Logger end timeout"));
           }, 5000); // 5 seconds timeout
