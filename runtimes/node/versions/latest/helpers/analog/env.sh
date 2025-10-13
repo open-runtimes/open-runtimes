@@ -3,4 +3,4 @@
 set -e
 shopt -s dotglob
 
-export NITRO_PRESET="node"
+export NITRO_PRESET="node_server"

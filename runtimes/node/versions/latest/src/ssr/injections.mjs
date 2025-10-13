@@ -15,14 +15,25 @@ const { registerOptions, waitForAllMessagesAcknowledged } =
 register("import-in-the-middle/hook.mjs", import.meta.url, registerOptions);
 
 // Main logic to override HTTP and HTTPS libraries
-function wrapHttp(exports) {
-  if (exports.Server) {
-    exports.Server = wrapServer(exports.Server);
+function wrapHttp(moduleExports) {
+  if (moduleExports.Server) {
+    moduleExports.Server = wrapServer(moduleExports.Server);
   }
-  if (exports.createServer) {
-    exports.createServer = wrapCreateServer(exports.createServer);
+  if (moduleExports.createServer) {
+    moduleExports.createServer = wrapCreateServer(moduleExports.createServer);
   }
-  return exports;
+
+  const isESM = moduleExports[Symbol.toStringTag] === "Module";
+  if (isESM) {
+    if (moduleExports.default.Server) {
+      moduleExports.default.Server = wrapServer(moduleExports.default.Server);
+    }
+    if (moduleExports.default.createServer) {
+      moduleExports.default.createServer = wrapCreateServer(
+        moduleExports.default.createServer,
+      );
+    }
+  }
 }
 
 // Override for methods used by Nitro
