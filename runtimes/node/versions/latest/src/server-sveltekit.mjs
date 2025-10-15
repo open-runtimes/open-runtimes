@@ -6,7 +6,7 @@ console.log("SvelteKit server starting ...");
 const app = express();
 
 // framework-specific logic
-app.use(onAction(handler));
+app.use(handler);
 // End of framework-specific logic
 
 const port = +(process.env.PORT || '3000');

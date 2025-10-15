@@ -7,13 +7,17 @@ cd /usr/local/server/src/function
 
 source /usr/local/server/helpers/remix/env.sh
 
-# Remix-serve requires "build" folder
-mkdir -p build
-mv server build/server
-mv client build/client
-
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
-    START_COMMAND="./node_modules/.bin/remix-serve ./build/server/index.js"
+    # Middleware-style
+    cp ../server-remix.mjs ./server.mjs
+    START_COMMAND="node ./server.mjs"
+    
+    # Standalone-style
+    # Remix-serve requires "build" folder (might not work due to build folder structure)
+    # mkdir -p build
+    # mv server build/server
+    # mv client build/client
+    # START_COMMAND="./node_modules/.bin/remix-serve ./build/server/index.js"
 else
     START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi

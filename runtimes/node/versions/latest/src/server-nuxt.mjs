@@ -7,7 +7,7 @@ const app = express();
 
 // framework-specific logic
 app.use(express.static("public"));
-app.use(onAction(listener));
+app.use(listener);
 // End of framework-specific logic
 
 const port = +(process.env.PORT || '3000');

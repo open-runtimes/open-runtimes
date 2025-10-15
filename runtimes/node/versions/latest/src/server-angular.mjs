@@ -6,7 +6,7 @@ console.log("Angular server starting ...");
 const app = express();
 
 // framework-specific logic
-app.use(onAction(reqHandler));
+app.use(reqHandler);
 // End of framework-specific logic
 
 const port = +(process.env.PORT || '3000');
