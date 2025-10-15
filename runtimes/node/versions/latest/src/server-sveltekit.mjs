@@ -1,21 +1,16 @@
 import { handler } from "./handler.js";
 import express from "express";
-import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
-import * as system from "./ssr/system.mjs";
 
 console.log("SvelteKit server starting ...");
 
 const app = express();
 
-app.use(system.routes);
-app.use(onInit);
-
 // framework-specific logic
-app.use(onAction(handler));
+app.use(handler);
 // End of framework-specific logic
 
-app.use(onError);
-
-app.listen(getPort(), getHost(), () => {
-  console.log(`SvelteKit server started on http://${getHost()}:${getPort()}`);
+const port = +(process.env.PORT || "3000");
+const host = process.env.HOST || "0.0.0.0";
+app.listen(port, host, () => {
+  console.log(`SvelteKit server started on http://${host}:${port}`);
 });

@@ -1,4 +1,7 @@
 import { appendFileSync } from "fs";
+import { createNamespace } from "cls-hooked";
+
+export const loggingNamespace = createNamespace("logging");
 
 export const nativeLog = console.log.bind(console);
 
