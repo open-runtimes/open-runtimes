@@ -8,7 +8,12 @@ cd /usr/local/server/src/function/
 source /usr/local/server/helpers/astro/env.sh
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
-    START_COMMAND="node ./server/entry.mjs"
+    # Middleware-style
+    cp ../server-astro.mjs ./server.mjs
+    START_COMMAND="node ./server.mjs"
+   
+    # Standalone-style
+    # START_COMMAND="node ./server/entry.mjs"
 else
     START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi

@@ -3,4 +3,8 @@
 set -e
 shopt -s dotglob
 
-export NITRO_PRESET="node_server"
+# Middleware-style
+export NITRO_PRESET="node"
+
+# Standalone-style
+# export NITRO_PRESET="node_server"
