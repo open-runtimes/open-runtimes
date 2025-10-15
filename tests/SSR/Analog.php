@@ -11,7 +11,7 @@ error_reporting(E_ALL);
 
 class Analog extends SSR
 {
-    // Skip concurrency test. Should work, but logs might to go wrong execution IDs
+    // Skip concurrency test. Should work, but logs might go to wrong execution IDs
     // Unaware of changes causing it, likely new Analog version
     public function testServerLogsConcurrency(): void
     {
