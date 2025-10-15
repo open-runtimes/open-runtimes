@@ -43,8 +43,6 @@ export class Logger {
       }
     }
 
-    nativeLog(stringLog);
-
     const path = `/mnt/logs/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`;
     try {
       appendFileSync(path, stringLog + "\n");
