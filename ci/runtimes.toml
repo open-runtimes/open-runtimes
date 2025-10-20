@@ -193,6 +193,14 @@ tools = "node --version && npm --version && npx --version && pnpm --version && y
 test = "SSR/Nuxt.php"
 output = "./.output"
 
+[tanstack-start]
+runtime = { name = "node", version = "22" }
+commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
+test = "SSR/TanstackStart.php"
+output = "./.output"
+
 [remix]
 runtime = { name = "node", version = "22" }
 commands = { install = "source /usr/local/server/helpers/remix/env.sh && npm install && npm run build && bash /usr/local/server/helpers/remix/bundle.sh", start = "bash helpers/remix/server.sh" }
