@@ -5,20 +5,21 @@ shopt -s dotglob
 # Configurable varaible for different runtimes
 ID=$1
 export VERSION="$(echo $ID | sed 's/.*-//')" # Get last section separated by -
-export RUNTIME="$(echo $ID | sed 's/\(.*\)-.*/\1/')" # Get all sections separated by - except last line
+export RUNTIME="$(echo $ID | sed 's/\(.*\)-.*/\1/')"
+# Get all sections separated by - except last line
 
 # If no numbers in version, merge it with runtime name
 if ! echo "$VERSION" | grep -q '[0-9]'; then
-    # Ignore this logic for 1 word runtimes
-    if ! [ "$VERSION" = "$RUNTIME"  ]; then
-        RUNTIME="$RUNTIME-$VERSION"
-        VERSION="latest"
-    fi
+	# Ignore this logic for 1 word runtimes
+	if ! [ "$VERSION" = "$RUNTIME" ]; then
+		RUNTIME="$RUNTIME-$VERSION"
+		VERSION="latest"
+	fi
 fi
 
 # If no version, or version latest, get first runtime's version from list
-if [ "$VERSION" = "latest"  ] || [ "$VERSION" = "$RUNTIME"  ]; then
-    VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
+if [ "$VERSION" = "latest" ] || [ "$VERSION" = "$RUNTIME" ]; then
+	VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 fi
 
 export ENTRYPOINT=$(yq ".$RUNTIME.entry" ci/runtimes.toml | sed 's/null//')

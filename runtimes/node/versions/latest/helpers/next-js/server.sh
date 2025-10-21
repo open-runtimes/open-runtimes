@@ -8,14 +8,17 @@ cd /usr/local/server/src/function
 source /usr/local/server/helpers/next-js/env.sh
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
-    # Middleware-style
-    cp ../server-next-js.mjs ./server.mjs
-    START_COMMAND="node ./server.mjs"
-   
-    # Standalone-style
-    # START_COMMAND="./node_modules/.bin/next start"
+	# Middleware-style
+	cp ../server-next-js.mjs ./server.mjs
+	START_COMMAND="node ./server.mjs"
+
+	# Standalone-style
+	# START_COMMAND="./node_modules/.bin/next start"
 else
-    START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
+	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi
 
-NODE_OPTIONS='--import "/usr/local/server/src/ssr/injections.mjs"' HOST=0.0.0.0 PORT=3000 $START_COMMAND
+NODE_OPTIONS='--import "/usr/local/server/src/ssr/injections.mjs"' \
+	HOST=0.0.0.0 \
+	PORT=3000 \
+	$START_COMMAND

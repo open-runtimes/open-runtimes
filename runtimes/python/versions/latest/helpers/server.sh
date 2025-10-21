@@ -10,16 +10,16 @@ workers=$((1 * $cpu_cores))
 
 # Ensure at least 1 worker
 if [ "$workers" -eq 0 ]; then
-    workers=1
+	workers=1
 fi
 
 echo "HTTP server successfully started!"
 python3 /usr/local/server/src/function/runtime-env/bin/gunicorn \
-  -b 0.0.0.0:3000 \
-  --log-level='warning' \
-  -w $workers \
-  --chdir "$(pwd)/src" \
-  --worker-class aiohttp.GunicornWebWorker \
-  --preload \
-  --timeout 0 \
-  'server:app'
+	-b 0.0.0.0:3000 \
+	--log-level='warning' \
+	-w $workers \
+	--chdir "$(pwd)/src" \
+	--worker-class aiohttp.GunicornWebWorker \
+	--preload \
+	--timeout 0 \
+	'server:app'
