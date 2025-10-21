@@ -15,6 +15,7 @@
     "express": "^4.21.2",
     "import-in-the-middle": "^1.14.4",
     "micro": "^9.3.4",
-    "require-in-the-middle": "^8.0.0"
+    "require-in-the-middle": "^8.0.0",
+    "srvx": "^0.8.16"
   }
 }
