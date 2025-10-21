@@ -1,7 +1,9 @@
+#!/bin/bash
 set -e
 shopt -s dotglob
 
-export RUNTIME_FOLDER=$(echo $RUNTIME | sed 's/\(.*\)-.*/\1/') # Get first part separated by -
+RUNTIME_FOLDER="${RUNTIME%-*}" # Get first part separated by -
+export RUNTIME_FOLDER
 export VERSION_FOLDER="$RUNTIME-$VERSION"
 export VERSION_FOLDER="${VERSION_FOLDER#*-}" # Remove runtime folder name
 

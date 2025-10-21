@@ -1,3 +1,4 @@
+#!/bin/bash
 # Use tests.sh instead, when running locally
 set -e
 shopt -s dotglob
@@ -14,12 +15,12 @@ LATEST_VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 if [ "$VERSION" = "$LATEST_VERSION" ]; then
 	echo "Running formatter ..."
 
-	cd ./runtimes/$RUNTIME_FOLDER
+	cd "./runtimes/$RUNTIME_FOLDER"
 	docker run \
 		--platform linux/x86_64 \
 		--rm \
 		--name open-runtimes-formatter \
-		-v $(pwd):/mnt/code:rw \
+		-v "$(pwd)":/mnt/code:rw \
 		open-runtimes/test-runtime \
 		bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
 	cd ../../
@@ -32,7 +33,7 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
 			--platform linux/x86_64 \
 			--rm \
 			--name open-runtimes-formatter \
-			-v $(pwd):/mnt/code:rw \
+			-v "$(pwd)":/mnt/code:rw \
 			open-runtimes/test-runtime \
 			bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
 		cd ../../../../
@@ -45,11 +46,11 @@ echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 if ! [ -z "$ENFORCED_RUNTIME" ]; then
-	cp -R ./tests/resources/functions/$RUNTIME/* ./tests/.runtime
+	cp -R "./tests/resources/functions/$RUNTIME"/* ./tests/.runtime
 else
-	cp -R ./tests/resources/functions/$RUNTIME_FOLDER/latest/* ./tests/.runtime
+	cp -R "./tests/resources/functions/$RUNTIME_FOLDER/latest"/* ./tests/.runtime
 	if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then
-		cp -R ./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/* ./tests/.runtime
+		cp -R "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER"/* ./tests/.runtime
 	fi
 fi
 
@@ -72,7 +73,7 @@ docker run \
 	--rm \
 	--name open-runtimes-test-build \
 	-v /tmp/.build:/usr/local/server/.build \
-	-v $(pwd):/mnt/code:rw \
+	-v "$(pwd)":/mnt/code:rw \
 	-e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" \
 	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
 	open-runtimes/test-runtime \
@@ -86,7 +87,7 @@ docker run \
 	--name open-runtimes-test-tools \
 	open-runtimes/test-runtime \
 	bash -c "$REQUIRED_TOOLS && $TOOLS"
-OUTPUT=$(docker logs open-runtimes-test-tools)
+docker logs open-runtimes-test-tools
 EXIT_CODE=$(docker inspect open-runtimes-test-tools --format='{{.State.ExitCode}}')
 docker rm --force open-runtimes-test-tools
 if [[ "$EXIT_CODE" == "0" ]]; then
@@ -105,9 +106,9 @@ docker run \
 	--network openruntimes \
 	-d \
 	--name open-runtimes-test-serve \
-	-v $TELEMETRY_FOLDER:/mnt/telemetry \
+	-v "$TELEMETRY_FOLDER":/mnt/telemetry \
 	-v /tmp/logs:/mnt/logs \
-	-v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro \
+	-v "$(pwd)/code.tar.gz":/mnt/code/code.tar.gz:ro \
 	-e OPEN_RUNTIMES_STATIC_FALLBACK="index.html" \
 	-e OPEN_RUNTIMES_HEADERS="{\"x-custom\":\"value\",\"X-CUSTOM-UPPERCASE\":\"Value2\",\"x-open-runtimes-custom\":248}" \
 	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
@@ -129,9 +130,9 @@ docker run \
 	--network openruntimes \
 	-d \
 	--name open-runtimes-test-serve-secondary \
-	-v $TELEMETRY_FOLDER:/mnt/telemetry \
+	-v "$TELEMETRY_FOLDER":/mnt/telemetry \
 	-v /tmp/logs:/mnt/logs \
-	-v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro \
+	-v "$(pwd)/code.tar.gz":/mnt/code/code.tar.gz:ro \
 	-e OPEN_RUNTIMES_HEADERS= \
 	-e OPEN_RUNTIMES_ENV=development \
 	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
@@ -148,10 +149,10 @@ docker run \
 	--network openruntimes \
 	-d \
 	--name open-runtimes-test-serve-teritary \
-	-v $TELEMETRY_FOLDER:/mnt/telemetry \
-	-v $(pwd)/resources:/mnt/resources \
+	-v "$TELEMETRY_FOLDER":/mnt/telemetry \
+	-v "$(pwd)/resources":/mnt/resources \
 	-v /tmp/logs:/mnt/logs \
-	-v $(pwd)/code.tar.gz:/mnt/code/code.tar.gz:ro \
+	-v "$(pwd)/code.tar.gz":/mnt/code/code.tar.gz:ro \
 	-e OPEN_RUNTIMES_HEADERS= \
 	-e OPEN_RUNTIMES_ENV=development \
 	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
@@ -170,8 +171,8 @@ docker run \
 	-e RUNTIME_NAME="$RUNTIME" \
 	-e RUNTIME_VERSION="$VERSION" \
 	-e OPEN_RUNTIMES_SECRET="test-secret-key" \
-	-e OPEN_RUNTIMES_ENTRYPOINT=$ENTRYPOINT \
-	-v $PWD:/app \
+	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
+	-v "$PWD":/app \
 	-v /tmp:/tmp \
 	-w /app \
 	phpswoole/swoole:5.1.2-php8.3-alpine \

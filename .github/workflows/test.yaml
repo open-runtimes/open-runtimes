@@ -45,6 +45,33 @@ jobs:
       - name: Check shell script formatting
         run: shfmt -d .
 
+  shell-script-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: |
+          wget -O shellcheck.tar.xz https://github.com/koalaman/shellcheck/releases/download/v0.9.0/shellcheck-v0.9.0.linux.x86_64.tar.xz
+          tar -xf shellcheck.tar.xz
+          sudo mv shellcheck-v0.9.0/shellcheck /usr/local/bin/
+      - name: Check shell script quality
+        run: |
+          # Run shellcheck and capture output
+          output=$(find . -name "*.sh" -not -path "./.git/*" -not -path "./runtimes/.test/*" -exec shellcheck {} + 2>&1 || true)
+          
+          # Filter out SC1091 info messages and check for real errors/warnings
+          errors=$(echo "$output" | grep -v "SC1091" | grep -E "(error|warning)" || true)
+          
+          if [ -n "$errors" ]; then
+            echo "Shellcheck found errors or warnings:"
+            echo "$errors"
+            exit 1
+          else
+            echo "Shellcheck passed - no errors or warnings found"
+            exit 0
+          fi
+
   open-runtimes:
     needs: prepare
     name: ${{ matrix.ID }}

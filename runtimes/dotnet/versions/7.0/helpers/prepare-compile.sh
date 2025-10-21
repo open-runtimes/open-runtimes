@@ -14,7 +14,7 @@ for filename in *.*proj; do
 	# This is somewhat brittle - won't handle PackageReferences split across multiple lines.
 	# Only occurs in the case of manually editing the csproj file. A solution is parsing the csproj file as XML.
 	PACKAGE_REFS=""
-	while read line; do
+	while read -r line; do
 		case "${line}" in *PackageReference*)
 			PACKAGE_REFS="\\t\\t${PACKAGE_REFS}${line}\\n"
 			;;

@@ -6,7 +6,7 @@ shopt -s dotglob
 # Parse float-like string to integer with trick to round-up
 cpu_cores=$(echo "$OPEN_RUNTIMES_CPUS" | awk '{print int($1 + 0.999999)}')
 
-workers=$((1 * $cpu_cores))
+workers=$((1 * cpu_cores))
 
 # Ensure at least 1 worker
 if [ "$workers" -eq 0 ]; then
