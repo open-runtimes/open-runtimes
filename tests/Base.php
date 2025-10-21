@@ -133,5 +133,7 @@ class Base extends TestCase
         self::assertIsFloat($timings['remote_download']);
         self::assertArrayHasKey('extract', $timings);
         self::assertIsFloat($timings['extract']);
+        self::assertArrayHasKey('listen', $timings);
+        self::assertIsFloat($timings['listen']);
     }
 }
