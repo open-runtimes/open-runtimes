@@ -1,12 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import json from "./.config/.file.json";
 
-export const Route = createFileRoute("/exception")({
+export const Route = createFileRoute("/hidden")({
   component: RouteComponent,
   loader: async () => {
-    throw new Error("Code exception occured");
-
     return {
-      msg: "No exceptions",
+      value: json.value,
     };
   },
 });
@@ -14,5 +13,5 @@ export const Route = createFileRoute("/exception")({
 function RouteComponent() {
   const data = Route.useLoaderData();
 
-  return <p>{data.msg}</p>;
+  return <p>{data.value}</p>;
 }

@@ -11,7 +11,7 @@ tests/**/code.tar.gz
 
 # Node
 tests/**/node_modules
-tests/**/package-lock.json
+# tests/**/package-lock.json
 
 # Deno
 tests/**/deno-cache
@@ -25,12 +25,12 @@ tests/**/.dart_tool/
 tests/**/.packages
 
 # Ruby
-tests/**/Gemfile.lock
+# tests/**/Gemfile.lock
 tests/**/vendor
 
 # PHP
 tests/**/vendor
-tests/**/composer.lock
+# tests/**/composer.lock
 
 # Swift
 tests/**/Run

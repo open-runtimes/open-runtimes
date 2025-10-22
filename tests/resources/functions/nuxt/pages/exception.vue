@@ -4,7 +4,7 @@
 </template>
 
 <script setup>
-    throw new Error('Code exception occured');
+    throw new Error('Code exception occurred');
     const msg = "No exceptions";
 </script>
 

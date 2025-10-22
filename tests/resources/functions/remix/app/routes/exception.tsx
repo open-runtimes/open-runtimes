@@ -1,7 +1,7 @@
 import { useLoaderData } from "@remix-run/react";
 
 export async function loader() {
-  throw new Error('Code exception occured');
+  throw new Error('Code exception occurred');
   const msg = "No exceptions";
   return { msg };
 }
