@@ -119,7 +119,7 @@ bash tests.sh go-1.23
 
 > Replace `go-1.23` with runtime name that you want to test
 
-## Formatting
+## Formatting
 
 Run following command to run formatter for any runtime runtime:
 
@@ -128,6 +128,56 @@ sh formatter.sh node
 ```
 
 > Replace `node` with runtime name that you want to test
+
+## Shell Script Quality
+
+We use `shfmt` and `shellcheck` to ensure shell script quality and formatting. These tools are automatically run in CI/CD, but you can also run them locally.
+
+### Installing Tools
+
+**shfmt (Shell Formatter)**
+```bash
+# macOS
+brew install shfmt
+
+# gosh
+go install mvdan.cc/sh/v3/cmd/gosh@latest
+```
+
+**shellcheck (Shell Script Linter)**
+```bash
+# macOS
+brew install shellcheck
+
+# windows
+choco install shellcheck
+
+# linux
+sudo apt install shellcheck
+```
+
+### Running Quality Checks
+
+**Format shell scripts:**
+```bash
+shfmt -w -l .
+```
+
+**Check shell script formatting:**
+```bash
+shfmt -d .
+```
+
+**Check shell script quality:**
+```bash
+find . -name "*.sh" \
+    -not -path "./.git/*" \
+    -not -path "./runtimes/.test/*" \
+    -not -path "./node_modules/*" \
+    -exec shellcheck -e SC1091 -S error {} +
+```
+
+> These commands will help you catch issues before submitting a pull request
 
 ## Introducing New Features
 
