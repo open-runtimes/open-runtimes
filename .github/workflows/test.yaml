@@ -57,20 +57,10 @@ jobs:
           sudo mv shellcheck-v0.9.0/shellcheck /usr/local/bin/
       - name: Check shell script quality
         run: |
-          # Run shellcheck and capture output
-          output=$(find . -name "*.sh" -not -path "./.git/*" -not -path "./runtimes/.test/*" -exec shellcheck {} + 2>&1 || true)
-          
-          # Filter out SC1091 info messages and check for real errors/warnings
-          errors=$(echo "$output" | grep -v "SC1091" | grep -E "(error|warning)" || true)
-          
-          if [ -n "$errors" ]; then
-            echo "Shellcheck found errors or warnings:"
-            echo "$errors"
-            exit 1
-          else
-            echo "Shellcheck passed - no errors or warnings found"
-            exit 0
-          fi
+          find . -name "*.sh" \
+            -not -path "./.git/*" \
+            -not -path "./runtimes/.test/*" \
+            -exec shellcheck -e SC1091 -S error {} +
 
   open-runtimes:
     needs: prepare
