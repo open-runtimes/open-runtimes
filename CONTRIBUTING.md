@@ -173,7 +173,9 @@ shfmt -d .
 find . -name "*.sh" \
     -not -path "./.git/*" \
     -not -path "./runtimes/.test/*" \
-    -not -path "./node_modules/*" \
+    -not -path "./**/node_modules/*" \
+    -not -path "./runtimes/java/versions/latest/gradlew" \
+    -not -path "./runtimes/kotlin/versions/latest/gradlew" \
     -exec shellcheck -e SC1091 -S warning {} +
 ```
 
