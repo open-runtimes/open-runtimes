@@ -3,7 +3,7 @@
 set -e
 shopt -s dotglob
 
-# Configurable varaible for different runtimes
+# Configurable variable for different runtimes
 export RUNTIME=$1
 VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 export VERSION
