@@ -8,14 +8,17 @@ cd /usr/local/server/src/function/
 source /usr/local/server/helpers/angular/env.sh
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
-    # Middleware-style
-    cp ../server-angular.mjs ./server.mjs
-    START_COMMAND="node ./server.mjs"
-    
-    # Standalone-style
-    # START_COMMAND="node ./server/server.mjs"
+	# Middleware-style
+	cp ../server-angular.mjs ./server.mjs
+	START_COMMAND="node ./server.mjs"
+
+	# Standalone-style
+	# START_COMMAND="node ./server/server.mjs"
 else
-    START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
+	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi
 
-NODE_OPTIONS='--import "/usr/local/server/src/ssr/injections.mjs"' HOST=0.0.0.0 PORT=3000 $START_COMMAND
+NODE_OPTIONS='--import "/usr/local/server/src/ssr/injections.mjs"' \
+	HOST=0.0.0.0 \
+	PORT=3000 \
+	$START_COMMAND

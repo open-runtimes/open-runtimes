@@ -5,7 +5,7 @@ shopt -s dotglob
 
 # Append User Function Dependencies
 if [ -f "/usr/local/build/CMakeLists.txt" ]; then
-    cat "/usr/local/build/CMakeLists.txt" >> "/usr/local/server/CMakeLists.txt"
+	cat "/usr/local/build/CMakeLists.txt" >>"/usr/local/server/CMakeLists.txt"
 fi
 
 # Copy user code into server code
@@ -24,7 +24,7 @@ mkdir /usr/local/build/compiled
 cd /usr/local/server
 
 if [ -f "CMakeCache.txt" ]; then
-    rm CMakeCache.txt
+	rm CMakeCache.txt
 fi
 
 mkdir -p build

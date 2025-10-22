@@ -1,13 +1,18 @@
+#!/bin/bash
 # Usage: sh formatter.sh node
 set -e
 shopt -s dotglob
 
-# Configurable varaible for different runtimes
+# Configurable variable for different runtimes
 export RUNTIME=$1
-export VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
-export ID="$RUNTIME-$VERSION"
-export FORMATTER_WRITE=$(yq ".$RUNTIME.formatter.write" ci/runtimes.toml)
-export FORMATTER_PREPARE=$(yq ".$RUNTIME.formatter.prepare" ci/runtimes.toml)
+VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
+export VERSION
+ID="$RUNTIME-$VERSION"
+export ID
+FORMATTER_WRITE=$(yq ".$RUNTIME.formatter.write" ci/runtimes.toml)
+export FORMATTER_WRITE
+FORMATTER_PREPARE=$(yq ".$RUNTIME.formatter.prepare" ci/runtimes.toml)
+export FORMATTER_PREPARE
 export RUNTIME_FOLDER=$RUNTIME
 export VERSION_FOLDER=$VERSION
 
@@ -18,11 +23,23 @@ bash ci-runtime-prepare.sh
 bash ci-runtime-build.sh
 
 cd "runtimes/$RUNTIME"
-docker run --platform linux/x86_64 --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
+docker run \
+	--platform linux/x86_64 \
+	--rm \
+	--name open-runtimes-formatter \
+	-v "$(pwd)":/mnt/code:rw \
+	open-runtimes/test-runtime \
+	bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
 cd ../../
 
 if [ -d "tests/resources/functions/$RUNTIME" ]; then
-    cd "tests/resources/functions/$RUNTIME"
-    docker run --platform linux/x86_64 --rm --name open-runtimes-formatter -v $(pwd):/mnt/code:rw open-runtimes/test-runtime bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
-    cd ../../../../
+	cd "tests/resources/functions/$RUNTIME"
+	docker run \
+		--platform linux/x86_64 \
+		--rm \
+		--name open-runtimes-formatter \
+		-v "$(pwd)":/mnt/code:rw \
+		open-runtimes/test-runtime \
+		bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_WRITE"
+	cd ../../../../
 fi
