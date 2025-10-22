@@ -25,16 +25,19 @@ if [ "$IS_SSR" -eq 0 ]; then
     cd /usr/local/build
     if [ -d "dist" ]; then
         cd ./dist
-        ENTRYPOINT="./server/index.mjs"
-        if [ -e "$ENTRYPOINT" ]; then
-            IS_SSR=1 # NitroV2, NitroV3 (standalone)
-            OPEN_RUNTIMES_OUTPUT_DIRECTORY="./dist"
-        fi
-        
         ENTRYPOINT="./server/server.js"
         if [ -e "$ENTRYPOINT" ]; then
             IS_SSR=1 # Native SSR (middleware)
             OPEN_RUNTIMES_OUTPUT_DIRECTORY="./dist"
+        fi
+    fi
+    
+    if [ -d ".output" ]; then
+        cd ./.output
+        ENTRYPOINT="./server/index.mjs"
+        if [ -e "$ENTRYPOINT" ]; then
+            IS_SSR=1 # NitroV2, NitroV3 (standalone)
+            OPEN_RUNTIMES_OUTPUT_DIRECTORY="./.output"
         fi
     fi
 fi

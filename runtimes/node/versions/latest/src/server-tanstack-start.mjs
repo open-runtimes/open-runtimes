@@ -15,5 +15,5 @@ app.use(nodeHandler);
 const port = +(process.env.PORT || "3000");
 const host = process.env.HOST || "0.0.0.0";
 app.listen(port, host, () => {
-  console.log(`Nuxt server started on http://${host}:${port}`);
+  console.log(`TanStack Start server started on http://${host}:${port}`);
 });

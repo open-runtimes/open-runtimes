@@ -18,7 +18,7 @@ class Angular extends SSR
         self::assertEquals(200, $response['code']); // Overriden from assertion 500
         self::assertStringContainsString("<router-outlet></router-outlet>", $response['body']); // New assertion
         self::assertStringNotContainsString("No exceptions", $response['body']);
-        self::assertStringNotContainsString('Code exception occured', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
-        self::assertStringContainsString('Code exception occured', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringNotContainsString('Code exception occurred', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('Code exception occurred', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 }

@@ -9,7 +9,7 @@ export class ExceptionComponent {
   msg = '';
 
   constructor() {
-    throw new Error('Code exception occured');
+    throw new Error('Code exception occurred');
     this.msg = "No exceptions";
   }
 }
