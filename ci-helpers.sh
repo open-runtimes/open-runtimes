@@ -11,6 +11,6 @@ if ! [ -z "$ENFORCED_RUNTIME" ]; then
 	export RUNTIME_FOLDER="$ENFORCED_RUNTIME"
 fi
 
-if ! [ -z "$ENFORCED_VERSION" ]; then
+if ! [ -z $ENFORCED_VERSION" ]; then
 	export VERSION_FOLDER="$ENFORCED_VERSION"
 fi

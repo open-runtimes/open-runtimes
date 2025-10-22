@@ -57,14 +57,14 @@ jobs:
           sudo mv shellcheck-v0.9.0/shellcheck /usr/local/bin/
       - name: Check shell script quality
         run: |
-          # -S error: Only fail on errors, not warnings
+          # -S warning: Only fail on warnings and errors, not info
           # -e SC1091: Ignore missing source warning
           # {} +: Pass multiple files to shellcheck at once for efficiency
           find . -name "*.sh" \
             -not -path "./.git/*" \
             -not -path "./runtimes/.test/*" \
             -not -path "./node_modules/*" \
-            -exec shellcheck -e SC1091 -S error {} +
+            -exec shellcheck -e SC1091 -S warning {} +
 
   open-runtimes:
     needs: prepare

@@ -174,7 +174,7 @@ find . -name "*.sh" \
     -not -path "./.git/*" \
     -not -path "./runtimes/.test/*" \
     -not -path "./node_modules/*" \
-    -exec shellcheck -e SC1091 -S error {} +
+    -exec shellcheck -e SC1091 -S warning {} +
 ```
 
 > These commands will help you catch issues before submitting a pull request
