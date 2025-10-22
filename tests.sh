@@ -3,7 +3,7 @@
 set -e
 shopt -s dotglob
 
-# Configurable varaible for different runtimes
+# Configurable variable for different runtimes
 ID=$1
 VERSION="${ID##*-}" # Get last section separated by -
 export VERSION
