@@ -17,12 +17,12 @@ class Nuxt extends SSR
         $response = Client::execute(url: '/exception', method: 'GET');
         self::assertEquals(500, $response['code']);
         self::assertStringNotContainsString("No exceptions", $response['body']);
-        self::assertStringNotContainsString('Code exception occured', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringNotContainsString('Code exception occurred', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
 
         // NOT in server error logs
-        self::assertStringNotContainsString('Code exception occured', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringNotContainsString('Code exception occurred', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
 
         // YES in response body
-        self::assertStringContainsString("Code exception occured", $response['body']);
+        self::assertStringContainsString("Code exception occurred", $response['body']);
     }
 }

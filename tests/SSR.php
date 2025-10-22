@@ -170,8 +170,8 @@ class SSR extends CSR
         $response = Client::execute(url: '/exception', method: 'GET');
         self::assertEquals(500, $response['code']);
         self::assertStringNotContainsString("No exceptions", $response['body']);
-        self::assertStringNotContainsString('Code exception occured', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
-        self::assertStringContainsString('Code exception occured', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringNotContainsString('Code exception occurred', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertStringContainsString('Code exception occurred', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 
     public function testServerLibrary(): void
