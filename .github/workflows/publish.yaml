@@ -347,6 +347,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Bun
+          - ID: bun-1.3
+            RUNTIME: bun
+            VERSION: "1.3"
+            IMAGE: openruntimes/bun:v5-1.3
+            ARCH: "linux/amd64,linux/arm64"
           - ID: bun-1.1
             RUNTIME: bun
             VERSION: "1.1"
