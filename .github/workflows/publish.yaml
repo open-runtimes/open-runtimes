@@ -151,6 +151,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Dart
+          - ID: dart-3.9
+            RUNTIME: dart
+            VERSION: "3.9"
+            IMAGE: openruntimes/dart:v5-3.9
+            ARCH: "linux/amd64,linux/arm64"
           - ID: dart-3.8
             RUNTIME: dart
             VERSION: "3.8"
