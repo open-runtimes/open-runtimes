@@ -9,7 +9,9 @@ source /usr/local/server/helpers/next-js/env.sh
 
 WEBPACK_ENTRYPOINT="./server/webpack-runtime.js"
 TURBOPACK_ENTRYPOINT="./turbopack"
-STANDALONE_ENTRYPOINT="./standalone/server.js"
+STANDALONE_ENTRYPOINT="./server.js"
+
+ls -al .
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
     # Detect SSR in custom output directory
