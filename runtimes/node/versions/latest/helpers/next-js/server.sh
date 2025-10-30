@@ -20,18 +20,8 @@ if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
 		START_COMMAND="node $STANDALONE_ENTRYPOINT"
 	fi
     
-	ENTRYPOINT="./server/server.js"
-	if [ -e "$WEBPACK_ENTRYPOINT" ] || [ -e "$TURBOPACK_ENTRYPOINT" ]; then
-		# No special export (middleware)
-		cp ../server-next-js.mjs ./server.mjs
-		START_COMMAND="node ./server.mjs"
-	fi
-    
-	# Realistically never happens - build prevents this
-	if [ -z "$START_COMMAND" ]; then
-		echo 'No server found'
-		exit 1
-	fi
+	cp ../server-next-js.mjs ./server.mjs
+	START_COMMAND="node ./server.mjs"
 else
 	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi

@@ -53,15 +53,12 @@ elif [ -e "$WEBPACK_ENTRYPOINT" ] || [ -e "$TURBOPACK_ENTRYPOINT" ]; then
 
     # Copy over public folder, package.json, next config, and node_modules
     if [ -d "/usr/local/build/public/" ]; then
-  		mv /usr/local/build/public/ ./public/
-   	fi
-
-    if [ -d "/usr/local/build/node_modules/" ]; then
-   	    mv /usr/local/build/node_modules/ ./node_modules/
-   	fi
-
+		mv /usr/local/build/public/ ./public/
+	fi
+	
    	mv /usr/local/build/package*.json ./
    	mv /usr/local/build/next.config.* ./
+    mv /usr/local/build/node_modules/ ./node_modules/
 
 	modclean --patterns default:safe --no-progress --run
 
