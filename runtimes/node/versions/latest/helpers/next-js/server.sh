@@ -7,21 +7,19 @@ cd /usr/local/server/src/function
 
 source /usr/local/server/helpers/next-js/env.sh
 
-WEBPACK_ENTRYPOINT="./server/webpack-runtime.js"
-TURBOPACK_ENTRYPOINT="./turbopack"
-STANDALONE_ENTRYPOINT="./server.js"
-
-ls -al .
-
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
-    # Detect SSR in custom output directory
-	if [ -e "$STANDALONE_ENTRYPOINT" ]; then
-		# Standalone
-		START_COMMAND="node $STANDALONE_ENTRYPOINT"
+	# Detect SSR in custom output directory
+
+	ENTRYPOINT="./server.js"
+	if [ -e "$ENTRYPOINT" ]; then
+		# Standalone approach
+		START_COMMAND="node $ENTRYPOINT"
+	else
+		# Middleware approach
+		cp ../server-next-js.mjs ./server.mjs
+		START_COMMAND="node ./server.mjs"
 	fi
-    
-	cp ../server-next-js.mjs ./server.mjs
-	START_COMMAND="node ./server.mjs"
+
 else
 	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi
