@@ -8,12 +8,18 @@ cd /usr/local/server/src/function
 source /usr/local/server/helpers/next-js/env.sh
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
-	# Middleware-style
-	cp ../server-next-js.mjs ./server.mjs
-	START_COMMAND="node ./server.mjs"
+	# Detect SSR in custom output directory
 
-	# Standalone-style
-	# START_COMMAND="./node_modules/.bin/next start"
+	ENTRYPOINT="./server.js"
+	if [ -e "$ENTRYPOINT" ]; then
+		# Standalone approach
+		START_COMMAND="node $ENTRYPOINT"
+	else
+		# Middleware approach
+		cp ../server-next-js.mjs ./server.mjs
+		START_COMMAND="node ./server.mjs"
+	fi
+
 else
 	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi
