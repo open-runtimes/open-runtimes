@@ -134,7 +134,7 @@ class SSR extends CSR
         });
 
         self::assertCount(5, $finishes);
-        self::assertNotEquals("12345", \implode("", $finishes));
+        self::assertNotEquals("12345", \implode("", $finishes)); // 0.8% flakyness. Re-run when it happens
     }
 
     public function testDevLogFiles(): void
@@ -195,11 +195,39 @@ class SSR extends CSR
         self::assertNotEquals($uuid1, $uuid2);
     }
 
-
     public function testHiddenFile(): void
     {
         $response = Client::execute(url: '/hidden', method: 'GET');
         self::assertEquals(200, $response['code']);
         self::assertStringContainsString('HIDDEN_FILE', $response['body']);
+    }
+    
+    public function testStaticCache(): void
+    {   
+        $response = Client::execute(url: '/static.txt', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertArrayHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayNotHasKey('surrogate-control', $response['headers']);
+        self::assertEquals('public, max-age=36000', $response['headers']['cdn-cache-control']);
+        
+        $response = Client::execute(url: '/date', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayNotHasKey('surrogate-control', $response['headers']);
+        
+        Client::$host = 'open-runtimes-test-serve-secondary';
+        
+        $response = Client::execute(url: '/static.txt', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayHasKey('surrogate-control', $response['headers']);
+        self::assertEquals('public, max-age=36000', $response['headers']['surrogate-control']);
+
+        $response = Client::execute(url: '/date', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayNotHasKey('surrogate-control', $response['headers']);
+        
+        Client::$host = 'open-runtimes-test-serve';
     }
 }
