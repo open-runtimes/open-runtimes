@@ -34,7 +34,7 @@ if [ -z "$OPEN_RUNTIMES_CACHE_HEADER" ]; then
 fi
 
 # Create dynamic config.toml
-cat > /tmp/config.toml << EOF
+cat >/tmp/config.toml <<EOF
 [advanced]
 
 [[advanced.rewrites]]
