@@ -196,11 +196,6 @@ jobs:
             VERSION: "2.16"
             IMAGE: openruntimes/dart:v5-2.16
             ARCH: "linux/amd64,linux/arm64"
-          - ID: dart-2.15
-            RUNTIME: dart
-            VERSION: "2.15"
-            IMAGE: openruntimes/dart:v5-2.15
-            ARCH: "linux/amd64,linux/arm64"
 
           # Ruby
           - ID: ruby-3.3
