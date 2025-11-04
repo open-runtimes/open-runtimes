@@ -10,6 +10,34 @@ error_reporting(E_ALL);
 
 class XStatic extends Base
 {
+    public function testCacheHeader(): void
+    {
+        
+        $response = Client::execute(url: '/index.html', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertArrayHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayNotHasKey('surrogate-control', $response['headers']);
+        self::assertEquals('public, max-age=36000', $response['headers']['cdn-cache-control']);
+        
+        $response = Client::execute(url: '/some/nested/path.txt', method: 'GET');
+        self::assertArrayHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayNotHasKey('surrogate-control', $response['headers']);
+        
+        Client::$host = 'open-runtimes-test-serve-secondary';
+        
+        $response = Client::execute(url: '/index.html', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayHasKey('surrogate-control', $response['headers']);
+        self::assertEquals('public, max-age=36000', $response['headers']['surrogate-control']);
+        
+        $response = Client::execute(url: '/some/nested/path.txt', method: 'GET');
+        self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayHasKey('surrogate-control', $response['headers']);
+        
+        Client::$host = 'open-runtimes-test-serve';
+    }
+    
     public function testFiles(): void
     {
         $response = Client::execute(url: '/index.html', method: 'GET');
