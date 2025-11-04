@@ -9,7 +9,7 @@ const app = express();
 // framework-specific logic
 app.use(
   express.static("build/client", {
-    setHeaders: (res, path) => {
+    setHeaders: (res, _path) => {
       res.setHeader(
         process.env.OPEN_RUNTIMES_CACHE_HEADER ?? "CDN-Cache-Control",
         "public, max-age=36000",

@@ -210,6 +210,11 @@ class SSR extends CSR
         self::assertArrayNotHasKey('surrogate-control', $response['headers']);
         self::assertEquals('public, max-age=36000', $response['headers']['cdn-cache-control']);
         
+        $response = Client::execute(url: '/date', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayNotHasKey('surrogate-control', $response['headers']);
+        
         Client::$host = 'open-runtimes-test-serve-secondary';
         
         $response = Client::execute(url: '/static.txt', method: 'GET');
@@ -217,6 +222,11 @@ class SSR extends CSR
         self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
         self::assertArrayHasKey('surrogate-control', $response['headers']);
         self::assertEquals('public, max-age=36000', $response['headers']['surrogate-control']);
+
+        $response = Client::execute(url: '/date', method: 'GET');
+        self::assertEquals(200, $response['code']);
+        self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
+        self::assertArrayNotHasKey('surrogate-control', $response['headers']);
         
         Client::$host = 'open-runtimes-test-serve';
     }

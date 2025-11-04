@@ -6,6 +6,16 @@ console.log("Angular server starting ...");
 const app = express();
 
 // framework-specific logic
+app.use(
+  express.static("browser", {
+    setHeaders: (res, _path) => {
+      res.setHeader(
+        process.env.OPEN_RUNTIMES_CACHE_HEADER ?? "CDN-Cache-Control",
+        "public, max-age=36000",
+      );
+    },
+  }),
+);
 app.use(reqHandler);
 // End of framework-specific logic
 
