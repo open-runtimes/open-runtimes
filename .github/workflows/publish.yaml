@@ -112,6 +112,16 @@ jobs:
             ARCH: "linux/amd64"
 
           # Python
+          - ID: python-3.14
+            RUNTIME: python
+            VERSION: "3.14"
+            IMAGE: openruntimes/python:v5-3.14
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: python-3.13
+            RUNTIME: python
+            VERSION: "3.13"
+            IMAGE: openruntimes/python:v5-3.13
+            ARCH: "linux/amd64,linux/arm64"
           - ID: python-3.12
             RUNTIME: python
             VERSION: "3.12"
@@ -139,6 +149,16 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Python ML
+          - ID: python-ml-3.14
+            RUNTIME: python
+            VERSION: "ml-3.14"
+            IMAGE: openruntimes/python-ml:v5-3.14
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: python-ml-3.13
+            RUNTIME: python
+            VERSION: "ml-3.13"
+            IMAGE: openruntimes/python-ml:v5-3.13
+            ARCH: "linux/amd64,linux/arm64"
           - ID: python-ml-3.12
             RUNTIME: python
             VERSION: "ml-3.12"
