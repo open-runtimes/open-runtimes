@@ -28,6 +28,33 @@ if [ ! -e "/mnt/resources/404.html" ]; then
 	cp /usr/local/server/404.html /mnt/resources/404.html
 fi
 
+# Generate dynamic config.toml with HEADER_NAME support
+if [ -z "$OPEN_RUNTIMES_CACHE_HEADER" ]; then
+	OPEN_RUNTIMES_CACHE_HEADER="CDN-Cache-Control"
+fi
+
+# Create dynamic config.toml
+cat >/tmp/config.toml <<EOF
+[advanced]
+
+[[advanced.rewrites]]
+source = "/__opr/timings"
+destination = "/__opr/timings.txt"
+
+[[advanced.rewrites]]
+source = "/__opr/health"
+destination = "/__opr/health.txt"
+
+[[advanced.rewrites]]
+source = "**/.env*"
+destination = "/tmp/__opr/empty"
+
+[[advanced.headers]]
+source = "**/*"
+[advanced.headers.headers]
+$OPEN_RUNTIMES_CACHE_HEADER = "public, max-age=36000"
+EOF
+
 # Start server
 static-web-server \
 	-p 3000 \
@@ -39,5 +66,5 @@ static-web-server \
 	--disable-symlinks \
 	--compression false \
 	--cache-control-headers false \
-	--config-file /usr/local/server/helpers/config.toml \
+	--config-file /tmp/config.toml \
 	-d /usr/local/server/src/function

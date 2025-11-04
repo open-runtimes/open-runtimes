@@ -124,6 +124,7 @@ docker run \
 # 3. Empty auth secret
 # 4. No custom env variable
 # 5. Uncompressed builds
+# 6. Custom cache header (static + ssr)
 PREPARE_UNCOMPRESSED_FILE="gunzip -ck /mnt/code/code.tar.gz > /mnt/code/code.tar"
 docker run \
 	--platform linux/x86_64 \
@@ -136,6 +137,7 @@ docker run \
 	-e OPEN_RUNTIMES_HEADERS= \
 	-e OPEN_RUNTIMES_ENV=development \
 	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
+	-e OPEN_RUNTIMES_CACHE_HEADER="Surrogate-Control" \
 	-e OPEN_RUNTIMES_SECRET= \
 	-p 3001:3000 \
 	open-runtimes/test-runtime \
