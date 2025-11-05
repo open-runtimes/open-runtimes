@@ -10,9 +10,9 @@ cp -a /usr/local/build/. /usr/local/server/src/main/java/io/openruntimes/java
 # Link user's depenrencies
 cd /usr/local/server/src/main/java/io/openruntimes/java
 for filename in ./*.gradle*; do
-    if [ ! -f "${filename}" ]; then
-        continue;
-    fi
-    mv "${filename}" "/usr/local/server/${filename}"
-    echo "apply from: \"${filename}\"" >> /usr/local/server/build.gradle
+	if [ ! -f "${filename}" ]; then
+		continue
+	fi
+	mv "${filename}" "/usr/local/server/${filename}"
+	echo "apply from: \"${filename}\"" >>/usr/local/server/build.gradle
 done

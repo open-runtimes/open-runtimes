@@ -32,6 +32,42 @@ jobs:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: bun ./ci/index.ts
 
+  shell-format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install shfmt
+        run: |
+          wget -O shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
+          chmod +x shfmt
+          sudo mv shfmt /usr/local/bin/
+      - name: Check shell script formatting
+        run: shfmt -d .
+
+  shell-script-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: |
+          wget -O shellcheck.tar.xz https://github.com/koalaman/shellcheck/releases/download/v0.9.0/shellcheck-v0.9.0.linux.x86_64.tar.xz
+          tar -xf shellcheck.tar.xz
+          sudo mv shellcheck-v0.9.0/shellcheck /usr/local/bin/
+      - name: Check shell script quality
+        run: |
+          # -S warning: Only fail on warnings and errors, not info
+          # -e SC1091: Ignore missing source warning
+          # {} +: Pass multiple files to shellcheck at once for efficiency
+          find . -name "*.sh" \
+            -not -path "./.git/*" \
+            -not -path "./runtimes/.test/*" \
+            -not -path "./**/node_modules/*" \
+            -not -path "./runtimes/java/versions/latest/gradlew" \
+            -not -path "./runtimes/kotlin/versions/latest/gradlew" \
+            -exec shellcheck -e SC1091 -S warning {} +
+
   open-runtimes:
     needs: prepare
     name: ${{ matrix.ID }}

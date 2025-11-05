@@ -11,7 +11,7 @@ export default class HomeComponent {
   msg = '';
 
   constructor() {
-    throw new Error('Code exception occured');
+    throw new Error('Code exception occurred');
     this.msg = "No exceptions";
   }
 }

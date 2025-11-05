@@ -1,33 +1,35 @@
-import express from "express";
 import { createRequestHandler } from "@remix-run/express";
 import * as build from "./build/server/index.js";
-import { onInit, getPort, getHost, onAction, onError } from "./ssr/helpers.mjs";
-import * as system from "./ssr/system.mjs";
+import express from "express";
 
 console.log("Remix server starting ...");
 
 const app = express();
 
-app.use(system.routes);
-app.use(onInit);
-
 // framework-specific logic
-app.use(express.static("build/client"));
+app.use(
+  express.static("build/client", {
+    setHeaders: (res, _path) => {
+      res.setHeader(
+        process.env.OPEN_RUNTIMES_CACHE_HEADER ?? "CDN-Cache-Control",
+        "public, max-age=36000",
+      );
+    },
+  }),
+);
 app.all(
   "*",
-  onAction(
-    createRequestHandler({
-      build,
-      getLoadContext(req, res) {
-        return {};
-      },
-    }),
-  ),
+  createRequestHandler({
+    build,
+    getLoadContext(req, res) {
+      return {};
+    },
+  }),
 );
 // End of framework-specific logic
 
-app.use(onError);
-
-app.listen(getPort(), getHost(), () => {
-  console.log(`Remix server started on http://${getHost()}:${getPort()}`);
+const port = +(process.env.PORT || "3000");
+const host = process.env.HOST || "0.0.0.0";
+app.listen(port, host, () => {
+  console.log(`Remix server started on http://${host}:${port}`);
 });

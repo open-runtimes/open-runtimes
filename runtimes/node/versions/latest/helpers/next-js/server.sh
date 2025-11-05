@@ -7,8 +7,24 @@ cd /usr/local/server/src/function
 
 source /usr/local/server/helpers/next-js/env.sh
 
-cp ../server-next-js.mjs ./server.mjs
-mkdir -p ./ssr
-cp -R ../ssr/* ./ssr/
+if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
+	# Detect SSR in custom output directory
 
-HOST=0.0.0.0 PORT=3000 node ./server.mjs
+	ENTRYPOINT="./server.js"
+	if [ -e "$ENTRYPOINT" ]; then
+		# Standalone approach
+		START_COMMAND="node $ENTRYPOINT"
+	else
+		# Middleware approach
+		cp ../server-next-js.mjs ./server.mjs
+		START_COMMAND="node ./server.mjs"
+	fi
+
+else
+	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
+fi
+
+NODE_OPTIONS='--import "/usr/local/server/src/ssr/injections.mjs"' \
+	HOST=0.0.0.0 \
+	PORT=3000 \
+	$START_COMMAND
