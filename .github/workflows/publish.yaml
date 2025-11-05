@@ -85,6 +85,11 @@ jobs:
             VERSION: "2.0"
             IMAGE: openruntimes/deno:v5-2.0
             ARCH: "linux/amd64,linux/arm64"
+          - ID: deno-2.5
+            RUNTIME: deno
+            VERSION: "2.5"
+            IMAGE: openruntimes/deno:v5-2.5
+            ARCH: "linux/amd64,linux/arm64"
           - ID: deno-1.46
             RUNTIME: deno
             VERSION: "1.46"
