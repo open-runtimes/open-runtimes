@@ -1,9 +1,11 @@
 import { define } from "../utils.ts";
 
 export default define.page(function Home(ctx) {
+  throw new Error('Code exception occurred');
+  
+  const msg = "No exceptions";
+  
   return (
-    <div>
-      Hello Open Runtimes
-    </div>
+   	<p>{msg}</p>
   );
 });

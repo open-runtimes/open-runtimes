@@ -1,5 +1,5 @@
-import { createAddHookMessageChannel, Hook } from "import-in-the-middle";
-import ritm from "require-in-the-middle";
+import { createAddHookMessageChannel, Hook } from "npm:import-in-the-middle";
+import ritm from "npm:require-in-the-middle";
 import { register } from "node:module";
 import {
   addAuthenticationCheck,
