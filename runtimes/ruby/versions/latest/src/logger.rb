@@ -106,11 +106,11 @@ class RuntimeLogger
   end
 
   def revert_native_logs()
-    $stdout = @native_logs_cache
-    $stderr = @native_errors_cache
+    $stdout = @native_logs_cache unless @native_logs_cache.nil?
+    $stderr = @native_errors_cache unless @native_errors_cache.nil?
 
-    unless @custom_std_stream.string.nil? || @custom_std_stream.string.empty?
-      self.write([custom_std_stream.string], RuntimeLogger::TYPE_LOG, true)
+    unless @custom_std_stream.nil? || @custom_std_stream.string.nil? || @custom_std_stream.string.empty?
+      self.write([@custom_std_stream.string], RuntimeLogger::TYPE_LOG, true)
     end
   end
 
