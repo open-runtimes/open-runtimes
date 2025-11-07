@@ -6,7 +6,7 @@ ARG PHP_SWOOLE_VERSION=v6.1.1
 ENV PHP_SWOOLE_VERSION=$PHP_SWOOLE_VERSION
 INCLUDE ./build
 
-FROM php:8.4.14-cli-alpine3.20 as final
+FROM php:8.4.14-cli-alpine3.21 as final
 INCLUDE ./base-before
 INCLUDE ./php
 COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20240924/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20240924/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20240924/
