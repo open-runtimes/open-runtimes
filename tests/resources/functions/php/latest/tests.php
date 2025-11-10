@@ -135,7 +135,10 @@ When you can have two!
 
             return $context->res->text('');
         case 'library':
-            $response = $client->request('GET', '/todos/'.$context->req->bodyRaw);
+            $response = $client->request('GET', '/todos/'.$context->req->bodyRaw, [
+                'headers' => ['Accept-Encoding' => 'identity;q=0'],
+            ]);
+
             $todo = \json_decode($response->getBody()->getContents(), true);
 
             return $context->res->json(['todo' => $todo]);
