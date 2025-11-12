@@ -149,11 +149,6 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Python ML
-          - ID: python-ml-3.14
-            RUNTIME: python
-            VERSION: "ml-3.14"
-            IMAGE: openruntimes/python-ml:v5-3.14
-            ARCH: "linux/amd64,linux/arm64"
           - ID: python-ml-3.13
             RUNTIME: python
             VERSION: "ml-3.13"
