@@ -34,6 +34,11 @@ jobs:
             VERSION: "3.32"
             IMAGE: openruntimes/flutter:v5-3.32
             ARCH: "linux/amd64,linux/arm64"
+          - ID: flutter-3.35
+            RUNTIME: flutter
+            VERSION: "3.35"
+            IMAGE: openruntimes/flutter:v5-3.35
+            ARCH: "linux/amd64,linux/arm64"
 
           # Static
           - ID: static-1
@@ -151,6 +156,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Dart
+          - ID: dart-3.9
+            RUNTIME: dart
+            VERSION: "3.9"
+            IMAGE: openruntimes/dart:v5-3.9
+            ARCH: "linux/amd64,linux/arm64"
           - ID: dart-3.8
             RUNTIME: dart
             VERSION: "3.8"
