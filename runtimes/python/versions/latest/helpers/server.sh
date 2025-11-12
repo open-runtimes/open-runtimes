@@ -19,7 +19,7 @@ python3 /usr/local/server/src/function/runtime-env/bin/gunicorn \
 	--log-level='warning' \
 	-w $workers \
 	--chdir "$(pwd)/src" \
-	--worker-class aiohttp.GunicornWebWorker \
+	--worker-class custom_worker.CustomGunicornWebWorker \
 	--preload \
 	--timeout 0 \
 	'server:app'
