@@ -53,6 +53,16 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Node
+          - ID: node-24.js
+            RUNTIME: node
+            VERSION: "24"
+            IMAGE: openruntimes/node:v5-24
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: node-23.js
+            RUNTIME: node
+            VERSION: "23"
+            IMAGE: openruntimes/node:v5-23
+            ARCH: "linux/amd64,linux/arm64"
           - ID: node-22.js
             RUNTIME: node
             VERSION: "22"
