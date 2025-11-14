@@ -1,5 +1,5 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM node:22.18.0-alpine3.22
+FROM node:22.21.1-alpine3.22
 
 INCLUDE ./base-before
 INCLUDE ./node
@@ -10,6 +10,6 @@ INCLUDE ./node
 # py3-pip - Python package manager
 # gcompat - Pre-requirement for Bun
 RUN apk add alpine-sdk python3-dev py3-pip gcompat
-RUN npm install bun@1.2.15 -g
+RUN npm install bun@1.3.2 -g
 
 INCLUDE ./base-after

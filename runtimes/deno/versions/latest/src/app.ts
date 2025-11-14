@@ -1,4 +1,4 @@
-import { Application } from "https://deno.land/x/oak@v17.0.0/mod.ts";
+import { Application } from "jsr:@oak/oak@17.1.6/application";
 
 export function createApp() {
   return new Application();

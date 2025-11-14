@@ -91,7 +91,7 @@ docker run --rm --interactive --tty --volume "%cd%":/app composer update --ignor
 docker build -t {{Image Tag Name}} ./runtimes/{{Folder of your runtime}}
 ```
 
-5. [Follow our contribution guide to learn how you can add support for more runtimes.](docs/add-runtime.md)
+5. Follow our contribution guide to learn how you can add support for [more runtimes](docs/add-runtime.md) or [more versions](docs/add-version.md).
 
 ## Testing
 
