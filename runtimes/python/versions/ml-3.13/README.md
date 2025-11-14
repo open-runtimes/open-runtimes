@@ -1,6 +1,6 @@
-# Python ML Runtime 3.12
+# Python ML Runtime 3.13
 
-This is the Open Runtime that builds and runs Python ML code based on a `python:3.12-bookworm` base image. 
+This is the Open Runtime that builds and runs Python ML code based on a `python:3.13-bookworm` base image. 
 
 The runtime itself uses [Flask](https://flask.palletsprojects.com/en/2.0.x) as the Web Server to process the execution requests.
 
@@ -25,13 +25,13 @@ END
 2. Build the code:
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=main.py --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/python-ml:v4-3.12 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=main.py --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/python-ml:v5-3.13 sh helpers/build.sh
 ```
 
 3. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/python-ml:v4-3.12 sh helpers/start.sh "python3 src/server.py"
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/python-ml:v5-3.13 sh helpers/start.sh "python3 src/server.py"
 ```
 
 4. In new terminal window, execute function:
@@ -53,7 +53,7 @@ git clone https://github.com/open-runtimes/open-runtimes.git
 2. Enter the Python runtime folder:
 
 ```bash
-cd open-runtimes/runtimes/python-ml-3.12
+cd open-runtimes/runtimes/python/versions/ml-3.13
 ```
 
 3. Run the included example cloud function:
