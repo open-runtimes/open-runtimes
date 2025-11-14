@@ -1,7 +1,6 @@
 from aiohttp.worker import GunicornWebWorker
 import asyncio
 
-
 class CustomGunicornWebWorker(GunicornWebWorker):
     def init_process(self):
         # Ensure event loop exists before aiohttp tries to close it
