@@ -31,7 +31,7 @@ test = "Serverless/Deno.php"
 
 [python]
 entry = "tests.py"
-versions = ["3.12", "3.11", "3.10", "3.9", "3.8"]
+versions = ["3.14", "3.13", "3.12", "3.11", "3.10", "3.9", "3.8"]
 commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "bash helpers/server.sh" }
 formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
 tools = "python --version && pip --version && poetry --version"
@@ -39,7 +39,7 @@ test = "Serverless/Python.php"
 
 [python-ml]
 entry = "tests.py"
-versions = ["3.12", "3.11"]
+versions = ["3.13", "3.12", "3.11"]
 commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "bash helpers/server.sh" }
 formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
 tools = "python --version && pip --version && poetry --version"
