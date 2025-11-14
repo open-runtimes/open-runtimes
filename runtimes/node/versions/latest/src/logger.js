@@ -3,6 +3,8 @@ const fs = require("fs");
 class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
+  static WRITE_TIMEOUT = 2000; // 2 seconds
+  static END_TIMEOUT = 5000; // 5 seconds
 
   id = "";
   enabled = false;
@@ -70,7 +72,14 @@ class Logger {
     }
 
     try {
-      stream.write(stringLog + "\n");
+      Promise.race([
+        stream.write(stringLog + "\n"),
+        new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error("Logger write timeout"));
+          }, Logger.WRITE_TIMEOUT);
+        }),
+      ]);
     } catch (err) {
       // Silently ignore write failures to prevent runtime crashes
       // The logging system should not cause the main execution to fail
@@ -84,14 +93,26 @@ class Logger {
 
     this.enabled = false;
 
-    await Promise.all([
-      new Promise((res) => {
-        this.streamLogs.end(undefined, undefined, res);
-      }),
-      new Promise((res) => {
-        this.streamErrors.end(undefined, undefined, res);
-      }),
-    ]);
+    try {
+      await Promise.race([
+        Promise.all([
+          new Promise((res) => {
+            this.streamLogs.end(undefined, undefined, res);
+          }),
+          new Promise((res) => {
+            this.streamErrors.end(undefined, undefined, res);
+          }),
+        ]),
+        new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error("Logger end timeout"));
+          }, Logger.END_TIMEOUT); // 5 seconds timeout
+        }),
+      ]);
+    } catch (err) {
+      // Silently fail to prevent 500 errors in runtime
+      // Log write failures should not crash the runtime
+    }
   }
 
   overrideNativeLogs() {
