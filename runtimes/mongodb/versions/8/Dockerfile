@@ -14,12 +14,15 @@ ENV OPEN_RUNTIMES_ENV=production
 
 # Install Node.js for OpenRuntimes management layer
 RUN apt-get update && \
-    apt-get install -y nodejs npm curl && \
+    apt-get install -y nodejs npm curl unzip && \
     rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /mnt/code
 RUN mkdir -p /mnt/logs
 RUN mkdir -p /mnt/telemetry
+RUN mkdir -p /usr/local/build
 RUN mkdir -p /usr/local/server
+RUN mkdir -p /usr/local/server/src/function
 
 WORKDIR /usr/local/server
 COPY package*.json ./

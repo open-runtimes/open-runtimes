@@ -248,21 +248,21 @@ output = "./dist/analog"
 # Database Runtimes
 [postgres]
 versions = ["16"]
-commands = { install = "npm ci", start = "bash helpers/server.sh" }
+commands = { install = "echo 'Database runtimes do not build user code'", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"No formatter for database runtime\"", check = "echo \"No formatting required\"", write = "echo \"No formatting required\"" }
-tools = "node --version && npm --version && postgres --version && wal-g --version"
+tools = "node --version && npm --version && postgres --version"
 test = "Database/Postgres.php"
 
 [mysql]
 versions = ["8.4"]
-commands = { install = "npm ci", start = "bash helpers/server.sh" }
+commands = { install = "echo 'Database runtimes do not build user code'", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"No formatter for database runtime\"", check = "echo \"No formatting required\"", write = "echo \"No formatting required\"" }
-tools = "node --version && npm --version && mysql --version && wal-g --version"
+tools = "node --version && npm --version && mysql --version"
 test = "Database/MySQL.php"
 
 [mongodb]
 versions = ["8"]
-commands = { install = "npm ci", start = "bash helpers/server.sh" }
+commands = { install = "echo 'Database runtimes do not build user code'", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"No formatter for database runtime\"", check = "echo \"No formatting required\"", write = "echo \"No formatting required\"" }
 tools = "node --version && npm --version && mongod --version"
 test = "Database/MongoDB.php"

@@ -15,7 +15,7 @@ ENV OPEN_RUNTIMES_ENV=production
 
 # Install Node.js for OpenRuntimes management layer
 # MySQL 8.4 image is based on Oracle Linux minimal, so use microdnf
-RUN microdnf install -y nodejs npm curl tar gzip && \
+RUN microdnf install -y nodejs npm curl tar gzip unzip && \
     microdnf clean all
 
 # Install WAL-G for MySQL backup management
@@ -26,9 +26,12 @@ RUN microdnf install -y wget && \
     microdnf remove -y wget && \
     microdnf clean all
 
+RUN mkdir -p /mnt/code
 RUN mkdir -p /mnt/logs
 RUN mkdir -p /mnt/telemetry
+RUN mkdir -p /usr/local/build
 RUN mkdir -p /usr/local/server
+RUN mkdir -p /usr/local/server/src/function
 
 WORKDIR /usr/local/server
 COPY package*.json ./
