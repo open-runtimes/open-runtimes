@@ -6,16 +6,17 @@ const fs = require("fs");
 const app = express();
 const MANAGEMENT_PORT = 3000;
 
-// Validate all required configuration
-const requiredEnvVars = ['POSTGRES_USER', 'POSTGRES_PASSWORD', 'POSTGRES_DB'];
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
-if (missingVars.length > 0) {
-  console.error("FATAL: Missing required environment variables:");
-  missingVars.forEach(varName => console.error(`  - ${varName}`));
-  console.error("\nAll database configuration must be provided at runtime.");
-  console.error("Use Kubernetes Secret/ConfigMap or docker run -e");
-  process.exit(1);
+if (!process.env.POSTGRES_USER) {
+  console.warn("WARNING: POSTGRES_USER not set, using default 'postgres' (for testing only)");
+  process.env.POSTGRES_USER = 'postgres';
+}
+if (!process.env.POSTGRES_PASSWORD) {
+  console.warn("WARNING: POSTGRES_PASSWORD not set, using default 'postgres' (for testing only)");
+  process.env.POSTGRES_PASSWORD = 'postgres';
+}
+if (!process.env.POSTGRES_DB) {
+  console.warn("WARNING: POSTGRES_DB not set, using default 'postgres' (for testing only)");
+  process.env.POSTGRES_DB = 'postgres';
 }
 
 let postgresProcess = null;

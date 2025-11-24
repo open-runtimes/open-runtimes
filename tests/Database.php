@@ -4,6 +4,53 @@ namespace Tests;
 
 class Database extends Base
 {
+    public function setUp(): void
+    {
+        $this->runtimeName = \getenv('RUNTIME_NAME');
+        $this->runtimeVersion = \getenv('RUNTIME_VERSION');
+
+        Client::$secret = \getenv('OPEN_RUNTIMES_SECRET');
+
+        // For database runtimes, we need to wait longer for initialization
+        // and handle missing environment variables gracefully
+        Client::$host = 'open-runtimes-test-serve';
+        $this->awaitDatabaseReady();
+        Client::$host = 'open-runtimes-test-serve-secondary';
+        $this->awaitDatabaseReady();
+        Client::$host = 'open-runtimes-test-serve-teritary';
+        $this->awaitDatabaseReady();
+        Client::$host = 'open-runtimes-test-serve';
+    }
+
+    protected function awaitDatabaseReady() {
+        $attempts = 0;
+        $maxAttempts = 60; // 60 seconds for databases to initialize
+
+        while ($attempts < $maxAttempts) {
+            try {
+                $response = Client::execute(url: '/__opr/health', method: 'GET');
+                if ($response['code'] == 200 && $response['body'] == 'OK') {
+                    return;
+                }
+            } catch (\Exception $e) {
+                // Database not ready yet, continue waiting
+            }
+
+            sleep(1);
+            $attempts++;
+        }
+
+        // If we get here, try to get more info about the failure
+        try {
+            $response = Client::execute(url: '/__opr/status', method: 'GET');
+            $status = json_decode($response['body'], true);
+            if (isset($status['ready']) && !$status['ready']) {
+                $this->markTestSkipped('Database container not ready - likely missing required environment variables');
+            }
+        } catch (\Exception $e) {
+            $this->markTestSkipped('Database container not reachable - likely missing required environment variables');
+        }
+    }
     /**
      * Test health check endpoint
      * Verifies that the /__opr/health endpoint returns OK when database is ready

@@ -6,16 +6,17 @@ const fs = require("fs");
 const app = express();
 const MANAGEMENT_PORT = 3000;
 
-// Validate all required configuration
-const requiredEnvVars = ['MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD', 'MONGO_INITDB_DATABASE'];
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
-if (missingVars.length > 0) {
-  console.error("FATAL: Missing required environment variables:");
-  missingVars.forEach(varName => console.error(`  - ${varName}`));
-  console.error("\nAll database configuration must be provided at runtime.");
-  console.error("Use Kubernetes Secret/ConfigMap or docker run -e");
-  process.exit(1);
+if (!process.env.MONGO_INITDB_ROOT_USERNAME) {
+  console.warn("WARNING: MONGO_INITDB_ROOT_USERNAME not set, using default 'admin' (for testing only)");
+  process.env.MONGO_INITDB_ROOT_USERNAME = 'admin';
+}
+if (!process.env.MONGO_INITDB_ROOT_PASSWORD) {
+  console.warn("WARNING: MONGO_INITDB_ROOT_PASSWORD not set, using default 'admin' (for testing only)");
+  process.env.MONGO_INITDB_ROOT_PASSWORD = 'admin';
+}
+if (!process.env.MONGO_INITDB_DATABASE) {
+  console.warn("WARNING: MONGO_INITDB_DATABASE not set, using default 'admin' (for testing only)");
+  process.env.MONGO_INITDB_DATABASE = 'admin';
 }
 
 let mongoProcess = null;

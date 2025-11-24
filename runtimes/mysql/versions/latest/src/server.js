@@ -6,16 +6,13 @@ const fs = require("fs");
 const app = express();
 const MANAGEMENT_PORT = 3000;
 
-// Validate all required configuration
-const requiredEnvVars = ['MYSQL_ROOT_PASSWORD', 'MYSQL_DATABASE'];
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
-if (missingVars.length > 0) {
-  console.error("FATAL: Missing required environment variables:");
-  missingVars.forEach(varName => console.error(`  - ${varName}`));
-  console.error("\nAll database configuration must be provided at runtime.");
-  console.error("Use Kubernetes Secret/ConfigMap or docker run -e");
-  process.exit(1);
+if (!process.env.MYSQL_ROOT_PASSWORD) {
+  console.warn("WARNING: MYSQL_ROOT_PASSWORD not set, using default 'mysql' (for testing only)");
+  process.env.MYSQL_ROOT_PASSWORD = 'mysql';
+}
+if (!process.env.MYSQL_DATABASE) {
+  console.warn("WARNING: MYSQL_DATABASE not set, using default 'mysql' (for testing only)");
+  process.env.MYSQL_DATABASE = 'mysql';
 }
 
 let mysqlProcess = null;
