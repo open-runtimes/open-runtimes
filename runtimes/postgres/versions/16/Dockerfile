@@ -38,6 +38,14 @@ COPY src/ ./src/
 COPY helpers/ ./helpers/
 RUN chmod +x /usr/local/server/helpers/*.sh
 
+# Declare volumes for persistent storage
+# Data directory - persists database files across container restarts
+VOLUME ["/var/lib/postgresql/data"]
+
+# Backup directory - for WAL-G backups and manual dumps
+RUN mkdir -p /mnt/backups
+VOLUME ["/mnt/backups"]
+
 EXPOSE 5432 3000
 
 CMD ["/usr/local/server/helpers/server.sh"]
