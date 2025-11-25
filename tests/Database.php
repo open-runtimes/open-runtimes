@@ -159,7 +159,7 @@ class Database extends Base
     {
         $response = Client::execute(url: '/__opr/timings', method: 'GET');
         self::assertEquals(200, $response['code']);
-        self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
+        self::assertEquals('text/plain; charset=utf-8', $response['headers']['content-type']);
         self::assertStringContainsString('startup=', $response['body']);
     }
 
@@ -307,5 +307,53 @@ class Database extends Base
 
         self::assertEquals(0, $failures,
             "Management API failed $failures out of $iterations requests");
+    }
+
+    /**
+     * Override base class tests that don't apply to database runtimes
+     * Database runtimes don't have function execution endpoints
+     */
+    public function testWrongSecret(): void
+    {
+        // Database runtimes don't implement function execution endpoints
+        // Only management endpoints are available, and they don't require secrets
+        $this->markTestSkipped('Database runtimes do not have function execution endpoints');
+    }
+
+    public function testEmptySecret(): void
+    {
+        // Database runtimes don't implement function execution endpoints
+        // Only management endpoints are available, and they don't require secrets
+        $this->markTestSkipped('Database runtimes do not have function execution endpoints');
+    }
+
+    public function testEmptyServerSecret(): void
+    {
+        // Database runtimes don't implement function execution endpoints
+        // Only management endpoints are available, and they don't require secrets
+        $this->markTestSkipped('Database runtimes do not have function execution endpoints');
+    }
+
+    /**
+     * Override testTimings for database runtimes
+     * Database runtimes only have startup timing, not download/extract timings
+     */
+    public function testTimings(): void
+    {
+        $response = Client::execute(method: 'GET', url: '/__opr/timings');
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('text/plain', $response['headers']['content-type']);
+
+        $timings = [];
+        foreach (explode("\n", trim($response['body'])) as $line) {
+            if (empty($line)) continue;
+            [$key, $value] = explode('=', $line, 2);
+            $timings[$key] = (float)$value;
+        }
+
+        // Database runtimes only have startup timing
+        self::assertArrayHasKey('startup', $timings);
+        self::assertIsFloat($timings['startup']);
+        self::assertGreaterThan(0, $timings['startup']);
     }
 }
