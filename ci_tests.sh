@@ -57,7 +57,15 @@ fi
 # Setup telemetry folder
 TELEMETRY_FOLDER="$(pwd)/tests/resources/telemetry"
 mkdir -p "$TELEMETRY_FOLDER"
-echo -e "local_download=0.200\nremote_download=10.560" >"$TELEMETRY_FOLDER/timings.txt"
+
+# Database runtimes don't have download timings, only startup timing
+DATABASE_RUNTIMES=("postgres" "mysql" "mongodb")
+if [[ " ${DATABASE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
+	# Start with empty timings file for database runtimes
+	> "$TELEMETRY_FOLDER/timings.txt"
+else
+	echo -e "local_download=0.200\nremote_download=10.560" >"$TELEMETRY_FOLDER/timings.txt"
+fi
 
 # Prevent Docker from creating folder
 cd ./tests/.runtime
