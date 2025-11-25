@@ -56,14 +56,23 @@ fi
 
 SERVICE_RUNTIMES=("postgres" "mysql" "mongodb")
 
+# Check if RUNTIME is in SERVICE_RUNTIMES array
+is_service_runtime=false
+for service_runtime in "${SERVICE_RUNTIMES[@]}"; do
+	if [[ "$service_runtime" == "$RUNTIME" ]]; then
+		is_service_runtime=true
+		break
+	fi
+done
+
 # Setup telemetry folder
 TELEMETRY_FOLDER="$(pwd)/tests/resources/telemetry"
 mkdir -p "$TELEMETRY_FOLDER"
 
 # Database runtimes don't have download timings, only startup timing
-if [[ " ${SERVICE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
+if [[ "$is_service_runtime" == "true" ]]; then
 	# Start with empty timings file for database runtimes
-	> "$TELEMETRY_FOLDER/timings.txt"
+	: >"$TELEMETRY_FOLDER/timings.txt"
 else
 	echo -e "local_download=0.200\nremote_download=10.560" >"$TELEMETRY_FOLDER/timings.txt"
 fi
@@ -77,7 +86,7 @@ BUILD_SCRIPT="helpers/build.sh"
 START_SCRIPT="helpers/start.sh"
 
 # Database runtimes use different script structure
-if [[ " ${SERVICE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
+if [[ "$is_service_runtime" == "true" ]]; then
 	# Database runtimes execute their start command directly
 	START_EXECUTION="$START_COMMAND"
 else
@@ -143,7 +152,7 @@ docker run \
 # 4. No custom env variable
 # 5. Uncompressed builds
 # 6. Custom cache header (static + ssr)
-if [[ " ${SERVICE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
+if [[ "$is_service_runtime" == "true" ]]; then
 	# Database runtimes don't need to prepare code files
 	PREPARE_UNCOMPRESSED_FILE="true"
 else

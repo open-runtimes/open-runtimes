@@ -9,7 +9,16 @@ mkdir -p ./runtimes/.test/helpers
 cp -R ./helpers/* ./runtimes/.test/helpers
 
 SERVICE_RUNTIMES=("postgres" "mysql" "mongodb")
-if [[ " ${SERVICE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
+# Check if RUNTIME is in SERVICE_RUNTIMES array
+is_service_runtime=false
+for service_runtime in "${SERVICE_RUNTIMES[@]}"; do
+	if [[ "$service_runtime" == "$RUNTIME" ]]; then
+		is_service_runtime=true
+		break
+	fi
+done
+
+if [[ "$is_service_runtime" == "true" ]]; then
 	cp "./runtimes/$RUNTIME_FOLDER/versions/$VERSION/Dockerfile" ./runtimes/.test/Dockerfile
 	cp -R "./runtimes/$RUNTIME_FOLDER/versions/$VERSION"/* ./runtimes/.test
 else
@@ -21,7 +30,7 @@ else
 fi
 
 # Global Docker configuration (only for function runtimes)
-if [[ ! " ${SERVICE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
+if [[ "$is_service_runtime" != "true" ]]; then
 	cp ./base-before.dockerfile ./runtimes/.test/base-before.dockerfile
 	cp ./base-after.dockerfile ./runtimes/.test/base-after.dockerfile
 fi

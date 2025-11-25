@@ -21,17 +21,17 @@ echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Waitin
 max_attempts=60
 attempt=0
 while [ $attempt -lt $max_attempts ]; do
-  if curl -sf http://localhost:3000/__opr/health > /dev/null 2>&1; then
-    echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[32m MySQL is ready! \e[0m"
+	if curl -sf http://localhost:3000/__opr/health >/dev/null 2>&1; then
+		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[32m MySQL is ready! \e[0m"
 
-    # Keep the container running
-    wait
-    exit 0
-  fi
+		# Keep the container running
+		wait
+		exit 0
+	fi
 
-  echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m MySQL not ready yet (attempt $attempt/$max_attempts)... \e[0m"
-  sleep 2
-  attempt=$((attempt + 1))
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m MySQL not ready yet (attempt $attempt/$max_attempts)... \e[0m"
+	sleep 2
+	attempt=$((attempt + 1))
 done
 
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[91m MySQL failed to start within timeout \e[0m"
