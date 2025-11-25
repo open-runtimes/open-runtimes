@@ -22,6 +22,7 @@ if (!process.env.MONGO_INITDB_DATABASE) {
 let mongoProcess = null;
 let dbReady = false;
 let client = null;
+let startupTimingWritten = false;
 
 function startMongoDB() {
   console.log("Starting MongoDB server...");
@@ -59,6 +60,16 @@ function startMongoDB() {
       if (!dbReady) {
         dbReady = true;
         console.log("MongoDB is ready to accept connections");
+
+        // Write startup timing if provided
+        if (process.env.STARTUP_TIME && !startupTimingWritten) {
+          const start = parseFloat(process.env.STARTUP_TIME);
+          const end = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
+          const elapsed = (end - start).toFixed(3);
+          fs.appendFileSync('/mnt/telemetry/timings.txt', `startup=${elapsed}\n`);
+          startupTimingWritten = true;
+          console.log(`Recorded startup timing: ${elapsed}s`);
+        }
 
         if (needsInit && !initAttempted) {
           initAttempted = true;

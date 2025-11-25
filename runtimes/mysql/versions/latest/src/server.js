@@ -18,6 +18,7 @@ if (!process.env.MYSQL_DATABASE) {
 let mysqlProcess = null;
 let dbReady = false;
 let connection = null;
+let startupTimingWritten = false;
 
 // Start MySQL server
 function startMySQL() {
@@ -38,6 +39,16 @@ function startMySQL() {
         dbReady = true;
         console.log("MySQL is ready to accept connections");
 
+        // Write startup timing if provided
+        if (process.env.STARTUP_TIME && !startupTimingWritten) {
+          const start = parseFloat(process.env.STARTUP_TIME);
+          const end = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
+          const elapsed = (end - start).toFixed(3);
+          fs.appendFileSync('/mnt/telemetry/timings.txt', `startup=${elapsed}\n`);
+          startupTimingWritten = true;
+          console.log(`Recorded startup timing: ${elapsed}s`);
+        }
+
         setTimeout(connectHealthClient, 2000);
       }
     }
@@ -51,6 +62,16 @@ function startMySQL() {
       if (!dbReady) {
         dbReady = true;
         console.log("MySQL is ready to accept connections");
+
+        // Write startup timing if provided
+        if (process.env.STARTUP_TIME && !startupTimingWritten) {
+          const start = parseFloat(process.env.STARTUP_TIME);
+          const end = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
+          const elapsed = (end - start).toFixed(3);
+          fs.appendFileSync('/mnt/telemetry/timings.txt', `startup=${elapsed}\n`);
+          startupTimingWritten = true;
+          console.log(`Recorded startup timing: ${elapsed}s`);
+        }
 
         setTimeout(connectHealthClient, 2000);
       }

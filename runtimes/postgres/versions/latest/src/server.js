@@ -22,6 +22,7 @@ if (!process.env.POSTGRES_DB) {
 let postgresProcess = null;
 let dbReady = false;
 let pgClient = null;
+let startupTimingWritten = false;
 
 function startPostgres() {
   console.log("Starting PostgreSQL server...");
@@ -41,6 +42,16 @@ function startPostgres() {
         dbReady = true;
         console.log("PostgreSQL is ready to accept connections");
 
+        // Write startup timing if provided
+        if (process.env.STARTUP_TIME && !startupTimingWritten) {
+          const start = parseFloat(process.env.STARTUP_TIME);
+          const end = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
+          const elapsed = (end - start).toFixed(3);
+          fs.appendFileSync('/mnt/telemetry/timings.txt', `startup=${elapsed}\n`);
+          startupTimingWritten = true;
+          console.log(`Recorded startup timing: ${elapsed}s`);
+        }
+
         setTimeout(connectHealthClient, 2000);
       }
     }
@@ -54,6 +65,16 @@ function startPostgres() {
       if (!dbReady) {
         dbReady = true;
         console.log("PostgreSQL is ready to accept connections");
+
+        // Write startup timing if provided
+        if (process.env.STARTUP_TIME && !startupTimingWritten) {
+          const start = parseFloat(process.env.STARTUP_TIME);
+          const end = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
+          const elapsed = (end - start).toFixed(3);
+          fs.appendFileSync('/mnt/telemetry/timings.txt', `startup=${elapsed}\n`);
+          startupTimingWritten = true;
+          console.log(`Recorded startup timing: ${elapsed}s`);
+        }
 
         setTimeout(connectHealthClient, 2000);
       }
@@ -111,6 +132,59 @@ app.get("/__opr/timings", (req, res) => {
 });
 
 app.get("/__opr/status", (req, res) => {
+  let volumeInfo = {};
+
+  // Check volume status
+  try {
+    const { execSync } = require("child_process");
+
+    // Check data directory
+    const pgDataPath = process.env.PGDATA || "/var/lib/postgresql/data";
+    if (fs.existsSync(pgDataPath)) {
+      const dfOutput = execSync(`df -h "${pgDataPath}" 2>/dev/null || echo ""`).toString();
+      const lines = dfOutput.trim().split('\n');
+      if (lines.length > 1) {
+        const parts = lines[1].split(/\s+/);
+        if (parts.length >= 5) {
+          volumeInfo.data = {
+            path: pgDataPath,
+            size: parts[1],
+            used: parts[2],
+            available: parts[3],
+            usePercent: parts[4],
+            mounted: true
+          };
+        }
+      }
+    } else {
+      volumeInfo.data = { path: pgDataPath, mounted: false };
+    }
+
+    // Check backup directory
+    if (fs.existsSync("/mnt/backups")) {
+      const dfOutput = execSync("df -h /mnt/backups 2>/dev/null || echo ''").toString();
+      const lines = dfOutput.trim().split('\n');
+      if (lines.length > 1) {
+        const parts = lines[1].split(/\s+/);
+        if (parts.length >= 5) {
+          volumeInfo.backups = {
+            path: "/mnt/backups",
+            size: parts[1],
+            used: parts[2],
+            available: parts[3],
+            usePercent: parts[4],
+            mounted: true
+          };
+        }
+      }
+    } else {
+      volumeInfo.backups = { path: "/mnt/backups", mounted: false };
+    }
+  } catch (err) {
+    // Volume info is optional, don't fail the status endpoint
+    console.error("Failed to get volume info:", err.message);
+  }
+
   const status = {
     ready: dbReady,
     engine: "postgres",
@@ -120,6 +194,7 @@ app.get("/__opr/status", (req, res) => {
       current: 0, // TODO: Query actual connection count
       max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS || "100"),
     },
+    volumes: volumeInfo
   };
 
   res.json(status);

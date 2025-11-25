@@ -22,6 +22,7 @@ if (!process.env.POSTGRES_DB) {
 let postgresProcess = null;
 let dbReady = false;
 let pgClient = null;
+let startupTimingWritten = false;
 
 function startPostgres() {
   console.log("Starting PostgreSQL server...");
@@ -41,6 +42,16 @@ function startPostgres() {
         dbReady = true;
         console.log("PostgreSQL is ready to accept connections");
 
+        // Write startup timing if provided
+        if (process.env.STARTUP_TIME && !startupTimingWritten) {
+          const start = parseFloat(process.env.STARTUP_TIME);
+          const end = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
+          const elapsed = (end - start).toFixed(3);
+          fs.appendFileSync('/mnt/telemetry/timings.txt', `startup=${elapsed}\n`);
+          startupTimingWritten = true;
+          console.log(`Recorded startup timing: ${elapsed}s`);
+        }
+
         setTimeout(connectHealthClient, 2000);
       }
     }
@@ -54,6 +65,16 @@ function startPostgres() {
       if (!dbReady) {
         dbReady = true;
         console.log("PostgreSQL is ready to accept connections");
+
+        // Write startup timing if provided
+        if (process.env.STARTUP_TIME && !startupTimingWritten) {
+          const start = parseFloat(process.env.STARTUP_TIME);
+          const end = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
+          const elapsed = (end - start).toFixed(3);
+          fs.appendFileSync('/mnt/telemetry/timings.txt', `startup=${elapsed}\n`);
+          startupTimingWritten = true;
+          console.log(`Recorded startup timing: ${elapsed}s`);
+        }
 
         setTimeout(connectHealthClient, 2000);
       }

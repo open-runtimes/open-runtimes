@@ -8,12 +8,12 @@ echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[32m Starti
 mkdir -p /mnt/telemetry
 mkdir -p /mnt/logs
 
-# Record startup time
+# Record startup time and pass to server
 start=$(awk '{print $1}' /proc/uptime)
 
 # Start the OpenRuntimes management server (which starts MySQL)
 cd /usr/local/server
-node src/server.js &
+STARTUP_TIME=$start node src/server.js &
 
 # Wait for MySQL to be ready
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Waiting for MySQL to be ready... \e[0m"
@@ -23,11 +23,6 @@ attempt=0
 while [ $attempt -lt $max_attempts ]; do
   if curl -sf http://localhost:3000/__opr/health > /dev/null 2>&1; then
     echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[32m MySQL is ready! \e[0m"
-
-    # Record startup timing
-    end=$(awk '{print $1}' /proc/uptime)
-    elapsed=$(awk "BEGIN{printf \"%.3f\", $end - $start}")
-    echo "startup=$elapsed" >> /mnt/telemetry/timings.txt
 
     # Keep the container running
     wait
