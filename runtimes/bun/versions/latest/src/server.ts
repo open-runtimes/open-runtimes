@@ -240,7 +240,7 @@ const action = async (logger: Logger, request: any) => {
   }
 
   const contentTypeValue = (
-    responseHeaders["content-type"] ?? "text/plain"
+    responseHeaders.get("content-type") ?? "text/plain"
   ).toLowerCase();
   if (
     !contentTypeValue.startsWith("multipart/") &&
