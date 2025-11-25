@@ -54,13 +54,14 @@ else
 	fi
 fi
 
+SERVICE_RUNTIMES=("postgres" "mysql" "mongodb")
+
 # Setup telemetry folder
 TELEMETRY_FOLDER="$(pwd)/tests/resources/telemetry"
 mkdir -p "$TELEMETRY_FOLDER"
 
 # Database runtimes don't have download timings, only startup timing
-DATABASE_RUNTIMES=("postgres" "mysql" "mongodb")
-if [[ " ${DATABASE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
+if [[ " ${SERVICE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
 	# Start with empty timings file for database runtimes
 	> "$TELEMETRY_FOLDER/timings.txt"
 else
@@ -74,6 +75,15 @@ touch code.tar.gz
 
 BUILD_SCRIPT="helpers/build.sh"
 START_SCRIPT="helpers/start.sh"
+
+# Database runtimes use different script structure
+if [[ " ${SERVICE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
+	# Database runtimes execute their start command directly
+	START_EXECUTION="$START_COMMAND"
+else
+	# Function runtimes use helpers/start.sh with the command as argument
+	START_EXECUTION="bash $START_SCRIPT \"$START_COMMAND\""
+fi
 
 # Main build
 docker run \
@@ -124,7 +134,7 @@ docker run \
 	-e CUSTOM_ENV_VAR=customValue \
 	-p 3000:3000 \
 	open-runtimes/test-runtime \
-	bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+	bash -c "$START_EXECUTION"
 
 # Secondary tests
 # 1. Empty enforced headers
@@ -133,7 +143,12 @@ docker run \
 # 4. No custom env variable
 # 5. Uncompressed builds
 # 6. Custom cache header (static + ssr)
-PREPARE_UNCOMPRESSED_FILE="gunzip -ck /mnt/code/code.tar.gz > /mnt/code/code.tar"
+if [[ " ${SERVICE_RUNTIMES[@]} " =~ " ${RUNTIME} " ]]; then
+	# Database runtimes don't need to prepare code files
+	PREPARE_UNCOMPRESSED_FILE="true"
+else
+	PREPARE_UNCOMPRESSED_FILE="gunzip -ck /mnt/code/code.tar.gz > /mnt/code/code.tar"
+fi
 docker run \
 	--platform linux/x86_64 \
 	--network openruntimes \
@@ -149,7 +164,7 @@ docker run \
 	-e OPEN_RUNTIMES_SECRET= \
 	-p 3001:3000 \
 	open-runtimes/test-runtime \
-	bash -c "$PREPARE_UNCOMPRESSED_FILE && $START_SCRIPT \"$START_COMMAND\""
+	bash -c "$PREPARE_UNCOMPRESSED_FILE && $START_EXECUTION"
 
 # Teritary tests
 # 1. Same as secondary
@@ -169,7 +184,7 @@ docker run \
 	-e OPEN_RUNTIMES_SECRET= \
 	-p 3002:3000 \
 	open-runtimes/test-runtime \
-	bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+	bash -c "$START_EXECUTION"
 
 cd ../../
 
