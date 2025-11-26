@@ -3,18 +3,12 @@ FROM mysql:8.4
 LABEL maintainer="team@appwrite.io"
 LABEL namespace="open-runtimes"
 LABEL org.opencontainers.image.source="https://github.com/open-runtimes/open-runtimes"
-
-# OpenRuntimes environment variables
-# IMPORTANT: All configuration must be provided at runtime via Kubernetes ConfigMap/Secret
-# The runtime has no defaults - makes it stateless and secure by design
 ENV OPEN_RUNTIMES_ENV=production
 
 # MySQL environment variables
 # Required: MYSQL_ROOT_PASSWORD, MYSQL_DATABASE
 # Optional: MYSQL_USER, MYSQL_PASSWORD (for additional non-root user)
 
-# Install Node.js for OpenRuntimes management layer
-# MySQL 8.4 image is based on Oracle Linux minimal, so use microdnf
 RUN microdnf install -y nodejs npm curl tar gzip unzip && \
     microdnf clean all
 
@@ -26,12 +20,13 @@ RUN microdnf install -y wget && \
     microdnf remove -y wget && \
     microdnf clean all
 
-RUN mkdir -p /mnt/code
-RUN mkdir -p /mnt/logs
-RUN mkdir -p /mnt/telemetry
-RUN mkdir -p /usr/local/build
-RUN mkdir -p /usr/local/server
-RUN mkdir -p /usr/local/server/src/function
+RUN mkdir -p /mnt/backups \
+ && mkdir -p /mnt/code \
+ && mkdir -p /mnt/logs \
+ && mkdir -p /mnt/telemetry \
+ && mkdir -p /usr/local/build \
+ && mkdir -p /usr/local/server \
+ && mkdir -p /usr/local/server/src/function
 
 WORKDIR /usr/local/server
 COPY package*.json ./
@@ -41,12 +36,7 @@ COPY src/ ./src/
 COPY helpers/ ./helpers/
 RUN chmod +x /usr/local/server/helpers/*.sh
 
-# Declare volumes for persistent storage
-# Data directory - persists database files across container restarts
 VOLUME ["/var/lib/mysql"]
-
-# Backup directory - for WAL-G backups and mysqldumps
-RUN mkdir -p /mnt/backups
 VOLUME ["/mnt/backups"]
 
 EXPOSE 3306 3000
