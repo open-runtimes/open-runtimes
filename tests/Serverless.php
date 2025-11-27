@@ -458,8 +458,8 @@ class Serverless extends Base
 
         $body = \json_decode($response['body'], true);
 
-        self::assertSame('163', $body['todo']['userId']);
-        self::assertSame('5', $body['todo']['id']);
+        self::assertSame(163, $body['todo']['userId']);
+        self::assertSame(5, $body['todo']['id']);
         self::assertSame('Invest in cryptocurrency', $body['todo']['todo']);
         self::assertSame(false, $body['todo']['completed']);
     }
