@@ -4,6 +4,17 @@ export default async function (context: any) {
 	const action = context.req.headers["x-action"];
 
 	switch (action) {
+		case "setCookie":
+			const headers = new Headers();
+			headers.append("set-cookie", "cookie=value; path=/");
+			headers.append("set-cookie", "cookie2=value2; path=/");
+			headers.append("some-header", "some-value");
+			return context.res.text("OK", 200, headers);
+		case "setCookie2":
+			return context.res.text("OK", 200, {
+				"set-cookie": ["cookie=value; path=/", "cookie2=value2; path=/"],
+				"some-header": "some-value",
+			});
 		case "plaintextResponse":
 			return context.res.text("Hello World 👋");
 		case "jsonResponse":

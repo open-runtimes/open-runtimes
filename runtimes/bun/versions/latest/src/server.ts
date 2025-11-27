@@ -215,27 +215,41 @@ const action = async (logger: Logger, request: any) => {
   output.statusCode = output.statusCode ?? 200;
   output.headers = output.headers ?? {};
 
-  const responseHeaders: any = {};
+  const responseHeaders = new Headers();
 
-  for (const header in output.headers) {
-    if (header.toLowerCase().startsWith("x-open-runtimes-")) {
-      continue;
+  if (output.headers instanceof Headers) {
+    for (const [key, value] of output.headers) {
+      responseHeaders.append(key.toLowerCase(), value);
     }
+  } else {
+    for (const header in output.headers) {
+      if (Array.isArray(output.headers[header])) {
+        for (const value of output.headers[header]) {
+          responseHeaders.append(header.toLowerCase(), value);
+        }
+      } else {
+        responseHeaders.append(header.toLowerCase(), output.headers[header]);
+      }
+    }
+  }
 
-    responseHeaders[header.toLowerCase()] = output.headers[header];
+  for (const [key, _value] of responseHeaders) {
+    if (key.toLowerCase().startsWith("x-open-runtimes-")) {
+      responseHeaders.delete(key);
+    }
   }
 
   const contentTypeValue = (
-    responseHeaders["content-type"] ?? "text/plain"
+    responseHeaders.get("content-type") ?? "text/plain"
   ).toLowerCase();
   if (
     !contentTypeValue.startsWith("multipart/") &&
     !contentTypeValue.includes("charset=")
   ) {
-    responseHeaders["content-type"] = contentTypeValue + "; charset=utf-8";
+    responseHeaders.set("content-type", contentTypeValue + "; charset=utf-8");
   }
 
-  responseHeaders["x-open-runtimes-log-id"] = logger.id;
+  responseHeaders.set("x-open-runtimes-log-id", logger.id);
   await logger.end();
 
   return new Response(output.body, {

@@ -229,5 +229,5 @@ class SSR extends CSR
         self::assertArrayNotHasKey('surrogate-control', $response['headers']);
         
         Client::$host = 'open-runtimes-test-serve';
-    }
+    }   
 }

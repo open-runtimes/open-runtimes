@@ -46,7 +46,7 @@ int main()
                     std::ifstream timingsFile("/mnt/telemetry/timings.txt");
                     std::string timings((std::istreambuf_iterator<char>(timingsFile)), std::istreambuf_iterator<char>());
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
-                    res->addHeader("content-type", "text/plain; charset=utf-8");
+                    res->setContentTypeString("text/plain; charset=utf-8");
                     res->setBody(timings);
                     callback(res);
                     return;
@@ -373,6 +373,8 @@ int main()
                     }
 
                     logger->revertNativeLogs();
+                    
+                    std::string contentTypeHeader = "";
 
                     for (const std::string &key : output.headers.getMemberNames())
                     {
@@ -383,14 +385,22 @@ int main()
                             headerKey.begin(),
                             [](unsigned char c){ return std::tolower(c); }
                         );
-
-                        if (headerKey.rfind("x-open-runtimes-", 0) != 0)
+                        
+                        
+                        bool isOprHeader = headerKey.rfind("x-open-runtimes-", 0) == 0;
+                        bool isContentTypeHeader = headerKey == "content-type";
+                        // We skip content type, because we set it a bit later, applying default if its not set...
+                        if (!isOprHeader && !isContentTypeHeader)
                         {
                             res->addHeader(headerKey, output.headers[key].asString());
                         }
+                        
+                        // ... but we still store it for later use here
+                        if(isContentTypeHeader) {
+                            contentTypeHeader = output.headers[key].asString();
+                        }
                     }
 
-                    std::string contentTypeHeader = res->getHeader("content-type");
                     if (contentTypeHeader.empty())
                     {
                         contentTypeHeader = "text/plain";
@@ -408,8 +418,8 @@ int main()
                     {
                         contentTypeHeader.append("; charset=utf-8");
                     }
-
-                    res->addHeader("content-type", contentTypeHeader);
+                    
+                    res->setContentTypeString(contentTypeHeader);
 
                     logger->end();
                     res->addHeader("x-open-runtimes-log-id", logger->id);
