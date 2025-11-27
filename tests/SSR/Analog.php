@@ -23,7 +23,7 @@ class Analog extends SSR
     public function testServerException(): void
     {
         $response = Client::execute(url: '/exception', method: 'GET');
-        self::assertEquals(200, $response['code']); // Changed
+        self::assertSame(200, $response['code']); // Changed
         self::assertStringContainsString("<router-outlet></router-outlet>", $response['body']); // Added
         self::assertStringNotContainsString("No exceptions", $response['body']);
         self::assertStringNotContainsString('Code exception occurred', Client::getLogs($response['headers']['x-open-runtimes-log-id']));

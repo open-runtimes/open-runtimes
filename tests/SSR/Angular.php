@@ -15,7 +15,7 @@ class Angular extends SSR
     public function testServerException(): void
     {
         $response = Client::execute(url: '/exception', method: 'GET');
-        self::assertEquals(200, $response['code']); // Overriden from assertion 500
+        self::assertSame(200, $response['code']); // Overriden from assertion 500
         self::assertStringContainsString("<router-outlet></router-outlet>", $response['body']); // New assertion
         self::assertStringNotContainsString("No exceptions", $response['body']);
         self::assertStringNotContainsString('Code exception occurred', Client::getLogs($response['headers']['x-open-runtimes-log-id']));

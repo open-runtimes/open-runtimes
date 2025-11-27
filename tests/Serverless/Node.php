@@ -19,8 +19,8 @@ class Node extends Serverless
      * public function testHiddenFile(): void
      * {
      *   $response = Client::execute(body: '', headers: ['x-action' => 'hiddenFile']);
-     *   self::assertEquals(200, $response['code']);
-     *   self::assertEquals('HIDDEN_FILE', $response['body']);
+     *   self::assertSame(200, $response['code']);
+     *   self::assertSame('HIDDEN_FILE', $response['body']);
      * }
      */
      
@@ -34,8 +34,8 @@ class Node extends Serverless
          }
          
          $response = Client::execute(body: '', headers: ['x-action' => 'headlessBrowser'], timeout: 15);
-         self::assertEquals(200, $response['code']);
-         self::assertEquals('image/png; charset=utf-8', $response['headers']['content-type']);
+         self::assertSame(200, $response['code']);
+         self::assertSame('image/png; charset=utf-8', $response['headers']['content-type']);
          self::assertGreaterThanOrEqual(100000, \mb_strlen($response['body'])); // Should be 1.355MB
      }
 }
