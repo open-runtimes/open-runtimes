@@ -3,11 +3,17 @@ package io.openruntimes.java;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.ToNumberPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RuntimeRequest {
-  private static final Gson gson = new GsonBuilder().serializeNulls().create();
+  private static final Gson gson =
+      new GsonBuilder()
+          .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+          .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+          .serializeNulls()
+          .create();
 
   private final String method;
   private final String scheme;

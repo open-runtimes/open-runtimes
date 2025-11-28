@@ -15,7 +15,7 @@ class Nuxt extends SSR
     public function testServerException(): void
     {
         $response = Client::execute(url: '/exception', method: 'GET');
-        self::assertEquals(500, $response['code']);
+        self::assertSame(500, $response['code']);
         self::assertStringNotContainsString("No exceptions", $response['body']);
         self::assertStringNotContainsString('Code exception occurred', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
 

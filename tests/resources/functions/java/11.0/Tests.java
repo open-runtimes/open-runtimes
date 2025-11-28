@@ -1,6 +1,8 @@
 package io.openruntimes.java;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.ToNumberPolicy;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -12,8 +14,6 @@ import java.util.HashMap;
 import java.util.concurrent.Executors;
 
 public class Tests {
-  final Gson gson = new Gson();
-
   public RuntimeOutput main(RuntimeContext context) throws Exception {
     String action = context.getReq().getHeaders().getOrDefault("x-action", "");
 
@@ -175,6 +175,11 @@ public class Tests {
         }
         in.close();
         con.disconnect();
+        Gson gson =
+            new GsonBuilder()
+                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                .create();
         Map<String, Object> todo = gson.fromJson(todoBuffer.toString(), Map.class);
         json.put("todo", todo);
         return context.getRes().json(json);

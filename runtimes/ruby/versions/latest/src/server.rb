@@ -61,7 +61,7 @@ def action(request, response, logger)
       pair = param.split('=', 2)
 
       if pair[0] != nil && !(pair[0].empty?)
-        query[pair[0]] = pair[1]
+        query[pair[0]] = pair[1] || ''
       end
     end
   end
