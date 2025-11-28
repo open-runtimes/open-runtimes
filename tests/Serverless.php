@@ -203,15 +203,17 @@ class Serverless extends Base
         self::assertSame('www.mydomain.com', $body['host']);
         self::assertSame('http://www.mydomain.com/', $body['url']);
 
-        $response = Client::execute(url: '/?a=b&c==d&e=f=g=&h&i=j&&k', headers: ['x-action' => 'requestUrl']);
+        $response = Client::execute(url: '/?a=b&c==d&e=f=g=&h&i=j&&k&l=', headers: ['x-action' => 'requestUrl']);
         self::assertSame(200, $response['code']);
         $body = \json_decode($response['body'], true);
         self::assertSame('b', $body['query']['a']);
         self::assertSame('=d', $body['query']['c']);
+        self::assertSame('f=g=', $body['query']['e']);
         self::assertSame('', $body['query']['h']);
         self::assertSame('j', $body['query']['i']);
         self::assertSame('', $body['query']['k']);
-        self::assertArrayNotHasKey('l', $body['query']);
+        self::assertSame('', $body['query']['l']);
+        self::assertArrayNotHasKey('m', $body['query']);
 
         $response = Client::execute(url: '/', headers: ['x-action' => 'requestUrl', 'host' => 'myapp.com', 'x-forwarded-proto' => 'https']);
         self::assertSame(200, $response['code']);

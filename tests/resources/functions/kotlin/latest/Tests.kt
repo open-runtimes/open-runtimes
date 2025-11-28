@@ -1,6 +1,7 @@
 package io.openruntimes.kotlin
 
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.ToNumberPolicy
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import java.io.BufferedReader
@@ -235,7 +236,11 @@ When you can have two!
                 return context.res.text("")
             }
             "library" -> {
-                val gson = Gson()
+                val gson =
+                    GsonBuilder()
+                        .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                        .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                        .create()
 
                 val url = URL("https://dummyjson.com/todos/" + context.req.bodyRaw)
                 val con =
