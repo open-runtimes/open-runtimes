@@ -439,6 +439,13 @@ jobs:
             VERSION: "1.23"
             IMAGE: openruntimes/go:v5-1.23
             ARCH: "linux/amd64,linux/arm64"
+
+          # Rust
+          - ID: rust-1.83
+            RUNTIME: rust
+            VERSION: "1.83"
+            IMAGE: openruntimes/rust:v5-1.83
+            ARCH: "linux/amd64,linux/arm64"
     name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
 

@@ -1,0 +1,24 @@
+[workspace]
+members = [".", "src/function"]
+resolver = "2"
+
+[package]
+name = "rust_runtime"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+openruntimes = { path = "src/function/types" }
+handler = { path = "src/function" }
+tokio = { version = "1", features = ["full"] }
+hyper = { version = "1", features = ["full", "http1", "http2", "server"] }
+hyper-util = { version = "0.1", features = ["tokio", "server", "server-auto"] }
+http-body-util = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+urlencoding = "2.1"
+libc = "0.2"
+
+[[bin]]
+name = "rust_runtime"
+path = "src/main.rs"

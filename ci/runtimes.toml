@@ -85,6 +85,14 @@ formatter = { prepare = "gem install rubocop", check = "rubocop --lint .", write
 tools = "ruby --version && gem --version"
 test = "Serverless/Ruby.php"
 
+[rust]
+entry = "tests.rs"
+versions = ["1.83"]
+commands = { install = "", start = "bash helpers/server.sh" }
+formatter = { prepare = "echo \"Using native formatter\"", check = "if [ -f Cargo.toml ]; then cargo fmt -- --check; else echo 'No Cargo.toml found, skipping formatter check'; fi", write = "if [ -f Cargo.toml ]; then cargo fmt; fi" }
+tools = "rustc --version && cargo --version"
+test = "Serverless/Rust.php"
+
 [php]
 entry = "tests.php"
 versions = ["8.4", "8.3", "8.2", "8.1", "8.0"]

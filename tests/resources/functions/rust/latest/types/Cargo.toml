@@ -1,0 +1,18 @@
+[package]
+name = "openruntimes"
+version = "1.0.0"
+edition = "2021"
+authors = ["Open Runtimes <team@openruntimes.io>"]
+description = "Types for Rust Open Runtime"
+license = "MIT"
+repository = "https://github.com/open-runtimes/types-for-rust"
+keywords = ["openruntimes", "serverless", "runtime"]
+categories = ["web-programming"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.8"
+
+[lib]
+path = "src/lib.rs"
