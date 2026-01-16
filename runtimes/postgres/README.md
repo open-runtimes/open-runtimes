@@ -11,6 +11,7 @@ This runtime provides a PostgreSQL database engine wrapped in an OpenRuntimes ma
 - **Health check endpoints** for container orchestration
 - **WAL-G integration** for continuous backups and PITR
 - **Telemetry and monitoring** via OpenRuntimes management API
+- **Streaming replication** for high availability
 
 ## Architecture
 
@@ -21,6 +22,7 @@ The runtime consists of two main components:
    - Health checks (`/__opr/health`)
    - Status monitoring (`/__opr/status`)
    - Telemetry (`/__opr/timings`)
+   - Replication management (`/__opr/replication`)
 
 ## Available Versions
 
@@ -54,6 +56,8 @@ docker run -d \
 
 ### Environment Variables
 
+#### Basic Configuration
+
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
 | `POSTGRES_USER` | Database superuser name | **YES** | (none - must provide) |
@@ -61,6 +65,31 @@ docker run -d \
 | `POSTGRES_DB` | Default database name | **YES** | (none - must provide) |
 | `POSTGRES_MAX_CONNECTIONS` | Maximum concurrent connections | No | `100` |
 | `PGDATA` | Data directory path | No | `/var/lib/postgresql/data` |
+
+#### Replication Configuration
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `POSTGRES_REPLICATION_MODE` | Replication mode: `standalone`, `primary`, or `replica` | No | `standalone` |
+| `POSTGRES_REPLICATION_USER` | Replication user name | No | `replicator` |
+| `POSTGRES_REPLICATION_PASSWORD` | Replication user password | For replication | (none) |
+| `POSTGRES_PRIMARY_HOST` | Primary server hostname (for replicas) | For replicas | (none) |
+| `POSTGRES_PRIMARY_PORT` | Primary server port | No | `5432` |
+| `POSTGRES_REPLICATION_SLOT_NAME` | Replication slot name | No | `replica_slot` |
+| `POSTGRES_WAL_LEVEL` | WAL level: `replica`, `logical` | No | `replica` |
+| `POSTGRES_MAX_WAL_SENDERS` | Maximum WAL sender processes | No | `10` |
+| `POSTGRES_MAX_REPLICATION_SLOTS` | Maximum replication slots | No | `10` |
+| `POSTGRES_WAL_KEEP_SIZE` | Minimum WAL to keep for replicas | No | `1GB` |
+| `POSTGRES_HOT_STANDBY` | Enable read queries on replica | No | `on` |
+| `POSTGRES_HOT_STANDBY_FEEDBACK` | Send feedback to primary | No | `on` |
+| `POSTGRES_SYNCHRONOUS_COMMIT` | Synchronous commit level | No | `on` |
+| `POSTGRES_SYNCHRONOUS_STANDBY_NAMES` | Synchronous standby names | No | (none) |
+| `POSTGRES_ARCHIVE_MODE` | Enable WAL archiving | No | `off` |
+| `POSTGRES_ARCHIVE_COMMAND` | Command to archive WAL files | No | (none) |
+| `POSTGRES_RESTORE_COMMAND` | Command to restore WAL files | No | (none) |
+| `POSTGRES_RECOVERY_TARGET_TIMELINE` | Recovery timeline target | No | `latest` |
+| `POSTGRES_PRIMARY_CONNINFO_EXTRA` | Extra connection parameters | No | (none) |
+| `POSTGRES_REPLICATION_ALLOWED_NETWORKS` | CIDR for replication connections | No | `0.0.0.0/0` |
 
 **Security Notes:**
 - The container will **fail to start** if required environment variables are not provided
@@ -80,8 +109,131 @@ curl http://localhost:3000/__opr/health
 
 ```bash
 curl http://localhost:3000/__opr/status
-# Returns JSON with database status, connections, uptime
+# Returns JSON with database status, connections, uptime, and replication info
 ```
+
+## Replication
+
+### Setting Up Streaming Replication
+
+#### Primary Server
+
+```bash
+POSTGRES_PASSWORD=$(openssl rand -base64 32)
+REPLICATION_PASSWORD=$(openssl rand -base64 32)
+
+docker run -d \
+  --name postgres-primary \
+  -p 5432:5432 \
+  -p 3000:3000 \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+  -e POSTGRES_DB=mydb \
+  -e POSTGRES_REPLICATION_MODE=primary \
+  -e POSTGRES_REPLICATION_USER=replicator \
+  -e POSTGRES_REPLICATION_PASSWORD="$REPLICATION_PASSWORD" \
+  -v postgres-primary-data:/var/lib/postgresql/data \
+  appwrite/postgres:16-runtime
+```
+
+#### Replica Server
+
+```bash
+docker run -d \
+  --name postgres-replica \
+  -p 5433:5432 \
+  -p 3001:3000 \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+  -e POSTGRES_DB=mydb \
+  -e POSTGRES_REPLICATION_MODE=replica \
+  -e POSTGRES_PRIMARY_HOST=postgres-primary \
+  -e POSTGRES_PRIMARY_PORT=5432 \
+  -e POSTGRES_REPLICATION_USER=replicator \
+  -e POSTGRES_REPLICATION_PASSWORD="$REPLICATION_PASSWORD" \
+  -v postgres-replica-data:/var/lib/postgresql/data \
+  appwrite/postgres:16-runtime
+```
+
+The replica will automatically:
+1. Perform a base backup from the primary (if data directory is empty)
+2. Create the `standby.signal` file
+3. Configure streaming replication
+4. Start following the primary
+
+### Replication Endpoints
+
+#### Get Replication Status
+
+```bash
+curl http://localhost:3000/__opr/replication
+```
+
+Returns detailed replication status including:
+- Primary: current WAL LSN, connected standbys, replication slots
+- Replica: receive/replay LSN, replication lag, WAL receiver status
+
+#### Promote Replica to Primary
+
+```bash
+curl -X POST http://localhost:3000/__opr/replication/promote
+```
+
+Promotes a replica to become a standalone primary server.
+
+#### Pause WAL Replay (Replica only)
+
+```bash
+curl -X POST http://localhost:3000/__opr/replication/pause
+```
+
+Pauses WAL replay, freezing the replica at its current state (useful for consistent backups).
+
+#### Resume WAL Replay (Replica only)
+
+```bash
+curl -X POST http://localhost:3000/__opr/replication/resume
+```
+
+Resumes WAL replay after a pause.
+
+#### Create Replication Slot (Primary only)
+
+```bash
+curl -X POST http://localhost:3000/__opr/replication/slot/my_slot_name
+```
+
+Creates a new physical replication slot.
+
+#### Drop Replication Slot (Primary only)
+
+```bash
+curl -X DELETE http://localhost:3000/__opr/replication/slot/my_slot_name
+```
+
+Drops an existing replication slot.
+
+### Synchronous Replication
+
+For stronger durability guarantees, enable synchronous replication:
+
+```bash
+# Primary
+-e POSTGRES_SYNCHRONOUS_COMMIT=on \
+-e POSTGRES_SYNCHRONOUS_STANDBY_NAMES='replica1'
+
+# Replica (set application_name)
+-e POSTGRES_PRIMARY_CONNINFO_EXTRA='application_name=replica1'
+```
+
+With synchronous replication, the primary waits for the standby to confirm WAL receipt before committing.
+
+### Hot Standby
+
+By default, replicas run in hot standby mode (`POSTGRES_HOT_STANDBY=on`), allowing read-only queries. This enables:
+- Load balancing read queries across replicas
+- Reporting workloads on replicas
+- Zero-downtime backups from replicas
 
 ## Integration with Appwrite
 

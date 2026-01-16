@@ -1,7 +1,8 @@
 const express = require("express");
 const mysql = require("mysql2/promise");
-const { spawn } = require("child_process");
+const { spawn, execSync } = require("child_process");
 const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const MANAGEMENT_PORT = 3000;
@@ -15,14 +16,251 @@ if (!process.env.MYSQL_DATABASE) {
   process.env.MYSQL_DATABASE = 'mysql';
 }
 
+// Replication configuration
+const REPLICATION_MODE = process.env.MYSQL_REPLICATION_MODE || 'standalone'; // standalone, primary, replica
+const SERVER_ID = parseInt(process.env.MYSQL_SERVER_ID || '1', 10);
+const REPLICATION_USER = process.env.MYSQL_REPLICATION_USER || 'replicator';
+const REPLICATION_PASSWORD = process.env.MYSQL_REPLICATION_PASSWORD || '';
+const PRIMARY_HOST = process.env.MYSQL_PRIMARY_HOST || '';
+const PRIMARY_PORT = parseInt(process.env.MYSQL_PRIMARY_PORT || '3306', 10);
+const GTID_MODE = process.env.MYSQL_GTID_MODE || 'ON';
+const ENFORCE_GTID_CONSISTENCY = process.env.MYSQL_ENFORCE_GTID_CONSISTENCY || 'ON';
+const BINLOG_FORMAT = process.env.MYSQL_BINLOG_FORMAT || 'ROW';
+const BINLOG_ROW_IMAGE = process.env.MYSQL_BINLOG_ROW_IMAGE || 'FULL';
+const SYNC_BINLOG = parseInt(process.env.MYSQL_SYNC_BINLOG || '1', 10);
+const RELAY_LOG_RECOVERY = process.env.MYSQL_RELAY_LOG_RECOVERY || 'ON';
+const READ_ONLY = process.env.MYSQL_READ_ONLY || (REPLICATION_MODE === 'replica' ? 'ON' : 'OFF');
+const SUPER_READ_ONLY = process.env.MYSQL_SUPER_READ_ONLY || (REPLICATION_MODE === 'replica' ? 'ON' : 'OFF');
+const REPLICATE_DO_DB = process.env.MYSQL_REPLICATE_DO_DB || '';
+const REPLICATE_IGNORE_DB = process.env.MYSQL_REPLICATE_IGNORE_DB || '';
+const REPLICATION_RETRY_INTERVAL = parseInt(process.env.MYSQL_REPLICATION_RETRY_INTERVAL || '60', 10);
+const REPLICATION_CONNECT_RETRY = parseInt(process.env.MYSQL_REPLICATION_CONNECT_RETRY || '60', 10);
+const SEMI_SYNC_ENABLED = process.env.MYSQL_SEMI_SYNC_ENABLED === 'true';
+const SEMI_SYNC_TIMEOUT = parseInt(process.env.MYSQL_SEMI_SYNC_TIMEOUT || '10000', 10);
+
 let mysqlProcess = null;
 let dbReady = false;
 let connection = null;
 let startupTimingWritten = false;
+let replicationConfigured = false;
+
+// Generate MySQL configuration file for replication
+function generateReplicationConfig() {
+  if (REPLICATION_MODE === 'standalone') {
+    console.log("Replication mode: standalone - no replication configuration needed");
+    return;
+  }
+
+  console.log(`Configuring MySQL for replication mode: ${REPLICATION_MODE}`);
+
+  let config = `[mysqld]
+# Replication configuration
+server-id=${SERVER_ID}
+log-bin=mysql-bin
+binlog-format=${BINLOG_FORMAT}
+binlog-row-image=${BINLOG_ROW_IMAGE}
+sync-binlog=${SYNC_BINLOG}
+`;
+
+  // GTID configuration
+  if (GTID_MODE === 'ON') {
+    config += `
+# GTID configuration
+gtid-mode=${GTID_MODE}
+enforce-gtid-consistency=${ENFORCE_GTID_CONSISTENCY}
+`;
+  }
+
+  if (REPLICATION_MODE === 'primary') {
+    config += `
+# Primary-specific settings
+log-slave-updates=ON
+`;
+  } else if (REPLICATION_MODE === 'replica') {
+    config += `
+# Replica-specific settings
+relay-log=mysql-relay-bin
+relay-log-recovery=${RELAY_LOG_RECOVERY}
+read-only=${READ_ONLY}
+super-read-only=${SUPER_READ_ONLY}
+log-slave-updates=ON
+skip-slave-start=ON
+`;
+    // Database filtering
+    if (REPLICATE_DO_DB) {
+      REPLICATE_DO_DB.split(',').forEach(db => {
+        config += `replicate-do-db=${db.trim()}\n`;
+      });
+    }
+    if (REPLICATE_IGNORE_DB) {
+      REPLICATE_IGNORE_DB.split(',').forEach(db => {
+        config += `replicate-ignore-db=${db.trim()}\n`;
+      });
+    }
+  }
+
+  // Write configuration file
+  const configDir = '/etc/mysql/conf.d';
+  const configPath = path.join(configDir, 'replication.cnf');
+
+  try {
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    fs.writeFileSync(configPath, config);
+    console.log(`Replication configuration written to ${configPath}`);
+  } catch (err) {
+    console.error(`Failed to write replication config: ${err.message}`);
+  }
+}
+
+// Create replication user on primary
+async function createReplicationUser() {
+  if (REPLICATION_MODE !== 'primary' || !REPLICATION_PASSWORD) {
+    return;
+  }
+
+  console.log("Creating replication user...");
+
+  let retries = 10;
+  while (retries > 0) {
+    try {
+      const conn = await mysql.createConnection({
+        host: "localhost",
+        port: 3306,
+        user: "root",
+        password: process.env.MYSQL_ROOT_PASSWORD,
+      });
+
+      // Create replication user
+      await conn.query(`CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'%' IDENTIFIED BY '${REPLICATION_PASSWORD}'`);
+      await conn.query(`GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'%'`);
+      await conn.query(`FLUSH PRIVILEGES`);
+
+      // Enable semi-sync if configured
+      if (SEMI_SYNC_ENABLED) {
+        try {
+          await conn.query(`INSTALL PLUGIN rpl_semi_sync_source SONAME 'semisync_source.so'`);
+          await conn.query(`SET GLOBAL rpl_semi_sync_source_enabled = 1`);
+          await conn.query(`SET GLOBAL rpl_semi_sync_source_timeout = ${SEMI_SYNC_TIMEOUT}`);
+          console.log("Semi-synchronous replication enabled on primary");
+        } catch (err) {
+          if (!err.message.includes('already exists')) {
+            console.error("Failed to enable semi-sync:", err.message);
+          }
+        }
+      }
+
+      await conn.end();
+      console.log(`Replication user '${REPLICATION_USER}' created successfully`);
+      return;
+    } catch (err) {
+      console.error(`Failed to create replication user (retries left: ${retries}):`, err.message);
+      retries--;
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+  }
+}
+
+// Configure replica to connect to primary
+async function configureReplica() {
+  if (REPLICATION_MODE !== 'replica' || !PRIMARY_HOST || !REPLICATION_PASSWORD) {
+    console.log("Skipping replica configuration - missing required parameters");
+    return;
+  }
+
+  console.log(`Configuring replica to connect to primary: ${PRIMARY_HOST}:${PRIMARY_PORT}`);
+
+  let retries = 10;
+  while (retries > 0) {
+    try {
+      const conn = await mysql.createConnection({
+        host: "localhost",
+        port: 3306,
+        user: "root",
+        password: process.env.MYSQL_ROOT_PASSWORD,
+      });
+
+      // Stop any existing replication
+      try {
+        await conn.query('STOP REPLICA');
+      } catch (e) {
+        // Ignore if replication not running
+      }
+
+      // Configure replication source
+      if (GTID_MODE === 'ON') {
+        // GTID-based replication
+        await conn.query(`
+          CHANGE REPLICATION SOURCE TO
+            SOURCE_HOST='${PRIMARY_HOST}',
+            SOURCE_PORT=${PRIMARY_PORT},
+            SOURCE_USER='${REPLICATION_USER}',
+            SOURCE_PASSWORD='${REPLICATION_PASSWORD}',
+            SOURCE_AUTO_POSITION=1,
+            SOURCE_CONNECT_RETRY=${REPLICATION_CONNECT_RETRY},
+            SOURCE_RETRY_COUNT=86400
+        `);
+      } else {
+        // Position-based replication
+        await conn.query(`
+          CHANGE REPLICATION SOURCE TO
+            SOURCE_HOST='${PRIMARY_HOST}',
+            SOURCE_PORT=${PRIMARY_PORT},
+            SOURCE_USER='${REPLICATION_USER}',
+            SOURCE_PASSWORD='${REPLICATION_PASSWORD}',
+            SOURCE_CONNECT_RETRY=${REPLICATION_CONNECT_RETRY},
+            SOURCE_RETRY_COUNT=86400
+        `);
+      }
+
+      // Enable semi-sync if configured
+      if (SEMI_SYNC_ENABLED) {
+        try {
+          await conn.query(`INSTALL PLUGIN rpl_semi_sync_replica SONAME 'semisync_replica.so'`);
+          await conn.query(`SET GLOBAL rpl_semi_sync_replica_enabled = 1`);
+          console.log("Semi-synchronous replication enabled on replica");
+        } catch (err) {
+          if (!err.message.includes('already exists')) {
+            console.error("Failed to enable semi-sync:", err.message);
+          }
+        }
+      }
+
+      // Start replication
+      await conn.query('START REPLICA');
+
+      // Verify replication is working
+      const [status] = await conn.query('SHOW REPLICA STATUS');
+      if (status && status.length > 0) {
+        const replicaStatus = status[0];
+        console.log(`Replica IO Running: ${replicaStatus.Replica_IO_Running}`);
+        console.log(`Replica SQL Running: ${replicaStatus.Replica_SQL_Running}`);
+
+        if (replicaStatus.Replica_IO_Running === 'Yes' && replicaStatus.Replica_SQL_Running === 'Yes') {
+          console.log("Replication configured and running successfully");
+          replicationConfigured = true;
+        } else if (replicaStatus.Last_IO_Error || replicaStatus.Last_SQL_Error) {
+          console.error(`Replication error - IO: ${replicaStatus.Last_IO_Error}, SQL: ${replicaStatus.Last_SQL_Error}`);
+        }
+      }
+
+      await conn.end();
+      return;
+    } catch (err) {
+      console.error(`Failed to configure replica (retries left: ${retries}):`, err.message);
+      retries--;
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+  }
+}
 
 // Start MySQL server
 function startMySQL() {
   console.log("Starting MySQL server...");
+
+  // Generate replication config before starting MySQL
+  generateReplicationConfig();
 
   mysqlProcess = spawn("docker-entrypoint.sh", ["mysqld"], {
     env: {
@@ -49,7 +287,15 @@ function startMySQL() {
           console.log(`Recorded startup timing: ${elapsed}s`);
         }
 
-        setTimeout(connectHealthClient, 2000);
+        // Configure replication after MySQL is ready
+        setTimeout(async () => {
+          if (REPLICATION_MODE === 'primary') {
+            await createReplicationUser();
+          } else if (REPLICATION_MODE === 'replica') {
+            await configureReplica();
+          }
+          connectHealthClient();
+        }, 2000);
       }
     }
   });
@@ -73,7 +319,15 @@ function startMySQL() {
           console.log(`Recorded startup timing: ${elapsed}s`);
         }
 
-        setTimeout(connectHealthClient, 2000);
+        // Configure replication after MySQL is ready
+        setTimeout(async () => {
+          if (REPLICATION_MODE === 'primary') {
+            await createReplicationUser();
+          } else if (REPLICATION_MODE === 'replica') {
+            await configureReplica();
+          }
+          connectHealthClient();
+        }, 2000);
       }
     }
   });
@@ -98,6 +352,90 @@ async function connectHealthClient() {
     console.error("Failed to connect health check client:", err.message);
     // Retry after 5 seconds
     setTimeout(connectHealthClient, 5000);
+  }
+}
+
+// Get replication status
+async function getReplicationStatus() {
+  if (!connection || REPLICATION_MODE === 'standalone') {
+    return null;
+  }
+
+  try {
+    if (REPLICATION_MODE === 'primary') {
+      const [status] = await connection.query('SHOW MASTER STATUS');
+      const [replicas] = await connection.query('SHOW REPLICAS');
+
+      let semiSyncStatus = null;
+      if (SEMI_SYNC_ENABLED) {
+        try {
+          const [semiSync] = await connection.query("SHOW STATUS LIKE 'Rpl_semi_sync_source%'");
+          semiSyncStatus = {};
+          semiSync.forEach(row => {
+            semiSyncStatus[row.Variable_name] = row.Value;
+          });
+        } catch (e) {}
+      }
+
+      return {
+        role: 'primary',
+        file: status[0]?.File || null,
+        position: status[0]?.Position || null,
+        binlogDoDb: status[0]?.Binlog_Do_DB || null,
+        binlogIgnoreDb: status[0]?.Binlog_Ignore_DB || null,
+        executedGtidSet: status[0]?.Executed_Gtid_Set || null,
+        connectedReplicas: replicas?.length || 0,
+        replicas: replicas?.map(r => ({
+          serverId: r.Server_Id,
+          host: r.Host,
+          port: r.Port,
+          sourceId: r.Source_Id
+        })) || [],
+        semiSync: semiSyncStatus
+      };
+    } else if (REPLICATION_MODE === 'replica') {
+      const [status] = await connection.query('SHOW REPLICA STATUS');
+
+      if (!status || status.length === 0) {
+        return { role: 'replica', configured: false };
+      }
+
+      const s = status[0];
+      let semiSyncStatus = null;
+      if (SEMI_SYNC_ENABLED) {
+        try {
+          const [semiSync] = await connection.query("SHOW STATUS LIKE 'Rpl_semi_sync_replica%'");
+          semiSyncStatus = {};
+          semiSync.forEach(row => {
+            semiSyncStatus[row.Variable_name] = row.Value;
+          });
+        } catch (e) {}
+      }
+
+      return {
+        role: 'replica',
+        configured: true,
+        sourceHost: s.Source_Host,
+        sourcePort: s.Source_Port,
+        sourceUser: s.Source_User,
+        ioRunning: s.Replica_IO_Running,
+        sqlRunning: s.Replica_SQL_Running,
+        lastIoError: s.Last_IO_Error || null,
+        lastSqlError: s.Last_SQL_Error || null,
+        secondsBehindSource: s.Seconds_Behind_Source,
+        sourceLogFile: s.Source_Log_File,
+        readSourceLogPos: s.Read_Source_Log_Pos,
+        relayLogFile: s.Relay_Log_File,
+        relayLogPos: s.Relay_Log_Pos,
+        execSourceLogPos: s.Exec_Source_Log_Pos,
+        retrievedGtidSet: s.Retrieved_Gtid_Set || null,
+        executedGtidSet: s.Executed_Gtid_Set || null,
+        semiSync: semiSyncStatus
+      };
+    }
+  } catch (err) {
+    console.error("Failed to get replication status:", err.message);
+    return { error: err.message };
   }
 }
 
@@ -143,6 +481,8 @@ app.get("/__opr/status", async (req, res) => {
     }
   }
 
+  const replicationStatus = await getReplicationStatus();
+
   const status = {
     ready: dbReady,
     engine: "mysql",
@@ -152,9 +492,68 @@ app.get("/__opr/status", async (req, res) => {
       current: currentConnections,
       max: parseInt(process.env.MYSQL_MAX_CONNECTIONS || "151"),
     },
+    replication: replicationStatus || {
+      mode: REPLICATION_MODE,
+      serverId: SERVER_ID
+    }
   };
 
   res.json(status);
+});
+
+// Replication-specific endpoints
+app.get("/__opr/replication", async (req, res) => {
+  const status = await getReplicationStatus();
+  if (!status) {
+    return res.json({ mode: 'standalone', enabled: false });
+  }
+  res.json({
+    mode: REPLICATION_MODE,
+    enabled: REPLICATION_MODE !== 'standalone',
+    serverId: SERVER_ID,
+    gtidMode: GTID_MODE,
+    ...status
+  });
+});
+
+app.post("/__opr/replication/start", async (req, res) => {
+  if (REPLICATION_MODE !== 'replica') {
+    return res.status(400).json({ error: 'Only available on replica' });
+  }
+
+  try {
+    await connection.query('START REPLICA');
+    res.json({ success: true, message: 'Replication started' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/__opr/replication/stop", async (req, res) => {
+  if (REPLICATION_MODE !== 'replica') {
+    return res.status(400).json({ error: 'Only available on replica' });
+  }
+
+  try {
+    await connection.query('STOP REPLICA');
+    res.json({ success: true, message: 'Replication stopped' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/__opr/replication/reset", async (req, res) => {
+  if (REPLICATION_MODE !== 'replica') {
+    return res.status(400).json({ error: 'Only available on replica' });
+  }
+
+  try {
+    await connection.query('STOP REPLICA');
+    await connection.query('RESET REPLICA ALL');
+    res.json({ success: true, message: 'Replication reset' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 async function shutdown(signal) {
