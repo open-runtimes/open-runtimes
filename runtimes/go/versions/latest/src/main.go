@@ -189,7 +189,7 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 		ch <- output
 	}
 
-	outputChan := make(chan openruntimes.Response)
+	outputChan := make(chan openruntimes.Response, 1)
 
 	logger.OverrideNativeLogs()
 
