@@ -29,6 +29,7 @@ interface Runtime {
 
     // Serverless metadata
     entry: string,
+    entry_no_export: string,
 }
 
 let perRuntime = true;
@@ -120,6 +121,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             VERSION: cleanVersion(version),
             TEST_CLASS: runtime.test,
             ENTRYPOINT: runtime.entry,
+            ENTRYPOINT_NO_EXPORT: runtime.entry_no_export,
             OUTPUT_DIRECTORY: runtime.output,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,

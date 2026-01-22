@@ -178,80 +178,89 @@ const action = async (logger, req, res) => {
   logger.overrideNativeLogs();
 
   let output = null;
+  let userFunction = null;
 
-  async function execute() {
-    let userFunction;
+  const entrypoint = process.env.OPEN_RUNTIMES_ENTRYPOINT;
+  const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
+
+  // Guard: Check file exists
+  if (!fs.existsSync(entrypointFilePath)) {
+    context.error(
+      `Failed to load entrypoint, file ${entrypoint} does not exist.`,
+    );
+    logger.revertNativeLogs();
+    output = context.res.text("", 503, {});
+  }
+
+  // Guard: Try to load module
+  if (output === null) {
     try {
-      userFunction = require(
-        USER_CODE_PATH + "/" + process.env.OPEN_RUNTIMES_ENTRYPOINT,
-      );
-    } catch (err) {
-      if (err.code === "ERR_REQUIRE_ESM") {
-        userFunction = await import(
-          USER_CODE_PATH + "/" + process.env.OPEN_RUNTIMES_ENTRYPOINT
+      try {
+        userFunction = require(entrypointFilePath);
+      } catch (err) {
+        if (err.code === "ERR_REQUIRE_ESM") {
+          userFunction = await import(entrypointFilePath);
+        } else {
+          throw err;
+        }
+      }
+
+      const fn = userFunction.default || userFunction;
+      if (typeof fn !== "function") {
+        throw new TypeError(
+          "Function signature invalid. Did you forget to export a 'main' function?",
         );
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (e instanceof SyntaxError) {
+        context.error(`Syntax error in ${entrypoint}: ${message}`);
+      } else if (e instanceof TypeError) {
+        context.error(message);
       } else {
-        throw err;
+        context.error(`Failed to load module: ${message}`);
       }
-    }
-
-    if (
-      !(
-        userFunction ||
-        userFunction.constructor ||
-        userFunction.call ||
-        userFunction.apply
-      )
-    ) {
-      throw new Error("User function is not valid.");
-    }
-
-    if (userFunction.default) {
-      if (
-        !(
-          userFunction.default.constructor ||
-          userFunction.default.call ||
-          userFunction.default.apply
-        )
-      ) {
-        throw new Error("User function is not valid.");
-      }
-
-      output = await userFunction.default(context);
-    } else {
-      output = await userFunction(context);
+      logger.revertNativeLogs();
+      output = context.res.text("", 503, {});
     }
   }
 
-  try {
-    if (safeTimeout !== null) {
-      let executed = true;
-
-      const timeoutPromise = new Promise((promiseRes) => {
-        setTimeout(() => {
-          executed = false;
-          promiseRes(true);
-        }, safeTimeout * 1000);
-      });
-
-      await Promise.race([execute(), timeoutPromise]);
-
-      if (!executed) {
-        context.error("Execution timed out.");
-        output = context.res.text("", 500, {});
+  // Execute user function
+  if (output === null) {
+    async function execute() {
+      if (userFunction.default) {
+        output = await userFunction.default(context);
+      } else {
+        output = await userFunction(context);
       }
-    } else {
-      await execute();
-    }
-  } catch (e) {
-    if (e.code === "MODULE_NOT_FOUND") {
-      context.error("Could not load code file.");
     }
 
-    context.error(e.stack || e);
-    output = context.res.text("", 500, {});
-  } finally {
-    logger.revertNativeLogs();
+    try {
+      if (safeTimeout !== null) {
+        let executed = true;
+
+        const timeoutPromise = new Promise((promiseRes) => {
+          setTimeout(() => {
+            executed = false;
+            promiseRes(true);
+          }, safeTimeout * 1000);
+        });
+
+        await Promise.race([execute(), timeoutPromise]);
+
+        if (!executed) {
+          context.error("Execution timed out.");
+          output = context.res.text("", 500, {});
+        }
+      } else {
+        await execute();
+      }
+    } catch (e) {
+      context.error(e.stack || e);
+      output = context.res.text("", 500, {});
+    } finally {
+      logger.revertNativeLogs();
+    }
   }
 
   if (output === null || output === undefined) {
