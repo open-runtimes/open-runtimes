@@ -17,6 +17,12 @@ cp -R /mnt/code/* /usr/local/build
 # Enter build folder
 cd /usr/local/build
 
+# Check if the entrypoint file exists
+if [ -n "$OPEN_RUNTIMES_ENTRYPOINT" ] && [ ! -f "$OPEN_RUNTIMES_ENTRYPOINT" ]; then
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[31m Error: Entrypoint file '$OPEN_RUNTIMES_ENTRYPOINT' not found in build output. \e[0m"
+	exit 1
+fi
+
 . /usr/local/server/helpers/prepare-build.sh
 
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Environment preparation finished. \e[0m"
