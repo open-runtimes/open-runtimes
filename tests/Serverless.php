@@ -755,4 +755,19 @@ class Serverless extends Base
 
         Client::$host = 'open-runtimes-test-serve';
     }
+    
+    public function testSetCookie(): void
+    {   
+        $response = Client::execute(headers: ['x-action' => 'setCookie']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('cookie=value; path=/', $response['headers']['set-cookie'][0]);
+        self::assertEquals('cookie2=value2; path=/', $response['headers']['set-cookie'][1]);
+        self::assertEquals('some-value', $response['headers']['some-header']);
+        
+        $response = Client::execute(headers: ['x-action' => 'setCookie2']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('cookie=value; path=/', $response['headers']['set-cookie'][0]);
+        self::assertEquals('cookie2=value2; path=/', $response['headers']['set-cookie'][1]);
+        self::assertEquals('some-value', $response['headers']['some-header']);
+    }
 }

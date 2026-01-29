@@ -40,7 +40,19 @@ class Client {
                     return $len;
         
                 $key = strtolower(trim($header[0]));
-                $responseHeaders[$key] = trim($header[1]);
+                
+                if(array_key_exists($key, $responseHeaders)) {
+                    if(\is_array($responseHeaders[$key])) {
+                        $responseHeaders[$key][] = trim($header[1]);
+                    } else {
+                        $responseHeaders[$key] = [
+                            $responseHeaders[$key],
+                            trim($header[1])
+                        ];
+                    }
+                } else {
+                    $responseHeaders[$key] = trim($header[1]);
+                }
         
                 return $len;
             },
