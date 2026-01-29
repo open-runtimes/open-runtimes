@@ -1,0 +1,17 @@
+{
+  "name": "open-runtimes-mysql",
+  "version": "1.0.0",
+  "description": "OpenRuntimes MySQL Database Runtime",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "keywords": ["mysql", "database", "openruntimes"],
+  "author": "team@appwrite.io",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "mysql2": "^3.11.5"
+  }
+}
