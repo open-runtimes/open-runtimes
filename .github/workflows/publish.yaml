@@ -439,6 +439,43 @@ jobs:
             VERSION: "1.23"
             IMAGE: openruntimes/go:v5-1.23
             ARCH: "linux/amd64,linux/arm64"
+
+          # PostgreSQL (17, 18)
+          - ID: postgres-17
+            RUNTIME: postgres
+            VERSION: "17"
+            IMAGE: openruntimes/postgres:v1-17
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: postgres-18
+            RUNTIME: postgres
+            VERSION: "18"
+            IMAGE: openruntimes/postgres:v1-18
+            ARCH: "linux/amd64,linux/arm64"
+
+          # MySQL (8.0, 8.4 LTS)
+          - ID: mysql-8.0
+            RUNTIME: mysql
+            VERSION: "8.0"
+            IMAGE: openruntimes/mysql:v1-8.0
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: mysql-8.4
+            RUNTIME: mysql
+            VERSION: "8.4"
+            IMAGE: openruntimes/mysql:v1-8.4
+            ARCH: "linux/amd64,linux/arm64"
+
+          # MariaDB (10.11 LTS, 11.4 LTS)
+          - ID: mariadb-10.11
+            RUNTIME: mariadb
+            VERSION: "10.11"
+            IMAGE: openruntimes/mariadb:v1-10.11
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: mariadb-11.4
+            RUNTIME: mariadb
+            VERSION: "11.4"
+            IMAGE: openruntimes/mariadb:v1-11.4
+            ARCH: "linux/amd64,linux/arm64"
+
     name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
 
