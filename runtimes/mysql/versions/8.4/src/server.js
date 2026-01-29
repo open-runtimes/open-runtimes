@@ -355,6 +355,61 @@ async function connectHealthClient() {
   }
 }
 
+// Get volume information
+function getVolumeInfo() {
+  const volumes = {};
+
+  // Data volume
+  const dataPath = '/var/lib/mysql';
+  try {
+    const dfOutput = execSync(`df -B1 ${dataPath} 2>/dev/null | tail -1`, { encoding: 'utf8' });
+    const parts = dfOutput.trim().split(/\s+/);
+    if (parts.length >= 4) {
+      const total = parseInt(parts[1]);
+      const used = parseInt(parts[2]);
+      const available = parseInt(parts[3]);
+      const usedPercent = total > 0 ? Math.round((used / total) * 100) : 0;
+      const availableGB = (available / (1024 * 1024 * 1024)).toFixed(1);
+
+      volumes.data = {
+        path: dataPath,
+        usedPercent: `${usedPercent}%`,
+        available: `${availableGB}GB`,
+        mounted: true
+      };
+    }
+  } catch (err) {
+    volumes.data = { path: dataPath, usedPercent: '0%', available: '0GB', mounted: fs.existsSync(dataPath) };
+  }
+
+  // Backups volume (if exists)
+  const backupsPath = '/mnt/backups';
+  if (fs.existsSync(backupsPath)) {
+    try {
+      const dfOutput = execSync(`df -B1 ${backupsPath} 2>/dev/null | tail -1`, { encoding: 'utf8' });
+      const parts = dfOutput.trim().split(/\s+/);
+      if (parts.length >= 4) {
+        const total = parseInt(parts[1]);
+        const used = parseInt(parts[2]);
+        const available = parseInt(parts[3]);
+        const usedPercent = total > 0 ? Math.round((used / total) * 100) : 0;
+        const availableGB = (available / (1024 * 1024 * 1024)).toFixed(1);
+
+        volumes.backups = {
+          path: backupsPath,
+          usedPercent: `${usedPercent}%`,
+          available: `${availableGB}GB`,
+          mounted: true
+        };
+      }
+    } catch (err) {
+      volumes.backups = { path: backupsPath, usedPercent: '0%', available: '0GB', mounted: true };
+    }
+  }
+
+  return volumes;
+}
+
 // Get replication status
 async function getReplicationStatus() {
   if (!connection || REPLICATION_MODE === 'standalone') {
@@ -482,6 +537,7 @@ app.get("/__opr/status", async (req, res) => {
   }
 
   const replicationStatus = await getReplicationStatus();
+  const volumes = getVolumeInfo();
 
   const status = {
     ready: dbReady,
@@ -492,6 +548,7 @@ app.get("/__opr/status", async (req, res) => {
       current: currentConnections,
       max: parseInt(process.env.MYSQL_MAX_CONNECTIONS || "151"),
     },
+    volumes: volumes,
     replication: replicationStatus || {
       mode: REPLICATION_MODE,
       serverId: SERVER_ID
@@ -552,6 +609,55 @@ app.post("/__opr/replication/reset", async (req, res) => {
     await connection.query('RESET REPLICA ALL');
     res.json({ success: true, message: 'Replication reset' });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Promote replica to primary (for failover)
+app.post("/__opr/replication/promote", async (req, res) => {
+  if (REPLICATION_MODE !== 'replica') {
+    return res.status(400).json({ error: 'Not a replica - cannot promote' });
+  }
+
+  try {
+    console.log("[Failover] Promoting replica to primary...");
+
+    // Stop replication
+    await connection.query('STOP REPLICA');
+    console.log("[Failover] Stopped replication");
+
+    // Clear replication configuration
+    await connection.query('RESET REPLICA ALL');
+    console.log("[Failover] Cleared replication configuration");
+
+    // Disable read-only mode to allow writes
+    await connection.query('SET GLOBAL read_only = OFF');
+    await connection.query('SET GLOBAL super_read_only = OFF');
+    console.log("[Failover] Disabled read-only mode");
+
+    // If semi-sync was enabled, reconfigure as source
+    if (SEMI_SYNC_ENABLED) {
+      try {
+        await connection.query(`INSTALL PLUGIN rpl_semi_sync_source SONAME 'semisync_source.so'`);
+        await connection.query(`SET GLOBAL rpl_semi_sync_source_enabled = 1`);
+        await connection.query(`SET GLOBAL rpl_semi_sync_source_timeout = ${SEMI_SYNC_TIMEOUT}`);
+        console.log("[Failover] Reconfigured semi-sync as source");
+      } catch (err) {
+        if (!err.message.includes('already exists')) {
+          console.error("[Failover] Failed to configure semi-sync as source:", err.message);
+        }
+      }
+    }
+
+    console.log("[Failover] Promotion complete - this node is now the primary");
+
+    res.json({
+      success: true,
+      message: 'Promoted to primary',
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error("[Failover] Promotion failed:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
