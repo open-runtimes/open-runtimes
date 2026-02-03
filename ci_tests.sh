@@ -79,6 +79,24 @@ docker run \
 	open-runtimes/test-runtime \
 	bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 
+# Build with no-export entrypoint (for safe entrypoint tests)
+if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
+	echo "Building no-export entrypoint test..."
+	mkdir -p no-export-build
+	cp -R . no-export-build/src
+	touch no-export-build/src/code.tar.gz
+	docker run \
+		--platform linux/x86_64 \
+		--rm \
+		--name open-runtimes-test-build-no-export \
+		-v /tmp/.build:/usr/local/server/.build \
+		-v "$(pwd)/no-export-build/src":/mnt/code:rw \
+		-e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" \
+		-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT_NO_EXPORT" \
+		open-runtimes/test-runtime \
+		bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
+fi
+
 # Tools test
 echo "Testing tools ..."
 REQUIRED_TOOLS="tar --help && unzip --help"
@@ -162,6 +180,25 @@ docker run \
 	-p 3002:3000 \
 	open-runtimes/test-runtime \
 	bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+
+# No export entrypoint tests (safe entrypoint feature)
+if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
+	echo "Starting no-export entrypoint container..."
+	docker run \
+		--platform linux/x86_64 \
+		--network openruntimes \
+		-d \
+		--name open-runtimes-test-serve-no-export \
+		-v "$TELEMETRY_FOLDER":/mnt/telemetry \
+		-v /tmp/logs:/mnt/logs \
+		-v "$(pwd)/no-export-build/src/code.tar.gz":/mnt/code/code.tar.gz:ro \
+		-e OPEN_RUNTIMES_HEADERS= \
+		-e OPEN_RUNTIMES_ENV=development \
+		-e OPEN_RUNTIMES_SECRET= \
+		-p 3004:3000 \
+		open-runtimes/test-runtime \
+		bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+fi
 
 cd ../../
 

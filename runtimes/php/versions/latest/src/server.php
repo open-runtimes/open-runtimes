@@ -109,41 +109,70 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
 
     $output = null;
 
-    $execute = function () use ($userFunction, &$output, $context, $logger) {
-        if ($userFunction === null) {
-            $userFunction = include(USER_CODE_PATH . '/' . getenv('OPEN_RUNTIMES_ENTRYPOINT'));
-        }
+    $entrypoint = getenv('OPEN_RUNTIMES_ENTRYPOINT');
+    $entrypointPath = USER_CODE_PATH . '/' . $entrypoint;
 
-        if (!is_callable($userFunction)) {
-            throw new Exception('User function is not valid.');
-        }
+    // Guard: Check file exists
+    if (!\file_exists($entrypointPath)) {
+        $context->error('Failed to load entrypoint, file ' . $entrypoint . ' does not exist.');
+        $output = $context->res->text('', 503);
+    }
 
-        $logger->overrideNativeLogs();
-        $output = $userFunction($context);
-        $logger->revertNativeLogs();
-    };
-
-    try {
-        if ($safeTimeout !== null) {
-            $executed = false;
-            Swoole\Coroutine\batch([
-                function () use ($execute, &$executed) {
-                    \call_user_func($execute);
-                    $executed = true;
-                }
-            ], $safeTimeout);
-
-            if (!$executed) {
-                $context->error('Execution timed out.');
-                $output = $context->res->text('', 500);
+    // Guard: Try to load module
+    if ($output === null) {
+        try {
+            if ($userFunction === null) {
+                $userFunction = include($entrypointPath);
             }
-        } else {
-            \call_user_func($execute);
+
+            if (!is_callable($userFunction)) {
+                throw new \TypeError("Function signature invalid. Did you forget to export a 'main' function?");
+            }
+        } catch (\ParseError $e) {
+            $context->error('Syntax error in ' . $e->getFile() . ':' . $e->getLine() . ': ' . $e->getMessage());
+            $output = $context->res->text('', 503);
+            $userFunction = null;
+        } catch (\TypeError $e) {
+            $context->error($e->getMessage());
+            $output = $context->res->text('', 503);
+            $userFunction = null;
+        } catch (\Throwable $e) {
+            $context->error('Failed to load module: ' . $e->getMessage());
+            $output = $context->res->text('', 503);
+            $userFunction = null;
         }
-    } catch (\Throwable $e) {
-        $context->error($e->getMessage()."\n".$e->getTraceAsString());
-        $context->error('At ' . $e->getFile() . ':' . $e->getLine());
-        $output = $context->res->text('', 500);
+    }
+
+    // Execute user function
+    if ($output === null && $userFunction !== null) {
+        $execute = function () use ($userFunction, &$output, $context, $logger) {
+            $logger->overrideNativeLogs();
+            $output = $userFunction($context);
+            $logger->revertNativeLogs();
+        };
+
+        try {
+            if ($safeTimeout !== null) {
+                $executed = false;
+                Swoole\Coroutine\batch([
+                    function () use ($execute, &$executed) {
+                        \call_user_func($execute);
+                        $executed = true;
+                    }
+                ], $safeTimeout);
+
+                if (!$executed) {
+                    $context->error('Execution timed out.');
+                    $output = $context->res->text('', 500);
+                }
+            } else {
+                \call_user_func($execute);
+            }
+        } catch (\Throwable $e) {
+            $context->error($e->getMessage()."\n".$e->getTraceAsString());
+            $context->error('At ' . $e->getFile() . ':' . $e->getLine());
+            $output = $context->res->text('', 500);
+        }
     }
 
     if ($output == null) {

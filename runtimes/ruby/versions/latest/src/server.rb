@@ -119,38 +119,70 @@ def action(request, response, logger)
   context = RuntimeContext.new(context_req, context_res, logger)
 
   output = nil
+  user_function_loaded = false
 
-  begin
-    load(USER_CODE_PATH + '/' + ENV['OPEN_RUNTIMES_ENTRYPOINT'])
+  entrypoint = ENV['OPEN_RUNTIMES_ENTRYPOINT']
+  entrypoint_file_path = USER_CODE_PATH + '/' + entrypoint
 
-    unless defined?(main = ()) # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression
-      raise 'User function is not valid.'
-    end
+  # Guard: Check file exists
+  unless File.exist?(entrypoint_file_path)
+    context.error("Failed to load entrypoint, file #{entrypoint} does not exist.")
+    output = context.res.text('', 503, {})
+  end
 
-    logger.override_native_logs
+  # Guard: Try to load module
+  if output.nil?
+    begin
+      load(entrypoint_file_path)
 
-    unless safe_timeout.nil?
-      results = execute(safe_timeout, main, context)
-      executed = results[0]
-      output = results[1]
-
-      unless executed
-        context.error('Execution timed out.')
-        output = context.res.text('', 500, {})
+      unless defined?(main = ()) # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression
+        raise NameError, "Function signature invalid. Did you forget to export a 'main' function?"
       end
-    else
-      output = main(context)
-    end
-  rescue StandardError => e
-    message = ""
-    message += e.full_message
-    message += "\n"
-    message += e.backtrace.join("\n")
 
-    context.error(message)
-    output = context.res.text('', 500, {})
-  ensure
-    logger.revert_native_logs
+      user_function_loaded = true
+    rescue SyntaxError => e
+      context.error("Syntax error in #{e.message}")
+      output = context.res.text('', 503, {})
+    rescue LoadError => e
+      context.error("Failed to load file: #{e.message}")
+      output = context.res.text('', 503, {})
+    rescue NameError => e
+      context.error(e.message.to_s)
+      output = context.res.text('', 503, {})
+    rescue StandardError => e
+      context.error("Failed to load module: #{e.message}")
+      output = context.res.text('', 503, {})
+    end
+  end
+
+  # Execute user function
+  if output.nil? && user_function_loaded
+    begin
+      logger.override_native_logs
+
+      unless safe_timeout.nil?
+        results = execute(safe_timeout, main, context)
+        executed = results[0]
+        output = results[1]
+
+        unless executed
+          context.error('Execution timed out.')
+          output = context.res.text('', 500, {})
+        end
+      else
+        output = main(context)
+      end
+    rescue StandardError => e
+      message = ""
+      message += e.full_message
+      message += "\n"
+      message += e.backtrace.join("\n")
+
+      context.error(message)
+      output = context.res.text('', 500, {})
+    ensure
+      logger.revert_native_logs
+    end
   end
 
   if output.nil?

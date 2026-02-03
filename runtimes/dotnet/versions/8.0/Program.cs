@@ -222,43 +222,90 @@ namespace DotNetRuntime
             logger.OverrideNativeLogs();
 
             RuntimeOutput? output = null;
+            Handler? handler = null;
 
+            // Guard: Try to load module
             try
             {
-                if (safeTimout != -1)
-                {
-                    var result = await await Task.WhenAny<RuntimeOutput?>(
-                        Task.Run<RuntimeOutput?>(async () =>
-                        {
-                            await Task.Delay(safeTimout * 1000);
-                            return null;
-                        }),
-                        new Handler().Main(context)
-                    );
+                handler = new Handler();
 
-                    if (result != null)
-                    {
-                        output = result;
-                    }
-                    else
-                    {
-                        context.Error("Execution timed out.");
-                        output = context.Res.Text("", 500);
-                    }
-                }
-                else
+                // Verify Main method exists
+                var mainMethod = handler.GetType().GetMethod("Main");
+                if (mainMethod == null)
                 {
-                    output = await new Handler().Main(context);
+                    throw new MissingMethodException(
+                        "Function signature invalid. Did you forget to export a 'Main' function?"
+                    );
                 }
+            }
+            catch (TypeLoadException e)
+            {
+                context.Error($"Type not found: {e.Message}");
+                logger.RevertNativeLogs();
+                output = context.Res.Text("", 503, new Dictionary<string, string>());
+                handler = null;
+            }
+            catch (MissingMethodException e)
+            {
+                context.Error(e.Message);
+                logger.RevertNativeLogs();
+                output = context.Res.Text("", 503, new Dictionary<string, string>());
+                handler = null;
+            }
+            catch (MissingMemberException e)
+            {
+                context.Error($"Member not found: {e.Message}");
+                logger.RevertNativeLogs();
+                output = context.Res.Text("", 503, new Dictionary<string, string>());
+                handler = null;
             }
             catch (Exception e)
             {
-                context.Error(e.ToString());
-                output = context.Res.Text("", 500, new Dictionary<string, string>());
-            }
-            finally
-            {
+                context.Error($"Failed to load module: {e.Message}");
                 logger.RevertNativeLogs();
+                output = context.Res.Text("", 503, new Dictionary<string, string>());
+            }
+
+            // Execute user function
+            if (output == null && handler != null)
+            {
+                try
+                {
+                    if (safeTimout != -1)
+                    {
+                        var result = await await Task.WhenAny<RuntimeOutput?>(
+                            Task.Run<RuntimeOutput?>(async () =>
+                            {
+                                await Task.Delay(safeTimout * 1000);
+                                return null;
+                            }),
+                            handler.Main(context)
+                        );
+
+                        if (result != null)
+                        {
+                            output = result;
+                        }
+                        else
+                        {
+                            context.Error("Execution timed out.");
+                            output = context.Res.Text("", 500);
+                        }
+                    }
+                    else
+                    {
+                        output = await handler.Main(context);
+                    }
+                }
+                catch (Exception e)
+                {
+                    context.Error(e.ToString());
+                    output = context.Res.Text("", 500, new Dictionary<string, string>());
+                }
+                finally
+                {
+                    logger.RevertNativeLogs();
+                }
             }
 
             if (output == null)

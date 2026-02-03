@@ -722,6 +722,29 @@ class Serverless extends Base
         self::assertEquals(1, $spaceOccurances);
     }
 
+    public function testNoExportEntrypoint(): void
+    {
+        // Check if this container exists (only for runtimes with test files)
+        Client::$host = 'open-runtimes-test-serve-no-export';
+        $response = Client::execute(timeout: 2);
+
+        if ($response['code'] === 0) {
+            // Container doesn't exist, skip test
+            Client::$host = 'open-runtimes-test-serve';
+            $this->markTestSkipped('No-export entrypoint container not available for this runtime');
+            return;
+        }
+
+        // Container exists, test the response
+        self::assertEquals(503, $response['code']);
+        self::assertEmpty($response['body']);
+
+        $errors = Client::getErrors($response['headers']['x-open-runtimes-log-id'] ?? 'dev');
+        self::assertNotEmpty($errors, 'Should contain error logs');
+
+        Client::$host = 'open-runtimes-test-serve';
+    }
+
     public function testDevLogFiles(): void
     {
         Client::$host = 'open-runtimes-test-serve-secondary';
