@@ -10,6 +10,7 @@ mkdir -p /mnt/telemetry
 if [ -f "/mnt/code/.extracted" ]; then
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code already extracted, skipping extraction. \e[0m"
 	echo "extract=0.000" >>/mnt/telemetry/timings.txt
+	cp -a /mnt/code/. /usr/local/server/src/function
 else
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code extraction started. \e[0m"
 
@@ -41,7 +42,12 @@ cd /usr/local/server
 
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Environment preparation started. \e[0m"
 
+# Track environment preparation timing
+prepare_start=$(awk '{print $1}' /proc/uptime)
 . /usr/local/server/helpers/prepare-start.sh
+prepare_end=$(awk '{print $1}' /proc/uptime)
+prepare_elapsed=$(awk "BEGIN{printf \"%.3f\", $prepare_end - $prepare_start}")
+echo "prepare=$prepare_elapsed" >>/mnt/telemetry/timings.txt
 
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Environment preparation finished. \e[0m"
 
