@@ -1,5 +1,5 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM mcr.microsoft.com/dotnet/sdk:8.0.417-alpine3.19
+FROM mcr.microsoft.com/dotnet/sdk:8.0.417-alpine3.23
 
 INCLUDE ./base-before
 INCLUDE ./dotnet

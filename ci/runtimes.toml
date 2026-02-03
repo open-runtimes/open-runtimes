@@ -122,7 +122,7 @@ test = "Serverless/Java.php"
 entry = "tests.cc"
 versions = ["23", "20", "17"]
 commands = { install = "", start = "bash helpers/server.sh" }
-formatter = { prepare = "apk add coreutils git clang-extra-tools", check = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror --dry-run", write = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror" }
+formatter = { prepare = "apk add coreutils git clang-extra-tools", check = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format --Werror --dry-run", write = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror" }
 tools = "cmake --version && make --version"
 test = "Serverless/CPP.php"
 
