@@ -92,13 +92,13 @@ class Base extends TestCase
         Client::$host = 'open-runtimes-test-serve-secondary';
 
         $response = Client::execute(method: 'GET', url: '/', headers: ['x-action' => 'plaintextResponse']);
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertNotEmpty($response['body']);
 
         Client::$secret = 'wrongSecret';
 
         $response = Client::execute(method: 'GET', url: '/', headers: ['x-action' => 'plaintextResponse', 'x-open-runtimes-secret' => 'wrong-secret']);
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertNotEmpty($response['body']);
 
         Client::$secret = \getenv('OPEN_RUNTIMES_SECRET');
@@ -108,14 +108,14 @@ class Base extends TestCase
     public function testHealth(): void
     {
         $response = Client::execute(method: 'GET', url: '/__opr/health');
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('OK', $response['body']);
+        self::assertSame(200, $response['code']);
+        self::assertSame('OK', $response['body']);
     }
 
     public function testTimings(): void
     {
         $response = Client::execute(method: 'GET', url: '/__opr/timings');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertStringContainsString('text/plain', $response['headers']['content-type']);
 
         // Parse key=value format
