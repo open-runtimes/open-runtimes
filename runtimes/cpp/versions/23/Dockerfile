@@ -1,6 +1,6 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM dart:3.10.9
+FROM alpine:3.23.3
 
 INCLUDE ./base-before
-INCLUDE ./dart
+INCLUDE ./cpp
 INCLUDE ./base-after

@@ -58,6 +58,11 @@ jobs:
             VERSION: "24"
             IMAGE: openruntimes/node:v5-24
             ARCH: "linux/amd64,linux/arm64"
+          - ID: node-25.js
+            RUNTIME: node
+            VERSION: "25"
+            IMAGE: openruntimes/node:v5-25
+            ARCH: "linux/amd64,linux/arm64"
           - ID: node-23.js
             RUNTIME: node
             VERSION: "23"
@@ -100,6 +105,11 @@ jobs:
             ARCH: "linux/amd64"
 
           # Deno
+          - ID: deno-2.6
+            RUNTIME: deno
+            VERSION: "2.6"
+            IMAGE: openruntimes/deno:v5-2.6
+            ARCH: "linux/amd64,linux/arm64"
           - ID: deno-2.5
             RUNTIME: deno
             VERSION: "2.5"
@@ -248,6 +258,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Ruby
+          - ID: ruby-4.0
+            RUNTIME: ruby
+            VERSION: "4.0"
+            IMAGE: openruntimes/ruby:v5-4.0
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
           - ID: ruby-3.4
             RUNTIME: ruby
             VERSION: "3.4"
@@ -275,6 +290,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # PHP
+          - ID: php-8.5
+            RUNTIME: php
+            VERSION: "8.5"
+            IMAGE: openruntimes/php:v5-8.5
+            ARCH: "linux/amd64,linux/arm64"
           - ID: php-8.4
             RUNTIME: php
             VERSION: "8.4"
@@ -302,6 +322,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # Swift
+          - ID: swift-6.2
+            RUNTIME: swift
+            VERSION: "6.2"
+            IMAGE: openruntimes/swift:v5-6.2
+            ARCH: "linux/amd64,linux/arm64"
           - ID: swift-5.10
             RUNTIME: swift
             VERSION: "5.10"
@@ -319,6 +344,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # Kotlin
+          - ID: kotlin-2.3
+            RUNTIME: kotlin
+            VERSION: "2.3"
+            IMAGE: openruntimes/kotlin:v5-2.3
+            ARCH: "linux/amd64"
           - ID: kotlin-2.0
             RUNTIME: kotlin
             VERSION: "2.0"
@@ -345,6 +375,11 @@ jobs:
             RUNTIME: java
             VERSION: "22"
             IMAGE: openruntimes/java:v5-22
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: java-25
+            RUNTIME: java
+            VERSION: "25"
+            IMAGE: openruntimes/java:v5-25
             ARCH: "linux/amd64,linux/arm64"
           - ID: java-21.0
             RUNTIME: java
@@ -373,6 +408,11 @@ jobs:
             ARCH: "linux/amd64,linux/arm64"
 
           # C++
+          - ID: cpp-23
+            RUNTIME: cpp
+            VERSION: "23"
+            IMAGE: openruntimes/cpp:v5-23
+            ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
           - ID: cpp-20
             RUNTIME: cpp
             VERSION: "20"
@@ -389,6 +429,11 @@ jobs:
             RUNTIME: dotnet
             VERSION: "8.0"
             IMAGE: openruntimes/dotnet:v5-8.0
+            ARCH: "linux/amd64,linux/arm64"
+          - ID: dotnet-10.0
+            RUNTIME: dotnet
+            VERSION: "10.0"
+            IMAGE: openruntimes/dotnet:v5-10.0
             ARCH: "linux/amd64,linux/arm64"
           - ID: dotnet-7.0
             RUNTIME: dotnet

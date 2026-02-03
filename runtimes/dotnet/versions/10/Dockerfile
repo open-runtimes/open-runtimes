@@ -1,6 +1,6 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM dart:3.10.9
+FROM mcr.microsoft.com/dotnet/sdk:10.0.2-alpine3.23
 
 INCLUDE ./base-before
-INCLUDE ./dart
+INCLUDE ./dotnet
 INCLUDE ./base-after

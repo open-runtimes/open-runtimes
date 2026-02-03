@@ -1,6 +1,7 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM dart:3.10.9
+FROM ruby:4.0.1-alpine3.22
+ENV OPEN_RUNTIMES_ENTRYPOINT=index.rb
 
 INCLUDE ./base-before
-INCLUDE ./dart
+INCLUDE ./ruby
 INCLUDE ./base-after

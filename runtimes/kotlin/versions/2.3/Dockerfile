@@ -1,6 +1,6 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM dart:3.10.9
+FROM eclipse-temurin:25-jdk-alpine
 
 INCLUDE ./base-before
-INCLUDE ./dart
+INCLUDE ./kotlin
 INCLUDE ./base-after

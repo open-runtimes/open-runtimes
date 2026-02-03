@@ -1,6 +1,6 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM dart:3.10.9
+FROM swift:6.2.3-jammy
 
 INCLUDE ./base-before
-INCLUDE ./dart
+INCLUDE ./swift
 INCLUDE ./base-after

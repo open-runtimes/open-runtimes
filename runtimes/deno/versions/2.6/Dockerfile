@@ -1,6 +1,6 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM dart:3.10.9
+FROM denoland/deno:alpine-2.6.8
 
 INCLUDE ./base-before
-INCLUDE ./dart
+INCLUDE ./deno
 INCLUDE ./base-after
