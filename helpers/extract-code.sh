@@ -10,10 +10,14 @@ if [ -f "/mnt/code/.extracted" ]; then
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code already extracted, skipping extraction. \e[0m"
 
 	start=$(awk '{print $1}' /proc/uptime)
-	cp -a /mnt/code/. /usr/local/server/src/function
+	shopt -s dotglob
+	for item in /mnt/code/*; do
+		ln -s "$item" /usr/local/server/src/function/
+	done
+	shopt -u dotglob
 	end=$(awk '{print $1}' /proc/uptime)
 	elapsed=$(awk "BEGIN{printf \"%.3f\", $end - $start}")
-	echo "copy=$elapsed" >>/mnt/telemetry/timings.txt
+	echo "symlink=$elapsed" >>/mnt/telemetry/timings.txt
 else
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code extraction started. \e[0m"
 
