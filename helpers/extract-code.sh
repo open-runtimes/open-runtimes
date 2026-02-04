@@ -8,7 +8,6 @@ mkdir -p /mnt/telemetry
 # Check if code is pre-extracted (e.g., by sidecar)
 if [ -f "/mnt/code/.extracted" ]; then
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code already extracted, skipping extraction. \e[0m"
-	echo "extract=0.000" >>/mnt/telemetry/timings.txt
 
 	start=$(awk '{print $1}' /proc/uptime)
 	cp -a /mnt/code/. /usr/local/server/src/function
