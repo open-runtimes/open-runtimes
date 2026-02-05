@@ -114,7 +114,7 @@ test = "Serverless/Kotlin.php"
 entry = "Tests.java"
 versions = ["25", "22", "21.0", "18.0", "17.0", "11.0", "8.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
-formatter = { prepare = "curl -sSLO https://github.com/google/google-java-format/releases/download/v1.22.0/google-java-format-1.22.0-all-deps.jar && chmod a+x google-java-format-1.22.0-all-deps.jar && mv google-java-format-1.22.0-all-deps.jar /tmp/google-java-format.jar", check = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --set-exit-if-changed --dry-run", write = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --replace" }
+formatter = { prepare = "curl -sSLO https://github.com/google/google-java-format/releases/download/v1.34.1/google-java-format-1.34.1-all-deps.jar && chmod a+x google-java-format-1.34.1-all-deps.jar && mv google-java-format-1.34.1-all-deps.jar /tmp/google-java-format.jar", check = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --set-exit-if-changed --dry-run", write = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --replace" }
 tools = "bash gradlew --version"
 test = "Serverless/Java.php"
 
