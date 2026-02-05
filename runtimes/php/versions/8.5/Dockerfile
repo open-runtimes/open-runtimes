@@ -9,5 +9,5 @@ INCLUDE ./build
 FROM php:8.5.2-cli-alpine3.23 as final
 INCLUDE ./base-before
 INCLUDE ./php
-COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20240924/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20240924/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20240924/
+COPY --from=step0 /usr/local/lib/php/extensions/no-debug-non-zts-20251120/swoole.so /usr/local/lib/php/extensions/no-debug-non-zts-20251120/yasd.so* /usr/local/lib/php/extensions/no-debug-non-zts-20251120/
 INCLUDE ./base-after
