@@ -152,56 +152,78 @@ const action = async (logger: Logger, request: any) => {
   logger.overrideNativeLogs();
 
   let output: any = null;
+  let userFunction: any = null;
 
-  async function execute() {
-    const userFunction = (
-      await import(USER_CODE_PATH + "/" + Bun.env["OPEN_RUNTIMES_ENTRYPOINT"])
-    ).default;
+  const entrypoint = Bun.env["OPEN_RUNTIMES_ENTRYPOINT"] ?? "";
+  const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
+  const entrypointFile = Bun.file(entrypointFilePath);
 
-    if (
-      !(
-        userFunction ||
-        userFunction.constructor ||
-        userFunction.call ||
-        userFunction.apply
-      )
-    ) {
-      throw new Error("User function is not valid.");
-    }
-
-    output = await userFunction(context);
+  // Guard: Check file exists
+  if (!(await entrypointFile.exists())) {
+    context.error(
+      `Failed to load entrypoint, file ${entrypoint} does not exist.`,
+    );
+    logger.revertNativeLogs();
+    output = context.res.text("", 503, {});
   }
 
-  try {
-    if (safeTimeout !== null) {
-      const safeTimeoutConst: number = safeTimeout;
-      let executed = true;
+  // Guard: Try to load module
+  if (output === null) {
+    try {
+      userFunction = (await import(entrypointFilePath)).default;
 
-      const timeoutPromise = new Promise((promiseRes) => {
-        setTimeout(() => {
-          executed = false;
-          promiseRes(true);
-        }, safeTimeoutConst * 1000);
-      });
-
-      await Promise.race([execute(), timeoutPromise]);
-
-      if (!executed) {
-        context.error("Execution timed out.");
-        output = context.res.text("", 500, {});
+      if (typeof userFunction !== "function") {
+        throw new TypeError(
+          "Function signature invalid. Did you forget to export a 'main' function?",
+        );
       }
-    } else {
-      await execute();
+    } catch (e: any) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (e instanceof SyntaxError) {
+        context.error(`Syntax error in ${entrypoint}: ${message}`);
+      } else if (e instanceof TypeError) {
+        context.error(message);
+      } else {
+        context.error(`Failed to load module: ${message}`);
+      }
+      logger.revertNativeLogs();
+      output = context.res.text("", 503, {});
     }
-  } catch (e: any) {
-    context.error(
-      e.message.includes("Cannot resolve module")
-        ? "Code file not found."
-        : e.stack || e,
-    );
-    output = context.res.text("", 500, {});
-  } finally {
-    logger.revertNativeLogs();
+  }
+
+  // Execute user function
+  if (output === null) {
+    async function execute() {
+      output = await userFunction(context);
+    }
+
+    try {
+      if (safeTimeout !== null) {
+        const safeTimeoutConst: number = safeTimeout;
+        let executed = true;
+
+        const timeoutPromise = new Promise((promiseRes) => {
+          setTimeout(() => {
+            executed = false;
+            promiseRes(true);
+          }, safeTimeoutConst * 1000);
+        });
+
+        await Promise.race([execute(), timeoutPromise]);
+
+        if (!executed) {
+          context.error("Execution timed out.");
+          output = context.res.text("", 500, {});
+        }
+      } else {
+        await execute();
+      }
+    } catch (e: any) {
+      context.error(e.stack || e);
+      output = context.res.text("", 500, {});
+    } finally {
+      logger.revertNativeLogs();
+    }
   }
 
   if (output === null || output === undefined) {

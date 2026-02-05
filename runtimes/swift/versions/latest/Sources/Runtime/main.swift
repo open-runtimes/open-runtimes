@@ -79,7 +79,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
             return Response(
                 status: .internalServerError,
                 body: .init(
-                    string: "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.")
+                    string: "Header \"x-open-runtimes-timeout\" must be an integer greater than 0."
+                )
             )
         }
 
@@ -94,7 +95,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
                 return Response(
                     status: .internalServerError,
                     body: .init(
-                        string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
+                        string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."
+                    )
                 )
             }
         }

@@ -1,5 +1,6 @@
 [node]
 entry = "tests.js"
+entry_no_export = "no-export.js"
 versions = [
     "25",
     "24",
@@ -28,6 +29,7 @@ test = "Serverless/Node.php"
 
 [deno]
 entry = "tests.ts"
+entry_no_export = "no-export.ts"
 versions = ["2.6", "2.5", "2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt" }
@@ -36,6 +38,7 @@ test = "Serverless/Deno.php"
 
 [python]
 entry = "tests.py"
+entry_no_export = "no-export.py"
 versions = ["3.14", "3.13", "3.12", "3.11", "3.10", "3.9", "3.8"]
 commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "bash helpers/server.sh" }
 formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
@@ -80,6 +83,7 @@ tools = "dart --version && flutter --version"
 
 [ruby]
 entry = "tests.rb"
+entry_no_export = "no-export.rb"
 versions = ["4.0", "3.4", "3.3", "3.2", "3.1", "3.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "gem install rubocop", check = "rubocop --lint .", write = "rubocop --fix-layout --lint ." }
@@ -88,6 +92,7 @@ test = "Serverless/Ruby.php"
 
 [php]
 entry = "tests.php"
+entry_no_export = "no-export.php"
 versions = ["8.5", "8.4", "8.3", "8.2", "8.1", "8.0"]
 commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "bash helpers/server.sh" }
 formatter = { prepare = "composer require laravel/pint", check = "./vendor/bin/pint --test", write = "./vendor/bin/pint" }
@@ -104,6 +109,7 @@ test = "Serverless/Swift.php"
 
 [kotlin]
 entry = "Tests.kt"
+entry_no_export = "NoExport.kt"
 versions = ["2.3", "2.0", "1.9", "1.8", "1.6"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "apk add curl && curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.3.1/ktlint && chmod a+x ktlint && mv ktlint /usr/local/bin/", check = "ktlint .", write = "ktlint --format ." }
@@ -112,6 +118,7 @@ test = "Serverless/Kotlin.php"
 
 [java]
 entry = "Tests.java"
+entry_no_export = "NoExport.java"
 versions = ["25", "22", "21.0", "18.0", "17.0", "11.0", "8.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "curl -sSLO https://github.com/google/google-java-format/releases/download/v1.34.1/google-java-format-1.34.1-all-deps.jar && chmod a+x google-java-format-1.34.1-all-deps.jar && mv google-java-format-1.34.1-all-deps.jar /tmp/google-java-format.jar", check = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --set-exit-if-changed --dry-run", write = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --replace" }
@@ -129,6 +136,7 @@ test = "Serverless/CPP.php"
 
 [dotnet]
 entry = "Tests.cs"
+entry_no_export = "NoExport.cs"
 versions = ["10.0", "8.0", "7.0", "6.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "dotnet tool install --global csharpier", check = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier check .'", write = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier format .'" }
@@ -145,6 +153,7 @@ test = "Serverless/Go.php"
 
 [bun]
 entry = "tests.ts"
+entry_no_export = "no-export.ts"
 versions = ["1.3", "1.2", "1.1", "1.0"]
 commands = { install = "bun install", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using bunx biome formatter\"", check = "bunx @biomejs/biome format .", write = "bunx @biomejs/biome format --write ." }

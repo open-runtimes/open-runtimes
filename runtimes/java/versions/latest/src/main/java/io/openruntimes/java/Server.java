@@ -199,54 +199,86 @@ public class Server {
 
     logger.overrideNativeLogs();
 
-    RuntimeOutput output;
+    RuntimeOutput output = null;
+    Method classMethod = null;
+    Object instance = null;
 
+    String entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
+
+    // Guard: Try to load module
     try {
-      String entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
-      entrypoint = entrypoint.substring(0, entrypoint.length() - 5); // Remove .java
-      entrypoint = entrypoint.replaceAll("/", ".");
+      String className = entrypoint.substring(0, entrypoint.length() - 5); // Remove .java
+      className = className.replaceAll("/", ".");
 
-      final Class classToLoad = Class.forName("io.openruntimes.java." + entrypoint);
-      final Method classMethod = classToLoad.getDeclaredMethod("main", RuntimeContext.class);
-      final Object instance = classToLoad.newInstance();
-
-      if (safeTimeout > 0) {
-        Future<RuntimeOutput> future =
-            executor.submit(
-                () -> {
-                  try {
-                    return (RuntimeOutput) classMethod.invoke(instance, context);
-                  } catch (Exception e) {
-                    StringWriter sw = new StringWriter();
-                    PrintWriter pw = new PrintWriter(sw);
-                    e.printStackTrace(pw);
-
-                    context.error(sw.toString());
-                    context.getRes().send("", 500);
-                  }
-
-                  return null;
-                });
-
-        try {
-          output = future.get(safeTimeout, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-          future.cancel(true);
-          context.error("Execution timed out.");
-          output = context.getRes().send("", 500);
-        }
-      } else {
-        output = (RuntimeOutput) classMethod.invoke(instance, context);
-      }
-    } catch (Exception e) {
-      StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw);
-      e.printStackTrace(pw);
-
-      context.error(sw.toString());
-      output = context.getRes().send("", 500);
-    } finally {
+      final Class classToLoad = Class.forName("io.openruntimes.java." + className);
+      classMethod = classToLoad.getDeclaredMethod("main", RuntimeContext.class);
+      instance = classToLoad.newInstance();
+    } catch (ClassNotFoundException e) {
+      context.error("Class not found: " + e.getMessage());
       logger.revertNativeLogs();
+      output = context.getRes().send("", 503);
+    } catch (NoSuchMethodException e) {
+      context.error("Function signature invalid. Did you forget to export a 'main' function?");
+      logger.revertNativeLogs();
+      output = context.getRes().send("", 503);
+    } catch (InstantiationException e) {
+      context.error("Failed to create instance: " + e.getMessage());
+      logger.revertNativeLogs();
+      output = context.getRes().send("", 503);
+    } catch (IllegalAccessException e) {
+      context.error("Access denied: " + e.getMessage());
+      logger.revertNativeLogs();
+      output = context.getRes().send("", 503);
+    } catch (Exception e) {
+      context.error("Failed to load module: " + e.getMessage());
+      logger.revertNativeLogs();
+      output = context.getRes().send("", 503);
+    }
+
+    // Execute user function
+    if (output == null && classMethod != null && instance != null) {
+      final Method finalClassMethod = classMethod;
+      final Object finalInstance = instance;
+
+      try {
+        if (safeTimeout > 0) {
+          Future<RuntimeOutput> future =
+              executor.submit(
+                  () -> {
+                    try {
+                      return (RuntimeOutput) finalClassMethod.invoke(finalInstance, context);
+                    } catch (Exception e) {
+                      StringWriter sw = new StringWriter();
+                      PrintWriter pw = new PrintWriter(sw);
+                      e.printStackTrace(pw);
+
+                      context.error(sw.toString());
+                      context.getRes().send("", 500);
+                    }
+
+                    return null;
+                  });
+
+          try {
+            output = future.get(safeTimeout, TimeUnit.SECONDS);
+          } catch (TimeoutException e) {
+            future.cancel(true);
+            context.error("Execution timed out.");
+            output = context.getRes().send("", 500);
+          }
+        } else {
+          output = (RuntimeOutput) classMethod.invoke(instance, context);
+        }
+      } catch (Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+
+        context.error(sw.toString());
+        output = context.getRes().send("", 500);
+      } finally {
+        logger.revertNativeLogs();
+      }
     }
 
     if (output == null) {
