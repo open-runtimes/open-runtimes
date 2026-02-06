@@ -31,11 +31,11 @@ class RuntimeLogger {
             let errorsUrl = URL(fileURLWithPath: "/mnt/logs/" + self.id + "_errors.log")
 
             if !FileManager.default.fileExists(atPath: logsUrl.path) {
-                FileManager.default.createFile(atPath: logsUrl.path, contents: nil, attributes: nil)
+                _ = FileManager.default.createFile(atPath: logsUrl.path, contents: nil, attributes: nil)
             }
 
             if !FileManager.default.fileExists(atPath: errorsUrl.path) {
-                FileManager.default.createFile(atPath: errorsUrl.path, contents: nil, attributes: nil)
+                _ = FileManager.default.createFile(atPath: errorsUrl.path, contents: nil, attributes: nil)
             }
 
             do {
