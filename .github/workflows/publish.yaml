@@ -430,10 +430,10 @@ jobs:
             VERSION: "8.0"
             IMAGE: openruntimes/dotnet:v5-8.0
             ARCH: "linux/amd64,linux/arm64"
-          - ID: dotnet-10.0
+          - ID: dotnet-10
             RUNTIME: dotnet
-            VERSION: "10.0"
-            IMAGE: openruntimes/dotnet:v5-10.0
+            VERSION: "10"
+            IMAGE: openruntimes/dotnet:v5-10
             ARCH: "linux/amd64,linux/arm64"
           - ID: dotnet-7.0
             RUNTIME: dotnet
