@@ -27,7 +27,7 @@ func execute(req: Request) async throws -> Response {
     }
 
     if req.uri.path == "/__opr/timings" {
-        let timings = try String(contentsOfFile: "/mnt/telemetry/timings.txt")
+        let timings = try String(contentsOfFile: "/mnt/telemetry/timings.txt", encoding: .utf8)
         var outputHeaders = HTTPHeaders()
         outputHeaders.add(name: "content-type", value: "text/plain; charset=utf-8")
         return Response(
