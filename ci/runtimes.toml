@@ -93,7 +93,7 @@ test = "Serverless/Ruby.php"
 [php]
 entry = "tests.php"
 entry_no_export = "no-export.php"
-versions = ["8.5", "8.4", "8.3", "8.2", "8.1", "8.0"]
+versions = ["8.4", "8.3", "8.2", "8.1", "8.0"]
 commands = { install = "composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev", start = "bash helpers/server.sh" }
 formatter = { prepare = "composer require laravel/pint", check = "./vendor/bin/pint --test", write = "./vendor/bin/pint" }
 tools = "php --version && composer --version"

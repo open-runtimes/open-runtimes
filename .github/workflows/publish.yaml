@@ -290,11 +290,6 @@ jobs:
             ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 
           # PHP
-          - ID: php-8.5
-            RUNTIME: php
-            VERSION: "8.5"
-            IMAGE: openruntimes/php:v5-8.5
-            ARCH: "linux/amd64,linux/arm64"
           - ID: php-8.4
             RUNTIME: php
             VERSION: "8.4"
