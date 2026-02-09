@@ -2,6 +2,12 @@ name: "Build and Deploy OpenRuntimes Images"
 
 on:
   workflow_dispatch:
+    inputs:
+      runtime:
+        description: "Runtime to build (leave empty for all)"
+        required: false
+        default: ""
+        type: string
   release:
     types: [ published ]
 
@@ -130,6 +136,14 @@ jobs:
                 { ID: "go-1.23", RUNTIME: "go", VERSION: "1.23", IMAGE: "openruntimes/go:v5-1.23", ARCH: "linux/amd64,linux/arm64" },
               ]
             };
+
+            const runtimeFilter = '${{ inputs.runtime }}';
+            if (runtimeFilter) {
+              matrix.include = matrix.include.filter(item =>
+                item.RUNTIME === runtimeFilter || item.ID.startsWith(runtimeFilter)
+              );
+            }
+
             return matrix;
 
   deploy:
