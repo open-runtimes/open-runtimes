@@ -16,7 +16,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.result }}
+      is_rc: ${{ steps.check.outputs.is_rc }}
     steps:
+      - name: Check if RC build
+        id: check
+        run: |
+          if [[ "${{ github.ref }}" != "refs/heads/main" && "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "is_rc=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_rc=false" >> $GITHUB_OUTPUT
+          fi
       - name: Generate matrix
         id: matrix
         uses: actions/github-script@v7
@@ -148,7 +157,7 @@ jobs:
 
   deploy:
     needs: prepare
-    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    if: needs.prepare.outputs.is_rc != 'true'
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
@@ -186,7 +195,7 @@ jobs:
 
   deploy-rc:
     needs: prepare
-    if: github.ref != 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    if: needs.prepare.outputs.is_rc == 'true'
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
