@@ -228,5 +228,5 @@ jobs:
           platforms: ${{ matrix.ARCH }}
           build-args: |
             VERSION=${{ matrix.IMAGE }}-rc
-          push: false
+          push: true
           tags: ${{ matrix.IMAGE }}-rc
