@@ -30,10 +30,6 @@ set +o allexport
 # Enter server folder
 cd /usr/local/server
 
-prepare_start=$(awk '{print $1}' /proc/uptime)
 . /usr/local/server/helpers/prepare-start.sh
-prepare_end=$(awk '{print $1}' /proc/uptime)
-prepare_elapsed=$(awk "BEGIN{printf \"%.3f\", $prepare_end - $prepare_start}")
-echo "prepare=$prepare_elapsed" >>/mnt/telemetry/timings.txt
 
 echo 'Starting ...'
