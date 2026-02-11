@@ -16,6 +16,7 @@ if [ -f /mnt/code/code.tar ]; then
 	end=$(awk '{print $1}' /proc/uptime)
 	elapsed=$(awk "BEGIN{printf \"%.3f\", $end - $start}")
 	echo "extract_tar=$elapsed" >>/mnt/telemetry/timings.txt
+	echo "extract=$elapsed" >>/mnt/telemetry/timings.txt
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Uncompressed tar extraction: ${elapsed}s \e[0m"
 
 elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
@@ -38,6 +39,7 @@ elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
 	end_igzip=$(awk '{print $1}' /proc/uptime)
 	elapsed_igzip=$(awk "BEGIN{printf \"%.3f\", $end_igzip - $start_igzip}")
 	echo "extract_igzip=$elapsed_igzip" >>/mnt/telemetry/timings.txt
+	echo "extract=$elapsed_igzip" >>/mnt/telemetry/timings.txt
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m igzip extraction: ${elapsed_igzip}s \e[0m"
 
 	# Log comparison
