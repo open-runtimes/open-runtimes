@@ -28,20 +28,20 @@ elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
 	echo "extract_gzip=$elapsed_regular" >>/mnt/telemetry/timings.txt
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Regular gzip extraction: ${elapsed_regular}s \e[0m"
 
-	# Clean up for pigz test
+	# Clean up for igzip test
 	rm -rf /usr/local/server/src/function/*
 
-	# Run pigz extraction
-	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Running pigz extraction... \e[0m"
-	start_pigz=$(awk '{print $1}' /proc/uptime)
-	tar -I pigz -xf /mnt/code/code.tar.gz -C /usr/local/server/src/function
-	end_pigz=$(awk '{print $1}' /proc/uptime)
-	elapsed_pigz=$(awk "BEGIN{printf \"%.3f\", $end_pigz - $start_pigz}")
-	echo "extract_pigz=$elapsed_pigz" >>/mnt/telemetry/timings.txt
-	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Pigz extraction: ${elapsed_pigz}s \e[0m"
+	# Run igzip extraction
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Running igzip extraction... \e[0m"
+	start_igzip=$(awk '{print $1}' /proc/uptime)
+	tar -I igzip -xf /mnt/code/code.tar.gz -C /usr/local/server/src/function
+	end_igzip=$(awk '{print $1}' /proc/uptime)
+	elapsed_igzip=$(awk "BEGIN{printf \"%.3f\", $end_igzip - $start_igzip}")
+	echo "extract_igzip=$elapsed_igzip" >>/mnt/telemetry/timings.txt
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m igzip extraction: ${elapsed_igzip}s \e[0m"
 
 	# Log comparison
-	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Extraction comparison - gzip: ${elapsed_regular}s vs pigz: ${elapsed_pigz}s \e[0m"
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Extraction comparison - gzip: ${elapsed_regular}s vs igzip: ${elapsed_igzip}s \e[0m"
 
 else
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code archive not found. \e[0m"

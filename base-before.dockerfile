@@ -7,9 +7,9 @@ ENV OPEN_RUNTIMES_HEADERS="{}"
 
 RUN <<EOR
     if [ -f /etc/alpine-release ]; then
-        apk add util-linux pigz
+        apk add util-linux isa-l
     else
-        apt install -y util-linux pigz
+        apt install -y util-linux isal
     fi
 EOR
 
