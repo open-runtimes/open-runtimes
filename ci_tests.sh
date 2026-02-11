@@ -82,6 +82,7 @@ docker run \
 # Build with no-export entrypoint (for safe entrypoint tests)
 if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
 	echo "Building no-export entrypoint test..."
+	echo "$(pwd)"
 	mkdir -p no-export-build
 	cp -R . no-export-build/src
 	touch no-export-build/src/code.tar.gz
