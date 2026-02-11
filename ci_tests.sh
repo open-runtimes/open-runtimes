@@ -101,9 +101,8 @@ fi
 # Build with modclean disabled (for SSR modclean tests)
 if [[ "$TEST_CLASS" == SSR/* ]]; then
 	echo "Building modclean-disabled test..."
-	echo "$(pwd)"
-	mkdir -p modclean-disabled-build
-	cp -R . modclean-disabled-build/src
+	mkdir -p modclean-disabled-build/src
+	tar --exclude='./modclean-disabled-build' --exclude='./no-export-build' -cf - . | tar -xf - -C modclean-disabled-build/src
 	touch modclean-disabled-build/src/code.tar.gz
 	docker run \
 		--platform linux/x86_64 \
