@@ -13,7 +13,7 @@ start=$(awk '{print $1}' /proc/uptime)
 if [ -f /mnt/code/code.tar ]; then
 	tar -xf /mnt/code/code.tar -C /usr/local/server/src/function
 elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
-	tar -I igzip -xf /mnt/code/code.tar.gz -C /usr/local/server/src/function
+	tar -zxf /mnt/code/code.tar.gz -C /usr/local/server/src/function
 else
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code archive not found. \e[0m"
 	exit 1
