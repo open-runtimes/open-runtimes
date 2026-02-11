@@ -97,6 +97,25 @@ if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
 		bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 fi
 
+# Build with modclean disabled (for SSR modclean tests)
+if [[ "$TEST_CLASS" == SSR/* ]]; then
+	echo "Building modclean-disabled test..."
+	mkdir -p modclean-disabled-build
+	cp -R . modclean-disabled-build/src
+	touch modclean-disabled-build/src/code.tar.gz
+	docker run \
+		--platform linux/x86_64 \
+		--rm \
+		--name open-runtimes-test-build-modclean \
+		-v /tmp/.build:/usr/local/server/.build \
+		-v "$(pwd)/modclean-disabled-build/src":/mnt/code:rw \
+		-e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" \
+		-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
+		-e OPEN_RUNTIMES_MODCLEAN=disabled \
+		open-runtimes/test-runtime \
+		bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
+fi
+
 # Tools test
 echo "Testing tools ..."
 REQUIRED_TOOLS="tar --help && unzip --help"

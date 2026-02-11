@@ -23,7 +23,7 @@ if [ -e "$ENTRYPOINT" ]; then
 	mv /usr/local/build/package*.json ./
 	mv /usr/local/build/node_modules/ ./node_modules/
 
-	if [[ "${DISABLE_MODCLEAN,,}" != "true" ]]; then
+	if [[ "${OPEN_RUNTIMES_MODCLEAN,,}" != "disabled" ]]; then
 		modclean --patterns default:safe --no-progress --run
 	fi
 
