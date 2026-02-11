@@ -82,7 +82,6 @@ docker run \
 # Build with no-export entrypoint (for safe entrypoint tests)
 if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
 	echo "Building no-export entrypoint test..."
-	echo "$(pwd)"
 	mkdir -p no-export-build
 	cp -R . no-export-build/src
 	touch no-export-build/src/code.tar.gz
@@ -102,7 +101,7 @@ fi
 if [[ "$TEST_CLASS" == SSR/* ]]; then
 	echo "Building modclean-disabled test..."
 	mkdir -p modclean-disabled-build/src
-	tar --exclude='./modclean-disabled-build' --exclude='./no-export-build' -cf - . | tar -xf - -C modclean-disabled-build/src
+	tar --exclude='./modclean-disabled-build' -cf - . | tar -xf - -C modclean-disabled-build/src
 	touch modclean-disabled-build/src/code.tar.gz
 	docker run \
 		--platform linux/x86_64 \

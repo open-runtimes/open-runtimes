@@ -202,8 +202,14 @@ class SSR extends CSR
         self::assertStringContainsString('HIDDEN_FILE', $response['body']);
     }
     
-    public function testModcleanDisabled(): void
+    public function testModclean(): void
     {
+        // Modclean is enabled, so we should not have .md files in node_modules
+        $archive = '/app/tests/.runtime/code.tar.gz';
+        $result = \shell_exec("tar -tzf {$archive} 2>/dev/null | grep 'node_modules/.*\\.md$' | head -1");
+        self::assertEmpty(\trim($result ?? ''), 'Expected no .md files in node_modules when modclean is enabled');
+
+        // Modclean is disabled, so we should have .md files in node_modules
         $archive = '/app/tests/.runtime/modclean-disabled-build/src/code.tar.gz';
         $result = \shell_exec("tar -tzf {$archive} 2>/dev/null | grep 'node_modules/.*\\.md$' | head -1");
         self::assertNotEmpty(\trim($result ?? ''), 'Expected .md files in node_modules when modclean is disabled');
