@@ -166,6 +166,10 @@ public class Tests {
         URL url = new URL("https://dummyjson.com/todos/" + context.getReq().getBodyRaw());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
+        con.setRequestProperty(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
+                + " Chrome/91.0.4472.124 Safari/537.36");
         con.getResponseCode();
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
