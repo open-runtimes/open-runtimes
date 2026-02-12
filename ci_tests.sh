@@ -54,10 +54,28 @@ else
 	fi
 fi
 
+SERVICE_RUNTIMES=("postgres" "mysql" "mongodb")
+
+# Check if RUNTIME is in SERVICE_RUNTIMES array
+is_service_runtime=false
+for service_runtime in "${SERVICE_RUNTIMES[@]}"; do
+	if [[ "$service_runtime" == "$RUNTIME" ]]; then
+		is_service_runtime=true
+		break
+	fi
+done
+
 # Setup telemetry folder
 TELEMETRY_FOLDER="$(pwd)/tests/resources/telemetry"
 mkdir -p "$TELEMETRY_FOLDER"
-echo -e "local_download=0.200\nremote_download=10.560" >"$TELEMETRY_FOLDER/timings.txt"
+
+# Database runtimes don't have download timings, only startup timing
+if [[ "$is_service_runtime" == "true" ]]; then
+	# Start with empty timings file for database runtimes
+	: >"$TELEMETRY_FOLDER/timings.txt"
+else
+	echo -e "local_download=0.200\nremote_download=10.560" >"$TELEMETRY_FOLDER/timings.txt"
+fi
 
 # Prevent Docker from creating folder
 cd ./tests/.runtime
@@ -66,6 +84,15 @@ touch code.tar.gz
 
 BUILD_SCRIPT="helpers/build.sh"
 START_SCRIPT="helpers/start.sh"
+
+# Database runtimes use different script structure
+if [[ "$is_service_runtime" == "true" ]]; then
+	# Database runtimes execute their start command directly
+	START_EXECUTION="$START_COMMAND"
+else
+	# Function runtimes use helpers/start.sh with the command as argument
+	START_EXECUTION="bash $START_SCRIPT \"$START_COMMAND\""
+fi
 
 # Main build
 docker run \
@@ -153,7 +180,7 @@ docker run \
 	-e CUSTOM_ENV_VAR=customValue \
 	-p 3000:3000 \
 	open-runtimes/test-runtime \
-	bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+	bash -c "$START_EXECUTION"
 
 # Secondary tests
 # 1. Empty enforced headers
@@ -162,7 +189,12 @@ docker run \
 # 4. No custom env variable
 # 5. Uncompressed builds
 # 6. Custom cache header (static + ssr)
-PREPARE_UNCOMPRESSED_FILE="gunzip -ck /mnt/code/code.tar.gz > /mnt/code/code.tar"
+if [[ "$is_service_runtime" == "true" ]]; then
+	# Database runtimes don't need to prepare code files
+	PREPARE_UNCOMPRESSED_FILE="true"
+else
+	PREPARE_UNCOMPRESSED_FILE="gunzip -ck /mnt/code/code.tar.gz > /mnt/code/code.tar"
+fi
 docker run \
 	--platform linux/x86_64 \
 	--network openruntimes \
@@ -178,7 +210,7 @@ docker run \
 	-e OPEN_RUNTIMES_SECRET= \
 	-p 3001:3000 \
 	open-runtimes/test-runtime \
-	bash -c "$PREPARE_UNCOMPRESSED_FILE && $START_SCRIPT \"$START_COMMAND\""
+	bash -c "$PREPARE_UNCOMPRESSED_FILE && $START_EXECUTION"
 
 # Teritary tests
 # 1. Same as secondary
@@ -198,7 +230,7 @@ docker run \
 	-e OPEN_RUNTIMES_SECRET= \
 	-p 3002:3000 \
 	open-runtimes/test-runtime \
-	bash -c "bash $START_SCRIPT \"$START_COMMAND\""
+	bash -c "$START_EXECUTION"
 
 # No export entrypoint tests (safe entrypoint feature)
 if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then

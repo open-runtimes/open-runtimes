@@ -1,0 +1,17 @@
+{
+  "name": "open-runtimes-postgres",
+  "version": "1.0.0",
+  "description": "OpenRuntimes PostgreSQL Database Runtime",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "keywords": ["postgres", "postgresql", "database", "openruntimes"],
+  "author": "team@appwrite.io",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}

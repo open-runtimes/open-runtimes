@@ -253,3 +253,25 @@ formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", wri
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/Analog.php"
 output = "./dist/analog"
+
+# Database Runtimes
+[postgres]
+versions = ["16"]
+commands = { install = "echo 'Database runtimes do not build user code'", start = "bash helpers/server.sh" }
+formatter = { prepare = "echo \"No formatter for database runtime\"", check = "echo \"No formatting required\"", write = "echo \"No formatting required\"" }
+tools = "node --version && npm --version && postgres --version"
+test = "Database/Postgres.php"
+
+[mysql]
+versions = ["8.4"]
+commands = { install = "echo 'Database runtimes do not build user code'", start = "bash helpers/server.sh" }
+formatter = { prepare = "echo \"No formatter for database runtime\"", check = "echo \"No formatting required\"", write = "echo \"No formatting required\"" }
+tools = "node --version && npm --version && mysql --version"
+test = "Database/MySQL.php"
+
+[mongodb]
+versions = ["8"]
+commands = { install = "echo 'Database runtimes do not build user code'", start = "bash helpers/server.sh" }
+formatter = { prepare = "echo \"No formatter for database runtime\"", check = "echo \"No formatting required\"", write = "echo \"No formatting required\"" }
+tools = "node --version && npm --version && mongod --version"
+test = "Database/MongoDB.php"
