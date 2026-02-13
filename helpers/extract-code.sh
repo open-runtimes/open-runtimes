@@ -15,7 +15,7 @@ if [ -f "/mnt/code/.extracted" ]; then
 	for item in /mnt/code/*; do
 		# Skip archive files and marker
 		case "$(basename "$item")" in
-			code.tar|code.tar.gz|code.gz|.extracted) continue ;;
+			code.tar | code.tar.gz | code.gz | .extracted) continue ;;
 		esac
 		ln -s "$item" /usr/local/server/src/function/ || symlink_failed=true
 	done
