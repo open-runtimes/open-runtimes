@@ -11,10 +11,26 @@ if [ -f "/mnt/code/.extracted" ]; then
 
 	start=$(awk '{print $1}' /proc/uptime)
 	shopt -s dotglob
+	symlink_failed=false
 	for item in /mnt/code/*; do
-		ln -s "$item" /usr/local/server/src/function/
+		# Skip archive files and marker
+		case "$(basename "$item")" in
+			code.tar|code.tar.gz|code.gz|.extracted) continue ;;
+		esac
+		ln -s "$item" /usr/local/server/src/function/ || symlink_failed=true
 	done
 	shopt -u dotglob
+
+	if [ "$symlink_failed" = true ]; then
+		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Symlink failed, falling back to extraction. \e[0m"
+		rm -f /usr/local/server/src/function/*
+		if [ -f /mnt/code/code.tar ]; then
+			tar -xf /mnt/code/code.tar -C /usr/local/server/src/function
+		elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
+			tar -zxf /mnt/code/code.tar.gz -C /usr/local/server/src/function
+		fi
+	fi
+
 	end=$(awk '{print $1}' /proc/uptime)
 	elapsed=$(awk "BEGIN{printf \"%.3f\", $end - $start}")
 	echo "symlink=$elapsed" >>/mnt/telemetry/timings.txt
