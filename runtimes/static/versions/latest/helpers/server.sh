@@ -56,6 +56,7 @@ $OPEN_RUNTIMES_CACHE_HEADER = "public, max-age=36000"
 EOF
 
 # Start server
+echo "HTTP server successfully started!"
 static-web-server \
 	-p 3000 \
 	--log-level info \
