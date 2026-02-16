@@ -2,6 +2,7 @@
 entry = "tests.js"
 entry_no_export = "no-export.js"
 versions = [
+    "25",
     "24",
     "23",
     "22",
@@ -29,7 +30,7 @@ test = "Serverless/Node.php"
 [deno]
 entry = "tests.ts"
 entry_no_export = "no-export.ts"
-versions = ["2.5", "2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
+versions = ["2.6", "2.5", "2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt" }
 tools = "deno --version" # TODO: NPM, PNPM and Yarn dont work in Deno alpine currently: https://github.com/denoland/deno_docker/issues/373
@@ -83,7 +84,7 @@ tools = "dart --version && flutter --version"
 [ruby]
 entry = "tests.rb"
 entry_no_export = "no-export.rb"
-versions = ["3.4", "3.3", "3.2", "3.1", "3.0"]
+versions = ["4.0", "3.4", "3.3", "3.2", "3.1", "3.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "gem install rubocop", check = "rubocop --lint .", write = "rubocop --fix-layout --lint ." }
 tools = "ruby --version && gem --version"
@@ -100,7 +101,7 @@ test = "Serverless/PHP.php"
 
 [swift]
 entry = "Tests.swift"
-versions = ["5.10", "5.9", "5.8"]
+versions = ["6.2", "5.10", "5.9", "5.8"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "rm -rf SwiftFormat && git clone https://github.com/nicklockwood/SwiftFormat && cd SwiftFormat && swift build -c release && mv /mnt/code/SwiftFormat/.build/release/swiftformat /tmp/swiftformat && cd .. && rm -rf SwiftFormat", check = "/tmp/swiftformat . --lint --swiftversion 5.8", write = "/tmp/swiftformat . --verbose --swiftversion 5.8" }
 tools = "swift --version"
@@ -109,7 +110,7 @@ test = "Serverless/Swift.php"
 [kotlin]
 entry = "Tests.kt"
 entry_no_export = "NoExport.kt"
-versions = ["2.0", "1.9", "1.8", "1.6"]
+versions = ["2.3", "2.0", "1.9", "1.8", "1.6"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "apk add curl && curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.3.1/ktlint && chmod a+x ktlint && mv ktlint /usr/local/bin/", check = "ktlint .", write = "ktlint --format ." }
 tools = "bash gradlew --version"
@@ -118,17 +119,17 @@ test = "Serverless/Kotlin.php"
 [java]
 entry = "Tests.java"
 entry_no_export = "NoExport.java"
-versions = ["22", "21.0", "18.0", "17.0", "11.0", "8.0"]
+versions = ["25", "22", "21.0", "18.0", "17.0", "11.0", "8.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
-formatter = { prepare = "curl -sSLO https://github.com/google/google-java-format/releases/download/v1.22.0/google-java-format-1.22.0-all-deps.jar && chmod a+x google-java-format-1.22.0-all-deps.jar && mv google-java-format-1.22.0-all-deps.jar /tmp/google-java-format.jar", check = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --set-exit-if-changed --dry-run", write = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --replace" }
+formatter = { prepare = "curl -sSLO https://github.com/google/google-java-format/releases/download/v1.34.1/google-java-format-1.34.1-all-deps.jar && chmod a+x google-java-format-1.34.1-all-deps.jar && mv google-java-format-1.34.1-all-deps.jar /tmp/google-java-format.jar", check = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --set-exit-if-changed --dry-run", write = "find ./ -name \"*.java\" -type f -print | xargs java -jar /tmp/google-java-format.jar --replace" }
 tools = "bash gradlew --version"
 test = "Serverless/Java.php"
 
 [cpp]
 entry = "tests.cc"
-versions = ["20", "17"]
+versions = ["23", "20", "17"]
 commands = { install = "", start = "bash helpers/server.sh" }
-formatter = { prepare = "apk add coreutils git clang-extra-tools", check = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror --dry-run", write = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror" }
+formatter = { prepare = "apk add coreutils git clang-extra-tools", check = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format --Werror --dry-run", write = "find ./ -iname '*.h' -o -iname '*.cpp' | xargs clang-format -i --Werror" }
 tools = "cmake --version && make --version"
 test = "Serverless/CPP.php"
 
@@ -136,7 +137,7 @@ test = "Serverless/CPP.php"
 [dotnet]
 entry = "Tests.cs"
 entry_no_export = "NoExport.cs"
-versions = ["8.0", "7.0", "6.0"]
+versions = ["10", "8.0", "7.0", "6.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "dotnet tool install --global csharpier", check = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier check .'", write = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier format .'" }
 tools = "dotnet --version"

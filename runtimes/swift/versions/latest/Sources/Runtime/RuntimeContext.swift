@@ -8,7 +8,7 @@ extension NSArray: CollectionType {}
 extension NSSet: CollectionType {}
 extension NSDictionary: CollectionType {}
 
-class RuntimeContext {
+class RuntimeContext: @unchecked Sendable {
     let req: RuntimeRequest
     let res: RuntimeResponse
     let logger: RuntimeLogger

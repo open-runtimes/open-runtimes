@@ -1,5 +1,5 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM ghcr.io/cirruslabs/flutter:3.32.0
+FROM ghcr.io/cirruslabs/flutter:3.32.6
 
 INCLUDE ./base-before
 INCLUDE ./flutter
