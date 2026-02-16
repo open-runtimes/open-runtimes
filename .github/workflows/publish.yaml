@@ -45,6 +45,7 @@ jobs:
                 { ID: "static-1", RUNTIME: "static", VERSION: "1", IMAGE: "openruntimes/static:v5-1", ARCH: "linux/amd64,linux/arm64" },
 
                 // Node
+                { ID: "node-25.js", RUNTIME: "node", VERSION: "25", IMAGE: "openruntimes/node:v5-25", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "node-24.js", RUNTIME: "node", VERSION: "24", IMAGE: "openruntimes/node:v5-24", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "node-23.js", RUNTIME: "node", VERSION: "23", IMAGE: "openruntimes/node:v5-23", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "node-22.js", RUNTIME: "node", VERSION: "22", IMAGE: "openruntimes/node:v5-22", ARCH: "linux/amd64,linux/arm64" },
@@ -56,6 +57,7 @@ jobs:
                 { ID: "node-14.5.js", RUNTIME: "node", VERSION: "14.5", IMAGE: "openruntimes/node:v5-14.5", ARCH: "linux/amd64" },
 
                 // Deno
+                { ID: "deno-2.6", RUNTIME: "deno", VERSION: "2.6", IMAGE: "openruntimes/deno:v5-2.6", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "deno-2.5", RUNTIME: "deno", VERSION: "2.5", IMAGE: "openruntimes/deno:v5-2.5", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "deno-2.0", RUNTIME: "deno", VERSION: "2.0", IMAGE: "openruntimes/deno:v5-2.0", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "deno-1.46", RUNTIME: "deno", VERSION: "1.46", IMAGE: "openruntimes/deno:v5-1.46", ARCH: "linux/amd64,linux/arm64" },
@@ -92,6 +94,7 @@ jobs:
                 { ID: "dart-2.16", RUNTIME: "dart", VERSION: "2.16", IMAGE: "openruntimes/dart:v5-2.16", ARCH: "linux/amd64,linux/arm64" },
 
                 // Ruby
+                { ID: "ruby-4.0", RUNTIME: "ruby", VERSION: "4.0", IMAGE: "openruntimes/ruby:v5-4.0", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
                 { ID: "ruby-3.4", RUNTIME: "ruby", VERSION: "3.4", IMAGE: "openruntimes/ruby:v5-3.4", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
                 { ID: "ruby-3.3", RUNTIME: "ruby", VERSION: "3.3", IMAGE: "openruntimes/ruby:v5-3.3", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
                 { ID: "ruby-3.2", RUNTIME: "ruby", VERSION: "3.2", IMAGE: "openruntimes/ruby:v5-3.2", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
@@ -106,17 +109,20 @@ jobs:
                 { ID: "php-8.0", RUNTIME: "php", VERSION: "8.0", IMAGE: "openruntimes/php:v5-8.0", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
 
                 // Swift
+                { ID: "swift-6.2", RUNTIME: "swift", VERSION: "6.2", IMAGE: "openruntimes/swift:v5-6.2", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "swift-5.10", RUNTIME: "swift", VERSION: "5.10", IMAGE: "openruntimes/swift:v5-5.10", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "swift-5.9", RUNTIME: "swift", VERSION: "5.9", IMAGE: "openruntimes/swift:v5-5.9", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "swift-5.8", RUNTIME: "swift", VERSION: "5.8", IMAGE: "openruntimes/swift:v5-5.8", ARCH: "linux/amd64,linux/arm64" },
 
                 // Kotlin
+                { ID: "kotlin-2.3", RUNTIME: "kotlin", VERSION: "2.3", IMAGE: "openruntimes/kotlin:v5-2.3", ARCH: "linux/amd64" },
                 { ID: "kotlin-2.0", RUNTIME: "kotlin", VERSION: "2.0", IMAGE: "openruntimes/kotlin:v5-2.0", ARCH: "linux/amd64" },
                 { ID: "kotlin-1.9", RUNTIME: "kotlin", VERSION: "1.9", IMAGE: "openruntimes/kotlin:v5-1.9", ARCH: "linux/amd64" },
                 { ID: "kotlin-1.8", RUNTIME: "kotlin", VERSION: "1.8", IMAGE: "openruntimes/kotlin:v5-1.8", ARCH: "linux/amd64" },
                 { ID: "kotlin-1.6", RUNTIME: "kotlin", VERSION: "1.6", IMAGE: "openruntimes/kotlin:v5-1.6", ARCH: "linux/amd64" },
 
                 // Java
+                { ID: "java-25", RUNTIME: "java", VERSION: "25", IMAGE: "openruntimes/java:v5-25", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "java-22", RUNTIME: "java", VERSION: "22", IMAGE: "openruntimes/java:v5-22", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "java-21.0", RUNTIME: "java", VERSION: "21.0", IMAGE: "openruntimes/java:v5-21.0", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "java-18.0", RUNTIME: "java", VERSION: "18.0", IMAGE: "openruntimes/java:v5-18.0", ARCH: "linux/amd64,linux/arm64" },
@@ -125,10 +131,12 @@ jobs:
                 { ID: "java-8.0", RUNTIME: "java", VERSION: "8.0", IMAGE: "openruntimes/java:v5-8.0", ARCH: "linux/amd64,linux/arm64" },
 
                 // C++
+                { ID: "cpp-23", RUNTIME: "cpp", VERSION: "23", IMAGE: "openruntimes/cpp:v5-23", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
                 { ID: "cpp-20", RUNTIME: "cpp", VERSION: "20", IMAGE: "openruntimes/cpp:v5-20", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
                 { ID: "cpp-17", RUNTIME: "cpp", VERSION: "17", IMAGE: "openruntimes/cpp:v5-17", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
 
                 // Dotnet
+                { ID: "dotnet-10", RUNTIME: "dotnet", VERSION: "10", IMAGE: "openruntimes/dotnet:v5-10", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "dotnet-8.0", RUNTIME: "dotnet", VERSION: "8.0", IMAGE: "openruntimes/dotnet:v5-8.0", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "dotnet-7.0", RUNTIME: "dotnet", VERSION: "7.0", IMAGE: "openruntimes/dotnet:v5-7.0", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "dotnet-6.0", RUNTIME: "dotnet", VERSION: "6.0", IMAGE: "openruntimes/dotnet:v5-6.0", ARCH: "linux/amd64,linux/arm64" },
