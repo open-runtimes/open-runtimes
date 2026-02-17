@@ -1,6 +1,6 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM denoland/deno:alpine-2.5.7
+FROM golang:1.26.0-alpine3.2323
 
 INCLUDE ./base-before
-INCLUDE ./deno
+INCLUDE ./go
 INCLUDE ./base-after

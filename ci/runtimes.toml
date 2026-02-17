@@ -145,7 +145,7 @@ test = "Serverless/Dotnet.php"
 
 [go]
 entry = "tests.go"
-versions = ["1.25", "1.24", "1.23"]
+versions = ["1.26", "1.25", "1.24", "1.23"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "if [ \"$(gofmt -s -l . | wc -l)\" -gt 0 ]; then echo 'Formatting errors:' && gofmt -s -l . && exit 1; fi", write = "gofmt -w -s ." }
 tools = "go version"
