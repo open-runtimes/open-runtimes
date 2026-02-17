@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr edit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git commit:*)",
+      "Bash(git show:*)",
+      "Bash(docker run:*)",
+      "WebFetch(domain:pkgs.alpinelinux.org)",
+      "Bash(grep:*)",
+      "Bash(git rm:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(ls:*)",
+      "Bash(shfmt:*)",
+      "Bash(shellcheck:*)",
+      "Bash(RUNTIME_FOLDER=node VERSION_FOLDER=22 bash:*)",
+      "Bash(docker tag:*)",
+      "Bash(docker build:*)",
+      "Bash(bash:*)",
+      "Bash(docker rm:*)"
+    ]
+  }
+}
