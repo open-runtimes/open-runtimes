@@ -1,5 +1,5 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM golang:1.26.0-alpine3.2323
+FROM golang:1.26.0-alpine3.23
 
 INCLUDE ./base-before
 INCLUDE ./go
