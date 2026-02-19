@@ -118,7 +118,7 @@ jobs:
           SIZE_MB=$(echo "scale=2; ${SIZE_BYTES} / 1048576" | bc)
           echo "mb=${SIZE_MB}" >> "$GITHUB_OUTPUT"
       - name: Report image size
-        if: always() && steps.size.outputs.mb && steps.size.outputs.mb != '0'
+        if: always() && steps.size.outputs.mb && steps.size.outputs.mb != '0' && matrix.REPORT_SIZE
         uses: actions/github-script@v7
         with:
           script: |
