@@ -122,7 +122,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const marker = '<!-- image-size-check -->';
+            const marker = '<!-- image-size-check ';
             const id = '${{ matrix.ID }}';
             const size = '${{ steps.size.outputs.mb }} MB';
             const pr = context.payload.pull_request.number;
@@ -135,21 +135,24 @@ jobs:
               const { data: comments } = await github.rest.issues.listComments({ ...opts, issue_number: pr });
               const comment = comments.find(c => c.body?.includes(marker));
 
-              const rows = new Map();
-              for (const m of (comment?.body ?? '').matchAll(/^\| `(.+?)` \| (.+?) \|$/gm))
-                rows.set(m[1], m[2]);
-              rows.set(id, size);
+              // Read state from base64-encoded JSON in comment
+              const state = {};
+              const b64Match = comment?.body?.match(/<!-- image-size-check (.+?) -->/);
+              if (b64Match) Object.assign(state, JSON.parse(Buffer.from(b64Match[1], 'base64').toString()));
+              state[id] = size;
 
-              const sorted = [...rows.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-              let body = `${marker}\n## Docker Image Sizes\n\n| Runtime | Size |\n|---------|------|\n`;
-              for (const [n, s] of sorted) body += `| \`${n}\` | ${s} |\n`;
+              // Render table from state
+              const encoded = Buffer.from(JSON.stringify(state)).toString('base64');
+              let body = `<!-- image-size-check ${encoded} -->\n## Docker Image Sizes\n\n| Runtime | Size |\n|---------|------|\n`;
+              for (const [n, s] of Object.entries(state)) body += `| \`${n}\` | ${s} |\n`;
 
               if (comment)
                 await github.rest.issues.updateComment({ ...opts, comment_id: comment.id, body });
               else
                 await github.rest.issues.createComment({ ...opts, issue_number: pr, body });
 
+              // Verify our entry survived (handles race condition)
               await new Promise(r => setTimeout(r, 1000));
               const { data: verify } = await github.rest.issues.listComments({ ...opts, issue_number: pr });
-              if (verify.find(c => c.body?.includes(marker))?.body?.includes(`| \`${id}\` |`)) break;
+              if (verify.find(c => c.body?.includes(marker))?.body?.includes(id)) break;
             }
