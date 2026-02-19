@@ -74,6 +74,7 @@ tools = "dart --version"
 test = "Serverless/Dart.php"
 
 [flutter]
+report_size = false
 versions = ["3.38", "3.35", "3.32", "3.29", "3.27", "3.24"]
 commands = { install = "flutter build web", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
@@ -168,6 +169,7 @@ tools = "static-web-server --version"
 test = "XStatic.php"
 
 [astro]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/astro/env.sh && npm install && npm run build && bash /usr/local/server/helpers/astro/bundle.sh", start = "bash helpers/astro/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -176,6 +178,7 @@ test = "SSR/Astro.php"
 output = "./dist"
 
 [sveltekit]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/sveltekit/env.sh && npm install && npm run build && bash /usr/local/server/helpers/sveltekit/bundle.sh", start = "bash helpers/sveltekit/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -184,6 +187,7 @@ test = "SSR/SvelteKit.php"
 output = "./build"
 
 [next-js]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -192,6 +196,7 @@ test = "SSR/NextJS.php"
 output = "./.next"
 
 [next-js-turbopack]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -200,6 +205,7 @@ test = "SSR/NextJS.php"
 output = "./.next"
 
 [nuxt]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/nuxt/env.sh && npm install && npm run build && bash /usr/local/server/helpers/nuxt/bundle.sh", start = "bash helpers/nuxt/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -208,6 +214,7 @@ test = "SSR/Nuxt.php"
 output = "./.output"
 
 [tanstack_start_nitro_v2]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -216,6 +223,7 @@ test = "SSR/TanstackStartNitro.php"
 output = "./.output"
 
 [tanstack_start_nitro_v3]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -224,6 +232,7 @@ test = "SSR/TanstackStartNitro.php"
 output = "./.output"
 
 [tanstack_start_native]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -232,6 +241,7 @@ test = "SSR/TanstackStart.php"
 output = "./dist"
 
 [remix]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/remix/env.sh && npm install && npm run build && bash /usr/local/server/helpers/remix/bundle.sh", start = "bash helpers/remix/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -240,6 +250,7 @@ test = "SSR/Remix.php"
 output = "./build"
 
 [angular]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/angular/env.sh && npm install && npm run build && bash /usr/local/server/helpers/angular/bundle.sh", start = "bash helpers/angular/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -248,6 +259,7 @@ test = "SSR/Angular.php"
 output = "./dist/angular"
 
 [analog]
+report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/analog/env.sh && npm install && npm run build && bash /usr/local/server/helpers/analog/bundle.sh", start = "bash helpers/analog/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }

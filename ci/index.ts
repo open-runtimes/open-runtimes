@@ -23,6 +23,7 @@ interface Runtime {
     tools: string,
     commands: RuntimeCommands,
     formatter: RuntimeFormatter,
+    report_size?: boolean,
 
     // Website metadata
     output: string,
@@ -114,6 +115,9 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
         }
 
         const id = `${key}${version ? `-${version}` : ''}`;
+        const reportSize = (key === 'node' && version.includes('mjs'))
+            ? false
+            : (runtime.report_size !== false);
 
         object.push({
             ID: id,
@@ -130,6 +134,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             FORMATTER_PREPARE: runtime.formatter.prepare,
             ENFORCED_RUNTIME: runtime.runtime?.name ?? "",
             ENFORCED_VERSION: runtime.runtime?.version ?? "",
+            REPORT_SIZE: reportSize,
         })
     });
 
