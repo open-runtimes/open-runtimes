@@ -72,6 +72,9 @@ jobs:
     needs: prepare
     name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
@@ -107,3 +110,46 @@ jobs:
           OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}
           ENFORCED_RUNTIME: ${{ matrix.ENFORCED_RUNTIME }}
           ENFORCED_VERSION: ${{ matrix.ENFORCED_VERSION }}
+      - name: Get image size
+        id: size
+        if: always()
+        run: |
+          SIZE_BYTES=$(docker image inspect open-runtimes/test-runtime --format='{{.Size}}' 2>/dev/null || echo "0")
+          SIZE_MB=$(echo "scale=2; ${SIZE_BYTES} / 1048576" | bc)
+          echo "mb=${SIZE_MB}" >> "$GITHUB_OUTPUT"
+      - name: Report image size
+        if: always() && steps.size.outputs.mb && steps.size.outputs.mb != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- image-size-check -->';
+            const id = '${{ matrix.ID }}';
+            const size = '${{ steps.size.outputs.mb }} MB';
+            const pr = context.payload.pull_request.number;
+            const opts = { owner: context.repo.owner, repo: context.repo.repo };
+
+            for (let attempt = 0; attempt < 5; attempt++) {
+              if (attempt > 0)
+                await new Promise(r => setTimeout(r, Math.floor(Math.random() * 5000) + 2000));
+
+              const { data: comments } = await github.rest.issues.listComments({ ...opts, issue_number: pr });
+              const comment = comments.find(c => c.body?.includes(marker));
+
+              const rows = new Map();
+              for (const m of (comment?.body ?? '').matchAll(/^\| `(.+?)` \| (.+?) \|$/gm))
+                rows.set(m[1], m[2]);
+              rows.set(id, size);
+
+              const sorted = [...rows.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+              let body = `${marker}\n## Docker Image Sizes\n\n| Runtime | Size |\n|---------|------|\n`;
+              for (const [n, s] of sorted) body += `| \`${n}\` | ${s} |\n`;
+
+              if (comment)
+                await github.rest.issues.updateComment({ ...opts, comment_id: comment.id, body });
+              else
+                await github.rest.issues.createComment({ ...opts, issue_number: pr, body });
+
+              await new Promise(r => setTimeout(r, 1000));
+              const { data: verify } = await github.rest.issues.listComments({ ...opts, issue_number: pr });
+              if (verify.find(c => c.body?.includes(marker))?.body?.includes(`| \`${id}\` |`)) break;
+            }
