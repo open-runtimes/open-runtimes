@@ -15,7 +15,7 @@ data class RuntimeRequest(
     val bodyText: String
         get() = String(bodyBinary)
     val bodyJson: MutableMap<String, Any>
-        get() = gson.fromJson(bodyText, MutableMap::class.java) as MutableMap<String, Any>
+        get() = gsonInternal.fromJson(bodyText, MutableMap::class.java) as MutableMap<String, Any>
     val bodyRaw: String
         get() = bodyText
     val body: Any

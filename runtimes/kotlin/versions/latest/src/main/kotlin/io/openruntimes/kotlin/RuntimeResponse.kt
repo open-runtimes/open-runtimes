@@ -1,12 +1,6 @@
 package io.openruntimes.kotlin
 
-import com.google.gson.GsonBuilder
-
 public class RuntimeResponse {
-    companion object {
-        private val gson = GsonBuilder().serializeNulls().create()
-    }
-
     fun binary(
         bytes: ByteArray,
         statusCode: Int = 200,
@@ -31,7 +25,7 @@ public class RuntimeResponse {
         headers: MutableMap<String, String> = mutableMapOf(),
     ): RuntimeOutput {
         headers["content-type"] = "application/json"
-        return this.text(gson.toJson(json), statusCode, headers)
+        return this.text(gsonInternal.toJson(json), statusCode, headers)
     }
 
     fun empty(): RuntimeOutput = this.text("", 204, mutableMapOf<String, String>())

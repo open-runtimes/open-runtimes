@@ -14,8 +14,13 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberFunctions
 import kotlin.time.Duration.Companion.seconds
 
-val gson: Gson = GsonBuilder().serializeNulls().create()
-val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
+val gsonInternal: Gson =
+    GsonBuilder()
+        .setObjectToNumberStrategy(
+            ToNumberPolicy.LONG_OR_DOUBLE,
+        ).setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+        .serializeNulls()
+        .create()
 
 suspend fun main() {
     println("HTTP server successfully started!")
