@@ -9,7 +9,7 @@ RUN <<EOR
     if [ -f /etc/alpine-release ]; then
         apk add util-linux zstd
     else
-        apt install -y util-linux zstd
+        apt-get update && apt-get install -y util-linux zstd
     fi
 EOR
 
