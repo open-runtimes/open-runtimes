@@ -1,6 +1,5 @@
 package io.openruntimes.kotlin
 
-import com.google.gson.GsonBuilder
 import java.io.ByteArrayOutputStream
 import java.io.FileWriter
 import java.io.IOException
@@ -28,7 +27,6 @@ class RuntimeLogger(
     var nativeErrorsCache: PrintStream? = null
 
     companion object {
-        private val gson = GsonBuilder().serializeNulls().create()
         public val TYPE_ERROR = "error"
         public val TYPE_LOG = "log"
     }
@@ -96,7 +94,7 @@ class RuntimeLogger(
         var i = 0
         for (message in messages) {
             if (message is Map<*, *> || message is List<*> || message is Set<*>) {
-                stringLog += gson.toJson(message)
+                stringLog += gsonInternal.toJson(message)
             } else {
                 stringLog += message.toString()
             }

@@ -9,7 +9,7 @@ class SSR extends CSR
     public function testHomepagePrerendered(): void
     {
         $response = Client::execute(url: '/', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertStringContainsString("Hello Open Runtimes", $response['body']);
     }
 
@@ -22,7 +22,7 @@ class SSR extends CSR
         };
 
         $response = Client::execute(url: '/date', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertNotEmpty($response['body']);
         $body1 = $response['body'];
         $date1 = $scrapeDate($body1);
@@ -30,7 +30,7 @@ class SSR extends CSR
         \sleep(1);
 
         $response = Client::execute(url: '/date', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertNotEmpty($response['body']);
         $body2 = $response['body'];
         $date2 = $scrapeDate($body2);
@@ -42,21 +42,21 @@ class SSR extends CSR
     public function testServerLogs(): void
     {
         $response = Client::execute(url: '/logs', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertStringContainsString("All logs printed", $response['body']);
         self::assertStringContainsString('A log printed', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
         self::assertStringContainsString('An error printed', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
         $logId1 = $response['headers']['x-open-runtimes-log-id'];
 
         $response = Client::execute(url: '/logs', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertStringContainsString("All logs printed", $response['body']);
         self::assertStringContainsString('A log printed', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
         self::assertStringContainsString('An error printed', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
         $logId2 = $response['headers']['x-open-runtimes-log-id'];
 
-        self::assertEquals(20, \strlen($logId1));
-        self::assertEquals(20, \strlen($logId2));
+        self::assertSame(20, \strlen($logId1));
+        self::assertSame(20, \strlen($logId2));
         self::assertNotEquals($logId1, $logId2);
 
         $response = Client::execute(url: '/logs', method: 'GET', headers: ['x-open-runtimes-logging' => 'disabled', 'x-open-runtimes-log-id' => 'noLogs' ]);
@@ -70,7 +70,7 @@ class SSR extends CSR
         self::assertStringContainsString('An error printed', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
 
         $response = Client::execute(url: '/logs', method: 'GET', headers: ['x-open-runtimes-log-id' => 'customLogs' ]);
-        self::assertEquals('customLogs', $response['headers']['x-open-runtimes-log-id']);
+        self::assertSame('customLogs', $response['headers']['x-open-runtimes-log-id']);
         self::assertStringContainsString('A log printed', Client::getLogs('customLogs'));
         self::assertStringContainsString('An error printed', Client::getErrors('customLogs'));
     }
@@ -83,7 +83,7 @@ class SSR extends CSR
             $response = Client::execute(url: '/concurrency', method: 'GET');
             $end = \microtime(true);
 
-            self::assertEquals(200, $response['code']);
+            self::assertSame(200, $response['code']);
             self::assertStringContainsString("OK Response", $response['body']);
             $logs = Client::getLogs($response['headers']['x-open-runtimes-log-id']);
             self::assertStringContainsString('Concurrent Log 1', $logs);
@@ -153,12 +153,12 @@ class SSR extends CSR
         self::assertEmpty(Client::getErrors('dev'));
  
         $response = Client::execute(url: '/logs', method: 'GET', headers: ['x-open-runtimes-logging' => 'enabled' ]);
-        self::assertEquals('dev', $response['headers']['x-open-runtimes-log-id']);
+        self::assertSame('dev', $response['headers']['x-open-runtimes-log-id']);
         self::assertStringContainsString('A log printed', Client::getLogs('dev'));
         self::assertStringContainsString('An error printed', Client::getErrors('dev'));
  
         $response = Client::execute(url: '/logs', method: 'GET', headers: ['x-open-runtimes-logging' => 'enabled', 'x-open-runtimes-log-id' => 'myLog' ]);
-        self::assertEquals('myLog', $response['headers']['x-open-runtimes-log-id']);
+        self::assertSame('myLog', $response['headers']['x-open-runtimes-log-id']);
         self::assertStringContainsString('A log printed', Client::getLogs('myLog'));
         self::assertStringContainsString('An error printed', Client::getErrors('myLog'));
 
@@ -168,7 +168,7 @@ class SSR extends CSR
     public function testServerException(): void
     {
         $response = Client::execute(url: '/exception', method: 'GET');
-        self::assertEquals(500, $response['code']);
+        self::assertSame(500, $response['code']);
         self::assertStringNotContainsString("No exceptions", $response['body']);
         self::assertStringNotContainsString('Code exception occurred', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
         self::assertStringContainsString('Code exception occurred', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
@@ -183,12 +183,12 @@ class SSR extends CSR
         };
 
         $response = Client::execute(url: '/library', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertStringContainsString("My UUID is", $response['body']);
         $uuid1 = $scrapeUuid($response['body']);
 
         $response = Client::execute(url: '/library', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertStringContainsString("My UUID is", $response['body']);
         $uuid2 = $scrapeUuid($response['body']);
 
@@ -198,7 +198,7 @@ class SSR extends CSR
     public function testHiddenFile(): void
     {
         $response = Client::execute(url: '/hidden', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertStringContainsString('HIDDEN_FILE', $response['body']);
     }
     
@@ -218,26 +218,26 @@ class SSR extends CSR
     public function testStaticCache(): void
     {   
         $response = Client::execute(url: '/static.txt', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertArrayHasKey('cdn-cache-control', $response['headers']);
         self::assertArrayNotHasKey('surrogate-control', $response['headers']);
-        self::assertEquals('public, max-age=36000', $response['headers']['cdn-cache-control']);
+        self::assertSame('public, max-age=36000', $response['headers']['cdn-cache-control']);
         
         $response = Client::execute(url: '/date', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
         self::assertArrayNotHasKey('surrogate-control', $response['headers']);
         
         Client::$host = 'open-runtimes-test-serve-secondary';
         
         $response = Client::execute(url: '/static.txt', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
         self::assertArrayHasKey('surrogate-control', $response['headers']);
-        self::assertEquals('public, max-age=36000', $response['headers']['surrogate-control']);
+        self::assertSame('public, max-age=36000', $response['headers']['surrogate-control']);
 
         $response = Client::execute(url: '/date', method: 'GET');
-        self::assertEquals(200, $response['code']);
+        self::assertSame(200, $response['code']);
         self::assertArrayNotHasKey('cdn-cache-control', $response['headers']);
         self::assertArrayNotHasKey('surrogate-control', $response['headers']);
         
