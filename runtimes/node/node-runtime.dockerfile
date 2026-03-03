@@ -1,5 +1,4 @@
 COPY package* /usr/local/server/
 
 RUN apk add --no-cache bash nss ca-certificates gcompat \
-    && npm install pnpm@9.15.9 modclean@2.1.2 -g \
     && npm ci && npm cache clean --force && rm -rf /tmp/*

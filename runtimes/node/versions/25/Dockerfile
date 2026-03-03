@@ -1,15 +1,20 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM node:25.5.0-alpine3.23
+
+# ---- Build image (used for npm install / SSR builds) ----
+FROM node:25.5.0-alpine3.23 AS build
 
 INCLUDE ./base-before
 INCLUDE ./node
 
-# Additional tooling needed for Node runtimes used for SSR (Sites)
-# alpine-sdk - basic tooling like git, gcc, g++, make...
-# python3-dev - Install Python (useful to some NPM libs)
-# py3-pip - Python package manager
-# gcompat - Pre-requirement for Bun
-RUN apk add alpine-sdk python3-dev py3-pip gcompat
-RUN npm install bun@1.3.2 -g
+RUN apk add --no-cache alpine-sdk python3-dev py3-pip font-noto \
+    && npm install bun@1.3.2 -g \
+    && npm cache clean --force && rm -rf /tmp/*
 
+INCLUDE ./base-after
+
+# ---- Runtime image (used for serving) ----
+FROM node:25.5.0-alpine3.23 AS runtime
+
+INCLUDE ./base-before
+INCLUDE ./node-runtime
 INCLUDE ./base-after

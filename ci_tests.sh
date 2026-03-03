@@ -11,6 +11,13 @@ bash ci-cleanup.sh
 bash ci-runtime-prepare.sh
 bash ci-runtime-build.sh
 
+# Determine which image to use for builds (build image if available, else runtime)
+if docker image inspect open-runtimes/test-runtime-build >/dev/null 2>&1; then
+	BUILD_IMAGE="open-runtimes/test-runtime-build"
+else
+	BUILD_IMAGE="open-runtimes/test-runtime"
+fi
+
 LATEST_VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
 if [ "$VERSION" = "$LATEST_VERSION" ]; then
 	echo "Running formatter ..."
@@ -21,7 +28,7 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
 		--rm \
 		--name open-runtimes-formatter \
 		-v "$(pwd)":/mnt/code:rw \
-		open-runtimes/test-runtime \
+		"$BUILD_IMAGE" \
 		bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
 	cd ../../
 
@@ -34,7 +41,7 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
 			--rm \
 			--name open-runtimes-formatter \
 			-v "$(pwd)":/mnt/code:rw \
-			open-runtimes/test-runtime \
+			"$BUILD_IMAGE" \
 			bash -c "cd /mnt/code && $FORMATTER_PREPARE && $FORMATTER_CHECK"
 		cd ../../../../
 	fi
@@ -76,7 +83,7 @@ docker run \
 	-v "$(pwd)":/mnt/code:rw \
 	-e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" \
 	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
-	open-runtimes/test-runtime \
+	"$BUILD_IMAGE" \
 	bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 
 # Build with no-export entrypoint (for safe entrypoint tests)
@@ -93,7 +100,7 @@ if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
 		-v "$(pwd)/no-export-build/src":/mnt/code:rw \
 		-e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" \
 		-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT_NO_EXPORT" \
-		open-runtimes/test-runtime \
+		"$BUILD_IMAGE" \
 		bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 fi
 
@@ -112,17 +119,17 @@ if [[ "$TEST_CLASS" == SSR/* ]]; then
 		-e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" \
 		-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
 		-e OPEN_RUNTIMES_MODCLEAN=disabled \
-		open-runtimes/test-runtime \
+		"$BUILD_IMAGE" \
 		bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 fi
 
-# Tools test
+# Tools test (run against build image which has all tools)
 echo "Testing tools ..."
 REQUIRED_TOOLS="tar --help && unzip --help"
 docker run \
 	--platform linux/x86_64 \
 	--name open-runtimes-test-tools \
-	open-runtimes/test-runtime \
+	"$BUILD_IMAGE" \
 	bash -c "$REQUIRED_TOOLS && $TOOLS"
 docker logs open-runtimes-test-tools
 EXIT_CODE=$(docker inspect open-runtimes-test-tools --format='{{.State.ExitCode}}')

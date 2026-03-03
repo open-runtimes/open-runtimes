@@ -3,4 +3,4 @@
 set -e
 shopt -s dotglob
 
-node --max_old_space_size=8192 src/server.js
+node --max_old_space_size=${OPEN_RUNTIMES_MAX_OLD_SPACE_SIZE:-8192} src/server.js

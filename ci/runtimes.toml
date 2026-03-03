@@ -1,4 +1,5 @@
 [node]
+has_build_image = true
 entry = "tests.js"
 entry_no_export = "no-export.js"
 versions = [

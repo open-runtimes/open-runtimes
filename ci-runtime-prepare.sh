@@ -8,8 +8,8 @@ mkdir -p ./runtimes/.test
 mkdir -p ./runtimes/.test/helpers
 cp -R ./helpers/* ./runtimes/.test/helpers
 
-# Runtime base dockerfile
-cp -R "./runtimes/$RUNTIME_FOLDER/$RUNTIME_FOLDER.dockerfile" ./runtimes/.test
+# Runtime base dockerfile(s)
+cp "./runtimes/$RUNTIME_FOLDER/"*.dockerfile ./runtimes/.test/
 
 # Runtime-specific files (most)
 cp -R "./runtimes/$RUNTIME_FOLDER/versions/latest"/* ./runtimes/.test
