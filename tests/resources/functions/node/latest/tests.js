@@ -125,9 +125,9 @@ When you can have two!
 				min: MIN_INT64,
 				max: MAX_INT64,
 				now: new Date(),
-				set: new Set([1, 2, 3]),
+				set: new Set(["setvalue1", "setvalue2", "setvalue3"]),
 				buffer: Uint8Array.from([0, 30, 255]),
-				url: new URL("https://appwrite.io/"),
+				url: new URL("https://appwrite.io/my-awesome-path"),
 			});
 
 			context.log(["arrayValue"]);
