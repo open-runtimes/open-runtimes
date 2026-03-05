@@ -1,6 +1,6 @@
 import { appendFileSync } from "fs";
 import { createNamespace } from "cls-hooked";
-import { uneval } from "devalue";
+import superjson from "superjson";
 
 export const loggingNamespace = createNamespace("logging");
 
@@ -33,14 +33,11 @@ export class Logger {
         if (message instanceof Error) {
           return message.stack || String(message);
         }
-        if (typeof message === "object" && message !== null) {
-          try {
-            return uneval(message);
-          } catch {
-            return String(message);
-          }
+        try {
+          return JSON.stringify(superjson.serialize(message).json);
+        } catch {
+          return String(message);
         }
-        return String(message);
       })
       .join(" ");
 

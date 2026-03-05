@@ -1,8 +1,8 @@
 const fs = require("fs");
 
-let _uneval;
-const _devalueReady = import("devalue").then((m) => {
-  _uneval = m.uneval;
+let _superjson;
+const _superjsonReady = import("superjson").then((m) => {
+  _superjson = m.default;
 });
 
 class Logger {
@@ -58,14 +58,13 @@ class Logger {
         if (message instanceof Error) {
           return message.stack || String(message);
         }
-        if (typeof message === "object" && message !== null) {
-          try {
-            return _uneval ? _uneval(message) : JSON.stringify(message);
-          } catch {
-            return String(message);
-          }
+        try {
+          return _superjson
+            ? JSON.stringify(_superjson.serialize(message).json)
+            : JSON.stringify(message);
+        } catch {
+          return String(message);
         }
-        return String(message);
       })
       .join(" ");
 
@@ -147,5 +146,5 @@ class Logger {
   }
 }
 
-Logger.ready = _devalueReady;
+Logger.ready = _superjsonReady;
 module.exports = Logger;

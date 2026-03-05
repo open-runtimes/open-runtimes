@@ -11,6 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "devalue": "^5.1.1"
+    "superjson": "^2.2.6"
   }
 }

@@ -1,5 +1,5 @@
 import { fileStreamReady } from "./fileStreamReady.ts";
-import { uneval } from "npm:devalue@^5.1.1";
+import superjson from "npm:superjson@^2.2.6";
 
 export class Logger {
   static TYPE_ERROR = "error";
@@ -75,14 +75,11 @@ export class Logger {
         if (message instanceof Error) {
           return message.stack || String(message);
         }
-        if (typeof message === "object" && message !== null) {
-          try {
-            return uneval(message);
-          } catch {
-            return String(message);
-          }
+        try {
+          return JSON.stringify(superjson.serialize(message).json);
+        } catch {
+          return String(message);
         }
-        return String(message);
       })
       .join(" ");
 

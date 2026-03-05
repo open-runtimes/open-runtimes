@@ -1,5 +1,5 @@
 const fs = require("node:fs");
-import { uneval } from "devalue";
+import superjson from "superjson";
 
 export class Logger {
   static TYPE_ERROR = "error";
@@ -58,14 +58,11 @@ export class Logger {
         if (message instanceof Error) {
           return message.stack || String(message);
         }
-        if (typeof message === "object" && message !== null) {
-          try {
-            return uneval(message);
-          } catch {
-            return String(message);
-          }
+        try {
+          return JSON.stringify(superjson.serialize(message).json);
+        } catch {
+          return String(message);
         }
-        return String(message);
       })
       .join(" ");
 
