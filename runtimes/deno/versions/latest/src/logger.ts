@@ -1,5 +1,5 @@
 import { fileStreamReady } from "./fileStreamReady.ts";
-import superjson from "npm:superjson@^2.2.6";
+import { JSONParse } from "./jsonParser.ts";
 
 export class Logger {
   static TYPE_ERROR = "error";
@@ -76,7 +76,7 @@ export class Logger {
           return message.stack || String(message);
         }
         try {
-          return JSON.stringify(superjson.serialize(message).json);
+          return JSONParse(message);
         } catch {
           return String(message);
         }
