@@ -116,7 +116,20 @@ When you can have two!
 			context.log(4.2);
 			context.log(true);
 
-			context.log({ objectKey: "objectValue" });
+			const MAX_INT64 = BigInt("9223372036854775807");
+			const MIN_INT64 = BigInt("-9223372036854775808");
+
+			// In JS we intentionally test many edge cases for stringifying
+			context.log({
+				objectKey: "objectValue",
+				min: MIN_INT64,
+				max: MAX_INT64,
+				now: new Date(),
+				set: new Set(["setvalue1", "setvalue2", "setvalue3"]),
+				buffer: Uint8Array.from([0, 30, 255]),
+				url: new URL("https://appwrite.io/my-awesome-path"),
+      });
+
 			context.log(["arrayValue"]);
 
 			context.log(String(new Array(9000).fill("A")));
