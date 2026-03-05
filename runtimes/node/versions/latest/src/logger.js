@@ -1,5 +1,10 @@
 const fs = require("fs");
 
+let _uneval;
+const _devalueReady = import("devalue").then((m) => {
+  _uneval = m.uneval;
+});
+
 class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
@@ -48,21 +53,21 @@ class Logger {
     const stream =
       type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
 
-    let stringLog = "";
-    for (let i = 0; i < messages.length; i++) {
-      const message = messages[i];
-      if (message instanceof Error) {
-        stringLog += [message.stack || message].join("\n");
-      } else if (message instanceof Object || Array.isArray(message)) {
-        stringLog += JSON.stringify(message);
-      } else {
-        stringLog += `${message}`;
-      }
-
-      if (i < messages.length - 1) {
-        stringLog += " ";
-      }
-    }
+    let stringLog = messages
+      .map((message) => {
+        if (message instanceof Error) {
+          return message.stack || String(message);
+        }
+        if (typeof message === "object" && message !== null) {
+          try {
+            return _uneval ? _uneval(message) : JSON.stringify(message);
+          } catch {
+            return String(message);
+          }
+        }
+        return String(message);
+      })
+      .join(" ");
 
     if (stringLog.length > 8000) {
       stringLog = stringLog.substring(0, 8000);
@@ -142,4 +147,5 @@ class Logger {
   }
 }
 
+Logger.ready = _devalueReady;
 module.exports = Logger;

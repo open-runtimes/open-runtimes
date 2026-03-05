@@ -116,7 +116,11 @@ When you can have two!
 			context.log(4.2);
 			context.log(true);
 
-			context.log({ objectKey: "objectValue" });
+			const MAX_INT64 = BigInt("9223372036854775807");
+			const MIN_INT64 = BigInt("-9223372036854775808");
+
+			// In JS we intentionally test big int passing too
+			context.log({ objectKey: "objectValue", min: MIN_INT64, max: MAX_INT64 });
 			context.log(["arrayValue"]);
 
 			context.log(String(new Array(9000).fill("A")));

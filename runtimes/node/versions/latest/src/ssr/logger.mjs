@@ -1,5 +1,6 @@
 import { appendFileSync } from "fs";
 import { createNamespace } from "cls-hooked";
+import { uneval } from "devalue";
 
 export const loggingNamespace = createNamespace("logging");
 
@@ -27,21 +28,21 @@ export class Logger {
   }
 
   static write(id, messages, type = Logger.TYPE_LOG) {
-    let stringLog = "";
-    for (let i = 0; i < messages.length; i++) {
-      const message = messages[i];
-      if (message instanceof Error) {
-        stringLog += [message.stack || message].join("\n");
-      } else if (message instanceof Object || Array.isArray(message)) {
-        stringLog += JSON.stringify(message);
-      } else {
-        stringLog += `${message}`;
-      }
-
-      if (i < messages.length - 1) {
-        stringLog += " ";
-      }
-    }
+    const stringLog = messages
+      .map((message) => {
+        if (message instanceof Error) {
+          return message.stack || String(message);
+        }
+        if (typeof message === "object" && message !== null) {
+          try {
+            return uneval(message);
+          } catch {
+            return String(message);
+          }
+        }
+        return String(message);
+      })
+      .join(" ");
 
     const path = `/mnt/logs/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`;
     try {
