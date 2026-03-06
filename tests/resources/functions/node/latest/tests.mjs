@@ -128,7 +128,7 @@ When you can have two!
 				set: new Set(["setvalue1", "setvalue2", "setvalue3"]),
 				buffer: Uint8Array.from([0, 30, 255]),
 				url: new URL("https://appwrite.io/my-awesome-path"),
-      });
+			});
 
 			context.log(["arrayValue"]);
 
