@@ -1,5 +1,10 @@
 const fs = require("fs");
 
+let _superjson;
+const _superjsonReady = import("superjson").then((m) => {
+  _superjson = m.default;
+});
+
 class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
@@ -48,21 +53,20 @@ class Logger {
     const stream =
       type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
 
-    let stringLog = "";
-    for (let i = 0; i < messages.length; i++) {
-      const message = messages[i];
-      if (message instanceof Error) {
-        stringLog += [message.stack || message].join("\n");
-      } else if (message instanceof Object || Array.isArray(message)) {
-        stringLog += JSON.stringify(message);
-      } else {
-        stringLog += `${message}`;
-      }
-
-      if (i < messages.length - 1) {
-        stringLog += " ";
-      }
-    }
+    let stringLog = messages
+      .map((message) => {
+        if (message instanceof Error) {
+          return message.stack || String(message);
+        }
+        try {
+          return _superjson
+            ? JSON.stringify(_superjson.serialize(message).json)
+            : JSON.stringify(message);
+        } catch {
+          return String(message);
+        }
+      })
+      .join(" ");
 
     if (stringLog.length > 8000) {
       stringLog = stringLog.substring(0, 8000);
@@ -142,4 +146,5 @@ class Logger {
   }
 }
 
+Logger.ready = _superjsonReady;
 module.exports = Logger;

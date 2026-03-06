@@ -11,7 +11,6 @@ versions = [
     "19.0",
     "18.0",
     "16.0",
-    "14.5",
     "24-mjs",
     "23-mjs",
     "22-mjs",
@@ -20,7 +19,6 @@ versions = [
     "19.0-mjs",
     "18.0-mjs",
     "16.0-mjs",
-    "14.5-mjs",
 ]
 commands = { install = "npm install", start = "bash helpers/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
@@ -32,7 +30,7 @@ entry = "tests.ts"
 entry_no_export = "no-export.ts"
 versions = ["2.6", "2.5", "2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "bash helpers/server.sh" }
-formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt" }
+formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt ." }
 tools = "deno --version" # TODO: NPM, PNPM and Yarn dont work in Deno alpine currently: https://github.com/denoland/deno_docker/issues/373
 test = "Serverless/Deno.php"
 

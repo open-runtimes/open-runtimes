@@ -54,7 +54,6 @@ jobs:
                 { ID: "node-19.js", RUNTIME: "node", VERSION: "19.0", IMAGE: "openruntimes/node:v5-19.0", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "node-18.js", RUNTIME: "node", VERSION: "18.0", IMAGE: "openruntimes/node:v5-18.0", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
                 { ID: "node-16.js", RUNTIME: "node", VERSION: "16.0", IMAGE: "openruntimes/node:v5-16.0", ARCH: "linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" },
-                { ID: "node-14.5.js", RUNTIME: "node", VERSION: "14.5", IMAGE: "openruntimes/node:v5-14.5", ARCH: "linux/amd64" },
 
                 // Deno
                 { ID: "deno-2.6", RUNTIME: "deno", VERSION: "2.6", IMAGE: "openruntimes/deno:v5-2.6", ARCH: "linux/amd64,linux/arm64" },
