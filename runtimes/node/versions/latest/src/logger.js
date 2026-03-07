@@ -58,7 +58,7 @@ class Logger {
         if (message instanceof Error) {
           return message.stack || String(message);
         }
-        if (typeof message === 'string') {
+        if (typeof message === "string") {
           return message;
         }
         try {
