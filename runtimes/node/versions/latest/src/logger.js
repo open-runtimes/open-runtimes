@@ -58,6 +58,9 @@ class Logger {
         if (message instanceof Error) {
           return message.stack || String(message);
         }
+        if (typeof message === "string") {
+          return message;
+        }
         try {
           return _superjson
             ? JSON.stringify(_superjson.serialize(message).json)
