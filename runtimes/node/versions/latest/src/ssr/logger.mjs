@@ -33,6 +33,9 @@ export class Logger {
         if (message instanceof Error) {
           return message.stack || String(message);
         }
+        if (typeof message === 'string') {
+          return message;
+        }
         try {
           return JSON.stringify(superjson.serialize(message).json);
         } catch {
