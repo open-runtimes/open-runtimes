@@ -1,13 +1,13 @@
-import { nodeFileTrace } from '@vercel/nft';
-import { writeFileSync, readFileSync, existsSync, realpathSync } from 'node:fs';
-import { resolve, relative } from 'node:path';
-import { createRequire } from 'node:module';
+import { nodeFileTrace } from "@vercel/nft";
+import { writeFileSync, readFileSync, existsSync, realpathSync } from "node:fs";
+import { resolve, relative } from "node:path";
+import { createRequire } from "node:module";
 
 const entrypoint = process.argv[2];
 const outputDir = resolve(process.argv[3]);
 
 if (!entrypoint || !outputDir) {
-  console.error('Usage: nft-trace.mjs <entrypoint> <output-dir>');
+  console.error("Usage: nft-trace.mjs <entrypoint> <output-dir>");
   process.exit(1);
 }
 
@@ -20,7 +20,7 @@ if (!existsSync(absoluteEntry)) {
 
 // Log NFT version for debuggability
 const require = createRequire(import.meta.url);
-const nftPkg = require('@vercel/nft/package.json');
+const nftPkg = require("@vercel/nft/package.json");
 console.log(`@vercel/nft v${nftPkg.version}`);
 
 let result;
@@ -30,7 +30,7 @@ try {
     processCwd: outputDir,
     readFile(path) {
       try {
-        return readFileSync(path, 'utf-8');
+        return readFileSync(path, "utf-8");
       } catch {
         return null;
       }
@@ -47,7 +47,7 @@ const { fileList } = result;
 const files = new Set();
 
 for (const f of fileList) {
-  if (f.startsWith('/') || f.startsWith('..')) continue;
+  if (f.startsWith("/") || f.startsWith("..")) continue;
   files.add(f);
 
   // If it's a symlink, also include the real path
@@ -55,7 +55,7 @@ for (const f of fileList) {
   try {
     const real = realpathSync(abs);
     const rel = relative(outputDir, real);
-    if (!rel.startsWith('/') && !rel.startsWith('..')) {
+    if (!rel.startsWith("/") && !rel.startsWith("..")) {
       files.add(rel);
     }
   } catch {
@@ -63,8 +63,8 @@ for (const f of fileList) {
   }
 }
 
-const manifestPath = resolve(outputDir, '.nft-files');
-writeFileSync(manifestPath, [...files].join('\0'), 'utf-8');
+const manifestPath = resolve(outputDir, ".nft-files");
+writeFileSync(manifestPath, [...files].join("\0"), "utf-8");
 
 // Log per-package summary
 const packages = new Set();
@@ -73,4 +73,6 @@ for (const f of files) {
   if (m) packages.add(m[0]);
 }
 
-console.log(`Traced ${files.size} files across ${packages.size} packages (${fileList.size} total)`);
+console.log(
+  `Traced ${files.size} files across ${packages.size} packages (${fileList.size} total)`,
+);

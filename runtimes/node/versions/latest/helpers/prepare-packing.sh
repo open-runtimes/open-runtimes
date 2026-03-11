@@ -17,7 +17,7 @@ if [ ! -d "$OUTPUT_DIR/node_modules" ]; then
 	return 0 2>/dev/null || exit 0
 fi
 
-cd "$OUTPUT_DIR"
+cd "$OUTPUT_DIR" || exit
 
 # Detect entrypoint from custom start command or framework output structure
 ENTRYPOINT=""
@@ -31,7 +31,7 @@ elif [ -e "./server.js" ] && [ -d "./.next" ]; then
 	ENTRYPOINT="./server.js"
 elif [ -d "./.next" ]; then
 	# Next.js non-standalone — trace the next package itself
-	echo 'import "next";' > ./.nft-entry.mjs
+	echo 'import "next";' >./.nft-entry.mjs
 	ENTRYPOINT="./.nft-entry.mjs"
 elif [ -e "./server/entry.mjs" ]; then
 	# Astro
@@ -74,7 +74,7 @@ if [ "$NFT_EXIT" -ne 0 ] || [ ! -f "$NFT_MANIFEST" ]; then
 fi
 
 # Read null-delimited manifest, filter to node_modules/ entries only
-mapfile -d '' ALL_FILES < "$NFT_MANIFEST"
+mapfile -d '' ALL_FILES <"$NFT_MANIFEST"
 
 NEEDED_FILES=()
 for file in "${ALL_FILES[@]}"; do
@@ -89,8 +89,8 @@ if [ "${#NEEDED_FILES[@]}" -eq 0 ]; then
 fi
 
 # Delete everything in node_modules not referenced by the trace
-(cd "$OUTPUT_DIR" && find node_modules -type f -o -type l) | sort > /tmp/.nft-all
-printf '%s\n' "${NEEDED_FILES[@]}" | sort > /tmp/.nft-keep
+(cd "$OUTPUT_DIR" && find node_modules -type f -o -type l) | sort >/tmp/.nft-all
+printf '%s\n' "${NEEDED_FILES[@]}" | sort >/tmp/.nft-keep
 comm -23 /tmp/.nft-all /tmp/.nft-keep | tr '\n' '\0' | xargs -0 rm -f
 find "$OUTPUT_DIR/node_modules" -type d -empty -delete
 
