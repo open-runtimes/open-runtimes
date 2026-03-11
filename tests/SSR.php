@@ -204,15 +204,15 @@ class SSR extends CSR
     
     public function testModclean(): void
     {
-        // Modclean is enabled, so we should not have .md files in node_modules
+        // NFT is enabled by default, so .md files should be pruned from node_modules
         $archive = '/app/tests/.runtime/code.tar.gz';
         $result = \shell_exec("tar -tzf {$archive} 2>/dev/null | grep 'node_modules/.*\\.md$' | head -1");
-        self::assertEmpty(\trim($result ?? ''), 'Expected no .md files in node_modules when modclean is enabled');
+        self::assertEmpty(\trim($result ?? ''), 'Expected no .md files in node_modules when cleanup is enabled');
 
-        // Modclean is disabled, so we should have .md files in node_modules
+        // Both NFT and modclean are disabled, so .md files should be preserved
         $archive = '/app/tests/.runtime/modclean-disabled-build/src/code.tar.gz';
         $result = \shell_exec("tar -tzf {$archive} 2>/dev/null | grep 'node_modules/.*\\.md$' | head -1");
-        self::assertNotEmpty(\trim($result ?? ''), 'Expected .md files in node_modules when modclean is disabled');
+        self::assertNotEmpty(\trim($result ?? ''), 'Expected .md files in node_modules when cleanup is disabled');
     }
 
     public function testStaticCache(): void
