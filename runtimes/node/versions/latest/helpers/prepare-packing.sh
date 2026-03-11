@@ -63,7 +63,7 @@ echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Tracin
 
 # Run NFT — capture exit code without triggering set -e
 NFT_EXIT=0
-NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft-trace.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
+timeout 120 env NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft-trace.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
 
 NFT_MANIFEST="$OUTPUT_DIR/.nft-files"
 
