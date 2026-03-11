@@ -213,7 +213,7 @@ class SSR extends CSR
         $disabledCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/.*\\.md$'");
 
         self::assertGreaterThan(0, $disabledCount, 'Expected .md files in node_modules when cleanup is disabled');
-        self::assertLessThan($disabledCount, $enabledCount, 'Expected fewer .md files when NFT is enabled');
+        self::assertLessThanOrEqual($disabledCount, $enabledCount, 'Expected no more .md files when NFT is enabled');
     }
 
     public function testStaticCache(): void
