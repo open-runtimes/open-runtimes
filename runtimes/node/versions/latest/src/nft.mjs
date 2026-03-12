@@ -1,5 +1,5 @@
 import { nodeFileTrace } from "@vercel/nft";
-import { writeFileSync, readFileSync, existsSync, realpathSync } from "node:fs";
+import { writeFileSync, existsSync, realpathSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import { createRequire } from "node:module";
 
@@ -7,7 +7,7 @@ const entrypoint = process.argv[2];
 const outputDir = resolve(process.argv[3]);
 
 if (!entrypoint || !outputDir) {
-  console.error("Usage: nft-trace.mjs <entrypoint> <output-dir>");
+  console.error("Usage: nft.mjs <entrypoint> <output-dir>");
   process.exit(1);
 }
 
@@ -28,13 +28,6 @@ try {
   result = await nodeFileTrace([absoluteEntry], {
     base: outputDir,
     processCwd: outputDir,
-    readFile(path) {
-      try {
-        return readFileSync(path, "utf-8");
-      } catch {
-        return null;
-      }
-    },
   });
 } catch (err) {
   console.error(`Trace failed: ${err.message}`);

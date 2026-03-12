@@ -70,7 +70,7 @@ echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Tracin
 
 # Run NFT — capture exit code without triggering set -e
 NFT_EXIT=0
-NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft-trace.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
+NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
 
 NFT_MANIFEST="$OUTPUT_DIR/.nft-files"
 
@@ -85,7 +85,6 @@ if [ "$NFT_EXIT" -eq 0 ] && [ -f "$NFT_MANIFEST" ]; then
 		fi
 	done
 elif [ -d "$OUTPUT_DIR/.next" ]; then
-	# NFT failed but Next.js generates its own .nft.json traces during build — use those
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m NFT failed (exit $NFT_EXIT), falling back to Next.js .nft.json traces. \e[0m"
 else
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m NFT failed (exit $NFT_EXIT), skipping pruning. \e[0m"
@@ -107,28 +106,7 @@ fi
 if [ -d "$OUTPUT_DIR/.next" ]; then
 	while IFS= read -r -d '' dep; do
 		NEEDED_FILES+=("$dep")
-	done < <(find "$OUTPUT_DIR/.next" -name '*.nft.json' -print0 | node -e "
-const fs = require('fs'), path = require('path');
-const base = process.argv[1];
-let buf = '';
-process.stdin.on('data', d => buf += d);
-process.stdin.on('end', () => {
-  const seen = new Set();
-  for (const nj of buf.split('\0').filter(Boolean)) {
-    try {
-      const { files } = JSON.parse(fs.readFileSync(nj, 'utf-8'));
-      const dir = path.dirname(nj);
-      for (const f of files || []) {
-        const rel = path.relative(base, path.resolve(dir, f));
-        if (rel.startsWith('node_modules/') && !rel.startsWith('..') && !seen.has(rel)) {
-          seen.add(rel);
-          process.stdout.write(rel + '\0');
-        }
-      }
-    } catch {}
-  }
-});
-" "$OUTPUT_DIR" 2>/dev/null)
+	done < <(find "$OUTPUT_DIR/.next" -name '*.nft.json' -print0 | node /usr/local/server/src/nft-nextjs-traces.mjs "$OUTPUT_DIR" 2>/dev/null)
 fi
 
 if [ "${#NEEDED_FILES[@]}" -eq 0 ]; then

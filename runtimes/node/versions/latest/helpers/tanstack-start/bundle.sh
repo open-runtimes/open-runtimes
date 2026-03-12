@@ -55,9 +55,7 @@ if [ "$IS_SSR" -eq 1 ]; then
 	mv /usr/local/build/node_modules/ ./node_modules/
 	rm -rf ./server/node_modules
 
-	if [[ "${OPEN_RUNTIMES_NFT:-}" == "disabled" ]] && [[ "${OPEN_RUNTIMES_MODCLEAN,,}" != "disabled" ]]; then
-		modclean --patterns default:safe --no-progress --run
-	fi
+	source /usr/local/server/helpers/run-modclean.sh
 
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR finished. \e[0m"
 fi
