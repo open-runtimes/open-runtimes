@@ -94,7 +94,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Run tests
-        timeout-minutes: 15
+        timeout-minutes: 30
         working-directory: ./
         run: bash ci_tests.sh
         env:

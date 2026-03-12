@@ -30,8 +30,15 @@ elif [ -e "./server.js" ] && [ -d "./.next" ]; then
 	# Next.js standalone
 	ENTRYPOINT="./server.js"
 elif [ -d "./.next" ]; then
-	# Next.js non-standalone — trace the next package itself
-	echo 'import "next";' >./.nft-entry.mjs
+	# Next.js non-standalone — trace next + server-rendered pages/routes
+	# The server-side files import user dependencies (e.g. usehooks-ts)
+	# that wouldn't be traced from just "next" alone.
+	{
+		echo 'import "next";'
+		find .next/server/pages .next/server/app -name '*.js' -o -name '*.mjs' 2>/dev/null | while read -r f; do
+			echo "import \"./$f\";"
+		done
+	} >./.nft-entry.mjs
 	ENTRYPOINT="./.nft-entry.mjs"
 elif [ -e "./server/entry.mjs" ]; then
 	# Astro
@@ -63,25 +70,66 @@ echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Tracin
 
 # Run NFT — capture exit code without triggering set -e
 NFT_EXIT=0
-timeout 120 env NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft-trace.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
+NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft-trace.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
 
 NFT_MANIFEST="$OUTPUT_DIR/.nft-files"
 
-if [ "$NFT_EXIT" -ne 0 ] || [ ! -f "$NFT_MANIFEST" ]; then
+NEEDED_FILES=()
+
+if [ "$NFT_EXIT" -eq 0 ] && [ -f "$NFT_MANIFEST" ]; then
+	# Read null-delimited manifest, filter to node_modules/ entries only
+	mapfile -d '' ALL_FILES <"$NFT_MANIFEST"
+	for file in "${ALL_FILES[@]}"; do
+		if [[ "$file" == node_modules/* ]]; then
+			NEEDED_FILES+=("$file")
+		fi
+	done
+elif [ -d "$OUTPUT_DIR/.next" ]; then
+	# NFT failed but Next.js generates its own .nft.json traces during build — use those
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m NFT failed (exit $NFT_EXIT), falling back to Next.js .nft.json traces. \e[0m"
+else
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m NFT failed (exit $NFT_EXIT), skipping pruning. \e[0m"
 	rm -f "$OUTPUT_DIR/.nft-entry.mjs"
 	return 0 2>/dev/null || exit 0
 fi
 
-# Read null-delimited manifest, filter to node_modules/ entries only
-mapfile -d '' ALL_FILES <"$NFT_MANIFEST"
+# Next.js bundles pre-compiled dependencies loaded via dynamic require()
+# that NFT cannot trace — always keep them.
+if [ -d "$OUTPUT_DIR/.next" ] && [ -d "$OUTPUT_DIR/node_modules/next/dist/compiled" ]; then
+	while IFS= read -r -d '' f; do
+		NEEDED_FILES+=("$f")
+	done < <(cd "$OUTPUT_DIR" && find node_modules/next/dist/compiled -type f -print0)
+fi
 
-NEEDED_FILES=()
-for file in "${ALL_FILES[@]}"; do
-	if [[ "$file" == node_modules/* ]]; then
-		NEEDED_FILES+=("$file")
-	fi
-done
+# Next.js generates .nft.json trace files during build for each server bundle.
+# These contain accurate dependency info that our NFT re-trace may miss
+# (webpack-compiled externals use patterns NFT can't always follow).
+if [ -d "$OUTPUT_DIR/.next" ]; then
+	while IFS= read -r -d '' dep; do
+		NEEDED_FILES+=("$dep")
+	done < <(find "$OUTPUT_DIR/.next" -name '*.nft.json' -print0 | node -e "
+const fs = require('fs'), path = require('path');
+const base = process.argv[1];
+let buf = '';
+process.stdin.on('data', d => buf += d);
+process.stdin.on('end', () => {
+  const seen = new Set();
+  for (const nj of buf.split('\0').filter(Boolean)) {
+    try {
+      const { files } = JSON.parse(fs.readFileSync(nj, 'utf-8'));
+      const dir = path.dirname(nj);
+      for (const f of files || []) {
+        const rel = path.relative(base, path.resolve(dir, f));
+        if (rel.startsWith('node_modules/') && !rel.startsWith('..') && !seen.has(rel)) {
+          seen.add(rel);
+          process.stdout.write(rel + '\0');
+        }
+      }
+    } catch {}
+  }
+});
+" "$OUTPUT_DIR" 2>/dev/null)
+fi
 
 if [ "${#NEEDED_FILES[@]}" -eq 0 ]; then
 	rm -f "$NFT_MANIFEST" "$OUTPUT_DIR/.nft-entry.mjs"
