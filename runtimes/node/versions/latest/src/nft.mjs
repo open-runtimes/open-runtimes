@@ -21,7 +21,6 @@ if (!existsSync(absoluteEntry)) {
 // Log NFT version for debuggability
 const require = createRequire(import.meta.url);
 const nftPkg = require("@vercel/nft/package.json");
-console.log(`@vercel/nft v${nftPkg.version}`);
 
 let result;
 try {
