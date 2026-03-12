@@ -18,10 +18,6 @@ if (!existsSync(absoluteEntry)) {
   process.exit(1);
 }
 
-// Log NFT version for debuggability
-const require = createRequire(import.meta.url);
-const nftPkg = require("@vercel/nft/package.json");
-
 let result;
 try {
   result = await nodeFileTrace([absoluteEntry], {

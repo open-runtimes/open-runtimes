@@ -21,6 +21,7 @@ cd "$OUTPUT_DIR" || exit
 
 # Detect entrypoint from custom start command or framework output structure
 ENTRYPOINT=""
+SSR_WRAPPER=""
 
 if [ -n "${OPEN_RUNTIMES_START_COMMAND:-}" ]; then
 	if [[ "$OPEN_RUNTIMES_START_COMMAND" =~ node[[:space:]]+([^[:space:]]+\.m?js) ]]; then
@@ -33,6 +34,7 @@ elif [ -d "./.next" ]; then
 	# Next.js non-standalone — trace next + server-rendered pages/routes
 	# The server-side files import user dependencies (e.g. usehooks-ts)
 	# that wouldn't be traced from just "next" alone.
+	SSR_WRAPPER="/usr/local/server/src/server-next-js.mjs"
 	{
 		echo 'import "next";'
 		find .next/server/pages .next/server/app -name '*.js' -o -name '*.mjs' 2>/dev/null | while read -r f; do
@@ -43,21 +45,48 @@ elif [ -d "./.next" ]; then
 elif [ -e "./server/entry.mjs" ]; then
 	# Astro
 	ENTRYPOINT="./server/entry.mjs"
+	SSR_WRAPPER="/usr/local/server/src/server-astro.mjs"
 elif [ -e "./server/server.mjs" ]; then
 	# Angular
 	ENTRYPOINT="./server/server.mjs"
+	SSR_WRAPPER="/usr/local/server/src/server-angular.mjs"
 elif [ -e "./handler.js" ]; then
 	# SvelteKit
 	ENTRYPOINT="./handler.js"
+	SSR_WRAPPER="/usr/local/server/src/server-sveltekit.mjs"
 elif [ -e "./build/server/index.js" ]; then
 	# Remix
 	ENTRYPOINT="./build/server/index.js"
+	SSR_WRAPPER="/usr/local/server/src/server-remix.mjs"
 elif [ -e "./server/server.js" ]; then
 	# TanStack Start native SSR
 	ENTRYPOINT="./server/server.js"
+	SSR_WRAPPER="/usr/local/server/src/server-tanstack-start.mjs"
 elif [ -e "./server/index.mjs" ]; then
 	# Nuxt / Analog / TanStack Start Nitro
 	ENTRYPOINT="./server/index.mjs"
+	SSR_WRAPPER="/usr/local/server/src/server-nuxt.mjs"
+fi
+
+# If there's an SSR wrapper, create a synthetic entry that traces both the
+# framework entrypoint and the wrapper's third-party dependencies.
+# We import the packages directly (not the wrapper file) so they resolve
+# from outputDir where node_modules lives.
+if [ -n "$SSR_WRAPPER" ] && [ -n "$ENTRYPOINT" ]; then
+	if [ "$ENTRYPOINT" != "./.nft-entry.mjs" ]; then
+		echo "import \"$ENTRYPOINT\";" >./.nft-entry.mjs
+	fi
+	# Include user's custom server file if present (e.g. Remix custom Express server)
+	for f in ./server.mjs ./server.js; do
+		if [ -e "$f" ] && [ "$f" != "$ENTRYPOINT" ]; then
+			echo "import \"$f\";" >>./.nft-entry.mjs
+		fi
+	done
+	grep -o 'from "[^"]*"' "$SSR_WRAPPER" | cut -d'"' -f2 | while read -r dep; do
+		[[ "$dep" == ./* || "$dep" == ../* || "$dep" == /* ]] && continue
+		echo "import \"$dep\";"
+	done >>./.nft-entry.mjs
+	ENTRYPOINT="./.nft-entry.mjs"
 fi
 
 if [ -z "$ENTRYPOINT" ]; then
