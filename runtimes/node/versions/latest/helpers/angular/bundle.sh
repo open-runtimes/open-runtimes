@@ -14,7 +14,5 @@ if [ -e "$ENTRYPOINT" ]; then
 	mv /usr/local/build/package*.json ./
 	mv /usr/local/build/node_modules/ ./node_modules/
 
-	source /usr/local/server/helpers/run-modclean.sh
-
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR finished. \e[0m"
 fi
