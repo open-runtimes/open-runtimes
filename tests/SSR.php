@@ -204,15 +204,29 @@ class SSR extends CSR
     
     public function testModclean(): void
     {
-        // Modclean is enabled, so we should not have .md files in node_modules
+        // Main build has modclean enabled (default behavior)
         $archive = '/app/tests/.runtime/code.tar.gz';
         $result = \shell_exec("tar -tzf {$archive} 2>/dev/null | grep 'node_modules/.*\\.md$' | head -1");
         self::assertEmpty(\trim($result ?? ''), 'Expected no .md files in node_modules when modclean is enabled');
 
-        // Modclean is disabled, so we should have .md files in node_modules
+        // Baseline build has all cleanup disabled
         $archive = '/app/tests/.runtime/modclean-disabled-build/src/code.tar.gz';
         $result = \shell_exec("tar -tzf {$archive} 2>/dev/null | grep 'node_modules/.*\\.md$' | head -1");
         self::assertNotEmpty(\trim($result ?? ''), 'Expected .md files in node_modules when modclean is disabled');
+    }
+
+    public function testNft(): void
+    {
+        // NFT build has NFT enabled, modclean disabled
+        $archive = '/app/tests/.runtime/nft-build/src/code.tar.gz';
+        $nftCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
+
+        // Baseline build has all cleanup disabled
+        $archive = '/app/tests/.runtime/modclean-disabled-build/src/code.tar.gz';
+        $fullCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
+
+        self::assertGreaterThan(0, $fullCount, 'Expected files in node_modules when cleanup is disabled');
+        self::assertLessThan($fullCount, $nftCount, 'Expected fewer files in node_modules after NFT pruning');
     }
 
     public function testStaticCache(): void
