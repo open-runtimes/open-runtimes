@@ -1,8 +1,8 @@
 #!/bin/bash
 # nft + prune node_modules to reduce build output size
 
-# Skip if NFT is disabled
-if [[ "${OPEN_RUNTIMES_NFT:-}" == "disabled" ]]; then
+# Skip if NFT is not explicitly enabled
+if [[ "${OPEN_RUNTIMES_NFT:-}" != "enabled" ]]; then
 	return 0 2>/dev/null || exit 0
 fi
 

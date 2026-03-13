@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(git show:*)",
+      "Bash(cat:*)",
+      "Bash(chmod +x:*)",
+      "WebFetch(domain:productionresultssa14.blob.core.windows.net)"
+    ]
+  }
+}

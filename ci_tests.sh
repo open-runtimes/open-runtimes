@@ -112,7 +112,7 @@ if [[ "$TEST_CLASS" == SSR/* ]]; then
 		-e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" \
 		-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
 		-e OPEN_RUNTIMES_MODCLEAN=disabled \
-		-e OPEN_RUNTIMES_NFT=disabled \
+		-e OPEN_RUNTIMES_NFT=not-enabled \
 		open-runtimes/test-runtime \
 		bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 fi
