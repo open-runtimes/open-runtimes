@@ -204,16 +204,17 @@ class SSR extends CSR
     
     public function testModclean(): void
     {
-        // NFT is enabled by default, so node_modules should be significantly pruned
+        // Main build has NFT enabled — node_modules should be pruned
         $archive = '/app/tests/.runtime/code.tar.gz';
-        $enabledCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/.*\\.md$'");
+        $prunedCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
 
-        // Both NFT and modclean are disabled, so .md files should be preserved
+        // Comparison build has both NFT and modclean disabled — full node_modules
         $archive = '/app/tests/.runtime/modclean-disabled-build/src/code.tar.gz';
-        $disabledCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/.*\\.md$'");
+        $fullCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
 
-        self::assertGreaterThan(0, $disabledCount, 'Expected .md files in node_modules when cleanup is disabled');
-        self::assertLessThanOrEqual($disabledCount, $enabledCount, 'Expected no more .md files when NFT is enabled');
+        self::assertGreaterThan(0, $fullCount, 'Expected files in node_modules when cleanup is disabled');
+        self::assertGreaterThan(0, $prunedCount, 'Expected some files to remain after NFT pruning');
+        self::assertLessThan($fullCount, $prunedCount, 'Expected fewer files in node_modules after NFT pruning');
     }
 
     public function testStaticCache(): void

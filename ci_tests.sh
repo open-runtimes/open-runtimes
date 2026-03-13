@@ -67,6 +67,12 @@ touch code.tar.gz
 BUILD_SCRIPT="helpers/build.sh"
 START_SCRIPT="helpers/start.sh"
 
+# Enable NFT pruning for SSR builds so functional tests validate pruned output
+NFT_FLAG=""
+if [[ "$TEST_CLASS" == SSR/* ]]; then
+	NFT_FLAG="-e OPEN_RUNTIMES_NFT=enabled"
+fi
+
 # Main build
 docker run \
 	--platform linux/x86_64 \
@@ -76,6 +82,7 @@ docker run \
 	-v "$(pwd)":/mnt/code:rw \
 	-e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" \
 	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
+	$NFT_FLAG \
 	open-runtimes/test-runtime \
 	bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 
@@ -112,7 +119,7 @@ if [[ "$TEST_CLASS" == SSR/* ]]; then
 		-e OPEN_RUNTIMES_OUTPUT_DIRECTORY="$OUTPUT_DIRECTORY" \
 		-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
 		-e OPEN_RUNTIMES_MODCLEAN=disabled \
-		-e OPEN_RUNTIMES_NFT=not-enabled \
+		-e OPEN_RUNTIMES_NFT=disabled \
 		open-runtimes/test-runtime \
 		bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 fi
