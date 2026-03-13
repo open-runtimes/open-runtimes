@@ -226,7 +226,6 @@ class SSR extends CSR
         $fullCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
 
         self::assertGreaterThan(0, $fullCount, 'Expected files in node_modules when cleanup is disabled');
-        self::assertGreaterThan(0, $nftCount, 'Expected some files to remain after NFT pruning');
         self::assertLessThan($fullCount, $nftCount, 'Expected fewer files in node_modules after NFT pruning');
     }
 

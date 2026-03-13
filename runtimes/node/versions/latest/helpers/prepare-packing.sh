@@ -133,8 +133,7 @@ else
 fi
 
 if [ "${#NEEDED_FILES[@]}" -eq 0 ]; then
-	rm -f "$NFT_MANIFEST" "$OUTPUT_DIR/.nft-entry.mjs"
-	return 0 2>/dev/null || exit 0
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m No node_modules dependencies traced — pruning all of node_modules \e[0m"
 fi
 
 # Delete everything in node_modules not referenced by the trace
