@@ -60,9 +60,5 @@ elif [ -e "$WEBPACK_ENTRYPOINT" ] || [ -e "$TURBOPACK_ENTRYPOINT" ]; then
 	mv /usr/local/build/next.config.* ./
 	mv /usr/local/build/node_modules/ ./node_modules/
 
-	if [[ "${OPEN_RUNTIMES_MODCLEAN,,}" != "disabled" ]]; then
-		modclean --patterns default:safe --no-progress --run
-	fi
-
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR finished. \e[0m"
 fi
