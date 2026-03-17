@@ -9,4 +9,4 @@ mkdir -p /usr/local/build/vendor
 # Copy dependencies
 cp -R /usr/local/server/vendor/* /usr/local/build/vendor
 
-OPEN_RUNTIMES_CLEANUP="none"
+export OPEN_RUNTIMES_CLEANUP="none"

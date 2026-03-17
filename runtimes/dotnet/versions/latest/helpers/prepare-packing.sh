@@ -8,4 +8,4 @@ mv /usr/local/build/compiled/* /tmp/compiled
 rm -rf /usr/local/build/*
 mv /tmp/compiled/* /usr/local/build/
 
-OPEN_RUNTIMES_CLEANUP="none"
+export OPEN_RUNTIMES_CLEANUP="none"
