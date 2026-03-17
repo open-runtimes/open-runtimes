@@ -2,6 +2,8 @@
 # Prune node_modules to reduce build output size
 # Strategies: NFT (opt-in tree-shaking) or modclean (default junk removal)
 
+export OPEN_RUNTIMES_CLEANUP="none"
+
 # Determine output directory
 OUTPUT_DIR="/usr/local/build"
 if [ -n "${OPEN_RUNTIMES_OUTPUT_DIRECTORY:-}" ]; then
@@ -147,10 +149,12 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 	# Clean up
 	rm -f /tmp/.nft-all /tmp/.nft-keep "$NFT_MANIFEST" "$OUTPUT_DIR/.nft-entry.mjs"
 
+	export OPEN_RUNTIMES_CLEANUP="nft"
 	return 0 2>/dev/null || exit 0
 fi
 
 # ─── modclean (default) ──────────────────────────────────────────────────────
 if [[ "${OPEN_RUNTIMES_MODCLEAN,,}" != "disabled" ]]; then
 	modclean --patterns default:safe --no-progress --run
+	export OPEN_RUNTIMES_CLEANUP="modclean"
 fi

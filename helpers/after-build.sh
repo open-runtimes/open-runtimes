@@ -28,9 +28,10 @@ if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
 	cd "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"
 fi
 
-# Store entrypoint into build. Will be used during start process
+# Store build metadata. Will be used during start process
 touch .open-runtimes
 echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" >.open-runtimes
+echo "OPEN_RUNTIMES_CLEANUP=${OPEN_RUNTIMES_CLEANUP:-none}" >>.open-runtimes
 
 if [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "none" ]; then
 	tar --exclude code.tar -cf /mnt/code/code.tar .

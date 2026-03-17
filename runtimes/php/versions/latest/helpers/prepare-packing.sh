@@ -5,3 +5,5 @@ shopt -s dotglob
 
 # Prepare empty folder to prevent errors with copying
 mkdir -p /usr/local/build/vendor
+
+export OPEN_RUNTIMES_CLEANUP="none"
