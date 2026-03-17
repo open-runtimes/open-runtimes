@@ -40,6 +40,7 @@ jobs:
                 { ID: "flutter-3.32", RUNTIME: "flutter", VERSION: "3.32", IMAGE: "openruntimes/flutter:v5-3.32", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "flutter-3.35", RUNTIME: "flutter", VERSION: "3.35", IMAGE: "openruntimes/flutter:v5-3.35", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "flutter-3.38", RUNTIME: "flutter", VERSION: "3.38", IMAGE: "openruntimes/flutter:v5-3.38", ARCH: "linux/amd64,linux/arm64" },
+                { ID: "flutter-3.41", RUNTIME: "flutter", VERSION: "3.41", IMAGE: "openruntimes/flutter:v5-3.41", ARCH: "linux/amd64,linux/arm64" },
 
                 // Static
                 { ID: "static-1", RUNTIME: "static", VERSION: "1", IMAGE: "openruntimes/static:v5-1", ARCH: "linux/amd64,linux/arm64" },
@@ -80,6 +81,7 @@ jobs:
                 { ID: "python-ml-3.11", RUNTIME: "python", VERSION: "ml-3.11", IMAGE: "openruntimes/python-ml:v5-3.11", ARCH: "linux/amd64,linux/arm64" },
 
                 // Dart
+                { ID: "dart-3.11", RUNTIME: "dart", VERSION: "3.11", IMAGE: "openruntimes/dart:v5-3.11", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "dart-3.10", RUNTIME: "dart", VERSION: "3.10", IMAGE: "openruntimes/dart:v5-3.10", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "dart-3.9", RUNTIME: "dart", VERSION: "3.9", IMAGE: "openruntimes/dart:v5-3.9", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "dart-3.8", RUNTIME: "dart", VERSION: "3.8", IMAGE: "openruntimes/dart:v5-3.8", ARCH: "linux/amd64,linux/arm64" },
