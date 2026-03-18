@@ -46,11 +46,13 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 			return 0 2>/dev/null || exit 0
 		fi
 
-		# Keep pre-compiled dependencies loaded via dynamic require()
-		if [ -d "$OUTPUT_DIR/node_modules/next/dist/compiled" ]; then
+		# Keep the entire next package — server-next-js.mjs imports "next" directly
+		# which needs next/dist/server/, next/dist/shared/, etc. beyond what
+		# individual page .nft.json traces reference.
+		if [ -d "$OUTPUT_DIR/node_modules/next" ]; then
 			while IFS= read -r -d '' f; do
 				NEEDED_FILES+=("$f")
-			done < <(cd "$OUTPUT_DIR" && find node_modules/next/dist/compiled -type f -print0)
+			done < <(cd "$OUTPUT_DIR" && find node_modules/next -type f -print0)
 		fi
 	else
 		# Generic frameworks — detect entrypoint and run NFT
