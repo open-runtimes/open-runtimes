@@ -1,5 +1,6 @@
 const micro = require("micro");
 const { buffer, send } = require("micro");
+const { Readable } = require("stream");
 const fs = require("fs");
 const Logger = require("./logger");
 
@@ -33,6 +34,41 @@ const server = micro(async (req, res) => {
     return send(res, 500, "");
   }
 });
+
+const applyOutputHeaders = (res, headers) => {
+  const plainHeaders = {};
+  if (typeof Headers !== "undefined" && headers instanceof Headers) {
+    for (const [key, value] of headers) {
+      if (
+        key.toLowerCase() === "set-cookie" &&
+        typeof headers.getSetCookie === "function"
+      ) {
+        plainHeaders[key] = headers.getSetCookie();
+      } else {
+        plainHeaders[key] = value;
+      }
+    }
+  } else {
+    Object.assign(plainHeaders, headers);
+  }
+
+  for (const key in plainHeaders) {
+    if (key.toLowerCase().startsWith("x-open-runtimes-")) {
+      continue;
+    }
+    res.setHeader(key.toLowerCase(), plainHeaders[key]);
+  }
+
+  const contentTypeValue = (
+    res.getHeader("content-type") ?? "text/plain"
+  ).toLowerCase();
+  if (
+    !contentTypeValue.startsWith("multipart/") &&
+    !contentTypeValue.includes("charset=")
+  ) {
+    res.setHeader("content-type", contentTypeValue + "; charset=utf-8");
+  }
+};
 
 const action = async (logger, req, res) => {
   const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
@@ -289,69 +325,21 @@ const action = async (logger, req, res) => {
     output = context.res.text("", 500, {});
   }
 
-  // Convert native Response objects to internal format
   if (typeof Response !== "undefined" && output instanceof Response) {
-    const responseHeaders = {};
-    for (const [key, value] of output.headers) {
-      if (
-        key.toLowerCase() === "set-cookie" &&
-        typeof output.headers.getSetCookie === "function"
-      ) {
-        responseHeaders[key] = output.headers.getSetCookie();
-      } else {
-        responseHeaders[key] = value;
-      }
-    }
+    applyOutputHeaders(res, output.headers);
 
-    let body = "";
-    if (output.body !== null) {
-      const arrayBuffer = await output.arrayBuffer();
-      body = Buffer.from(arrayBuffer);
-    }
+    res.setHeader("x-open-runtimes-log-id", logger.id);
+    await logger.end();
 
-    output = {
-      body: body,
-      statusCode: output.status,
-      headers: responseHeaders,
-    };
+    const body = output.body !== null ? Readable.from(output.body) : "";
+    return send(res, output.status, body);
   }
 
   output.body = output.body ?? "";
   output.statusCode = output.statusCode ?? 200;
   output.headers = output.headers ?? {};
 
-  // Convert native Headers instances to plain objects
-  if (typeof Headers !== "undefined" && output.headers instanceof Headers) {
-    const plainHeaders = {};
-    for (const [key, value] of output.headers) {
-      if (
-        key.toLowerCase() === "set-cookie" &&
-        typeof output.headers.getSetCookie === "function"
-      ) {
-        plainHeaders[key] = output.headers.getSetCookie();
-      } else {
-        plainHeaders[key] = value;
-      }
-    }
-    output.headers = plainHeaders;
-  }
-
-  for (const header in output.headers) {
-    if (header.toLowerCase().startsWith("x-open-runtimes-")) {
-      continue;
-    }
-    res.setHeader(header.toLowerCase(), output.headers[header]);
-  }
-
-  const contentTypeValue = (
-    res.getHeader("content-type") ?? "text/plain"
-  ).toLowerCase();
-  if (
-    !contentTypeValue.startsWith("multipart/") &&
-    !contentTypeValue.includes("charset=")
-  ) {
-    res.setHeader("content-type", contentTypeValue + "; charset=utf-8");
-  }
+  applyOutputHeaders(res, output.headers);
 
   res.setHeader("x-open-runtimes-log-id", logger.id);
   await logger.end();
