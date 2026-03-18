@@ -212,13 +212,13 @@ When you can have two!
 					"second-header": "second-value",
 				},
 			});
-		case "nativeRequest":
-			const nativeReq = context.req.asNative();
+		case "rawRequest":
+			const rawReq = context.req.raw;
 			return context.res.json({
-				url: nativeReq.url,
-				method: nativeReq.method,
-				body: await nativeReq.text(),
-				hasContentType: nativeReq.headers.has("content-type"),
+				url: rawReq.url,
+				method: rawReq.method,
+				body: await rawReq.text(),
+				hasContentType: rawReq.headers.has("content-type"),
 			});
 		case "spreadOperatorLogs":
 			const engine = "open-runtimes";

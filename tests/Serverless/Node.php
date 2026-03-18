@@ -106,10 +106,10 @@ class Node extends Serverless
          self::assertGreaterThanOrEqual(100000, \mb_strlen($response['body'])); // Should be 1.355MB
      }
 
-     public function testNativeResponse(): void
+     public function testRawResponse(): void
     {
         if (str_starts_with($this->runtimeVersion, '16.0')) {
-            self::markTestSkipped('Node 16 does not support native response object.');
+            self::markTestSkipped('Node 16 does not support raw response object.');
         }
 
         // Text response
@@ -160,16 +160,16 @@ class Node extends Serverless
         self::assertEquals('second-value', $response['headers']['second-header']);
     }
 
-    public function testNativeRequest(): void
+    public function testRawRequest(): void
     {
         if (str_starts_with($this->runtimeVersion, '16.0')) {
-            self::markTestSkipped('Node 16 does not support native request object.');
+            self::markTestSkipped('Node 16 does not support raw request object.');
         }
 
         $response = Client::execute(
             body: 'Hello Native',
             method: 'POST',
-            headers: ['x-action' => 'nativeRequest', 'content-type' => 'text/plain']
+            headers: ['x-action' => 'rawRequest', 'content-type' => 'text/plain']
         );
         self::assertEquals(200, $response['code']);
 

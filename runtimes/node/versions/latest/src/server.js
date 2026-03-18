@@ -142,6 +142,25 @@ const action = async (logger, req, res) => {
 
   const context = {
     req: {
+      get raw() {
+        if (typeof Request === "undefined") {
+          throw new Error(
+            "Web API Request class is not available. Requires Node.js 18 or later.",
+          );
+        }
+
+        const isBodyAllowed = this.method !== "GET" && this.method !== "HEAD";
+
+        return new Request(this.url, {
+          method: this.method,
+          headers: this.headers,
+          body:
+            isBodyAllowed && this.bodyBinary.length > 0
+              ? this.bodyBinary
+              : null,
+          duplex: isBodyAllowed ? "half" : undefined,
+        });
+      },
       get body() {
         if (contentType.startsWith("application/json")) {
           return this.bodyBinary && this.bodyBinary.length > 0
@@ -172,25 +191,6 @@ const action = async (logger, req, res) => {
       port,
       url,
       path,
-      asNative: function () {
-        if (typeof Request === "undefined") {
-          throw new Error(
-            "Web API Request class is not available. Requires Node.js 18 or later.",
-          );
-        }
-
-        const isBodyAllowed = this.method !== "GET" && this.method !== "HEAD";
-
-        return new Request(this.url, {
-          method: this.method,
-          headers: this.headers,
-          body:
-            isBodyAllowed && this.bodyBinary.length > 0
-              ? this.bodyBinary
-              : null,
-          duplex: isBodyAllowed ? "half" : undefined,
-        });
-      },
     },
     res: {
       send: function (body, statusCode = 200, headers = {}) {
