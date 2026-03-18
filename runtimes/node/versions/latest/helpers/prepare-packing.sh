@@ -20,8 +20,9 @@ cd "$OUTPUT_DIR" || exit
 # ─── NFT (opt-in) ────────────────────────────────────────────────────────────
 if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 
-	# Next.js standalone already tree-shakes node_modules — skip
-	if [ -e "./server.js" ] && [ -d "./.next" ]; then
+	# Next.js — skip NFT; standalone already tree-shakes, non-standalone .nft.json
+	# traces miss server-wrapper and next.config imports. Falls back to modclean.
+	if [ -d "./.next" ]; then
 		return 0 2>/dev/null || exit 0
 	fi
 
