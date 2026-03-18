@@ -11,16 +11,6 @@ class PythonML extends Python
         self::assertTrue(true); // Disable test till implemented
     }
 
-    public function testNativeResponse(): void
-    {
-        self::assertTrue(true); // Disable test till implemented
-    }
-
-    public function testNativeRequest(): void
-    {
-        self::assertTrue(true); // Disable test till implemented
-    }
-
     public function testTensorflowVersion(): void
     {
         $response = Client::execute(body: 'Hello', headers: ['x-action' => 'tensorflowVersion']);

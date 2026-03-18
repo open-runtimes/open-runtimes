@@ -182,20 +182,11 @@ When you can have two!
 				"some-header": "some-value",
 			});
 		case "responseObjectText":
-			if (typeof Response === "undefined") {
-				return context.res.text("Hello World 👋");
-			}
 			return new Response("Hello World 👋", {
 				status: 200,
 				headers: { "content-type": "text/plain" },
 			});
 		case "responseObjectJson":
-			if (typeof Response === "undefined") {
-				return context.res.json({
-					json: true,
-					message: "Developers are awesome.",
-				});
-			}
 			return new Response(
 				JSON.stringify({ json: true, message: "Developers are awesome." }),
 				{
@@ -204,34 +195,16 @@ When you can have two!
 				},
 			);
 		case "responseObjectBinary":
-			if (typeof Response === "undefined") {
-				return context.res.binary(Buffer.from(Uint8Array.from([0, 10, 255])));
-			}
 			return new Response(Uint8Array.from([0, 10, 255]), {
 				status: 200,
 			});
 		case "responseObjectEmpty":
-			if (typeof Response === "undefined") {
-				return context.res.empty();
-			}
 			return new Response(null, { status: 204 });
 		case "responseObjectRedirect":
-			if (typeof Response === "undefined") {
-				return context.res.redirect("https://github.com/");
-			}
 			return Response.redirect("https://github.com/", 301);
 		case "responseObjectStatus":
-			if (typeof Response === "undefined") {
-				return context.res.text("FAIL", 404);
-			}
 			return new Response("FAIL", { status: 404 });
 		case "responseObjectHeaders":
-			if (typeof Response === "undefined") {
-				return context.res.text("OK", 200, {
-					"first-header": "first-value",
-					"second-header": "second-value",
-				});
-			}
 			return new Response("OK", {
 				status: 200,
 				headers: {
@@ -240,14 +213,6 @@ When you can have two!
 				},
 			});
 		case "nativeRequest":
-			if (typeof Request === "undefined") {
-				return context.res.json({
-					url: context.req.url,
-					method: context.req.method,
-					body: context.req.bodyText,
-					hasContentType: "content-type" in context.req.headers,
-				});
-			}
 			const nativeReq = context.req.asNative();
 			return context.res.json({
 				url: nativeReq.url,
