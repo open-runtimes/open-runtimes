@@ -136,6 +136,25 @@ const action = async (logger, req, res) => {
       port,
       url,
       path,
+      asNative: function () {
+        if (typeof Request === "undefined") {
+          throw new Error(
+            "Web API Request class is not available. Requires Node.js 18 or later.",
+          );
+        }
+
+        const isBodyAllowed = this.method !== "GET" && this.method !== "HEAD";
+
+        return new Request(this.url, {
+          method: this.method,
+          headers: this.headers,
+          body:
+            isBodyAllowed && this.bodyBinary.length > 0
+              ? this.bodyBinary
+              : null,
+          duplex: isBodyAllowed ? "half" : undefined,
+        });
+      },
     },
     res: {
       send: function (body, statusCode = 200, headers = {}) {
@@ -270,9 +289,52 @@ const action = async (logger, req, res) => {
     output = context.res.text("", 500, {});
   }
 
+  // Convert native Response objects to internal format
+  if (typeof Response !== "undefined" && output instanceof Response) {
+    const responseHeaders = {};
+    for (const [key, value] of output.headers) {
+      if (
+        key.toLowerCase() === "set-cookie" &&
+        typeof output.headers.getSetCookie === "function"
+      ) {
+        responseHeaders[key] = output.headers.getSetCookie();
+      } else {
+        responseHeaders[key] = value;
+      }
+    }
+
+    let body = "";
+    if (output.body !== null) {
+      const arrayBuffer = await output.arrayBuffer();
+      body = Buffer.from(arrayBuffer);
+    }
+
+    output = {
+      body: body,
+      statusCode: output.status,
+      headers: responseHeaders,
+    };
+  }
+
   output.body = output.body ?? "";
   output.statusCode = output.statusCode ?? 200;
   output.headers = output.headers ?? {};
+
+  // Convert native Headers instances to plain objects
+  if (typeof Headers !== "undefined" && output.headers instanceof Headers) {
+    const plainHeaders = {};
+    for (const [key, value] of output.headers) {
+      if (
+        key.toLowerCase() === "set-cookie" &&
+        typeof output.headers.getSetCookie === "function"
+      ) {
+        plainHeaders[key] = output.headers.getSetCookie();
+      } else {
+        plainHeaders[key] = value;
+      }
+    }
+    output.headers = plainHeaders;
+  }
 
   for (const header in output.headers) {
     if (header.toLowerCase().startsWith("x-open-runtimes-")) {

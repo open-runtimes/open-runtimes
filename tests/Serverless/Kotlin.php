@@ -11,7 +11,17 @@ class Kotlin extends Serverless
     {
         self::assertTrue(true); // Disable test till implemented
     }
-    
+
+    public function testNativeResponse(): void
+    {
+        self::assertTrue(true); // Disable test till implemented
+    }
+
+    public function testNativeRequest(): void
+    {
+        self::assertTrue(true); // Disable test till implemented
+    }
+
     public function testDeprecatedMethodsBytesBody(): void
     {
         $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethodsBytesBody']);

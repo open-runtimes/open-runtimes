@@ -164,6 +164,97 @@ When you can have two!
 			return context.res.send(image, 200, {
 				"content-type": "image/png",
 			});
+		case "setCookie":
+			if (typeof Headers === "undefined") {
+				return context.res.text("OK", 200, {
+					"set-cookie": ["cookie=value; path=/", "cookie2=value2; path=/"],
+					"some-header": "some-value",
+				});
+			}
+			const cookieHeaders = new Headers();
+			cookieHeaders.append("set-cookie", "cookie=value; path=/");
+			cookieHeaders.append("set-cookie", "cookie2=value2; path=/");
+			cookieHeaders.append("some-header", "some-value");
+			return context.res.text("OK", 200, cookieHeaders);
+		case "setCookie2":
+			return context.res.text("OK", 200, {
+				"set-cookie": ["cookie=value; path=/", "cookie2=value2; path=/"],
+				"some-header": "some-value",
+			});
+		case "responseObjectText":
+			if (typeof Response === "undefined") {
+				return context.res.text("Hello World 👋");
+			}
+			return new Response("Hello World 👋", {
+				status: 200,
+				headers: { "content-type": "text/plain" },
+			});
+		case "responseObjectJson":
+			if (typeof Response === "undefined") {
+				return context.res.json({
+					json: true,
+					message: "Developers are awesome.",
+				});
+			}
+			return new Response(
+				JSON.stringify({ json: true, message: "Developers are awesome." }),
+				{
+					status: 200,
+					headers: { "content-type": "application/json" },
+				},
+			);
+		case "responseObjectBinary":
+			if (typeof Response === "undefined") {
+				return context.res.binary(Buffer.from(Uint8Array.from([0, 10, 255])));
+			}
+			return new Response(Uint8Array.from([0, 10, 255]), {
+				status: 200,
+			});
+		case "responseObjectEmpty":
+			if (typeof Response === "undefined") {
+				return context.res.empty();
+			}
+			return new Response(null, { status: 204 });
+		case "responseObjectRedirect":
+			if (typeof Response === "undefined") {
+				return context.res.redirect("https://github.com/");
+			}
+			return Response.redirect("https://github.com/", 301);
+		case "responseObjectStatus":
+			if (typeof Response === "undefined") {
+				return context.res.text("FAIL", 404);
+			}
+			return new Response("FAIL", { status: 404 });
+		case "responseObjectHeaders":
+			if (typeof Response === "undefined") {
+				return context.res.text("OK", 200, {
+					"first-header": "first-value",
+					"second-header": "second-value",
+				});
+			}
+			return new Response("OK", {
+				status: 200,
+				headers: {
+					"first-header": "first-value",
+					"second-header": "second-value",
+				},
+			});
+		case "nativeRequest":
+			if (typeof Request === "undefined") {
+				return context.res.json({
+					url: context.req.url,
+					method: context.req.method,
+					body: context.req.bodyText,
+					hasContentType: "content-type" in context.req.headers,
+				});
+			}
+			const nativeReq = context.req.asNative();
+			return context.res.json({
+				url: nativeReq.url,
+				method: nativeReq.method,
+				body: await nativeReq.text(),
+				hasContentType: nativeReq.headers.has("content-type"),
+			});
 		case "spreadOperatorLogs":
 			const engine = "open-runtimes";
 			context.log("engine:", engine);

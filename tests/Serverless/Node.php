@@ -7,11 +7,6 @@ use Tests\Serverless;
 
 class Node extends Serverless
 {
-    public function testSetCookie(): void
-    {
-        self::assertTrue(true); // Disable test till implemented
-    }
-
     /**
      * TODO: In future, when this becomes important,
      * Move to Serverless.php and update all runtime tests to have action for this
