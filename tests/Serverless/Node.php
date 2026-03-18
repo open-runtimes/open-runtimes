@@ -162,6 +162,10 @@ class Node extends Serverless
 
     public function testNativeRequest(): void
     {
+        if (str_starts_with($this->runtimeVersion, '16.0')) {
+            self::markTestSkipped('Node 16 does not support native request object.');
+        }
+
         $response = Client::execute(
             body: 'Hello Native',
             method: 'POST',
