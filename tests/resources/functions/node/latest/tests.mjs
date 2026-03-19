@@ -212,6 +212,21 @@ When you can have two!
 					"second-header": "second-value",
 				},
 			});
+		case "streamingResponse": {
+			const encoder = new TextEncoder();
+			const streamData = new ReadableStream({
+				async start(controller) {
+					controller.enqueue(encoder.encode("chunk1"));
+					await new Promise((resolve) => setTimeout(resolve, 1000));
+					controller.enqueue(encoder.encode("chunk2"));
+					controller.close();
+				},
+			});
+			return new Response(streamData, {
+				status: 200,
+				headers: { "content-type": "text/plain" },
+			});
+		}
 		case "rawRequest":
 			const rawReq = context.req.raw;
 			return context.res.json({

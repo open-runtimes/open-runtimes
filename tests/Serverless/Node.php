@@ -160,6 +160,27 @@ class Node extends Serverless
         self::assertEquals('second-value', $response['headers']['second-header']);
     }
 
+    public function testStreamingResponse(): void
+    {
+        if (str_starts_with($this->runtimeVersion, '16.0')) {
+            self::markTestSkipped('Node 16 does not support streaming Response.');
+        }
+
+        $response = Client::executeStreaming(headers: ['x-action' => 'streamingResponse']);
+
+        self::assertEquals(200, $response['code']);
+        self::assertStringContainsString('chunk1', $response['body']);
+        self::assertStringContainsString('chunk2', $response['body']);
+        self::assertEquals('chunk1chunk2', $response['body']);
+
+        // Prove streaming: chunks must arrive with a time gap
+        self::assertGreaterThanOrEqual(2, \count($response['chunks']));
+        $firstTime = $response['chunks'][0]['time'];
+        $lastTime = $response['chunks'][\count($response['chunks']) - 1]['time'];
+        self::assertGreaterThanOrEqual(0.5, $lastTime - $firstTime,
+            'Chunks should arrive with >= 0.5s gap, proving streaming not buffering');
+    }
+
     public function testRawRequest(): void
     {
         if (str_starts_with($this->runtimeVersion, '16.0')) {

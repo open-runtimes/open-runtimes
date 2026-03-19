@@ -89,6 +89,103 @@ class Client {
         ];
     }
 
+    public static function executeStreaming($body = '', $url = '/', $method = 'POST', $headers = [], int $timeout = 10) {
+        $ch = \curl_init();
+
+        $initHeaders = [];
+
+        if(!(\array_key_exists('content-type', $headers))) {
+            $initHeaders['content-type'] = 'text/plain';
+        }
+
+        if(!empty(self::$secret)) {
+            $initHeaders['x-open-runtimes-secret'] = self::$secret;
+            $initHeaders['Authorization'] = 'Basic ' . \base64_encode('opr:' . self::$secret);
+        }
+
+        $headers = \array_merge($initHeaders, $headers);
+
+        $headersParsed = [];
+
+        foreach ($headers as $header => $value) {
+            $headersParsed[] = $header . ': ' . $value;
+        }
+
+        $responseHeaders = [];
+        $chunks = [];
+
+        $optArray = [
+            CURLOPT_URL => 'http://' . self::$host . ':' . self::$port . $url,
+            CURLOPT_RETURNTRANSFER => false,
+            CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$responseHeaders) {
+                $len = strlen($header);
+                $header = explode(':', $header, 2);
+                if (count($header) < 2)
+                    return $len;
+
+                $key = strtolower(trim($header[0]));
+
+                if(array_key_exists($key, $responseHeaders)) {
+                    if(\is_array($responseHeaders[$key])) {
+                        $responseHeaders[$key][] = trim($header[1]);
+                    } else {
+                        $responseHeaders[$key] = [
+                            $responseHeaders[$key],
+                            trim($header[1])
+                        ];
+                    }
+                } else {
+                    $responseHeaders[$key] = trim($header[1]);
+                }
+
+                return $len;
+            },
+            CURLOPT_WRITEFUNCTION => function ($curl, $data) use (&$chunks) {
+                $chunks[] = [
+                    'data' => $data,
+                    'time' => \microtime(true),
+                ];
+                return \strlen($data);
+            },
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
+            CURLOPT_HTTPHEADER => $headersParsed,
+            CURLOPT_TIMEOUT => $timeout,
+        ];
+
+        if($body !== NULL) {
+            $optArray[CURLOPT_POSTFIELDS] = \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body;
+        }
+
+        \curl_setopt_array($ch, $optArray);
+
+        curl_exec($ch);
+        $code = curl_getinfo($ch, \CURLINFO_HTTP_CODE);
+
+        $error = null;
+        $errorNumber = null;
+        if (curl_errno($ch)) {
+            $errorNumber = curl_errno($ch);
+            $error = curl_error($ch);
+        }
+
+        \curl_close($ch);
+
+        $fullBody = '';
+        foreach ($chunks as $chunk) {
+            $fullBody .= $chunk['data'];
+        }
+
+        return [
+            'code' => $code,
+            'body' => $fullBody,
+            'headers' => $responseHeaders,
+            'chunks' => $chunks,
+            'error' => $error,
+            'errorNumber' => $errorNumber,
+        ];
+    }
+
     private static function getFile(string $name, int $attempt = 1) {
         if(!\file_exists($name) || \file_exists($name . ".lock")) {
             if($attempt >= 3) {
