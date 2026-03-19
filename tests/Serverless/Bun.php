@@ -2,8 +2,8 @@
 
 namespace Tests\Serverless;
 
-use Tests\Serverless;
+use Tests\Serverless\Javascript;
 
-class Bun extends Serverless
+class Bun extends Javascript
 {
 }

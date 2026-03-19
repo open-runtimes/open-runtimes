@@ -2,9 +2,9 @@
 
 namespace Tests\Serverless;
 
-use Tests\Serverless;
+use Tests\Serverless\Javascript;
 
-class Deno extends Serverless
+class Deno extends Javascript
 {
     public function testSetCookie(): void
     {
