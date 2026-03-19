@@ -11,8 +11,7 @@ error_reporting(E_ALL);
 
 class NextJS extends SSR
 {
-    // NFT is intentionally skipped for Next.js — .nft.json traces miss
-    // server-wrapper and next.config imports, so we fall back to modclean.
+    // NFT prunes Next.js non-standalone builds via synthetic entry + .nft.json merge
     public function testNft(): void
     {
         $archive = '/app/tests/.runtime/nft-build/src/code.tar.gz';
@@ -22,7 +21,7 @@ class NextJS extends SSR
         $fullCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
 
         self::assertGreaterThan(0, $fullCount, 'Expected files in node_modules when cleanup is disabled');
-        self::assertEquals($fullCount, $nftCount, 'Expected NFT to be skipped for Next.js (counts should be equal)');
+        self::assertLessThan($fullCount, $nftCount, 'Expected NFT to prune node_modules for Next.js');
     }
 
     public function testHomepagePrerendered(): void

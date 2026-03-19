@@ -34,11 +34,11 @@ echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" >.open-runtimes
 echo "OPEN_RUNTIMES_CLEANUP=${OPEN_RUNTIMES_CLEANUP:-none}" >>.open-runtimes
 
 if [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "none" ]; then
-	tar --exclude code.tar -cf /mnt/code/code.tar .
+	tar --exclude code.tar -cf /mnt/code/code.tar . 2>/dev/null
 elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "zstd" ]; then
-	tar --exclude code.tar.gz -cf - . | zstd -f -o /mnt/code/code.tar.gz
+	tar --exclude code.tar.gz -cf - . 2>/dev/null | zstd -f -o /mnt/code/code.tar.gz 2>/dev/null
 else
-	tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
+	tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz . 2>/dev/null
 fi
 
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Build packaging finished. \e[0m"
