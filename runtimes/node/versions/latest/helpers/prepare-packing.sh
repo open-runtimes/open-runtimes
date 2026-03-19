@@ -43,8 +43,8 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 			# Instead, extract its bare-specifier imports and add them individually.
 			for cfg in ./next.config.ts ./next.config.mjs ./next.config.js; do
 				if [ -e "$cfg" ]; then
-					grep -oE "(from|require\s*\()\s*[\"']([^./][^\"']*)" "$cfg" \
-						| grep -oE "[\"'][^\"']+" | tr -d "\"'" | while read -r dep; do
+					grep -oE "(from|require\s*\()\s*[\"']([^./][^\"']*)" "$cfg" |
+						grep -oE "[\"'][^\"']+" | tr -d "\"'" | while read -r dep; do
 						echo "import \"$dep\";"
 					done
 					break
