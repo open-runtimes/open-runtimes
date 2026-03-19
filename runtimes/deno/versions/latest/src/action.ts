@@ -3,6 +3,39 @@ import { getContextBody } from "./getContextBody.ts";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
+const applyOutputHeaders = (ctx: any, headers: any) => {
+  const plainHeaders: Record<string, any> = {};
+  if (headers instanceof Headers) {
+    for (const [key, value] of headers) {
+      plainHeaders[key] = value;
+    }
+  } else {
+    Object.assign(plainHeaders, headers);
+  }
+
+  for (const key in plainHeaders) {
+    if (key.toLowerCase().startsWith("x-open-runtimes-")) {
+      continue;
+    }
+
+    ctx.response.headers.set(key.toLowerCase(), plainHeaders[key]);
+  }
+
+  const contentTypeValue = (
+    ctx.response.headers.get("content-type") ?? "text/plain"
+  ).toLowerCase();
+
+  if (
+    !contentTypeValue.startsWith("multipart/") &&
+    !contentTypeValue.includes("charset=")
+  ) {
+    ctx.response.headers.set(
+      "content-type",
+      contentTypeValue + "; charset=utf-8",
+    );
+  }
+};
+
 export const action = async (logger: Logger, ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? "";
   let safeTimeout: number | null = null;
@@ -107,6 +140,16 @@ export const action = async (logger: Logger, ctx: any) => {
       },
       get bodyBinary() {
         return bodyBinary;
+      },
+      get raw() {
+        const isBodyAllowed = this.method !== "GET" && this.method !== "HEAD";
+        return new Request(this.url, {
+          method: this.method,
+          headers: this.headers,
+          body: isBodyAllowed && this.bodyBinary.byteLength > 0
+            ? this.bodyBinary
+            : null,
+        });
       },
       headers,
       method: ctx.request.method,
@@ -248,29 +291,24 @@ export const action = async (logger: Logger, ctx: any) => {
     output = context.res.text("", 500, {});
   }
 
+  if (output instanceof Response) {
+    applyOutputHeaders(ctx, output.headers);
+
+    ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
+    await logger.end();
+
+    ctx.response.status = output.status;
+    if (output.status !== 204) {
+      ctx.response.body = output.body;
+    }
+    return;
+  }
+
   output.body = output.body ?? "";
   output.statusCode = output.statusCode ?? 200;
   output.headers = output.headers ?? {};
 
-  for (const header in output.headers) {
-    if (header.toLowerCase().startsWith("x-open-runtimes-")) {
-      continue;
-    }
-
-    ctx.response.headers.set(header.toLowerCase(), output.headers[header]);
-  }
-
-  const contentTypeValue =
-    (ctx.response.headers.get("content-type") ?? "text/plain").toLowerCase();
-  if (
-    !contentTypeValue.startsWith("multipart/") &&
-    !contentTypeValue.includes("charset=")
-  ) {
-    ctx.response.headers.set(
-      "content-type",
-      contentTypeValue + "; charset=utf-8",
-    );
-  }
+  applyOutputHeaders(ctx, output.headers);
 
   ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
   await logger.end();

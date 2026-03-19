@@ -147,6 +147,61 @@ When you can have two!
       return context.res.send(image, 200, {
         "content-type": "image/png",
       });
+    case "responseObjectText":
+      return new Response("Hello World 👋", {
+        status: 200,
+        headers: { "content-type": "text/plain" },
+      });
+    case "responseObjectJson":
+      return new Response(
+        JSON.stringify({ json: true, message: "Developers are awesome." }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      );
+    case "responseObjectBinary":
+      return new Response(Uint8Array.from([0, 10, 255]), {
+        status: 200,
+      });
+    case "responseObjectEmpty":
+      return new Response(null, { status: 204 });
+    case "responseObjectRedirect":
+      return Response.redirect("https://github.com/", 301);
+    case "responseObjectStatus":
+      return new Response("FAIL", { status: 404 });
+    case "responseObjectHeaders":
+      return new Response("OK", {
+        status: 200,
+        headers: {
+          "first-header": "first-value",
+          "second-header": "second-value",
+        },
+      });
+    case "streamingResponse": {
+      const encoder = new TextEncoder();
+      const streamData = new ReadableStream({
+        async start(controller) {
+          controller.enqueue(encoder.encode("chunk1"));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          controller.enqueue(encoder.encode("chunk2"));
+          controller.close();
+        },
+      });
+      return new Response(streamData, {
+        status: 200,
+        headers: { "content-type": "text/plain" },
+      });
+    }
+    case "rawRequest": {
+      const rawReq = context.req.raw;
+      return context.res.json({
+        url: rawReq.url,
+        method: rawReq.method,
+        body: await rawReq.text(),
+        hasContentType: rawReq.headers.has("content-type"),
+      });
+    }
     case "spreadOperatorLogs":
       const engine = "open-runtimes";
       context.log("engine:", engine);

@@ -101,6 +101,17 @@ const action = async (logger: Logger, request: any) => {
       get bodyBinary() {
         return bodyBinary;
       },
+      get raw() {
+        const isBodyAllowed = this.method !== "GET" && this.method !== "HEAD";
+        return new Request(this.url, {
+          method: this.method,
+          headers: this.headers,
+          body:
+            isBodyAllowed && this.bodyBinary.byteLength > 0
+              ? this.bodyBinary
+              : null,
+        });
+      },
       headers,
       method: request.method,
       url,
@@ -231,6 +242,34 @@ const action = async (logger: Logger, request: any) => {
       "Return statement missing. return context.res.empty() if no response is expected.",
     );
     output = context.res.text("", 500, {});
+  }
+
+  if (output instanceof Response) {
+    const responseHeaders = output.headers;
+
+    for (const [key] of responseHeaders) {
+      if (key.toLowerCase().startsWith("x-open-runtimes-")) {
+        responseHeaders.delete(key);
+      }
+    }
+
+    const contentTypeValue = (
+      responseHeaders.get("content-type") ?? "text/plain"
+    ).toLowerCase();
+    if (
+      !contentTypeValue.startsWith("multipart/") &&
+      !contentTypeValue.includes("charset=")
+    ) {
+      responseHeaders.set("content-type", contentTypeValue + "; charset=utf-8");
+    }
+
+    responseHeaders.set("x-open-runtimes-log-id", logger.id);
+    await logger.end();
+
+    return new Response(output.body, {
+      status: output.status,
+      headers: responseHeaders,
+    });
   }
 
   output.body = output.body ?? "";
