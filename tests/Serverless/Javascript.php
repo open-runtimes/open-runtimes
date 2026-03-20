@@ -9,7 +9,7 @@ abstract class Javascript extends Serverless
 {
     public function testRawResponse(): void
     {
-        if (str_starts_with($this->runtimeVersion, '16.0')) {
+        if ($this->runtimeName === 'node' && str_starts_with($this->runtimeVersion, '16.0')) {
             self::markTestSkipped('Node 16 does not support raw response object.');
         }
 
@@ -44,9 +44,13 @@ abstract class Javascript extends Serverless
 
         // Redirect response
         $response = Client::execute(headers: ['x-action' => 'responseObjectRedirect']);
-        self::assertEquals(301, $response['code']);
-        self::assertEmpty($response['body']);
-        self::assertEquals('https://github.com/', $response['headers']['location']);
+        if ($this->runtimeName === 'bun' && in_array($this->runtimeVersion, ['1.0', '1.1'])) {
+            self::assertEquals(200, $response['code']); // Earlier versions of Bun automatically follow redirects.
+        } else {
+            self::assertEquals(301, $response['code']);
+            self::assertEmpty($response['body']);
+            self::assertEquals('https://github.com/', $response['headers']['location']);
+        }
 
         // Custom status code
         $response = Client::execute(headers: ['x-action' => 'responseObjectStatus']);
@@ -63,7 +67,7 @@ abstract class Javascript extends Serverless
 
     public function testStreamingResponse(): void
     {
-        if (str_starts_with($this->runtimeVersion, '16.0')) {
+        if ($this->runtimeName === 'node' && str_starts_with($this->runtimeVersion, '16.0')) {
             self::markTestSkipped('Node 16 does not support raw response object.');
         }
 
@@ -84,7 +88,7 @@ abstract class Javascript extends Serverless
 
     public function testRawRequest(): void
     {
-        if (str_starts_with($this->runtimeVersion, '16.0')) {
+        if ($this->runtimeName === 'node' && str_starts_with($this->runtimeVersion, '16.0')) {
             self::markTestSkipped('Node 16 does not support raw request object.');
         }
 
