@@ -25,6 +25,7 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 	# Detect entrypoint from custom start command or framework output structure
 	ENTRYPOINT=""
 	SSR_WRAPPER=""
+	EXTRA_ENTRIES=()
 
 	if [ -n "${OPEN_RUNTIMES_START_COMMAND:-}" ]; then
 		if [[ "$OPEN_RUNTIMES_START_COMMAND" =~ node[[:space:]]+([^[:space:]]+\.m?js) ]]; then
@@ -36,20 +37,26 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 	elif [ -d "./.next" ]; then
 		# Next.js non-standalone — trace next + next.config + server-rendered pages/routes
 		SSR_WRAPPER="/usr/local/server/src/server-next-js.mjs"
+		EXTRA_ENTRIES=()
+		# Trace next.config as a separate NFT entry so its plugin dependencies
+		# (e.g. @content-collections/next) are included in the trace.
+		for cfg in ./next.config.ts ./next.config.mjs ./next.config.js; do
+			if [ -e "$cfg" ]; then
+				EXTRA_ENTRIES+=("$cfg")
+				break
+			fi
+		done
+		# Trace instrumentation file — Next.js loads it at server startup but
+		# it's not referenced by any page bundle, so NFT would otherwise miss
+		# its dependencies (e.g. @opentelemetry/*, dd-trace, @sentry/nextjs).
+		for inst in ./instrumentation.ts ./instrumentation.js ./src/instrumentation.ts ./src/instrumentation.js; do
+			if [ -e "$inst" ]; then
+				EXTRA_ENTRIES+=("$inst")
+				break
+			fi
+		done
 		{
 			echo 'import "next";'
-			# Trace next.config dependencies (e.g. @content-collections/next).
-			# Can't import the config directly — NFT can't resolve .ts from .mjs.
-			# Instead, extract its bare-specifier imports and add them individually.
-			for cfg in ./next.config.ts ./next.config.mjs ./next.config.js; do
-				if [ -e "$cfg" ]; then
-					grep -oE "(from|require\s*\()\s*[\"']([^./][^\"']*)" "$cfg" |
-						grep -oE "[\"'][^\"']+" | tr -d "\"'" | while read -r dep; do
-						echo "import \"$dep\";"
-					done
-					break
-				fi
-			done
 			find .next/server/pages .next/server/app -name '*.js' -o -name '*.mjs' 2>/dev/null | while read -r f; do
 				echo "import \"./$f\";"
 			done
@@ -108,7 +115,7 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 
 	# Run NFT — capture exit code without triggering set -e
 	NFT_EXIT=0
-	NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
+	NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft.mjs "$ENTRYPOINT" "${EXTRA_ENTRIES[@]}" "$OUTPUT_DIR" || NFT_EXIT=$?
 
 	NFT_MANIFEST="$OUTPUT_DIR/.nft-files"
 
@@ -130,16 +137,39 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 		return 0 2>/dev/null || exit 0
 	fi
 
-	# Next.js bundles pre-compiled dependencies loaded via dynamic require()
-	# that NFT cannot trace — always keep them.
-	if [ -d "$OUTPUT_DIR/.next" ] && [ -d "$OUTPUT_DIR/node_modules/next/dist/compiled" ]; then
-		while IFS= read -r -d '' f; do
-			NEEDED_FILES+=("$f")
-		done < <(cd "$OUTPUT_DIR" && find node_modules/next/dist/compiled -type f -print0)
-	fi
-
-	# Keep @next/swc-* native binaries so Next.js doesn't download them at startup.
-	if [ -d "$OUTPUT_DIR/.next" ]; then
+	# Next.js loads dependencies via dynamic require() that NFT cannot trace.
+	# Walk next's full dependency tree (including transitive deps) and keep
+	# every package found — this stays correct across Next.js versions.
+	if [ -d "$OUTPUT_DIR/.next" ] && [ -f "$OUTPUT_DIR/node_modules/next/package.json" ]; then
+		# Starting from next's package.json, recursively collect all dependencies,
+		# peerDependencies, and optionalDependencies (e.g. sharp, native addons).
+		# Prints one package name per line, deduplicated.
+		while IFS= read -r pkg; do
+			if [ -d "$OUTPUT_DIR/node_modules/$pkg" ]; then
+				while IFS= read -r -d '' f; do
+					NEEDED_FILES+=("$f")
+				done < <(cd "$OUTPUT_DIR" && find "node_modules/$pkg" -type f -print0)
+			fi
+		done < <(node -e "
+			var fs = require('fs');
+			var nm = '$OUTPUT_DIR/node_modules';
+			var seen = new Set();
+			var queue = ['next'];
+			while (queue.length) {
+				var name = queue.shift();
+				if (seen.has(name)) continue;
+				seen.add(name);
+				try {
+					var p = JSON.parse(fs.readFileSync(nm+'/'+name+'/package.json','utf8'));
+					var deps = Object.keys(Object.assign(
+						{}, p.dependencies, p.peerDependencies, p.optionalDependencies
+					));
+					deps.forEach(function(d) { if (!seen.has(d)) queue.push(d); });
+				} catch(e) {}
+			}
+			seen.forEach(function(d) { console.log(d); });
+		")
+		# Keep @next/swc-* native binaries (platform-specific, not in next's deps)
 		for swcdir in "$OUTPUT_DIR"/node_modules/@next/swc-*; do
 			[ -d "$swcdir" ] || continue
 			while IFS= read -r -d '' f; do
