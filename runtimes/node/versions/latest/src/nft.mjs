@@ -52,3 +52,14 @@ for (const f of fileList) {
 
 const manifestPath = resolve(outputDir, ".nft-files");
 writeFileSync(manifestPath, [...files].join("\0"), "utf-8");
+
+// Log per-package summary
+const packages = new Set();
+for (const f of files) {
+  const m = f.match(/^node_modules\/(?:@[^/]+\/)?[^/]+/);
+  if (m) packages.add(m[0]);
+}
+
+console.log(
+  `Traced ${files.size} files across ${packages.size} packages (${fileList.size} total)`,
+);
