@@ -20,171 +20,120 @@ cd "$OUTPUT_DIR" || exit
 # ─── NFT (opt-in) ────────────────────────────────────────────────────────────
 if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 
-	SIZE_BEFORE=$(du -sm "$OUTPUT_DIR/node_modules" 2>/dev/null | cut -f1)
-
-	# Detect entrypoint from custom start command or framework output structure
-	ENTRYPOINT=""
-	SSR_WRAPPER=""
-	EXTRA_ENTRIES=()
-
-	if [ -n "${OPEN_RUNTIMES_START_COMMAND:-}" ]; then
-		if [[ "$OPEN_RUNTIMES_START_COMMAND" =~ node[[:space:]]+([^[:space:]]+\.m?js) ]]; then
-			ENTRYPOINT="${BASH_REMATCH[1]}"
-		fi
-	elif [ -e "./server.js" ] && [ -d "./.next" ]; then
-		# Next.js standalone
-		ENTRYPOINT="./server.js"
-	elif [ -d "./.next" ]; then
-		# Next.js non-standalone — trace next + next.config + server-rendered pages/routes
-		SSR_WRAPPER="/usr/local/server/src/server-next-js.mjs"
-		EXTRA_ENTRIES=()
-		# Trace next.config as a separate NFT entry so its plugin dependencies
-		# (e.g. @content-collections/next) are included in the trace.
-		for cfg in ./next.config.ts ./next.config.mjs ./next.config.js; do
-			if [ -e "$cfg" ]; then
-				EXTRA_ENTRIES+=("$cfg")
-				break
-			fi
-		done
-		# Trace instrumentation file — Next.js loads it at server startup but
-		# it's not referenced by any page bundle, so NFT would otherwise miss
-		# its dependencies (e.g. @opentelemetry/*, dd-trace, @sentry/nextjs).
-		for inst in ./instrumentation.ts ./instrumentation.js ./src/instrumentation.ts ./src/instrumentation.js; do
-			if [ -e "$inst" ]; then
-				EXTRA_ENTRIES+=("$inst")
-				break
-			fi
-		done
-		{
-			echo 'import "next";'
-			find .next/server/pages .next/server/app -name '*.js' -o -name '*.mjs' 2>/dev/null | while read -r f; do
-				echo "import \"./$f\";"
-			done
-		} >./.nft-entry.mjs
-		ENTRYPOINT="./.nft-entry.mjs"
-	elif [ -e "./server/entry.mjs" ]; then
-		# Astro
-		ENTRYPOINT="./server/entry.mjs"
-		SSR_WRAPPER="/usr/local/server/src/server-astro.mjs"
-	elif [ -e "./server/server.mjs" ]; then
-		# Angular
-		ENTRYPOINT="./server/server.mjs"
-		SSR_WRAPPER="/usr/local/server/src/server-angular.mjs"
-	elif [ -e "./handler.js" ]; then
-		# SvelteKit
-		ENTRYPOINT="./handler.js"
-		SSR_WRAPPER="/usr/local/server/src/server-sveltekit.mjs"
-	elif [ -e "./build/server/index.js" ]; then
-		# Remix
-		ENTRYPOINT="./build/server/index.js"
-		SSR_WRAPPER="/usr/local/server/src/server-remix.mjs"
-	elif [ -e "./server/server.js" ]; then
-		# TanStack Start native SSR
-		ENTRYPOINT="./server/server.js"
-		SSR_WRAPPER="/usr/local/server/src/server-tanstack-start.mjs"
-	elif [ -e "./server/index.mjs" ]; then
-		# Nuxt / Analog / TanStack Start Nitro
-		ENTRYPOINT="./server/index.mjs"
-		SSR_WRAPPER="/usr/local/server/src/server-nuxt.mjs"
-	fi
-
-	# If there's an SSR wrapper, create a synthetic entry that traces both the
-	# framework entrypoint and the wrapper's third-party dependencies.
-	# We import the packages directly (not the wrapper file) so they resolve
-	# from outputDir where node_modules lives.
-	if [ -n "$SSR_WRAPPER" ] && [ -n "$ENTRYPOINT" ]; then
-		if [ "$ENTRYPOINT" != "./.nft-entry.mjs" ]; then
-			echo "import \"$ENTRYPOINT\";" >./.nft-entry.mjs
-		fi
-		# Include user's custom server file if present (e.g. Remix custom Express server)
-		for f in ./server.mjs ./server.js; do
-			if [ -e "$f" ] && [ "$f" != "$ENTRYPOINT" ]; then
-				echo "import \"$f\";" >>./.nft-entry.mjs
-			fi
-		done
-		grep -o 'from "[^"]*"' "$SSR_WRAPPER" | cut -d'"' -f2 | while read -r dep; do
-			[[ "$dep" == ./* || "$dep" == ../* || "$dep" == /* ]] && continue
-			echo "import \"$dep\";"
-		done >>./.nft-entry.mjs
-		ENTRYPOINT="./.nft-entry.mjs"
-	fi
-
-	if [ -z "$ENTRYPOINT" ]; then
+	# Next.js — skip NFT; standalone already tree-shakes, non-standalone .nft.json
+	# traces miss server-wrapper and next.config imports. Falls back to modclean.
+	if [ -d "./.next" ]; then
 		return 0 2>/dev/null || exit 0
 	fi
 
-	# Run NFT — capture exit code without triggering set -e
-	NFT_EXIT=0
-	NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft.mjs "$ENTRYPOINT" "${EXTRA_ENTRIES[@]}" "$OUTPUT_DIR" || NFT_EXIT=$?
-
-	NFT_MANIFEST="$OUTPUT_DIR/.nft-files"
+	SIZE_BEFORE=$(du -sm "$OUTPUT_DIR/node_modules" 2>/dev/null | cut -f1)
 
 	NEEDED_FILES=()
 
-	if [ "$NFT_EXIT" -eq 0 ] && [ -f "$NFT_MANIFEST" ]; then
-		# Read null-delimited manifest, filter to node_modules/ entries only
-		mapfile -d '' ALL_FILES <"$NFT_MANIFEST"
-		for file in "${ALL_FILES[@]}"; do
-			if [[ "$file" == node_modules/* ]]; then
-				NEEDED_FILES+=("$file")
-			fi
-		done
-	elif [ -d "$OUTPUT_DIR/.next" ]; then
-		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m NFT failed (exit $NFT_EXIT), falling back to Next.js .nft.json traces. \e[0m"
-	else
-		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m NFT failed (exit $NFT_EXIT), skipping pruning. \e[0m"
-		rm -f "$OUTPUT_DIR/.nft-entry.mjs"
-		return 0 2>/dev/null || exit 0
-	fi
+	if [ -d "./.next" ]; then
+		# Next.js non-standalone — use native .nft.json trace files instead of
+		# re-tracing with NFT (webpack-compiled externals use patterns NFT can't follow)
+		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Collecting Next.js traces (node_modules: ${SIZE_BEFORE}MB) \e[0m"
 
-	# Next.js loads dependencies via dynamic require() that NFT cannot trace.
-	# Walk next's full dependency tree (including transitive deps) and keep
-	# every package found — this stays correct across Next.js versions.
-	if [ -d "$OUTPUT_DIR/.next" ] && [ -f "$OUTPUT_DIR/node_modules/next/package.json" ]; then
-		# Starting from next's package.json, recursively collect all dependencies,
-		# peerDependencies, and optionalDependencies (e.g. sharp, native addons).
-		# Prints one package name per line, deduplicated.
-		while IFS= read -r pkg; do
-			if [ -d "$OUTPUT_DIR/node_modules/$pkg" ]; then
-				while IFS= read -r -d '' f; do
-					NEEDED_FILES+=("$f")
-				done < <(cd "$OUTPUT_DIR" && find "node_modules/$pkg" -type f -print0)
-			fi
-		done < <(node -e "
-			var fs = require('fs');
-			var nm = '$OUTPUT_DIR/node_modules';
-			var seen = new Set();
-			var queue = ['next'];
-			while (queue.length) {
-				var name = queue.shift();
-				if (seen.has(name)) continue;
-				seen.add(name);
-				try {
-					var p = JSON.parse(fs.readFileSync(nm+'/'+name+'/package.json','utf8'));
-					var deps = Object.keys(Object.assign(
-						{}, p.dependencies, p.peerDependencies, p.optionalDependencies
-					));
-					deps.forEach(function(d) { if (!seen.has(d)) queue.push(d); });
-				} catch(e) {}
-			}
-			seen.forEach(function(d) { console.log(d); });
-		")
-		# Keep @next/swc-* native binaries (platform-specific, not in next's deps)
-		for swcdir in "$OUTPUT_DIR"/node_modules/@next/swc-*; do
-			[ -d "$swcdir" ] || continue
-			while IFS= read -r -d '' f; do
-				NEEDED_FILES+=("$f")
-			done < <(cd "$OUTPUT_DIR" && find "node_modules/@next/$(basename "$swcdir")" -type f -print0)
-		done
-	fi
-
-	# Next.js generates .nft.json trace files during build for each server bundle.
-	# These contain accurate dependency info that our NFT re-trace may miss
-	# (webpack-compiled externals use patterns NFT can't always follow).
-	if [ -d "$OUTPUT_DIR/.next" ]; then
+		# Parse .nft.json files for node_modules dependencies
 		while IFS= read -r -d '' dep; do
 			NEEDED_FILES+=("$dep")
-		done < <(find "$OUTPUT_DIR/.next" -name '*.nft.json' -print0 | node /usr/local/server/src/nft-nextjs.mjs "$OUTPUT_DIR" 2>/dev/null)
+		done < <(find "$OUTPUT_DIR/.next" -name '*.nft.json' -print0 | node /usr/local/server/src/nft-nextjs.mjs "$OUTPUT_DIR")
+
+		# Sanity check: if .nft.json parsing yielded nothing, skip pruning rather
+		# than accidentally deleting all of node_modules except next/dist/compiled.
+		if [ "${#NEEDED_FILES[@]}" -eq 0 ]; then
+			echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m No dependencies found in .nft.json traces, skipping pruning. \e[0m"
+			return 0 2>/dev/null || exit 0
+		fi
+
+		# Keep the entire next package — server-next-js.mjs imports "next" directly
+		# which needs next/dist/server/, next/dist/shared/, etc. beyond what
+		# individual page .nft.json traces reference.
+		if [ -d "$OUTPUT_DIR/node_modules/next" ]; then
+			while IFS= read -r -d '' f; do
+				NEEDED_FILES+=("$f")
+			done < <(cd "$OUTPUT_DIR" && find node_modules/next -type f -print0)
+		fi
+	else
+		# Generic frameworks — detect entrypoint and run NFT
+		ENTRYPOINT=""
+		SSR_WRAPPER=""
+
+		if [ -n "${OPEN_RUNTIMES_START_COMMAND:-}" ]; then
+			if [[ "$OPEN_RUNTIMES_START_COMMAND" =~ node[[:space:]]+([^[:space:]]+\.m?js) ]]; then
+				ENTRYPOINT="${BASH_REMATCH[1]}"
+			fi
+		elif [ -e "./server/entry.mjs" ]; then
+			# Astro
+			ENTRYPOINT="./server/entry.mjs"
+			SSR_WRAPPER="/usr/local/server/src/server-astro.mjs"
+		elif [ -e "./server/server.mjs" ]; then
+			# Angular
+			ENTRYPOINT="./server/server.mjs"
+			SSR_WRAPPER="/usr/local/server/src/server-angular.mjs"
+		elif [ -e "./handler.js" ]; then
+			# SvelteKit
+			ENTRYPOINT="./handler.js"
+			SSR_WRAPPER="/usr/local/server/src/server-sveltekit.mjs"
+		elif [ -e "./build/server/index.js" ]; then
+			# Remix
+			ENTRYPOINT="./build/server/index.js"
+			SSR_WRAPPER="/usr/local/server/src/server-remix.mjs"
+		elif [ -e "./server/server.js" ]; then
+			# TanStack Start native SSR
+			ENTRYPOINT="./server/server.js"
+			SSR_WRAPPER="/usr/local/server/src/server-tanstack-start.mjs"
+		elif [ -e "./server/index.mjs" ]; then
+			# Nuxt / Analog / TanStack Start Nitro
+			ENTRYPOINT="./server/index.mjs"
+			SSR_WRAPPER="/usr/local/server/src/server-nuxt.mjs"
+		fi
+
+		# If there's an SSR wrapper, create a synthetic entry that traces both the
+		# framework entrypoint and the wrapper's third-party dependencies.
+		# We import the packages directly (not the wrapper file) so they resolve
+		# from outputDir where node_modules lives.
+		if [ -n "$SSR_WRAPPER" ] && [ -n "$ENTRYPOINT" ]; then
+			echo "import \"$ENTRYPOINT\";" >./.nft-entry.mjs
+			# Include user's custom server file if present (e.g. Remix custom Express server)
+			for f in ./server.mjs ./server.js; do
+				if [ -e "$f" ] && [ "$f" != "$ENTRYPOINT" ]; then
+					echo "import \"$f\";" >>./.nft-entry.mjs
+				fi
+			done
+			grep -o 'from "[^"]*"' "$SSR_WRAPPER" | cut -d'"' -f2 | while read -r dep; do
+				[[ "$dep" == ./* || "$dep" == ../* || "$dep" == /* ]] && continue
+				echo "import \"$dep\";"
+			done >>./.nft-entry.mjs
+			ENTRYPOINT="./.nft-entry.mjs"
+		fi
+
+		if [ -z "$ENTRYPOINT" ]; then
+			return 0 2>/dev/null || exit 0
+		fi
+
+		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Tracing from $ENTRYPOINT (node_modules: ${SIZE_BEFORE}MB) \e[0m"
+
+		# Run NFT — capture exit code without triggering set -e
+		NFT_EXIT=0
+		NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
+
+		NFT_MANIFEST="$OUTPUT_DIR/.nft-files"
+
+		if [ "$NFT_EXIT" -eq 0 ] && [ -f "$NFT_MANIFEST" ]; then
+			# Read null-delimited manifest, filter to node_modules/ entries only
+			mapfile -d '' ALL_FILES <"$NFT_MANIFEST"
+			for file in "${ALL_FILES[@]}"; do
+				if [[ "$file" == node_modules/* ]]; then
+					NEEDED_FILES+=("$file")
+				fi
+			done
+		else
+			echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m NFT failed (exit $NFT_EXIT), skipping pruning. \e[0m"
+			rm -f "$OUTPUT_DIR/.nft-entry.mjs"
+			return 0 2>/dev/null || exit 0
+		fi
 	fi
 
 	if [ "${#NEEDED_FILES[@]}" -eq 0 ]; then
@@ -198,7 +147,7 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 	find "$OUTPUT_DIR/node_modules" -type d -empty -delete
 
 	SIZE_AFTER=$(du -sm "$OUTPUT_DIR/node_modules" 2>/dev/null | cut -f1)
-	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Pruned node_modules: ${SIZE_BEFORE}MB → ${SIZE_AFTER:-0}MB \e[0m"
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[32m Pruned node_modules: ${SIZE_BEFORE}MB → ${SIZE_AFTER:-0}MB \e[0m"
 
 	# Clean up
 	rm -f /tmp/.nft-all /tmp/.nft-keep "$NFT_MANIFEST" "$OUTPUT_DIR/.nft-entry.mjs"
