@@ -2,30 +2,24 @@ import { nodeFileTrace } from "@vercel/nft";
 import { writeFileSync, existsSync, realpathSync } from "node:fs";
 import { resolve, relative } from "node:path";
 
-// Usage: nft.mjs <entrypoint...> <output-dir>
-// Last argument is always the output directory; all preceding args are entrypoints.
-const args = process.argv.slice(2);
-const outputDir = resolve(args.pop());
-const entrypoints = args;
+const entrypoint = process.argv[2];
+const outputDir = resolve(process.argv[3]);
 
-if (!entrypoints.length || !outputDir) {
-  console.error("Usage: nft.mjs <entrypoint...> <output-dir>");
+if (!entrypoint || !outputDir) {
+  console.error("Usage: nft.mjs <entrypoint> <output-dir>");
   process.exit(1);
 }
 
-const absoluteEntries = [];
-for (const ep of entrypoints) {
-  const abs = resolve(outputDir, ep);
-  if (!existsSync(abs)) {
-    console.error(`Entrypoint not found: ${abs}`);
-    process.exit(1);
-  }
-  absoluteEntries.push(abs);
+const absoluteEntry = resolve(outputDir, entrypoint);
+
+if (!existsSync(absoluteEntry)) {
+  console.error(`Entrypoint not found: ${absoluteEntry}`);
+  process.exit(1);
 }
 
 let result;
 try {
-  result = await nodeFileTrace(absoluteEntries, {
+  result = await nodeFileTrace([absoluteEntry], {
     base: outputDir,
     processCwd: outputDir,
   });
