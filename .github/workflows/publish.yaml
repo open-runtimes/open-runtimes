@@ -1,4 +1,5 @@
-name: "Build and Deploy OpenRuntimes Images"
+name: "Build and Publish OpenRuntimes Images"
+run-name: "Build and Publish OpenRuntimes Images (${{ github.sha }} by @${{ github.actor }})"
 
 on:
   workflow_dispatch:
