@@ -106,6 +106,19 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 				[[ "$dep" == ./* || "$dep" == ../* || "$dep" == /* ]] && continue
 				echo "import \"$dep\";"
 			done >>./.nft-entry.mjs
+
+			# Include declared production dependencies so that native/binary packages
+			# and bundler-externalized modules are traced even when the framework bundler 
+			# (Nitro/Vite) has already inlined JS deps.
+			if [ -f "$OUTPUT_DIR/package.json" ]; then
+				node -e "
+					const pkg = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf-8'));
+					for (const dep of Object.keys(pkg.dependencies || {})) {
+						process.stdout.write('import \"' + dep + '\";\n');
+					}
+				" "$OUTPUT_DIR/package.json" >>./.nft-entry.mjs
+			fi
+
 			ENTRYPOINT="./.nft-entry.mjs"
 		fi
 
@@ -137,7 +150,8 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 	fi
 
 	if [ "${#NEEDED_FILES[@]}" -eq 0 ]; then
-		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m No node_modules dependencies traced — pruning all of node_modules \e[0m"
+		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m No node_modules dependencies traced — skipping pruning \e[0m"
+		return 0 2>/dev/null || exit 0
 	fi
 
 	# Delete everything in node_modules not referenced by the trace
