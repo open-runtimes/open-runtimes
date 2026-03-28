@@ -108,7 +108,7 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 			done >>./.nft-entry.mjs
 
 			# Include declared production dependencies so that native/binary packages
-			# and bundler-externalized modules are traced even when the framework bundler 
+			# and bundler-externalized modules are traced even when the framework bundler
 			# (Nitro/Vite) has already inlined JS deps.
 			if [ -f "$OUTPUT_DIR/package.json" ]; then
 				node -e "
