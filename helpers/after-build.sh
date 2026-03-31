@@ -33,12 +33,16 @@ touch .open-runtimes
 echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" >.open-runtimes
 echo "OPEN_RUNTIMES_CLEANUP=${OPEN_RUNTIMES_CLEANUP:-none}" >>.open-runtimes
 
-if [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "none" ]; then
-	tar --exclude code.tar -cf /mnt/code/code.tar .
-elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "zstd" ]; then
-	tar --exclude code.tar.gz -cf - . | zstd -f -o /mnt/code/code.tar.gz
+. /usr/local/server/helpers/select-compression.sh
+
+echo "OPEN_RUNTIMES_COMPRESSION=$COMPRESSION_METHOD" >>.open-runtimes
+
+if [ "$COMPRESSION_METHOD" = "none" ]; then
+	tar --exclude code.tar --exclude code.tar.gz -cf /mnt/code/code.tar.gz .
+elif [ "$COMPRESSION_METHOD" = "zstd" ]; then
+	tar --exclude code.tar --exclude code.tar.gz -cf - . | zstd -qf -o /mnt/code/code.tar.gz
 else
-	tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
+	tar --exclude code.tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
 fi
 
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Build packaging finished. \e[0m"
