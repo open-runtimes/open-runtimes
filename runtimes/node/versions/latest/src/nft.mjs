@@ -52,4 +52,3 @@ for (const f of fileList) {
 
 const manifestPath = resolve(outputDir, ".nft-files");
 writeFileSync(manifestPath, [...files].join("\0"), "utf-8");
-
