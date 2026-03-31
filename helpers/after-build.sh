@@ -41,8 +41,6 @@ if [ "$COMPRESSION_METHOD" = "none" ]; then
 	tar --exclude code.tar --exclude code.tar.gz -cf /mnt/code/code.tar.gz .
 elif [ "$COMPRESSION_METHOD" = "zstd" ]; then
 	tar --exclude code.tar --exclude code.tar.gz -cf - . | zstd -qf -o /mnt/code/code.tar.gz
-elif [ "$COMPRESSION_METHOD" = "igzip" ]; then
-	tar --exclude code.tar --exclude code.tar.gz -I igzip -cf /mnt/code/code.tar.gz .
 else
 	tar --exclude code.tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
 fi

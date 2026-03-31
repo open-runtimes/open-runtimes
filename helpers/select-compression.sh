@@ -16,8 +16,8 @@ elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "auto" ]; then
         # < 5MB: no compression
         COMPRESSION_METHOD="none"
     elif [ "$TOTAL_SIZE_KB" -lt 10240 ]; then
-        # 5-10MB: igzip (fast gzip via ISA-L)
-        COMPRESSION_METHOD="igzip"
+        # 5-10MB: gzip (edge decompresses with igzip)
+        COMPRESSION_METHOD="gzip"
     else
         # >= 10MB: zstd (best decompression throughput)
         COMPRESSION_METHOD="zstd"

@@ -7,9 +7,9 @@ ENV OPEN_RUNTIMES_HEADERS="{}"
 
 RUN <<EOR
     if [ -f /etc/alpine-release ]; then
-        apk add util-linux zstd isa-l
+        apk add util-linux zstd
     else
-        apt-get update && apt-get install -y util-linux zstd isal
+        apt-get update && apt-get install -y util-linux zstd
     fi
 EOR
 
