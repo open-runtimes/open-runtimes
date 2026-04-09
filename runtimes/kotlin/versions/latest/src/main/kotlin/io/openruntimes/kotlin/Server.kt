@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.HttpUtil
 import io.netty.handler.codec.http.HttpVersion
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.charset.StandardCharsets
