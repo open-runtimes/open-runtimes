@@ -1,20 +1,19 @@
 plugins {
-	id 'org.jetbrains.kotlin.jvm' version '2.2+'
+	id 'org.jetbrains.kotlin.jvm' version '1.9+'
 }
 
 group = 'io.openruntimes'
 version = '1.0.0'
+sourceCompatibility = '8'
 
 repositories {
 	mavenCentral()
 }
 
 dependencies {
-	implementation "io.javalin:javalin:7.1.0"
+	implementation 'io.netty:netty-codec-http:4.1.115.Final'
 	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
 	implementation "com.google.code.gson:gson:2.13.1"
-	implementation "org.slf4j:slf4j-simple:2.0.17"
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.0'
 	implementation "org.jetbrains.kotlin:kotlin-reflect:2.2.0"
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 }

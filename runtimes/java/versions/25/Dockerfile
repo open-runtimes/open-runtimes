@@ -1,7 +1,7 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM eclipse-temurin:25-jdk-jammy
+FROM ghcr.io/graalvm/native-image-community:23-ol9
 
-RUN apt update && apt install curl -y
+RUN microdnf install -y curl
 
 INCLUDE ./base-before
 INCLUDE ./java
