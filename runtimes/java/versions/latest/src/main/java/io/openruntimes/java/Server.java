@@ -193,15 +193,12 @@ public class Server {
       byte[] bodyBytes = new byte[content.readableBytes()];
       content.readBytes(bodyBytes);
 
-      executor.submit(
-          () -> {
-            try {
-              action(ctx, keepAlive, method, path, queryString, requestHeaders, bodyBytes);
-            } catch (Exception e) {
-              sendResponse(
-                  ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, new byte[0], null);
-            }
-          });
+      try {
+        action(ctx, keepAlive, method, path, queryString, requestHeaders, bodyBytes);
+      } catch (Exception e) {
+        sendResponse(
+            ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, new byte[0], null);
+      }
     }
 
     @Override
