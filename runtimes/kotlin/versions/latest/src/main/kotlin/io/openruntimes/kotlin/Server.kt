@@ -22,7 +22,7 @@ suspend fun main() {
 
     Javalin
         .create { config ->
-            config.maxRequestSize = 20L * 1024 * 1024
+            config.http.maxRequestSize = 20L * 1024 * 1024
         }.start(3000)
         .get("/*") { runBlocking { execute(it) } }
         .post("/*") { runBlocking { execute(it) } }
@@ -93,7 +93,7 @@ suspend fun action(
 
     val bodyBinary = ctx.bodyAsBytes()
     val headers = mutableMapOf<String, String>()
-    val method = ctx.method()
+    val method = ctx.method().name
 
     for (entry in ctx.headerMap().entries.iterator()) {
         val header = entry.key.lowercase()
