@@ -22,9 +22,7 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import io.netty.handler.codec.http.HttpServerCodec
 import io.netty.handler.codec.http.HttpUtil
 import io.netty.handler.codec.http.HttpVersion
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -119,8 +117,6 @@ private fun sendResponse(
 }
 
 class RequestHandler : SimpleChannelInboundHandler<FullHttpRequest>() {
-    private val scope = CoroutineScope(Dispatchers.Default)
-
     override fun channelRead0(ctx: ChannelHandlerContext, request: FullHttpRequest) {
         val uri = request.uri()
         val questionMark = uri.indexOf('?')
@@ -153,7 +149,7 @@ class RequestHandler : SimpleChannelInboundHandler<FullHttpRequest>() {
 
         val queryString = if (questionMark >= 0) uri.substring(questionMark + 1) else ""
 
-        scope.launch {
+        runBlocking {
             try {
                 execute(ctx, keepAlive, method, path, queryString, bodyBinary, requestHeaders)
             } catch (e: Exception) {
