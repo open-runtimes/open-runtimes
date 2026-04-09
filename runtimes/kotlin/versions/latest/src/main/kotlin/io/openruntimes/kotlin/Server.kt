@@ -23,14 +23,14 @@ suspend fun main() {
     Javalin
         .create { config ->
             config.http.maxRequestSize = 20L * 1024 * 1024
+            config.routes.get("/*") { runBlocking { execute(it) } }
+            config.routes.post("/*") { runBlocking { execute(it) } }
+            config.routes.put("/*") { runBlocking { execute(it) } }
+            config.routes.delete("/*") { runBlocking { execute(it) } }
+            config.routes.patch("/*") { runBlocking { execute(it) } }
+            config.routes.options("/*") { runBlocking { execute(it) } }
+            config.routes.head("/*") { runBlocking { execute(it) } }
         }.start(3000)
-        .get("/*") { runBlocking { execute(it) } }
-        .post("/*") { runBlocking { execute(it) } }
-        .put("/*") { runBlocking { execute(it) } }
-        .delete("/*") { runBlocking { execute(it) } }
-        .patch("/*") { runBlocking { execute(it) } }
-        .options("/*") { runBlocking { execute(it) } }
-        .head("/*") { runBlocking { execute(it) } }
 }
 
 suspend fun execute(ctx: Context) {
