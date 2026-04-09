@@ -9,6 +9,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -18,11 +19,12 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.QueryStringDecoder;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -31,7 +33,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -62,7 +63,55 @@ public class Server {
     executor = temporary;
   }
 
+  private static final String serverSecret;
+  private static final Map<String, Object> enforcedHeaders;
+
+  static {
+    String secret = System.getenv("OPEN_RUNTIMES_SECRET");
+    serverSecret = secret != null ? secret : "";
+
+    String headersJson = System.getenv("OPEN_RUNTIMES_HEADERS");
+    if (headersJson == null || headersJson.isEmpty()) {
+      headersJson = "{}";
+    }
+    enforcedHeaders = gsonInternal.fromJson(headersJson, Map.class);
+  }
+
+  private static volatile Method cachedMethod;
+  private static volatile Object cachedInstance;
+  private static volatile boolean classLoaded = false;
+  private static volatile String classLoadError = null;
+
+  private static synchronized void loadUserClass() {
+    if (classLoaded) {
+      return;
+    }
+
+    String entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
+    try {
+      String className = entrypoint.substring(0, entrypoint.length() - 5);
+      className = className.replaceAll("/", ".");
+
+      Class<?> classToLoad = Class.forName("io.openruntimes.java." + className);
+      cachedMethod = classToLoad.getDeclaredMethod("main", RuntimeContext.class);
+      cachedInstance = classToLoad.newInstance();
+      classLoaded = true;
+    } catch (ClassNotFoundException e) {
+      classLoadError = "Class not found: " + e.getMessage();
+      classLoaded = true;
+    } catch (NoSuchMethodException e) {
+      classLoadError =
+          "Function signature invalid. Did you forget to export a 'main' function?";
+      classLoaded = true;
+    } catch (Exception e) {
+      classLoadError = "Failed to load module: " + e.getMessage();
+      classLoaded = true;
+    }
+  }
+
   public static void main(String[] args) throws Exception {
+    loadUserClass();
+
     EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -81,7 +130,9 @@ public class Server {
                       .addLast(new HttpObjectAggregator(20 * 1024 * 1024))
                       .addLast(new RequestHandler());
                 }
-              });
+              })
+          .option(ChannelOption.SO_BACKLOG, 1024)
+          .childOption(ChannelOption.SO_KEEPALIVE, true);
 
       bootstrap.bind(3000).sync();
       System.out.println("HTTP server successfully started!");
@@ -96,37 +147,41 @@ public class Server {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
-      QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
-      String path = decoder.path();
+      String uri = request.uri();
+      int questionMark = uri.indexOf('?');
+      String path = questionMark >= 0 ? uri.substring(0, questionMark) : uri;
+      boolean keepAlive = HttpUtil.isKeepAlive(request);
 
       if (path.equals("/__opr/health")) {
-        sendResponse(ctx, HttpResponseStatus.OK, "OK".getBytes(StandardCharsets.UTF_8), null);
+        sendResponse(
+            ctx, keepAlive, HttpResponseStatus.OK, "OK".getBytes(StandardCharsets.UTF_8), null);
         return;
       }
 
       if (path.equals("/__opr/timings")) {
         try {
-          String timings = new String(Files.readAllBytes(Paths.get("/mnt/telemetry/timings.txt")));
+          String timings =
+              new String(Files.readAllBytes(Paths.get("/mnt/telemetry/timings.txt")));
           Map<String, String> headers = new HashMap<>();
           headers.put("content-type", "text/plain; charset=utf-8");
           sendResponse(
               ctx,
+              keepAlive,
               HttpResponseStatus.OK,
               timings.getBytes(StandardCharsets.UTF_8),
               headers);
         } catch (IOException e) {
           sendResponse(
               ctx,
+              keepAlive,
               HttpResponseStatus.INTERNAL_SERVER_ERROR,
-              "Error reading timings".getBytes(StandardCharsets.UTF_8),
+              new byte[0],
               null);
         }
         return;
       }
 
       String method = request.method().name();
-      String uri = request.uri();
-      int questionMark = uri.indexOf('?');
       String queryString = questionMark >= 0 ? uri.substring(questionMark + 1) : "";
 
       Map<String, String> requestHeaders = new HashMap<>();
@@ -141,13 +196,10 @@ public class Server {
       executor.submit(
           () -> {
             try {
-              executeAction(ctx, method, path, queryString, requestHeaders, bodyBytes);
+              action(ctx, keepAlive, method, path, queryString, requestHeaders, bodyBytes);
             } catch (Exception e) {
               sendResponse(
-                  ctx,
-                  HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                  new byte[0],
-                  null);
+                  ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, new byte[0], null);
             }
           });
     }
@@ -157,8 +209,9 @@ public class Server {
       ctx.close();
     }
 
-    private void executeAction(
+    private void action(
         ChannelHandlerContext ctx,
+        boolean keepAlive,
         String method,
         String path,
         String queryString,
@@ -181,282 +234,231 @@ public class Server {
       }
 
       try {
-        action(logger, ctx, method, path, queryString, requestHeaders, bodyBytes);
+        int safeTimeout = -1;
+        String timeout = requestHeaders.get("x-open-runtimes-timeout");
+        if (timeout != null && !timeout.isEmpty()) {
+          boolean invalid = false;
+
+          try {
+            safeTimeout = Integer.parseInt(timeout);
+          } catch (NumberFormatException e) {
+            invalid = true;
+          }
+
+          if (invalid || safeTimeout == 0) {
+            sendResponse(
+                ctx,
+                keepAlive,
+                HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                "Header \"x-open-runtimes-timeout\" must be an integer greater than 0."
+                    .getBytes(StandardCharsets.UTF_8),
+                null);
+            return;
+          }
+        }
+
+        String secret = requestHeaders.get("x-open-runtimes-secret");
+        if (secret == null) {
+          secret = "";
+        }
+
+        if (!serverSecret.equals("") && !secret.equals(serverSecret)) {
+          sendResponse(
+              ctx,
+              keepAlive,
+              HttpResponseStatus.INTERNAL_SERVER_ERROR,
+              "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."
+                  .getBytes(StandardCharsets.UTF_8),
+              null);
+          return;
+        }
+
+        Map<String, String> headers = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
+          String header = entry.getKey();
+          if (!header.startsWith("x-open-runtimes-")) {
+            headers.put(header, entry.getValue());
+          }
+        }
+
+        for (Map.Entry<String, Object> entry : enforcedHeaders.entrySet()) {
+          headers.put(entry.getKey().toLowerCase(), String.valueOf(entry.getValue()));
+        }
+
+        String scheme = requestHeaders.get("x-forwarded-proto");
+        if (scheme == null) {
+          scheme = "http";
+        }
+        String defaultPort = scheme.equals("https") ? "443" : "80";
+
+        String hostHeader = requestHeaders.get("host");
+        if (hostHeader == null) {
+          hostHeader = "";
+        }
+        String host;
+        int port;
+
+        if (hostHeader.contains(":")) {
+          host = hostHeader.split(":")[0];
+          port = Integer.parseInt(hostHeader.split(":")[1]);
+        } else {
+          host = hostHeader;
+          port = Integer.parseInt(defaultPort);
+        }
+
+        Map<String, String> query = new HashMap<>();
+
+        for (String param : queryString.split("&")) {
+          String[] pair = param.split("=", 2);
+
+          if (pair.length >= 1 && pair[0] != null && !pair[0].isEmpty()) {
+            String value = pair.length == 2 ? pair[1] : "";
+            query.put(pair[0], value);
+          }
+        }
+
+        String url = scheme + "://" + host;
+
+        if (port != Integer.parseInt(defaultPort)) {
+          url += ":" + port;
+        }
+
+        url += path;
+
+        if (!queryString.isEmpty()) {
+          url += "?" + queryString;
+        }
+
+        RuntimeRequest runtimeRequest =
+            new RuntimeRequest(
+                method, scheme, host, port, path, query, queryString, headers, bodyBytes, url);
+        RuntimeResponse runtimeResponse = new RuntimeResponse();
+        RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse, logger);
+
+        logger.overrideNativeLogs();
+
+        RuntimeOutput output = null;
+
+        if (classLoadError != null) {
+          context.error(classLoadError);
+          logger.revertNativeLogs();
+          output = context.getRes().send("", 503);
+        }
+
+        if (output == null && cachedMethod != null && cachedInstance != null) {
+          try {
+            if (safeTimeout > 0) {
+              final RuntimeContext finalContext = context;
+              Future<RuntimeOutput> future =
+                  executor.submit(
+                      () -> {
+                        try {
+                          return (RuntimeOutput) cachedMethod.invoke(cachedInstance, finalContext);
+                        } catch (Exception e) {
+                          StringWriter sw = new StringWriter();
+                          PrintWriter pw = new PrintWriter(sw);
+                          e.printStackTrace(pw);
+
+                          finalContext.error(sw.toString());
+                          finalContext.getRes().send("", 500);
+                        }
+
+                        return null;
+                      });
+
+              try {
+                output = future.get(safeTimeout, TimeUnit.SECONDS);
+              } catch (TimeoutException e) {
+                future.cancel(true);
+                context.error("Execution timed out.");
+                output = context.getRes().send("", 500);
+              }
+            } else {
+              output = (RuntimeOutput) cachedMethod.invoke(cachedInstance, context);
+            }
+          } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+
+            context.error(sw.toString());
+            output = context.getRes().send("", 500);
+          } finally {
+            logger.revertNativeLogs();
+          }
+        }
+
+        if (output == null) {
+          context.error(
+              "Return statement missing. return context.res.empty() if no response is expected.");
+          output = context.getRes().send("", 500);
+        }
+
+        output.getHeaders().putIfAbsent("content-type", "text/plain");
+
+        Map<String, String> responseHeaders = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
+          String header = entry.getKey().toLowerCase();
+          String headerValue = entry.getValue();
+
+          if (header.startsWith("x-open-runtimes-")) {
+            continue;
+          }
+
+          if (header.equals("content-type") && !headerValue.startsWith("multipart/")) {
+            headerValue = headerValue.toLowerCase();
+
+            if (!headerValue.contains("charset=")) {
+              headerValue += "; charset=utf-8";
+            }
+          }
+
+          responseHeaders.put(header, headerValue);
+        }
+        responseHeaders.put("x-open-runtimes-log-id", logger.getId());
+
+        try {
+          logger.end();
+        } catch (IOException e) {
+          // Ignore missing logs
+        }
+
+        sendResponse(
+            ctx,
+            keepAlive,
+            HttpResponseStatus.valueOf(output.getStatusCode()),
+            output.getBody(),
+            responseHeaders);
+
       } catch (Exception e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
-        String message = sw.toString();
 
         Map<String, String> responseHeaders = new HashMap<>();
         responseHeaders.put("x-open-runtimes-log-id", logger.getId());
 
         try {
-          String[] logs = new String[1];
-          logs[0] = message;
-          logger.write(logs, RuntimeLogger.TYPE_ERROR, false);
+          logger.write(new String[] {sw.toString()}, RuntimeLogger.TYPE_ERROR, false);
           logger.end();
         } catch (IOException e2) {
-          // Ignore missing logs
+          // Ignore
         }
 
-        sendResponse(
-            ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, new byte[0], responseHeaders);
-      }
-    }
-
-    private void action(
-        RuntimeLogger logger,
-        ChannelHandlerContext ctx,
-        String method,
-        String path,
-        String queryString,
-        Map<String, String> requestHeaders,
-        byte[] bodyBytes) {
-
-      int safeTimeout = -1;
-      String timeout = requestHeaders.get("x-open-runtimes-timeout");
-      if (timeout != null && !timeout.isEmpty()) {
-        boolean invalid = false;
-
-        try {
-          safeTimeout = Integer.parseInt(timeout);
-        } catch (NumberFormatException e) {
-          invalid = true;
-        }
-
-        if (invalid || safeTimeout == 0) {
-          sendResponse(
-              ctx,
-              HttpResponseStatus.INTERNAL_SERVER_ERROR,
-              "Header \"x-open-runtimes-timeout\" must be an integer greater than 0."
-                  .getBytes(StandardCharsets.UTF_8),
-              null);
-          return;
-        }
-      }
-
-      String serverSecret = System.getenv("OPEN_RUNTIMES_SECRET");
-      if (serverSecret == null) {
-        serverSecret = "";
-      }
-
-      String secret = requestHeaders.get("x-open-runtimes-secret");
-      if (secret == null) {
-        secret = "";
-      }
-
-      if (!serverSecret.equals("") && !secret.equals(serverSecret)) {
         sendResponse(
             ctx,
+            keepAlive,
             HttpResponseStatus.INTERNAL_SERVER_ERROR,
-            "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."
-                .getBytes(StandardCharsets.UTF_8),
-            null);
-        return;
+            new byte[0],
+            responseHeaders);
       }
-
-      Map<String, String> headers = new HashMap<>();
-
-      for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
-        String header = entry.getKey().toLowerCase();
-        if (!(header.startsWith("x-open-runtimes-"))) {
-          headers.put(header, entry.getValue());
-        }
-      }
-
-      String enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS");
-
-      if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
-        enforcedHeadersString = "{}";
-      }
-
-      Map<String, Object> enforcedHeaders =
-          gsonInternal.fromJson(enforcedHeadersString, Map.class);
-
-      for (Map.Entry<String, Object> entry : enforcedHeaders.entrySet()) {
-        headers.put(entry.getKey().toLowerCase(), String.valueOf(entry.getValue()));
-      }
-
-      String scheme = requestHeaders.get("x-forwarded-proto");
-      if (scheme == null) {
-        scheme = "http";
-      }
-      String defaultPort = scheme.equals("https") ? "443" : "80";
-
-      String hostHeader = requestHeaders.get("host");
-      if (hostHeader == null) {
-        hostHeader = "";
-      }
-      String host = "";
-      int port;
-
-      if (hostHeader.contains(":")) {
-        host = hostHeader.split(":")[0];
-        port = Integer.parseInt(hostHeader.split(":")[1]);
-      } else {
-        host = hostHeader;
-        port = Integer.parseInt(defaultPort);
-      }
-
-      Map<String, String> query = new HashMap<>();
-
-      for (String param : queryString.split("&")) {
-        String[] pair = param.split("=", 2);
-
-        if (pair.length >= 1 && pair[0] != null && !pair[0].isEmpty()) {
-          String value = pair.length == 2 ? pair[1] : "";
-          query.put(pair[0], value);
-        }
-      }
-
-      String url = scheme + "://" + host;
-
-      if (port != Integer.parseInt(defaultPort)) {
-        url += ":" + port;
-      }
-
-      url += path;
-
-      if (!queryString.isEmpty()) {
-        url += "?" + queryString;
-      }
-
-      RuntimeRequest runtimeRequest =
-          new RuntimeRequest(
-              method, scheme, host, port, path, query, queryString, headers, bodyBytes, url);
-      RuntimeResponse runtimeResponse = new RuntimeResponse();
-      RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse, logger);
-
-      logger.overrideNativeLogs();
-
-      RuntimeOutput output = null;
-      Method classMethod = null;
-      Object instance = null;
-
-      String entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
-
-      try {
-        String className = entrypoint.substring(0, entrypoint.length() - 5);
-        className = className.replaceAll("/", ".");
-
-        final Class classToLoad = Class.forName("io.openruntimes.java." + className);
-        classMethod = classToLoad.getDeclaredMethod("main", RuntimeContext.class);
-        instance = classToLoad.newInstance();
-      } catch (ClassNotFoundException e) {
-        context.error("Class not found: " + e.getMessage());
-        logger.revertNativeLogs();
-        output = context.getRes().send("", 503);
-      } catch (NoSuchMethodException e) {
-        context.error(
-            "Function signature invalid. Did you forget to export a 'main' function?");
-        logger.revertNativeLogs();
-        output = context.getRes().send("", 503);
-      } catch (InstantiationException e) {
-        context.error("Failed to create instance: " + e.getMessage());
-        logger.revertNativeLogs();
-        output = context.getRes().send("", 503);
-      } catch (IllegalAccessException e) {
-        context.error("Access denied: " + e.getMessage());
-        logger.revertNativeLogs();
-        output = context.getRes().send("", 503);
-      } catch (Exception e) {
-        context.error("Failed to load module: " + e.getMessage());
-        logger.revertNativeLogs();
-        output = context.getRes().send("", 503);
-      }
-
-      if (output == null && classMethod != null && instance != null) {
-        final Method finalClassMethod = classMethod;
-        final Object finalInstance = instance;
-
-        try {
-          if (safeTimeout > 0) {
-            Future<RuntimeOutput> future =
-                executor.submit(
-                    () -> {
-                      try {
-                        return (RuntimeOutput)
-                            finalClassMethod.invoke(finalInstance, context);
-                      } catch (Exception e) {
-                        StringWriter sw = new StringWriter();
-                        PrintWriter pw = new PrintWriter(sw);
-                        e.printStackTrace(pw);
-
-                        context.error(sw.toString());
-                        context.getRes().send("", 500);
-                      }
-
-                      return null;
-                    });
-
-            try {
-              output = future.get(safeTimeout, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-              future.cancel(true);
-              context.error("Execution timed out.");
-              output = context.getRes().send("", 500);
-            }
-          } else {
-            output = (RuntimeOutput) classMethod.invoke(instance, context);
-          }
-        } catch (Exception e) {
-          StringWriter sw = new StringWriter();
-          PrintWriter pw = new PrintWriter(sw);
-          e.printStackTrace(pw);
-
-          context.error(sw.toString());
-          output = context.getRes().send("", 500);
-        } finally {
-          logger.revertNativeLogs();
-        }
-      }
-
-      if (output == null) {
-        context.error(
-            "Return statement missing. return context.res.empty() if no response is expected.");
-        output = context.getRes().send("", 500);
-      }
-
-      output.getHeaders().putIfAbsent("content-type", "text/plain");
-
-      Map<String, String> responseHeaders = new HashMap<>();
-
-      for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
-        String header = entry.getKey().toLowerCase();
-        String headerValue = entry.getValue();
-
-        if (header.startsWith("x-open-runtimes-")) {
-          continue;
-        }
-
-        if (header.equals("content-type") && !headerValue.startsWith("multipart/")) {
-          headerValue = headerValue.toLowerCase();
-
-          if (!headerValue.contains("charset=")) {
-            headerValue += "; charset=utf-8";
-          }
-        }
-
-        responseHeaders.put(header, headerValue);
-      }
-      responseHeaders.put("x-open-runtimes-log-id", logger.getId());
-
-      try {
-        logger.end();
-      } catch (IOException e) {
-        // Ignore missing logs
-      }
-
-      sendResponse(
-          ctx,
-          HttpResponseStatus.valueOf(output.getStatusCode()),
-          output.getBody(),
-          responseHeaders);
     }
 
     private static void sendResponse(
         ChannelHandlerContext ctx,
+        boolean keepAlive,
         HttpResponseStatus status,
         byte[] body,
         Map<String, String> headers) {
@@ -473,9 +475,14 @@ public class Server {
 
       response
           .headers()
-          .set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+          .setInt(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
 
-      ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+      if (keepAlive) {
+        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        ctx.writeAndFlush(response);
+      } else {
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+      }
     }
   }
 }
