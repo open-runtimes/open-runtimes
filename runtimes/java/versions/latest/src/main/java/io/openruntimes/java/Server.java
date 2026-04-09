@@ -126,11 +126,8 @@ public class Server {
 
       String method = request.method().name();
       String uri = request.uri();
-      String queryString = "";
       int questionMark = uri.indexOf('?');
-      if (questionMark >= 0) {
-        queryString = uri.substring(questionMark + 1);
-      }
+      String queryString = questionMark >= 0 ? uri.substring(questionMark + 1) : "";
 
       Map<String, String> requestHeaders = new HashMap<>();
       for (Map.Entry<String, String> entry : request.headers()) {
