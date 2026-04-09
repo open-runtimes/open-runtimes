@@ -32,7 +32,7 @@ sanitize_gradle() {
 			file_depth = 0
 		}
 	}
-	' "$1" > "$1.tmp" && mv "$1.tmp" "$1"
+	' "$1" >"$1.tmp" && mv "$1.tmp" "$1"
 }
 
 # Copy user code to server code
