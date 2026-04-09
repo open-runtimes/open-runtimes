@@ -16,6 +16,7 @@ dependencies {
 	implementation "org.slf4j:slf4j-simple:2.0.17"
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.0'
 	implementation "org.jetbrains.kotlin:kotlin-reflect:2.2.0"
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 task buildJar(type: Jar) {
