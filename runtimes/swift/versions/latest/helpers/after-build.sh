@@ -21,14 +21,8 @@ mkdir /usr/local/build/compiled
 
 # Compile the Code
 swift package resolve
-swift build --configuration release --static-swift-stdlib
+swift build --configuration release
 cp "$(swift build --configuration release --show-bin-path)/Runtime" /usr/local/build/compiled/
-
-# Strip debug symbols to reduce binary size
-strip /usr/local/build/compiled/Runtime
-
-# Clean up build artifacts to reduce image size
-rm -rf /usr/local/server/.build
 
 echo "Packing build ..."
 
