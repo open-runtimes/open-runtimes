@@ -10,6 +10,9 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.ChannelOption
 import io.netty.channel.SimpleChannelInboundHandler
+import io.netty.channel.epoll.Epoll
+import io.netty.channel.epoll.EpollEventLoopGroup
+import io.netty.channel.epoll.EpollServerSocketChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.util.concurrent.DefaultEventExecutorGroup
 import io.netty.channel.socket.SocketChannel
@@ -71,14 +74,16 @@ private fun loadUserClass() {
 suspend fun main() {
     loadUserClass()
 
-    val boss = NioEventLoopGroup(1)
-    val workers = NioEventLoopGroup()
+    val useEpoll = Epoll.isAvailable()
+    val boss = if (useEpoll) EpollEventLoopGroup(1) else NioEventLoopGroup(1)
+    val workers = if (useEpoll) EpollEventLoopGroup() else NioEventLoopGroup()
+    val channelClass = if (useEpoll) EpollServerSocketChannel::class.java else NioServerSocketChannel::class.java
     val handlerGroup = DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors() * 16)
 
     try {
         val bootstrap = ServerBootstrap()
             .group(boss, workers)
-            .channel(NioServerSocketChannel::class.java)
+            .channel(channelClass)
             .childHandler(object : ChannelInitializer<SocketChannel>() {
                 override fun initChannel(channel: SocketChannel) {
                     channel.pipeline()
@@ -89,6 +94,7 @@ suspend fun main() {
             })
             .option(ChannelOption.SO_BACKLOG, 1024)
             .childOption(ChannelOption.SO_KEEPALIVE, true)
+            .childOption(ChannelOption.TCP_NODELAY, true)
 
         val future = bootstrap.bind(3000).sync()
         println("HTTP server successfully started!")

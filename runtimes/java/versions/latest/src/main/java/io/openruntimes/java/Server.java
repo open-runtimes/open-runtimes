@@ -11,11 +11,15 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.ServerChannel;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -113,8 +117,20 @@ public class Server {
   public static void main(String[] args) throws Exception {
     loadUserClass();
 
-    EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-    EventLoopGroup workerGroup = new NioEventLoopGroup();
+    EventLoopGroup bossGroup;
+    EventLoopGroup workerGroup;
+    Class<? extends ServerChannel> channelClass;
+
+    if (Epoll.isAvailable()) {
+      bossGroup = new EpollEventLoopGroup(1);
+      workerGroup = new EpollEventLoopGroup();
+      channelClass = EpollServerSocketChannel.class;
+    } else {
+      bossGroup = new NioEventLoopGroup(1);
+      workerGroup = new NioEventLoopGroup();
+      channelClass = NioServerSocketChannel.class;
+    }
+
     DefaultEventExecutorGroup handlerGroup =
         new DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors() * 16);
 
@@ -122,7 +138,7 @@ public class Server {
       ServerBootstrap bootstrap = new ServerBootstrap();
       bootstrap
           .group(bossGroup, workerGroup)
-          .channel(NioServerSocketChannel.class)
+          .channel(channelClass)
           .childHandler(
               new ChannelInitializer<SocketChannel>() {
                 @Override
@@ -135,7 +151,8 @@ public class Server {
                 }
               })
           .option(ChannelOption.SO_BACKLOG, 1024)
-          .childOption(ChannelOption.SO_KEEPALIVE, true);
+          .childOption(ChannelOption.SO_KEEPALIVE, true)
+          .childOption(ChannelOption.TCP_NODELAY, true);
 
       bootstrap.bind(3000).sync();
       System.out.println("HTTP server successfully started!");
