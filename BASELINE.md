@@ -61,7 +61,7 @@ PHP 8.4                   454   623 us    77 ms   150 ms    2,749   172 MiB     
 Deno 2.6                  688   622 us    81 ms   115 ms    1,881   484 MiB     250 MB
 Python 3.14             2,814   810 us    83 ms   249 ms    1,484   131 MiB     690 MB
 .NET 10                   515   408 us    55 ms   203 ms    1,238   200 MiB     1.08 GB
-Ruby 4.0                1,480   1.33 ms    3 ms   438 ms      590   122 MiB     537 MB
+Ruby 4.0                1,480   1.33 ms  115 ms   438 ms      590   122 MiB     537 MB
 ```
 
 ## Per-host raw data
