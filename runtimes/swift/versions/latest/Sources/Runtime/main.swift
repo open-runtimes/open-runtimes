@@ -1,8 +1,6 @@
 import Foundation
 import Vapor
 
-// Swift 6 strict concurrency requires nonisolated(unsafe) for globals,
-// but we support Swift 5.8+ so we use an enum namespace to avoid the issue.
 enum CachedEnvironment {
     static let secret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
     static let enforcedHeaders: [String: Any?] = {
