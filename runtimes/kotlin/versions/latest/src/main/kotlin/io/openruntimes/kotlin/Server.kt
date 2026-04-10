@@ -133,7 +133,10 @@ private fun sendResponse(
 }
 
 class RequestHandler : SimpleChannelInboundHandler<FullHttpRequest>() {
-    override fun channelRead0(ctx: ChannelHandlerContext, request: FullHttpRequest) {
+    override fun channelRead0(
+        ctx: ChannelHandlerContext,
+        request: FullHttpRequest,
+    ) {
         val uri = request.uri()
         val questionMark = uri.indexOf('?')
         val path = if (questionMark >= 0) uri.substring(0, questionMark) else uri
@@ -179,7 +182,10 @@ class RequestHandler : SimpleChannelInboundHandler<FullHttpRequest>() {
         }
     }
 
-    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
+    override fun exceptionCaught(
+        ctx: ChannelHandlerContext,
+        cause: Throwable,
+    ) {
         ctx.close()
     }
 }
@@ -374,7 +380,6 @@ suspend fun execute(
             output.body,
             responseHeaders,
         )
-
     } catch (e: Exception) {
         val sw = StringWriter()
         val pw = PrintWriter(sw)
@@ -383,7 +388,9 @@ suspend fun execute(
         try {
             logger.write(arrayOf(sw.toString()), RuntimeLogger.TYPE_ERROR, false)
             logger.end()
-        } catch (_: IOException) {}
+        } catch (_: IOException) {
+            // ignored
+        }
 
         sendResponse(
             ctx,

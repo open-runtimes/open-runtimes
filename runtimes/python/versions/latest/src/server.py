@@ -63,9 +63,8 @@ def _load_user_module():
     except AttributeError as e:
         _module_error = str(e)
     except Exception as e:
-        _module_error = (
-            "Failed to load module: "
-            + "".join(traceback.TracebackException.from_exception(e).format())
+        _module_error = "Failed to load module: " + "".join(
+            traceback.TracebackException.from_exception(e).format()
         )
 
 
@@ -84,9 +83,10 @@ async def action(logger, request: web_request.Request):
 
         safeTimeout = int(timeout)
 
-    if _SERVER_SECRET != "" and request.headers.get(
-        "x-open-runtimes-secret", ""
-    ) != _SERVER_SECRET:
+    if (
+        _SERVER_SECRET != ""
+        and request.headers.get("x-open-runtimes-secret", "") != _SERVER_SECRET
+    ):
         return web.Response(
             text='Unauthorized. Provide correct "x-open-runtimes-secret" header.',
             status=500,

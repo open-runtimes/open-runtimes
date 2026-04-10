@@ -19,7 +19,6 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -30,6 +29,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -105,8 +105,7 @@ public class Server {
       classLoadError = "Class not found: " + e.getMessage();
       classLoaded = true;
     } catch (NoSuchMethodException e) {
-      classLoadError =
-          "Function signature invalid. Did you forget to export a 'main' function?";
+      classLoadError = "Function signature invalid. Did you forget to export a 'main' function?";
       classLoaded = true;
     } catch (Exception e) {
       classLoadError = "Failed to load module: " + e.getMessage();
@@ -181,8 +180,7 @@ public class Server {
 
       if (path.equals("/__opr/timings")) {
         try {
-          String timings =
-              new String(Files.readAllBytes(Paths.get("/mnt/telemetry/timings.txt")));
+          String timings = new String(Files.readAllBytes(Paths.get("/mnt/telemetry/timings.txt")));
           Map<String, String> headers = new HashMap<>();
           headers.put("content-type", "text/plain; charset=utf-8");
           sendResponse(
@@ -192,12 +190,7 @@ public class Server {
               timings.getBytes(StandardCharsets.UTF_8),
               headers);
         } catch (IOException e) {
-          sendResponse(
-              ctx,
-              keepAlive,
-              HttpResponseStatus.INTERNAL_SERVER_ERROR,
-              new byte[0],
-              null);
+          sendResponse(ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, new byte[0], null);
         }
         return;
       }
@@ -217,8 +210,7 @@ public class Server {
       try {
         action(ctx, keepAlive, method, path, queryString, requestHeaders, bodyBytes);
       } catch (Exception e) {
-        sendResponse(
-            ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, new byte[0], null);
+        sendResponse(ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, new byte[0], null);
       }
     }
 
@@ -466,11 +458,7 @@ public class Server {
         }
 
         sendResponse(
-            ctx,
-            keepAlive,
-            HttpResponseStatus.INTERNAL_SERVER_ERROR,
-            new byte[0],
-            responseHeaders);
+            ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, new byte[0], responseHeaders);
       }
     }
 
@@ -482,8 +470,7 @@ public class Server {
         Map<String, String> headers) {
 
       FullHttpResponse response =
-          new DefaultFullHttpResponse(
-              HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(body));
+          new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(body));
 
       if (headers != null) {
         for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -491,9 +478,7 @@ public class Server {
         }
       }
 
-      response
-          .headers()
-          .setInt(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+      response.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
 
       if (keepAlive) {
         response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);

@@ -6,8 +6,8 @@ nonisolated(unsafe) let cachedSecret: String = ProcessInfo.processInfo.environme
 nonisolated(unsafe) let cachedEnforcedHeaders: [String: Any?] = {
     let raw = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] ?? "{}"
     guard !raw.isEmpty,
-        let data = raw.data(using: .utf8),
-        let parsed = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any?]
+          let data = raw.data(using: .utf8),
+          let parsed = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any?]
     else {
         return [:]
     }

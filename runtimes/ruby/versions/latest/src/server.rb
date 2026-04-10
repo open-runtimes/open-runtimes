@@ -138,7 +138,7 @@ def action(request, response, logger)
     begin
       load(entrypoint_file_path)
 
-      unless defined?(main = ()) # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression
+      unless defined?(main = ()) # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression, Lint/UselessAssignment
         raise NameError, "Function signature invalid. Did you forget to export a 'main' function?"
       end
 
