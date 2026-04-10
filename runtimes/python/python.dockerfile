@@ -8,6 +8,8 @@ EOR
 
 ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
 
+RUN pip3 install --no-cache-dir poetry
+
 COPY requirements.txt .
 
 # Create a virtual environment for the server dependencies

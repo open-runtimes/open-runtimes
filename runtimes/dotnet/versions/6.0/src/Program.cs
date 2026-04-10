@@ -32,7 +32,7 @@ Console.WriteLine("HTTP server successfully started!");
 
 app.Run();
 
-static async Task<IResult> Execute(HttpRequest request)
+async Task<IResult> Execute(HttpRequest request)
 {
     if (request.Path == "/__opr/health")
     {
@@ -78,7 +78,7 @@ static async Task<IResult> Execute(HttpRequest request)
     }
 }
 
-static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
+async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
 {
     int safeTimout = -1;
     var timeout = request.Headers.TryGetValue("x-open-runtimes-timeout", out var timeoutValue)

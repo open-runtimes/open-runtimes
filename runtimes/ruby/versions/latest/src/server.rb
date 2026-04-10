@@ -164,7 +164,7 @@ def action(request, response, logger)
       logger.override_native_logs
 
       unless safe_timeout.nil?
-        results = execute(safe_timeout, main, context)
+        results = execute(safe_timeout, method(:main), context)
         executed = results[0]
         output = results[1]
 
