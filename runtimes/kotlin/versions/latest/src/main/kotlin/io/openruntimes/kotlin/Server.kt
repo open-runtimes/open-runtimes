@@ -43,11 +43,15 @@ val gsonInternal: Gson =
     GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
 
 private val serverSecret: String = System.getenv("OPEN_RUNTIMES_SECRET") ?: ""
-private val enforcedHeaders: Map<String, Any> = run {
-    val json = System.getenv("OPEN_RUNTIMES_HEADERS")
-    if (json.isNullOrEmpty()) emptyMap()
-    else gsonInternal.fromJson(json, MutableMap::class.java) as Map<String, Any>
-}
+private val enforcedHeaders: Map<String, Any> =
+    run {
+        val json = System.getenv("OPEN_RUNTIMES_HEADERS")
+        if (json.isNullOrEmpty()) {
+            emptyMap()
+        } else {
+            gsonInternal.fromJson(json, MutableMap::class.java) as Map<String, Any>
+        }
+    }
 
 private var cachedMethod: KFunction<*>? = null
 private var cachedInstance: Any? = null
