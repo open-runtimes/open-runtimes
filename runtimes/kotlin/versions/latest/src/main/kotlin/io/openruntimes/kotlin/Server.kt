@@ -87,24 +87,21 @@ suspend fun main() {
     val handlerGroup = DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors() * 16)
 
     try {
-        val bootstrap =
-            ServerBootstrap()
-                .group(boss, workers)
-                .channel(channelClass)
-                .childHandler(
-                    object : ChannelInitializer<SocketChannel>() {
-                        override fun initChannel(channel: SocketChannel) {
-                            channel
-                                .pipeline()
-                                .addLast(HttpServerCodec())
-                                .addLast(HttpObjectAggregator(20 * 1024 * 1024))
-                                .addLast(handlerGroup, RequestHandler())
-                        }
-                    },
-                )
-                .option(ChannelOption.SO_BACKLOG, 1024)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childOption(ChannelOption.TCP_NODELAY, true)
+        val bootstrap = ServerBootstrap()
+        bootstrap.group(boss, workers)
+        bootstrap.channel(channelClass)
+        bootstrap.childHandler(
+            object : ChannelInitializer<SocketChannel>() {
+                override fun initChannel(channel: SocketChannel) {
+                    channel.pipeline().addLast(HttpServerCodec())
+                    channel.pipeline().addLast(HttpObjectAggregator(20 * 1024 * 1024))
+                    channel.pipeline().addLast(handlerGroup, RequestHandler())
+                }
+            },
+        )
+        bootstrap.option(ChannelOption.SO_BACKLOG, 1024)
+        bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true)
+        bootstrap.childOption(ChannelOption.TCP_NODELAY, true)
 
         val future = bootstrap.bind(3000).sync()
         println("HTTP server successfully started!")
@@ -203,10 +200,11 @@ suspend fun execute(
     bodyBinary: ByteArray,
     requestHeaders: MutableMap<String, String>,
 ) {
-    val logger = RuntimeLogger(
-        requestHeaders["x-open-runtimes-logging"],
-        requestHeaders["x-open-runtimes-log-id"],
-    )
+    val logger =
+        RuntimeLogger(
+            requestHeaders["x-open-runtimes-logging"],
+            requestHeaders["x-open-runtimes-log-id"],
+        )
 
     try {
         var safeTimeout = -1
