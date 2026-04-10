@@ -1,9 +1,9 @@
 import Foundation
 import Vapor
 
-let cachedSecret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
+nonisolated(unsafe) let cachedSecret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
 
-let cachedEnforcedHeaders: [String: Any?] = {
+nonisolated(unsafe) let cachedEnforcedHeaders: [String: Any?] = {
     let raw = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] ?? "{}"
     guard !raw.isEmpty,
         let data = raw.data(using: .utf8),
