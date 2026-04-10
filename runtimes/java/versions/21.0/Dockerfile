@@ -1,5 +1,5 @@
 # syntax = devthefuture/dockerfile-x:1.4.2
-FROM ghcr.io/graalvm/native-image-community:21-ol9
+FROM eclipse-temurin:21-jdk-jammy
 
 INCLUDE ./base-before
 INCLUDE ./java

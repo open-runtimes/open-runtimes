@@ -26,7 +26,7 @@ task buildJar(type: Jar) {
 		)
 	}
 	from {
-		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+		configurations.runtimeClasspath.collect { File file -> file.isDirectory() ? file : zipTree(file) }
 	} {
 		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	}
