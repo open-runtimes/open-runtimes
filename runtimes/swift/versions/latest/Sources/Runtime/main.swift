@@ -1,27 +1,6 @@
 import Foundation
 import Vapor
 
-enum CachedEnvironment {
-#if compiler(>=5.10)
-    nonisolated(unsafe) static let secret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
-    nonisolated(unsafe) static let enforcedHeaders: [String: Any?] = parseEnforcedHeaders()
-#else
-    static let secret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
-    static let enforcedHeaders: [String: Any?] = parseEnforcedHeaders()
-#endif
-
-    private static func parseEnforcedHeaders() -> [String: Any?] {
-        let raw = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] ?? "{}"
-        guard !raw.isEmpty,
-              let data = raw.data(using: .utf8),
-              let parsed = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any?]
-        else {
-            return [:]
-        }
-        return parsed
-    }
-}
-
 var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
 let app = Application(env)
@@ -108,9 +87,9 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         safeTimeout = timeoutInt
     }
 
-    if !CachedEnvironment.secret.isEmpty {
+    if !(ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? "").isEmpty {
         if !req.headers.contains(name: "x-open-runtimes-secret")
-            || req.headers["x-open-runtimes-secret"].first != CachedEnvironment.secret
+            || req.headers["x-open-runtimes-secret"].first != (ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? "")
         {
             return Response(
                 status: .internalServerError,
@@ -171,11 +150,17 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         }
     }
 
-    for (key, value) in CachedEnvironment.enforcedHeaders {
-        if let value {
-            headers[key.lowercased()] = String(describing: value)
-        } else {
-            headers[key.lowercased()] = ""
+    let enforcedHeadersRaw = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] ?? "{}"
+    if !enforcedHeadersRaw.isEmpty,
+       let enforcedHeadersData = enforcedHeadersRaw.data(using: .utf8),
+       let enforcedHeaders = try? JSONSerialization.jsonObject(with: enforcedHeadersData, options: .allowFragments) as? [String: Any?]
+    {
+        for (key, value) in enforcedHeaders {
+            if let value {
+                headers[key.lowercased()] = String(describing: value)
+            } else {
+                headers[key.lowercased()] = ""
+            }
         }
     }
 
