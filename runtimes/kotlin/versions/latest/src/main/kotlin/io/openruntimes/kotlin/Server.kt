@@ -11,6 +11,7 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.ChannelOption
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.util.concurrent.DefaultEventExecutorGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.codec.http.DefaultFullHttpResponse
@@ -72,6 +73,7 @@ suspend fun main() {
 
     val boss = NioEventLoopGroup(1)
     val workers = NioEventLoopGroup()
+    val handlerGroup = DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors() * 16)
 
     try {
         val bootstrap = ServerBootstrap()
@@ -82,7 +84,7 @@ suspend fun main() {
                     channel.pipeline()
                         .addLast(HttpServerCodec())
                         .addLast(HttpObjectAggregator(20 * 1024 * 1024))
-                        .addLast(RequestHandler())
+                        .addLast(handlerGroup, RequestHandler())
                 }
             })
             .option(ChannelOption.SO_BACKLOG, 1024)
@@ -92,6 +94,7 @@ suspend fun main() {
         println("HTTP server successfully started!")
         future.channel().closeFuture().sync()
     } finally {
+        handlerGroup.shutdownGracefully()
         boss.shutdownGracefully()
         workers.shutdownGracefully()
     }

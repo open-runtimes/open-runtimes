@@ -13,6 +13,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -114,6 +115,8 @@ public class Server {
 
     EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     EventLoopGroup workerGroup = new NioEventLoopGroup();
+    DefaultEventExecutorGroup handlerGroup =
+        new DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors() * 16);
 
     try {
       ServerBootstrap bootstrap = new ServerBootstrap();
@@ -128,7 +131,7 @@ public class Server {
                       .pipeline()
                       .addLast(new HttpServerCodec())
                       .addLast(new HttpObjectAggregator(20 * 1024 * 1024))
-                      .addLast(new RequestHandler());
+                      .addLast(handlerGroup, new RequestHandler());
                 }
               })
           .option(ChannelOption.SO_BACKLOG, 1024)
@@ -138,6 +141,7 @@ public class Server {
       System.out.println("HTTP server successfully started!");
       Thread.currentThread().join();
     } finally {
+      handlerGroup.shutdownGracefully();
       bossGroup.shutdownGracefully();
       workerGroup.shutdownGracefully();
     }
