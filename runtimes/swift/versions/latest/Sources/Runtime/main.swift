@@ -1,26 +1,21 @@
 import Foundation
 import Vapor
 
-#if compiler(>=5.10)
-nonisolated(unsafe) let cachedSecret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
-#else
-let cachedSecret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
-#endif
-
-#if compiler(>=5.10)
-nonisolated(unsafe) let cachedEnforcedHeaders: [String: Any?] = {
-#else
-let cachedEnforcedHeaders: [String: Any?] = {
-#endif
-    let raw = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] ?? "{}"
-    guard !raw.isEmpty,
-          let data = raw.data(using: .utf8),
-          let parsed = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any?]
-    else {
-        return [:]
-    }
-    return parsed
-}()
+// Swift 6 strict concurrency requires nonisolated(unsafe) for globals,
+// but we support Swift 5.8+ so we use an enum namespace to avoid the issue.
+enum CachedEnvironment {
+    static let secret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
+    static let enforcedHeaders: [String: Any?] = {
+        let raw = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] ?? "{}"
+        guard !raw.isEmpty,
+              let data = raw.data(using: .utf8),
+              let parsed = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any?]
+        else {
+            return [:]
+        }
+        return parsed
+    }()
+}
 
 var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
@@ -108,9 +103,9 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         safeTimeout = timeoutInt
     }
 
-    if !cachedSecret.isEmpty {
+    if !CachedEnvironment.secret.isEmpty {
         if !req.headers.contains(name: "x-open-runtimes-secret")
-            || req.headers["x-open-runtimes-secret"].first != cachedSecret
+            || req.headers["x-open-runtimes-secret"].first != CachedEnvironment.secret
         {
             return Response(
                 status: .internalServerError,
@@ -171,7 +166,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         }
     }
 
-    for (key, value) in cachedEnforcedHeaders {
+    for (key, value) in CachedEnvironment.enforcedHeaders {
         if let value {
             headers[key.lowercased()] = String(describing: value)
         } else {
