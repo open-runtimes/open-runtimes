@@ -2,13 +2,13 @@ import Foundation
 import Vapor
 
 enum CachedEnvironment {
-    #if compiler(>=5.10)
+#if compiler(>=5.10)
     nonisolated(unsafe) static let secret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
     nonisolated(unsafe) static let enforcedHeaders: [String: Any?] = parseEnforcedHeaders()
-    #else
+#else
     static let secret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
     static let enforcedHeaders: [String: Any?] = parseEnforcedHeaders()
-    #endif
+#endif
 
     private static func parseEnforcedHeaders() -> [String: Any?] {
         let raw = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] ?? "{}"
