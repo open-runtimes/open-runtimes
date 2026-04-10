@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
 var cachedSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? string.Empty;
-var cachedEnforcedHeaders = JsonSerializer
-    .Deserialize<Dictionary<string, object>>(
+var cachedEnforcedHeaders =
+    JsonSerializer.Deserialize<Dictionary<string, object>>(
         string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS"))
             ? "{}"
             : Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS")!

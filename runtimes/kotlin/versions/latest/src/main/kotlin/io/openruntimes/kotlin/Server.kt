@@ -14,7 +14,6 @@ import io.netty.channel.epoll.Epoll
 import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.epoll.EpollServerSocketChannel
 import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.util.concurrent.DefaultEventExecutorGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.codec.http.DefaultFullHttpResponse
@@ -26,6 +25,7 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import io.netty.handler.codec.http.HttpServerCodec
 import io.netty.handler.codec.http.HttpUtil
 import io.netty.handler.codec.http.HttpVersion
+import io.netty.util.concurrent.DefaultEventExecutorGroup
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
@@ -39,7 +39,8 @@ import kotlin.reflect.full.memberFunctions
 import kotlin.time.Duration.Companion.seconds
 
 val gson: Gson = GsonBuilder().serializeNulls().create()
-val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
+val gsonInternal: Gson =
+    GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
 
 private val serverSecret: String = System.getenv("OPEN_RUNTIMES_SECRET") ?: ""
 private val enforcedHeaders: Map<String, Any> = run {
@@ -77,24 +78,29 @@ suspend fun main() {
     val useEpoll = Epoll.isAvailable()
     val boss = if (useEpoll) EpollEventLoopGroup(1) else NioEventLoopGroup(1)
     val workers = if (useEpoll) EpollEventLoopGroup() else NioEventLoopGroup()
-    val channelClass = if (useEpoll) EpollServerSocketChannel::class.java else NioServerSocketChannel::class.java
+    val channelClass =
+        if (useEpoll) EpollServerSocketChannel::class.java else NioServerSocketChannel::class.java
     val handlerGroup = DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors() * 16)
 
     try {
-        val bootstrap = ServerBootstrap()
-            .group(boss, workers)
-            .channel(channelClass)
-            .childHandler(object : ChannelInitializer<SocketChannel>() {
-                override fun initChannel(channel: SocketChannel) {
-                    channel.pipeline()
-                        .addLast(HttpServerCodec())
-                        .addLast(HttpObjectAggregator(20 * 1024 * 1024))
-                        .addLast(handlerGroup, RequestHandler())
-                }
-            })
-            .option(ChannelOption.SO_BACKLOG, 1024)
-            .childOption(ChannelOption.SO_KEEPALIVE, true)
-            .childOption(ChannelOption.TCP_NODELAY, true)
+        val bootstrap =
+            ServerBootstrap()
+                .group(boss, workers)
+                .channel(channelClass)
+                .childHandler(
+                    object : ChannelInitializer<SocketChannel>() {
+                        override fun initChannel(channel: SocketChannel) {
+                            channel
+                                .pipeline()
+                                .addLast(HttpServerCodec())
+                                .addLast(HttpObjectAggregator(20 * 1024 * 1024))
+                                .addLast(handlerGroup, RequestHandler())
+                        }
+                    },
+                )
+                .option(ChannelOption.SO_BACKLOG, 1024)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
 
         val future = bootstrap.bind(3000).sync()
         println("HTTP server successfully started!")
@@ -111,7 +117,7 @@ private fun sendResponse(
     keepAlive: Boolean,
     status: HttpResponseStatus,
     body: ByteArray,
-    headers: Map<String, String> = emptyMap()
+    headers: Map<String, String> = emptyMap(),
 ) {
     val response = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(body))
     response.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, body.size)
@@ -141,9 +147,11 @@ class RequestHandler : SimpleChannelInboundHandler<FullHttpRequest>() {
         if (path == "/__opr/timings") {
             val timings = java.io.File("/mnt/telemetry/timings.txt").readText()
             sendResponse(
-                ctx, keepAlive, HttpResponseStatus.OK,
+                ctx,
+                keepAlive,
+                HttpResponseStatus.OK,
                 timings.toByteArray(StandardCharsets.UTF_8),
-                mapOf("content-type" to "text/plain; charset=utf-8")
+                mapOf("content-type" to "text/plain; charset=utf-8"),
             )
             return
         }
@@ -183,11 +191,11 @@ suspend fun execute(
     path: String,
     queryString: String,
     bodyBinary: ByteArray,
-    requestHeaders: MutableMap<String, String>
+    requestHeaders: MutableMap<String, String>,
 ) {
     val logger = RuntimeLogger(
         requestHeaders["x-open-runtimes-logging"],
-        requestHeaders["x-open-runtimes-log-id"]
+        requestHeaders["x-open-runtimes-log-id"],
     )
 
     try {
@@ -202,7 +210,13 @@ suspend fun execute(
             }
 
             if (invalid || safeTimeout < 0) {
-                sendResponse(ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.".toByteArray(StandardCharsets.UTF_8))
+                sendResponse(
+                    ctx,
+                    keepAlive,
+                    HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                    "Header \"x-open-runtimes-timeout\" must be an integer greater than 0."
+                        .toByteArray(StandardCharsets.UTF_8),
+                )
                 return
             }
         }
@@ -210,7 +224,13 @@ suspend fun execute(
         val secretHeader = requestHeaders["x-open-runtimes-secret"] ?: ""
 
         if (serverSecret != "" && secretHeader != serverSecret) {
-            sendResponse(ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.".toByteArray(StandardCharsets.UTF_8))
+            sendResponse(
+                ctx,
+                keepAlive,
+                HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."
+                    .toByteArray(StandardCharsets.UTF_8),
+            )
             return
         }
 
@@ -258,7 +278,19 @@ suspend fun execute(
             url += "?$queryString"
         }
 
-        val runtimeRequest = RuntimeRequest(method, protoHeader, host, port, path, query, queryString, headers, bodyBinary, url)
+        val runtimeRequest =
+            RuntimeRequest(
+                method,
+                protoHeader,
+                host,
+                port,
+                path,
+                query,
+                queryString,
+                headers,
+                bodyBinary,
+                url,
+            )
         val runtimeResponse = RuntimeResponse()
         val runtimeContext = RuntimeContext(runtimeRequest, runtimeResponse, logger)
 
@@ -275,24 +307,26 @@ suspend fun execute(
         if (output == null && cachedMethod != null && cachedInstance != null) {
             try {
                 if (safeTimeout > 0) {
-                    output = withTimeoutOrNull(safeTimeout.seconds) {
-                        if (cachedMethod!!.isSuspend) {
-                            cachedMethod!!.callSuspend(cachedInstance, runtimeContext) as RuntimeOutput
-                        } else {
-                            cachedMethod!!.call(cachedInstance, runtimeContext) as RuntimeOutput
+                    output =
+                        withTimeoutOrNull(safeTimeout.seconds) {
+                            if (cachedMethod!!.isSuspend) {
+                                cachedMethod!!.callSuspend(cachedInstance, runtimeContext) as RuntimeOutput
+                            } else {
+                                cachedMethod!!.call(cachedInstance, runtimeContext) as RuntimeOutput
+                            }
                         }
-                    }
 
                     if (output == null) {
                         runtimeContext.error("Execution timed out.")
                         output = runtimeContext.res.text("", 500)
                     }
                 } else {
-                    output = if (cachedMethod!!.isSuspend) {
-                        cachedMethod!!.callSuspend(cachedInstance, runtimeContext) as RuntimeOutput
-                    } else {
-                        cachedMethod!!.call(cachedInstance, runtimeContext) as RuntimeOutput
-                    }
+                    output =
+                        if (cachedMethod!!.isSuspend) {
+                            cachedMethod!!.callSuspend(cachedInstance, runtimeContext) as RuntimeOutput
+                        } else {
+                            cachedMethod!!.call(cachedInstance, runtimeContext) as RuntimeOutput
+                        }
                 }
             } catch (e: Exception) {
                 val sw = StringWriter()
@@ -333,7 +367,13 @@ suspend fun execute(
 
         logger.end()
 
-        sendResponse(ctx, keepAlive, HttpResponseStatus.valueOf(output.statusCode), output.body, responseHeaders)
+        sendResponse(
+            ctx,
+            keepAlive,
+            HttpResponseStatus.valueOf(output.statusCode),
+            output.body,
+            responseHeaders,
+        )
 
     } catch (e: Exception) {
         val sw = StringWriter()
@@ -346,8 +386,11 @@ suspend fun execute(
         } catch (_: IOException) {}
 
         sendResponse(
-            ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, ByteArray(0),
-            mapOf("x-open-runtimes-log-id" to (logger.id ?: ""))
+            ctx,
+            keepAlive,
+            HttpResponseStatus.INTERNAL_SERVER_ERROR,
+            ByteArray(0),
+            mapOf("x-open-runtimes-log-id" to (logger.id ?: "")),
         )
     }
 }

@@ -6,9 +6,7 @@ const Logger = require("./logger");
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
 const secret = process.env["OPEN_RUNTIMES_SECRET"] || "";
-const enforcedHeaders = JSON.parse(
-  process.env.OPEN_RUNTIMES_HEADERS || "{}",
-);
+const enforcedHeaders = JSON.parse(process.env.OPEN_RUNTIMES_HEADERS || "{}");
 const entrypoint = process.env.OPEN_RUNTIMES_ENTRYPOINT;
 const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
 
@@ -95,10 +93,7 @@ const action = async (logger, req, res) => {
     safeTimeout = +timeout;
   }
 
-  if (
-    secret &&
-    req.headers[`x-open-runtimes-secret`] !== secret
-  ) {
+  if (secret && req.headers[`x-open-runtimes-secret`] !== secret) {
     return send(
       res,
       500,

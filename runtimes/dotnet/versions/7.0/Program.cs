@@ -8,8 +8,8 @@ namespace DotNetRuntime
         private static readonly string CachedSecret =
             Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? string.Empty;
 
-        private static readonly Dictionary<string, object> CachedEnforcedHeaders = JsonSerializer
-            .Deserialize<Dictionary<string, object>>(
+        private static readonly Dictionary<string, object> CachedEnforcedHeaders =
+            JsonSerializer.Deserialize<Dictionary<string, object>>(
                 string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS"))
                     ? "{}"
                     : Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS")!
