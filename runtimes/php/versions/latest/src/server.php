@@ -10,13 +10,19 @@ $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 $server->set([
     'package_max_length' => $payloadSize,
     'buffer_output_size' => $payloadSize,
+    'worker_num' => (int) (getenv('OPEN_RUNTIMES_WORKERS') ?: \swoole_cpu_num() * 2),
+    'open_tcp_nodelay' => true,
 ]);
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
+$enforcedHeadersCache = \json_decode(getenv('OPEN_RUNTIMES_HEADERS') ?: '{}', true);
+$secretCache = getenv('OPEN_RUNTIMES_SECRET') ?: '';
+$entrypointCache = getenv('OPEN_RUNTIMES_ENTRYPOINT') ?: '';
+
 $userFunction = null;
 
-$action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction) {
+$action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction, $enforcedHeadersCache, $secretCache, $entrypointCache) {
     $requestHeaders = $req->header;
 
     $cookieHeaders = [];
@@ -41,7 +47,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
         $safeTimeout = \intval($timeout);
     }
 
-    if ((getenv('OPEN_RUNTIMES_SECRET') ?? '') != "" && ($requestHeaders['x-open-runtimes-secret'] ?? '') !== getenv('OPEN_RUNTIMES_SECRET')) {
+    if ($secretCache !== '' && ($requestHeaders['x-open-runtimes-secret'] ?? '') !== $secretCache) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
         return;
@@ -100,8 +106,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
         }
     }
 
-    $enforcedHeaders = json_decode(getenv('OPEN_RUNTIMES_HEADERS') ?? '{}', true);
-    foreach ($enforcedHeaders as $key => $value) {
+    foreach ($enforcedHeadersCache as $key => $value) {
         $context->req->headers[\strtolower($key)] = \strval($value);
     }
 
@@ -109,7 +114,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
 
     $output = null;
 
-    $entrypoint = getenv('OPEN_RUNTIMES_ENTRYPOINT');
+    $entrypoint = $entrypointCache;
     $entrypointPath = USER_CODE_PATH . '/' . $entrypoint;
 
     // Guard: Check file exists

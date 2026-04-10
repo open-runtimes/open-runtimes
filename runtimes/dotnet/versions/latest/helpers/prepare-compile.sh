@@ -34,7 +34,7 @@ mkdir /usr/local/build/compiled
 
 # Compile the Code
 cd /usr/local/server
-dotnet publish DotNetRuntime.csproj -c Release
+dotnet publish DotNetRuntime.csproj -c Release --self-contained true
 
 # Copy output files
 cp -R /usr/local/server/bin/Release/net8.0/publish/* /usr/local/build/compiled

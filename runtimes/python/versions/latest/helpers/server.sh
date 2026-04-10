@@ -22,4 +22,6 @@ python3 /usr/local/server/src/function/runtime-env/bin/gunicorn \
 	--worker-class custom_worker.CustomGunicornWebWorker \
 	--preload \
 	--timeout 0 \
+	--keep-alive 5 \
+	--backlog 2048 \
 	'server:app'

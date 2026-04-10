@@ -1,6 +1,19 @@
 import Foundation
 import Vapor
 
+let cachedSecret: String = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
+
+let cachedEnforcedHeaders: [String: Any?] = {
+    let raw = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] ?? "{}"
+    guard !raw.isEmpty,
+        let data = raw.data(using: .utf8),
+        let parsed = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any?]
+    else {
+        return [:]
+    }
+    return parsed
+}()
+
 var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
 let app = Application(env)
@@ -87,18 +100,16 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         safeTimeout = timeoutInt
     }
 
-    if let serverSecret = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] {
-        if serverSecret != "" {
-            if !req.headers.contains(name: "x-open-runtimes-secret")
-                || req.headers["x-open-runtimes-secret"].first != serverSecret
-            {
-                return Response(
-                    status: .internalServerError,
-                    body: .init(
-                        string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."
-                    )
+    if !cachedSecret.isEmpty {
+        if !req.headers.contains(name: "x-open-runtimes-secret")
+            || req.headers["x-open-runtimes-secret"].first != cachedSecret
+        {
+            return Response(
+                status: .internalServerError,
+                body: .init(
+                    string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."
                 )
-            }
+            )
         }
     }
 
@@ -152,23 +163,11 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         }
     }
 
-    if var serverHeadersString = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_HEADERS"] {
-        if serverHeadersString == "" {
-            serverHeadersString = "{}"
-        }
-
-        let serverHeaders =
-            try JSONSerialization.jsonObject(
-                with: serverHeadersString.data(using: .utf8)!,
-                options: .allowFragments
-            ) as! [String: Any?]
-
-        for (key, value) in serverHeaders {
-            if let value {
-                headers[key.lowercased()] = String(describing: value)
-            } else {
-                headers[key.lowercased()] = ""
-            }
+    for (key, value) in cachedEnforcedHeaders {
+        if let value {
+            headers[key.lowercased()] = String(describing: value)
+        } else {
+            headers[key.lowercased()] = ""
         }
     }
 

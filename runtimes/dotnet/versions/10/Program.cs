@@ -5,6 +5,16 @@ namespace DotNetRuntime
 {
     public class Program
     {
+        private static readonly string CachedSecret =
+            Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? string.Empty;
+
+        private static readonly Dictionary<string, object> CachedEnforcedHeaders = JsonSerializer
+            .Deserialize<Dictionary<string, object>>(
+                string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS"))
+                    ? "{}"
+                    : Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS")!
+            ) ?? new Dictionary<string, object>();
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -97,8 +107,7 @@ namespace DotNetRuntime
                 ? secretValue.ToString()
                 : string.Empty;
 
-            string serverSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET");
-            if (!string.IsNullOrEmpty(serverSecret) && secret != serverSecret)
+            if (!string.IsNullOrEmpty(CachedSecret) && secret != CachedSecret)
             {
                 return new CustomResponse(
                     "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."u8.ToArray(),
@@ -129,18 +138,7 @@ namespace DotNetRuntime
                 }
             }
 
-            String enforcedHeadersString = Environment.GetEnvironmentVariable(
-                "OPEN_RUNTIMES_HEADERS"
-            );
-            if (string.IsNullOrEmpty(enforcedHeadersString))
-            {
-                enforcedHeadersString = "{}";
-            }
-
-            Dictionary<string, object> enforcedHeaders =
-                JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString)
-                ?? new Dictionary<string, object>();
-            foreach (KeyValuePair<string, object> entry in enforcedHeaders)
+            foreach (KeyValuePair<string, object> entry in CachedEnforcedHeaders)
             {
                 headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
             }

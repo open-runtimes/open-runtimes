@@ -5,17 +5,38 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/url"
 	"openruntimes/handler"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/open-runtimes/types-for-go/v4/openruntimes"
 )
+
+var serverSecret string
+var enforcedHeaders map[string]interface{}
+
+func init() {
+	serverSecret = os.Getenv("OPEN_RUNTIMES_SECRET")
+
+	headersEnv := os.Getenv("OPEN_RUNTIMES_HEADERS")
+	if headersEnv == "" {
+		headersEnv = "{}"
+	}
+
+	err := json.Unmarshal([]byte(headersEnv), &enforcedHeaders)
+	if err != nil {
+		enforcedHeaders = map[string]interface{}{}
+	}
+
+	if runtime.GOMAXPROCS(0) < 2 {
+		runtime.GOMAXPROCS(runtime.NumCPU())
+	}
+}
 
 func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) error {
 	timeout := r.Header.Get("x-open-runtimes-timeout")
@@ -36,7 +57,6 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	}
 
 	secret := r.Header.Get("x-open-runtimes-secret")
-	serverSecret := os.Getenv("OPEN_RUNTIMES_SECRET")
 
 	if serverSecret != "" && secret != serverSecret {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -59,20 +79,9 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 			value[0] = strings.ToLower(value[0])
 		}
 
-		if strings.HasPrefix(key, "x-open-runtimes-") == false {
+		if !strings.HasPrefix(key, "x-open-runtimes-") {
 			headers[key] = value[0]
 		}
-	}
-
-	headersEnv := os.Getenv("OPEN_RUNTIMES_HEADERS")
-	if headersEnv == "" {
-		headersEnv = "{}"
-	}
-
-	var enforcedHeaders map[string]interface{}
-	err = json.Unmarshal([]byte(headersEnv), &enforcedHeaders)
-	if err != nil {
-		enforcedHeaders = map[string]interface{}{}
 	}
 
 	for key, value := range enforcedHeaders {
@@ -215,7 +224,7 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	for key, value := range output.Headers {
 		key = strings.ToLower(key)
 
-		if strings.HasPrefix(key, "x-open-runtimes-") == false {
+		if !strings.HasPrefix(key, "x-open-runtimes-") {
 			outputHeaders[key] = value
 		}
 	}
@@ -230,7 +239,7 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 
 	contentTypeValue = strings.ToLower(contentTypeValue)
 
-	if strings.HasPrefix(contentTypeValue, "multipart/") == false && strings.Contains(contentTypeValue, "charset=") == false {
+	if !strings.HasPrefix(contentTypeValue, "multipart/") && !strings.Contains(contentTypeValue, "charset=") {
 		outputHeaders["content-type"] = contentTypeValue + "; charset=utf-8"
 	}
 
@@ -302,14 +311,17 @@ func main() {
 		}
 	}
 
-	listener, err := net.Listen("tcp", ":3000")
-	if err != nil {
-		panic(err)
+	server := &http.Server{
+		Addr:         ":3000",
+		Handler:      http.MaxBytesHandler(http.HandlerFunc(handler), 20*1024*1024),
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
 	}
 
 	fmt.Println("HTTP server successfully started!")
 
-	err = http.Serve(listener, http.MaxBytesHandler(http.HandlerFunc(handler), 20*1024*1024))
+	err := server.ListenAndServe()
 	if err != nil {
 		panic(err)
 	}
