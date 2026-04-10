@@ -18,8 +18,15 @@ class Logger
 
         if ($this->enabled) {
             $this->id = !empty($id) ? $id : (\getenv('OPEN_RUNTIMES_ENV') === 'development' ? 'dev' : $this->generateId());
+        }
+    }
 
+    private function ensureStreams(): void
+    {
+        if ($this->streamLogs === null) {
             $this->streamLogs = \fopen('/mnt/logs/' . $this->id . '_logs.log', 'a');
+        }
+        if ($this->streamErrors === null) {
             $this->streamErrors = \fopen('/mnt/logs/' . $this->id . '_errors.log', 'a');
         }
     }
@@ -34,6 +41,8 @@ class Logger
             $this->includesNativeInfo = true;
             $this->write(['Native logs detected. Use context.log() or context.error() for better experience.']);
         }
+
+        $this->ensureStreams();
 
         $stream = $type == Logger::TYPE_ERROR ? $this->streamErrors : $this->streamLogs;
 
@@ -75,8 +84,12 @@ class Logger
 
         $this->enabled = false;
 
-        \fclose($this->streamLogs);
-        \fclose($this->streamErrors);
+        if ($this->streamLogs !== null) {
+            \fclose($this->streamLogs);
+        }
+        if ($this->streamErrors !== null) {
+            \fclose($this->streamErrors);
+        }
     }
 
 

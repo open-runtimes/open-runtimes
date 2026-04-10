@@ -26,32 +26,32 @@ class RuntimeLogger {
             } else {
                 self.id = id
             }
+        }
+    }
 
+    private func ensureStreams() {
+        if streamLogs == nil {
             let logsUrl = URL(fileURLWithPath: "/mnt/logs/" + self.id + "_logs.log")
-            let errorsUrl = URL(fileURLWithPath: "/mnt/logs/" + self.id + "_errors.log")
-
             if !FileManager.default.fileExists(atPath: logsUrl.path) {
                 _ = FileManager.default.createFile(atPath: logsUrl.path, contents: nil, attributes: nil)
             }
-
+            do {
+                streamLogs = try FileHandle(forWritingTo: logsUrl)
+                streamLogs?.seekToEndOfFile()
+            } catch {
+                // Silently fail
+            }
+        }
+        if streamErrors == nil {
+            let errorsUrl = URL(fileURLWithPath: "/mnt/logs/" + self.id + "_errors.log")
             if !FileManager.default.fileExists(atPath: errorsUrl.path) {
                 _ = FileManager.default.createFile(atPath: errorsUrl.path, contents: nil, attributes: nil)
             }
-
             do {
-                streamLogs = try FileHandle(forWritingTo: logsUrl)
                 streamErrors = try FileHandle(forWritingTo: errorsUrl)
-
-                if let stream = streamLogs {
-                    stream.seekToEndOfFile()
-                }
-
-                if let stream = streamErrors {
-                    stream.seekToEndOfFile()
-                }
+                streamErrors?.seekToEndOfFile()
             } catch {
-                // Silently fail to prevent 500 errors in runtime
-                // Log write failures should not crash the runtime
+                // Silently fail
             }
         }
     }
@@ -60,6 +60,8 @@ class RuntimeLogger {
         if enabled == false {
             return
         }
+
+        ensureStreams()
 
         var stream = streamLogs
 

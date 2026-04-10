@@ -26,9 +26,16 @@ class Logger {
         : process.env.OPEN_RUNTIMES_ENV === "development"
           ? "dev"
           : this.generateId();
+    }
+  }
+
+  ensureStreams() {
+    if (this.streamLogs === null) {
       this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
         flags: "a",
       });
+    }
+    if (this.streamErrors === null) {
       this.streamErrors = fs.createWriteStream(
         `/mnt/logs/${this.id}_errors.log`,
         {
@@ -49,6 +56,8 @@ class Logger {
         "Native logs detected. Use context.log() or context.error() for better experience.",
       ]);
     }
+
+    this.ensureStreams();
 
     const stream =
       type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
@@ -91,14 +100,23 @@ class Logger {
 
     this.enabled = false;
 
-    await Promise.all([
-      new Promise((res) => {
-        this.streamLogs.end(undefined, undefined, res);
-      }),
-      new Promise((res) => {
-        this.streamErrors.end(undefined, undefined, res);
-      }),
-    ]);
+    const promises = [];
+    if (this.streamLogs !== null) {
+      promises.push(
+        new Promise((res) => {
+          this.streamLogs.end(undefined, undefined, res);
+        }),
+      );
+    }
+    if (this.streamErrors !== null) {
+      promises.push(
+        new Promise((res) => {
+          this.streamErrors.end(undefined, undefined, res);
+        }),
+      );
+    }
+
+    await Promise.all(promises);
   }
 
   overrideNativeLogs() {

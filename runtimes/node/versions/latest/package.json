@@ -13,7 +13,6 @@
   "dependencies": {
     "@vercel/nft": "^0.29.2",
     "cls-hooked": "^4.2.2",
-    "express": "^4.21.2",
     "import-in-the-middle": "^1.14.4",
     "micro": "^9.3.4",
     "require-in-the-middle": "^8.0.0",

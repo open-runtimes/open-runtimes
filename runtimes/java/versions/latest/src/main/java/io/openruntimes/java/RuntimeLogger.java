@@ -62,14 +62,20 @@ public class RuntimeLogger {
       } else {
         this.id = id;
       }
-
-      this.streamLogs = new FileWriter("/mnt/logs/" + this.id + "_logs.log", true);
-      this.streamErrors = new FileWriter("/mnt/logs/" + this.id + "_errors.log", true);
     }
   }
 
   public String getId() {
     return this.id;
+  }
+
+  private void ensureStreams() throws IOException {
+    if (this.streamLogs == null) {
+      this.streamLogs = new FileWriter("/mnt/logs/" + this.id + "_logs.log", true);
+    }
+    if (this.streamErrors == null) {
+      this.streamErrors = new FileWriter("/mnt/logs/" + this.id + "_errors.log", true);
+    }
   }
 
   public void write(Object[] messages, String type, Boolean xnative) throws IOException {
@@ -92,6 +98,8 @@ public class RuntimeLogger {
       logs[0] = "Native logs detected. Use context.log() or context.error() for better experience.";
       this.write(logs, type, xnative);
     }
+
+    this.ensureStreams();
 
     FileWriter stream = this.streamLogs;
 
@@ -137,8 +145,12 @@ public class RuntimeLogger {
 
     this.enabled = false;
 
-    this.streamLogs.close();
-    this.streamErrors.close();
+    if (this.streamLogs != null) {
+      this.streamLogs.close();
+    }
+    if (this.streamErrors != null) {
+      this.streamErrors.close();
+    }
   }
 
   public void overrideNativeLogs() {

@@ -4,6 +4,12 @@ import json
 import os
 import traceback
 
+try:
+    import uvloop
+    uvloop.install()
+except ImportError:
+    pass
+
 from aiohttp import web, web_exceptions, web_request
 from function_types import Context
 from logger import Logger

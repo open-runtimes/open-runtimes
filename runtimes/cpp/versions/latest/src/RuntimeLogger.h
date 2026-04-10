@@ -46,9 +46,15 @@ public:
       } else {
         id = headerId;
       }
+    }
+  }
 
+  void ensureStreams() {
+    if (!streamLogs) {
       streamLogs = std::make_shared<std::ofstream>(
           "/mnt/logs/" + id + "_logs.log", std::ios_base::app);
+    }
+    if (!streamErrors) {
       streamErrors = std::make_shared<std::ofstream>(
           "/mnt/logs/" + id + "_errors.log", std::ios_base::app);
     }
@@ -70,6 +76,8 @@ public:
             "better experience.",
             type, native);
     }
+
+    ensureStreams();
 
     std::shared_ptr<std::ofstream> stream =
         type == "error" ? streamErrors : streamLogs;
@@ -96,8 +104,12 @@ public:
 
     enabled = false;
 
-    streamLogs->close();
-    streamErrors->close();
+    if (streamLogs) {
+      streamLogs->close();
+    }
+    if (streamErrors) {
+      streamErrors->close();
+    }
   }
 
   void overrideNativeLogs() {

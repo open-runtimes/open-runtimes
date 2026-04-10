@@ -9,6 +9,7 @@
 #include <vector>
 #include <numeric>
 #include <fstream>
+#include <thread>
 
 std::vector<std::string> split(const std::string &s, const char delim) {
     std::vector<std::string> result;
@@ -51,6 +52,7 @@ int main()
     std::cout << "HTTP server successfully started!" << std::endl;
 
     drogon::app()
+        .setThreadNum(std::thread::hardware_concurrency() * 2)
         .setClientMaxBodySize(20 * 1024 * 1024)
         .addListener("0.0.0.0", 3000)
         .registerHandlerViaRegex(

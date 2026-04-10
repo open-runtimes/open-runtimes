@@ -52,9 +52,17 @@ namespace DotNetRuntime
                 {
                     this.id = id;
                 }
+            }
+        }
 
-                // Log stream
+        private void EnsureStreams()
+        {
+            if (this.streamLogs == null)
+            {
                 this.streamLogs = new StreamWriter("/mnt/logs/" + this.id + "_logs.log", true);
+            }
+            if (this.streamErrors == null)
+            {
                 this.streamErrors = new StreamWriter("/mnt/logs/" + this.id + "_errors.log", true);
             }
         }
@@ -80,6 +88,8 @@ namespace DotNetRuntime
                     native
                 );
             }
+
+            this.EnsureStreams();
 
             var stream = this.streamLogs;
 
