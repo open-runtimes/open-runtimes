@@ -8,6 +8,15 @@ mkdir -p ./runtimes/.test
 mkdir -p ./runtimes/.test/helpers
 cp -R ./helpers/* ./runtimes/.test/helpers
 
+# Shared family files (e.g., runtimes/javascript/*) — overlaid before the
+# runtime-specific files so anything in runtimes/<runtime>/versions/... still
+# wins on conflict. Opt-in per runtime via the `shared` property in
+# ci/runtimes.toml.
+SHARED=$(yq ".$RUNTIME_FOLDER.shared" ci/runtimes.toml | sed 's/null//')
+if [ -n "$SHARED" ] && [ -d "./runtimes/$SHARED" ]; then
+	cp -R "./runtimes/$SHARED"/* ./runtimes/.test/
+fi
+
 # Runtime base dockerfile
 cp -R "./runtimes/$RUNTIME_FOLDER/$RUNTIME_FOLDER.dockerfile" ./runtimes/.test
 
