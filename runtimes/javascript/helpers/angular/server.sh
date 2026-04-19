@@ -6,7 +6,7 @@ shopt -s dotglob
 cd /usr/local/server/src/function/
 
 source /usr/local/server/helpers/angular/env.sh
-source /usr/local/server/helpers/javascript-runner.sh
+source /usr/local/server/helpers/javascript-runner/env.sh
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
 	# Middleware-style
