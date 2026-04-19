@@ -27,6 +27,8 @@ if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
 		echo 'No server found'
 		exit 1
 	fi
+else
+	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi
 
 BUN_OPTIONS="--preload /usr/local/server/src/ssr/injections.ts" \
