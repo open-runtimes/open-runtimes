@@ -8,6 +8,14 @@ mkdir -p ./runtimes/.test
 mkdir -p ./runtimes/.test/helpers
 cp -R ./helpers/* ./runtimes/.test/helpers
 
+# Shared JS runtime files (node, bun) — overlaid before runtime-specific so
+# anything in runtimes/<runtime>/versions/... still wins on conflict.
+case "$RUNTIME_FOLDER" in
+node | bun)
+	cp -R ./runtimes/shared/js/* ./runtimes/.test/
+	;;
+esac
+
 # Runtime base dockerfile
 cp -R "./runtimes/$RUNTIME_FOLDER/$RUNTIME_FOLDER.dockerfile" ./runtimes/.test
 
