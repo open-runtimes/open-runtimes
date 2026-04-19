@@ -5,16 +5,16 @@ shopt -s dotglob
 
 cd /usr/local/server/src/function/
 
-source /usr/local/server/helpers/angular/env.sh
-source /usr/local/server/helpers/js-runner.sh
+source /usr/local/server/helpers/analog/env.sh
+source /usr/local/server/helpers/javascript-runner.sh
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
 	# Middleware-style
-	cp ../server-angular.mjs ./server.mjs
-	START_COMMAND="$OPR_JS_RUNNER ./server.mjs"
+	cp ../server-analog.mjs ./server.mjs
+	START_COMMAND="$OPR_JAVASCRIPT_RUNNER ./server.mjs"
 
 	# Standalone-style
-	# START_COMMAND="$OPR_JS_RUNNER ./server/server.mjs"
+	# START_COMMAND="$OPR_JAVASCRIPT_RUNNER ./server/index.mjs"
 else
 	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
 fi

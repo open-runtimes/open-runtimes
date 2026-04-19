@@ -6,12 +6,12 @@ shopt -s dotglob
 cd /usr/local/server/src/function
 
 source /usr/local/server/helpers/remix/env.sh
-source /usr/local/server/helpers/js-runner.sh
+source /usr/local/server/helpers/javascript-runner.sh
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
 	# Middleware-style
 	cp ../server-remix.mjs ./server.mjs
-	START_COMMAND="$OPR_JS_RUNNER ./server.mjs"
+	START_COMMAND="$OPR_JAVASCRIPT_RUNNER ./server.mjs"
 
 	# Standalone-style
 	# Remix-serve requires "build" folder (might not work due to build folder structure)

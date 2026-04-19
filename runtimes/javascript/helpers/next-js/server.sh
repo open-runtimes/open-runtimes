@@ -6,7 +6,7 @@ shopt -s dotglob
 cd /usr/local/server/src/function
 
 source /usr/local/server/helpers/next-js/env.sh
-source /usr/local/server/helpers/js-runner.sh
+source /usr/local/server/helpers/javascript-runner.sh
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
 	# Detect SSR in custom output directory
@@ -14,11 +14,11 @@ if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
 	ENTRYPOINT="./server.js"
 	if [ -e "$ENTRYPOINT" ]; then
 		# Standalone approach
-		START_COMMAND="$OPR_JS_RUNNER $ENTRYPOINT"
+		START_COMMAND="$OPR_JAVASCRIPT_RUNNER $ENTRYPOINT"
 	else
 		# Middleware approach
 		cp ../server-next-js.mjs ./server.mjs
-		START_COMMAND="$OPR_JS_RUNNER ./server.mjs"
+		START_COMMAND="$OPR_JAVASCRIPT_RUNNER ./server.mjs"
 	fi
 
 else

@@ -24,6 +24,7 @@ commands = { install = "npm install", start = "bash helpers/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && modclean --version"
 test = "Serverless/Node.php"
+shared = "javascript"
 
 [deno]
 entry = "tests.ts"
