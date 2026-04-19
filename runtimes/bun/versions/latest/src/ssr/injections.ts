@@ -119,7 +119,11 @@ function wrapCreateServer(originalCreateServer: any) {
 // and `createServer()` both flow through the wrapped emit.
 for (const mod of [http, https] as any[]) {
   if (!mod) continue;
-  if (mod.Server && mod.Server.prototype && !mod.Server.prototype.__oprEmitPatched) {
+  if (
+    mod.Server &&
+    mod.Server.prototype &&
+    !mod.Server.prototype.__oprEmitPatched
+  ) {
     const originalEmit = mod.Server.prototype.emit;
     mod.Server.prototype.emit = overrideEmit(originalEmit);
     mod.Server.prototype.__oprEmitPatched = true;

@@ -12,7 +12,10 @@ export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
 
-  static start(status: string | null | undefined, id: string | null | undefined): string {
+  static start(
+    status: string | null | undefined,
+    id: string | null | undefined,
+  ): string {
     const enabled = (status ? status : "enabled") === "enabled";
 
     if (!enabled) {
@@ -54,14 +57,23 @@ export class Logger {
     }
   }
 
-  static overrideNativeLogs(namespace: AsyncLocalStorage<{ id: string }>, _rid: string) {
-    const forward = (type: string) => (...args: any[]) => {
-      const store = namespace.getStore();
-      const requestId = store?.id ?? "";
-      Logger.write(requestId, args, type);
-    };
+  static overrideNativeLogs(
+    namespace: AsyncLocalStorage<{ id: string }>,
+    _rid: string,
+  ) {
+    const forward =
+      (type: string) =>
+      (...args: any[]) => {
+        const store = namespace.getStore();
+        const requestId = store?.id ?? "";
+        Logger.write(requestId, args, type);
+      };
 
-    console.log = console.info = console.debug = console.warn = forward(Logger.TYPE_LOG);
+    console.log =
+      console.info =
+      console.debug =
+      console.warn =
+        forward(Logger.TYPE_LOG);
     console.error = forward(Logger.TYPE_ERROR);
   }
 
