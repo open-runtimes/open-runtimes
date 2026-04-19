@@ -12,7 +12,7 @@ import {
   addOprEndpoints,
   addAuthenticationCheck,
   addSafeTimeout,
-} from "./system";
+} from "./system.mjs";
 import { Logger, loggingNamespace } from "./logger";
 
 console.log("Preparing SSR runtime ...");
