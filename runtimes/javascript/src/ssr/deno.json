@@ -1,5 +1,9 @@
 {
   "imports": {
-    "superjson": "npm:superjson@^2.2.6"
+    "superjson": "npm:superjson@^2.2.6",
+    "express": "npm:express@^4.21.2",
+    "srvx/node": "npm:srvx@^0.8.16/node",
+    "@remix-run/express": "npm:@remix-run/express@^2.16.0",
+    "next": "npm:next@^15.1.3"
   }
 }
