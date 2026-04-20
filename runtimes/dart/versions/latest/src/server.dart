@@ -7,6 +7,13 @@ import '{entrypoint}' as user_code;
 import 'function_types.dart';
 import 'logger.dart';
 
+final String _cachedSecret = Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '';
+final Map<String, dynamic> _cachedEnforcedHeaders = () {
+  String? raw = Platform.environment['OPEN_RUNTIMES_HEADERS'];
+  return jsonDecode((raw != null && raw.isNotEmpty) ? raw : '{}')
+      as Map<String, dynamic>;
+}();
+
 Future<shelf.Response> action(Logger logger, dynamic req) async {
   int? safeTimeout = null;
   String timeout = req.headers['x-open-runtimes-timeout'] ?? '';
@@ -21,9 +28,8 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  if ((Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '') != '' &&
-      (req.headers['x-open-runtimes-secret'] ?? '') !=
-          Platform.environment['OPEN_RUNTIMES_SECRET']) {
+  if (_cachedSecret.isNotEmpty &&
+      (req.headers['x-open-runtimes-secret'] ?? '') != _cachedSecret) {
     return shelf.Response(
       500,
       body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.',
@@ -57,13 +63,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  String? enforcedHeadersString = Platform.environment['OPEN_RUNTIMES_HEADERS'];
-  final enforcedHeaders = jsonDecode(
-    (enforcedHeadersString != null && !enforcedHeadersString.isEmpty)
-        ? enforcedHeadersString
-        : '{}',
-  );
-  enforcedHeaders.forEach((key, value) {
+  _cachedEnforcedHeaders.forEach((key, value) {
     headers[key.toLowerCase()] = '${value}';
   });
 

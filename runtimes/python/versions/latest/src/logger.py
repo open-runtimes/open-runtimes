@@ -41,7 +41,10 @@ class Logger:
             else:
                 self.id = id
 
+    def _ensure_streams(self):
+        if self.stream_logs is None:
             self.stream_logs = open("/mnt/logs/" + self.id + "_logs.log", "a")
+        if self.stream_errors is None:
             self.stream_errors = open("/mnt/logs/" + self.id + "_errors.log", "a")
 
     def write(self, messages, xtype=None, is_native=False):
@@ -58,6 +61,8 @@ class Logger:
                     "Native logs detected. Use context.log() or context.error() for better experience."
                 ]
             )
+
+        self._ensure_streams()
 
         stream = self.stream_logs
 
@@ -94,8 +99,10 @@ class Logger:
 
         self.enabled = False
 
-        self.stream_logs.close()
-        self.stream_errors.close()
+        if self.stream_logs is not None:
+            self.stream_logs.close()
+        if self.stream_errors is not None:
+            self.stream_errors.close()
 
     def override_native_logs(self):
         sys.stderr = sys.stdout = self.custom_std = StringIO()

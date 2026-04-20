@@ -28,7 +28,17 @@ export class Logger {
   }
 
   async setup() {
-    if (this.enabled) {
+    // Streams are now created lazily on first write
+  }
+
+  private streamsReady: Promise<void> | null = null;
+
+  private ensureStreams(): Promise<void> {
+    if (this.streamsReady !== null) {
+      return this.streamsReady;
+    }
+
+    this.streamsReady = (async () => {
       const [streamLogs, streamErrors] = await Promise.all([
         Deno.open(`/mnt/logs/${this.id}_logs.log`, {
           create: true,
@@ -47,7 +57,9 @@ export class Logger {
 
       this.streamLogs = streamLogs;
       this.streamErrors = streamErrors;
-    }
+    })();
+
+    return this.streamsReady;
   }
 
   write(messages: any[], type = Logger.TYPE_LOG, native = false) {
@@ -60,14 +72,6 @@ export class Logger {
       this.write([
         "Native logs detected. Use context.log() or context.error() for better experience.",
       ]);
-    }
-
-    const stream = type === Logger.TYPE_ERROR
-      ? this.streamErrors
-      : this.streamLogs;
-
-    if (!stream) {
-      return;
     }
 
     let stringLog = messages
@@ -93,7 +97,13 @@ export class Logger {
 
     const encoded = new TextEncoder().encode(stringLog + "\n");
     try {
-      this.writePromises.push(stream.write(encoded));
+      const writeOp = this.ensureStreams().then(() => {
+        const stream = type === Logger.TYPE_ERROR
+          ? this.streamErrors
+          : this.streamLogs;
+        return stream!.write(encoded);
+      });
+      this.writePromises.push(writeOp);
     } catch (error) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
@@ -101,7 +111,7 @@ export class Logger {
   }
 
   async end() {
-    if (!this.enabled || !this.streamLogs || !this.streamErrors) {
+    if (!this.enabled) {
       return;
     }
 
@@ -111,10 +121,15 @@ export class Logger {
       await promise;
     }
 
-    await Promise.all([
-      this.streamLogs.close(),
-      this.streamErrors.close(),
-    ]);
+    const closes: Promise<void>[] = [];
+    if (this.streamLogs !== null) {
+      closes.push(this.streamLogs.close());
+    }
+    if (this.streamErrors !== null) {
+      closes.push(this.streamErrors.close());
+    }
+
+    await Promise.all(closes);
   }
 
   overrideNativeLogs() {

@@ -4,9 +4,77 @@ import json
 import os
 import traceback
 
+try:
+    import uvloop
+    uvloop.install()
+except ImportError:
+    pass
+
 from aiohttp import web, web_exceptions, web_request
 from function_types import Context
 from logger import Logger
+
+_SERVER_SECRET = os.environ.get("OPEN_RUNTIMES_SECRET", "")
+_ENFORCED_HEADERS_RAW = os.environ.get("OPEN_RUNTIMES_HEADERS", "")
+_ENFORCED_HEADERS = {
+    k.lower(): str(v)
+    for k, v in json.loads(
+        _ENFORCED_HEADERS_RAW if _ENFORCED_HEADERS_RAW else "{}"
+    ).items()
+}
+
+_cached_module = None
+_cached_main = None
+_module_error = None
+
+
+def _load_user_module():
+    global _cached_module, _cached_main, _module_error
+    if _cached_module is not None or _module_error is not None:
+        return
+
+    entrypoint = os.environ.get("OPEN_RUNTIMES_ENTRYPOINT", "")
+    path = "/usr/local/server/src/function/" + entrypoint
+
+    if not os.path.isfile(path):
+        _module_error = (
+            "Failed to load entrypoint, file " + entrypoint + " does not exist."
+        )
+        return
+
+    user_path = entrypoint
+    if user_path.endswith(".py"):
+        user_path = user_path[:-3]
+    user_path = user_path.replace("/", ".")
+
+    try:
+        module = importlib.import_module("function." + user_path)
+        if not callable(getattr(module, "main", None)):
+            raise AttributeError(
+                "Function signature invalid. Did you forget to export a 'main' function?"
+            )
+        _cached_module = module
+        _cached_main = module.main
+    except ModuleNotFoundError as e:
+        _module_error = "Module not found: " + str(e.name)
+    except SyntaxError as e:
+        _module_error = (
+            "Syntax error in "
+            + str(e.filename)
+            + ":"
+            + str(e.lineno)
+            + ": "
+            + str(e.msg)
+        )
+    except AttributeError as e:
+        _module_error = str(e)
+    except Exception as e:
+        _module_error = "Failed to load module: " + "".join(
+            traceback.TracebackException.from_exception(e).format()
+        )
+
+
+_load_user_module()
 
 
 async def action(logger, request: web_request.Request):
@@ -21,9 +89,10 @@ async def action(logger, request: web_request.Request):
 
         safeTimeout = int(timeout)
 
-    if os.getenv("OPEN_RUNTIMES_SECRET", "") != "" and request.headers.get(
-        "x-open-runtimes-secret", ""
-    ) != os.getenv("OPEN_RUNTIMES_SECRET", ""):
+    if (
+        _SERVER_SECRET != ""
+        and request.headers.get("x-open-runtimes-secret", "") != _SERVER_SECRET
+    ):
         return web.Response(
             text='Unauthorized. Provide correct "x-open-runtimes-secret" header.',
             status=500,
@@ -73,74 +142,24 @@ async def action(logger, request: web_request.Request):
         if not key.lower().startswith("x-open-runtimes-"):
             context.req.headers[key.lower()] = headers[key]
 
-    server_headers = os.getenv("OPEN_RUNTIMES_HEADERS", "")
-    server_headers = server_headers if server_headers else "{}"
-    enforced_headers = json.loads(server_headers)
-    for key in enforced_headers.keys():
-        context.req.headers[key.lower()] = str(enforced_headers[key])
+    for key, value in _ENFORCED_HEADERS.items():
+        context.req.headers[key] = value
 
     logger.override_native_logs()
 
     output = None
-    userModule = None
 
-    entrypoint = os.getenv("OPEN_RUNTIMES_ENTRYPOINT")
-    entrypointFilePath = "/usr/local/server/src/function/" + entrypoint
-
-    # Guard: Check file exists
-    if not os.path.isfile(entrypointFilePath):
-        context.error(
-            "Failed to load entrypoint, file " + entrypoint + " does not exist."
-        )
+    if _module_error is not None:
+        context.error(_module_error)
         logger.revert_native_logs()
         output = context.res.text("", 503, {})
 
-    # Guard: Try to load module
-    if output is None:
-        userPath = entrypoint
-        if userPath.endswith(".py"):
-            userPath = userPath[:-3]
-        userPath = userPath.replace("/", ".")
-
-        try:
-            userModule = importlib.import_module("function." + userPath)
-            if not callable(getattr(userModule, "main", None)):
-                raise AttributeError(
-                    "Function signature invalid. Did you forget to export a 'main' function?"
-                )
-        except ModuleNotFoundError as e:
-            context.error("Module not found: " + str(e.name))
-            output = context.res.text("", 503, {})
-        except SyntaxError as e:
-            context.error(
-                "Syntax error in "
-                + str(e.filename)
-                + ":"
-                + str(e.lineno)
-                + ": "
-                + str(e.msg)
-            )
-            output = context.res.text("", 503, {})
-        except AttributeError as e:
-            context.error(str(e))
-            output = context.res.text("", 503, {})
-        except Exception as e:
-            context.error(
-                "Failed to load module: "
-                + "".join(traceback.TracebackException.from_exception(e).format())
-            )
-            output = context.res.text("", 503, {})
-        finally:
-            if output is not None:
-                logger.revert_native_logs()
-
-    # Execute user function
     if output is None:
 
         async def execute(context):
-            if asyncio.iscoroutinefunction(userModule.main):
-                return await userModule.main(context)
-            return userModule.main(context)
+            if asyncio.iscoroutinefunction(_cached_main):
+                return await _cached_main(context)
+            return _cached_main(context)
 
         try:
             if safeTimeout is not None:

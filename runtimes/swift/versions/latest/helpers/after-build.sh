@@ -23,6 +23,7 @@ mkdir /usr/local/build/compiled
 swift package resolve
 swift build --configuration release
 cp "$(swift build --configuration release --show-bin-path)/Runtime" /usr/local/build/compiled/
+strip /usr/local/build/compiled/Runtime 2>/dev/null || true
 
 echo "Packing build ..."
 

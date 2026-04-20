@@ -35,7 +35,14 @@ class RuntimeLogger
         @id = id
       end
 
+    end
+  end
+
+  def ensure_streams
+    if @stream_logs.nil?
       @stream_logs = File.open("/mnt/logs/" + @id + "_logs.log", 'a')
+    end
+    if @stream_errors.nil?
       @stream_errors = File.open("/mnt/logs/" + @id + "_errors.log", 'a')
     end
   end
@@ -50,6 +57,8 @@ class RuntimeLogger
       self.write(["Native logs detected. Use context.log() or context.error() for better experience."], type,
                  native)
     end
+
+    ensure_streams
 
     stream = @stream_logs
 
@@ -93,8 +102,8 @@ class RuntimeLogger
 
     @enabled = false
 
-    @stream_logs.close
-    @stream_errors.close
+    @stream_logs.close unless @stream_logs.nil?
+    @stream_errors.close unless @stream_errors.nil?
   end
 
   def override_native_logs()

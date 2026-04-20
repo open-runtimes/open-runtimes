@@ -64,8 +64,14 @@ class RuntimeLogger(
                     this.id = this.generateId()
                 }
             }
+        }
+    }
 
+    private fun ensureStreams() {
+        if (this.streamLogs == null) {
             this.streamLogs = FileWriter("/mnt/logs/" + this.id + "_logs.log", true)
+        }
+        if (this.streamErrors == null) {
             this.streamErrors = FileWriter("/mnt/logs/" + this.id + "_errors.log", true)
         }
     }
@@ -84,6 +90,8 @@ class RuntimeLogger(
 
             this.write(arrayOf("Native logs detected. Use context.log() or context.error() for better experience."), type, native)
         }
+
+        this.ensureStreams()
 
         var stream: FileWriter? = this.streamLogs
 

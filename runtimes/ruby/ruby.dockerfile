@@ -1,2 +1,1 @@
-RUN apk add --update alpine-sdk bash
-RUN gem install bundler
+RUN apk add --update --no-cache alpine-sdk bash && gem install bundler

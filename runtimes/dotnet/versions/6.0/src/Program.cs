@@ -6,6 +6,14 @@ using DotNetRuntime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
+var cachedSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? string.Empty;
+var cachedEnforcedHeaders =
+    JsonSerializer.Deserialize<Dictionary<string, object>>(
+        string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS"))
+            ? "{}"
+            : Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS")!
+    ) ?? new Dictionary<string, object>();
+
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
@@ -24,7 +32,7 @@ Console.WriteLine("HTTP server successfully started!");
 
 app.Run();
 
-static async Task<IResult> Execute(HttpRequest request)
+async Task<IResult> Execute(HttpRequest request)
 {
     if (request.Path == "/__opr/health")
     {
@@ -70,7 +78,7 @@ static async Task<IResult> Execute(HttpRequest request)
     }
 }
 
-static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
+async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
 {
     int safeTimout = -1;
     var timeout = request.Headers.TryGetValue("x-open-runtimes-timeout", out var timeoutValue)
@@ -94,8 +102,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         ? secretValue.ToString()
         : string.Empty;
 
-    string serverSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET");
-    if (!string.IsNullOrEmpty(serverSecret) && secret != serverSecret)
+    if (!string.IsNullOrEmpty(cachedSecret) && secret != cachedSecret)
     {
         return new CustomResponse(
             System.Text.Encoding.UTF8.GetBytes(
@@ -127,16 +134,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         }
     }
 
-    String enforcedHeadersString = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS");
-    if (string.IsNullOrEmpty(enforcedHeadersString))
-    {
-        enforcedHeadersString = "{}";
-    }
-
-    Dictionary<string, object> enforcedHeaders =
-        JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString)
-        ?? new Dictionary<string, object>();
-    foreach (KeyValuePair<string, object> entry in enforcedHeaders)
+    foreach (KeyValuePair<string, object> entry in cachedEnforcedHeaders)
     {
         headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
     }

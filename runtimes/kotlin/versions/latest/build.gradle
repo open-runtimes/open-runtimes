@@ -11,12 +11,12 @@ repositories {
 }
 
 dependencies {
-	implementation "io.javalin:javalin:4.6.8"
-	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"
-	implementation "com.google.code.gson:gson:2.9.0"
-	implementation "org.slf4j:slf4j-simple:1.8.0-beta4"
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
-	implementation "org.jetbrains.kotlin:kotlin-reflect:1.6.21"
+	implementation 'io.netty:netty-codec-http:4.1.115.Final'
+	implementation 'io.netty:netty-transport-native-epoll:4.1.115.Final:linux-x86_64'
+	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
+	implementation "com.google.code.gson:gson:2.13.1"
+	implementation "org.jetbrains.kotlin:kotlin-reflect:2.2.0"
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 task buildJar(type: Jar) {
@@ -26,7 +26,7 @@ task buildJar(type: Jar) {
 		)
 	}
 	from {
-		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+		configurations.runtimeClasspath.collect { File file -> file.isDirectory() ? file : zipTree(file) }
 	} {
 		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	}

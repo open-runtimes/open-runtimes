@@ -3,6 +3,12 @@ import { getContextBody } from "./getContextBody.ts";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
+const CACHED_SECRET = Deno.env.get("OPEN_RUNTIMES_SECRET") ?? "";
+const CACHED_ENFORCED_HEADERS: Record<string, string> = JSON.parse(
+  Deno.env.get("OPEN_RUNTIMES_HEADERS") || "{}",
+);
+const CACHED_ENTRYPOINT = Deno.env.get("OPEN_RUNTIMES_ENTRYPOINT") ?? "";
+
 export const action = async (logger: Logger, ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? "";
   let safeTimeout: number | null = null;
@@ -18,9 +24,8 @@ export const action = async (logger: Logger, ctx: any) => {
   }
 
   if (
-    Deno.env.get("OPEN_RUNTIMES_SECRET") &&
-    (ctx.request.headers.get("x-open-runtimes-secret") ?? "") !==
-      Deno.env.get("OPEN_RUNTIMES_SECRET")
+    CACHED_SECRET &&
+    (ctx.request.headers.get("x-open-runtimes-secret") ?? "") !== CACHED_SECRET
   ) {
     ctx.response.status = 500;
     ctx.response.body =
@@ -51,13 +56,8 @@ export const action = async (logger: Logger, ctx: any) => {
     headers[header.toLowerCase()] = ctx.request.headers.get(header);
   });
 
-  const enforcedHeaders = JSON.parse(
-    Deno.env.get("OPEN_RUNTIMES_HEADERS")
-      ? (Deno.env.get("OPEN_RUNTIMES_HEADERS") ?? "{}")
-      : "{}",
-  );
-  for (const header in enforcedHeaders) {
-    headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
+  for (const header in CACHED_ENFORCED_HEADERS) {
+    headers[header.toLowerCase()] = `${CACHED_ENFORCED_HEADERS[header]}`;
   }
 
   const scheme = ctx.request.headers.get("x-forwarded-proto") ?? "http";
@@ -162,7 +162,7 @@ export const action = async (logger: Logger, ctx: any) => {
   let output: any = null;
   let userFunction: any = null;
 
-  const entrypoint = Deno.env.get("OPEN_RUNTIMES_ENTRYPOINT") ?? "";
+  const entrypoint = CACHED_ENTRYPOINT;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
 
   // Guard: Check file exists

@@ -7,6 +7,11 @@ require_relative 'execute.rb'
 
 USER_CODE_PATH = '/usr/local/server/src/function';
 
+ENFORCED_HEADERS = JSON.parse(ENV.fetch('OPEN_RUNTIMES_HEADERS', '{}').then { |v| v.empty? ? '{}' : v })
+  .transform_keys(&:downcase)
+  .freeze
+SERVER_SECRET = ENV.fetch('OPEN_RUNTIMES_SECRET', '').freeze
+
 def action(request, response, logger)
   safe_timeout = nil
 
@@ -23,9 +28,8 @@ def action(request, response, logger)
   end
 
   secret = request.env['HTTP_X_OPEN_RUNTIMES_SECRET'] || ''
-  server_secret = ENV['OPEN_RUNTIMES_SECRET'] || ''
 
-  if !(server_secret.empty?) && secret != server_secret
+  if !(SERVER_SECRET.empty?) && secret != SERVER_SECRET
     response.status = 500
     response.body = 'Unauthorized. Provide correct "x-open-runtimes-secret" header.'
     return
@@ -108,9 +112,8 @@ def action(request, response, logger)
     end
   end
 
-  enforced_headers = JSON.parse(ENV['OPEN_RUNTIMES_HEADERS'].empty? ? '{}' : ENV['OPEN_RUNTIMES_HEADERS'])
-  enforced_headers.each do |key, value|
-    headers[key.downcase] = value.to_s
+  ENFORCED_HEADERS.each do |key, value|
+    headers[key] = value.to_s
   end
 
   context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers,
@@ -135,7 +138,7 @@ def action(request, response, logger)
     begin
       load(entrypoint_file_path)
 
-      unless defined?(main = ()) # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression
+      unless defined?(main = ()) # rubocop:disable Lint/AssignmentInCondition, Lint/EmptyExpression, Lint/UselessAssignment
         raise NameError, "Function signature invalid. Did you forget to export a 'main' function?"
       end
 
@@ -161,7 +164,7 @@ def action(request, response, logger)
       logger.override_native_logs
 
       unless safe_timeout.nil?
-        results = execute(safe_timeout, main, context)
+        results = execute(safe_timeout, method(:main), context)
         executed = results[0]
         output = results[1]
 

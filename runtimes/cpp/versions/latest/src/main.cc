@@ -9,6 +9,7 @@
 #include <vector>
 #include <numeric>
 #include <fstream>
+#include <thread>
 
 std::vector<std::string> split(const std::string &s, const char delim) {
     std::vector<std::string> result;
@@ -22,11 +23,36 @@ std::vector<std::string> split(const std::string &s, const char delim) {
     return result;
 }
 
+static std::string cachedSecret;
+static Json::Value cachedEnforcedHeaders;
+static bool cachedEnforcedHeadersValid = false;
+
+void initCache() {
+    char* secretChar = std::getenv("OPEN_RUNTIMES_SECRET");
+    cachedSecret = (secretChar != nullptr) ? std::string(secretChar) : "";
+
+    char* headersChar = std::getenv("OPEN_RUNTIMES_HEADERS");
+    std::string headersString = (headersChar != nullptr) ? std::string(headersChar) : "";
+    if (headersString.empty()) {
+        headersString = "{}";
+    }
+
+    Json::Reader reader;
+    cachedEnforcedHeadersValid = reader.parse(headersString, cachedEnforcedHeaders);
+    if (!cachedEnforcedHeadersValid) {
+        cachedEnforcedHeaders = Json::Value(Json::objectValue);
+        cachedEnforcedHeadersValid = true;
+    }
+}
+
 int main()
 {
+    initCache();
+
     std::cout << "HTTP server successfully started!" << std::endl;
 
     drogon::app()
+        .setThreadNum(std::thread::hardware_concurrency() * 2)
         .setClientMaxBodySize(20 * 1024 * 1024)
         .addListener("0.0.0.0", 3000)
         .registerHandlerViaRegex(
@@ -80,11 +106,10 @@ int main()
                         }
                     }
 
-                    if(std::getenv("OPEN_RUNTIMES_SECRET") != nullptr) {
-                        std::string serverSecret(std::getenv("OPEN_RUNTIMES_SECRET"));
+                    if(!cachedSecret.empty()) {
                         std::string secret = req->getHeader("x-open-runtimes-secret");
 
-                        if(serverSecret != "" && secret != serverSecret) {
+                        if(secret != cachedSecret) {
                             res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
                             res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
                             callback(res);
@@ -296,35 +321,17 @@ int main()
                         headers["cookie"] = cookieHeadersString;
                     }
 
-                    char* serverHeadersChar = std::getenv("OPEN_RUNTIMES_HEADERS");
-                    if(serverHeadersChar != nullptr) {
-                        std::string serverHeadersString(serverHeadersChar);
+                    for (const std::string &key : cachedEnforcedHeaders.getMemberNames())
+                    {
+                        std::string headerKey = key;
+                        std::transform(
+                            headerKey.begin(),
+                            headerKey.end(),
+                            headerKey.begin(),
+                            [](unsigned char c){ return std::tolower(c); }
+                        );
 
-                        if(serverHeadersString.empty()) {
-                            serverHeadersString = "{}";
-                        }
-
-                        Json::Value serverHeaders;
-                        Json::Reader serverHeadersReader;
-                        bool parsingResult = serverHeadersReader.parse(serverHeadersString, serverHeaders);
-                        if(!parsingResult)
-                        {
-                            throw std::runtime_error("Invalid JSON body.");
-                        }
-
-                        for (const std::string &key : serverHeaders.getMemberNames())
-                        {
-                            std::string headerKey = key;
-                            std::transform(
-                                headerKey.begin(),
-                                headerKey.end(),
-                                headerKey.begin(),
-                                [](unsigned char c){ return std::tolower(c); }
-                            );
-
-                            auto value = serverHeaders[key];
-                            headers[headerKey] = value.asString();
-                        }
+                        headers[headerKey] = cachedEnforcedHeaders[key].asString();
                     }
 
                     runtimeRequest.headers = headers;

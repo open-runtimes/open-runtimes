@@ -22,10 +22,16 @@ class Logger {
           : (Platform.environment['OPEN_RUNTIMES_ENV'] == 'development'
                 ? 'dev'
                 : this.generateId());
+    }
+  }
 
+  void _ensureStreams() {
+    if (this.streamLogs == null) {
       this.streamLogs = File(
         '/mnt/logs/' + this.id + '_logs.log',
       ).openWrite(mode: FileMode.append);
+    }
+    if (this.streamErrors == null) {
       this.streamErrors = File(
         '/mnt/logs/' + this.id + '_errors.log',
       ).openWrite(mode: FileMode.append);
@@ -45,6 +51,8 @@ class Logger {
         'Native logs detected. Use context.log() or context.error() for better experience.',
       );
     }
+
+    _ensureStreams();
 
     final stream = type == Logger.TYPE_ERROR
         ? this.streamErrors
@@ -80,20 +88,28 @@ class Logger {
   }
 
   Future<void> end() async {
-    if (!this.enabled || this.streamLogs == null || this.streamErrors == null) {
+    if (!this.enabled) {
       return;
     }
 
     this.enabled = false;
 
     var futureFlushes = <Future>[];
-    futureFlushes.add(this.streamLogs?.flush() ?? Future.value());
-    futureFlushes.add(this.streamErrors?.flush() ?? Future.value());
+    if (this.streamLogs != null) {
+      futureFlushes.add(this.streamLogs!.flush());
+    }
+    if (this.streamErrors != null) {
+      futureFlushes.add(this.streamErrors!.flush());
+    }
     await Future.wait(futureFlushes);
 
     var futureCloses = <Future>[];
-    futureCloses.add(this.streamLogs?.close() ?? Future.value());
-    futureCloses.add(this.streamErrors?.close() ?? Future.value());
+    if (this.streamLogs != null) {
+      futureCloses.add(this.streamLogs!.close());
+    }
+    if (this.streamErrors != null) {
+      futureCloses.add(this.streamErrors!.close());
+    }
     await Future.wait(futureCloses);
   }
 

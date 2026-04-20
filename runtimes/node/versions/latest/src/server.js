@@ -5,6 +5,50 @@ const Logger = require("./logger");
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
+const secret = process.env["OPEN_RUNTIMES_SECRET"] || "";
+const enforcedHeaders = JSON.parse(process.env.OPEN_RUNTIMES_HEADERS || "{}");
+const entrypoint = process.env.OPEN_RUNTIMES_ENTRYPOINT;
+const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
+
+let userModule = null;
+let moduleError = null;
+
+function loadUserModule() {
+  if (!fs.existsSync(entrypointFilePath)) {
+    moduleError = `Failed to load entrypoint, file ${entrypoint} does not exist.`;
+    return;
+  }
+
+  try {
+    userModule = require(entrypointFilePath);
+  } catch (err) {
+    if (err.code === "ERR_REQUIRE_ESM") {
+      // ESM modules must be loaded async; defer to first request
+      userModule = null;
+    } else {
+      const message = err instanceof Error ? err.message : String(err);
+      if (err instanceof SyntaxError) {
+        moduleError = `Syntax error in ${entrypoint}: ${message}`;
+      } else if (err instanceof TypeError) {
+        moduleError = message;
+      } else {
+        moduleError = `Failed to load module: ${message}`;
+      }
+    }
+  }
+
+  if (userModule !== null) {
+    const fn = userModule.default || userModule;
+    if (typeof fn !== "function") {
+      moduleError =
+        "Function signature invalid. Did you forget to export a 'main' function?";
+      userModule = null;
+    }
+  }
+}
+
+loadUserModule();
+
 const server = micro(async (req, res) => {
   if (req.url === "/__opr/health") {
     return send(res, 200, "OK");
@@ -49,11 +93,7 @@ const action = async (logger, req, res) => {
     safeTimeout = +timeout;
   }
 
-  if (
-    process.env["OPEN_RUNTIMES_SECRET"] &&
-    req.headers[`x-open-runtimes-secret`] !==
-      process.env["OPEN_RUNTIMES_SECRET"]
-  ) {
+  if (secret && req.headers[`x-open-runtimes-secret`] !== secret) {
     return send(
       res,
       500,
@@ -73,11 +113,6 @@ const action = async (logger, req, res) => {
       headers[header.toLowerCase()] = req.headers[header];
     });
 
-  const enforcedHeaders = JSON.parse(
-    process.env.OPEN_RUNTIMES_HEADERS
-      ? process.env.OPEN_RUNTIMES_HEADERS
-      : "{}",
-  );
   for (const header in enforcedHeaders) {
     headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
   }
@@ -178,32 +213,19 @@ const action = async (logger, req, res) => {
   logger.overrideNativeLogs();
 
   let output = null;
-  let userFunction = null;
+  let userFunction = userModule;
 
-  const entrypoint = process.env.OPEN_RUNTIMES_ENTRYPOINT;
-  const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
-
-  // Guard: Check file exists
-  if (!fs.existsSync(entrypointFilePath)) {
-    context.error(
-      `Failed to load entrypoint, file ${entrypoint} does not exist.`,
-    );
+  if (moduleError !== null) {
+    context.error(moduleError);
     logger.revertNativeLogs();
     output = context.res.text("", 503, {});
   }
 
-  // Guard: Try to load module
-  if (output === null) {
+  // Handle ESM modules that could not be loaded synchronously at startup
+  if (output === null && userFunction === null) {
     try {
-      try {
-        userFunction = require(entrypointFilePath);
-      } catch (err) {
-        if (err.code === "ERR_REQUIRE_ESM") {
-          userFunction = await import(entrypointFilePath);
-        } else {
-          throw err;
-        }
-      }
+      userFunction = await import(entrypointFilePath);
+      userModule = userFunction;
 
       const fn = userFunction.default || userFunction;
       if (typeof fn !== "function") {
