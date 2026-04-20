@@ -20,9 +20,11 @@ if ! echo "$VERSION" | grep -q '[0-9]'; then
 	fi
 fi
 
-# If no version, or version latest, get first runtime's version from list
+# If no version, or version latest, get first runtime's version from list.
+# Filter "null" so an entry without a versions field yields "" (matches what
+# the CI matrix produces via cleanVersion('')).
 if [ "$VERSION" = "latest" ] || [ "$VERSION" = "$RUNTIME" ]; then
-	VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
+	VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml | sed 's/null//')
 fi
 
 ENTRYPOINT=$(yq ".$RUNTIME.entry" ci/runtimes.toml | sed 's/null//')
