@@ -37,6 +37,8 @@ for (const mod of [http, https] as any[]) {
   }
 }
 
+const port = Deno.env.get("PORT");
+const host = Deno.env.get("HOST");
 console.log(
-  `SSR runtime prepared with configuration PORT=${Deno.env.get("PORT")} and HOST=${Deno.env.get("HOST")}`,
+  `SSR runtime prepared with configuration PORT=${port} and HOST=${host}`,
 );
