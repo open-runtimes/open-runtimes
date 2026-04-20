@@ -1,8 +1,10 @@
-import { appendFileSync } from "fs";
-import { createNamespace } from "cls-hooked";
+import { appendFileSync } from "node:fs";
+import { AsyncLocalStorage } from "node:async_hooks";
 import superjson from "superjson";
 
-export const loggingNamespace = createNamespace("logging");
+// Shared between node and bun. Uses AsyncLocalStorage (built into Node 16+
+// and Bun) instead of cls-hooked so both runtimes can consume the same file.
+export const loggingNamespace = new AsyncLocalStorage();
 
 export const nativeLog = console.log.bind(console);
 
@@ -47,26 +49,23 @@ export class Logger {
     const path = `/mnt/logs/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`;
     try {
       appendFileSync(path, stringLog + "\n");
-    } catch (err) {
-      // Silently ignore write failures to prevent runtime crashes
-      // The logging system should not cause the main execution to fail
+    } catch {
+      // Silently ignore write failures to prevent runtime crashes.
     }
   }
 
-  static overrideNativeLogs(namespace, rid) {
+  static overrideNativeLogs(namespace, _rid) {
+    const forward = (type) => (...args) => {
+      const requestId = namespace.getStore()?.id ?? "";
+      Logger.write(requestId, args, type);
+    };
+
     console.log =
       console.info =
       console.debug =
       console.warn =
-        (...args) => {
-          const requestId = namespace.get("id");
-          Logger.write(requestId, args, Logger.TYPE_LOG, true);
-        };
-
-    console.error = (...args) => {
-      const requestId = namespace.get("id");
-      Logger.write(requestId, args, Logger.TYPE_ERROR, true);
-    };
+        forward(Logger.TYPE_LOG);
+    console.error = forward(Logger.TYPE_ERROR);
   }
 
   // Recreated from https://www.php.net/manual/en/function.uniqid.php
