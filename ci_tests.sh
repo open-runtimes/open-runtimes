@@ -101,8 +101,11 @@ if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
 		bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 fi
 
-# Build with all cleanup disabled (baseline for modclean + NFT comparison)
-if [[ "$TEST_CLASS" == SSR/* ]]; then
+# Build with all cleanup disabled (baseline for modclean + NFT comparison).
+# Only relevant for node — bun and deno ship the repo-root no-op
+# prepare-packing.sh so there's nothing to compare against, and the
+# companion testModclean/testNft cases markTestSkipped there.
+if [[ "$TEST_CLASS" == SSR/* ]] && [[ -z "$ENFORCED_RUNTIME" || "$ENFORCED_RUNTIME" == "node" ]]; then
 	echo "Building cleanup-disabled baseline..."
 	mkdir -p modclean-disabled-build/src
 	tar --exclude='./modclean-disabled-build' --exclude='./nft-build' -cf - . | tar -xf - -C modclean-disabled-build/src
@@ -250,6 +253,7 @@ docker run \
 	--rm \
 	-e RUNTIME_NAME="$RUNTIME" \
 	-e RUNTIME_VERSION="$VERSION" \
+	-e ENFORCED_RUNTIME="$ENFORCED_RUNTIME" \
 	-e OPEN_RUNTIMES_SECRET="test-secret-key" \
 	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
 	-v "$PWD":/app \

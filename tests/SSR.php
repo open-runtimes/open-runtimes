@@ -204,6 +204,14 @@ class SSR extends CSR
     
     public function testModclean(): void
     {
+        // modclean is wired into helpers/prepare-packing.sh only for the node
+        // runtime. The bun and deno images ship the repo-root no-op prepare-
+        // packing.sh, so the cleanup phase never runs and these assertions
+        // don't apply there.
+        if (\getenv('ENFORCED_RUNTIME') !== 'node') {
+            self::markTestSkipped('modclean is a node-only cleanup step.');
+        }
+
         // Main build has modclean enabled (default behavior)
         $archive = '/app/tests/.runtime/code.tar.gz';
         $result = \shell_exec("tar -tzf {$archive} 2>/dev/null | grep 'node_modules/.*\\.md$' | head -1");
@@ -217,6 +225,11 @@ class SSR extends CSR
 
     public function testNft(): void
     {
+        // @vercel/nft pruning is node-only (same story as modclean above).
+        if (\getenv('ENFORCED_RUNTIME') !== 'node') {
+            self::markTestSkipped('@vercel/nft pruning is a node-only cleanup step.');
+        }
+
         // NFT build has NFT enabled, modclean disabled
         $archive = '/app/tests/.runtime/nft-build/src/code.tar.gz';
         $nftCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
