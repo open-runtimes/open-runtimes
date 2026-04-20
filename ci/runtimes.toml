@@ -34,6 +34,7 @@ commands = { install = "deno cache tests.ts", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt ." }
 tools = "deno --version" # TODO: NPM, PNPM and Yarn dont work in Deno alpine currently: https://github.com/denoland/deno_docker/issues/373
 test = "Serverless/Deno.php"
+shared = "javascript"
 
 [python]
 entry = "tests.py"
