@@ -416,15 +416,11 @@ tools = "deno --version && node --version && npm --version && npx --version && p
 test = "SSR/NextJS.php"
 output = "./.next"
 
-[next-js-turbopack_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "next-js-turbopack"
-commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/NextJS.php"
-output = "./.next"
+# next-js-turbopack under deno is intentionally omitted. Turbopack emits a
+# CJS-style `_document.js` without `type: module` that deno's node-compat
+# loader treats as ESM, blowing up with "ReferenceError: require is not
+# defined" at file scope. The non-turbopack next-js_deno variant works fine
+# and is sufficient coverage for deno × Next.js.
 
 [nuxt_deno]
 report_size = false
