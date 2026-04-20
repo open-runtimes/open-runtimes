@@ -27,6 +27,10 @@ interface Runtime {
 
     // Website metadata
     output: string,
+    // Optional: test-fixture folder under tests/resources/functions/. Defaults
+    // to the runtime key. Lets a variant entry (e.g. astro_bun) reuse an
+    // existing fixture dir (astro) rather than duplicating it.
+    fixture?: string,
 
     // Serverless metadata
     entry: string,
@@ -134,6 +138,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             FORMATTER_PREPARE: runtime.formatter.prepare,
             ENFORCED_RUNTIME: runtime.runtime?.name ?? "",
             ENFORCED_VERSION: runtime.runtime?.version ?? "",
+            FIXTURE: runtime.fixture ?? "",
             REPORT_SIZE: reportSize,
         })
     });

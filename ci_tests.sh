@@ -46,7 +46,11 @@ echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 if ! [ -z "$ENFORCED_RUNTIME" ]; then
-	cp -R "./tests/resources/functions/$RUNTIME"/* ./tests/.runtime
+	# SSR entries may set `fixture = "<framework>"` so variants (astro_bun,
+	# astro_deno, ...) can reuse the base framework's fixture dir rather
+	# than duplicating it. Default to the entry name otherwise.
+	FIXTURE_DIR="${FIXTURE:-$RUNTIME}"
+	cp -R "./tests/resources/functions/$FIXTURE_DIR"/* ./tests/.runtime
 else
 	cp -R "./tests/resources/functions/$RUNTIME_FOLDER/latest"/* ./tests/.runtime
 	if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then

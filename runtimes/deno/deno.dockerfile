@@ -1,13 +1,21 @@
-RUN apk update && apk add bash nss font-noto ca-certificates
+RUN apk update && apk add bash nss font-noto ca-certificates nodejs-current npm python3 make g++ gcc git
+
+# Deno's alpine image bundles a glibc-shim libgcc_s.so.1 at /usr/local/lib/
+# that conflicts with node's musl-linked expectations. Remove it so node loads
+# the system (alpine) libgcc from /usr/lib instead. Deno stays functional —
+# its binary is statically linked and doesn't need the shim at runtime.
+RUN rm -f /usr/local/lib/libgcc_s.so*
+
+RUN npm install pnpm yarn -g
 
 ENV OPEN_RUNTIMES_ENTRYPOINT=mod.ts
 ENV DENO_DIR=/usr/builds/deno-cache
 
 # Pre-populate /usr/local/server/node_modules so the shared SSR preload's
 # `import superjson from "superjson"` resolves under --node-modules-dir=manual
-# at runtime. Deno's alpine image has no npm, so we use deno install against
-# the runtimes/javascript/src/ssr/deno.json import map that's already been
-# overlaid into /usr/local/server/src/ssr/.
+# at runtime. We use deno install against the runtimes/javascript/src/ssr/
+# deno.json import map that's already been overlaid into
+# /usr/local/server/src/ssr/.
 #
 # Only deno 2.x exposes the npm-style `deno install` (with --allow-scripts and
 # --node-modules-dir=auto|manual). On deno 1.x the same subcommand is the
