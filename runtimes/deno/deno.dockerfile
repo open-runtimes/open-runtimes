@@ -6,8 +6,6 @@ RUN apk update && apk add bash nss font-noto ca-certificates nodejs-current npm 
 # its binary is statically linked and doesn't need the shim at runtime.
 RUN rm -f /usr/local/lib/libgcc_s.so*
 
-RUN npm install pnpm yarn -g
-
 ENV OPEN_RUNTIMES_ENTRYPOINT=mod.ts
 ENV DENO_DIR=/usr/builds/deno-cache
 
