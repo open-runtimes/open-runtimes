@@ -462,15 +462,16 @@ tools = "deno --version && node --version && npm --version && npx --version && p
 test = "SSR/TanstackStart.php"
 output = "./dist"
 
-[remix_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "remix"
-commands = { install = "source /usr/local/server/helpers/remix/env.sh && npm install && npm run build && bash /usr/local/server/helpers/remix/bundle.sh", start = "bash helpers/remix/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Remix.php"
-output = "./build"
+# remix_deno is intentionally omitted. Remix's compiled server imports
+# `renderToPipeableStream` from "react-dom/server", but react-dom's
+# package.json "exports" field hardcodes a `"deno"` condition pointing at
+# server.browser.js — which only exports `renderToString`, not the
+# streaming API Remix needs. Deno picks that browser build by default and
+# the server crashes at import time. Working around would require either
+# an upstream react-dom change or an import-map override that pins the
+# exact server.node.js subpath per Remix version; neither is worth the
+# complexity for a single framework × runtime combo. remix_bun and the
+# node variant continue to work.
 
 [angular_deno]
 report_size = false
