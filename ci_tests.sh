@@ -46,11 +46,19 @@ echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 if ! [ -z "$ENFORCED_RUNTIME" ]; then
-	# SSR entries may set `fixture = "<framework>"` so variants (astro_bun,
-	# astro_deno, ...) can reuse the base framework's fixture dir rather
-	# than duplicating it. Default to the entry name otherwise.
-	FIXTURE_DIR="${FIXTURE:-$RUNTIME}"
-	cp -R "./tests/resources/functions/$FIXTURE_DIR"/* ./tests/.runtime
+	# Every SSR entry must declare `fixture = "<framework>"` in
+	# ci/runtimes.toml. The name points at the fixture directory under
+	# tests/resources/functions/ and lets variants (astro_bun, astro_deno, ...)
+	# reuse the base framework's fixture rather than duplicating it.
+	if [ -z "$FIXTURE" ]; then
+		echo "Error: SSR entry '$RUNTIME' is missing the required 'fixture' field in ci/runtimes.toml"
+		exit 1
+	fi
+	if [ ! -d "./tests/resources/functions/$FIXTURE" ]; then
+		echo "Error: fixture directory ./tests/resources/functions/$FIXTURE does not exist (declared by '$RUNTIME')"
+		exit 1
+	fi
+	cp -R "./tests/resources/functions/$FIXTURE"/* ./tests/.runtime
 else
 	cp -R "./tests/resources/functions/$RUNTIME_FOLDER/latest"/* ./tests/.runtime
 	if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then

@@ -27,9 +27,11 @@ interface Runtime {
 
     // Website metadata
     output: string,
-    // Optional: test-fixture folder under tests/resources/functions/. Defaults
-    // to the runtime key. Lets a variant entry (e.g. astro_bun) reuse an
-    // existing fixture dir (astro) rather than duplicating it.
+    // Required for SSR entries (any entry with `runtime = {...}` set): names
+    // the fixture folder under tests/resources/functions/. Lets framework
+    // variants (astro, astro_bun, astro_deno, ...) all point at the same
+    // `astro` fixture rather than duplicating it. ci_tests.sh errors out if
+    // an SSR entry is missing this field.
     fixture?: string,
 
     // Serverless metadata
