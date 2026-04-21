@@ -24,5 +24,6 @@ ENV DENO_DIR=/usr/builds/deno-cache
 RUN if [ -f /usr/local/server/src/ssr/deno.json ] && \
 	deno install --help 2>/dev/null | grep -q -- '--allow-scripts'; then \
 	cp /usr/local/server/src/ssr/deno.json /usr/local/server/deno.json && \
-	cd /usr/local/server && deno install --node-modules-dir=auto --allow-scripts; \
+	cd /usr/local/server && deno install --node-modules-dir=auto --allow-scripts && \
+	rm /usr/local/server/deno.json; \
 	fi

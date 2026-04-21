@@ -3,8 +3,7 @@
 # runtimes/javascript/helpers/<framework>/server.sh.
 #
 # OPR_JAVASCRIPT_RUNNER  — the binary the shared script uses to launch SSR entries
-# BUN_OPTIONS            — ensures user-owned http.createServer flows inherit
-#                          the Open Runtimes contract via src/ssr/injections.ts
+#                          with the preload that installs the Open Runtimes
+#                          contract via src/ssr/injections.ts
 
-export OPR_JAVASCRIPT_RUNNER="bun"
-export BUN_OPTIONS="--preload /usr/local/server/src/ssr/injections.ts"
+export OPR_JAVASCRIPT_RUNNER="bun --preload /usr/local/server/src/ssr/injections.ts"
