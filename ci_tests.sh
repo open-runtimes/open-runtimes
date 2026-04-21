@@ -46,10 +46,6 @@ echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 if ! [ -z "$ENFORCED_RUNTIME" ]; then
-	# Every SSR entry must declare `fixture = "<framework>"` in
-	# ci/runtimes.toml. The name points at the fixture directory under
-	# tests/resources/functions/ and lets variants (astro_bun, astro_deno, ...)
-	# reuse the base framework's fixture rather than duplicating it.
 	if [ -z "$FIXTURE" ]; then
 		echo "Error: SSR entry '$RUNTIME' is missing the required 'fixture' field in ci/runtimes.toml"
 		exit 1

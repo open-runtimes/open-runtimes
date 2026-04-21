@@ -281,9 +281,6 @@ test = "SSR/Analog.php"
 output = "./dist/analog"
 
 # ─── SSR variants: bun runtime ────────────────────────────────────────────────
-# Same test classes as their node-runtime counterparts above, re-targeted at
-# the bun runtime image. Reuse the existing fixture dirs via the `fixture`
-# field rather than duplicating them.
 
 [astro_bun]
 report_size = false

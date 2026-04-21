@@ -27,11 +27,7 @@ interface Runtime {
 
     // Website metadata
     output: string,
-    // Required for SSR entries (any entry with `runtime = {...}` set): names
-    // the fixture folder under tests/resources/functions/. Lets framework
-    // variants (astro, astro_bun, astro_deno, ...) all point at the same
-    // `astro` fixture rather than duplicating it. ci_tests.sh errors out if
-    // an SSR entry is missing this field.
+    // Fixture folder under tests/resources/functions/. Required for SSR entries.
     fixture?: string,
 
     // Serverless metadata
