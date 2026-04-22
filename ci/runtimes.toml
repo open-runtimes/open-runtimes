@@ -173,7 +173,6 @@ test = "XStatic.php"
 [astro]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "astro"
 commands = { install = "source /usr/local/server/helpers/astro/env.sh && npm install && npm run build && bash /usr/local/server/helpers/astro/bundle.sh", start = "bash helpers/astro/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -183,7 +182,6 @@ output = "./dist"
 [sveltekit]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "sveltekit"
 commands = { install = "source /usr/local/server/helpers/sveltekit/env.sh && npm install && npm run build && bash /usr/local/server/helpers/sveltekit/bundle.sh", start = "bash helpers/sveltekit/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -193,7 +191,6 @@ output = "./build"
 [next-js]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "next-js"
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -203,7 +200,6 @@ output = "./.next"
 [next-js-turbopack]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "next-js-turbopack"
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -213,7 +209,6 @@ output = "./.next"
 [nuxt]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "nuxt"
 commands = { install = "source /usr/local/server/helpers/nuxt/env.sh && npm install && npm run build && bash /usr/local/server/helpers/nuxt/bundle.sh", start = "bash helpers/nuxt/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -223,7 +218,6 @@ output = "./.output"
 [tanstack_start_nitro_v2]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "tanstack_start_nitro_v2"
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -233,7 +227,6 @@ output = "./.output"
 [tanstack_start_nitro_v3]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "tanstack_start_nitro_v3"
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -243,7 +236,6 @@ output = "./.output"
 [tanstack_start_native]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "tanstack_start_native"
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -253,7 +245,6 @@ output = "./dist"
 [remix]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "remix"
 commands = { install = "source /usr/local/server/helpers/remix/env.sh && npm install && npm run build && bash /usr/local/server/helpers/remix/bundle.sh", start = "bash helpers/remix/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -263,7 +254,6 @@ output = "./build"
 [angular]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "angular"
 commands = { install = "source /usr/local/server/helpers/angular/env.sh && npm install && npm run build && bash /usr/local/server/helpers/angular/bundle.sh", start = "bash helpers/angular/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
@@ -273,230 +263,26 @@ output = "./dist/angular"
 [analog]
 report_size = false
 runtime = { name = "node", version = "24" }
-fixture = "analog"
 commands = { install = "source /usr/local/server/helpers/analog/env.sh && npm install && npm run build && bash /usr/local/server/helpers/analog/bundle.sh", start = "bash helpers/analog/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/Analog.php"
 output = "./dist/analog"
 
-# ─── SSR variants: bun runtime ────────────────────────────────────────────────
-
-[astro_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "astro"
-commands = { install = "source /usr/local/server/helpers/astro/env.sh && npm install && npm run build && bash /usr/local/server/helpers/astro/bundle.sh", start = "bash helpers/astro/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Astro.php"
-output = "./dist"
-
-[sveltekit_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "sveltekit"
-commands = { install = "source /usr/local/server/helpers/sveltekit/env.sh && npm install && npm run build && bash /usr/local/server/helpers/sveltekit/bundle.sh", start = "bash helpers/sveltekit/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/SvelteKit.php"
-output = "./build"
-
 [next-js_bun]
 report_size = false
 runtime = { name = "bun", version = "1.3" }
-fixture = "next-js"
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
 test = "SSR/NextJS.php"
 output = "./.next"
-
-[next-js-turbopack_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "next-js-turbopack"
-commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/NextJS.php"
-output = "./.next"
-
-[nuxt_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "nuxt"
-commands = { install = "source /usr/local/server/helpers/nuxt/env.sh && npm install && npm run build && bash /usr/local/server/helpers/nuxt/bundle.sh", start = "bash helpers/nuxt/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Nuxt.php"
-output = "./.output"
-
-[tanstack_start_nitro_v2_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "tanstack_start_nitro_v2"
-commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/TanstackStartNitro.php"
-output = "./.output"
-
-[tanstack_start_nitro_v3_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "tanstack_start_nitro_v3"
-commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/TanstackStartNitro.php"
-output = "./.output"
-
-[tanstack_start_native_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "tanstack_start_native"
-commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/TanstackStart.php"
-output = "./dist"
-
-[remix_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "remix"
-commands = { install = "source /usr/local/server/helpers/remix/env.sh && npm install && npm run build && bash /usr/local/server/helpers/remix/bundle.sh", start = "bash helpers/remix/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Remix.php"
-output = "./build"
-
-[angular_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "angular"
-commands = { install = "source /usr/local/server/helpers/angular/env.sh && npm install && npm run build && bash /usr/local/server/helpers/angular/bundle.sh", start = "bash helpers/angular/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Angular.php"
-output = "./dist/angular"
-
-[analog_bun]
-report_size = false
-runtime = { name = "bun", version = "1.3" }
-fixture = "analog"
-commands = { install = "source /usr/local/server/helpers/analog/env.sh && npm install && npm run build && bash /usr/local/server/helpers/analog/bundle.sh", start = "bash helpers/analog/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Analog.php"
-output = "./dist/analog"
-
-# ─── SSR variants: deno runtime ───────────────────────────────────────────────
-
-[astro_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "astro"
-commands = { install = "source /usr/local/server/helpers/astro/env.sh && npm install && npm run build && bash /usr/local/server/helpers/astro/bundle.sh", start = "bash helpers/astro/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Astro.php"
-output = "./dist"
-
-[sveltekit_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "sveltekit"
-commands = { install = "source /usr/local/server/helpers/sveltekit/env.sh && npm install && npm run build && bash /usr/local/server/helpers/sveltekit/bundle.sh", start = "bash helpers/sveltekit/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/SvelteKit.php"
-output = "./build"
 
 [next-js_deno]
 report_size = false
 runtime = { name = "deno", version = "2.6" }
-fixture = "next-js"
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
 test = "SSR/NextJS.php"
 output = "./.next"
-
-# next-js-turbopack under deno is intentionally omitted. Turbopack emits a
-# CJS-style `_document.js` without `type: module` that deno's node-compat
-# loader treats as ESM, blowing up with "ReferenceError: require is not
-# defined" at file scope. The non-turbopack next-js_deno variant works fine
-# and is sufficient coverage for deno × Next.js.
-
-[nuxt_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "nuxt"
-commands = { install = "source /usr/local/server/helpers/nuxt/env.sh && npm install && npm run build && bash /usr/local/server/helpers/nuxt/bundle.sh", start = "bash helpers/nuxt/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Nuxt.php"
-output = "./.output"
-
-[tanstack_start_nitro_v2_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "tanstack_start_nitro_v2"
-commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/TanstackStartNitro.php"
-output = "./.output"
-
-[tanstack_start_nitro_v3_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "tanstack_start_nitro_v3"
-commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/TanstackStartNitro.php"
-output = "./.output"
-
-[tanstack_start_native_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "tanstack_start_native"
-commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/TanstackStart.php"
-output = "./dist"
-
-# remix_deno is intentionally omitted. Remix's compiled server imports
-# `renderToPipeableStream` from "react-dom/server", but react-dom's
-# package.json "exports" field hardcodes a `"deno"` condition pointing at
-# server.browser.js — which only exports `renderToString`, not the
-# streaming API Remix needs. Deno picks that browser build by default and
-# the server crashes at import time. Working around would require either
-# an upstream react-dom change or an import-map override that pins the
-# exact server.node.js subpath per Remix version; neither is worth the
-# complexity for a single framework × runtime combo. remix_bun and the
-# node variant continue to work.
-
-[angular_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "angular"
-commands = { install = "source /usr/local/server/helpers/angular/env.sh && npm install && npm run build && bash /usr/local/server/helpers/angular/bundle.sh", start = "bash helpers/angular/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Angular.php"
-output = "./dist/angular"
-
-[analog_deno]
-report_size = false
-runtime = { name = "deno", version = "2.6" }
-fixture = "analog"
-commands = { install = "source /usr/local/server/helpers/analog/env.sh && npm install && npm run build && bash /usr/local/server/helpers/analog/bundle.sh", start = "bash helpers/analog/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version"
-test = "SSR/Analog.php"
-output = "./dist/analog"

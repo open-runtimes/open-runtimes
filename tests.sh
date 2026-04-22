@@ -49,7 +49,5 @@ ENFORCED_RUNTIME=$(yq ".$RUNTIME.runtime.name" ci/runtimes.toml | sed 's/null//'
 export ENFORCED_RUNTIME
 ENFORCED_VERSION=$(yq ".$RUNTIME.runtime.version" ci/runtimes.toml | sed 's/null//')
 export ENFORCED_VERSION
-FIXTURE=$(yq ".$RUNTIME.fixture" ci/runtimes.toml | sed 's/null//')
-export FIXTURE
 
 bash ci_tests.sh

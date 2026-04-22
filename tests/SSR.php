@@ -78,19 +78,6 @@ class SSR extends CSR
 
     public function testServerLogsConcurrency(): void
     {
-        // Angular's Zone.js patches setTimeout and captures the ambient
-        // AsyncLocalStorage snapshot when zone is first initialised. Under
-        // deno's node-compat that snapshot sticks to the first request's
-        // context and is replayed for every subsequent concurrent request's
-        // timer callbacks, so all console.log output lands in the first
-        // request's log file. Node and bun don't exhibit this (their ALS
-        // propagation interacts differently with Zone), so the test still
-        // runs there. Deno × Angular is a known Zone.js / ALS compat gap,
-        // tracked as a follow-up.
-        if ($this->runtimeName === 'angular_deno') {
-            self::markTestSkipped('Zone.js + AsyncLocalStorage context propagation is broken on deno; see PR description.');
-        }
-
         $ensureRequestLogs = function() {
             $start = \microtime(true);
             $response = Client::execute(url: '/concurrency', method: 'GET');

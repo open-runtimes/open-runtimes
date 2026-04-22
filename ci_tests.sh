@@ -46,15 +46,15 @@ echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 if ! [ -z "$ENFORCED_RUNTIME" ]; then
-	if [ -z "$FIXTURE" ]; then
-		echo "Error: SSR entry '$RUNTIME' is missing the required 'fixture' field in ci/runtimes.toml"
+	RESOURCE_RUNTIME="$RUNTIME"
+	if [ "$RUNTIME" = "next-js_bun" ] || [ "$RUNTIME" = "next-js_deno" ]; then
+		RESOURCE_RUNTIME="next-js"
+	fi
+	if [ ! -d "./tests/resources/functions/$RESOURCE_RUNTIME" ]; then
+		echo "Error: test resource directory ./tests/resources/functions/$RESOURCE_RUNTIME does not exist"
 		exit 1
 	fi
-	if [ ! -d "./tests/resources/functions/$FIXTURE" ]; then
-		echo "Error: fixture directory ./tests/resources/functions/$FIXTURE does not exist (declared by '$RUNTIME')"
-		exit 1
-	fi
-	cp -R "./tests/resources/functions/$FIXTURE"/* ./tests/.runtime
+	cp -R "./tests/resources/functions/$RESOURCE_RUNTIME"/* ./tests/.runtime
 else
 	cp -R "./tests/resources/functions/$RUNTIME_FOLDER/latest"/* ./tests/.runtime
 	if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then

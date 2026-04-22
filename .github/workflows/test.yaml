@@ -110,7 +110,6 @@ jobs:
           OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}
           ENFORCED_RUNTIME: ${{ matrix.ENFORCED_RUNTIME }}
           ENFORCED_VERSION: ${{ matrix.ENFORCED_VERSION }}
-          FIXTURE: ${{ matrix.FIXTURE }}
       - name: Report image size
         if: always() && matrix.REPORT_SIZE
         uses: actions/github-script@v7
