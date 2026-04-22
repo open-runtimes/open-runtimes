@@ -208,7 +208,8 @@ class SSR extends CSR
         // runtime. The bun and deno images ship the repo-root no-op prepare-
         // packing.sh, so the cleanup phase never runs and these assertions
         // don't apply there.
-        if (\getenv('ENFORCED_RUNTIME') !== 'node') {
+        $enforcedRuntime = \getenv('ENFORCED_RUNTIME');
+        if ($enforcedRuntime !== false && $enforcedRuntime !== '' && $enforcedRuntime !== 'node') {
             self::markTestSkipped('modclean is a node-only cleanup step.');
         }
 
@@ -226,7 +227,8 @@ class SSR extends CSR
     public function testNft(): void
     {
         // @vercel/nft pruning is node-only (same story as modclean above).
-        if (\getenv('ENFORCED_RUNTIME') !== 'node') {
+        $enforcedRuntime = \getenv('ENFORCED_RUNTIME');
+        if ($enforcedRuntime !== false && $enforcedRuntime !== '' && $enforcedRuntime !== 'node') {
             self::markTestSkipped('@vercel/nft pruning is a node-only cleanup step.');
         }
 

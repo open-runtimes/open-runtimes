@@ -15,7 +15,8 @@ class NextJS extends SSR
     // server-wrapper and next.config imports, so we fall back to modclean.
     public function testNft(): void
     {
-        if (\getenv('ENFORCED_RUNTIME') !== 'node') {
+        $enforcedRuntime = \getenv('ENFORCED_RUNTIME');
+        if ($enforcedRuntime !== false && $enforcedRuntime !== '' && $enforcedRuntime !== 'node') {
             self::markTestSkipped('@vercel/nft pruning is a node-only cleanup step.');
         }
 
