@@ -45,9 +45,5 @@ OUTPUT_DIRECTORY=$(yq ".$RUNTIME.output" ci/runtimes.toml | sed 's/null//')
 export OUTPUT_DIRECTORY
 TOOLS=$(yq ".$RUNTIME.tools" ci/runtimes.toml | sed 's/null//')
 export TOOLS
-ENFORCED_RUNTIME=$(yq ".$RUNTIME.runtime.name" ci/runtimes.toml | sed 's/null//')
-export ENFORCED_RUNTIME
-ENFORCED_VERSION=$(yq ".$RUNTIME.runtime.version" ci/runtimes.toml | sed 's/null//')
-export ENFORCED_VERSION
 
 bash ci_tests.sh

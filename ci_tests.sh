@@ -45,15 +45,14 @@ fi
 echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
-if ! [ -z "$ENFORCED_RUNTIME" ]; then
+RESOURCE_RUNTIME=""
+if [ -d "./tests/resources/functions/$RUNTIME" ]; then
 	RESOURCE_RUNTIME="$RUNTIME"
-	if [ "$RUNTIME" = "next-js_bun" ] || [ "$RUNTIME" = "next-js_deno" ]; then
-		RESOURCE_RUNTIME="next-js"
-	fi
-	if [ ! -d "./tests/resources/functions/$RESOURCE_RUNTIME" ]; then
-		echo "Error: test resource directory ./tests/resources/functions/$RESOURCE_RUNTIME does not exist"
-		exit 1
-	fi
+elif [[ "$RUNTIME" == *_* ]] && [ -d "./tests/resources/functions/${RUNTIME%%_*}" ]; then
+	RESOURCE_RUNTIME="${RUNTIME%%_*}"
+fi
+
+if [ -n "$RESOURCE_RUNTIME" ]; then
 	cp -R "./tests/resources/functions/$RESOURCE_RUNTIME"/* ./tests/.runtime
 else
 	cp -R "./tests/resources/functions/$RUNTIME_FOLDER/latest"/* ./tests/.runtime
@@ -106,10 +105,7 @@ if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
 fi
 
 # Build with all cleanup disabled (baseline for modclean + NFT comparison).
-# Only relevant for node — bun and deno ship the repo-root no-op
-# prepare-packing.sh so there's nothing to compare against, and the
-# companion testModclean/testNft cases markTestSkipped there.
-if [[ "$TEST_CLASS" == SSR/* ]] && [[ -z "$ENFORCED_RUNTIME" || "$ENFORCED_RUNTIME" == "node" ]]; then
+if [[ "$TEST_CLASS" == SSR/* ]]; then
 	echo "Building cleanup-disabled baseline..."
 	mkdir -p modclean-disabled-build/src
 	tar --exclude='./modclean-disabled-build' --exclude='./nft-build' -cf - . | tar -xf - -C modclean-disabled-build/src
@@ -257,7 +253,6 @@ docker run \
 	--rm \
 	-e RUNTIME_NAME="$RUNTIME" \
 	-e RUNTIME_VERSION="$VERSION" \
-	-e ENFORCED_RUNTIME="$ENFORCED_RUNTIME" \
 	-e OPEN_RUNTIMES_SECRET="test-secret-key" \
 	-e OPEN_RUNTIMES_ENTRYPOINT="$ENTRYPOINT" \
 	-v "$PWD":/app \
