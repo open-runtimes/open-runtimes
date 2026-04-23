@@ -47,9 +47,9 @@ mkdir -p ./tests/.runtime
 
 RESOURCE_RUNTIME=""
 case "$RUNTIME" in
-	next-js_bun | next-js_deno)
-		RESOURCE_RUNTIME="next-js"
-		;;
+next-js_bun | next-js_deno)
+	RESOURCE_RUNTIME="next-js"
+	;;
 esac
 
 if [ -n "$RESOURCE_RUNTIME" ]; then
