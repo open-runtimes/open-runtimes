@@ -46,11 +46,13 @@ echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 RESOURCE_RUNTIME=""
-case "$RUNTIME" in
-next-js_bun | next-js_deno)
-	RESOURCE_RUNTIME="next-js"
-	;;
-esac
+if [ -n "$RUNTIME_OVERRIDE" ]; then
+	if [ -d "./tests/resources/functions/$RUNTIME" ]; then
+		RESOURCE_RUNTIME="$RUNTIME"
+	elif [[ "$RUNTIME" == *_* ]] && [ -d "./tests/resources/functions/${RUNTIME%%_*}" ]; then
+		RESOURCE_RUNTIME="${RUNTIME%%_*}"
+	fi
+fi
 
 if [ -n "$RESOURCE_RUNTIME" ]; then
 	cp -R "./tests/resources/functions/$RESOURCE_RUNTIME"/* ./tests/.runtime
