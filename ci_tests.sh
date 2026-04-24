@@ -46,7 +46,7 @@ echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
 RESOURCE_RUNTIME=""
-if [ -n "$RUNTIME_OVERRIDE" ]; then
+if [ -n "$ENFORCED_RUNTIME" ]; then
 	if [ -d "./tests/resources/functions/$RUNTIME" ]; then
 		RESOURCE_RUNTIME="$RUNTIME"
 	elif [[ "$RUNTIME" == *_* ]] && [ -d "./tests/resources/functions/${RUNTIME%%_*}" ]; then
