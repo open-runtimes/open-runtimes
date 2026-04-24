@@ -107,7 +107,16 @@ if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
 fi
 
 # Build with all cleanup disabled (baseline for modclean + NFT comparison).
+TEST_CLEANUP_VARIANTS=false
 if [[ "$TEST_CLASS" == SSR/* ]]; then
+	case "$RUNTIME_FOLDER" in
+	node | bun | deno)
+		TEST_CLEANUP_VARIANTS=true
+		;;
+	esac
+fi
+
+if [[ "$TEST_CLEANUP_VARIANTS" == "true" ]]; then
 	echo "Building cleanup-disabled baseline..."
 	mkdir -p modclean-disabled-build/src
 	tar --exclude='./modclean-disabled-build' --exclude='./nft-build' -cf - . | tar -xf - -C modclean-disabled-build/src

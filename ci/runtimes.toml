@@ -32,7 +32,7 @@ entry_no_export = "no-export.ts"
 versions = ["2.6", "2.5", "2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt ." }
-tools = "deno --version && node --version && npm --version && npx --version && modclean --version"
+tools = "deno --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && modclean --version"
 test = "Serverless/Deno.php"
 shared = "javascript"
 
@@ -283,6 +283,6 @@ report_size = false
 runtime = { name = "deno", version = "2.6" }
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
-tools = "deno --version && node --version && npm --version && npx --version && python3 --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
+tools = "deno --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/NextJS.php"
 output = "./.next"

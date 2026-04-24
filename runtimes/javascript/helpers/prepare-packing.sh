@@ -20,19 +20,13 @@ cd "$OUTPUT_DIR" || exit
 # ─── NFT (opt-in) ────────────────────────────────────────────────────────────
 if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 
-	# Next.js — skip NFT; standalone already tree-shakes, non-standalone .nft.json
-	# traces miss server-wrapper and next.config imports. Falls back to modclean.
-	if [ -d "./.next" ]; then
-		return 0 2>/dev/null || exit 0
-	fi
-
 	SIZE_BEFORE=$(du -sm "$OUTPUT_DIR/node_modules" 2>/dev/null | cut -f1)
 
 	NEEDED_FILES=()
 
 	if [ -d "./.next" ]; then
-		# Next.js non-standalone — use native .nft.json trace files instead of
-		# re-tracing with NFT (webpack-compiled externals use patterns NFT can't follow)
+		# Next.js emits native .nft.json traces. Use them instead of re-tracing
+		# webpack-compiled externals that @vercel/nft cannot reliably follow.
 		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Collecting Next.js traces (node_modules: ${SIZE_BEFORE}MB) \e[0m"
 
 		# Parse .nft.json files for node_modules dependencies
@@ -47,9 +41,9 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 			return 0 2>/dev/null || exit 0
 		fi
 
-		# Keep the entire next package — server-next-js.mjs imports "next" directly
-		# which needs next/dist/server/, next/dist/shared/, etc. beyond what
-		# individual page .nft.json traces reference.
+		# Keep the entire next package. The wrapper imports "next" directly and
+		# needs next/dist/server, next/dist/shared, and related runtime files
+		# beyond what individual page traces reference.
 		if [ -d "$OUTPUT_DIR/node_modules/next" ]; then
 			while IFS= read -r -d '' f; do
 				NEEDED_FILES+=("$f")
