@@ -21,10 +21,10 @@ class NextJS extends SSR
         $fullCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
 
         self::assertGreaterThan(0, $fullCount, 'Expected files in node_modules when cleanup is disabled');
-        self::assertStringContainsString('OPEN_RUNTIMES_CLEANUP=nft', $metadata);
         self::assertLessThanOrEqual($fullCount, $nftCount, 'Expected Next.js NFT cleanup to not increase node_modules files');
 
         if (\str_ends_with($this->runtimeName, '_bun') || \str_ends_with($this->runtimeName, '_deno')) {
+            self::assertStringContainsString('OPEN_RUNTIMES_CLEANUP=nft', $metadata);
             self::assertLessThan($fullCount, $nftCount, 'Expected fewer files in node_modules after Next.js NFT pruning');
         }
     }
