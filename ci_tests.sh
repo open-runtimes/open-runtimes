@@ -12,7 +12,7 @@ bash ci-runtime-prepare.sh
 bash ci-runtime-build.sh
 
 LATEST_VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
-if [ "$VERSION" = "$LATEST_VERSION" ]; then
+if [ -z "$ENFORCED_RUNTIME" ] && [ "$VERSION" = "$LATEST_VERSION" ]; then
 	echo "Running formatter ..."
 
 	cd "./runtimes/$RUNTIME_FOLDER"
@@ -39,7 +39,7 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
 		cd ../../../../
 	fi
 else
-	echo "Skipping formatter. Formatter runs only in: $RUNTIME-$LATEST_VERSION"
+	echo "Skipping formatter. Formatter runs only in: $RUNTIME-$LATEST_VERSION, and not for enforced-runtime aliases"
 fi
 
 echo "Running tests ..."
