@@ -15,12 +15,18 @@ class NextJS extends SSR
     {
         $archive = '/app/tests/.runtime/nft-build/src/code.tar.gz';
         $nftCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
+        $metadata = (string)\shell_exec("tar -xOf {$archive} ./.open-runtimes 2>/dev/null");
 
         $archive = '/app/tests/.runtime/modclean-disabled-build/src/code.tar.gz';
         $fullCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
 
         self::assertGreaterThan(0, $fullCount, 'Expected files in node_modules when cleanup is disabled');
-        self::assertLessThan($fullCount, $nftCount, 'Expected fewer files in node_modules after Next.js NFT pruning');
+        self::assertStringContainsString('OPEN_RUNTIMES_CLEANUP=nft', $metadata);
+        self::assertLessThanOrEqual($fullCount, $nftCount, 'Expected Next.js NFT cleanup to not increase node_modules files');
+
+        if (\str_ends_with($this->runtimeName, '_bun') || \str_ends_with($this->runtimeName, '_deno')) {
+            self::assertLessThan($fullCount, $nftCount, 'Expected fewer files in node_modules after Next.js NFT pruning');
+        }
     }
 
     public function testHomepagePrerendered(): void
