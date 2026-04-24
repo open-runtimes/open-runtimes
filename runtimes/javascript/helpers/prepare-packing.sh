@@ -25,64 +25,14 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 	NEEDED_FILES=()
 
 	if [ -d "./.next" ]; then
-		# Next.js emits native .nft.json traces. Use them instead of re-tracing
-		# webpack-compiled externals that @vercel/nft cannot reliably follow.
-		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Collecting Next.js traces (node_modules: ${SIZE_BEFORE}MB) \e[0m"
-
-		# Parse .nft.json files for node_modules dependencies
-		while IFS= read -r -d '' dep; do
-			NEEDED_FILES+=("$dep")
-		done < <(find "$OUTPUT_DIR/.next" -name '*.nft.json' -print0 | node /usr/local/server/src/nft-nextjs.mjs "$OUTPUT_DIR")
-
-		# Some Next.js outputs (including Turbopack) may not include usable native
-		# traces. Fall back to tracing the runtime wrapper and declared production
-		# dependencies so NFT cleanup still has a safe keep-list.
-		if [ "${#NEEDED_FILES[@]}" -eq 0 ]; then
-			echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m No dependencies found in .nft.json traces, falling back to package tracing. \e[0m"
-
-			{
-				grep -o 'from "[^"]*"' /usr/local/server/src/server-next-js.mjs | cut -d'"' -f2 | while read -r dep; do
-					[[ "$dep" == ./* || "$dep" == ../* || "$dep" == /* ]] && continue
-					echo "import \"$dep\";"
-				done
-
-				if [ -f "$OUTPUT_DIR/package.json" ]; then
-					node -e "
-						const pkg = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf-8'));
-						for (const dep of Object.keys(pkg.dependencies || {})) {
-							process.stdout.write('import \"' + dep + '\";\n');
-						}
-					" "$OUTPUT_DIR/package.json"
-				fi
-			} >./.nft-entry.mjs
-
-			NFT_EXIT=0
-			NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft.mjs "./.nft-entry.mjs" "$OUTPUT_DIR" || NFT_EXIT=$?
-
-			NFT_MANIFEST="$OUTPUT_DIR/.nft-files"
-
-			if [ "$NFT_EXIT" -eq 0 ] && [ -f "$NFT_MANIFEST" ]; then
-				mapfile -d '' ALL_FILES <"$NFT_MANIFEST"
-				for file in "${ALL_FILES[@]}"; do
-					if [[ "$file" == node_modules/* ]]; then
-						NEEDED_FILES+=("$file")
-					fi
-				done
-			else
-				echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m Next.js fallback NFT failed (exit $NFT_EXIT), skipping pruning. \e[0m"
-				rm -f "$OUTPUT_DIR/.nft-entry.mjs"
-				return 0 2>/dev/null || exit 0
-			fi
+		# Next.js NFT is intentionally skipped: native .nft.json traces miss
+		# server-wrapper and next.config imports. Use default modclean instead.
+		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m Next.js NFT cleanup skipped, falling back to modclean. \e[0m"
+		if [[ "${OPEN_RUNTIMES_MODCLEAN,,}" != "disabled" ]]; then
+			modclean --patterns default:safe --no-progress --run
+			export OPEN_RUNTIMES_CLEANUP="modclean"
 		fi
-
-		# Keep the entire next package. The wrapper imports "next" directly and
-		# needs next/dist/server, next/dist/shared, and related runtime files
-		# beyond what individual page traces reference.
-		if [ -d "$OUTPUT_DIR/node_modules/next" ]; then
-			while IFS= read -r -d '' f; do
-				NEEDED_FILES+=("$f")
-			done < <(cd "$OUTPUT_DIR" && find node_modules/next -type f -print0)
-		fi
+		return 0 2>/dev/null || exit 0
 	else
 		# Generic frameworks — detect entrypoint and run NFT
 		ENTRYPOINT=""
