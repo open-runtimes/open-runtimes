@@ -45,17 +45,12 @@ fi
 echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
-RESOURCE_RUNTIME=""
-if [ -n "$ENFORCED_RUNTIME" ]; then
-	if [ -d "./tests/resources/functions/$RUNTIME" ]; then
-		RESOURCE_RUNTIME="$RUNTIME"
-	elif [[ "$RUNTIME" == *_* ]] && [ -d "./tests/resources/functions/${RUNTIME%%_*}" ]; then
-		RESOURCE_RUNTIME="${RUNTIME%%_*}"
-	fi
-fi
+TEST_RESOURCE_DIR=$(yq ".$RUNTIME.test_resource_dir" ci/runtimes.toml | sed 's/null//')
 
-if [ -n "$RESOURCE_RUNTIME" ]; then
-	cp -R "./tests/resources/functions/$RESOURCE_RUNTIME"/* ./tests/.runtime
+if [ -n "$TEST_RESOURCE_DIR" ]; then
+	cp -R "./tests/resources/functions/$TEST_RESOURCE_DIR"/* ./tests/.runtime
+elif ! [ -z "$ENFORCED_RUNTIME" ]; then
+	cp -R "./tests/resources/functions/$RUNTIME"/* ./tests/.runtime
 else
 	cp -R "./tests/resources/functions/$RUNTIME_FOLDER/latest"/* ./tests/.runtime
 	if [ -d "./tests/resources/functions/$RUNTIME_FOLDER/$VERSION_FOLDER/" ]; then
