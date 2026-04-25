@@ -32,7 +32,7 @@ class Node extends Serverless
              self::assertTrue(true);
              return;
          }
-         
+
          $response = Client::execute(body: '', headers: ['x-action' => 'headlessBrowser'], timeout: 15);
          self::assertEquals(200, $response['code']);
          self::assertEquals('image/png; charset=utf-8', $response['headers']['content-type']);

@@ -162,7 +162,7 @@ context.res.json(json!({"data": "value"}), Some(201), Some(headers))
 
 ### Logging
 
-> **Important:** Always use `context.log()` and `context.error()` for logging. 
+> **Important:** Always use `context.log()` and `context.error()` for logging.
 > Native Rust logging methods like `println!()`, `eprintln!()`, `print!()`, or `dbg!()` are **not captured** by the runtime and will not appear in execution logs.
 
 ```rust
