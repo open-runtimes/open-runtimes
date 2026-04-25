@@ -172,50 +172,82 @@ suspend fun action(
 
     logger.overrideNativeLogs()
 
-    var output: RuntimeOutput?
+    var output: RuntimeOutput? = null
+    var classMethod: kotlin.reflect.KFunction<*>? = null
+    var instance: Any? = null
 
+    val entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT")
+
+    // Guard: Try to load module
     try {
-        var entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT")
-        entrypoint =
+        val className =
             entrypoint
                 .substring(0, entrypoint.length - 3)
                 .replace('/', '.')
 
-        val classToLoad = Class.forName("io.openruntimes.kotlin.$entrypoint").kotlin
-        val classMethod = classToLoad.memberFunctions.find { it.name == "main" }!!
-        val instance = classToLoad.createInstance()
+        val classToLoad = Class.forName("io.openruntimes.kotlin.$className").kotlin
+        classMethod = classToLoad.memberFunctions.find { it.name == "main" }
+        if (classMethod == null) {
+            throw NoSuchMethodException("Function signature invalid. Did you forget to export a 'main' function?")
+        }
+        instance = classToLoad.createInstance()
+    } catch (e: ClassNotFoundException) {
+        context.error("Class not found: ${e.message}")
+        logger.revertNativeLogs()
+        output = context.res.text("", 503, mutableMapOf())
+    } catch (e: NoSuchMethodException) {
+        context.error(e.message ?: "Function signature invalid. Did you forget to export a 'main' function?")
+        logger.revertNativeLogs()
+        output = context.res.text("", 503, mutableMapOf())
+    } catch (e: InstantiationException) {
+        context.error("Failed to create instance: ${e.message}")
+        logger.revertNativeLogs()
+        output = context.res.text("", 503, mutableMapOf())
+    } catch (e: IllegalAccessException) {
+        context.error("Access denied: ${e.message}")
+        logger.revertNativeLogs()
+        output = context.res.text("", 503, mutableMapOf())
+    } catch (e: Exception) {
+        context.error("Failed to load module: ${e.message}")
+        logger.revertNativeLogs()
+        output = context.res.text("", 503, mutableMapOf())
+    }
 
-        if (safeTimeout > 0) {
-            output =
-                withTimeoutOrNull(safeTimeout.seconds) {
+    // Execute user function
+    if (output == null && classMethod != null && instance != null) {
+        try {
+            if (safeTimeout > 0) {
+                output =
+                    withTimeoutOrNull(safeTimeout.seconds) {
+                        if (classMethod.isSuspend) {
+                            classMethod.callSuspend(instance, context) as RuntimeOutput
+                        } else {
+                            classMethod.call(instance, context) as RuntimeOutput
+                        }
+                    }
+
+                if (output == null) {
+                    context.error("Execution timed out.")
+                    output = context.res.text("", 500)
+                }
+            } else {
+                output =
                     if (classMethod.isSuspend) {
                         classMethod.callSuspend(instance, context) as RuntimeOutput
                     } else {
                         classMethod.call(instance, context) as RuntimeOutput
                     }
-                }
-
-            if (output == null) {
-                context.error("Execution timed out.")
-                output = context.res.text("", 500)
             }
-        } else {
-            output =
-                if (classMethod.isSuspend) {
-                    classMethod.callSuspend(instance, context) as RuntimeOutput
-                } else {
-                    classMethod.call(instance, context) as RuntimeOutput
-                }
-        }
-    } catch (e: Exception) {
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        e.printStackTrace(pw)
+        } catch (e: Exception) {
+            val sw = StringWriter()
+            val pw = PrintWriter(sw)
+            e.printStackTrace(pw)
 
-        context.error(sw.toString())
-        output = context.res.text("", 500, mutableMapOf())
-    } finally {
-        logger.revertNativeLogs()
+            context.error(sw.toString())
+            output = context.res.text("", 500, mutableMapOf())
+        } finally {
+            logger.revertNativeLogs()
+        }
     }
 
     if (output == null) {

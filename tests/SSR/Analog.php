@@ -27,7 +27,7 @@ class Analog extends SSR
         self::assertStringContainsString("<router-outlet></router-outlet>", $response['body']); // Added
         self::assertStringNotContainsString("No exceptions", $response['body']);
         self::assertStringNotContainsString('Code exception occurred', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
-        self::assertStringNotContainsString('ERROR Error: NG04002: \'exception\'', Client::getLogs($response['headers']['x-open-runtimes-log-id'])); // Added
-        self::assertStringContainsString('ERROR Error: NG04002: \'exception\'', Client::getErrors($response['headers']['x-open-runtimes-log-id'])); // Changed
+        self::assertStringNotContainsString('Error: NG04002: \'exception\'', Client::getLogs($response['headers']['x-open-runtimes-log-id'])); // Added
+        self::assertStringContainsString('Error: NG04002: \'exception\'', Client::getErrors($response['headers']['x-open-runtimes-log-id'])); // Changed
     }
 }

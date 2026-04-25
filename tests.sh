@@ -27,6 +27,8 @@ fi
 
 ENTRYPOINT=$(yq ".$RUNTIME.entry" ci/runtimes.toml | sed 's/null//')
 export ENTRYPOINT
+ENTRYPOINT_NO_EXPORT=$(yq ".$RUNTIME.entry_no_export" ci/runtimes.toml | sed 's/null//')
+export ENTRYPOINT_NO_EXPORT
 INSTALL_COMMAND=$(yq ".$RUNTIME.commands.install" ci/runtimes.toml | sed 's/null//')
 export INSTALL_COMMAND
 START_COMMAND=$(yq ".$RUNTIME.commands.start" ci/runtimes.toml | sed 's/null//')

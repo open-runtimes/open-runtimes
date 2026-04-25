@@ -27,7 +27,7 @@ func execute(req: Request) async throws -> Response {
     }
 
     if req.uri.path == "/__opr/timings" {
-        let timings = try String(contentsOfFile: "/mnt/telemetry/timings.txt")
+        let timings = try String(contentsOfFile: "/mnt/telemetry/timings.txt", encoding: .utf8)
         var outputHeaders = HTTPHeaders()
         outputHeaders.add(name: "content-type", value: "text/plain; charset=utf-8")
         return Response(
@@ -79,7 +79,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
             return Response(
                 status: .internalServerError,
                 body: .init(
-                    string: "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.")
+                    string: "Header \"x-open-runtimes-timeout\" must be an integer greater than 0."
+                )
             )
         }
 
@@ -94,7 +95,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
                 return Response(
                     status: .internalServerError,
                     body: .init(
-                        string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
+                        string: "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."
+                    )
                 )
             }
         }

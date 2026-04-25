@@ -10,5 +10,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {
+    "superjson": "^2.2.6"
+  }
 }

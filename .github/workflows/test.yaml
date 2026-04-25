@@ -72,6 +72,9 @@ jobs:
     needs: prepare
     name: ${{ matrix.ID }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
@@ -107,3 +110,41 @@ jobs:
           OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}
           ENFORCED_RUNTIME: ${{ matrix.ENFORCED_RUNTIME }}
           ENFORCED_VERSION: ${{ matrix.ENFORCED_VERSION }}
+      - name: Report image size
+        if: always() && matrix.REPORT_SIZE
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { exitCode, stdout } = await exec.getExecOutput('docker', ['image', 'inspect', 'open-runtimes/test-runtime', '--format={{.Size}}'], { silent: true, ignoreReturnCode: true });
+            const sizeBytes = exitCode === 0 ? parseInt(stdout.trim()) : 0;
+            if (!sizeBytes) return;
+
+            const marker = '<!-- image-size-check ';
+            const id = '${{ matrix.ID }}';
+            const size = (sizeBytes / 1048576).toFixed(2) + ' MB';
+            const pr = context.payload.pull_request.number;
+
+            for (let attempt = 0; attempt < 5; attempt++) {
+              if (attempt > 0)
+                await new Promise(r => setTimeout(r, Math.floor(Math.random() * 5000) + 2000));
+
+              const { data: comments } = await github.rest.issues.listComments({ ...context.repo, issue_number: pr });
+              const comment = comments.find(c => c.body?.includes(marker));
+
+              const b64 = comment?.body?.match(/<!-- image-size-check (.+?) -->/)?.[1];
+              const state = b64 ? JSON.parse(Buffer.from(b64, 'base64').toString()) : {};
+              state[id] = size;
+
+              const encoded = Buffer.from(JSON.stringify(state)).toString('base64');
+              let body = `<!-- image-size-check ${encoded} -->\n## Docker Image Sizes\n\n| Runtime | Size |\n|---------|------|\n`;
+              for (const [n, s] of Object.entries(state).sort((a, b) => a[0].localeCompare(b[0]))) body += `| \`${n}\` | ${s} |\n`;
+
+              if (comment)
+                await github.rest.issues.updateComment({ ...context.repo, comment_id: comment.id, body });
+              else
+                await github.rest.issues.createComment({ ...context.repo, issue_number: pr, body });
+
+              await new Promise(r => setTimeout(r, 1000));
+              const { data: verify } = await github.rest.issues.listComments({ ...context.repo, issue_number: pr });
+              if (verify.find(c => c.body?.includes(marker))?.body?.includes(id)) break;
+            }

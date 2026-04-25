@@ -23,12 +23,14 @@ interface Runtime {
     tools: string,
     commands: RuntimeCommands,
     formatter: RuntimeFormatter,
+    report_size?: boolean,
 
     // Website metadata
     output: string,
 
     // Serverless metadata
     entry: string,
+    entry_no_export: string,
 }
 
 let perRuntime = true;
@@ -113,6 +115,9 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
         }
 
         const id = `${key}${version ? `-${version}` : ''}`;
+        const reportSize = (key === 'node' && version.includes('mjs'))
+            ? false
+            : (runtime.report_size !== false);
 
         object.push({
             ID: id,
@@ -120,6 +125,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             VERSION: cleanVersion(version),
             TEST_CLASS: runtime.test,
             ENTRYPOINT: runtime.entry,
+            ENTRYPOINT_NO_EXPORT: runtime.entry_no_export,
             OUTPUT_DIRECTORY: runtime.output,
             INSTALL_COMMAND: runtime.commands.install,
             START_COMMAND: runtime.commands.start,
@@ -128,6 +134,7 @@ function generateRuntimeObject(runtime: Runtime, key: string) {
             FORMATTER_PREPARE: runtime.formatter.prepare,
             ENFORCED_RUNTIME: runtime.runtime?.name ?? "",
             ENFORCED_VERSION: runtime.runtime?.version ?? "",
+            REPORT_SIZE: reportSize,
         })
     });
 
