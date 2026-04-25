@@ -169,12 +169,7 @@ async fn action(
         let key_lower = key.as_str().to_lowercase();
 
         if !key_lower.starts_with("x-open-runtimes-") {
-            let mut value_str = value.to_str().unwrap_or("").to_string();
-
-            if key_lower == "content-type" {
-                value_str = value_str.to_lowercase();
-            }
-
+            let value_str = value.to_str().unwrap_or("").to_string();
             headers.insert(key_lower, value_str);
         }
     }
@@ -235,11 +230,14 @@ async fn action(
         for pair in query_string.split('&') {
             if let Some((key, value)) = pair.split_once('=') {
                 query.insert(
-                    key.to_string(),
+                    urlencoding::decode(key).unwrap_or_default().to_string(),
                     urlencoding::decode(value).unwrap_or_default().to_string(),
                 );
             } else {
-                query.insert(pair.to_string(), String::new());
+                query.insert(
+                    urlencoding::decode(pair).unwrap_or_default().to_string(),
+                    String::new(),
+                );
             }
         }
     }
