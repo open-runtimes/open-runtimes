@@ -16,10 +16,14 @@ pub fn main(context: Context) -> Response {
     match action {
         "plaintextResponse" => context.res.text("Hello World 👋", None, None),
 
-        "jsonResponse" => context.res.json(json!({
-            "json": true,
-            "message": "Developers are awesome."
-        }), None, None),
+        "jsonResponse" => context.res.json(
+            json!({
+                "json": true,
+                "message": "Developers are awesome."
+            }),
+            None,
+            None,
+        ),
 
         "customCharsetResponse" => {
             let mut headers = HashMap::new();
@@ -54,15 +58,14 @@ When you can have two!
             context.res.text(body, None, Some(headers))
         }
 
-        "redirectResponse" => context.res.redirect(
-            "https://github.com/",
-            Some(301), None,
-        ),
+        "redirectResponse" => context.res.redirect("https://github.com/", Some(301), None),
 
         "emptyResponse" => context.res.empty(),
 
         "noResponse" => {
-            context.res.text("This should be ignored, as it is not returned.", None, None);
+            context
+                .res
+                .text("This should be ignored, as it is not returned.", None, None);
             context.error("Return statement missing. return context.getRes().empty() if no response is expected.");
             context.res.text("", Some(500), None)
         }
@@ -72,11 +75,15 @@ When you can have two!
             context.res.text("This should be returned.", None, None)
         }
 
-        "enforcedHeaders" => context.res.json(json!({
-            "x-custom": context.req.headers.get("x-custom"),
-            "x-custom-uppercase": context.req.headers.get("x-custom-uppercase"),
-            "x-open-runtimes-custom": context.req.headers.get("x-open-runtimes-custom"),
-        }), None, None),
+        "enforcedHeaders" => context.res.json(
+            json!({
+                "x-custom": context.req.headers.get("x-custom"),
+                "x-custom-uppercase": context.req.headers.get("x-custom-uppercase"),
+                "x-open-runtimes-custom": context.req.headers.get("x-open-runtimes-custom"),
+            }),
+            None,
+            None,
+        ),
 
         "headersResponse" => {
             let second_header = context
@@ -109,15 +116,19 @@ When you can have two!
 
         "requestMethod" => context.res.text(&context.req.method, None, None),
 
-        "requestUrl" => context.res.json(json!({
-            "url": context.req.url,
-            "port": context.req.port,
-            "path": context.req.path,
-            "query": context.req.query,
-            "queryString": context.req.query_string,
-            "scheme": context.req.scheme,
-            "host": context.req.host,
-        }), None, None),
+        "requestUrl" => context.res.json(
+            json!({
+                "url": context.req.url,
+                "port": context.req.port,
+                "path": context.req.path,
+                "query": context.req.query,
+                "queryString": context.req.query_string,
+                "scheme": context.req.scheme,
+                "host": context.req.host,
+            }),
+            None,
+            None,
+        ),
 
         "requestHeaders" => context.res.json(&context.req.headers, None, None),
 
@@ -177,10 +188,14 @@ When you can have two!
             let var = env::var("CUSTOM_ENV_VAR").unwrap_or_default();
             let empty_var = env::var("NOT_DEFINED_VAR").ok();
 
-            context.res.json(json!({
-                "var": var,
-                "emptyVar": empty_var,
-            }), None, None)
+            context.res.json(
+                json!({
+                    "var": var,
+                    "emptyVar": empty_var,
+                }),
+                None,
+                None,
+            )
         }
 
         "logs" => {
@@ -213,9 +228,13 @@ When you can have two!
                 .send()
             {
                 Ok(response) => match response.json::<Value>() {
-                    Ok(todo) => context.res.json(json!({
-                        "todo": todo
-                    }), None, None),
+                    Ok(todo) => context.res.json(
+                        json!({
+                            "todo": todo
+                        }),
+                        None,
+                        None,
+                    ),
                     Err(e) => {
                         context.error(format!("JSON parse error: {:?}", e));
                         context.res.text("", Some(500), None)
@@ -245,13 +264,14 @@ When you can have two!
             context.res.send(String::from_utf8_lossy(&body).to_string())
         }
 
-        "deprecatedMethodsUntypedBody" => {
+        "deprecatedMethodsUntypedBody" =>
+        {
             #[allow(deprecated)]
             context.res.send("50".to_string())
         }
 
         "deprecatedMethodsBytesBody" => {
-            use base64::{Engine as _, engine::general_purpose};
+            use base64::{engine::general_purpose, Engine as _};
             let image = general_purpose::STANDARD.decode(
                 "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAsSwAALEsBpT2WqQAAAMlQTFRFAAAA/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu+zZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZu/Tdt/TZv/TZu/TZu/TZu/TZu/TZu/TZu/TZu/TZv/TZv/TZu/TZu/TZu/TZu/TZu/TZu/Tdv/TZu/TZuuSxTMwAAAEN0Uk5TABN71PrYkxIu5P/jNyDf60XK3vkOWv11JiVsYazyawE8zInhtgd8bXTitQaw8WcBHMbPXP7pciMWIDLd1yIx5hWA/BXEE2wAAACqSURBVHicXY7PCwFxEMXfkxVKkVDbHrb2YMVBOZM/Xzk52AO1tYpNSdRGfhTzne8qvMM085mZ1yMAiky5wQxAWUZtmSmo8QkrhyeD63J5rxZ5ldvCAWzJoSNfPL+Axhb0jmiSCeCLE2MwSOFyraYdre0M3ko9u5c/EG4U9BL5Xpp2ECsQ04BcAEObjyNG6NvseV5/D1RC5mkl+niX4kuymXD+CzDlozT7gDdmIiQgwIp6VQAAAABJRU5ErkJggg=="
             ).unwrap();
@@ -287,26 +307,37 @@ When you can have two!
         "setCookie" => {
             context.log("setCookie: Creating headers");
             let mut headers = HashMap::new();
-            headers.insert("set-cookie".to_string(), vec![
-                "cookie=value; path=/".to_string(),
-                "cookie2=value2; path=/".to_string()
-            ].join("\n"));
+            headers.insert(
+                "set-cookie".to_string(),
+                vec![
+                    "cookie=value; path=/".to_string(),
+                    "cookie2=value2; path=/".to_string(),
+                ]
+                .join("\n"),
+            );
             headers.insert("some-header".to_string(), "some-value".to_string());
 
             context.log(format!("setCookie: Headers created: {:?}", headers));
 
             let response = context.res.text("OK", Some(200), Some(headers));
 
-            context.log(format!("setCookie: Response created with status_code: {}", response.status_code));
+            context.log(format!(
+                "setCookie: Response created with status_code: {}",
+                response.status_code
+            ));
             response
         }
 
         "setCookie2" => {
             let mut headers = HashMap::new();
-            headers.insert("set-cookie".to_string(), vec![
-                "cookie=value; path=/".to_string(),
-                "cookie2=value2; path=/".to_string()
-            ].join("\n"));
+            headers.insert(
+                "set-cookie".to_string(),
+                vec![
+                    "cookie=value; path=/".to_string(),
+                    "cookie2=value2; path=/".to_string(),
+                ]
+                .join("\n"),
+            );
             headers.insert("some-header".to_string(), "some-value".to_string());
 
             context.res.text("OK", Some(200), Some(headers))

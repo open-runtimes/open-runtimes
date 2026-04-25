@@ -53,10 +53,7 @@ impl Logger {
 
         let mut random_padding = String::new();
         for _ in 0..7 {
-            let rand_digit = (SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .subsec_nanos() % 16) as u8;
+            let rand_digit = rand::random::<u8>() % 16;
             random_padding.push_str(&format!("{:x}", rand_digit));
         }
 
@@ -90,7 +87,8 @@ impl Logger {
         let mut message = messages.join(" ");
 
         if message.len() > MAX_LOG_SIZE {
-            message.truncate(MAX_LOG_SIZE);
+            let safe_len = message.floor_char_boundary(MAX_LOG_SIZE);
+            message.truncate(safe_len);
             message.push_str("... Log truncated due to size limit (8000 characters)");
         }
 

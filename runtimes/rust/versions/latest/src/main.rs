@@ -155,7 +155,7 @@ async fn action(
 
     if !server_secret.is_empty() && secret != server_secret {
         return Ok(Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .status(StatusCode::UNAUTHORIZED)
             .header("content-type", "text/plain")
             .body(Full::new(Bytes::from(
                 "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.",
@@ -181,7 +181,9 @@ async fn action(
 
     // Enforce headers from environment
     let headers_env = env::var("OPEN_RUNTIMES_HEADERS").unwrap_or_else(|_| "{}".to_string());
-    if let Ok(enforced_headers) = serde_json::from_str::<HashMap<String, serde_json::Value>>(&headers_env) {
+    if let Ok(enforced_headers) =
+        serde_json::from_str::<HashMap<String, serde_json::Value>>(&headers_env)
+    {
         for (key, value) in enforced_headers {
             let value_string = match value {
                 serde_json::Value::String(s) => s,
@@ -215,7 +217,10 @@ async fn action(
     let (host, port) = if host_header.contains(':') {
         let parts: Vec<&str> = host_header.splitn(2, ':').collect();
         let h = parts[0].to_string();
-        let p = parts.get(1).and_then(|s| s.parse::<u16>().ok()).unwrap_or(default_port);
+        let p = parts
+            .get(1)
+            .and_then(|s| s.parse::<u16>().ok())
+            .unwrap_or(default_port);
         (h, p)
     } else {
         (host_header.to_string(), default_port)
@@ -252,7 +257,10 @@ async fn action(
         String::new()
     };
 
-    let request_url = format!("{}://{}{}{}{}", scheme, host, port_in_url, path, query_string_in_url);
+    let request_url = format!(
+        "{}://{}{}{}{}",
+        scheme, host, port_in_url, path, query_string_in_url
+    );
 
     // Read body with 20MB size limit (20 * 1024 * 1024 = 20971520 bytes)
     const MAX_BODY_SIZE: usize = 20 * 1024 * 1024;
@@ -293,9 +301,7 @@ async fn action(
     let output = if let Some(timeout_secs) = safe_timeout {
         let ctx = context.clone();
         let log = logger.clone();
-        let user_function = tokio::task::spawn_blocking(move || {
-            execute_user_function(ctx, log)
-        });
+        let user_function = tokio::task::spawn_blocking(move || execute_user_function(ctx, log));
 
         match timeout(Duration::from_secs(timeout_secs), user_function).await {
             Ok(Ok(result)) => result,
@@ -311,9 +317,7 @@ async fn action(
     } else {
         let ctx = context.clone();
         let log = logger.clone();
-        let handle = tokio::task::spawn_blocking(move || {
-            execute_user_function(ctx, log)
-        });
+        let handle = tokio::task::spawn_blocking(move || execute_user_function(ctx, log));
 
         match handle.await {
             Ok(result) => result,
@@ -357,7 +361,11 @@ async fn action(
     // Build response
     let mut response_builder = Response::builder().status(status_code);
 
-    let log_id_value = if logging == "disabled" { "" } else { logger.id.as_str() };
+    let log_id_value = if logging == "disabled" {
+        ""
+    } else {
+        logger.id.as_str()
+    };
     response_builder = response_builder.header("x-open-runtimes-log-id", log_id_value);
 
     for (key, value) in output_headers {
@@ -370,7 +378,9 @@ async fn action(
         }
     }
 
-    Ok(response_builder.body(Full::new(Bytes::from(output.body))).unwrap())
+    Ok(response_builder
+        .body(Full::new(Bytes::from(output.body)))
+        .unwrap())
 }
 
 #[tokio::main]

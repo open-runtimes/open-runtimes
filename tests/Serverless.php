@@ -411,6 +411,8 @@ class Serverless extends Base
         self::assertStringContainsString(42, $logs);
         self::assertStringContainsString(4.2, $logs);
         self::assertStringContainsString('true', \strtolower($logs)); // strlower allows True in Python
+        self::assertStringContainsString('Native log', $logs);
+        self::assertStringContainsString('Native logs detected.', $logs);
         self::assertStringContainsString('Error log', $errors);
         self::assertStringContainsString('objectKey', $logs);
         self::assertStringContainsString('objectValue', $logs);
