@@ -6,4 +6,4 @@ pub mod response;
 pub use context::Context;
 pub use logger::{Logger, LoggerType};
 pub use request::ContextRequest;
-pub use response::{ContextResponse, Response, ResponseOptions};
+pub use response::{ContextResponse, Response};

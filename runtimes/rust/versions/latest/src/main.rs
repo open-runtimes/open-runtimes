@@ -103,7 +103,7 @@ fn execute_user_function(ctx: Context, log: Logger) -> openruntimes::Response {
                 "Unknown panic".to_string()
             };
             log.write(vec![panic_msg], openruntimes::LoggerType::Error, false);
-            ctx.res.text("", ctx.res.with_status_code(500))
+            ctx.res.text("", Some(500), None)
         }
     }
 }
@@ -301,11 +301,11 @@ async fn action(
             Ok(Ok(result)) => result,
             Ok(Err(_)) => {
                 context.error("Task join error.");
-                context.res.text("", context.res.with_status_code(500))
+                context.res.text("", Some(500), None)
             }
             Err(_) => {
                 context.error("Execution timed out.");
-                context.res.text("", context.res.with_status_code(500))
+                context.res.text("", Some(500), None)
             }
         }
     } else {
@@ -319,7 +319,7 @@ async fn action(
             Ok(result) => result,
             Err(_) => {
                 context.error("Task join error.");
-                context.res.text("", context.res.with_status_code(500))
+                context.res.text("", Some(500), None)
             }
         }
     };

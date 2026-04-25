@@ -25,21 +25,6 @@ impl Default for Response {
     }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct ResponseOptions {
-    pub status_code: Option<u16>,
-    pub headers: Option<HashMap<String, String>>,
-}
-
-impl ResponseOptions {
-    pub fn new() -> Self {
-        ResponseOptions {
-            status_code: None,
-            headers: None,
-        }
-    }
-}
-
 #[derive(Clone)]
 pub struct ContextResponse;
 
@@ -48,12 +33,17 @@ impl ContextResponse {
         ContextResponse
     }
 
-    pub fn text<S: Into<String>>(&self, text: S, options: ResponseOptions) -> Response {
+    pub fn text<S: Into<String>>(
+        &self,
+        text: S,
+        status_code: Option<u16>,
+        headers: Option<HashMap<String, String>>,
+    ) -> Response {
         let text_string = text.into();
         let mut response = Response {
-            status_code: options.status_code.unwrap_or(200),
+            status_code: status_code.unwrap_or(200),
             body: text_string.into_bytes(),
-            headers: options.headers.unwrap_or_default(),
+            headers: headers.unwrap_or_default(),
         };
 
         if !response.headers.contains_key("content-type") {
@@ -65,32 +55,46 @@ impl ContextResponse {
         response
     }
 
-    pub fn json<T: Serialize>(&self, data: T) -> Response {
+    pub fn json<T: Serialize>(
+        &self,
+        data: T,
+        status_code: Option<u16>,
+        headers: Option<HashMap<String, String>>,
+    ) -> Response {
         let json_string = serde_json::to_string(&data).unwrap_or_else(|_| "{}".to_string());
         let mut response = Response {
-            status_code: 200,
+            status_code: status_code.unwrap_or(200),
             body: json_string.into_bytes(),
-            headers: HashMap::new(),
+            headers: headers.unwrap_or_default(),
         };
 
-        response
-            .headers
-            .insert("content-type".to_string(), "application/json".to_string());
+        if !response.headers.contains_key("content-type") {
+            response
+                .headers
+                .insert("content-type".to_string(), "application/json".to_string());
+        }
 
         response
     }
 
-    pub fn binary(&self, data: Vec<u8>) -> Response {
+    pub fn binary(
+        &self,
+        data: Vec<u8>,
+        status_code: Option<u16>,
+        headers: Option<HashMap<String, String>>,
+    ) -> Response {
         let mut response = Response {
-            status_code: 200,
+            status_code: status_code.unwrap_or(200),
             body: data,
-            headers: HashMap::new(),
+            headers: headers.unwrap_or_default(),
         };
 
-        response.headers.insert(
-            "content-type".to_string(),
-            "application/octet-stream".to_string(),
-        );
+        if !response.headers.contains_key("content-type") {
+            response.headers.insert(
+                "content-type".to_string(),
+                "application/octet-stream".to_string(),
+            );
+        }
 
         response
     }
@@ -103,35 +107,26 @@ impl ContextResponse {
         }
     }
 
-    pub fn redirect<S: Into<String>>(&self, url: S, options: ResponseOptions) -> Response {
+    pub fn redirect<S: Into<String>>(
+        &self,
+        url: S,
+        status_code: Option<u16>,
+        headers: Option<HashMap<String, String>>,
+    ) -> Response {
         let url_string = url.into();
-        let mut headers = options.headers.unwrap_or_default();
-        headers.insert("location".to_string(), url_string);
+        let mut response_headers = headers.unwrap_or_default();
+        response_headers.insert("location".to_string(), url_string);
 
         Response {
-            status_code: options.status_code.unwrap_or(301),
+            status_code: status_code.unwrap_or(301),
             body: Vec::new(),
-            headers,
+            headers: response_headers,
         }
     }
 
     #[deprecated(note = "Use text(), json(), or binary() instead")]
     pub fn send<S: Into<String>>(&self, data: S) -> Response {
-        self.text(data, ResponseOptions::default())
-    }
-
-    pub fn with_status_code(&self, status_code: u16) -> ResponseOptions {
-        ResponseOptions {
-            status_code: Some(status_code),
-            headers: None,
-        }
-    }
-
-    pub fn with_headers(&self, headers: HashMap<String, String>) -> ResponseOptions {
-        ResponseOptions {
-            status_code: None,
-            headers: Some(headers),
-        }
+        self.text(data, None, None)
     }
 }
 

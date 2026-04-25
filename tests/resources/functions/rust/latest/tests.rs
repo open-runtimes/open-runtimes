@@ -1,4 +1,4 @@
-use openruntimes::{Context, Response, ResponseOptions};
+use openruntimes::{Context, Response};
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::env;
@@ -14,12 +14,12 @@ pub fn main(context: Context) -> Response {
         .unwrap_or("");
 
     match action {
-        "plaintextResponse" => context.res.text("Hello World 👋", ResponseOptions::default()),
+        "plaintextResponse" => context.res.text("Hello World 👋", None, None),
 
         "jsonResponse" => context.res.json(json!({
             "json": true,
             "message": "Developers are awesome."
-        })),
+        }), None, None),
 
         "customCharsetResponse" => {
             let mut headers = HashMap::new();
@@ -27,13 +27,13 @@ pub fn main(context: Context) -> Response {
                 "content-type".to_string(),
                 "text/plain; charset=iso-8859-1".to_string(),
             );
-            context.res.text("ÅÆ", context.res.with_headers(headers))
+            context.res.text("ÅÆ", None, Some(headers))
         }
 
         "uppercaseCharsetResponse" => {
             let mut headers = HashMap::new();
             headers.insert("content-type".to_string(), "TEXT/PLAIN".to_string());
-            context.res.text("ÅÆ", context.res.with_headers(headers))
+            context.res.text("ÅÆ", None, Some(headers))
         }
 
         "multipartResponse" => {
@@ -51,32 +51,32 @@ When you can have two!
                 "content-type".to_string(),
                 "multipart/form-data; boundary=12345".to_string(),
             );
-            context.res.text(body, context.res.with_headers(headers))
+            context.res.text(body, None, Some(headers))
         }
 
         "redirectResponse" => context.res.redirect(
             "https://github.com/",
-            context.res.with_status_code(301),
+            Some(301), None,
         ),
 
         "emptyResponse" => context.res.empty(),
 
         "noResponse" => {
-            context.res.text("This should be ignored, as it is not returned.", ResponseOptions::default());
+            context.res.text("This should be ignored, as it is not returned.", None, None);
             context.error("Return statement missing. return context.getRes().empty() if no response is expected.");
-            context.res.text("", context.res.with_status_code(500))
+            context.res.text("", Some(500), None)
         }
 
         "doubleResponse" => {
-            context.res.text("This should be ignored.", ResponseOptions::default());
-            context.res.text("This should be returned.", ResponseOptions::default())
+            context.res.text("This should be ignored.", None, None);
+            context.res.text("This should be returned.", None, None)
         }
 
         "enforcedHeaders" => context.res.json(json!({
             "x-custom": context.req.headers.get("x-custom"),
             "x-custom-uppercase": context.req.headers.get("x-custom-uppercase"),
             "x-open-runtimes-custom": context.req.headers.get("x-open-runtimes-custom"),
-        })),
+        }), None, None),
 
         "headersResponse" => {
             let second_header = context
@@ -102,12 +102,12 @@ When you can have two!
                 "third-value".to_string(),
             );
 
-            context.res.text("OK", context.res.with_headers(headers))
+            context.res.text("OK", None, Some(headers))
         }
 
-        "statusResponse" => context.res.text("FAIL", context.res.with_status_code(404)),
+        "statusResponse" => context.res.text("FAIL", Some(404), None),
 
-        "requestMethod" => context.res.text(&context.req.method, ResponseOptions::default()),
+        "requestMethod" => context.res.text(&context.req.method, None, None),
 
         "requestUrl" => context.res.json(json!({
             "url": context.req.url,
@@ -117,60 +117,60 @@ When you can have two!
             "queryString": context.req.query_string,
             "scheme": context.req.scheme,
             "host": context.req.host,
-        })),
+        }), None, None),
 
-        "requestHeaders" => context.res.json(&context.req.headers),
+        "requestHeaders" => context.res.json(&context.req.headers, None, None),
 
-        "requestBodyText" => context.res.text(context.req.body_text(), ResponseOptions::default()),
+        "requestBodyText" => context.res.text(context.req.body_text(), None, None),
 
         "requestBodyJson" => {
             let mut ctx = context.clone();
             // Validate that body is not empty
             if ctx.req.body_binary().is_empty() {
                 ctx.error("Cannot parse JSON body");
-                return ctx.res.text("", ctx.res.with_status_code(500));
+                return ctx.res.text("", Some(500), None);
             }
             match ctx.req.body_json::<Value>() {
-                Ok(body_json) => ctx.res.json(body_json),
+                Ok(body_json) => ctx.res.json(body_json, None, None),
                 Err(_) => {
                     ctx.error("Cannot parse JSON body");
-                    ctx.res.text("", ctx.res.with_status_code(500))
+                    ctx.res.text("", Some(500), None)
                 }
             }
         }
 
-        "requestBodyBinary" => context.res.binary(context.req.body_binary()),
+        "requestBodyBinary" => context.res.binary(context.req.body_binary(), None, None),
 
-        "requestBodyTextAuto" => context.res.text(context.req.body_text(), ResponseOptions::default()),
+        "requestBodyTextAuto" => context.res.text(context.req.body_text(), None, None),
 
         "requestBodyJsonAuto" => {
             let mut ctx = context.clone();
-            context.res.json(ctx.req.body())
+            context.res.json(ctx.req.body(), None, None)
         }
 
         "binaryResponse1" => {
             let bytes = vec![0, 10, 255];
-            context.res.binary(bytes)
+            context.res.binary(bytes, None, None)
         }
 
         "binaryResponse2" => {
             let bytes = vec![0, 20, 255];
-            context.res.binary(bytes)
+            context.res.binary(bytes, None, None)
         }
 
         "binaryResponse3" => {
             let bytes = vec![0, 30, 255];
-            context.res.binary(bytes)
+            context.res.binary(bytes, None, None)
         }
 
         "binaryResponse4" => {
             let bytes = vec![0, 40, 255];
-            context.res.binary(bytes)
+            context.res.binary(bytes, None, None)
         }
 
         "binaryResponse5" => {
             let bytes = vec![0, 50, 255];
-            context.res.binary(bytes)
+            context.res.binary(bytes, None, None)
         }
 
         "envVars" => {
@@ -180,7 +180,7 @@ When you can have two!
             context.res.json(json!({
                 "var": var,
                 "emptyVar": empty_var,
-            }))
+            }), None, None)
         }
 
         "logs" => {
@@ -200,7 +200,7 @@ When you can have two!
             context.log("A".repeat(9000));
             context.error("B".repeat(9000));
 
-            context.res.text("", ResponseOptions::default())
+            context.res.text("", None, None)
         }
 
         "library" => {
@@ -215,15 +215,15 @@ When you can have two!
                 Ok(response) => match response.json::<Value>() {
                     Ok(todo) => context.res.json(json!({
                         "todo": todo
-                    })),
+                    }), None, None),
                     Err(e) => {
                         context.error(format!("JSON parse error: {:?}", e));
-                        context.res.text("", context.res.with_status_code(500))
+                        context.res.text("", Some(500), None)
                     }
                 },
                 Err(e) => {
                     context.error(format!("HTTP request error: {:?}", e));
-                    context.res.text("", context.res.with_status_code(500))
+                    context.res.text("", Some(500), None)
                 }
             }
         }
@@ -235,7 +235,7 @@ When you can have two!
 
             context.log("Timeout end.");
 
-            context.res.text("Successful response.", ResponseOptions::default())
+            context.res.text("Successful response.", None, None)
         }
 
         "deprecatedMethods" => {
@@ -274,14 +274,14 @@ When you can have two!
             let mut headers = HashMap::new();
             headers.insert("x-method".to_string(), context.req.method.clone());
 
-            context.res.text(hash, context.res.with_headers(headers))
+            context.res.text(hash, None, Some(headers))
         }
 
         "spreadOperatorLogs" => {
             let engine = "open-runtimes";
             context.log_multiple(vec!["engine:".to_string(), engine.to_string()]);
             context.error_multiple(vec!["engine:".to_string(), engine.to_string()]);
-            context.res.text("OK", ResponseOptions::default())
+            context.res.text("OK", None, None)
         }
 
         "setCookie" => {
@@ -295,10 +295,7 @@ When you can have two!
 
             context.log(format!("setCookie: Headers created: {:?}", headers));
 
-            let response = context.res.text("OK", openruntimes::ResponseOptions {
-                status_code: Some(200),
-                headers: Some(headers),
-            });
+            let response = context.res.text("OK", Some(200), Some(headers));
 
             context.log(format!("setCookie: Response created with status_code: {}", response.status_code));
             response
@@ -312,10 +309,7 @@ When you can have two!
             ].join("\n"));
             headers.insert("some-header".to_string(), "some-value".to_string());
 
-            context.res.text("OK", openruntimes::ResponseOptions {
-                status_code: Some(200),
-                headers: Some(headers),
-            })
+            context.res.text("OK", Some(200), Some(headers))
         }
 
         "errorTest" => {
@@ -325,7 +319,7 @@ When you can have two!
 
         _ => {
             context.error("Unknown action in tests.rs");
-            context.res.text("", context.res.with_status_code(500))
+            context.res.text("", Some(500), None)
         }
     }
 }
