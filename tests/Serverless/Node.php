@@ -103,18 +103,11 @@ class Node extends Serverless
         self::assertStringContainsString('Error log', $errors);
     }
 
-    public function testHeadlessBrowser(): void
-    {
-        // Skip test for Node.js 14.5
-        // Doesn't work, and investing time is not worth it
-        if ($this->runtimeVersion === '14.5') {
-            self::assertTrue(true);
-            return;
-        }
-
+     public function testHeadlessBrowser(): void
+     {   
          $response = Client::execute(body: '', headers: ['x-action' => 'headlessBrowser'], timeout: 15);
          self::assertEquals(200, $response['code']);
          self::assertEquals('image/png; charset=utf-8', $response['headers']['content-type']);
          self::assertGreaterThanOrEqual(100000, \mb_strlen($response['body'])); // Should be 1.355MB
-    }
+     }
 }
