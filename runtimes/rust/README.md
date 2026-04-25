@@ -10,14 +10,14 @@ To learn more about runtimes, visit [Structure](https://github.com/open-runtimes
 ```bash
 mkdir rust-function && cd rust-function
 tee -a main.rs << 'END'
-use openruntimes::{Context, Response, ResponseOptions};
+use openruntimes::{Context, Response};
 use serde_json::json;
 
 pub fn main(context: Context) -> Response {
     context.res.json(json!({
         "message": "Hello from Rust!",
         "random": rand::random::<f64>()
-    }))
+    }), None, None)
 }
 END
 ```
@@ -71,7 +71,7 @@ Output `{"message":"Hello from Rust!","random":0.7232589496628183}` with random 
 use openruntimes::{Context, Response};
 
 pub fn main(context: Context) -> Response {
-    context.res.text("Hello, World!", Default::default())
+    context.res.text("Hello, World!", None, None)
 }
 ```
 
@@ -120,31 +120,44 @@ let url = &context.req.url;
 ### Response (`context.res`)
 
 ```rust
-// Return JSON
+// Return JSON (status 200 by default)
 context.res.json(json!({
     "message": "Hello"
-}))
+}), None, None)
 
-// Return text
-context.res.text("Hello, World!", ResponseOptions::default())
+// Return JSON with custom status code
+context.res.json(json!({
+    "error": "Not found"
+}), Some(404), None)
+
+// Return text (status 200 by default)
+context.res.text("Hello, World!", None, None)
+
+// Return text with custom status code
+context.res.text("Not Found", Some(404), None)
 
 // Return binary
-context.res.binary(vec![0, 1, 2, 3])
+context.res.binary(vec![0, 1, 2, 3], None, None)
 
 // Return empty response
 context.res.empty()
 
-// Redirect
-context.res.redirect("https://example.com/", context.res.with_status_code(301))
+// Redirect (301 by default)
+context.res.redirect("https://example.com/", None, None)
 
-// Custom status code
-context.res.text("Not Found", context.res.with_status_code(404))
+// Redirect with custom status
+context.res.redirect("https://example.com/", Some(302), None)
 
 // Custom headers
 use std::collections::HashMap;
 let mut headers = HashMap::new();
 headers.insert("X-Custom-Header".to_string(), "value".to_string());
-context.res.text("Hello", context.res.with_headers(headers))
+context.res.text("Hello", None, Some(headers))
+
+// Custom status code AND headers
+let mut headers = HashMap::new();
+headers.insert("X-Custom-Header".to_string(), "value".to_string());
+context.res.json(json!({"data": "value"}), Some(201), Some(headers))
 ```
 
 ### Logging
@@ -205,10 +218,10 @@ pub fn main(context: Context) -> Response {
         .send()
         .and_then(|r| r.json::<Value>())
     {
-        Ok(data) => context.res.json(data),
+        Ok(data) => context.res.json(data, None, None),
         Err(e) => {
             context.error(format!("Request failed: {:?}", e));
-            context.res.text("", context.res.with_status_code(500))
+            context.res.text("", Some(500), None)
         }
     }
 }
