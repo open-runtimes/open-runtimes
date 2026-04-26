@@ -199,7 +199,7 @@ When you can have two!
         }
 
         "logs" => {
-            context.log("Native log");
+            println!("Native log");
             context.log("Debug log");
             context.error("Error log");
 
