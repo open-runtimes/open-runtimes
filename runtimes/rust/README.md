@@ -36,7 +36,7 @@ name = "handler"
 path = "main.rs"
 
 [dependencies]
-openruntimes = { path = "/mnt/code/types-for-rust" }
+openruntimes = { version = "1.0.3", package = "chiragagg5k-openruntimes-types-for-rust" }
 serde_json = "1.0"
 rand = "0.8"
 END
@@ -87,7 +87,7 @@ path = "main.rs"  # or your entry file
 
 - The default entrypoint is `main.rs`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.rs`.
 
-- **Logging:** Always use `context.log()` and `context.error()` for logging. Native Rust logging (`println!`, `eprintln!`, `dbg!`) is **not captured** by the runtime. See the [Logging](#logging) section for details.
+- **Logging:** Use `context.log()` and `context.error()` for structured logging. Native Rust output (`println!`, `eprintln!`, `dbg!`) is also captured during function execution and surfaced in request logs. See the [Logging](#logging) section for details.
 
 ## Context API
 
