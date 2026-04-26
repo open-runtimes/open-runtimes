@@ -327,8 +327,6 @@ async fn action(
         }
     };
 
-    logger.end();
-
     // Process output
     let status_code = if output.status_code == 0 {
         200
@@ -385,9 +383,13 @@ async fn action(
         }
     }
 
-    response_builder
+    let response = response_builder
         .body(Full::new(Bytes::from(output.body)))
-        .map_err(|e| format!("Failed to build response: {}", e))
+        .map_err(|e| format!("Failed to build response: {}", e))?;
+
+    logger.end();
+
+    Ok(response)
 }
 
 #[tokio::main]
