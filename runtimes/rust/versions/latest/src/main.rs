@@ -341,18 +341,26 @@ async fn action(
         }
     }
 
-    // Set content-type with charset
-    let mut content_type = output_headers
+    // Set content-type with charset. Match Node's behaviour: only the
+    // lowercased + charset-suffixed form is written when we actually need
+    // to append the charset. For multipart responses or values that
+    // already carry a charset we preserve the user's original casing —
+    // this keeps multipart boundary tokens intact (RFC 2046 §5.1.1).
+    let original_content_type = output_headers
         .get("content-type")
         .cloned()
-        .unwrap_or_else(|| "text/plain".to_string())
-        .to_lowercase();
+        .unwrap_or_else(|| "text/plain".to_string());
+    let content_type_lower = original_content_type.to_lowercase();
 
-    if !content_type.starts_with("multipart/") && !content_type.contains("charset=") {
-        content_type = format!("{}; charset=utf-8", content_type);
-    }
+    let final_content_type = if !content_type_lower.starts_with("multipart/")
+        && !content_type_lower.contains("charset=")
+    {
+        format!("{}; charset=utf-8", content_type_lower)
+    } else {
+        original_content_type
+    };
 
-    output_headers.insert("content-type".to_string(), content_type);
+    output_headers.insert("content-type".to_string(), final_content_type);
 
     // Build response
     let mut response_builder = Response::builder().status(status_code);

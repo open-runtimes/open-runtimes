@@ -34,7 +34,7 @@ class Rust extends Serverless
 
         $response = Client::execute(headers: ['x-action' => 'logs']);
         $logIdSecond = $response['headers']['x-open-runtimes-log-id'];
-        self::assertEquals(20, \strlen($logId));
+        self::assertEquals(20, \strlen($logIdSecond));
         self::assertNotEquals($logId, $logIdSecond);
 
         $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'disabled', 'x-open-runtimes-log-id' => 'noLogs']);
