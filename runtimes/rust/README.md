@@ -162,8 +162,8 @@ context.res.json(json!({"data": "value"}), Some(201), Some(headers))
 
 ### Logging
 
-> **Important:** Always use `context.log()` and `context.error()` for logging.
-> Native Rust logging methods like `println!()`, `eprintln!()`, `print!()`, or `dbg!()` are **not captured** by the runtime and will not appear in execution logs.
+> **Recommended:** Use `context.log()` and `context.error()` for structured runtime logs.
+> Native Rust stdout/stderr output from `println!()`, `eprintln!()`, `print!()`, or `dbg!()` is also captured during function execution and written to the request logs.
 
 ```rust
 // Log messages
@@ -178,17 +178,16 @@ context.error("Something went wrong");
 context.log_multiple(vec!["First".to_string(), "Second".to_string()]);
 ```
 
-**Do NOT use:**
+**Native stdout/stderr also works:**
 ```rust
-// ❌ These will NOT be captured in logs
-println!("This won't appear in logs");
-eprintln!("This won't appear either");
+// These are captured in request logs, with a native-log notice.
+println!("This will appear in logs");
+eprintln!("This error will appear in logs");
 dbg!(some_variable);
 ```
 
-**Use instead:**
+**Prefer context logging when possible:**
 ```rust
-// ✅ These WILL be captured in logs
 context.log("This will appear in logs");
 context.error("This error will appear in logs");
 ```
