@@ -67,8 +67,8 @@ impl ContextRequest {
         let content_type = self
             .headers
             .get("content-type")
-            .map(|s| s.as_str())
-            .unwrap_or("");
+            .map(|s| s.to_lowercase())
+            .unwrap_or_default();
 
         if content_type.contains("application/json") {
             // Return empty object for empty body with JSON content-type

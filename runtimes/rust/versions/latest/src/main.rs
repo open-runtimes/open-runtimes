@@ -341,14 +341,14 @@ async fn action(
         }
     }
 
-    // Set content-type with charset (preserve parameter case, e.g. multipart boundaries)
+    // Set content-type with charset
     let mut content_type = output_headers
         .get("content-type")
         .cloned()
-        .unwrap_or_else(|| "text/plain".to_string());
+        .unwrap_or_else(|| "text/plain".to_string())
+        .to_lowercase();
 
-    let content_type_lower = content_type.to_lowercase();
-    if !content_type_lower.starts_with("multipart/") && !content_type_lower.contains("charset=") {
+    if !content_type.starts_with("multipart/") && !content_type.contains("charset=") {
         content_type = format!("{}; charset=utf-8", content_type);
     }
 
