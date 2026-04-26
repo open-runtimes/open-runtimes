@@ -87,7 +87,10 @@ impl Logger {
         let mut message = messages.join(" ");
 
         if message.len() > MAX_LOG_SIZE {
-            let safe_len = message.floor_char_boundary(MAX_LOG_SIZE);
+            let mut safe_len = MAX_LOG_SIZE;
+            while safe_len > 0 && !message.is_char_boundary(safe_len) {
+                safe_len -= 1;
+            }
             message.truncate(safe_len);
             message.push_str("... Log truncated due to size limit (8000 characters)");
         }

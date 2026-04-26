@@ -2,6 +2,7 @@
 name = "openruntimes"
 version = "1.0.0"
 edition = "2021"
+rust-version = "1.83"
 authors = ["Open Runtimes <team@openruntimes.io>"]
 description = "Types for Rust Open Runtime"
 license = "MIT"

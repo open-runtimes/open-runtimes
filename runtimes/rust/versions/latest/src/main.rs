@@ -1,4 +1,4 @@
-use http_body_util::{BodyExt, Full};
+use http_body_util::{BodyExt, Full, Limited};
 use hyper::body::Bytes;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
@@ -260,13 +260,14 @@ async fn action(
         scheme, host, port_in_url, path, query_string_in_url
     );
 
-    // Read body with 20MB size limit (20 * 1024 * 1024 = 20971520 bytes)
+    // Read body with 20MB size limit, enforced during streaming so a
+    // multi-GB upload is rejected before it can fill memory.
     const MAX_BODY_SIZE: usize = 20 * 1024 * 1024;
 
-    let body_bytes = match req.collect().await {
-        Ok(collected) => {
-            let bytes = collected.to_bytes().to_vec();
-            if bytes.len() > MAX_BODY_SIZE {
+    let body_bytes = match Limited::new(req.into_body(), MAX_BODY_SIZE).collect().await {
+        Ok(collected) => collected.to_bytes().to_vec(),
+        Err(err) => {
+            if err.is::<http_body_util::LengthLimitError>() {
                 return Ok(Response::builder()
                     .status(StatusCode::INTERNAL_SERVER_ERROR)
                     .header("content-type", "text/plain")
@@ -275,9 +276,6 @@ async fn action(
                     )))
                     .unwrap());
             }
-            bytes
-        }
-        Err(_) => {
             return Err("Could not parse body into a string.".to_string());
         }
     };
@@ -343,14 +341,14 @@ async fn action(
         }
     }
 
-    // Set content-type with charset
+    // Set content-type with charset (preserve parameter case, e.g. multipart boundaries)
     let mut content_type = output_headers
         .get("content-type")
         .cloned()
-        .unwrap_or_else(|| "text/plain".to_string())
-        .to_lowercase();
+        .unwrap_or_else(|| "text/plain".to_string());
 
-    if !content_type.starts_with("multipart/") && !content_type.contains("charset=") {
+    let content_type_lower = content_type.to_lowercase();
+    if !content_type_lower.starts_with("multipart/") && !content_type_lower.contains("charset=") {
         content_type = format!("{}; charset=utf-8", content_type);
     }
 
