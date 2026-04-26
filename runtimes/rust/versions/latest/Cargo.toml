@@ -9,7 +9,13 @@ edition = "2021"
 rust-version = "1.83"
 
 [dependencies]
-openruntimes = { path = "src/function/types" }
+# TODO: Migrate to the official `openruntimes` crate once
+# github.com/open-runtimes/types-for-rust exists and publishes under the
+# bare `openruntimes` name. This temporary mirror lives at
+# github.com/ChiragAgg5k/types-for-rust; the `package` alias keeps user
+# code importing `openruntimes::*` so only this manifest line changes
+# during the cutover.
+openruntimes = { version = "1.0", package = "chiragagg5k-openruntimes-types-for-rust" }
 handler = { path = "src/function" }
 tokio = { version = "1", features = ["full"] }
 hyper = { version = "1", features = ["full", "http1", "http2", "server"] }
