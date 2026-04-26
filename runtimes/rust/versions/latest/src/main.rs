@@ -134,13 +134,15 @@ async fn action(
         match timeout_header.parse::<u64>() {
             Ok(t) if t > 0 => Some(t),
             _ => {
-                return Ok(Response::builder()
+                let response = Response::builder()
                     .status(StatusCode::INTERNAL_SERVER_ERROR)
                     .header("content-type", "text/plain")
                     .body(Full::new(Bytes::from(
                         "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.",
                     )))
-                    .unwrap());
+                    .unwrap();
+                logger.end();
+                return Ok(response);
             }
         }
     } else {
@@ -157,13 +159,15 @@ async fn action(
     let server_secret = env::var("OPEN_RUNTIMES_SECRET").unwrap_or_default();
 
     if !server_secret.is_empty() && secret != server_secret {
-        return Ok(Response::builder()
+        let response = Response::builder()
             .status(StatusCode::UNAUTHORIZED)
             .header("content-type", "text/plain")
             .body(Full::new(Bytes::from(
                 "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.",
             )))
-            .unwrap());
+            .unwrap();
+        logger.end();
+        return Ok(response);
     }
 
     // Parse headers
@@ -271,13 +275,15 @@ async fn action(
         Ok(collected) => collected.to_bytes().to_vec(),
         Err(err) => {
             if err.is::<http_body_util::LengthLimitError>() {
-                return Ok(Response::builder()
+                let response = Response::builder()
                     .status(StatusCode::INTERNAL_SERVER_ERROR)
                     .header("content-type", "text/plain")
                     .body(Full::new(Bytes::from(
                         "Request body size exceeds 20MB limit.",
                     )))
-                    .unwrap());
+                    .unwrap();
+                logger.end();
+                return Ok(response);
             }
             return Err("Could not parse body into a string.".to_string());
         }
