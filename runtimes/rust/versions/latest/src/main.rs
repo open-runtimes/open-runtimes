@@ -381,6 +381,12 @@ async fn action(
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Suppress the default panic hook so user-function panics — caught by
+    // `catch_unwind` in execute_user_function and surfaced via the logger —
+    // don't also dump a "thread panicked at ..." message to the container's
+    // stderr.
+    std::panic::set_hook(Box::new(|_| {}));
+
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     let listener = TcpListener::bind(addr).await?;
 
