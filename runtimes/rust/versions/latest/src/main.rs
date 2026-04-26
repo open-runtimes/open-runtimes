@@ -374,9 +374,9 @@ async fn action(
         }
     }
 
-    Ok(response_builder
+    response_builder
         .body(Full::new(Bytes::from(output.body)))
-        .unwrap())
+        .map_err(|e| format!("Failed to build response: {}", e))
 }
 
 #[tokio::main]
