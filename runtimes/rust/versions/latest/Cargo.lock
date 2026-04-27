@@ -55,18 +55,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
-name = "chiragagg5k-openruntimes-types-for-rust"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40bed38cc7187bac86e605fa0d64e8b22253ded9ae1f7e0a6109b29063164bce"
-dependencies = [
- "libc",
- "rand",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -273,8 +261,8 @@ name = "handler"
 version = "0.1.0"
 dependencies = [
  "base64",
- "chiragagg5k-openruntimes-types-for-rust",
  "md5",
+ "openruntimes-types-for-rust",
  "reqwest",
  "serde",
  "serde_json",
@@ -671,6 +659,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 
 [[package]]
+name = "openruntimes-types-for-rust"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f648c43c6b6c48bfc85af1183e8f8b98d2d7e8b4105e89360f5ed189c5077e36"
+dependencies = [
+ "rand",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "openssl"
 version = "0.10.78"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -906,13 +905,13 @@ dependencies = [
 name = "rust_runtime"
 version = "1.0.0"
 dependencies = [
- "chiragagg5k-openruntimes-types-for-rust",
  "handler",
  "http-body-util",
  "hyper",
  "hyper-util",
  "indexmap",
  "libc",
+ "openruntimes-types-for-rust",
  "serde",
  "serde_json",
  "tokio",

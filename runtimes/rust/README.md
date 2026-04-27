@@ -36,7 +36,7 @@ name = "handler"
 path = "main.rs"
 
 [dependencies]
-openruntimes = { version = "1.0.3", package = "chiragagg5k-openruntimes-types-for-rust" }
+openruntimes = { version = "1.0", package = "openruntimes-types-for-rust" }
 serde_json = "1.0"
 rand = "0.8"
 END

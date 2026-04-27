@@ -9,9 +9,7 @@ name = "handler"
 path = "lib.rs"
 
 [dependencies]
-# TODO: see runtimes/rust/versions/latest/Cargo.toml — switch to the
-# official `openruntimes` crate once open-runtimes/types-for-rust is live.
-openruntimes = { version = "1.0", package = "chiragagg5k-openruntimes-types-for-rust" }
+openruntimes = { version = "1.0", package = "openruntimes-types-for-rust" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 reqwest = { version = "0.12", features = ["blocking", "json"] }
