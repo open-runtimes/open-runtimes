@@ -95,7 +95,7 @@ test = "Serverless/Ruby.php"
 entry = "tests.rs"
 versions = ["1.83"]
 commands = { install = "", start = "bash helpers/server.sh" }
-formatter = { prepare = "echo \"Using native formatter\"", check = "if [ -f Cargo.toml ]; then cargo fmt -- --check; else echo 'No Cargo.toml found, skipping formatter check'; fi", write = "if [ -f Cargo.toml ]; then cargo fmt; fi" }
+formatter = { prepare = "echo \"Using native formatter\"", check = "find ./ -name '*.rs' -type f -print | xargs rustfmt --check --edition 2021", write = "find ./ -name '*.rs' -type f -print | xargs rustfmt --edition 2021" }
 tools = "rustc --version && cargo --version"
 test = "Serverless/Rust.php"
 

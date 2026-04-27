@@ -93,20 +93,22 @@ async fn handle_request(
 
 fn execute_user_function(ctx: Context, mut log: Logger) -> openruntimes::Response {
     log.override_native_logs();
-    let result = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| handler::main(ctx.clone()))) {
-        Ok(response) => response,
-        Err(panic_info) => {
-            let panic_msg = if let Some(s) = panic_info.downcast_ref::<&str>() {
-                s.to_string()
-            } else if let Some(s) = panic_info.downcast_ref::<String>() {
-                s.clone()
-            } else {
-                "Unknown panic".to_string()
-            };
-            log.write(vec![panic_msg], openruntimes::LoggerType::Error, false);
-            ctx.res.text("", Some(500), None)
-        }
-    };
+    let result =
+        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| handler::main(ctx.clone())))
+        {
+            Ok(response) => response,
+            Err(panic_info) => {
+                let panic_msg = if let Some(s) = panic_info.downcast_ref::<&str>() {
+                    s.to_string()
+                } else if let Some(s) = panic_info.downcast_ref::<String>() {
+                    s.clone()
+                } else {
+                    "Unknown panic".to_string()
+                };
+                log.write(vec![panic_msg], openruntimes::LoggerType::Error, false);
+                ctx.res.text("", Some(500), None)
+            }
+        };
     log.revert_native_logs();
     result
 }
