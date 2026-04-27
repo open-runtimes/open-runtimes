@@ -660,9 +660,9 @@ checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 
 [[package]]
 name = "openruntimes-types-for-rust"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94b65da1058fe35cb418b2575b01444cfa0a305c526507ca00e2bbe62570f21e"
+checksum = "60a031a0919bbfb3b30efd0a2e63ec5981675ec28942434533ad8e3f29dc760d"
 dependencies = [
  "libc",
  "rand",
