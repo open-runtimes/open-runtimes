@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.21.2",
+    "srvx": "^0.8.16",
     "superjson": "^2.2.6"
   }
 }
