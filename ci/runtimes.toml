@@ -91,6 +91,14 @@ formatter = { prepare = "gem install rubocop", check = "rubocop --lint .", write
 tools = "ruby --version && gem --version"
 test = "Serverless/Ruby.php"
 
+[rust]
+entry = "tests.rs"
+versions = ["1.83"]
+commands = { install = "", start = "bash helpers/server.sh" }
+formatter = { prepare = "echo \"Using native formatter\"", check = "find ./ -name '*.rs' -type f -print | xargs rustfmt --check --edition 2021", write = "find ./ -name '*.rs' -type f -print | xargs rustfmt --edition 2021" }
+tools = "rustc --version && cargo --version"
+test = "Serverless/Rust.php"
+
 [php]
 entry = "tests.php"
 entry_no_export = "no-export.php"
