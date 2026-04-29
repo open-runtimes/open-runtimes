@@ -7,6 +7,23 @@ if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
 	cd "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"
 fi
 
+# Subdirectories of .next/cache that are pure build-time artifacts and never
+# read at runtime. Safe to drop before packaging.
+#   webpack — webpack persistent build cache (often hundreds of MB)
+#   swc     — SWC compiler cache
+# Not listed (intentionally kept): fetch-cache, images, server, use-cache —
+# these are populated by `next build` for ISR / RSC / image optimization and
+# removing them changes runtime behavior.
+NEXT_BUILD_ONLY_CACHE_DIRS=("webpack" "swc")
+
+for dir in "${NEXT_BUILD_ONLY_CACHE_DIRS[@]}"; do
+	if [ -d "./cache/$dir" ]; then
+		SIZE=$(du -sh "./cache/$dir" 2>/dev/null | cut -f1)
+		rm -rf "./cache/$dir"
+		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[32m Pruned build-only cache .next/cache/$dir (${SIZE:-?}) \e[0m"
+	fi
+done
+
 WEBPACK_ENTRYPOINT="./server/webpack-runtime.js"
 TURBOPACK_ENTRYPOINT="./turbopack"
 STANDALONE_ENTRYPOINT="./standalone/server.js"
