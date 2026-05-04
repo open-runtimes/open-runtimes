@@ -28,18 +28,26 @@ extract_archive() {
 	format=$(detect_archive_format "$archive")
 	case "$format" in
 	gzip) tar -xzf "$archive" -C "$dest" ;;
-	zstd) zstd -dc "$archive" | tar -xf - -C "$dest" ;;
+	# Subshell with pipefail so a zstd error (corrupt archive, missing
+	# binary) surfaces as a non-zero exit instead of being masked by tar
+	# choking on a truncated stream.
+	zstd) (set -o pipefail && zstd -dc "$archive" | tar -xf - -C "$dest") ;;
 	*) tar -xf "$archive" -C "$dest" ;;
 	esac
 }
 
-# Locate the build archive in /mnt/code and extract it to dest.
+# Locate the build archive in /mnt/code and extract it to dest. The build
+# always writes /mnt/code/code.tar.gz; code.tar and code.gz are accepted as
+# legacy fallbacks. Each branch passes the file that actually exists rather
+# than a hardcoded name.
 extract_code_archive() {
 	local dest="$1"
 	if [ -f /mnt/code/code.tar ]; then
 		extract_archive /mnt/code/code.tar "$dest"
-	elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
+	elif [ -f /mnt/code/code.tar.gz ]; then
 		extract_archive /mnt/code/code.tar.gz "$dest"
+	elif [ -f /mnt/code/code.gz ]; then
+		extract_archive /mnt/code/code.gz "$dest"
 	else
 		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code archive not found. \e[0m"
 		exit 1
