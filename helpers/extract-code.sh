@@ -5,12 +5,60 @@
 # Prepare telemetry
 mkdir -p /mnt/telemetry
 
+# Detect archive compression by reading the first 4 magic bytes. The build
+# packs as code.tar.gz regardless of actual compression (helpers/select-
+# compression.sh picks gzip/zstd/none by build size), so the filename can't
+# be trusted.
+detect_archive_format() {
+	local magic
+	magic=$(head -c4 "$1" 2>/dev/null | od -An -vtx1 2>/dev/null | tr -d ' \n')
+	case "$magic" in
+	1f8b*) echo "gzip" ;;
+	28b52ffd) echo "zstd" ;;
+	*) echo "tar" ;;
+	esac
+}
+
+# Extract one archive into a destination dir, picking the right decompressor
+# from detected format.
+extract_archive() {
+	local archive="$1"
+	local dest="$2"
+	local format
+	format=$(detect_archive_format "$archive")
+	case "$format" in
+	gzip) tar -xzf "$archive" -C "$dest" ;;
+	zstd) zstd -dc "$archive" | tar -xf - -C "$dest" ;;
+	*) tar -xf "$archive" -C "$dest" ;;
+	esac
+}
+
+# Locate the build archive in /mnt/code and extract it to dest.
+extract_code_archive() {
+	local dest="$1"
+	if [ -f /mnt/code/code.tar ]; then
+		extract_archive /mnt/code/code.tar "$dest"
+	elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
+		extract_archive /mnt/code/code.tar.gz "$dest"
+	else
+		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code archive not found. \e[0m"
+		exit 1
+	fi
+}
+
 # Check if code is pre-extracted (e.g., by sidecar)
 if [ -f "/mnt/code/.extracted" ]; then
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code already extracted, skipping extraction. \e[0m"
 
 	start=$(awk '{print $1}' /proc/uptime)
 	shopt -s dotglob
+
+	# Clear stub files baked into the runtime image at this path. Some
+	# runtimes (e.g. Rust) ship a placeholder Cargo.toml + lib.rs here so
+	# their workspace compiles. Without this, `ln -s` would collide and
+	# force a full re-extraction on every cold start.
+	rm -rf /usr/local/server/src/function/*
+
 	symlink_failed=false
 	for item in /mnt/code/*; do
 		# Skip archive files and marker
@@ -19,20 +67,13 @@ if [ -f "/mnt/code/.extracted" ]; then
 		esac
 		ln -s "$item" /usr/local/server/src/function/ || symlink_failed=true
 	done
-	shopt -u dotglob
 
 	if [ "$symlink_failed" = true ]; then
 		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Symlink failed, falling back to extraction. \e[0m"
-		rm -f /usr/local/server/src/function/*
-		if [ -f /mnt/code/code.tar ]; then
-			tar -xf /mnt/code/code.tar -C /usr/local/server/src/function
-		elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
-			tar -zxf /mnt/code/code.tar.gz -C /usr/local/server/src/function
-		else
-			echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code archive not found. \e[0m"
-			exit 1
-		fi
+		rm -rf /usr/local/server/src/function/*
+		extract_code_archive /usr/local/server/src/function
 	fi
+	shopt -u dotglob
 
 	end=$(awk '{print $1}' /proc/uptime)
 	elapsed=$(awk "BEGIN{printf \"%.3f\", $end - $start}")
@@ -46,14 +87,7 @@ else
 
 	# Extract code from mounted volume to function folder
 	start=$(awk '{print $1}' /proc/uptime)
-	if [ -f /mnt/code/code.tar ]; then
-		tar -xf /mnt/code/code.tar -C /usr/local/server/src/function
-	elif [ -f /mnt/code/code.tar.gz ] || [ -f /mnt/code/code.gz ]; then
-		tar -zxf /mnt/code/code.tar.gz -C /usr/local/server/src/function
-	else
-		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code archive not found. \e[0m"
-		exit 1
-	fi
+	extract_code_archive /usr/local/server/src/function
 
 	end=$(awk '{print $1}' /proc/uptime)
 	elapsed=$(awk "BEGIN{printf \"%.3f\", $end - $start}")
