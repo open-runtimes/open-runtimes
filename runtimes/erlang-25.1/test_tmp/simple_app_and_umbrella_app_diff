@@ -1,0 +1,99 @@
+Only in server2: apps
+Only in server: _checkouts
+diff --color -ra server/config/sys.config server2/config/sys.config
+1,7c1,2
+< [%% Kernel/logger
+<     {kernel, [
+<         {logger, [
+<             {handler, default, logger_std_h, #{}}
+<         ]}
+<         %%, {logger_level, info}
+<     ]}
+---
+> [
+>   {server2, []}
+diff --color -ra server/config/vm.args server2/config/vm.args
+1c1,6
+< -sname server
+---
+> -sname server2
+> 
+> -setcookie server2_cookie
+> 
+> +K true
+> +A30
+diff --color -ra server/README.md server2/README.md
+1c1
+< server
+---
+> server2
+diff --color -ra server/rebar.config server2/rebar.config
+1,2d0
+< % {erl_first_files, ["plugins/my/src/my.erl"]}.
+< 
+3a2
+> {deps, []}.
+5,36c4,20
+< {deps, [
+<     {jsone,  "1.6.1"},   %% JSON Encode/Decode
+<     {cowboy, "2.9.0"}    %% HTTP Server
+< ]}.
+< 
+< {plugins, [my, configure]}.
+< % {plugins_dir, "{{root_dir}}/plugins"}.
+< % {plugins, [{my, "./plugins/my"}]}.
+< % {plugins, [{my, {git_subdir, "file:///usr/code/server/plugins/my", {branch, "master"}, "plugins/my"}}]}.
+< 
+< {shell, [
+<   % {config, "config/sys.config"},
+<     {apps, [server]}
+< ]}.
+< 
+< {relx, [
+<     {release, {server, "1.0.0"}, [server]},
+<     {vm_args, "config/vm.args"},
+<     {sys_config, "config/sys.config"},
+<     {dev_mode, true},
+<     {include_erts, false},
+<     {extended_start_script, true}
+< ]}.
+< 
+< {profiles, [
+<     {prod, [
+<         {relx, [
+<             {dev_mode, false},
+<             {include_erts, true},
+<             {include_src, false}
+<         ]}
+<     ]}
+---
+> {relx, [{release, {server2, "0.1.0"},
+>          [server2,
+>           sasl]},
+> 
+>         {mode, dev},
+> 
+>         %% automatically picked up if the files
+>         %% exist but can be set manually, which
+>         %% is required if the names aren't exactly
+>         %% sys.config and vm.args
+>         {sys_config, "./config/sys.config"},
+>         {vm_args, "./config/vm.args"}
+> 
+>         %% the .src form of the configuration files do
+>         %% not require setting RELX_REPLACE_OS_VARS
+>         %% {sys_config_src, "./config/sys.config.src"},
+>         %% {vm_args_src, "./config/vm.args.src"}
+39c23,32
+< %% vim: ft=erlang
+---
+> {profiles, [{prod, [{relx,
+>                      [%% prod is the default mode when prod
+>                       %% profile is used, so does not have
+>                       %% to be explicitly included like this
+>                       {mode, prod}
+>
+>                       %% use minimal mode to exclude ERTS
+>                       %% {mode, minimal}
+>                      ]
+>             }]}]}.
