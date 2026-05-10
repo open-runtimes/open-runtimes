@@ -3,12 +3,36 @@ package io.openruntimes.kotlin
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.ToNumberPolicy
-import io.javalin.Javalin
-import io.javalin.http.Context
+import io.netty.bootstrap.ServerBootstrap
+import io.netty.buffer.Unpooled
+import io.netty.channel.ChannelFutureListener
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelInitializer
+import io.netty.channel.ChannelOption
+import io.netty.channel.SimpleChannelInboundHandler
+import io.netty.channel.epoll.Epoll
+import io.netty.channel.epoll.EpollEventLoopGroup
+import io.netty.channel.epoll.EpollServerSocketChannel
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.util.concurrent.DefaultEventExecutorGroup
+import io.netty.channel.socket.SocketChannel
+import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.handler.codec.http.DefaultFullHttpResponse
+import io.netty.handler.codec.http.FullHttpRequest
+import io.netty.handler.codec.http.HttpHeaderNames
+import io.netty.handler.codec.http.HttpHeaderValues
+import io.netty.handler.codec.http.HttpObjectAggregator
+import io.netty.handler.codec.http.HttpResponseStatus
+import io.netty.handler.codec.http.HttpServerCodec
+import io.netty.handler.codec.http.HttpUtil
+import io.netty.handler.codec.http.HttpVersion
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.nio.charset.StandardCharsets
+import kotlin.reflect.KFunction
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberFunctions
@@ -17,267 +41,313 @@ import kotlin.time.Duration.Companion.seconds
 val gson: Gson = GsonBuilder().serializeNulls().create()
 val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
 
-suspend fun main() {
-    println("HTTP server successfully started!")
-
-    Javalin
-        .create { config ->
-            config.maxRequestSize = 20L * 1024 * 1024
-        }.start(3000)
-        .get("/*") { runBlocking { execute(it) } }
-        .post("/*") { runBlocking { execute(it) } }
-        .put("/*") { runBlocking { execute(it) } }
-        .delete("/*") { runBlocking { execute(it) } }
-        .patch("/*") { runBlocking { execute(it) } }
-        .options("/*") { runBlocking { execute(it) } }
-        .head("/*") { runBlocking { execute(it) } }
+private val serverSecret: String = System.getenv("OPEN_RUNTIMES_SECRET") ?: ""
+private val enforcedHeaders: Map<String, Any> = run {
+    val json = System.getenv("OPEN_RUNTIMES_HEADERS")
+    if (json.isNullOrEmpty()) emptyMap()
+    else gsonInternal.fromJson(json, MutableMap::class.java) as Map<String, Any>
 }
 
-suspend fun execute(ctx: Context) {
-    if (ctx.path() == "/__opr/health") {
-        ctx.status(200).result("OK")
-        return
+private var cachedMethod: KFunction<*>? = null
+private var cachedInstance: Any? = null
+private var classLoadError: String? = null
+
+private fun loadUserClass() {
+    val entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT")
+    try {
+        val className = entrypoint.substring(0, entrypoint.length - 3).replace('/', '.')
+        val classToLoad = Class.forName("io.openruntimes.kotlin.$className").kotlin
+        cachedMethod = classToLoad.memberFunctions.find { it.name == "main" }
+        if (cachedMethod == null) {
+            throw NoSuchMethodException("Function signature invalid. Did you forget to export a 'main' function?")
+        }
+        cachedInstance = classToLoad.createInstance()
+    } catch (e: ClassNotFoundException) {
+        classLoadError = "Class not found: ${e.message}"
+    } catch (e: NoSuchMethodException) {
+        classLoadError = e.message ?: "Function signature invalid."
+    } catch (e: Exception) {
+        classLoadError = "Failed to load module: ${e.message}"
     }
-    if (ctx.path() == "/__opr/timings") {
-        val timings = java.io.File("/mnt/telemetry/timings.txt").readText()
-        ctx.contentType("text/plain; charset=utf-8").result(timings)
-        return
+}
+
+suspend fun main() {
+    loadUserClass()
+
+    val useEpoll = Epoll.isAvailable()
+    val boss = if (useEpoll) EpollEventLoopGroup(1) else NioEventLoopGroup(1)
+    val workers = if (useEpoll) EpollEventLoopGroup() else NioEventLoopGroup()
+    val channelClass = if (useEpoll) EpollServerSocketChannel::class.java else NioServerSocketChannel::class.java
+    val handlerGroup = DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors() * 16)
+
+    try {
+        val bootstrap = ServerBootstrap()
+            .group(boss, workers)
+            .channel(channelClass)
+            .childHandler(object : ChannelInitializer<SocketChannel>() {
+                override fun initChannel(channel: SocketChannel) {
+                    channel.pipeline()
+                        .addLast(HttpServerCodec())
+                        .addLast(HttpObjectAggregator(20 * 1024 * 1024))
+                        .addLast(handlerGroup, RequestHandler())
+                }
+            })
+            .option(ChannelOption.SO_BACKLOG, 1024)
+            .childOption(ChannelOption.SO_KEEPALIVE, true)
+            .childOption(ChannelOption.TCP_NODELAY, true)
+
+        val future = bootstrap.bind(3000).sync()
+        println("HTTP server successfully started!")
+        future.channel().closeFuture().sync()
+    } finally {
+        handlerGroup.shutdownGracefully()
+        boss.shutdownGracefully()
+        workers.shutdownGracefully()
+    }
+}
+
+private fun sendResponse(
+    ctx: ChannelHandlerContext,
+    keepAlive: Boolean,
+    status: HttpResponseStatus,
+    body: ByteArray,
+    headers: Map<String, String> = emptyMap()
+) {
+    val response = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(body))
+    response.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, body.size)
+    for ((key, value) in headers) {
+        response.headers().set(key, value)
+    }
+    if (keepAlive) {
+        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE)
+        ctx.writeAndFlush(response)
+    } else {
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
+    }
+}
+
+class RequestHandler : SimpleChannelInboundHandler<FullHttpRequest>() {
+    override fun channelRead0(ctx: ChannelHandlerContext, request: FullHttpRequest) {
+        val uri = request.uri()
+        val questionMark = uri.indexOf('?')
+        val path = if (questionMark >= 0) uri.substring(0, questionMark) else uri
+        val keepAlive = HttpUtil.isKeepAlive(request)
+
+        if (path == "/__opr/health") {
+            sendResponse(ctx, keepAlive, HttpResponseStatus.OK, "OK".toByteArray(StandardCharsets.UTF_8))
+            return
+        }
+
+        if (path == "/__opr/timings") {
+            val timings = java.io.File("/mnt/telemetry/timings.txt").readText()
+            sendResponse(
+                ctx, keepAlive, HttpResponseStatus.OK,
+                timings.toByteArray(StandardCharsets.UTF_8),
+                mapOf("content-type" to "text/plain; charset=utf-8")
+            )
+            return
+        }
+
+        val method = request.method().name()
+        val bodyBinary = ByteArray(request.content().readableBytes())
+        request.content().readBytes(bodyBinary)
+
+        val requestHeaders = mutableMapOf<String, String>()
+        for (entry in request.headers()) {
+            requestHeaders[entry.key.lowercase()] = entry.value
+        }
+
+        val queryString = if (questionMark >= 0) uri.substring(questionMark + 1) else ""
+
+        runBlocking {
+            try {
+                execute(ctx, keepAlive, method, path, queryString, bodyBinary, requestHeaders)
+            } catch (e: Exception) {
+                val sw = StringWriter()
+                val pw = PrintWriter(sw)
+                e.printStackTrace(pw)
+                sendResponse(ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, ByteArray(0))
+            }
+        }
     }
 
-    val logger = RuntimeLogger(ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"))
+    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
+        ctx.close()
+    }
+}
+
+suspend fun execute(
+    ctx: ChannelHandlerContext,
+    keepAlive: Boolean,
+    method: String,
+    path: String,
+    queryString: String,
+    bodyBinary: ByteArray,
+    requestHeaders: MutableMap<String, String>
+) {
+    val logger = RuntimeLogger(
+        requestHeaders["x-open-runtimes-logging"],
+        requestHeaders["x-open-runtimes-log-id"]
+    )
+
     try {
-        action(logger, ctx)
+        var safeTimeout = -1
+        val timeoutHeader = requestHeaders["x-open-runtimes-timeout"] ?: ""
+        if (timeoutHeader.isNotEmpty()) {
+            var invalid = false
+            try {
+                safeTimeout = timeoutHeader.toInt()
+            } catch (e: NumberFormatException) {
+                invalid = true
+            }
+
+            if (invalid || safeTimeout < 0) {
+                sendResponse(ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, "Header \"x-open-runtimes-timeout\" must be an integer greater than 0.".toByteArray(StandardCharsets.UTF_8))
+                return
+            }
+        }
+
+        val secretHeader = requestHeaders["x-open-runtimes-secret"] ?: ""
+
+        if (serverSecret != "" && secretHeader != serverSecret) {
+            sendResponse(ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, "Unauthorized. Provide correct \"x-open-runtimes-secret\" header.".toByteArray(StandardCharsets.UTF_8))
+            return
+        }
+
+        val headers = mutableMapOf<String, String>()
+        for ((key, value) in requestHeaders) {
+            if (!key.startsWith("x-open-runtimes-")) {
+                headers[key] = value
+            }
+        }
+
+        for ((key, value) in enforcedHeaders) {
+            headers[key.lowercase()] = "$value"
+        }
+
+        val protoHeader = requestHeaders["x-forwarded-proto"] ?: "http"
+        val defaultPort = if (protoHeader == "https") "443" else "80"
+        val hostHeader = requestHeaders["host"] ?: ""
+
+        val host: String
+        val port: Int
+
+        if (hostHeader.contains(":")) {
+            host = hostHeader.split(":")[0]
+            port = hostHeader.split(":")[1].toInt()
+        } else {
+            host = hostHeader
+            port = defaultPort.toInt()
+        }
+
+        val query = HashMap<String, String>()
+        for (param in queryString.split("&")) {
+            val pair = param.split("=", limit = 2)
+            if (pair.isNotEmpty() && pair[0].isNotEmpty()) {
+                val value = if (pair.size == 2) pair[1] else ""
+                query[pair[0]] = value
+            }
+        }
+
+        var url = "$protoHeader://$host"
+        if (port != defaultPort.toInt()) {
+            url += ":$port"
+        }
+        url += path
+        if (queryString.isNotEmpty()) {
+            url += "?$queryString"
+        }
+
+        val runtimeRequest = RuntimeRequest(method, protoHeader, host, port, path, query, queryString, headers, bodyBinary, url)
+        val runtimeResponse = RuntimeResponse()
+        val runtimeContext = RuntimeContext(runtimeRequest, runtimeResponse, logger)
+
+        logger.overrideNativeLogs()
+
+        var output: RuntimeOutput? = null
+
+        if (classLoadError != null) {
+            runtimeContext.error(classLoadError!!)
+            logger.revertNativeLogs()
+            output = runtimeContext.res.text("", 503, mutableMapOf())
+        }
+
+        if (output == null && cachedMethod != null && cachedInstance != null) {
+            try {
+                if (safeTimeout > 0) {
+                    output = withTimeoutOrNull(safeTimeout.seconds) {
+                        if (cachedMethod!!.isSuspend) {
+                            cachedMethod!!.callSuspend(cachedInstance, runtimeContext) as RuntimeOutput
+                        } else {
+                            cachedMethod!!.call(cachedInstance, runtimeContext) as RuntimeOutput
+                        }
+                    }
+
+                    if (output == null) {
+                        runtimeContext.error("Execution timed out.")
+                        output = runtimeContext.res.text("", 500)
+                    }
+                } else {
+                    output = if (cachedMethod!!.isSuspend) {
+                        cachedMethod!!.callSuspend(cachedInstance, runtimeContext) as RuntimeOutput
+                    } else {
+                        cachedMethod!!.call(cachedInstance, runtimeContext) as RuntimeOutput
+                    }
+                }
+            } catch (e: Exception) {
+                val sw = StringWriter()
+                val pw = PrintWriter(sw)
+                e.printStackTrace(pw)
+                runtimeContext.error(sw.toString())
+                output = runtimeContext.res.text("", 500, mutableMapOf())
+            } finally {
+                logger.revertNativeLogs()
+            }
+        }
+
+        if (output == null) {
+            runtimeContext.error("Return statement missing. return context.res.empty() if no response is expected.")
+            output = runtimeContext.res.text("", 500, mutableMapOf())
+        }
+
+        val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap()
+
+        if (resHeaders["content-type"] == null) {
+            resHeaders["content-type"] = "text/plain"
+        }
+
+        if (!resHeaders["content-type"]!!.startsWith("multipart/")) {
+            resHeaders["content-type"] = resHeaders["content-type"]!!.lowercase()
+            if (!resHeaders["content-type"]!!.contains("charset=")) {
+                resHeaders["content-type"] += "; charset=utf-8"
+            }
+        }
+
+        val responseHeaders = mutableMapOf<String, String>()
+        resHeaders.forEach { (key, value) ->
+            if (!key.startsWith("x-open-runtimes-")) {
+                responseHeaders[key] = value
+            }
+        }
+        responseHeaders["x-open-runtimes-log-id"] = logger.id ?: ""
+
+        logger.end()
+
+        sendResponse(ctx, keepAlive, HttpResponseStatus.valueOf(output.statusCode), output.body, responseHeaders)
+
     } catch (e: Exception) {
         val sw = StringWriter()
         val pw = PrintWriter(sw)
         e.printStackTrace(pw)
 
-        val message = sw.toString()
-
-        ctx.header("x-open-runtimes-log-id", logger.id ?: "")
-
-        logger.write(arrayOf(message), RuntimeLogger.TYPE_ERROR, false)
-        logger.end()
-
-        ctx.status(500).result("")
-    }
-}
-
-suspend fun action(
-    logger: RuntimeLogger,
-    ctx: Context,
-) {
-    var safeTimeout = -1
-    val timeout = ctx.header("x-open-runtimes-timeout") ?: ""
-    if (timeout.isNotEmpty()) {
-        var invalid = false
         try {
-            safeTimeout = timeout.toInt()
-        } catch (e: NumberFormatException) {
-            invalid = true
-        }
+            logger.write(arrayOf(sw.toString()), RuntimeLogger.TYPE_ERROR, false)
+            logger.end()
+        } catch (_: IOException) {}
 
-        if (invalid || safeTimeout < 0) {
-            ctx.status(500).result("Header \"x-open-runtimes-timeout\" must be an integer greater than 0.")
-            return
-        }
-    }
-
-    val secret = ctx.header("x-open-runtimes-secret") ?: ""
-    val serverSecret = System.getenv("OPEN_RUNTIMES_SECRET") ?: ""
-
-    if (serverSecret != "" && secret != serverSecret) {
-        ctx.status(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
-        return
-    }
-
-    val bodyBinary = ctx.bodyAsBytes()
-    val headers = mutableMapOf<String, String>()
-    val method = ctx.method()
-
-    for (entry in ctx.headerMap().entries.iterator()) {
-        val header = entry.key.lowercase()
-        if (!(header.startsWith("x-open-runtimes-"))) {
-            headers[header] = entry.value
-        }
-    }
-
-    var enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS")
-    if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
-        enforcedHeadersString = "{}"
-    }
-    val enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, MutableMap::class.java)
-
-    for (entry in enforcedHeaders.entries.iterator()) {
-        val header = "${entry.key}".lowercase()
-        headers[header] = "${entry.value}"
-    }
-
-    val hostHeader = ctx.header("host") ?: ""
-    val protoHeader = ctx.header("x-forwarded-proto") ?: "http"
-
-    val defaultPort = if (protoHeader == "https") "443" else "80"
-
-    val host: String
-    val port: Int
-
-    if (hostHeader.contains(":")) {
-        host = hostHeader.split(":")[0]
-        port = hostHeader.split(":")[1].toInt()
-    } else {
-        host = hostHeader
-        port = defaultPort.toInt()
-    }
-
-    val path = ctx.path()
-    val queryString = ctx.queryString() ?: ""
-    val query = HashMap<String, String>()
-
-    for (param in queryString.split("&")) {
-        val pair = param.split("=", limit = 2)
-
-        if (pair.isNotEmpty() && pair[0].isNotEmpty()) {
-            val value = if (pair.size == 2) pair[1] else ""
-            query[pair[0]] = value
-        }
-    }
-
-    var url = "$protoHeader://$host"
-
-    if (port != defaultPort.toInt()) {
-        url += ":$port"
-    }
-
-    url += path
-
-    if (!queryString.isEmpty()) {
-        url += "?$queryString"
-    }
-
-    val runtimeRequest =
-        RuntimeRequest(
-            method,
-            protoHeader,
-            host,
-            port,
-            path,
-            query,
-            queryString,
-            headers,
-            bodyBinary,
-            url,
+        sendResponse(
+            ctx, keepAlive, HttpResponseStatus.INTERNAL_SERVER_ERROR, ByteArray(0),
+            mapOf("x-open-runtimes-log-id" to (logger.id ?: ""))
         )
-    val runtimeResponse = RuntimeResponse()
-    val context = RuntimeContext(runtimeRequest, runtimeResponse, logger)
-
-    logger.overrideNativeLogs()
-
-    var output: RuntimeOutput? = null
-    var classMethod: kotlin.reflect.KFunction<*>? = null
-    var instance: Any? = null
-
-    val entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT")
-
-    // Guard: Try to load module
-    try {
-        val className =
-            entrypoint
-                .substring(0, entrypoint.length - 3)
-                .replace('/', '.')
-
-        val classToLoad = Class.forName("io.openruntimes.kotlin.$className").kotlin
-        classMethod = classToLoad.memberFunctions.find { it.name == "main" }
-        if (classMethod == null) {
-            throw NoSuchMethodException("Function signature invalid. Did you forget to export a 'main' function?")
-        }
-        instance = classToLoad.createInstance()
-    } catch (e: ClassNotFoundException) {
-        context.error("Class not found: ${e.message}")
-        logger.revertNativeLogs()
-        output = context.res.text("", 503, mutableMapOf())
-    } catch (e: NoSuchMethodException) {
-        context.error(e.message ?: "Function signature invalid. Did you forget to export a 'main' function?")
-        logger.revertNativeLogs()
-        output = context.res.text("", 503, mutableMapOf())
-    } catch (e: InstantiationException) {
-        context.error("Failed to create instance: ${e.message}")
-        logger.revertNativeLogs()
-        output = context.res.text("", 503, mutableMapOf())
-    } catch (e: IllegalAccessException) {
-        context.error("Access denied: ${e.message}")
-        logger.revertNativeLogs()
-        output = context.res.text("", 503, mutableMapOf())
-    } catch (e: Exception) {
-        context.error("Failed to load module: ${e.message}")
-        logger.revertNativeLogs()
-        output = context.res.text("", 503, mutableMapOf())
     }
-
-    // Execute user function
-    if (output == null && classMethod != null && instance != null) {
-        try {
-            if (safeTimeout > 0) {
-                output =
-                    withTimeoutOrNull(safeTimeout.seconds) {
-                        if (classMethod.isSuspend) {
-                            classMethod.callSuspend(instance, context) as RuntimeOutput
-                        } else {
-                            classMethod.call(instance, context) as RuntimeOutput
-                        }
-                    }
-
-                if (output == null) {
-                    context.error("Execution timed out.")
-                    output = context.res.text("", 500)
-                }
-            } else {
-                output =
-                    if (classMethod.isSuspend) {
-                        classMethod.callSuspend(instance, context) as RuntimeOutput
-                    } else {
-                        classMethod.call(instance, context) as RuntimeOutput
-                    }
-            }
-        } catch (e: Exception) {
-            val sw = StringWriter()
-            val pw = PrintWriter(sw)
-            e.printStackTrace(pw)
-
-            context.error(sw.toString())
-            output = context.res.text("", 500, mutableMapOf())
-        } finally {
-            logger.revertNativeLogs()
-        }
-    }
-
-    if (output == null) {
-        context.error("Return statement missing. return context.res.empty() if no response is expected.")
-        output = context.res.text("", 500, mutableMapOf())
-    }
-
-    val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap()
-
-    if (resHeaders["content-type"] == null) {
-        resHeaders["content-type"] = "text/plain"
-    }
-
-    if (!resHeaders["content-type"]!!.startsWith("multipart/")) {
-        resHeaders["content-type"] = resHeaders["content-type"]!!.lowercase()
-
-        if (!resHeaders["content-type"]!!.contains("charset=")) {
-            resHeaders["content-type"] += "; charset=utf-8"
-        }
-    }
-
-    resHeaders.forEach { (key, value) ->
-        if (!key.startsWith("x-open-runtimes-")) {
-            ctx.header(key, value)
-        }
-    }
-
-    ctx.header("x-open-runtimes-log-id", logger.id ?: "")
-
-    logger.end()
-
-    ctx.status(output.statusCode).result(output.body)
 }

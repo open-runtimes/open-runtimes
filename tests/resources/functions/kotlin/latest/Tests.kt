@@ -229,8 +229,8 @@ When you can have two!
                     ),
                 )
 
-                context.log(String(CharArray(9000) { 'A' }))
-                context.error(String(CharArray(9000) { 'B' }))
+                context.log(CharArray(9000) { 'A' }.concatToString())
+                context.error(CharArray(9000) { 'B' }.concatToString())
 
                 return context.res.text("")
             }
@@ -310,6 +310,6 @@ When you can have two!
             result[index * 2 + 1] = (lower + (if (lower < 10) 48 else 65 - 10)).toChar()
         }
 
-        return kotlin.text.String(result)
+        return result.concatToString()
     }
 }

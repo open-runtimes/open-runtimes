@@ -14,9 +14,10 @@ repositories {
 }
 
 dependencies {
-	implementation "io.javalin:javalin:6.1.3"
-	implementation "org.slf4j:slf4j-simple:2.0.10"
+	implementation 'io.netty:netty-codec-http:4.1.115.Final'
+	implementation 'io.netty:netty-transport-native-epoll:4.1.115.Final:linux-x86_64'
 	implementation 'com.google.code.gson:gson:2.9.0'
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 task buildJar(type: Jar) {
@@ -27,7 +28,7 @@ task buildJar(type: Jar) {
 		)
 	}
 	from {
-		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+		configurations.runtimeClasspath.collect { File file -> file.isDirectory() ? file : zipTree(file) }
 	} {
 		exclude "META-INF/**"
 	}

@@ -11,9 +11,10 @@ repositories {
 }
 
 dependencies {
-	implementation "io.javalin:javalin:4.6.8"
-	implementation "org.slf4j:slf4j-simple:2.0.10"
+	implementation 'io.netty:netty-codec-http:4.1.115.Final'
+	implementation 'io.netty:netty-transport-native-epoll:4.1.115.Final:linux-x86_64'
 	implementation 'com.google.code.gson:gson:2.9.0'
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 task buildJar(type: Jar) {
