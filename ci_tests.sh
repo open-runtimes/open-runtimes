@@ -12,7 +12,7 @@ bash ci-runtime-prepare.sh
 bash ci-runtime-build.sh
 
 LATEST_VERSION=$(yq ".$RUNTIME.versions[0]" ci/runtimes.toml)
-if [ "$VERSION" = "$LATEST_VERSION" ]; then
+if [ -z "$ENFORCED_RUNTIME" ] && [ "$VERSION" = "$LATEST_VERSION" ]; then
 	echo "Running formatter ..."
 
 	cd "./runtimes/$RUNTIME_FOLDER"
@@ -39,13 +39,17 @@ if [ "$VERSION" = "$LATEST_VERSION" ]; then
 		cd ../../../../
 	fi
 else
-	echo "Skipping formatter. Formatter runs only in: $RUNTIME-$LATEST_VERSION"
+	echo "Skipping formatter. Formatter runs only in: $RUNTIME-$LATEST_VERSION, and not for enforced-runtime aliases"
 fi
 
 echo "Running tests ..."
 mkdir -p ./tests/.runtime
 
-if ! [ -z "$ENFORCED_RUNTIME" ]; then
+TEST_RESOURCE_DIR=$(yq ".$RUNTIME.test_resource_dir" ci/runtimes.toml | sed 's/null//')
+
+if [ -n "$TEST_RESOURCE_DIR" ]; then
+	cp -R "./tests/resources/functions/$TEST_RESOURCE_DIR"/* ./tests/.runtime
+elif ! [ -z "$ENFORCED_RUNTIME" ]; then
 	cp -R "./tests/resources/functions/$RUNTIME"/* ./tests/.runtime
 else
 	cp -R "./tests/resources/functions/$RUNTIME_FOLDER/latest"/* ./tests/.runtime
@@ -97,8 +101,17 @@ if [ -n "$ENTRYPOINT_NO_EXPORT" ] && [ -f "$ENTRYPOINT_NO_EXPORT" ]; then
 		bash -c "$BUILD_SCRIPT \"$INSTALL_COMMAND\""
 fi
 
-# Build with all cleanup disabled (baseline for modclean + NFT comparison)
+# Build with all cleanup disabled (baseline for modclean + NFT comparison).
+TEST_CLEANUP_VARIANTS=false
 if [[ "$TEST_CLASS" == SSR/* ]]; then
+	case "$RUNTIME_FOLDER" in
+	node | bun | deno)
+		TEST_CLEANUP_VARIANTS=true
+		;;
+	esac
+fi
+
+if [[ "$TEST_CLEANUP_VARIANTS" == "true" ]]; then
 	echo "Building cleanup-disabled baseline..."
 	mkdir -p modclean-disabled-build/src
 	tar --exclude='./modclean-disabled-build' --exclude='./nft-build' -cf - . | tar -xf - -C modclean-disabled-build/src
