@@ -35,6 +35,7 @@ jobs:
             const matrix = {
               include: [
                 // Flutter
+                { ID: "flutter-3.44", RUNTIME: "flutter", VERSION: "3.44", IMAGE: "openruntimes/flutter:v5-3.44", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "flutter-3.41", RUNTIME: "flutter", VERSION: "3.41", IMAGE: "openruntimes/flutter:v5-3.41", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "flutter-3.24", RUNTIME: "flutter", VERSION: "3.24", IMAGE: "openruntimes/flutter:v5-3.24", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "flutter-3.27", RUNTIME: "flutter", VERSION: "3.27", IMAGE: "openruntimes/flutter:v5-3.27", ARCH: "linux/amd64,linux/arm64" },
