@@ -297,6 +297,8 @@ const action = async (logger, req, res) => {
   return send(res, output.statusCode, output.body);
 };
 
-server.listen(3000, undefined, undefined, () => {
-  console.log("HTTP server successfully started!");
+Logger.ready.then(() => {
+  server.listen(3000, undefined, undefined, () => {
+    console.log("HTTP server successfully started!");
+  });
 });
