@@ -181,8 +181,10 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 
   if (contentTypeValue.contains('charset=')) {
     encoding = Encoding.getByName(contentTypeValue.split('charset=')[1]);
-  } else if (!contentTypeValue.startsWith('multipart/') &&
-      !contentTypeValue.startsWith('image/')) {
+  } else if (contentTypeValue.startsWith('text/') ||
+      contentTypeValue.startsWith('application/json') ||
+      contentTypeValue.startsWith('application/xml') ||
+      contentTypeValue.startsWith('application/javascript')) {
     contentTypeValue += '; charset=utf-8';
     encoding = Encoding.getByName('utf-8');
   }
