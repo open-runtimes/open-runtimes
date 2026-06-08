@@ -149,7 +149,7 @@ fi
 
 # Tools test
 echo "Testing tools ..."
-REQUIRED_TOOLS="tar --help && unzip --help && command -v mksquashfs && command -v unsquashfs"
+REQUIRED_TOOLS="tar --help && unzip --help && mksquashfs -help && unsquashfs -help"
 docker run \
 	--platform linux/x86_64 \
 	--name open-runtimes-test-tools \
