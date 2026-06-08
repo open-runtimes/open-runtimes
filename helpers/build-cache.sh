@@ -22,7 +22,11 @@ if [ -f /cache/stores.sqfs ]; then
 	echo '[build cache] Hit.'
 	rm -rf "$CACHE_ROOT"
 	mkdir -p "$CACHE_ROOT"
-	unsquashfs -q -f -d "$CACHE_ROOT" /cache/stores.sqfs
+	if ! unsquashfs -q -f -d "$CACHE_ROOT" /cache/stores.sqfs; then
+		echo '[build cache] Warning: failed to restore cache, starting fresh.'
+		rm -rf "$CACHE_ROOT"
+		mkdir -p "$CACHE_ROOT"
+	fi
 else
 	echo '[build cache] Miss.'
 fi
