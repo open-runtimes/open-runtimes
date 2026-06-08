@@ -27,8 +27,6 @@ if [ -f /cache/stores.sqfs ]; then
 		rm -rf "$CACHE_ROOT"
 		mkdir -p "$CACHE_ROOT"
 	fi
-else
-	echo '[build cache] Miss.'
 fi
 
 set +e
