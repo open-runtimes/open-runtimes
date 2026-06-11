@@ -1,0 +1,2246 @@
+{
+  "group": {
+    "default": {
+      "targets": [
+        "node",
+        "deno",
+        "python",
+        "python-ml",
+        "dart",
+        "flutter",
+        "ruby",
+        "rust",
+        "php",
+        "swift",
+        "kotlin",
+        "java",
+        "cpp",
+        "dotnet",
+        "go",
+        "bun",
+        "static"
+      ]
+    },
+    "node": {
+      "targets": [
+        "node-22",
+        "node-23",
+        "node-24",
+        "node-25",
+        "node-21_0",
+        "node-20_0",
+        "node-19_0",
+        "node-18_0",
+        "node-16_0"
+      ]
+    },
+    "deno": {
+      "targets": [
+        "deno-2_6",
+        "deno-2_5",
+        "deno-2_0",
+        "deno-1_46",
+        "deno-1_40",
+        "deno-1_35",
+        "deno-1_24",
+        "deno-1_21"
+      ]
+    },
+    "python": {
+      "targets": [
+        "python-3_14",
+        "python-3_13",
+        "python-3_12",
+        "python-3_11",
+        "python-3_10",
+        "python-3_9",
+        "python-3_8"
+      ]
+    },
+    "python-ml": {
+      "targets": [
+        "python-ml-3_13",
+        "python-ml-3_12",
+        "python-ml-3_11"
+      ]
+    },
+    "dart": {
+      "targets": [
+        "dart-3_12",
+        "dart-3_11",
+        "dart-3_10",
+        "dart-3_9",
+        "dart-3_8",
+        "dart-3_5",
+        "dart-3_3",
+        "dart-3_1",
+        "dart-3_0",
+        "dart-2_19",
+        "dart-2_18",
+        "dart-2_17",
+        "dart-2_16"
+      ]
+    },
+    "flutter": {
+      "targets": [
+        "flutter-3_44",
+        "flutter-3_41",
+        "flutter-3_38",
+        "flutter-3_35",
+        "flutter-3_32",
+        "flutter-3_29",
+        "flutter-3_27",
+        "flutter-3_24"
+      ]
+    },
+    "ruby": {
+      "targets": [
+        "ruby-4_0",
+        "ruby-3_4",
+        "ruby-3_3",
+        "ruby-3_2",
+        "ruby-3_1",
+        "ruby-3_0"
+      ]
+    },
+    "rust": {
+      "targets": [
+        "rust-1_83"
+      ]
+    },
+    "php": {
+      "targets": [
+        "php-8_4",
+        "php-8_3",
+        "php-8_2",
+        "php-8_1",
+        "php-8_0"
+      ]
+    },
+    "swift": {
+      "targets": [
+        "swift-6_2",
+        "swift-5_10",
+        "swift-5_9",
+        "swift-5_8"
+      ]
+    },
+    "kotlin": {
+      "targets": [
+        "kotlin-2_3",
+        "kotlin-2_0",
+        "kotlin-1_9",
+        "kotlin-1_8",
+        "kotlin-1_6"
+      ]
+    },
+    "java": {
+      "targets": [
+        "java-22",
+        "java-25",
+        "java-21_0",
+        "java-18_0",
+        "java-17_0",
+        "java-11_0",
+        "java-8_0"
+      ]
+    },
+    "cpp": {
+      "targets": [
+        "cpp-17",
+        "cpp-20",
+        "cpp-23"
+      ]
+    },
+    "dotnet": {
+      "targets": [
+        "dotnet-10",
+        "dotnet-8_0",
+        "dotnet-7_0",
+        "dotnet-6_0"
+      ]
+    },
+    "go": {
+      "targets": [
+        "go-1_26",
+        "go-1_25",
+        "go-1_24",
+        "go-1_23"
+      ]
+    },
+    "bun": {
+      "targets": [
+        "bun-1_3",
+        "bun-1_2",
+        "bun-1_1",
+        "bun-1_0"
+      ]
+    },
+    "static": {
+      "targets": [
+        "static-1"
+      ]
+    }
+  },
+  "target": {
+    "node-22": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/node/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/node/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "node:22.22.0-alpine3.23",
+        "INSTALL_SSR_TOOLING": "true"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/node:v5-22${TAG_SUFFIX}"
+      ]
+    },
+    "node-23": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/node/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/node/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "node:23.11.1-alpine3.22",
+        "INSTALL_SSR_TOOLING": "true"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/node:v5-23${TAG_SUFFIX}"
+      ]
+    },
+    "node-24": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/node/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/node/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "node:24.13.0-alpine3.23",
+        "INSTALL_SSR_TOOLING": "true"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/node:v5-24${TAG_SUFFIX}"
+      ]
+    },
+    "node-25": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/node/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/node/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "node:25.5.0-alpine3.23",
+        "INSTALL_SSR_TOOLING": "true"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/node:v5-25${TAG_SUFFIX}"
+      ]
+    },
+    "node-21_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/node/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/node/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "node:21.7.3-alpine3.20"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/node:v5-21.0${TAG_SUFFIX}"
+      ]
+    },
+    "node-20_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/node/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/node/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "node:20.17.0-alpine3.20"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/node:v5-20.0${TAG_SUFFIX}"
+      ]
+    },
+    "node-19_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/node/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/node/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "node:19.9.0-alpine3.18"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/node:v5-19.0${TAG_SUFFIX}"
+      ]
+    },
+    "node-18_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/node/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/node/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "node:18.20.8-alpine3.20"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/node:v5-18.0${TAG_SUFFIX}"
+      ]
+    },
+    "node-16_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/node/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/node/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "node:16.20.2-alpine3.18",
+        "PNPM_VERSION": "8"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/node:v5-16.0${TAG_SUFFIX}"
+      ]
+    },
+    "deno-2_6": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/deno/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/deno/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "denoland/deno:alpine-2.6.7"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/deno:v5-2.6${TAG_SUFFIX}"
+      ]
+    },
+    "deno-2_5": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/deno/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/deno/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "denoland/deno:alpine-2.5.7"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/deno:v5-2.5${TAG_SUFFIX}"
+      ]
+    },
+    "deno-2_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/deno/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/deno/versions/latest",
+        "version": "./runtimes/deno/versions/2.0"
+      },
+      "args": {
+        "BASE_IMAGE": "denoland/deno:alpine-2.0.6"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/deno:v5-2.0${TAG_SUFFIX}"
+      ]
+    },
+    "deno-1_46": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/deno/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/deno/versions/latest",
+        "version": "./runtimes/deno/versions/1.46"
+      },
+      "args": {
+        "BASE_IMAGE": "denoland/deno:alpine-1.46.3"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/deno:v5-1.46${TAG_SUFFIX}"
+      ]
+    },
+    "deno-1_40": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/deno/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/deno/versions/latest",
+        "version": "./runtimes/deno/versions/1.40"
+      },
+      "args": {
+        "BASE_IMAGE": "denoland/deno:alpine-1.40.5"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/deno:v5-1.40${TAG_SUFFIX}"
+      ]
+    },
+    "deno-1_35": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/deno/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/deno/versions/latest",
+        "version": "./runtimes/deno/versions/1.35"
+      },
+      "args": {
+        "BASE_IMAGE": "denoland/deno:alpine-1.35.3"
+      },
+      "platforms": [
+        "linux/amd64"
+      ],
+      "tags": [
+        "${REGISTRY}/deno:v5-1.35${TAG_SUFFIX}"
+      ]
+    },
+    "deno-1_24": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/deno/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/deno/versions/latest",
+        "version": "./runtimes/deno/versions/1.24"
+      },
+      "args": {
+        "BASE_IMAGE": "denoland/deno:alpine-1.24.3"
+      },
+      "platforms": [
+        "linux/amd64"
+      ],
+      "tags": [
+        "${REGISTRY}/deno:v5-1.24${TAG_SUFFIX}"
+      ]
+    },
+    "deno-1_21": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/deno/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/deno/versions/latest",
+        "version": "./runtimes/deno/versions/1.21"
+      },
+      "args": {
+        "BASE_IMAGE": "denoland/deno:alpine-1.21.3"
+      },
+      "platforms": [
+        "linux/amd64"
+      ],
+      "tags": [
+        "${REGISTRY}/deno:v5-1.21${TAG_SUFFIX}"
+      ]
+    },
+    "python-3_14": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.14.2-alpine3.23"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python:v5-3.14${TAG_SUFFIX}"
+      ]
+    },
+    "python-3_13": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.13.11-alpine3.23"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python:v5-3.13${TAG_SUFFIX}"
+      ]
+    },
+    "python-3_12": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.12.12-alpine3.22"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python:v5-3.12${TAG_SUFFIX}"
+      ]
+    },
+    "python-3_11": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.11.14-alpine3.22"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python:v5-3.11${TAG_SUFFIX}"
+      ]
+    },
+    "python-3_10": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.10.19-alpine3.22"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python:v5-3.10${TAG_SUFFIX}"
+      ]
+    },
+    "python-3_9": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.9.25-alpine3.22"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python:v5-3.9${TAG_SUFFIX}"
+      ]
+    },
+    "python-3_8": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.8.20-alpine3.20"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python:v5-3.8${TAG_SUFFIX}"
+      ]
+    },
+    "python-ml-3_13": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./runtimes/python/versions/ml-3.13"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.13.11-bookworm",
+        "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python-ml:v5-3.13${TAG_SUFFIX}"
+      ]
+    },
+    "python-ml-3_12": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./runtimes/python/versions/ml-3.12"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.12.12-bookworm",
+        "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python-ml:v5-3.12${TAG_SUFFIX}"
+      ]
+    },
+    "python-ml-3_11": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/python/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/python/versions/latest",
+        "version": "./runtimes/python/versions/ml-3.11"
+      },
+      "args": {
+        "BASE_IMAGE": "python:3.11.14-bookworm",
+        "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/python-ml:v5-3.11${TAG_SUFFIX}"
+      ]
+    },
+    "dart-3_12": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.12"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.12.0"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.12${TAG_SUFFIX}"
+      ]
+    },
+    "dart-3_11": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.11"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.11.1"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.11${TAG_SUFFIX}"
+      ]
+    },
+    "dart-3_10": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.10"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.10.8"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.10${TAG_SUFFIX}"
+      ]
+    },
+    "dart-3_9": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.9"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.9.4"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.9${TAG_SUFFIX}"
+      ]
+    },
+    "dart-3_8": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.8"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.8.3"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.8${TAG_SUFFIX}"
+      ]
+    },
+    "dart-3_5": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.5"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.5.4"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.5${TAG_SUFFIX}"
+      ]
+    },
+    "dart-3_3": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.3"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.3.4"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.3${TAG_SUFFIX}"
+      ]
+    },
+    "dart-3_1": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.1"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.1.5"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.1${TAG_SUFFIX}"
+      ]
+    },
+    "dart-3_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.0"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.0.7"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.0${TAG_SUFFIX}"
+      ]
+    },
+    "dart-2_19": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/2.19"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:2.19.6"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-2.19${TAG_SUFFIX}"
+      ]
+    },
+    "dart-2_18": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/2.18"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:2.18.7"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-2.18${TAG_SUFFIX}"
+      ]
+    },
+    "dart-2_17": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/2.17"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:2.17.7"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-2.17${TAG_SUFFIX}"
+      ]
+    },
+    "dart-2_16": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dart/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/2.16"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:2.16.2"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-2.16${TAG_SUFFIX}"
+      ]
+    },
+    "flutter-3_44": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/flutter/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/flutter/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ghcr.io/adrianjagielak/flutter:3.44.0"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/flutter:v5-3.44${TAG_SUFFIX}"
+      ]
+    },
+    "flutter-3_41": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/flutter/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/flutter/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ghcr.io/cirruslabs/flutter:3.41.2"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/flutter:v5-3.41${TAG_SUFFIX}"
+      ]
+    },
+    "flutter-3_38": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/flutter/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/flutter/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ghcr.io/cirruslabs/flutter:3.38.9"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/flutter:v5-3.38${TAG_SUFFIX}"
+      ]
+    },
+    "flutter-3_35": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/flutter/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/flutter/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ghcr.io/cirruslabs/flutter:3.35.7"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/flutter:v5-3.35${TAG_SUFFIX}"
+      ]
+    },
+    "flutter-3_32": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/flutter/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/flutter/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ghcr.io/cirruslabs/flutter:3.32.6"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/flutter:v5-3.32${TAG_SUFFIX}"
+      ]
+    },
+    "flutter-3_29": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/flutter/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/flutter/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ghcr.io/cirruslabs/flutter:3.29.3"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/flutter:v5-3.29${TAG_SUFFIX}"
+      ]
+    },
+    "flutter-3_27": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/flutter/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/flutter/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ghcr.io/cirruslabs/flutter:3.27.3"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/flutter:v5-3.27${TAG_SUFFIX}"
+      ]
+    },
+    "flutter-3_24": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/flutter/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/flutter/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ghcr.io/cirruslabs/flutter:3.24.5"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/flutter:v5-3.24${TAG_SUFFIX}"
+      ]
+    },
+    "ruby-4_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/ruby/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/ruby/versions/latest",
+        "version": "./runtimes/ruby/versions/4.0"
+      },
+      "args": {
+        "BASE_IMAGE": "ruby:4.0.1-alpine3.22"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/ruby:v5-4.0${TAG_SUFFIX}"
+      ]
+    },
+    "ruby-3_4": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/ruby/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/ruby/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ruby:3.4.8-alpine3.22"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/ruby:v5-3.4${TAG_SUFFIX}"
+      ]
+    },
+    "ruby-3_3": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/ruby/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/ruby/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ruby:3.3.10-alpine3.22"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/ruby:v5-3.3${TAG_SUFFIX}"
+      ]
+    },
+    "ruby-3_2": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/ruby/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/ruby/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ruby:3.2.10-alpine3.22"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/ruby:v5-3.2${TAG_SUFFIX}"
+      ]
+    },
+    "ruby-3_1": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/ruby/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/ruby/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "ruby:3.1.7-alpine3.20"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/ruby:v5-3.1${TAG_SUFFIX}"
+      ]
+    },
+    "ruby-3_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/ruby/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/ruby/versions/latest",
+        "version": "./runtimes/ruby/versions/3.0"
+      },
+      "args": {
+        "BASE_IMAGE": "ruby:3.0.7-alpine3.16"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/ruby:v5-3.0${TAG_SUFFIX}"
+      ]
+    },
+    "rust-1_83": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/rust/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/rust/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "rust:1.83-alpine"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/rust:v5-1.83${TAG_SUFFIX}"
+      ]
+    },
+    "php-8_4": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/php/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/php/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "php:8.4.17-cli-alpine3.23",
+        "PHP_SWOOLE_VERSION": "v6.1.1",
+        "BUILD_PACKAGES": "linux-headers"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/php:v5-8.4${TAG_SUFFIX}"
+      ]
+    },
+    "php-8_3": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/php/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/php/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "php:8.3.27-cli-alpine3.21",
+        "BUILD_BASE_IMAGE": "php:8.3.30-cli-alpine3.22",
+        "PHP_SWOOLE_VERSION": "v5.1.2",
+        "BUILD_PACKAGES": "linux-headers"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/php:v5-8.3${TAG_SUFFIX}"
+      ]
+    },
+    "php-8_2": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/php/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/php/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "php:8.2.30-cli-alpine3.22",
+        "PHP_SWOOLE_VERSION": "v5.1.2",
+        "BUILD_PACKAGES": "linux-headers"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/php:v5-8.2${TAG_SUFFIX}"
+      ]
+    },
+    "php-8_1": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/php/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/php/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "php:8.1.34-cli-alpine3.22",
+        "PHP_SWOOLE_VERSION": "v5.1.2"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/php:v5-8.1${TAG_SUFFIX}"
+      ]
+    },
+    "php-8_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/php/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/php/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "php:8.0.30-cli-alpine3.16",
+        "PHP_SWOOLE_VERSION": "v4.7.0"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/php:v5-8.0${TAG_SUFFIX}"
+      ]
+    },
+    "swift-6_2": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/swift/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/swift/versions/latest",
+        "version": "./runtimes/swift/versions/6.2"
+      },
+      "args": {
+        "BASE_IMAGE": "swift:6.2.3-jammy"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/swift:v5-6.2${TAG_SUFFIX}"
+      ]
+    },
+    "swift-5_10": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/swift/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/swift/versions/latest",
+        "version": "./runtimes/swift/versions/5.10"
+      },
+      "args": {
+        "BASE_IMAGE": "swift:5.10.1-jammy"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/swift:v5-5.10${TAG_SUFFIX}"
+      ]
+    },
+    "swift-5_9": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/swift/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/swift/versions/latest",
+        "version": "./runtimes/swift/versions/5.9"
+      },
+      "args": {
+        "BASE_IMAGE": "swift:5.9.2-jammy"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/swift:v5-5.9${TAG_SUFFIX}"
+      ]
+    },
+    "swift-5_8": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/swift/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/swift/versions/latest",
+        "version": "./runtimes/swift/versions/5.8"
+      },
+      "args": {
+        "BASE_IMAGE": "swift:5.8.1-jammy"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/swift:v5-5.8${TAG_SUFFIX}"
+      ]
+    },
+    "kotlin-2_3": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/kotlin/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/kotlin/versions/latest",
+        "version": "./runtimes/kotlin/versions/2.3"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:25-jdk-alpine"
+      },
+      "platforms": [
+        "linux/amd64"
+      ],
+      "tags": [
+        "${REGISTRY}/kotlin:v5-2.3${TAG_SUFFIX}"
+      ]
+    },
+    "kotlin-2_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/kotlin/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/kotlin/versions/latest",
+        "version": "./runtimes/kotlin/versions/2.0"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:22-jdk-alpine"
+      },
+      "platforms": [
+        "linux/amd64"
+      ],
+      "tags": [
+        "${REGISTRY}/kotlin:v5-2.0${TAG_SUFFIX}"
+      ]
+    },
+    "kotlin-1_9": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/kotlin/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/kotlin/versions/latest",
+        "version": "./runtimes/kotlin/versions/1.9"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:19-jdk-alpine"
+      },
+      "platforms": [
+        "linux/amd64"
+      ],
+      "tags": [
+        "${REGISTRY}/kotlin:v5-1.9${TAG_SUFFIX}"
+      ]
+    },
+    "kotlin-1_8": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/kotlin/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/kotlin/versions/latest",
+        "version": "./runtimes/kotlin/versions/1.8"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:19-jdk-alpine"
+      },
+      "platforms": [
+        "linux/amd64"
+      ],
+      "tags": [
+        "${REGISTRY}/kotlin:v5-1.8${TAG_SUFFIX}"
+      ]
+    },
+    "kotlin-1_6": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/kotlin/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/kotlin/versions/latest",
+        "version": "./runtimes/kotlin/versions/1.6"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:18-jdk-alpine"
+      },
+      "platforms": [
+        "linux/amd64"
+      ],
+      "tags": [
+        "${REGISTRY}/kotlin:v5-1.6${TAG_SUFFIX}"
+      ]
+    },
+    "java-22": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/java/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/java/versions/latest",
+        "version": "./runtimes/java/versions/22"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:22-jdk-jammy",
+        "SYSTEM_PACKAGES": "curl"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/java:v5-22${TAG_SUFFIX}"
+      ]
+    },
+    "java-25": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/java/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/java/versions/latest",
+        "version": "./runtimes/java/versions/25"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:25-jdk-jammy",
+        "SYSTEM_PACKAGES": "curl"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/java:v5-25${TAG_SUFFIX}"
+      ]
+    },
+    "java-21_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/java/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/java/versions/latest",
+        "version": "./runtimes/java/versions/21.0"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:21-jdk-jammy"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/java:v5-21.0${TAG_SUFFIX}"
+      ]
+    },
+    "java-18_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/java/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/java/versions/latest",
+        "version": "./runtimes/java/versions/18.0"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:18-jdk-jammy"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/java:v5-18.0${TAG_SUFFIX}"
+      ]
+    },
+    "java-17_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/java/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/java/versions/latest",
+        "version": "./runtimes/java/versions/17.0"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:17-jdk-jammy"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/java:v5-17.0${TAG_SUFFIX}"
+      ]
+    },
+    "java-11_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/java/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/java/versions/latest",
+        "version": "./runtimes/java/versions/11.0"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:11-jdk-jammy"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/java:v5-11.0${TAG_SUFFIX}"
+      ]
+    },
+    "java-8_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/java/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/java/versions/latest",
+        "version": "./runtimes/java/versions/8.0"
+      },
+      "args": {
+        "BASE_IMAGE": "eclipse-temurin:8-jdk-jammy"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/java:v5-8.0${TAG_SUFFIX}"
+      ]
+    },
+    "cpp-17": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/cpp/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/cpp/versions/latest",
+        "version": "./runtimes/cpp/versions/17"
+      },
+      "args": {
+        "BASE_IMAGE": "alpine:3.23.3"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/cpp:v5-17${TAG_SUFFIX}"
+      ]
+    },
+    "cpp-20": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/cpp/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/cpp/versions/latest",
+        "version": "./runtimes/cpp/versions/20"
+      },
+      "args": {
+        "BASE_IMAGE": "alpine:3.23.3"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/cpp:v5-20${TAG_SUFFIX}"
+      ]
+    },
+    "cpp-23": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/cpp/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/cpp/versions/latest",
+        "version": "./runtimes/cpp/versions/23"
+      },
+      "args": {
+        "BASE_IMAGE": "alpine:3.23.3"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm/v6",
+        "linux/arm/v7",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/cpp:v5-23${TAG_SUFFIX}"
+      ]
+    },
+    "dotnet-10": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dotnet/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dotnet/versions/latest",
+        "version": "./runtimes/dotnet/versions/10"
+      },
+      "args": {
+        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:10.0.102-alpine3.23"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dotnet:v5-10${TAG_SUFFIX}"
+      ]
+    },
+    "dotnet-8_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dotnet/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dotnet/versions/latest",
+        "version": "./runtimes/dotnet/versions/8.0"
+      },
+      "args": {
+        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:8.0.417-alpine3.23"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dotnet:v5-8.0${TAG_SUFFIX}"
+      ]
+    },
+    "dotnet-7_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dotnet/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dotnet/versions/latest",
+        "version": "./runtimes/dotnet/versions/7.0"
+      },
+      "args": {
+        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:7.0.410-alpine3.19"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dotnet:v5-7.0${TAG_SUFFIX}"
+      ]
+    },
+    "dotnet-6_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/dotnet/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dotnet/versions/latest",
+        "version": "./runtimes/dotnet/versions/6.0"
+      },
+      "args": {
+        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:6.0.428-1-alpine3.20"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dotnet:v5-6.0${TAG_SUFFIX}"
+      ]
+    },
+    "go-1_26": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/go/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/go/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "golang:1.26.0-alpine3.23"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/go:v5-1.26${TAG_SUFFIX}"
+      ]
+    },
+    "go-1_25": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/go/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/go/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "golang:1.25.6-alpine3.23"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/go:v5-1.25${TAG_SUFFIX}"
+      ]
+    },
+    "go-1_24": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/go/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/go/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "golang:1.24.12-alpine3.23"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/go:v5-1.24${TAG_SUFFIX}"
+      ]
+    },
+    "go-1_23": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/go/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/go/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "golang:1.23.12-alpine3.22"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/go:v5-1.23${TAG_SUFFIX}"
+      ]
+    },
+    "bun-1_3": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/bun/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/bun/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "oven/bun:1.3.8-alpine"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/bun:v5-1.3${TAG_SUFFIX}"
+      ]
+    },
+    "bun-1_2": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/bun/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/bun/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "oven/bun:1.2.23-alpine"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/bun:v5-1.2${TAG_SUFFIX}"
+      ]
+    },
+    "bun-1_1": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/bun/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/bun/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "oven/bun:1.1.45-alpine"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/bun:v5-1.1${TAG_SUFFIX}"
+      ]
+    },
+    "bun-1_0": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/bun/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./runtimes/javascript",
+        "latest": "./runtimes/bun/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "oven/bun:1.0.36-alpine"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/bun:v5-1.0${TAG_SUFFIX}"
+      ]
+    },
+    "static-1": {
+      "inherits": [
+        "_base"
+      ],
+      "dockerfile": "runtimes/static/Dockerfile",
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/static/versions/latest",
+        "version": "./docker/empty"
+      },
+      "args": {
+        "BASE_IMAGE": "joseluisq/static-web-server:2.39.0-alpine"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/static:v5-1${TAG_SUFFIX}"
+      ]
+    }
+  }
+}

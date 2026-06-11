@@ -244,10 +244,10 @@ You will have to create multiple of these for each version of the language you a
 To run your tests locally, go ahead and run the following command in your terminal:
 
 ```bash
-RUNTIME={{Your Runtime}} ENTRYPOINT={{ your entrypoint }} TEST_CLASS=Base ./tests.sh 
+make test ID={{your runtime, e.g. dart-2.12}}
 ```
 
-Replace the curly brackets with the values you set in `.travis.yml` and make sure to run the command in the root of the repository.
+Make sure to run the command in the root of the repository.
 
 If all tests pass then move on to the next step, otherwise you will need to troubleshoot the problem before continuing.
 

@@ -1,7 +1,5 @@
 // @ts-ignore
 import data from "../../../../ci/runtimes.toml";
-import { join } from "path";
-import { readFileSync } from "fs";
 
 export class Local {
   static getRuntimesVersions(): Record<string, string[]> {
@@ -41,43 +39,23 @@ export class Local {
       let runtime: string = entries[0] ?? "";
       let versions: string[] = entries[1] ?? [];
 
-      // Edge case due to "-" in name
-      if (runtime === "python-ml") {
-        runtime = "python";
-        versions = versions.map((version) => `ml-${version}`);
-      }
-
       for (const version of versions) {
-        const dockerFilePath = join(
-          process.cwd(),
-          "..",
-          "..",
-          "..",
-          "runtimes",
-          runtime,
-          "versions",
-          version,
-          "Dockerfile",
-        );
-
-        const dockerFile = readFileSync(dockerFilePath, "utf-8");
-
-        const tagMatch = dockerFile.match(/^FROM\s+([^\s]+)/m);
-        if (!tagMatch || !tagMatch[1]) {
+        // Base images live in the [<runtime>.build.versions] tables of
+        // ci/runtimes.toml (the source docker-bake.json is generated from)
+        const base = data[runtime]?.build?.versions?.[version]?.base;
+        if (!base) {
           throw new Error(
-            `Failed to extract Docker image tag from ${dockerFilePath}`,
+            `Failed to find base image for ${runtime} ${version} in ci/runtimes.toml`,
           );
         }
 
-        const tag = tagMatch[1];
+        // Edge case due to "-" in name: report under the directory layout name
+        const key =
+          runtime === "python-ml"
+            ? `python/ml-${version}`
+            : `${runtime}/${version}`;
 
-        const key = `${runtime}/${version}`;
-
-        if (!dockerVersions[key]) {
-          dockerVersions[key] = [];
-        }
-
-        dockerVersions[key] = tag;
+        dockerVersions[key] = base;
       }
     }
 

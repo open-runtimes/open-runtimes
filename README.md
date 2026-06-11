@@ -105,11 +105,16 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 ├── example
 │   ├── (runtime-specific, like server.js)
 ├── helpers
-│   ├── after-build.sh
-│   ├── before-build.sh
-│   ├── before-start.sh
 │   ├── build.sh
-│   └── start.sh
+│   ├── start.sh
+│   └── lifecycle
+│       ├── build.sh
+│       ├── start.sh
+│       ├── lib.sh
+│       ├── extract.sh
+│       └── compression.sh
+├── hooks
+│   ├── (runtime-specific, like compile.sh)
 ├── docker-compose.yml
 ├── Dockerfile
 ├── README.md
@@ -130,11 +135,18 @@ Structure of `helpers/` directory follows:
 
 | Name               	| Description                                                                                                                                           	|
 |--------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------	|
-| before-build.sh       | Mirroring of function code from mount directory to build directiry. Do changes inside build directory if needed.                                          |
-| after-build.sh       	| Append .open-runtimes file, gzip file, and store into mount directory. Do post-build changes to build output if needed.                                  	|
-| build.sh           	| Shortcut combining `before-build.sh`, your custom build command (like `npm install`), and `after-build.sh`.                                          	    |
-| before-start.sh 	    | Extracting of function build from mount directory into server's directory. Do changes to server directory if needed.                                      |
-| start.sh         	    | Shortcut combining `before-start.sh` and your custom start command (like `npm start`)                                                                     |
+| build.sh           	| Entrypoint running the build lifecycle: stage code, run hooks, run your custom build command (like `npm install`), and package the build output.          |
+| start.sh         	    | Entrypoint running the start lifecycle: extract the build, run hooks, and run your custom start command (like `npm start`).                               |
+| lifecycle/         	| The lifecycle runner shared by all runtimes (staging, archiving, code extraction, compression selection, telemetry).                                      |
+
+Runtime-specific behavior lives in an optional `hooks/` directory next to `helpers/`. A hook is sourced by the lifecycle runner when present, and skipped otherwise:
+
+| Hook               	| Phase                                                                                                                                                  	|
+|--------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| build-prepare.sh      | After code is staged into the build directory, before the build command runs (e.g. create a virtualenv).                                                  |
+| compile.sh         	| After the build command, for compiled languages (e.g. `cargo build`, `gradlew buildJar`).                                                                 |
+| pack.sh            	| Before the build output is archived (e.g. prune `node_modules`, swap in compiled binaries).                                                               |
+| start-prepare.sh   	| After the build is extracted, before the server starts (e.g. activate a virtualenv).                                                                      |
 
 Every request sent to any of the runtimes must have the `x-open-runtimes-secret` header. The value of this header has to match the value of environment variable `OPEN_RUNTIMES_SECRET` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
 

@@ -45,6 +45,7 @@ tests/**/Run
 **/cpp_runtime
 **/cmake_install.cmake
 **/Makefile
+!/Makefile
 
 # .NET
 runtimes/dotnet-*/**/bin

@@ -4,9 +4,9 @@ This guide shows how to add a new version to an existing runtime using Bun 1.3 a
 
 ## Required Changes
 
-You need to update three components when adding a new runtime version:
+Adding a version is a config-only change to `ci/runtimes.toml`, plus regenerating the bake file.
 
-### 1. Update `ci/runtimes.toml`
+### 1. Add the version to the test list
 
 Add the new version to the `versions` array (newer versions first):
 
@@ -18,41 +18,40 @@ entry = "tests.ts"
 # ...
 ```
 
-### 2. Create Version-Specific Dockerfile
+### 2. Add the version to the build table
 
-Create a new directory and Dockerfile for the version:
+Add a matching entry under `[bun.build.versions]` (newer versions first):
 
-```bash
-mkdir runtimes/bun/versions/1.3
-```
-
-Create a Dockerfile in `runtimes/bun/versions/1.3/Dockerfile`:
-
-```dockerfile
-# syntax = devthefuture/dockerfile-x:1.4.2
-FROM oven/bun:1.3.0-alpine
-
-INCLUDE ./base-before
-INCLUDE ./bun
-INCLUDE ./base-after
-```
-
-> You can copy `Dockerfile` contents from another version, just changing the version in image.
-
-Always include most accurate version of image, including patch version, linux distro, and it's version to the best accuracy possible. You can search what's available on [Docker Hub](https://hub.docker.com/).
-
-### 3. Update `.github/workflows/publish.yaml`
-
-Add new entries to the runtime's matrix section (newer versions first):
-
-```yaml
-# Bun
-- ID: bun-1.3
-  RUNTIME: bun
-  VERSION: "1.3"
-  IMAGE: openruntimes/bun:v5-1.3
-  ARCH: "linux/amd64,linux/arm64"
+```diff
+[bun.build.versions]
++"1.3" = { base = "oven/bun:1.3.0-alpine" }
+"1.2" = { base = "oven/bun:1.2.23-alpine" }
 # ...
 ```
 
-> You can copy release configuration of existing version, and just change numbers
+Always pin the most accurate base image version available, including patch version, linux distro, and its version. You can search what's available on [Docker Hub](https://hub.docker.com/).
+
+Optional per-version keys:
+
+| Key         | Purpose                                                                  |
+|-------------|--------------------------------------------------------------------------|
+| `args`      | Build args for the runtime's `runtimes/<runtime>/Dockerfile` (e.g. `PNPM_VERSION`) |
+| `platforms` | Override the published platforms for this version                        |
+| `version_dir` | Overlay directory under `runtimes/<runtime>/versions/` when it differs from the version name (e.g. python `ml-3.13`) |
+| `build_base`  | Builder-stage base image when it differs from `base` (php only)        |
+
+If the version needs extra files baked into the image (custom `build.gradle`, different sources), put them in `runtimes/<runtime>/versions/<version>/` — they overlay `versions/latest/` during the image build.
+
+### 3. Regenerate docker-bake.json
+
+```bash
+bun ci/bake.ts
+```
+
+CI rejects the change if `docker-bake.json` is out of date or if the test and build version lists drift apart.
+
+### 4. Test locally (optional)
+
+```bash
+make test ID=bun-1.3
+```

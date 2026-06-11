@@ -103,28 +103,28 @@ Before running the tests, make sure to install all required PHP libraries:
 docker run --rm --interactive --tty --volume $PWD:/app composer install
 ```
 
-You also need to install [yq](https://github.com/mikefarah/yq):
+You also need to install [bun](https://bun.sh):
 
 ```bash
-brew install yq
+brew install oven-sh/bun/bun
 ```
-
-> Alternatively run `go install github.com/mikefarah/yq/v4@latest` if brew isn't installed
 
 To run test for a runtime, get runtime name (folder name) and execute below command:
 
 ```bash
-bash tests.sh go-1.23
+make test ID=go-1.23
 ```
 
-> Replace `go-1.23` with runtime name that you want to test
+> Replace `go-1.23` with runtime name that you want to test. This builds the
+> image with `docker buildx bake`, stages test fixtures, and runs the PHP test
+> suite through `tests/compose.yaml` (see `bun ci/test.ts --help` for flags).
 
 ## Formatting
 
 Run following command to run formatter for any runtime runtime:
 
 ```
-sh formatter.sh node
+make format ID=node
 ```
 
 > Replace `node` with runtime name that you want to test
