@@ -101,29 +101,26 @@ function stageFixtures(): void {
     // Prevent Docker from creating the archive path as a directory
     writeFileSync(join(runtimeDir, 'code.tar.gz'), '');
 
-    // Variant build directories (copies of the staged fixture, excluding the
-    // variant dirs themselves to avoid recursive copies)
-    const variantDirs = ['no-export-build', 'modclean-disabled-build', 'nft-build'];
-    const stageVariant = (variant: string) => {
-        const dir = join(runtimeDir, variant, 'src');
-        mkdirSync(dir, { recursive: true });
-        for (const item of readdirSync(runtimeDir)) {
-            if (variantDirs.includes(item)) {
-                continue;
-            }
-            cpSync(join(runtimeDir, item), join(dir, item), { recursive: true });
-        }
-    };
-    if (entry.COMPOSE_PROFILES.includes('no-export')) {
-        stageVariant('no-export-build');
-    }
-    if (entry.COMPOSE_PROFILES.includes('cleanup-variants')) {
-        stageVariant('modclean-disabled-build');
-        stageVariant('nft-build');
-    }
-
     rmSync('/tmp/logs', { recursive: true, force: true });
     mkdirSync('/tmp/logs', { recursive: true });
+}
+
+// Variant build directories: copies of tests/.runtime, staged AFTER the main
+// build so the main build's /mnt/code does not contain them (java/kotlin/dotnet
+// compile everything under the build directory — a nested copy of the sources
+// produces duplicate-class errors). Matches the legacy ci_tests.sh ordering.
+const variantDirs = ['no-export-build', 'modclean-disabled-build', 'nft-build'];
+
+function stageVariant(variant: string): void {
+    const runtimeDir = join(repoRoot, 'tests/.runtime');
+    const dir = join(runtimeDir, variant, 'src');
+    mkdirSync(dir, { recursive: true });
+    for (const item of readdirSync(runtimeDir)) {
+        if (variantDirs.includes(item)) {
+            continue;
+        }
+        cpSync(join(runtimeDir, item), join(dir, item), { recursive: true });
+    }
 }
 
 function down(): void {
@@ -147,6 +144,11 @@ if (args.includes('--image-only')) {
     process.exit(0);
 }
 
+// The compose services join the external `openruntimes` network — make sure it
+// exists before the first compose invocation (the formatter runs early)
+down();
+Bun.spawnSync(['docker', 'network', 'create', 'openruntimes'], { env: composeEnv });
+
 if (args.includes('--format-write')) {
     runFormatter('write');
     process.exit(0);
@@ -161,8 +163,6 @@ if (entry.RUN_FORMATTER && !args.includes('--skip-formatter')) {
 
 console.log('Staging test fixtures ...');
 stageFixtures();
-down();
-Bun.spawnSync(['docker', 'network', 'create', 'openruntimes'], { env: composeEnv });
 
 console.log('Testing tools ...');
 run([...compose, 'run', '--rm', 'tools']);
@@ -171,12 +171,15 @@ console.log('Running build ...');
 run([...compose, 'run', '--rm', 'build']);
 if (entry.COMPOSE_PROFILES.includes('no-export')) {
     console.log('Building no-export entrypoint test ...');
+    stageVariant('no-export-build');
     run([...compose, 'run', '--rm', 'build-no-export']);
 }
 if (entry.COMPOSE_PROFILES.includes('cleanup-variants')) {
     console.log('Building cleanup-disabled baseline ...');
+    stageVariant('modclean-disabled-build');
     run([...compose, 'run', '--rm', 'build-baseline']);
     console.log('Building NFT-enabled test ...');
+    stageVariant('nft-build');
     run([...compose, 'run', '--rm', 'build-nft']);
 }
 

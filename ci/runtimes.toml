@@ -147,7 +147,9 @@ test = "Serverless/CPP.php"
 
 [dotnet]
 entry = "Tests.cs"
-entry_no_export = "NoExport.cs"
+# No entry_no_export: the dotnet runtime binds `new Handler()` at compile time
+# and compiles every .cs file, so entrypoint-based no-export detection (503 on
+# missing export) cannot work with the current build model.
 versions = ["10", "8.0", "7.0", "6.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "dotnet tool install --global csharpier", check = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier check .'", write = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier format .'" }
