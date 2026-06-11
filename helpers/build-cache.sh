@@ -36,13 +36,10 @@ set -e
 
 if [ "$status" -eq 0 ] && [ -d "$CACHE_ROOT" ]; then
 	processors=$(nproc 2>/dev/null || echo 1)
-	mksquashfs_log=$(mktemp)
-	if mksquashfs "$CACHE_ROOT" /cache/stores.sqfs -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors" >"$mksquashfs_log" 2>&1; then
-		rm -f "$mksquashfs_log"
+	if mksquashfs_output=$(mksquashfs "$CACHE_ROOT" /cache/stores.sqfs -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors" 2>&1); then
 		echo '[build cache] Saved.'
 	else
-		cat "$mksquashfs_log"
-		rm -f "$mksquashfs_log"
+		printf '%s\n' "$mksquashfs_output"
 		echo '[build cache] Warning: failed to save cache, build result preserved.'
 	fi
 fi
