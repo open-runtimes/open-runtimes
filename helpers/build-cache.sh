@@ -36,7 +36,7 @@ set -e
 
 if [ "$status" -eq 0 ] && [ -d "$CACHE_ROOT" ]; then
 	processors=$(nproc 2>/dev/null || echo 1)
-	if mksquashfs "$CACHE_ROOT" /cache/stores.sqfs -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors"; then
+	if mksquashfs "$CACHE_ROOT" /cache/stores.sqfs -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors" >/dev/null 2>&1; then
 		echo '[build cache] Saved.'
 	else
 		echo '[build cache] Warning: failed to save cache, build result preserved.'
