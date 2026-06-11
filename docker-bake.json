@@ -183,11 +183,14 @@
     }
   },
   "target": {
+    "_node": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk update && apk add bash nss font-noto ca-certificates gcompat\n\n# https://pnpm.io/installation#compatibility (node 16 needs pnpm 8)\nARG PNPM_VERSION=9.15.9\nRUN npm install pnpm@$${PNPM_VERSION} modclean@2.1.2 -g\n\nRUN npm ci && npm cache clean --force\n\n# Additional tooling needed for Node runtimes used for SSR (Sites)\n# alpine-sdk - basic tooling like git, gcc, g++, make...\n# python3-dev - Install Python (useful to some NPM libs)\n# py3-pip - Python package manager\n# gcompat - Pre-requirement for Bun\nARG INSTALL_SSR_TOOLING=\"false\"\nARG BUN_VERSION=1.3.2\nRUN if [ \"$INSTALL_SSR_TOOLING\" = \"true\" ]; then \\\n        apk add alpine-sdk python3-dev py3-pip gcompat && \\\n        npm install bun@$${BUN_VERSION} -g; \\\n    fi\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"node --max_old_space_size=8192 src/server.js\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "node-22": {
       "inherits": [
-        "_base"
+        "_base",
+        "_node"
       ],
-      "dockerfile": "runtimes/node/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -208,9 +211,9 @@
     },
     "node-23": {
       "inherits": [
-        "_base"
+        "_base",
+        "_node"
       ],
-      "dockerfile": "runtimes/node/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -231,9 +234,9 @@
     },
     "node-24": {
       "inherits": [
-        "_base"
+        "_base",
+        "_node"
       ],
-      "dockerfile": "runtimes/node/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -254,9 +257,9 @@
     },
     "node-25": {
       "inherits": [
-        "_base"
+        "_base",
+        "_node"
       ],
-      "dockerfile": "runtimes/node/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -277,9 +280,9 @@
     },
     "node-21_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_node"
       ],
-      "dockerfile": "runtimes/node/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -299,9 +302,9 @@
     },
     "node-20_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_node"
       ],
-      "dockerfile": "runtimes/node/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -321,9 +324,9 @@
     },
     "node-19_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_node"
       ],
-      "dockerfile": "runtimes/node/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -343,9 +346,9 @@
     },
     "node-18_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_node"
       ],
-      "dockerfile": "runtimes/node/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -367,9 +370,9 @@
     },
     "node-16_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_node"
       ],
-      "dockerfile": "runtimes/node/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -390,11 +393,14 @@
         "${REGISTRY}/node:v5-16.0${TAG_SUFFIX}"
       ]
     },
+    "_deno": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk update && apk add bash nss font-noto ca-certificates nodejs-current npm python3 make g++ gcc git\n\n# Deno's alpine image bundles a glibc-shim libgcc_s.so.1 at /usr/local/lib/\n# that conflicts with node's musl-linked expectations. Remove it so node loads\n# the system (alpine) libgcc from /usr/lib instead. Deno stays functional —\n# its binary is statically linked and doesn't need the shim at runtime.\nRUN rm -f /usr/local/lib/libgcc_s.so*\nRUN npm install modclean@2.1.2 -g && \\\n\tif deno --version | head -1 | grep -qE '^deno 2\\.'; then npm install pnpm yarn -g; fi && \\\n\tnpm install --no-save --prefix /usr/local/server @vercel/nft@^0.29.2\n\nENV OPEN_RUNTIMES_ENTRYPOINT=mod.ts\nENV DENO_DIR=/usr/builds/deno-cache\n\n# Pre-populate /usr/local/server/node_modules so the shared SSR preload's\n# `import superjson from \"superjson\"` resolves under --node-modules-dir=manual\n# at runtime. We use deno install against the runtimes/javascript/src/ssr/\n# deno.json import map that's already been overlaid into\n# /usr/local/server/src/ssr/.\n#\n# Only deno 2.x exposes the npm-style `deno install` (with --allow-scripts and\n# --node-modules-dir=auto|manual). On deno 1.x the same subcommand is the\n# CLI-script installer where --node-modules-dir takes only true|false and\n# --allow-scripts doesn't exist, so we skip the step there. Deno 1.x also\n# predates --import (required for the SSR preload) so SSR isn't viable on\n# those versions anyway. Probing --allow-scripts is a clean 2.x-only signal.\nRUN if [ -f /usr/local/server/src/ssr/deno.json ] && \\\n\tdeno install --help 2>/dev/null | grep -q -- '--allow-scripts'; then \\\n\tcp /usr/local/server/src/ssr/deno.json /usr/local/server/deno.json && \\\n\tcd /usr/local/server && deno install --node-modules-dir=auto --allow-scripts && \\\n\trm /usr/local/server/deno.json; \\\n\tfi\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"deno run --allow-run --allow-net --allow-write --allow-read --allow-env src/server.ts\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "deno-2_6": {
       "inherits": [
-        "_base"
+        "_base",
+        "_deno"
       ],
-      "dockerfile": "runtimes/deno/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -414,9 +420,9 @@
     },
     "deno-2_5": {
       "inherits": [
-        "_base"
+        "_base",
+        "_deno"
       ],
-      "dockerfile": "runtimes/deno/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -436,9 +442,9 @@
     },
     "deno-2_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_deno"
       ],
-      "dockerfile": "runtimes/deno/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -458,9 +464,9 @@
     },
     "deno-1_46": {
       "inherits": [
-        "_base"
+        "_base",
+        "_deno"
       ],
-      "dockerfile": "runtimes/deno/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -480,9 +486,9 @@
     },
     "deno-1_40": {
       "inherits": [
-        "_base"
+        "_base",
+        "_deno"
       ],
-      "dockerfile": "runtimes/deno/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -502,9 +508,9 @@
     },
     "deno-1_35": {
       "inherits": [
-        "_base"
+        "_base",
+        "_deno"
       ],
-      "dockerfile": "runtimes/deno/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -523,9 +529,9 @@
     },
     "deno-1_24": {
       "inherits": [
-        "_base"
+        "_base",
+        "_deno"
       ],
-      "dockerfile": "runtimes/deno/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -544,9 +550,9 @@
     },
     "deno-1_21": {
       "inherits": [
-        "_base"
+        "_base",
+        "_deno"
       ],
-      "dockerfile": "runtimes/deno/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -563,11 +569,14 @@
         "${REGISTRY}/deno:v5-1.21${TAG_SUFFIX}"
       ]
     },
+    "_python": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\n# Extra system packages installed before everything else (used by ml variants:\n# \"gcc pkg-config libhdf5-dev\" on a bookworm base)\nARG SYSTEM_PACKAGES=\"\"\nRUN if [ -n \"$SYSTEM_PACKAGES\" ]; then \\\n        if [ -f /etc/alpine-release ]; then apk update && apk add --no-cache $SYSTEM_PACKAGES; \\\n        else apt-get update && apt-get install -y $SYSTEM_PACKAGES; fi; \\\n    fi\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk update && apk add bash alpine-sdk libffi-dev\n    else\n        apt-get update && apt-get install -y bash\n    fi\nEOR\n\n# Install Poetry package manager\nRUN pip3 install --no-cache-dir poetry\n\nENV OPEN_RUNTIMES_ENTRYPOINT=main.py\n\n# Create a virtual environment for the server dependencies\nRUN python3 -m venv server-env\nRUN server-env/bin/pip install --no-cache-dir -r requirements.txt\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "python-3_14": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -587,9 +596,9 @@
     },
     "python-3_13": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -609,9 +618,9 @@
     },
     "python-3_12": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -631,9 +640,9 @@
     },
     "python-3_11": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -653,9 +662,9 @@
     },
     "python-3_10": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -675,9 +684,9 @@
     },
     "python-3_9": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -697,9 +706,9 @@
     },
     "python-3_8": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -719,9 +728,9 @@
     },
     "python-ml-3_13": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -742,9 +751,9 @@
     },
     "python-ml-3_12": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -765,9 +774,9 @@
     },
     "python-ml-3_11": {
       "inherits": [
-        "_base"
+        "_base",
+        "_python"
       ],
-      "dockerfile": "runtimes/python/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -786,11 +795,14 @@
         "${REGISTRY}/python-ml:v5-3.11${TAG_SUFFIX}"
       ]
     },
+    "_dart": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apt-get update && apt-get install -y bash\n\nRUN dart --disable-analytics\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"src/function/server\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "dart-3_12": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -810,9 +822,9 @@
     },
     "dart-3_11": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -832,9 +844,9 @@
     },
     "dart-3_10": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -854,9 +866,9 @@
     },
     "dart-3_9": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -876,9 +888,9 @@
     },
     "dart-3_8": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -898,9 +910,9 @@
     },
     "dart-3_5": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -920,9 +932,9 @@
     },
     "dart-3_3": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -942,9 +954,9 @@
     },
     "dart-3_1": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -964,9 +976,9 @@
     },
     "dart-3_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -986,9 +998,9 @@
     },
     "dart-2_19": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1008,9 +1020,9 @@
     },
     "dart-2_18": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1030,9 +1042,9 @@
     },
     "dart-2_17": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1052,9 +1064,9 @@
     },
     "dart-2_16": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dart"
       ],
-      "dockerfile": "runtimes/dart/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1072,11 +1084,14 @@
         "${REGISTRY}/dart:v5-2.16${TAG_SUFFIX}"
       ]
     },
+    "_flutter": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apt-get update && apt-get install -y bash\n\nRUN dart --disable-analytics\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n\n# Enable web platform\nRUN flutter config --enable-web\n"
+    },
     "flutter-3_44": {
       "inherits": [
-        "_base"
+        "_base",
+        "_flutter"
       ],
-      "dockerfile": "runtimes/flutter/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1096,9 +1111,9 @@
     },
     "flutter-3_41": {
       "inherits": [
-        "_base"
+        "_base",
+        "_flutter"
       ],
-      "dockerfile": "runtimes/flutter/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1118,9 +1133,9 @@
     },
     "flutter-3_38": {
       "inherits": [
-        "_base"
+        "_base",
+        "_flutter"
       ],
-      "dockerfile": "runtimes/flutter/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1140,9 +1155,9 @@
     },
     "flutter-3_35": {
       "inherits": [
-        "_base"
+        "_base",
+        "_flutter"
       ],
-      "dockerfile": "runtimes/flutter/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1162,9 +1177,9 @@
     },
     "flutter-3_32": {
       "inherits": [
-        "_base"
+        "_base",
+        "_flutter"
       ],
-      "dockerfile": "runtimes/flutter/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1184,9 +1199,9 @@
     },
     "flutter-3_29": {
       "inherits": [
-        "_base"
+        "_base",
+        "_flutter"
       ],
-      "dockerfile": "runtimes/flutter/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1206,9 +1221,9 @@
     },
     "flutter-3_27": {
       "inherits": [
-        "_base"
+        "_base",
+        "_flutter"
       ],
-      "dockerfile": "runtimes/flutter/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1228,9 +1243,9 @@
     },
     "flutter-3_24": {
       "inherits": [
-        "_base"
+        "_base",
+        "_flutter"
       ],
-      "dockerfile": "runtimes/flutter/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1248,11 +1263,14 @@
         "${REGISTRY}/flutter:v5-3.24${TAG_SUFFIX}"
       ]
     },
+    "_ruby": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.rb\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk add --update alpine-sdk bash\nRUN gem install bundler\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"bundle exec puma -b tcp://0.0.0.0:3000 -e production\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "ruby-4_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_ruby"
       ],
-      "dockerfile": "runtimes/ruby/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1274,9 +1292,9 @@
     },
     "ruby-3_4": {
       "inherits": [
-        "_base"
+        "_base",
+        "_ruby"
       ],
-      "dockerfile": "runtimes/ruby/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1298,9 +1316,9 @@
     },
     "ruby-3_3": {
       "inherits": [
-        "_base"
+        "_base",
+        "_ruby"
       ],
-      "dockerfile": "runtimes/ruby/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1322,9 +1340,9 @@
     },
     "ruby-3_2": {
       "inherits": [
-        "_base"
+        "_base",
+        "_ruby"
       ],
-      "dockerfile": "runtimes/ruby/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1346,9 +1364,9 @@
     },
     "ruby-3_1": {
       "inherits": [
-        "_base"
+        "_base",
+        "_ruby"
       ],
-      "dockerfile": "runtimes/ruby/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1370,9 +1388,9 @@
     },
     "ruby-3_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_ruby"
       ],
-      "dockerfile": "runtimes/ruby/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1392,11 +1410,14 @@
         "${REGISTRY}/ruby:v5-3.0${TAG_SUFFIX}"
       ]
     },
+    "_rust": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=main.rs\n\nRUN apk update && apk add --no-cache \\\n    bash \\\n    musl-dev \\\n    openssl-dev \\\n    openssl-libs-static \\\n    pkgconfig \\\n    curl\n\nRUN rustup component add rustfmt\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"src/function/rust_runtime\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "rust-1_83": {
       "inherits": [
-        "_base"
+        "_base",
+        "_rust"
       ],
-      "dockerfile": "runtimes/rust/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1414,11 +1435,14 @@
         "${REGISTRY}/rust:v5-1.83${TAG_SUFFIX}"
       ]
     },
+    "_php": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\n# Builder stage uses the same base unless a version pins a different one (8.3)\nARG BUILD_BASE_IMAGE=$${BASE_IMAGE}\n\nFROM $${BUILD_BASE_IMAGE} AS step0\n\n# Extra packages only needed to compile extensions (linux-headers on php >= 8.2)\nARG BUILD_PACKAGES=\"\"\nRUN if [ -n \"$BUILD_PACKAGES\" ]; then apk update && apk add --no-cache $BUILD_PACKAGES; fi\n\nARG PHP_SWOOLE_VERSION\nENV PHP_SWOOLE_VERSION=$PHP_SWOOLE_VERSION\nRUN \\\n  apk add --no-cache --virtual .deps \\\n  make \\\n  automake \\\n  autoconf \\\n  gcc \\\n  g++ \\\n  git \\\n  zlib-dev \\\n  brotli-dev \\\n  yaml-dev \\\n  libmaxminddb-dev \\\n  openssl-dev\n\nRUN docker-php-ext-install sockets\n\nRUN \\\n  ## Swoole Extension\n  git clone --depth 1 --branch $PHP_SWOOLE_VERSION https://github.com/swoole/swoole-src.git && \\\n  cd swoole-src && \\\n  phpize && \\\n  ./configure --enable-http2 --enable-openssl && \\\n  make && make install && \\\n  cd ..\n\n# Stage compiled extensions at a fixed path so the final stage doesn't need to\n# know the PHP-ABI-versioned extension directory name.\nRUN mkdir -p /opt/ext \\\n    && cp \"$(php-config --extension-dir)/swoole.so\" /opt/ext/ \\\n    && (cp \"$(php-config --extension-dir)\"/yasd.so* /opt/ext/ 2>/dev/null || true)\n\nFROM $${BASE_IMAGE} AS final\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.php\n\nRUN \\\n  apk update \\\n  && apk add --no-cache --virtual .deps \\\n  make \\\n  automake \\\n  autoconf \\\n  gcc \\\n  g++ \\\n  curl-dev \\\n  && apk add --no-cache \\\n  libstdc++ \\\n  certbot \\\n  brotli-dev \\\n  yaml-dev \\\n  libmaxminddb-dev \\\n  libgomp \\\n  bash \\\n  && docker-php-ext-install opcache \\\n  && apk del .deps \\\n  && rm -rf /var/cache/apk/*\n\nCOPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer\n\nRUN composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev\nRUN mv vendor vendor-server\n\nCOPY --from=step0 /opt/ext/ /opt/ext/\nRUN cp /opt/ext/* \"$(php-config --extension-dir)/\" && rm -rf /opt/ext\n\n# Enable Extensions\nRUN echo extension=swoole.so >> /usr/local/etc/php/conf.d/swoole.ini\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"php -d memory_limit=8G src/server.php\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "php-8_4": {
       "inherits": [
-        "_base"
+        "_base",
+        "_php"
       ],
-      "dockerfile": "runtimes/php/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1440,9 +1464,9 @@
     },
     "php-8_3": {
       "inherits": [
-        "_base"
+        "_base",
+        "_php"
       ],
-      "dockerfile": "runtimes/php/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1465,9 +1489,9 @@
     },
     "php-8_2": {
       "inherits": [
-        "_base"
+        "_base",
+        "_php"
       ],
-      "dockerfile": "runtimes/php/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1489,9 +1513,9 @@
     },
     "php-8_1": {
       "inherits": [
-        "_base"
+        "_base",
+        "_php"
       ],
-      "dockerfile": "runtimes/php/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1512,9 +1536,9 @@
     },
     "php-8_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_php"
       ],
-      "dockerfile": "runtimes/php/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1535,11 +1559,14 @@
         "${REGISTRY}/php:v5-8.0${TAG_SUFFIX}"
       ]
     },
+    "_swift": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=\n\nRUN apt-get update && apt-get install -y zip bash\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"src/function/Runtime serve --env production --hostname 0.0.0.0 --port 3000\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "swift-6_2": {
       "inherits": [
-        "_base"
+        "_base",
+        "_swift"
       ],
-      "dockerfile": "runtimes/swift/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1559,9 +1586,9 @@
     },
     "swift-5_10": {
       "inherits": [
-        "_base"
+        "_base",
+        "_swift"
       ],
-      "dockerfile": "runtimes/swift/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1581,9 +1608,9 @@
     },
     "swift-5_9": {
       "inherits": [
-        "_base"
+        "_base",
+        "_swift"
       ],
-      "dockerfile": "runtimes/swift/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1603,9 +1630,9 @@
     },
     "swift-5_8": {
       "inherits": [
-        "_base"
+        "_base",
+        "_swift"
       ],
-      "dockerfile": "runtimes/swift/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1623,11 +1650,14 @@
         "${REGISTRY}/swift:v5-5.8${TAG_SUFFIX}"
       ]
     },
+    "_kotlin": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk update && apk add bash\n\nENV OPEN_RUNTIMES_ENTRYPOINT=Index.kt\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"java -jar src/function/kotlin-runtime-1.0.0.jar\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "kotlin-2_3": {
       "inherits": [
-        "_base"
+        "_base",
+        "_kotlin"
       ],
-      "dockerfile": "runtimes/kotlin/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1646,9 +1676,9 @@
     },
     "kotlin-2_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_kotlin"
       ],
-      "dockerfile": "runtimes/kotlin/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1667,9 +1697,9 @@
     },
     "kotlin-1_9": {
       "inherits": [
-        "_base"
+        "_base",
+        "_kotlin"
       ],
-      "dockerfile": "runtimes/kotlin/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1688,9 +1718,9 @@
     },
     "kotlin-1_8": {
       "inherits": [
-        "_base"
+        "_base",
+        "_kotlin"
       ],
-      "dockerfile": "runtimes/kotlin/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1709,9 +1739,9 @@
     },
     "kotlin-1_6": {
       "inherits": [
-        "_base"
+        "_base",
+        "_kotlin"
       ],
-      "dockerfile": "runtimes/kotlin/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1728,11 +1758,14 @@
         "${REGISTRY}/kotlin:v5-1.6${TAG_SUFFIX}"
       ]
     },
+    "_java": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\n# Extra system packages installed before everything else (java >= 22: curl)\nARG SYSTEM_PACKAGES=\"\"\nRUN if [ -n \"$SYSTEM_PACKAGES\" ]; then apt-get update && apt-get install -y $SYSTEM_PACKAGES; fi\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apt-get update && apt-get install -y zip bash\n\nENV OPEN_RUNTIMES_ENTRYPOINT=Index.java\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"java -jar src/function/java-runtime-1.0.0.jar\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "java-22": {
       "inherits": [
-        "_base"
+        "_base",
+        "_java"
       ],
-      "dockerfile": "runtimes/java/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1753,9 +1786,9 @@
     },
     "java-25": {
       "inherits": [
-        "_base"
+        "_base",
+        "_java"
       ],
-      "dockerfile": "runtimes/java/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1776,9 +1809,9 @@
     },
     "java-21_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_java"
       ],
-      "dockerfile": "runtimes/java/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1798,9 +1831,9 @@
     },
     "java-18_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_java"
       ],
-      "dockerfile": "runtimes/java/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1820,9 +1853,9 @@
     },
     "java-17_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_java"
       ],
-      "dockerfile": "runtimes/java/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1842,9 +1875,9 @@
     },
     "java-11_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_java"
       ],
-      "dockerfile": "runtimes/java/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1864,9 +1897,9 @@
     },
     "java-8_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_java"
       ],
-      "dockerfile": "runtimes/java/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1884,11 +1917,14 @@
         "${REGISTRY}/java:v5-8.0${TAG_SUFFIX}"
       ]
     },
+    "_cpp": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.cc\nARG DEBIAN_FRONTEND=noninteractive\nENV DROGON_VERSION=v1.9.7\n\nRUN apk add --no-cache \\\n    git \\\n    gcc \\\n    g++ \\\n    cmake \\\n    make \\\n    openssl \\\n    doxygen \\\n    jsoncpp-dev \\\n    openssl-dev \\\n    zlib-dev \\\n    curl-dev \\\n    util-linux-dev \\\n    bash\n\nRUN git clone --depth 1 --branch $DROGON_VERSION https://github.com/drogonframework/drogon \\\n    && cd drogon \\\n    && git submodule update --init \\\n    && mkdir build \\\n    && cd build \\\n    && cmake -DCMAKE_BUILD_TYPE=Release .. \\\n    && make -j\"$(nproc)\" \\\n    && make install \\\n    && cd / \\\n    && rm -rf /drogon\n\nEXPOSE 3000\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"src/function/cpp_runtime\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "cpp-17": {
       "inherits": [
-        "_base"
+        "_base",
+        "_cpp"
       ],
-      "dockerfile": "runtimes/cpp/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1910,9 +1946,9 @@
     },
     "cpp-20": {
       "inherits": [
-        "_base"
+        "_base",
+        "_cpp"
       ],
-      "dockerfile": "runtimes/cpp/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1934,9 +1970,9 @@
     },
     "cpp-23": {
       "inherits": [
-        "_base"
+        "_base",
+        "_cpp"
       ],
-      "dockerfile": "runtimes/cpp/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1956,11 +1992,14 @@
         "${REGISTRY}/cpp:v5-23${TAG_SUFFIX}"
       ]
     },
+    "_dotnet": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk update && apk add bash\n\nENV OPEN_RUNTIMES_ENTRYPOINT=Index.cs\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"dotnet src/function/DotNetRuntime.dll\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "dotnet-10": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dotnet"
       ],
-      "dockerfile": "runtimes/dotnet/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -1980,9 +2019,9 @@
     },
     "dotnet-8_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dotnet"
       ],
-      "dockerfile": "runtimes/dotnet/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -2002,9 +2041,9 @@
     },
     "dotnet-7_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dotnet"
       ],
-      "dockerfile": "runtimes/dotnet/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -2024,9 +2063,9 @@
     },
     "dotnet-6_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_dotnet"
       ],
-      "dockerfile": "runtimes/dotnet/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -2044,11 +2083,14 @@
         "${REGISTRY}/dotnet:v5-6.0${TAG_SUFFIX}"
       ]
     },
+    "_go": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk update && apk add bash\n\nENV OPEN_RUNTIMES_ENTRYPOINT=main.go\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"src/function/server\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "go-1_26": {
       "inherits": [
-        "_base"
+        "_base",
+        "_go"
       ],
-      "dockerfile": "runtimes/go/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -2068,9 +2110,9 @@
     },
     "go-1_25": {
       "inherits": [
-        "_base"
+        "_base",
+        "_go"
       ],
-      "dockerfile": "runtimes/go/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -2090,9 +2132,9 @@
     },
     "go-1_24": {
       "inherits": [
-        "_base"
+        "_base",
+        "_go"
       ],
-      "dockerfile": "runtimes/go/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -2112,9 +2154,9 @@
     },
     "go-1_23": {
       "inherits": [
-        "_base"
+        "_base",
+        "_go"
       ],
-      "dockerfile": "runtimes/go/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",
@@ -2132,11 +2174,14 @@
         "${REGISTRY}/go:v5-1.23${TAG_SUFFIX}"
       ]
     },
+    "_bun": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.ts\n# Bun 1.0 arm64 includes glibc, whose /usr/lib/libc.so conflicts with musl-dev from g++.\nRUN apk update \\\n  && APK_ADD_FLAGS=\"\" \\\n  && if apk info -e glibc > /dev/null 2>&1; then APK_ADD_FLAGS=\"--force-overwrite\"; fi \\\n  && apk add $${APK_ADD_FLAGS} bash npm nss font-noto ca-certificates python3 make g++ gcc git\nRUN npm install pnpm@9.15.9 yarn modclean@2.1.2 -g\nRUN bun install && npm install --no-save --prefix /usr/local/server @vercel/nft@^0.29.2\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"bun src/server.ts\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "bun-1_3": {
       "inherits": [
-        "_base"
+        "_base",
+        "_bun"
       ],
-      "dockerfile": "runtimes/bun/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -2156,9 +2201,9 @@
     },
     "bun-1_2": {
       "inherits": [
-        "_base"
+        "_base",
+        "_bun"
       ],
-      "dockerfile": "runtimes/bun/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -2178,9 +2223,9 @@
     },
     "bun-1_1": {
       "inherits": [
-        "_base"
+        "_base",
+        "_bun"
       ],
-      "dockerfile": "runtimes/bun/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -2200,9 +2245,9 @@
     },
     "bun-1_0": {
       "inherits": [
-        "_base"
+        "_base",
+        "_bun"
       ],
-      "dockerfile": "runtimes/bun/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./runtimes/javascript",
@@ -2220,11 +2265,14 @@
         "${REGISTRY}/bun:v5-1.0${TAG_SUFFIX}"
       ]
     },
+    "_static": {
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk update && apk add bash apache2-utils\n\n# Directory for configurable fallback files (like 404)\nRUN mkdir -p /mnt/resources\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
     "static-1": {
       "inherits": [
-        "_base"
+        "_base",
+        "_static"
       ],
-      "dockerfile": "runtimes/static/Dockerfile",
       "contexts": {
         "helpers": "./helpers",
         "shared": "./docker/empty",

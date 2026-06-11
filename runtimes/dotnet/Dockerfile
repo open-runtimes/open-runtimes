@@ -1,4 +1,6 @@
-# syntax = devthefuture/dockerfile-x:1.4.2
+# syntax=docker/dockerfile:1
+# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the
+# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 

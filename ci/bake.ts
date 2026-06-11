@@ -37,6 +37,43 @@ const groups: Record<string, { targets: string[] }> = { default: { targets: [] }
 const targets: Record<string, any> = {};
 const errors: string[] = [];
 
+// Resolve `INCLUDE ./path` directives in a family Dockerfile by inlining the
+// referenced fragment (path + ".dockerfile"). The resolved content is embedded
+// in the bake file via `dockerfile-inline`, so no third-party BuildKit
+// frontend is needed.
+const dockerfileCache: Record<string, string> = {};
+
+function resolveDockerfile(runtimeDir: string): string {
+    if (dockerfileCache[runtimeDir]) {
+        return dockerfileCache[runtimeDir];
+    }
+
+    const path = join(repoRoot, 'runtimes', runtimeDir, 'Dockerfile');
+    const resolved = readFileSync(path, 'utf-8')
+        .split('\n')
+        .map((line) => {
+            const include = line.match(/^INCLUDE\s+\.\/(\S+)\s*$/);
+            if (!include) {
+                return line;
+            }
+            const fragment = join(repoRoot, `${include[1]}.dockerfile`);
+            if (!existsSync(fragment)) {
+                errors.push(`${path}: INCLUDE target not found: ${fragment}`);
+                return line;
+            }
+            return readFileSync(fragment, 'utf-8').trimEnd();
+        })
+        .join('\n')
+        // Bake parses JSON strings as HCL templates — escape Dockerfile
+        // ${ARG} interpolations so they reach BuildKit untouched (function
+        // replacements avoid the special meaning of $ in replacement strings)
+        .replaceAll('${', () => '$${')
+        .replaceAll('%{', () => '%%{');
+
+    dockerfileCache[runtimeDir] = resolved;
+    return resolved;
+}
+
 for (const [key, runtime] of Object.entries<any>(data)) {
     const build: BuildConfig | undefined = runtime.build;
     if (!build) {
@@ -48,6 +85,12 @@ for (const [key, runtime] of Object.entries<any>(data)) {
 
     groups[key] = { targets: [] };
     groups.default.targets.push(key);
+
+    // Hidden per-family target carrying the resolved Dockerfile; version
+    // targets inherit it (underscore prefix keeps it out of all groups)
+    targets[`_${runtimeDir}`] = {
+        'dockerfile-inline': resolveDockerfile(runtimeDir),
+    };
 
     // The published versions must stay aligned with the test `versions` list
     // (ignoring test-only -mjs variants).
@@ -76,8 +119,7 @@ for (const [key, runtime] of Object.entries<any>(data)) {
         Object.assign(args, cfg.args ?? {});
 
         targets[targetName] = {
-            inherits: ['_base'],
-            dockerfile: `runtimes/${runtimeDir}/Dockerfile`,
+            inherits: ['_base', `_${runtimeDir}`],
             contexts: {
                 helpers: './helpers',
                 shared: runtime.shared ? `./runtimes/${runtime.shared}` : './docker/empty',
