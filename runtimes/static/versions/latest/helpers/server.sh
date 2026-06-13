@@ -33,17 +33,28 @@ if [ -z "$OPEN_RUNTIMES_CACHE_HEADER" ]; then
 	OPEN_RUNTIMES_CACHE_HEADER="CDN-Cache-Control"
 fi
 
-# Toggle the in-memory cache for SWS
-OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED="${OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED:-true}"
+# Echo $1 if it's a non-negative integer, else the fallback $2 (keeps the TOML valid).
+sanitize_int() {
+	case "$1" in
+	'' | *[!0-9]*) echo "$2" ;;
+	*) echo "$1" ;;
+	esac
+}
 
-# Seconds a cached entry stays valid before it is dropped (time-to-live).
-OPEN_RUNTIMES_STATIC_CACHE_TTL="${OPEN_RUNTIMES_STATIC_CACHE_TTL:-86400}"
+# Toggle the in-memory cache.
+OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED="$(echo "${OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED:-true}" | tr '[:upper:]' '[:lower:]')"
 
-# Max number of files held in the cache; least-used entries evict past this.
-OPEN_RUNTIMES_STATIC_CACHE_CAPACITY="${OPEN_RUNTIMES_STATIC_CACHE_CAPACITY:-4096}"
+# Time-to-live in seconds.
+OPEN_RUNTIMES_STATIC_CACHE_TTL="$(sanitize_int "${OPEN_RUNTIMES_STATIC_CACHE_TTL:-86400}" 86400)"
 
-# Largest single file (in KiB) eligible for caching; bigger files stream from disk.
-OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB="${OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB:-8192}"
+# Time-to-idle in seconds; defaults to TTL.
+OPEN_RUNTIMES_STATIC_CACHE_TTI="$(sanitize_int "${OPEN_RUNTIMES_STATIC_CACHE_TTI:-$OPEN_RUNTIMES_STATIC_CACHE_TTL}" "$OPEN_RUNTIMES_STATIC_CACHE_TTL")"
+
+# Max cached files.
+OPEN_RUNTIMES_STATIC_CACHE_CAPACITY="$(sanitize_int "${OPEN_RUNTIMES_STATIC_CACHE_CAPACITY:-4096}" 4096)"
+
+# Max cacheable file size (KiB).
+OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB="$(sanitize_int "${OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB:-8192}" 8192)"
 
 # Create dynamic config.toml
 cat >/tmp/config.toml <<EOF
@@ -57,7 +68,7 @@ if [ "$OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED" = "true" ]; then
 [advanced.memory-cache]
 capacity = $OPEN_RUNTIMES_STATIC_CACHE_CAPACITY
 ttl = $OPEN_RUNTIMES_STATIC_CACHE_TTL
-tti = $OPEN_RUNTIMES_STATIC_CACHE_TTL
+tti = $OPEN_RUNTIMES_STATIC_CACHE_TTI
 max-file-size = $OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB
 EOF
 fi
