@@ -33,6 +33,9 @@ if [ -z "$OPEN_RUNTIMES_CACHE_HEADER" ]; then
 	OPEN_RUNTIMES_CACHE_HEADER="CDN-Cache-Control"
 fi
 
+# Toggle the in-memory cache for SWS
+OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED="${OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED:-true}"
+
 # Seconds a cached entry stays valid before it is dropped (time-to-live).
 OPEN_RUNTIMES_STATIC_CACHE_TTL="${OPEN_RUNTIMES_STATIC_CACHE_TTL:-86400}"
 
@@ -45,12 +48,21 @@ OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB="${OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_K
 # Create dynamic config.toml
 cat >/tmp/config.toml <<EOF
 [advanced]
+EOF
+
+# Append the in-memory cache table unless the feature is disabled.
+if [ "$OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED" = "true" ]; then
+	cat >>/tmp/config.toml <<EOF
 
 [advanced.memory-cache]
 capacity = $OPEN_RUNTIMES_STATIC_CACHE_CAPACITY
 ttl = $OPEN_RUNTIMES_STATIC_CACHE_TTL
 tti = $OPEN_RUNTIMES_STATIC_CACHE_TTL
 max-file-size = $OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB
+EOF
+fi
+
+cat >>/tmp/config.toml <<EOF
 
 [[advanced.rewrites]]
 source = "/__opr/timings"
