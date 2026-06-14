@@ -206,7 +206,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/node:v5-22${TAG_SUFFIX}"
+        "${REGISTRY}/node:v5-22${TAG_SUFFIX}",
+        "${REGISTRY}/node:v5-22${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "node-23": {
@@ -229,7 +230,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/node:v5-23${TAG_SUFFIX}"
+        "${REGISTRY}/node:v5-23${TAG_SUFFIX}",
+        "${REGISTRY}/node:v5-23${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "node-24": {
@@ -252,7 +254,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/node:v5-24${TAG_SUFFIX}"
+        "${REGISTRY}/node:v5-24${TAG_SUFFIX}",
+        "${REGISTRY}/node:v5-24${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "node-25": {
@@ -275,7 +278,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/node:v5-25${TAG_SUFFIX}"
+        "${REGISTRY}/node:v5-25${TAG_SUFFIX}",
+        "${REGISTRY}/node:v5-25${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "node-21_0": {
@@ -297,7 +301,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/node:v5-21.0${TAG_SUFFIX}"
+        "${REGISTRY}/node:v5-21.0${TAG_SUFFIX}",
+        "${REGISTRY}/node:v5-21.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "node-20_0": {
@@ -319,7 +324,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/node:v5-20.0${TAG_SUFFIX}"
+        "${REGISTRY}/node:v5-20.0${TAG_SUFFIX}",
+        "${REGISTRY}/node:v5-20.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "node-19_0": {
@@ -341,7 +347,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/node:v5-19.0${TAG_SUFFIX}"
+        "${REGISTRY}/node:v5-19.0${TAG_SUFFIX}",
+        "${REGISTRY}/node:v5-19.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "node-18_0": {
@@ -365,7 +372,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/node:v5-18.0${TAG_SUFFIX}"
+        "${REGISTRY}/node:v5-18.0${TAG_SUFFIX}",
+        "${REGISTRY}/node:v5-18.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "node-16_0": {
@@ -390,7 +398,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/node:v5-16.0${TAG_SUFFIX}"
+        "${REGISTRY}/node:v5-16.0${TAG_SUFFIX}",
+        "${REGISTRY}/node:v5-16.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_deno": {
@@ -415,7 +424,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/deno:v5-2.6${TAG_SUFFIX}"
+        "${REGISTRY}/deno:v5-2.6${TAG_SUFFIX}",
+        "${REGISTRY}/deno:v5-2.6${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "deno-2_5": {
@@ -437,7 +447,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/deno:v5-2.5${TAG_SUFFIX}"
+        "${REGISTRY}/deno:v5-2.5${TAG_SUFFIX}",
+        "${REGISTRY}/deno:v5-2.5${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "deno-2_0": {
@@ -459,7 +470,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/deno:v5-2.0${TAG_SUFFIX}"
+        "${REGISTRY}/deno:v5-2.0${TAG_SUFFIX}",
+        "${REGISTRY}/deno:v5-2.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "deno-1_46": {
@@ -481,7 +493,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/deno:v5-1.46${TAG_SUFFIX}"
+        "${REGISTRY}/deno:v5-1.46${TAG_SUFFIX}",
+        "${REGISTRY}/deno:v5-1.46${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "deno-1_40": {
@@ -503,7 +516,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/deno:v5-1.40${TAG_SUFFIX}"
+        "${REGISTRY}/deno:v5-1.40${TAG_SUFFIX}",
+        "${REGISTRY}/deno:v5-1.40${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "deno-1_35": {
@@ -524,7 +538,8 @@
         "linux/amd64"
       ],
       "tags": [
-        "${REGISTRY}/deno:v5-1.35${TAG_SUFFIX}"
+        "${REGISTRY}/deno:v5-1.35${TAG_SUFFIX}",
+        "${REGISTRY}/deno:v5-1.35${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "deno-1_24": {
@@ -545,7 +560,8 @@
         "linux/amd64"
       ],
       "tags": [
-        "${REGISTRY}/deno:v5-1.24${TAG_SUFFIX}"
+        "${REGISTRY}/deno:v5-1.24${TAG_SUFFIX}",
+        "${REGISTRY}/deno:v5-1.24${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "deno-1_21": {
@@ -566,7 +582,8 @@
         "linux/amd64"
       ],
       "tags": [
-        "${REGISTRY}/deno:v5-1.21${TAG_SUFFIX}"
+        "${REGISTRY}/deno:v5-1.21${TAG_SUFFIX}",
+        "${REGISTRY}/deno:v5-1.21${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_python": {
@@ -591,7 +608,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python:v5-3.14${TAG_SUFFIX}"
+        "${REGISTRY}/python:v5-3.14${TAG_SUFFIX}",
+        "${REGISTRY}/python:v5-3.14${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "python-3_13": {
@@ -613,7 +631,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python:v5-3.13${TAG_SUFFIX}"
+        "${REGISTRY}/python:v5-3.13${TAG_SUFFIX}",
+        "${REGISTRY}/python:v5-3.13${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "python-3_12": {
@@ -635,7 +654,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python:v5-3.12${TAG_SUFFIX}"
+        "${REGISTRY}/python:v5-3.12${TAG_SUFFIX}",
+        "${REGISTRY}/python:v5-3.12${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "python-3_11": {
@@ -657,7 +677,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python:v5-3.11${TAG_SUFFIX}"
+        "${REGISTRY}/python:v5-3.11${TAG_SUFFIX}",
+        "${REGISTRY}/python:v5-3.11${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "python-3_10": {
@@ -679,7 +700,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python:v5-3.10${TAG_SUFFIX}"
+        "${REGISTRY}/python:v5-3.10${TAG_SUFFIX}",
+        "${REGISTRY}/python:v5-3.10${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "python-3_9": {
@@ -701,7 +723,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python:v5-3.9${TAG_SUFFIX}"
+        "${REGISTRY}/python:v5-3.9${TAG_SUFFIX}",
+        "${REGISTRY}/python:v5-3.9${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "python-3_8": {
@@ -723,7 +746,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python:v5-3.8${TAG_SUFFIX}"
+        "${REGISTRY}/python:v5-3.8${TAG_SUFFIX}",
+        "${REGISTRY}/python:v5-3.8${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "python-ml-3_13": {
@@ -746,7 +770,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python-ml:v5-3.13${TAG_SUFFIX}"
+        "${REGISTRY}/python-ml:v5-3.13${TAG_SUFFIX}",
+        "${REGISTRY}/python-ml:v5-3.13${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "python-ml-3_12": {
@@ -769,7 +794,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python-ml:v5-3.12${TAG_SUFFIX}"
+        "${REGISTRY}/python-ml:v5-3.12${TAG_SUFFIX}",
+        "${REGISTRY}/python-ml:v5-3.12${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "python-ml-3_11": {
@@ -792,7 +818,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/python-ml:v5-3.11${TAG_SUFFIX}"
+        "${REGISTRY}/python-ml:v5-3.11${TAG_SUFFIX}",
+        "${REGISTRY}/python-ml:v5-3.11${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_dart": {
@@ -817,7 +844,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-3.12${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-3.12${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.12${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-3_11": {
@@ -839,7 +867,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-3.11${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-3.11${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.11${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-3_10": {
@@ -861,7 +890,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-3.10${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-3.10${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.10${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-3_9": {
@@ -883,7 +913,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-3.9${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-3.9${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.9${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-3_8": {
@@ -905,7 +936,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-3.8${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-3.8${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.8${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-3_5": {
@@ -927,7 +959,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-3.5${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-3.5${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.5${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-3_3": {
@@ -949,7 +982,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-3.3${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-3.3${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.3${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-3_1": {
@@ -971,7 +1005,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-3.1${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-3.1${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.1${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-3_0": {
@@ -993,7 +1028,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-3.0${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-3.0${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-2_19": {
@@ -1015,7 +1051,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-2.19${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-2.19${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-2.19${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-2_18": {
@@ -1037,7 +1074,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-2.18${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-2.18${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-2.18${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-2_17": {
@@ -1059,7 +1097,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-2.17${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-2.17${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-2.17${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dart-2_16": {
@@ -1081,7 +1120,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dart:v5-2.16${TAG_SUFFIX}"
+        "${REGISTRY}/dart:v5-2.16${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-2.16${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_flutter": {
@@ -1106,7 +1146,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/flutter:v5-3.44${TAG_SUFFIX}"
+        "${REGISTRY}/flutter:v5-3.44${TAG_SUFFIX}",
+        "${REGISTRY}/flutter:v5-3.44${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "flutter-3_41": {
@@ -1128,7 +1169,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/flutter:v5-3.41${TAG_SUFFIX}"
+        "${REGISTRY}/flutter:v5-3.41${TAG_SUFFIX}",
+        "${REGISTRY}/flutter:v5-3.41${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "flutter-3_38": {
@@ -1150,7 +1192,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/flutter:v5-3.38${TAG_SUFFIX}"
+        "${REGISTRY}/flutter:v5-3.38${TAG_SUFFIX}",
+        "${REGISTRY}/flutter:v5-3.38${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "flutter-3_35": {
@@ -1172,7 +1215,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/flutter:v5-3.35${TAG_SUFFIX}"
+        "${REGISTRY}/flutter:v5-3.35${TAG_SUFFIX}",
+        "${REGISTRY}/flutter:v5-3.35${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "flutter-3_32": {
@@ -1194,7 +1238,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/flutter:v5-3.32${TAG_SUFFIX}"
+        "${REGISTRY}/flutter:v5-3.32${TAG_SUFFIX}",
+        "${REGISTRY}/flutter:v5-3.32${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "flutter-3_29": {
@@ -1216,7 +1261,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/flutter:v5-3.29${TAG_SUFFIX}"
+        "${REGISTRY}/flutter:v5-3.29${TAG_SUFFIX}",
+        "${REGISTRY}/flutter:v5-3.29${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "flutter-3_27": {
@@ -1238,7 +1284,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/flutter:v5-3.27${TAG_SUFFIX}"
+        "${REGISTRY}/flutter:v5-3.27${TAG_SUFFIX}",
+        "${REGISTRY}/flutter:v5-3.27${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "flutter-3_24": {
@@ -1260,7 +1307,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/flutter:v5-3.24${TAG_SUFFIX}"
+        "${REGISTRY}/flutter:v5-3.24${TAG_SUFFIX}",
+        "${REGISTRY}/flutter:v5-3.24${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_ruby": {
@@ -1287,7 +1335,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/ruby:v5-4.0${TAG_SUFFIX}"
+        "${REGISTRY}/ruby:v5-4.0${TAG_SUFFIX}",
+        "${REGISTRY}/ruby:v5-4.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "ruby-3_4": {
@@ -1311,7 +1360,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/ruby:v5-3.4${TAG_SUFFIX}"
+        "${REGISTRY}/ruby:v5-3.4${TAG_SUFFIX}",
+        "${REGISTRY}/ruby:v5-3.4${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "ruby-3_3": {
@@ -1335,7 +1385,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/ruby:v5-3.3${TAG_SUFFIX}"
+        "${REGISTRY}/ruby:v5-3.3${TAG_SUFFIX}",
+        "${REGISTRY}/ruby:v5-3.3${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "ruby-3_2": {
@@ -1359,7 +1410,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/ruby:v5-3.2${TAG_SUFFIX}"
+        "${REGISTRY}/ruby:v5-3.2${TAG_SUFFIX}",
+        "${REGISTRY}/ruby:v5-3.2${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "ruby-3_1": {
@@ -1383,7 +1435,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/ruby:v5-3.1${TAG_SUFFIX}"
+        "${REGISTRY}/ruby:v5-3.1${TAG_SUFFIX}",
+        "${REGISTRY}/ruby:v5-3.1${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "ruby-3_0": {
@@ -1407,7 +1460,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/ruby:v5-3.0${TAG_SUFFIX}"
+        "${REGISTRY}/ruby:v5-3.0${TAG_SUFFIX}",
+        "${REGISTRY}/ruby:v5-3.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_rust": {
@@ -1432,7 +1486,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/rust:v5-1.83${TAG_SUFFIX}"
+        "${REGISTRY}/rust:v5-1.83${TAG_SUFFIX}",
+        "${REGISTRY}/rust:v5-1.83${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_php": {
@@ -1459,7 +1514,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/php:v5-8.4${TAG_SUFFIX}"
+        "${REGISTRY}/php:v5-8.4${TAG_SUFFIX}",
+        "${REGISTRY}/php:v5-8.4${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "php-8_3": {
@@ -1484,7 +1540,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/php:v5-8.3${TAG_SUFFIX}"
+        "${REGISTRY}/php:v5-8.3${TAG_SUFFIX}",
+        "${REGISTRY}/php:v5-8.3${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "php-8_2": {
@@ -1508,7 +1565,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/php:v5-8.2${TAG_SUFFIX}"
+        "${REGISTRY}/php:v5-8.2${TAG_SUFFIX}",
+        "${REGISTRY}/php:v5-8.2${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "php-8_1": {
@@ -1531,7 +1589,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/php:v5-8.1${TAG_SUFFIX}"
+        "${REGISTRY}/php:v5-8.1${TAG_SUFFIX}",
+        "${REGISTRY}/php:v5-8.1${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "php-8_0": {
@@ -1556,7 +1615,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/php:v5-8.0${TAG_SUFFIX}"
+        "${REGISTRY}/php:v5-8.0${TAG_SUFFIX}",
+        "${REGISTRY}/php:v5-8.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_swift": {
@@ -1581,7 +1641,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/swift:v5-6.2${TAG_SUFFIX}"
+        "${REGISTRY}/swift:v5-6.2${TAG_SUFFIX}",
+        "${REGISTRY}/swift:v5-6.2${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "swift-5_10": {
@@ -1603,7 +1664,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/swift:v5-5.10${TAG_SUFFIX}"
+        "${REGISTRY}/swift:v5-5.10${TAG_SUFFIX}",
+        "${REGISTRY}/swift:v5-5.10${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "swift-5_9": {
@@ -1625,7 +1687,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/swift:v5-5.9${TAG_SUFFIX}"
+        "${REGISTRY}/swift:v5-5.9${TAG_SUFFIX}",
+        "${REGISTRY}/swift:v5-5.9${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "swift-5_8": {
@@ -1647,7 +1710,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/swift:v5-5.8${TAG_SUFFIX}"
+        "${REGISTRY}/swift:v5-5.8${TAG_SUFFIX}",
+        "${REGISTRY}/swift:v5-5.8${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_kotlin": {
@@ -1671,7 +1735,8 @@
         "linux/amd64"
       ],
       "tags": [
-        "${REGISTRY}/kotlin:v5-2.3${TAG_SUFFIX}"
+        "${REGISTRY}/kotlin:v5-2.3${TAG_SUFFIX}",
+        "${REGISTRY}/kotlin:v5-2.3${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "kotlin-2_0": {
@@ -1692,7 +1757,8 @@
         "linux/amd64"
       ],
       "tags": [
-        "${REGISTRY}/kotlin:v5-2.0${TAG_SUFFIX}"
+        "${REGISTRY}/kotlin:v5-2.0${TAG_SUFFIX}",
+        "${REGISTRY}/kotlin:v5-2.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "kotlin-1_9": {
@@ -1713,7 +1779,8 @@
         "linux/amd64"
       ],
       "tags": [
-        "${REGISTRY}/kotlin:v5-1.9${TAG_SUFFIX}"
+        "${REGISTRY}/kotlin:v5-1.9${TAG_SUFFIX}",
+        "${REGISTRY}/kotlin:v5-1.9${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "kotlin-1_8": {
@@ -1734,7 +1801,8 @@
         "linux/amd64"
       ],
       "tags": [
-        "${REGISTRY}/kotlin:v5-1.8${TAG_SUFFIX}"
+        "${REGISTRY}/kotlin:v5-1.8${TAG_SUFFIX}",
+        "${REGISTRY}/kotlin:v5-1.8${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "kotlin-1_6": {
@@ -1755,7 +1823,8 @@
         "linux/amd64"
       ],
       "tags": [
-        "${REGISTRY}/kotlin:v5-1.6${TAG_SUFFIX}"
+        "${REGISTRY}/kotlin:v5-1.6${TAG_SUFFIX}",
+        "${REGISTRY}/kotlin:v5-1.6${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_java": {
@@ -1781,7 +1850,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/java:v5-22${TAG_SUFFIX}"
+        "${REGISTRY}/java:v5-22${TAG_SUFFIX}",
+        "${REGISTRY}/java:v5-22${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "java-25": {
@@ -1804,7 +1874,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/java:v5-25${TAG_SUFFIX}"
+        "${REGISTRY}/java:v5-25${TAG_SUFFIX}",
+        "${REGISTRY}/java:v5-25${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "java-21_0": {
@@ -1826,7 +1897,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/java:v5-21.0${TAG_SUFFIX}"
+        "${REGISTRY}/java:v5-21.0${TAG_SUFFIX}",
+        "${REGISTRY}/java:v5-21.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "java-18_0": {
@@ -1848,7 +1920,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/java:v5-18.0${TAG_SUFFIX}"
+        "${REGISTRY}/java:v5-18.0${TAG_SUFFIX}",
+        "${REGISTRY}/java:v5-18.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "java-17_0": {
@@ -1870,7 +1943,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/java:v5-17.0${TAG_SUFFIX}"
+        "${REGISTRY}/java:v5-17.0${TAG_SUFFIX}",
+        "${REGISTRY}/java:v5-17.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "java-11_0": {
@@ -1892,7 +1966,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/java:v5-11.0${TAG_SUFFIX}"
+        "${REGISTRY}/java:v5-11.0${TAG_SUFFIX}",
+        "${REGISTRY}/java:v5-11.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "java-8_0": {
@@ -1914,7 +1989,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/java:v5-8.0${TAG_SUFFIX}"
+        "${REGISTRY}/java:v5-8.0${TAG_SUFFIX}",
+        "${REGISTRY}/java:v5-8.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_cpp": {
@@ -1941,7 +2017,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/cpp:v5-17${TAG_SUFFIX}"
+        "${REGISTRY}/cpp:v5-17${TAG_SUFFIX}",
+        "${REGISTRY}/cpp:v5-17${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "cpp-20": {
@@ -1965,7 +2042,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/cpp:v5-20${TAG_SUFFIX}"
+        "${REGISTRY}/cpp:v5-20${TAG_SUFFIX}",
+        "${REGISTRY}/cpp:v5-20${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "cpp-23": {
@@ -1989,7 +2067,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/cpp:v5-23${TAG_SUFFIX}"
+        "${REGISTRY}/cpp:v5-23${TAG_SUFFIX}",
+        "${REGISTRY}/cpp:v5-23${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_dotnet": {
@@ -2014,7 +2093,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dotnet:v5-10${TAG_SUFFIX}"
+        "${REGISTRY}/dotnet:v5-10${TAG_SUFFIX}",
+        "${REGISTRY}/dotnet:v5-10${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dotnet-8_0": {
@@ -2036,7 +2116,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dotnet:v5-8.0${TAG_SUFFIX}"
+        "${REGISTRY}/dotnet:v5-8.0${TAG_SUFFIX}",
+        "${REGISTRY}/dotnet:v5-8.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dotnet-7_0": {
@@ -2058,7 +2139,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dotnet:v5-7.0${TAG_SUFFIX}"
+        "${REGISTRY}/dotnet:v5-7.0${TAG_SUFFIX}",
+        "${REGISTRY}/dotnet:v5-7.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dotnet-6_0": {
@@ -2080,7 +2162,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/dotnet:v5-6.0${TAG_SUFFIX}"
+        "${REGISTRY}/dotnet:v5-6.0${TAG_SUFFIX}",
+        "${REGISTRY}/dotnet:v5-6.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_go": {
@@ -2105,7 +2188,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/go:v5-1.26${TAG_SUFFIX}"
+        "${REGISTRY}/go:v5-1.26${TAG_SUFFIX}",
+        "${REGISTRY}/go:v5-1.26${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "go-1_25": {
@@ -2127,7 +2211,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/go:v5-1.25${TAG_SUFFIX}"
+        "${REGISTRY}/go:v5-1.25${TAG_SUFFIX}",
+        "${REGISTRY}/go:v5-1.25${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "go-1_24": {
@@ -2149,7 +2234,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/go:v5-1.24${TAG_SUFFIX}"
+        "${REGISTRY}/go:v5-1.24${TAG_SUFFIX}",
+        "${REGISTRY}/go:v5-1.24${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "go-1_23": {
@@ -2171,7 +2257,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/go:v5-1.23${TAG_SUFFIX}"
+        "${REGISTRY}/go:v5-1.23${TAG_SUFFIX}",
+        "${REGISTRY}/go:v5-1.23${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_bun": {
@@ -2196,7 +2283,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/bun:v5-1.3${TAG_SUFFIX}"
+        "${REGISTRY}/bun:v5-1.3${TAG_SUFFIX}",
+        "${REGISTRY}/bun:v5-1.3${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "bun-1_2": {
@@ -2218,7 +2306,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/bun:v5-1.2${TAG_SUFFIX}"
+        "${REGISTRY}/bun:v5-1.2${TAG_SUFFIX}",
+        "${REGISTRY}/bun:v5-1.2${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "bun-1_1": {
@@ -2240,7 +2329,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/bun:v5-1.1${TAG_SUFFIX}"
+        "${REGISTRY}/bun:v5-1.1${TAG_SUFFIX}",
+        "${REGISTRY}/bun:v5-1.1${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "bun-1_0": {
@@ -2262,7 +2352,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/bun:v5-1.0${TAG_SUFFIX}"
+        "${REGISTRY}/bun:v5-1.0${TAG_SUFFIX}",
+        "${REGISTRY}/bun:v5-1.0${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "_static": {
@@ -2287,7 +2378,8 @@
         "linux/arm64"
       ],
       "tags": [
-        "${REGISTRY}/static:v5-1${TAG_SUFFIX}"
+        "${REGISTRY}/static:v5-1${TAG_SUFFIX}",
+        "${REGISTRY}/static:v5-1${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     }
   }

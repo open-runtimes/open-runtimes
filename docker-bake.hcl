@@ -17,6 +17,14 @@ variable "TAG_SUFFIX" {
   default = ""
 }
 
+# Cloud builds set this to "-<short-sha>" (e.g. "-a1b2c3d") to additionally
+# publish an immutable, commit-pinned tag alongside the mutable one. Empty by
+# default, so the SHA tag collapses onto the mutable tag (deduped by bake) and
+# OSS publishes are unaffected.
+variable "SHA_SUFFIX" {
+  default = ""
+}
+
 target "_base" {
   context = "."
 }

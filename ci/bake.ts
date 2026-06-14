@@ -128,7 +128,13 @@ for (const [key, runtime] of Object.entries<any>(data)) {
             },
             args,
             platforms: cfg.platforms ?? build.platforms ?? DEFAULT_PLATFORMS,
-            tags: [`\${REGISTRY}/${image}:v5-${version}\${TAG_SUFFIX}`],
+            // Mutable tag (consumed by appwrite/appwrite) plus an immutable
+            // SHA-pinned tag for cloud. SHA_SUFFIX is empty by default, so the
+            // second tag collapses onto the first and bake dedupes them.
+            tags: [
+                `\${REGISTRY}/${image}:v5-${version}\${TAG_SUFFIX}`,
+                `\${REGISTRY}/${image}:v5-${version}\${TAG_SUFFIX}\${SHA_SUFFIX}`,
+            ],
         };
     }
 }

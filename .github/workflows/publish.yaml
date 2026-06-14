@@ -63,7 +63,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME  }}
           password: ${{ secrets.DOCKERHUB_TOKEN  }}
       - name: Build & Publish to DockerHub
-        run: docker buildx bake --push "${{ matrix.target }}"
+        run: SHA_SUFFIX="-${GITHUB_SHA::7}" docker buildx bake --push "${{ matrix.target }}"
 
   deploy-rc:
     needs: prepare
