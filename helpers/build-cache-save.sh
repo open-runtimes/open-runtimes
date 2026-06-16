@@ -32,7 +32,7 @@ fi
 
 if "${mksquashfs_cmd[@]}" "$OPEN_RUNTIMES_BUILD_CACHE_ROOT" "$tmp_artifact" -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors"; then
 	if [ -n "${OPEN_RUNTIMES_BUILD_CACHE_MAX_SIZE_BYTES:-}" ]; then
-		size=$(wc -c < "$tmp_artifact" | tr -d ' ')
+		size=$(wc -c <"$tmp_artifact" | tr -d ' ')
 		if [ "$size" -gt "$OPEN_RUNTIMES_BUILD_CACHE_MAX_SIZE_BYTES" ]; then
 			rm -f "$tmp_artifact"
 			echo '[build cache] Save skipped: artifact too large.'
