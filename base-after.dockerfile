@@ -6,6 +6,9 @@ RUN chmod +x /usr/local/server/helpers/server.sh
 RUN chmod +x /usr/local/server/helpers/before-build.sh
 RUN chmod +x /usr/local/server/helpers/build.sh
 RUN chmod +x /usr/local/server/helpers/after-build.sh
+RUN chmod +x /usr/local/server/helpers/build-cache-env.sh
+RUN chmod +x /usr/local/server/helpers/restore-build-cache.sh
+RUN chmod +x /usr/local/server/helpers/save-build-cache.sh
 RUN chmod +x /usr/local/server/helpers/select-compression.sh
 
 EXPOSE 3000

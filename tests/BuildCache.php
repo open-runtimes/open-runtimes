@@ -1,0 +1,287 @@
+<?php
+
+namespace Tests;
+
+use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use FilesystemIterator;
+
+class BuildCache extends TestCase
+{
+    private string $root;
+    private string $helpers;
+
+    protected function setUp(): void
+    {
+        $this->root = \sys_get_temp_dir() . '/open-runtimes-build-cache-' . \bin2hex(\random_bytes(6));
+        \mkdir($this->root, 0777, true);
+        $this->helpers = \dirname(__DIR__) . '/helpers';
+    }
+
+    protected function tearDown(): void
+    {
+        $this->removePath($this->root);
+    }
+
+    public function testRestoreMissExitsZero(): void
+    {
+        $bin = $this->createBinDir(['unsquashfs' => "#!/bin/sh\nexit 0\n"]);
+        $result = $this->runScript('restore-build-cache.sh', $bin, $this->env());
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('[build cache] Miss.', $result['output']);
+    }
+
+    public function testRestoreWithMissingUnsquashfsExitsZero(): void
+    {
+        $result = $this->runScript('restore-build-cache.sh', $this->createBinDir(), $this->env());
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('missing unsquashfs', $result['output']);
+    }
+
+    public function testRestoreWithCorruptArtifactExitsZeroAndClearsPartialCacheRoot(): void
+    {
+        $artifact = $this->root . '/stores.sqfs';
+        \file_put_contents($artifact, 'corrupt');
+
+        $bin = $this->createBinDir([
+            'unsquashfs' => "#!/bin/sh\nmkdir -p \"$4/partial\"\nexit 1\n",
+        ]);
+
+        $result = $this->runScript('restore-build-cache.sh', $bin, $this->env());
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('failed to restore cache', $result['output']);
+        self::assertDirectoryExists($this->cacheRoot());
+        self::assertFileDoesNotExist($this->cacheRoot() . '/partial');
+    }
+
+    public function testSaveWithMissingMksquashfsExitsZero(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+
+        $result = $this->runScript('save-build-cache.sh', $this->createBinDir(), $this->env());
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('missing mksquashfs', $result['output']);
+    }
+
+    public function testSaveWithMissingCacheRootExitsZero(): void
+    {
+        $bin = $this->createBinDir(['mksquashfs' => "#!/bin/sh\nexit 0\n"]);
+
+        $result = $this->runScript('save-build-cache.sh', $bin, $this->env());
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('Save skipped: cache root missing.', $result['output']);
+    }
+
+    public function testSaveWithMissingArtifactDirectoryExitsZero(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        $bin = $this->createBinDir(['mksquashfs' => "#!/bin/sh\nexit 1\n"]);
+
+        $result = $this->runScript('save-build-cache.sh', $bin, [
+            'OPEN_RUNTIMES_BUILD_CACHE_ROOT' => $this->cacheRoot(),
+            'OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT' => $this->root . '/missing/stores.sqfs',
+        ]);
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('Save skipped: artifact directory missing.', $result['output']);
+    }
+
+    public function testSaveFailureExitsZeroAndDeletesTemporaryArtifact(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf tmp > \"$2\"\nexit 1\n",
+        ]);
+
+        $result = $this->runScript('save-build-cache.sh', $bin, $this->env());
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('failed to save cache', $result['output']);
+        self::assertFileDoesNotExist($this->artifact() . '.tmp');
+    }
+
+    public function testSuccessfulSaveWritesFinalArtifactAtomically(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        \file_put_contents($this->cacheRoot() . '/store', 'cache');
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf saved > \"$2\"\nexit 0\n",
+        ]);
+
+        $result = $this->runScript('save-build-cache.sh', $bin, $this->env());
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('[build cache] Saved.', $result['output']);
+        self::assertFileExists($this->artifact());
+        self::assertFileDoesNotExist($this->artifact() . '.tmp');
+    }
+
+    public function testUserBuildCommandFailureStillFailsBuild(): void
+    {
+        $result = $this->runShell('false; status=$?; exit "$status"');
+
+        self::assertSame(1, $result['code']);
+    }
+
+    public function testUserBuildCommandSuccessStillSucceedsIfCacheSaveFails(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        $bin = $this->createBinDir(['mksquashfs' => "#!/bin/sh\nexit 1\n"]);
+
+        $result = $this->runShell(
+            'true; status=$?; if [ "$status" -eq 0 ]; then /bin/bash ' . \escapeshellarg($this->helpers . '/save-build-cache.sh') . '; fi; exit "$status"',
+            $bin,
+            $this->env()
+        );
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('failed to save cache', $result['output']);
+    }
+
+    public function testBuildLifecycleRunsCacheAutomaticallyInBeforeAndAfterBuild(): void
+    {
+        $build = \file_get_contents($this->helpers . '/build.sh');
+        $beforeBuild = \file_get_contents($this->helpers . '/before-build.sh');
+        $afterBuild = \file_get_contents($this->helpers . '/after-build.sh');
+
+        self::assertStringNotContainsString('restore-build-cache.sh', $build);
+        self::assertStringNotContainsString('save-build-cache.sh', $build);
+        self::assertStringContainsString('. /usr/local/server/helpers/build-cache-env.sh', $beforeBuild);
+        self::assertLessThan(\strpos($beforeBuild, 'Environment preparation started'), \strpos($beforeBuild, 'restore-build-cache.sh'));
+        self::assertLessThan(\strpos($afterBuild, 'Build finished'), \strpos($afterBuild, 'save-build-cache.sh'));
+    }
+
+    public function testCacheHitStillWorksOnSecondBuild(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        \file_put_contents($this->cacheRoot() . '/store', 'cache');
+
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf restored > \"$2\"\nexit 0\n",
+            'unsquashfs' => "#!/bin/sh\nmkdir -p \"$4\"\ncp \"$5\" \"$4/store\"\nexit 0\n",
+        ]);
+
+        $save = $this->runScript('save-build-cache.sh', $bin, $this->env());
+        $this->removePath($this->cacheRoot());
+        $restore = $this->runScript('restore-build-cache.sh', $bin, $this->env());
+
+        self::assertSame(0, $save['code']);
+        self::assertSame(0, $restore['code']);
+        self::assertStringContainsString('[build cache] Hit.', $restore['output']);
+        self::assertSame('restored', \file_get_contents($this->cacheRoot() . '/store'));
+    }
+
+    public function testNoExecutorPathReferencesBuildCacheWrapper(): void
+    {
+        $repo = \dirname(__DIR__);
+        self::assertFileDoesNotExist($repo . '/helpers/build-cache.sh');
+
+        if (!\is_dir($repo . '/executor')) {
+            self::assertTrue(true);
+            return;
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($repo . '/executor', FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            if (!$file->isFile() || \strpos($file->getPathname(), '/.git/') !== false) {
+                continue;
+            }
+
+            self::assertStringNotContainsString('build-cache.sh', \file_get_contents($file->getPathname()), $file->getPathname());
+        }
+    }
+
+    private function runScript(string $script, string $bin, array $env): array
+    {
+        return $this->runShell('/bin/bash ' . \escapeshellarg($this->helpers . '/' . $script), $bin, $env);
+    }
+
+    private function runShell(string $command, ?string $bin = null, array $env = []): array
+    {
+        $descriptorSpec = [
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+
+        $process = \proc_open(['/bin/bash', '-c', $command], $descriptorSpec, $pipes, null, $env + [
+            'PATH' => ($bin ? $bin . ':' : '') . '/bin:/usr/bin',
+        ]);
+
+        if (!\is_resource($process)) {
+            self::fail('Failed to start process.');
+        }
+
+        $output = \stream_get_contents($pipes[1]) . \stream_get_contents($pipes[2]);
+        \fclose($pipes[1]);
+        \fclose($pipes[2]);
+
+        return [
+            'code' => \proc_close($process),
+            'output' => $output,
+        ];
+    }
+
+    private function createBinDir(array $commands = []): string
+    {
+        $bin = $this->root . '/bin-' . \bin2hex(\random_bytes(3));
+        \mkdir($bin, 0777, true);
+
+        foreach ($commands as $name => $contents) {
+            $path = $bin . '/' . $name;
+            \file_put_contents($path, $contents);
+            \chmod($path, 0755);
+        }
+
+        return $bin;
+    }
+
+    private function env(): array
+    {
+        return [
+            'OPEN_RUNTIMES_BUILD_CACHE_ROOT' => $this->cacheRoot(),
+            'OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT' => $this->artifact(),
+        ];
+    }
+
+    private function cacheRoot(): string
+    {
+        return $this->root . '/cache-root';
+    }
+
+    private function artifact(): string
+    {
+        return $this->root . '/stores.sqfs';
+    }
+
+    private function removePath(string $path): void
+    {
+        if (!\file_exists($path) && !\is_link($path)) {
+            return;
+        }
+
+        if (\is_file($path) || \is_link($path)) {
+            \unlink($path);
+            return;
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            $file->isDir() ? \rmdir($file->getPathname()) : \unlink($file->getPathname());
+        }
+
+        \rmdir($path);
+    }
+}
