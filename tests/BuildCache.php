@@ -11,12 +11,15 @@ class BuildCache extends TestCase
 {
     private string $root;
     private string $helpers;
+    private string $repoHelpers;
 
     protected function setUp(): void
     {
         $this->root = \sys_get_temp_dir() . '/open-runtimes-build-cache-' . \bin2hex(\random_bytes(6));
         \mkdir($this->root, 0777, true);
-        $this->helpers = \dirname(__DIR__) . '/helpers';
+        $this->repoHelpers = \dirname(__DIR__) . '/helpers';
+        $this->helpers = $this->root . '/helpers';
+        $this->copyHelpersForTest();
     }
 
     protected function tearDown(): void
@@ -27,7 +30,7 @@ class BuildCache extends TestCase
     public function testRestoreMissExitsZero(): void
     {
         $bin = $this->createBinDir(['unsquashfs' => "#!/bin/sh\nexit 0\n"]);
-        $result = $this->runScript('build-cache-restore.sh', $bin, $this->env());
+        $result = $this->runScript('build-cache-restore.sh', $bin);
 
         self::assertSame(0, $result['code']);
         self::assertStringContainsString('[build cache] Miss.', $result['output']);
@@ -35,7 +38,7 @@ class BuildCache extends TestCase
 
     public function testRestoreWithMissingUnsquashfsExitsZero(): void
     {
-        $result = $this->runScript('build-cache-restore.sh', $this->createBinDir(), $this->env());
+        $result = $this->runScript('build-cache-restore.sh', $this->createBinDir());
 
         self::assertSame(0, $result['code']);
         self::assertStringContainsString('missing unsquashfs', $result['output']);
@@ -50,7 +53,7 @@ class BuildCache extends TestCase
             'unsquashfs' => "#!/bin/sh\nmkdir -p \"$4/partial\"\nexit 1\n",
         ]);
 
-        $result = $this->runScript('build-cache-restore.sh', $bin, $this->env());
+        $result = $this->runScript('build-cache-restore.sh', $bin);
 
         self::assertSame(0, $result['code']);
         self::assertStringContainsString('failed to restore cache', $result['output']);
@@ -62,7 +65,7 @@ class BuildCache extends TestCase
     {
         \mkdir($this->cacheRoot(), 0777, true);
 
-        $result = $this->runScript('build-cache-save.sh', $this->createBinDir(), $this->env());
+        $result = $this->runScript('build-cache-save.sh', $this->createBinDir());
 
         self::assertSame(0, $result['code']);
         self::assertStringContainsString('missing mksquashfs', $result['output']);
@@ -72,7 +75,7 @@ class BuildCache extends TestCase
     {
         $bin = $this->createBinDir(['mksquashfs' => "#!/bin/sh\nexit 0\n"]);
 
-        $result = $this->runScript('build-cache-save.sh', $bin, $this->env());
+        $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
         self::assertStringContainsString('Save skipped: cache root missing.', $result['output']);
@@ -81,12 +84,10 @@ class BuildCache extends TestCase
     public function testSaveWithMissingArtifactDirectoryExitsZero(): void
     {
         \mkdir($this->cacheRoot(), 0777, true);
+        $this->writeTestCachePaths($this->cacheRoot(), $this->root . '/missing/stores.sqfs');
         $bin = $this->createBinDir(['mksquashfs' => "#!/bin/sh\nexit 1\n"]);
 
-        $result = $this->runScript('build-cache-save.sh', $bin, [
-            'OPEN_RUNTIMES_BUILD_CACHE_ROOT' => $this->cacheRoot(),
-            'OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT' => $this->root . '/missing/stores.sqfs',
-        ]);
+        $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
         self::assertStringContainsString('Save skipped: artifact directory missing.', $result['output']);
@@ -99,7 +100,7 @@ class BuildCache extends TestCase
             'mksquashfs' => "#!/bin/sh\nprintf tmp > \"$2\"\nexit 1\n",
         ]);
 
-        $result = $this->runScript('build-cache-save.sh', $bin, $this->env());
+        $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
         self::assertStringContainsString('failed to save cache', $result['output']);
@@ -114,7 +115,7 @@ class BuildCache extends TestCase
             'mksquashfs' => "#!/bin/sh\nprintf saved > \"$2\"\nexit 0\n",
         ]);
 
-        $result = $this->runScript('build-cache-save.sh', $bin, $this->env());
+        $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
         self::assertStringContainsString('[build cache] Saved.', $result['output']);
@@ -137,7 +138,7 @@ class BuildCache extends TestCase
         $result = $this->runShell(
             'true; status=$?; if [ "$status" -eq 0 ]; then /bin/bash ' . \escapeshellarg($this->helpers . '/build-cache-save.sh') . '; fi; exit "$status"',
             $bin,
-            $this->env()
+            []
         );
 
         self::assertSame(0, $result['code']);
@@ -157,6 +158,16 @@ class BuildCache extends TestCase
         self::assertLessThan(\strpos($afterBuild, 'Build finished'), \strpos($afterBuild, 'build-cache-save.sh'));
     }
 
+    public function testBuildCacheEnvUsesFixedPaths(): void
+    {
+        $env = \file_get_contents($this->repoHelpers . '/build-cache-env.sh');
+
+        self::assertStringContainsString('OPEN_RUNTIMES_BUILD_CACHE_ROOT="/usr/local/cache/build"', $env);
+        self::assertStringContainsString('OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="/cache/stores.sqfs"', $env);
+        self::assertStringNotContainsString('${OPEN_RUNTIMES_BUILD_CACHE_ROOT:-', $env);
+        self::assertStringNotContainsString('${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT:-', $env);
+    }
+
     public function testCacheHitStillWorksOnSecondBuild(): void
     {
         \mkdir($this->cacheRoot(), 0777, true);
@@ -167,9 +178,9 @@ class BuildCache extends TestCase
             'unsquashfs' => "#!/bin/sh\nmkdir -p \"$4\"\ncp \"$5\" \"$4/store\"\nexit 0\n",
         ]);
 
-        $save = $this->runScript('build-cache-save.sh', $bin, $this->env());
+        $save = $this->runScript('build-cache-save.sh', $bin);
         $this->removePath($this->cacheRoot());
-        $restore = $this->runScript('build-cache-restore.sh', $bin, $this->env());
+        $restore = $this->runScript('build-cache-restore.sh', $bin);
 
         self::assertSame(0, $save['code']);
         self::assertSame(0, $restore['code']);
@@ -200,7 +211,7 @@ class BuildCache extends TestCase
         }
     }
 
-    private function runScript(string $script, string $bin, array $env): array
+    private function runScript(string $script, string $bin, array $env = []): array
     {
         return $this->runShell('/bin/bash ' . \escapeshellarg($this->helpers . '/' . $script), $bin, $env);
     }
@@ -244,14 +255,6 @@ class BuildCache extends TestCase
         return $bin;
     }
 
-    private function env(): array
-    {
-        return [
-            'OPEN_RUNTIMES_BUILD_CACHE_ROOT' => $this->cacheRoot(),
-            'OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT' => $this->artifact(),
-        ];
-    }
-
     private function cacheRoot(): string
     {
         return $this->root . '/cache-root';
@@ -260,6 +263,25 @@ class BuildCache extends TestCase
     private function artifact(): string
     {
         return $this->root . '/stores.sqfs';
+    }
+
+    private function copyHelpersForTest(): void
+    {
+        \mkdir($this->helpers, 0777, true);
+
+        foreach (['build-cache-env.sh', 'build-cache-restore.sh', 'build-cache-save.sh', 'build.sh', 'before-build.sh', 'after-build.sh'] as $file) {
+            \copy($this->repoHelpers . '/' . $file, $this->helpers . '/' . $file);
+        }
+
+        $this->writeTestCachePaths($this->cacheRoot(), $this->artifact());
+    }
+
+    private function writeTestCachePaths(string $cacheRoot, string $artifact): void
+    {
+        $env = \file_get_contents($this->repoHelpers . '/build-cache-env.sh');
+        $env = \str_replace('OPEN_RUNTIMES_BUILD_CACHE_ROOT="/usr/local/cache/build"', 'OPEN_RUNTIMES_BUILD_CACHE_ROOT="' . $cacheRoot . '"', $env);
+        $env = \str_replace('OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="/cache/stores.sqfs"', 'OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="' . $artifact . '"', $env);
+        \file_put_contents($this->helpers . '/build-cache-env.sh', $env);
     }
 
     private function removePath(string $path): void
