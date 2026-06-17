@@ -109,7 +109,7 @@ class BuildCache extends TestCase
         self::assertFileDoesNotExist($this->artifact() . '.tmp');
     }
 
-    public function testSuccessfulSaveWritesFinalArtifactAtomically(): void
+    public function testSuccessfulSaveWritesFinalArtifact(): void
     {
         \mkdir($this->cacheRoot(), 0777, true);
         \file_put_contents($this->cacheRoot() . '/store', 'cache');
@@ -124,6 +124,23 @@ class BuildCache extends TestCase
         self::assertStringNotContainsString('squashfs stdout', $result['output']);
         self::assertStringNotContainsString('squashfs stderr', $result['output']);
         self::assertFileExists($this->artifact());
+        self::assertFileDoesNotExist($this->artifact() . '.tmp');
+    }
+
+    public function testSuccessfulSaveOverwritesExistingArtifact(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        \file_put_contents($this->cacheRoot() . '/store', 'cache');
+        \file_put_contents($this->artifact(), 'old');
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf new > \"$2\"\nexit 0\n",
+        ]);
+
+        $result = $this->runScript('build-cache-save.sh', $bin);
+
+        self::assertSame(0, $result['code']);
+        $this->assertBuildCacheLogContains('Build cache saved.', $result['output']);
+        self::assertSame('new', \file_get_contents($this->artifact()));
         self::assertFileDoesNotExist($this->artifact() . '.tmp');
     }
 
