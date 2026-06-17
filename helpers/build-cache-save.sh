@@ -44,7 +44,7 @@ if "${mksquashfs_cmd[@]}" "$OPEN_RUNTIMES_BUILD_CACHE_ROOT" "$tmp_artifact" -com
 		fi
 	fi
 
-	if mv "$tmp_artifact" "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT"; then
+	if mv -f "$tmp_artifact" "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT"; then
 		log 'Build cache saved.'
 	else
 		rm -f "$tmp_artifact"

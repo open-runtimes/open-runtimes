@@ -33,7 +33,7 @@ class BuildCache extends TestCase
         $result = $this->runScript('build-cache-restore.sh', $bin);
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('Build cache miss.', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache miss.', $result['output']);
     }
 
     public function testRestoreWithMissingUnsquashfsExitsZero(): void
@@ -41,7 +41,7 @@ class BuildCache extends TestCase
         $result = $this->runScript('build-cache-restore.sh', $this->createBinDir());
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('missing unsquashfs', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache warning: missing unsquashfs, continuing without cache restore.', $result['output']);
     }
 
     public function testRestoreWithCorruptArtifactExitsZeroAndClearsPartialCacheRoot(): void
@@ -56,7 +56,7 @@ class BuildCache extends TestCase
         $result = $this->runScript('build-cache-restore.sh', $bin);
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('failed to restore cache', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache warning: failed to restore cache, starting fresh.', $result['output']);
         self::assertStringNotContainsString('squashfs stdout', $result['output']);
         self::assertStringNotContainsString('squashfs stderr', $result['output']);
         self::assertDirectoryExists($this->cacheRoot());
@@ -70,7 +70,7 @@ class BuildCache extends TestCase
         $result = $this->runScript('build-cache-save.sh', $this->createBinDir());
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('missing mksquashfs', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache warning: missing mksquashfs, continuing without cache save.', $result['output']);
     }
 
     public function testSaveWithMissingCacheRootExitsZero(): void
@@ -80,7 +80,7 @@ class BuildCache extends TestCase
         $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('Build cache save skipped: cache root missing.', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache save skipped: cache root missing.', $result['output']);
     }
 
     public function testSaveWithMissingArtifactDirectoryExitsZero(): void
@@ -92,7 +92,7 @@ class BuildCache extends TestCase
         $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('Build cache save skipped: artifact directory missing.', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache save skipped: artifact directory missing.', $result['output']);
     }
 
     public function testSaveFailureExitsZeroAndDeletesTemporaryArtifact(): void
@@ -105,11 +105,11 @@ class BuildCache extends TestCase
         $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('failed to save cache', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache warning: failed to save cache, build result preserved.', $result['output']);
         self::assertFileDoesNotExist($this->artifact() . '.tmp');
     }
 
-    public function testSuccessfulSaveWritesFinalArtifactAtomically(): void
+    public function testSuccessfulSaveWritesFinalArtifact(): void
     {
         \mkdir($this->cacheRoot(), 0777, true);
         \file_put_contents($this->cacheRoot() . '/store', 'cache');
@@ -120,10 +120,44 @@ class BuildCache extends TestCase
         $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('Build cache saved.', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache saved.', $result['output']);
         self::assertStringNotContainsString('squashfs stdout', $result['output']);
         self::assertStringNotContainsString('squashfs stderr', $result['output']);
         self::assertFileExists($this->artifact());
+        self::assertFileDoesNotExist($this->artifact() . '.tmp');
+    }
+
+    public function testSuccessfulSaveOverwritesExistingArtifact(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        \file_put_contents($this->cacheRoot() . '/store', 'cache');
+        \file_put_contents($this->artifact(), 'old');
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf new > \"$2\"\nexit 0\n",
+        ]);
+
+        $result = $this->runScript('build-cache-save.sh', $bin);
+
+        self::assertSame(0, $result['code']);
+        $this->assertBuildCacheLogContains('Build cache saved.', $result['output']);
+        self::assertSame('new', \file_get_contents($this->artifact()));
+        self::assertFileDoesNotExist($this->artifact() . '.tmp');
+    }
+
+    public function testFailedSavePreservesExistingArtifact(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        \file_put_contents($this->cacheRoot() . '/store', 'cache');
+        \file_put_contents($this->artifact(), 'old');
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf corrupt > \"$2\"\nexit 1\n",
+        ]);
+
+        $result = $this->runScript('build-cache-save.sh', $bin);
+
+        self::assertSame(0, $result['code']);
+        $this->assertBuildCacheLogContains('Build cache warning: failed to save cache, build result preserved.', $result['output']);
+        self::assertSame('old', \file_get_contents($this->artifact()));
         self::assertFileDoesNotExist($this->artifact() . '.tmp');
     }
 
@@ -139,7 +173,7 @@ class BuildCache extends TestCase
         $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('failed to save cache', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache warning: failed to save cache, build result preserved.', $result['output']);
         self::assertFileDoesNotExist($this->artifact());
         self::assertFileDoesNotExist($this->artifact() . '.tmp');
     }
@@ -163,7 +197,7 @@ class BuildCache extends TestCase
         );
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('failed to save cache', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache warning: failed to save cache, build result preserved.', $result['output']);
     }
 
     public function testBuildLifecycleRunsCacheAutomaticallyInBeforeAndAfterBuild(): void
@@ -205,7 +239,7 @@ class BuildCache extends TestCase
 
         self::assertSame(0, $save['code']);
         self::assertSame(0, $restore['code']);
-        self::assertStringContainsString('Build cache hit.', $restore['output']);
+        $this->assertBuildCacheLogContains('Build cache hit.', $restore['output']);
         self::assertSame('restored', \file_get_contents($this->cacheRoot() . '/store'));
     }
 
@@ -235,6 +269,19 @@ class BuildCache extends TestCase
     private function runScript(string $script, string $bin, array $env = []): array
     {
         return $this->runShell('/bin/bash ' . \escapeshellarg($this->helpers . '/' . $script), $bin, $env);
+    }
+
+    private function assertBuildCacheLogContains(string $message, string $output): void
+    {
+        $output = $this->stripAnsi($output);
+
+        self::assertStringContainsString('[open-runtimes]', $output);
+        self::assertStringContainsString($message, $output);
+    }
+
+    private function stripAnsi(string $output): string
+    {
+        return \preg_replace('/(?:\x1B|\\\\e)\[[0-9;]*m/', '', $output) ?? $output;
     }
 
     private function runShell(string $command, ?string $bin = null, array $env = []): array
