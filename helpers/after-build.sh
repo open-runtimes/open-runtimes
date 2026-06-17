@@ -46,4 +46,5 @@ else
 fi
 
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Build packaging finished. \e[0m"
+bash /usr/local/server/helpers/build-cache-save.sh || true
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[32m Build finished. \e[0m"

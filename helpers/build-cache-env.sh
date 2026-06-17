@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export OPEN_RUNTIMES_BUILD_CACHE_ROOT="/usr/local/cache/build"
+export OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="/cache/stores.sqfs"
+
+export npm_config_cache="$OPEN_RUNTIMES_BUILD_CACHE_ROOT/npm"
+export YARN_CACHE_FOLDER="$OPEN_RUNTIMES_BUILD_CACHE_ROOT/yarn"
+export npm_config_store_dir="$OPEN_RUNTIMES_BUILD_CACHE_ROOT/pnpm"
+export XDG_CACHE_HOME="$OPEN_RUNTIMES_BUILD_CACHE_ROOT/xdg-cache"
+export XDG_STATE_HOME="$OPEN_RUNTIMES_BUILD_CACHE_ROOT/xdg-state"
+export BUN_INSTALL_CACHE_DIR="$OPEN_RUNTIMES_BUILD_CACHE_ROOT/bun"
