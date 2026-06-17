@@ -123,6 +123,23 @@ class BuildCache extends TestCase
         self::assertFileDoesNotExist($this->artifact() . '.tmp');
     }
 
+    public function testMoveFailureExitsZeroAndDeletesTemporaryArtifact(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        \file_put_contents($this->cacheRoot() . '/store', 'cache');
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf saved > \"$2\"\nexit 0\n",
+            'mv' => "#!/bin/sh\nexit 1\n",
+        ]);
+
+        $result = $this->runScript('build-cache-save.sh', $bin);
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('failed to save cache', $result['output']);
+        self::assertFileDoesNotExist($this->artifact());
+        self::assertFileDoesNotExist($this->artifact() . '.tmp');
+    }
+
     public function testUserBuildCommandFailureStillFailsBuild(): void
     {
         $result = $this->runShell('false; status=$?; exit "$status"');
