@@ -10,6 +10,8 @@ log() {
 tmp_artifact="${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT}.tmp"
 rm -f "$tmp_artifact"
 artifact_dir="${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT%/*}"
+output_artifact="$tmp_artifact"
+promote_artifact="true"
 
 if ! command -v mksquashfs >/dev/null 2>&1; then
 	log 'Build cache warning: missing mksquashfs, continuing without cache save.'
@@ -34,9 +36,14 @@ else
 	mksquashfs_cmd=(mksquashfs)
 fi
 
-if "${mksquashfs_cmd[@]}" "$OPEN_RUNTIMES_BUILD_CACHE_ROOT" "$tmp_artifact" -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors" >/dev/null 2>&1; then
+if [ -f "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT" ] && [ -z "${OPEN_RUNTIMES_BUILD_CACHE_MAX_SIZE_BYTES:-}" ]; then
+	output_artifact="$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT"
+	promote_artifact="false"
+fi
+
+if "${mksquashfs_cmd[@]}" "$OPEN_RUNTIMES_BUILD_CACHE_ROOT" "$output_artifact" -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors" >/dev/null 2>&1; then
 	if [ -n "${OPEN_RUNTIMES_BUILD_CACHE_MAX_SIZE_BYTES:-}" ]; then
-		size=$(wc -c <"$tmp_artifact" | tr -d ' ')
+		size=$(wc -c <"$output_artifact" | tr -d ' ')
 		if [ "$size" -gt "$OPEN_RUNTIMES_BUILD_CACHE_MAX_SIZE_BYTES" ]; then
 			rm -f "$tmp_artifact"
 			log 'Build cache save skipped: artifact too large.'
@@ -44,7 +51,9 @@ if "${mksquashfs_cmd[@]}" "$OPEN_RUNTIMES_BUILD_CACHE_ROOT" "$tmp_artifact" -com
 		fi
 	fi
 
-	if mv -f "$tmp_artifact" "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT"; then
+	if [ "$promote_artifact" = "false" ]; then
+		log 'Build cache saved.'
+	elif mv "$tmp_artifact" "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT"; then
 		log 'Build cache saved.'
 	else
 		rm -f "$tmp_artifact"

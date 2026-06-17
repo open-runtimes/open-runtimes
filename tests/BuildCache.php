@@ -133,7 +133,7 @@ class BuildCache extends TestCase
         \file_put_contents($this->cacheRoot() . '/store', 'cache');
         \file_put_contents($this->artifact(), 'old');
         $bin = $this->createBinDir([
-            'mksquashfs' => "#!/bin/sh\nprintf new > \"$2\"\nexit 0\n",
+            'mksquashfs' => "#!/bin/sh\nif [ \"\$2\" != " . \escapeshellarg($this->artifact()) . " ]; then exit 2; fi\nprintf new > \"\$2\"\nexit 0\n",
         ]);
 
         $result = $this->runScript('build-cache-save.sh', $bin);
