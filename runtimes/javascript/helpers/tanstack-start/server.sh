@@ -12,8 +12,21 @@ if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
 	# Detect SSR in custom output directory
 	ENTRYPOINT="./server/index.mjs"
 	if [ -e "$ENTRYPOINT" ]; then
-		# NitroV2, NitroV3 (standalone)
-		START_COMMAND="$OPR_JAVASCRIPT_RUNNER ./server/index.mjs"
+		# NitroV2, NitroV3. env.sh sets NITRO_PRESET=node_server, but a user's
+		# vite.config can override it, so read the actual preset from nitro.json:
+		# node-listener exports a handler and never listens (needs a wrapper),
+		# anything else is a standalone self-listening server.
+		PRESET=""
+		if [ -e "./nitro.json" ]; then
+			PRESET="$(sed -n 's/.*"preset"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' ./nitro.json)"
+		fi
+
+		if [ "$PRESET" = "node-listener" ]; then
+			cp ../server-tanstack-start-listener.mjs ./server-http.mjs
+			START_COMMAND="$OPR_JAVASCRIPT_RUNNER ./server-http.mjs"
+		else
+			START_COMMAND="$OPR_JAVASCRIPT_RUNNER ./server/index.mjs"
+		fi
 	fi
 
 	ENTRYPOINT="./server/server.js"
