@@ -30,7 +30,7 @@ log_file_output() {
 		return
 	fi
 
-	while IFS= read -r line; do
+	while IFS= read -r line || [ -n "$line" ]; do
 		log "Build cache mksquashfs output: $line"
 	done <"$file"
 }
