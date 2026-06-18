@@ -107,6 +107,22 @@ class BuildCache extends TestCase
         self::assertSame(0, $result['code']);
         $this->assertBuildCacheLogContains('Build cache warning: failed to save cache, build result preserved.', $result['output']);
         self::assertFileDoesNotExist($this->artifact() . '.tmp');
+        self::assertSame([], \glob($this->root . '/build-cache-save.*'));
+    }
+
+    public function testSaveFailureLogsMksquashfsOutput(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf 'squashfs stdout\n'\nprintf 'squashfs stderr\n' >&2\nexit 1\n",
+        ]);
+
+        $result = $this->runScript('build-cache-save.sh', $bin);
+
+        self::assertSame(0, $result['code']);
+        $this->assertBuildCacheLogContains('Build cache warning: failed to save cache with exit code 1, build result preserved.', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache mksquashfs output: squashfs stdout', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache mksquashfs output: squashfs stderr', $result['output']);
     }
 
     public function testSuccessfulSaveWritesFinalArtifact(): void
@@ -141,6 +157,41 @@ class BuildCache extends TestCase
         self::assertSame(0, $result['code']);
         $this->assertBuildCacheLogContains('Build cache saved.', $result['output']);
         self::assertSame('new', \file_get_contents($this->artifact()));
+        self::assertFileDoesNotExist($this->artifact() . '.tmp');
+    }
+
+    public function testSuccessfulSaveLogsUnchangedArtifact(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        \file_put_contents($this->cacheRoot() . '/store', 'cache');
+        \file_put_contents($this->artifact(), 'same');
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf same > \"$2\"\nexit 0\n",
+        ]);
+
+        $result = $this->runScript('build-cache-save.sh', $bin);
+
+        self::assertSame(0, $result['code']);
+        $this->assertBuildCacheLogContains('Build cache save skipped: artifact unchanged', $result['output']);
+        self::assertSame('same', \file_get_contents($this->artifact()));
+        self::assertFileDoesNotExist($this->artifact() . '.tmp');
+    }
+
+    public function testSaveSkipsTooLargeArtifactWithSizes(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        \file_put_contents($this->artifact(), 'old');
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf large > \"$2\"\nexit 0\n",
+        ]);
+
+        $result = $this->runScript('build-cache-save.sh', $bin, [
+            'OPEN_RUNTIMES_BUILD_CACHE_MAX_SIZE_BYTES' => '3',
+        ]);
+
+        self::assertSame(0, $result['code']);
+        $this->assertBuildCacheLogContains('Build cache save skipped: artifact too large (5 bytes, max 3 bytes).', $result['output']);
+        self::assertSame('old', \file_get_contents($this->artifact()));
         self::assertFileDoesNotExist($this->artifact() . '.tmp');
     }
 
