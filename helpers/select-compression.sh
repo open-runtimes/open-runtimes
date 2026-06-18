@@ -12,9 +12,12 @@ elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "auto" ]; then
 	TOTAL_SIZE_KB=$(du -sk . 2>/dev/null | cut -f1)
 	TOTAL_SIZE_KB=${TOTAL_SIZE_KB:-0}
 
-	if [ "$TOTAL_SIZE_KB" -lt 10240 ]; then
+	if [ "$TOTAL_SIZE_KB" -lt 5120 ]; then
 		# < 5MB: no compression
 		COMPRESSION_METHOD="none"
+	elif [ "$TOTAL_SIZE_KB" -lt 10240 ]; then
+		# 5-10MB: gzip (edge decompresses with igzip)
+		COMPRESSION_METHOD="gzip"
 	else
 		# >= 10MB: gzip (best decompression throughput)
 		COMPRESSION_METHOD="gzip"
