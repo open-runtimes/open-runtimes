@@ -16,7 +16,7 @@ elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "auto" ]; then
 		# < 5MB: no compression
 		COMPRESSION_METHOD="none"
 	else
-		# >= 10MB: zstd (best decompression throughput)
+		# >= 10MB: gzip (best decompression throughput)
 		COMPRESSION_METHOD="gzip"
 	fi
 
