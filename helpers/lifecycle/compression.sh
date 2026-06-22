@@ -15,12 +15,9 @@ elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "auto" ]; then
 	if [ "$TOTAL_SIZE_KB" -lt 5120 ]; then
 		# < 5MB: no compression
 		COMPRESSION_METHOD="none"
-	elif [ "$TOTAL_SIZE_KB" -lt 10240 ]; then
-		# 5-10MB: gzip (edge decompresses with igzip)
-		COMPRESSION_METHOD="gzip"
 	else
-		# >= 10MB: zstd (best decompression throughput)
-		COMPRESSION_METHOD="zstd"
+		# >= 5MB: gzip (edge decompresses with igzip)
+		COMPRESSION_METHOD="gzip"
 	fi
 
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Auto compression: ${COMPRESSION_METHOD} (size=${TOTAL_SIZE_KB}KB) \e[0m"
