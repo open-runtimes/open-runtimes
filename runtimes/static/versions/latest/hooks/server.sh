@@ -33,9 +33,47 @@ if [ -z "$OPEN_RUNTIMES_CACHE_HEADER" ]; then
 	OPEN_RUNTIMES_CACHE_HEADER="CDN-Cache-Control"
 fi
 
+# Echo $1 if it's a non-negative integer, else the fallback $2 (keeps the TOML valid).
+sanitize_int() {
+	case "$1" in
+	'' | *[!0-9]*) echo "$2" ;;
+	*) echo "$1" ;;
+	esac
+}
+
+# Toggle the in-memory cache.
+OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED="$(echo "${OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED:-true}" | tr '[:upper:]' '[:lower:]')"
+
+# Time-to-live in seconds.
+OPEN_RUNTIMES_STATIC_CACHE_TTL="$(sanitize_int "${OPEN_RUNTIMES_STATIC_CACHE_TTL:-86400}" 86400)"
+
+# Time-to-idle in seconds; defaults to TTL.
+OPEN_RUNTIMES_STATIC_CACHE_TTI="$(sanitize_int "${OPEN_RUNTIMES_STATIC_CACHE_TTI:-$OPEN_RUNTIMES_STATIC_CACHE_TTL}" "$OPEN_RUNTIMES_STATIC_CACHE_TTL")"
+
+# Max cached files.
+OPEN_RUNTIMES_STATIC_CACHE_CAPACITY="$(sanitize_int "${OPEN_RUNTIMES_STATIC_CACHE_CAPACITY:-4096}" 4096)"
+
+# Max cacheable file size (KiB).
+OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB="$(sanitize_int "${OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB:-8192}" 8192)"
+
 # Create dynamic config.toml
 cat >/tmp/config.toml <<EOF
 [advanced]
+EOF
+
+# Append the in-memory cache table unless the feature is disabled.
+if [ "$OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED" = "true" ]; then
+	cat >>/tmp/config.toml <<EOF
+
+[advanced.memory-cache]
+capacity = $OPEN_RUNTIMES_STATIC_CACHE_CAPACITY
+ttl = $OPEN_RUNTIMES_STATIC_CACHE_TTL
+tti = $OPEN_RUNTIMES_STATIC_CACHE_TTI
+max-file-size = $OPEN_RUNTIMES_STATIC_CACHE_MAX_FILE_KIB
+EOF
+fi
+
+cat >>/tmp/config.toml <<EOF
 
 [[advanced.rewrites]]
 source = "/__opr/timings"
