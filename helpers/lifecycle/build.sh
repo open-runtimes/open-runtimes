@@ -7,6 +7,11 @@ shopt -s dotglob
 
 . /usr/local/server/helpers/lifecycle/lib.sh
 
+# --- Build cache: restore package-manager caches before the build runs ---
+
+. /usr/local/server/helpers/build-cache-env.sh
+bash /usr/local/server/helpers/build-cache-restore.sh || true
+
 # --- Stage: copy source code into the build directory ---
 
 opr_log "Environment preparation started."
@@ -83,4 +88,9 @@ else
 fi
 
 opr_log "Build packaging finished."
+
+# --- Build cache: persist package-manager caches for the next build ---
+
+bash /usr/local/server/helpers/build-cache-save.sh || true
+
 opr_success "Build finished."
