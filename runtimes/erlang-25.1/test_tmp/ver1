@@ -1,0 +1,47 @@
+diff --color -ra server/rebar.lock server_/rebar.lock
+4d3
+<  {<<"jsone">>,{pkg,<<"jsone">>,<<"1.6.1">>},0},
+10d8
+<  {<<"jsone">>, <<"7EA1098FE004C4127320FE0E3CF6A951B01F82039FEAA56C322DC7E34DD59762">>},
+15d12
+<  {<<"jsone">>, <<"A6C1DF6081DF742068D2ED747A4FE8A7740C56421B53E02BC9D4907DD3502922">>},
+diff --color -ra server/src/handler.erl server_/src/handler.erl
+1c1
+< -module(handler).
+---
+> -module(handler)
+3,11c3,18
+< -export([main/1]).
+< 
+< main({_, V, H, P } = Req) ->
+<   io:fwrite("~nReq: ~w ~n~n", [Req]),
+<   io:fwrite("Vars: ~w Headers: ~w Payload: ~w~n~n", [V, H, P]),
+<   % io:fwrite("Req Headers: ~w~n", [maps:get(headers, Req)]),
+<   % throw(<<"Something happend">>),
+<   % server_res:send(<<"Hi">>).
+<   server_res:json(#{ data => <<"Some Data">> }).
+---
+> -export([init/2]).
+>  
+> init(#{method := Method} = Req, _State) ->
+>     handle_req(Method, Req).
+>  
+> handle_req(<<"GET">>, Req) ->
+>     {ok, text_plain(Req, <<"pong">>)};
+>  
+> handle_req(_Method, Req) ->
+>     cowboy_req:reply(404, Req).
+>  
+> text_plain(Request, ResponseBody) ->
+>     ResponseHeaders = #{
+>         <<"content-type">> => <<"text/plain">>
+>     }, --
+>     cowboy_req:reply(200, ResponseHeaders, ResponseBody, Request).
+diff --color -ra server/src/server_app.erl server_/src/server_app.erl
+15c15
+<         {'_', [{"/", server_handler, []}]}
+---
+>         {'_', [{"/", handler, []}]}
+diff --color -ra server/src/server.app.src server_/src/server.app.src
+9d8
+<     sasl,
