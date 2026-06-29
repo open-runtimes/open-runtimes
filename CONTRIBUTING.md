@@ -100,7 +100,7 @@ docker buildx bake node-25 --load
 
 ## Testing
 
-We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by GitHub Actions, and tests run for all runtimes. For the full local testing guide — including end-to-end testing against self-hosted cloud and edge — see [docs/testing.md](docs/testing.md).
+We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by GitHub Actions, and tests run for all runtimes. For the full local testing guide — including end-to-end testing against Appwrite Community Edition and edge — see [docs/testing.md](docs/testing.md).
 
 Before running the tests, make sure to install all required PHP libraries:
 

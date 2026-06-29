@@ -25,6 +25,14 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 	NEEDED_FILES=()
 
 	if [ -d "./.next" ]; then
+		# node historically shipped Next.js node_modules untouched (its pre
+		# shared-packer behavior). Preserve that per runtime via
+		# OPEN_RUNTIMES_NEXTJS_CLEANUP=none so published images pack Next.js exactly
+		# as before; bun/deno default to modclean.
+		if [ "${OPEN_RUNTIMES_NEXTJS_CLEANUP:-modclean}" = "none" ]; then
+			return 0 2>/dev/null || exit 0
+		fi
+
 		# Next.js NFT is intentionally skipped: native .nft.json traces miss
 		# server-wrapper and next.config imports. Use default modclean instead.
 		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m Next.js NFT cleanup skipped, falling back to modclean. \e[0m"

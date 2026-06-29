@@ -6,9 +6,10 @@ There are two distinct things you can test, and they use different loops:
    functions the way the test suite expects? This is the **in-repo harness**
    (`make test`). It is fast, deterministic, and is what CI runs. Use it for
    almost all runtime work.
-2. **End-to-end through a self-hosted product** — does a freshly-built runtime
-   image actually run under a real executor inside [cloud](https://github.com/appwrite/cloud)
-   or [edge](https://github.com/appwrite/edge)? This is a heavier integration
+2. **End-to-end through Appwrite Community Edition** — does a freshly-built
+   runtime image actually run under a real executor inside a self-hosted
+   [Appwrite Community Edition](https://github.com/appwrite/appwrite) install
+   (or [edge](https://github.com/appwrite/edge))? This is a heavier integration
    loop. Use it only to smoke-test image packaging against a real executor.
 
 Start with loop 1. Only promote to loop 2 once the in-repo harness is green.
@@ -49,7 +50,7 @@ Useful flags (pass through `bun ci/test.ts` directly):
 
 **A run passes if** every step exits `0` and PHPUnit reports green. A failure
 here is almost always a build/packaging or hook regression — fix it before
-touching cloud or edge.
+touching Community Edition or edge.
 
 To sweep several runtimes:
 
@@ -59,7 +60,27 @@ for id in node-25 python-3.14 swift-6.2 rust-1.83 static-1; do
 done
 ```
 
-## Loop 2 — end-to-end through self-hosted cloud (docker-compose)
+## Loop 2 — end-to-end through Appwrite Community Edition (docker-compose)
+
+[Appwrite Community Edition](https://github.com/appwrite/appwrite) is the
+open-source, self-hostable build of Appwrite, shipped as a set of Docker
+microservices in a single `docker-compose.yml`. One of those services is the
+`openruntimes-executor` — the same executor that builds and runs these runtime
+images in production — which makes it a realistic target for this loop. Install
+it with the one-line bootstrapper; it writes a `docker-compose.yml` and `.env`
+into an `appwrite/` directory:
+
+```bash
+docker run -it --rm \
+    --volume /var/run/docker.sock:/var/run/docker.sock \
+    --volume "$(pwd)"/appwrite:/usr/src/code/appwrite:rw \
+    --entrypoint="install" \
+    appwrite/appwrite:1.8.0
+```
+
+See the [Appwrite self-hosting docs](https://appwrite.io/docs/advanced/self-hosting)
+for production setup and configuration. Everything below runs from the generated
+`appwrite/` directory.
 
 The executor pulls runtime images from the registry before running them, so a
 locally-built image of the same tag is **overwritten by the pull** unless you
@@ -73,8 +94,9 @@ disable it. That toggle is the whole trick.
    docker buildx bake static-1  --load --set '*.tags=openruntimes/static:v5-1'
    ```
 
-2. **Tell the executor to use the local image instead of pulling.** In your
-   cloud checkout, add a compose override (don't edit the tracked compose file):
+2. **Tell the executor to use the local image instead of pulling.** In the
+   `appwrite/` directory, add a compose override next to the generated
+   `docker-compose.yml` (don't edit the generated file):
 
    ```yaml
    # docker-compose.override.yml
@@ -87,11 +109,13 @@ disable it. That toggle is the whole trick.
    > The default is `OPR_EXECUTOR_IMAGE_PULL=enabled`. Confirm `disabled` is the
    > accepted value in your executor version before relying on it.
 
-3. **Bring up cloud**, then create and deploy a function on that runtime (via
-   the console or the Appwrite CLI) and execute it.
+3. **Bring it up** with `docker compose up -d`, then create and deploy a
+   function on that runtime (via the console at http://localhost or the Appwrite
+   CLI) and execute it.
 
-4. **Verify**: the function builds and executes, and `docker logs exc1` shows
-   the executor using the local image with no registry pull.
+4. **Verify**: the function builds and executes, and
+   `docker logs openruntimes-executor` shows the executor using the local image
+   with no registry pull.
 
 ## Loop 3 — end-to-end through edge (kind/Tilt)
 
@@ -126,5 +150,5 @@ kind node so the pull is satisfied locally.
 | Confirming an image runs under a real executor before release | **2** |
 | Prod-parity smoke for the edge deployment model | **3** |
 
-Edge mostly re-confirms what cloud already proves, so treat it as a final
-prod-parity check rather than your main loop.
+Edge mostly re-confirms what Community Edition already proves, so treat it as a
+final prod-parity check rather than your main loop.

@@ -28,4 +28,8 @@ RUN if [ "$INSTALL_SSR_TOOLING" = "true" ]; then \
 
 ENV OPEN_RUNTIMES_SERVER_COMMAND="node --max_old_space_size=8192 src/server.js"
 
+# Next.js packing: keep node's pre-consolidation behavior (ship node_modules
+# untouched) instead of the shared packer's modclean fallback used by bun/deno.
+ENV OPEN_RUNTIMES_NEXTJS_CLEANUP=none
+
 INCLUDE ./docker/base-after

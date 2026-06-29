@@ -240,7 +240,7 @@ and the build version list drift apart.
 
    This builds the image, stages your fixtures, and runs the suite. See
    [docs/testing.md](testing.md) for the full local-testing guide (including
-   end-to-end testing against self-hosted cloud and edge).
+   end-to-end testing against Appwrite Community Edition and edge).
 
 ## 7. Update the README
 
