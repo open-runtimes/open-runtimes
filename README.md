@@ -5,7 +5,7 @@
 ---
 
 [![Discord](https://img.shields.io/discord/937092945713172480?label=discord&style=flat-square)](https://discord.gg/mkZcevnxuf)
-[![Build Status](https://img.shields.io/travis/com/open-runtimes/open-runtimes/main?style=flat-square)](https://travis-ci.com/github/open-runtimes/open-runtimes)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/open-runtimes/open-runtimes/test.yaml?style=flat-square)](https://github.com/open-runtimes/open-runtimes/actions/workflows/test.yaml)
 [![Twitter Account](https://img.shields.io/twitter/follow/appwrite?color=00acee&label=twitter&style=flat-square)](https://twitter.com/appwrite)
 
 <!-- [![Docker Pulls](https://img.shields.io/docker/pulls/appwrite/appwrite?color=f02e65&style=flat-square)](https://hub.docker.com/r/appwrite/appwrite) -->
@@ -53,6 +53,7 @@ Runtime environments for serverless cloud computing for multiple coding language
 | Dart | [openruntimes/dart](https://hub.docker.com/r/openruntimes/dart)        | [README](/runtimes/dart/README.md)      | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dart?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dart) |
 | Deno | [openruntimes/deno](https://hub.docker.com/r/openruntimes/deno)        | [README](/runtimes/deno/README.md)      | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/deno?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/deno) |
 | .NET | [openruntimes/dotnet](https://hub.docker.com/r/openruntimes/dotnet)     | [README](/runtimes/dotnet/README.md)     | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/dotnet?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/dotnet) |
+| Flutter | [openruntimes/flutter](https://hub.docker.com/r/openruntimes/flutter)  | [README](/runtimes/flutter/README.md)   | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/flutter?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/flutter) |
 | Java | [openruntimes/java](https://hub.docker.com/r/openruntimes/java)         | [README](/runtimes/java/README.md)       | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/java?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/java) |
 | Kotlin | [openruntimes/kotlin](https://hub.docker.com/r/openruntimes/kotlin)     | [README](/runtimes/kotlin/README.md)     | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/kotlin?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/kotlin) |
 | Go | [openruntimes/go](https://hub.docker.com/r/openruntimes/go)            | [README](/runtimes/go/README.md)        | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/go?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/go) |
@@ -63,6 +64,8 @@ Runtime environments for serverless cloud computing for multiple coding language
 | Python ML | [openruntimes/python-ml:v5-3.12](https://hub.docker.com/r/openruntimes/python-ml) | [README](/runtimes/python/versions/ml-3.12/README.md) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python-ml?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python-ml) |
 | Python ML | [openruntimes/python-ml:v5-3.13](https://hub.docker.com/r/openruntimes/python-ml) | [README](/runtimes/python/versions/ml-3.13/README.md) | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/python-ml?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/python-ml) |
 | Ruby | [openruntimes/ruby](https://hub.docker.com/r/openruntimes/ruby)         | [README](/runtimes/ruby/README.md)       | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/ruby?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/ruby) |
+| Rust | [openruntimes/rust](https://hub.docker.com/r/openruntimes/rust)         | [README](/runtimes/rust/README.md)       | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/rust?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/rust) |
+| Static | [openruntimes/static](https://hub.docker.com/r/openruntimes/static)     | [README](/runtimes/static)               | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/static?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/static) |
 | Swift | [openruntimes/swift](https://hub.docker.com/r/openruntimes/swift)       | [README](/runtimes/swift/README.md)      | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/swift?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/swift) |
 | Bun | [openruntimes/bun](https://hub.docker.com/r/openruntimes/bun)           | [README](/runtimes/bun/README.md)        | [![Docker Pulls](https://img.shields.io/docker/pulls/openruntimes/bun?color=f02e65&style=flat-square)](https://hub.docker.com/r/openruntimes/bun) |
 
@@ -102,8 +105,6 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 .
 ├── src
 │   ├── (runtime-specific, like index.js)
-├── example
-│   ├── (runtime-specific, like server.js)
 ├── helpers
 │   ├── build.sh
 │   ├── start.sh
@@ -115,7 +116,6 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 │       └── compression.sh
 ├── hooks
 │   ├── (runtime-specific, like compile.sh)
-├── docker-compose.yml
 ├── Dockerfile
 ├── README.md
 └── (runtime-specific, like package.json)
@@ -125,9 +125,7 @@ All runtimes share a common basic structure, but each additionally adds runtime-
 | Name               	| Description                                                                                                                                           	|
 |--------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------	|
 | src/           	    | Contains source code of HTTP server of the runtime server                                                                                               	|
-| example/           	| Contains a sample function to demonstrate the usage of the runtime server                                                                             	|
 | helpers/           	| Contains bash scripts that helps with simple build and start process. Can be ignored for more complex solution.                                          	|
-| docker-compose.yml 	| Configuration to easily run the example code with `docker-compose up`                                                                                 	|
 | Dockerfile         	| Instructions to build a runtime, install it's dependencies and setup the runtime server. These images are usually based on official alpine or ubuntu. 	|
 | README.md          	| Runtime specific documentation                                                                                                                        	|
 

@@ -1,6 +1,6 @@
 # How to Add a Runtime Version
 
-This guide shows how to add a new version to an existing runtime using Bun 1.3 as an example.
+This guide shows how to add a new version to an existing runtime using Bun 1.4 as an example.
 
 ## Required Changes
 
@@ -13,8 +13,8 @@ Add the new version to the `versions` array (newer versions first):
 ```diff
 [bun]
 entry = "tests.ts"
--versions = ["1.2", "1.1", "1.0"]
-+versions = ["1.3", "1.2", "1.1", "1.0"]
+-versions = ["1.3", "1.2", "1.1", "1.0"]
++versions = ["1.4", "1.3", "1.2", "1.1", "1.0"]
 # ...
 ```
 
@@ -24,8 +24,8 @@ Add a matching entry under `[bun.build.versions]` (newer versions first):
 
 ```diff
 [bun.build.versions]
-+"1.3" = { base = "oven/bun:1.3.0-alpine" }
-"1.2" = { base = "oven/bun:1.2.23-alpine" }
++"1.4" = { base = "oven/bun:1.4.0-alpine" }
+"1.3" = { base = "oven/bun:1.3.8-alpine" }
 # ...
 ```
 
@@ -53,5 +53,5 @@ CI rejects the change if `docker-bake.json` is out of date or if the test and bu
 ### 4. Test locally (optional)
 
 ```bash
-make test ID=bun-1.3
+make test ID=bun-1.4
 ```

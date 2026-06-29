@@ -86,16 +86,21 @@ docker run --rm --interactive --tty --volume "$(pwd)":/app composer update --ign
 docker run --rm --interactive --tty --volume "%cd%":/app composer update --ignore-platform-reqs --optimize-autoloader --no-plugins --no-scripts --prefer-dist
 ```
 
-4. Build the runtimes you want to test using the docker build command:
+3. Install [bun](https://bun.sh), which drives the test and image-build tooling:
+```bash
+brew install oven-sh/bun/bun
 ```
-docker build -t {{Image Tag Name}} ./runtimes/{{Folder of your runtime}}
+
+4. Build a runtime image you want to test with `docker buildx bake` (or `make image ID=<runtime>-<version>`):
+```bash
+docker buildx bake node-25 --load
 ```
 
 5. Follow our contribution guide to learn how you can add support for [more runtimes](docs/add-runtime.md) or [more versions](docs/add-version.md).
 
 ## Testing
 
-We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by Travis CI, and tests run for all runtimes.
+We use PHP framework PHPUnit to test Open Runtimes. Every PR is automatically tested by GitHub Actions, and tests run for all runtimes. For the full local testing guide — including end-to-end testing against self-hosted cloud and edge — see [docs/testing.md](docs/testing.md).
 
 Before running the tests, make sure to install all required PHP libraries:
 

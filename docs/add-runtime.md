@@ -2,263 +2,256 @@
 
 This document is part of the Open Runtimes contributors' guide. Before you continue reading this document make sure you have read the [Code of Conduct](https://github.com/open-runtimes/open-runtimes/blob/main/CODE_OF_CONDUCT.md) and the [Contributing Guide](https://github.com/open-runtimes/open-runtimes/blob/main/CONTRIBUTING.md).
 
+> Adding a **new version** to an existing runtime is a much smaller, config-only
+> change. See [add-version.md](add-version.md). This guide is for adding a
+> brand-new language.
+
 ## 1. Prerequisites
+
 For a runtime to work, two prerequisites **must** be met due to the way Open Runtimes's Runtime Execution Model works:
 
- - [ ] The Language in question must be able to run a web server that can serve JSON and text.
- - [ ] The Runtime must be able to be packaged into a Docker container
- 
- Note: Both Compiled and Interpreted languages work with Open Runtimes's execution model but are written in slightly different ways.
+ - [ ] The language must be able to run a web server that serves JSON and text on port `3000`.
+ - [ ] The runtime must be packageable into a Docker container.
 
-It's really easy to contribute to an open-source project, but when using GitHub, there are a few steps we need to follow. This section will take you step-by-step through the process of preparing your local version of Open Runtimes, where you can make any changes without affecting Open Runtimes right away.
-
-> If you are experienced with GitHub or have made a pull request before, you can skip to [Implement New Runtime](#2-implement-new-runtime).
+Both compiled and interpreted languages work with Open Runtimes; they only differ in which build hooks they implement (see [§3](#3-the-build-and-start-lifecycle)).
 
 ### 1.1 Fork the Open Runtimes repository
 
-Before making any changes, you will need to fork Open Runtimes's repository to keep branches on the official repo clean. To do that, visit [Open Runtimes's Runtime repository](https://github.com/open-runtimes/open-runtimes) and click on the fork button.
-
-[![Fork button](https://github.com/open-runtimes/open-runtimes/raw/main/docs/images/fork.png)](https://github.com/open-runtimes/open-runtimes/raw/main/docs/images/fork.png)
-
-This will redirect you from `github.com/open-runtimes/open-runtimes` to `github.com/YOUR_USERNAME/open-runtimes`, meaning all changes you do are only done inside your repository. Once you are there, click the highlighted `Code` button, copy the URL and clone the repository to your computer using the `git clone` command:
+Fork [the repository](https://github.com/open-runtimes/open-runtimes), clone your fork, and create a `feat-XXX-YYY-runtime` branch from `main` (`XXX` = issue ID, `YYY` = runtime name).
 
 ```bash
-$ git clone COPIED_URL
+git clone COPIED_URL
+git checkout -b feat-XXX-YYY-runtime
 ```
 
-> To fork a repository, you will need a basic understanding of CLI and git-cli binaries installed. If you are a beginner, we recommend you to use `Github Desktop`. It is a clean and simple visual Git client.
+## 2. Runtime layout
 
-Finally, you will need to create a `feat-XXX-YYY-runtime` branch from the `main` branch and switch to it. The `XXX` should represent the issue ID and `YYY` the runtime name.
+Each runtime lives in `runtimes/<runtime>/`. There is **one family `Dockerfile`**
+that serves every version; versioned source lives under `versions/`. Using Rust
+as a compiled example and Node as an interpreted one, a runtime looks like:
 
-## 2. Implement new runtime
-
-### 2.1 Preparing the files for your new runtime
-
-The first step to writing a new runtime is to create a folder within `/runtimes` with the name of the runtime and the version separated by a dash. For instance, if I was to write a Rust Runtime with version 1.55 the folder name would be: `rust-1.55`.
-
-Within that folder you will need to create a few basic files that all Open Runtimes runtimes require:
-
-
-- `Dockerfile` - Dockerfile that explains how the container will be built.
-- `README.md` - A readme file explaining the runtime and any special notes for the runtime. A good example of this is the PHP 8.0 runtime.
-
-### 2.2 Differences between compiled and interpreted runtimes
-
-Runtimes within Open Runtimes are created differently depending on whether they are compiled or interpreted. This is due to the fundamental differences between the two ways of running the code.
-
-Interpreted languages have both a `build.sh` file and a `start.sh` file.
-
-The `build.sh` file for an interpreted runtime is normally used for installing any dependencies for both the server itself and the user's code and then to copy it to the `/usr/code` folder which is then packaged and can be used later for running the server. The build script is always executed during the build stage of a function deployment.
-
-The `start.sh` file for an interpreted runtime should extract the `/tmp/code.tar.gz` file that contains both the user's code and the dependencies. This tarball was created by Open Runtimes build stage, and start process should install the dependencies that were pre-downloaded by the build stage. This is most likely done by moving them into the relevant locations for that runtime, most likely near server code. It will then run the server ready for execution.
-
----
-
-The `build.sh` script for a compiled runtime is used to move the user's source code and rename it into source files for the runtime (The `INTERNAL_RUNTIME_ENTRYPOINT` environment variable can help with this). It will also build the code and move it into the `/usr/code` folder.
-
-#### Note:
-
-- `/tmp/code.tar.gz` is always created from the `/usr/code` folder as an output of the build stage. If you need any files for either compiled or interpreted runtimes you should place them there and extract them from the `/tmp/code.tar.gz` during the `start.sh` script to get the files you need.
-
-- If you need to do any changes to user files during the build, we recommend copying them into `/usr/builds`. This way you do changes internally, and don't actually touch the code on the harddrive of the user.
-
-- If your runtime needs any additional transformation of user input, we recommend doing that in `prepare.sh`, and running this preparation script from `build.sh`. This helps us differenciate between build process, and process of adjusting user code.
-
-- Make sure to checkout existing runtimes to also include files such as `.env`, `.gitignore` and so on.
-
-- Once done with runtime, please make sure to include `example` folder with example script. This script must use HTTP client library, and it must send a specific request to read specific API. We do this to make sure our example covers most of the usage, and you can easily see exact same script in any runtime. Please refer to other runtimes to see what exactly needs to be done in the example script.
-
-### 2.3 Writing the runtime
-
-Internally, the runtime can be anything you like as long as it follows the standards set by the other runtimes.
-
-The best way to go about writing a runtime is like so:
-
-Initialize a web server that runs on port 3000 and binds to the 0.0.0.0 IP and on each `POST` request do the following:
-
-1. Check that the `x-internal-challenge` header matches the `INTERNAL_RUNTIME_KEY` environment variable. If not return an error with a `401` status code and an `unauthorized` error message.
-
-2. Decode the executor's JSON POST request. This normally looks like so:
-```json
-{
- "variables": {
-    "USER_KEY":"abcd1234"
- },
- "headers": {
-    "hello":"world!"
- },
- "payload":"An Example Payload"
-}
+```
+runtimes/<runtime>/
+├── Dockerfile               # one Dockerfile for all versions (see §2.1)
+├── README.md                # short description + notes for this runtime
+├── versions/
+│   └── latest/              # source shared by every version
+│       ├── src/             # the runtime HTTP server (server.js, main.rs, …)
+│       └── hooks/           # optional build/start lifecycle hooks (see §3)
+│   └── <version>/           # OPTIONAL: files that overlay latest/ for one version
+└── versions/latest/...
 ```
 
-You must create two classes for users to use within their scripts.
+At image-build time the container's `/usr/local/server` directory is assembled
+by overlaying four [named build contexts](https://docs.docker.com/build/building/context/), later layers winning:
 
-A `Request` Class and a `Response` class. The `Request` class must store `variables`, `payload` and `headers` and pass them to the user's function. The Request always goes before the response in the user's function parameters.
+1. `helpers` → the repo's `helpers/` (the global lifecycle runner — you don't touch this)
+2. `shared` → `runtimes/<shared family>/` (e.g. `javascript` for node/bun/deno), or empty
+3. `latest` → `runtimes/<runtime>/versions/latest/`
+4. `version` → `runtimes/<runtime>/versions/<version>/` extras, or empty
 
-The `Response` class must have two functions:
+User code is mounted at `/mnt/code`; the build directory is `/usr/local/build`.
 
-- `send(string)` function which will return text to the request
-- `json(object)` function which will return JSON to the request setting the appropriate headers
+### 2.1 Writing the Dockerfile
 
-For languages that have dynamic typing such as JS, you can pass an object with these attributes if you like.
+The Dockerfile is intentionally thin. It starts from a `BASE_IMAGE` build arg
+(the actual version is supplied from `ci/runtimes.toml`, see [§4](#4-register-the-runtime)),
+`INCLUDE`s the shared base fragments, installs any system packages the language
+needs, and declares the command that starts the server. Real example (`runtimes/rust/Dockerfile`):
 
-Please make sure to add appropriate checks to make sure the imported file is a function that you can execute.
+```dockerfile
+# syntax=docker/dockerfile:1
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
 
-3. Finally, execute the function and handle whatever response the user's code returns. Wrap the function into a `try catch` statement to handle any errors the user's function encounters and return them cleanly to the executor with the error schema.
+INCLUDE ./docker/base-before
 
-### 2.4 The Error Schema
+ENV OPEN_RUNTIMES_ENTRYPOINT=main.rs
 
-All errors that occur during the execution of a user's function **MUST** be returned using this JSON Object otherwise OpenRuntimes will be unable to parse them for the user.
+RUN apk update && apk add --no-cache bash musl-dev openssl-dev pkgconfig curl
 
-```json5
-{
-    "code": 500, // (Int) Use 404 if function not found or use 401 if the x-internal-challenge check failed.
-    "message": "Error: Tried to divide by 0 \n /usr/code/index.js:80:7", // (String) Try to return a stacktrace and detailed error message if possible. This is shown to the user.
-}
+ENV OPEN_RUNTIMES_SERVER_COMMAND="src/function/rust_runtime"
+
+INCLUDE ./docker/base-after
 ```
 
-### 2.5 Writing your Dockerfile
+Key points:
 
-The Dockerfile is very important as it's the environment you are creating to run build the runtime and also run the code if you are writing an interpreted runtime (compiled runtimes will use an `alpine` or `ubuntu` image to run the compiled executable).
+- **`INCLUDE ./docker/base-before` / `./docker/base-after`** are resolved by
+  `bun ci/bake.ts`, which inlines `docker/base-before.dockerfile` and
+  `docker/base-after.dockerfile`. These create `/mnt/code`, `/mnt/logs`,
+  `/mnt/telemetry`, `/usr/local/build`, assemble `/usr/local/server` from the
+  build contexts, set default env (`OPEN_RUNTIMES_SECRET`, `OPEN_RUNTIMES_ENV`,
+  `OPEN_RUNTIMES_HEADERS`), and `EXPOSE 3000`. Always keep both INCLUDEs.
+- **`OPEN_RUNTIMES_SERVER_COMMAND`** is the command that launches your HTTP
+  server. For interpreted runtimes it invokes the interpreter on your server
+  source (e.g. node sets `node ... src/server.js`); for compiled runtimes it
+  points at the built binary.
+- **`OPEN_RUNTIMES_ENTRYPOINT`** is the default user entrypoint file name. It
+  can be overridden per deployment.
+- Prefer small `alpine` base images where the language allows it.
 
-The first thing you need to do is find a Docker image to base your runtime off. You can find these at [Docker Hub](https://hub.docker.com). If possible, try to use verified official builds of the language you are creating a runtime for. We also prefer `alpine` based images, as they help save a lot of space.
+## 3. The build and start lifecycle
 
-Next, in your Dockerfile at the start, add the Docker image you want to base it off at the top like so:
+The global lifecycle runner lives in `helpers/lifecycle/` and is the same for
+every runtime. Your runtime customizes it by dropping scripts into
+`versions/latest/hooks/`. A missing hook means that phase is a no-op — most
+interpreted runtimes need **no hooks at all** (the shared `javascript` family
+provides the JS ones).
+
+Hooks are **sourced, not executed**, so a hook can export environment that later
+phases see (e.g. activating a virtualenv, or setting `OPEN_RUNTIMES_CLEANUP`).
+
+**Build** (`helpers/lifecycle/build.sh`, invoked as `helpers/build.sh "<install command>"`):
+
+| Phase | What happens | Hook |
+|---|---|---|
+| Stage | restore build cache, copy `/mnt/code` → `/usr/local/build` | `build-prepare` |
+| Install | run the user/install command in `/usr/local/build` | — |
+| Compile | (compiled langs) build the binary | `compile` |
+| Pack | prune/clean build output | `pack` |
+| Archive | tar `/usr/local/build` → `/mnt/code/code.tar.gz`, write `.open-runtimes` metadata, save build cache | — |
+
+**Start** (`helpers/lifecycle/start.sh`, invoked as `helpers/start.sh "<start command>"`):
+
+| Phase | What happens | Hook |
+|---|---|---|
+| Extract | unpack `code.tar.gz` | — |
+| Prepare | move deps/binaries into place, activate envs | `start-prepare` |
+| Serve | run the start command and watch for the server-ready line | — |
+
+A **compiled** runtime typically only needs a `compile` hook (and sometimes a
+`pack` hook to keep only the binary). For example, `runtimes/rust/versions/latest/hooks/compile.sh`
+copies user code into `src/function/`, runs `cargo build --release`, and moves
+the binary into `/usr/local/build`. An **interpreted** runtime usually needs no
+hooks beyond what its shared family already provides.
+
+> Useful paths: `/mnt/code` (mounted user code + the output `code.tar.gz`),
+> `/usr/local/build` (build working dir), `/usr/local/server` (the runtime
+> itself), `/mnt/telemetry` (timing files), `/mnt/logs`.
+
+## 4. Writing the runtime server
+
+Your server in `versions/latest/src/` must run an HTTP server on `0.0.0.0:3000`.
+The contract (see `runtimes/node/versions/latest/src/server.js` for the
+reference implementation):
+
+1. **Health/timings**: respond to `GET /__opr/health` and `GET /__opr/timings`.
+2. **Auth**: if `OPEN_RUNTIMES_SECRET` is set, reject requests whose
+   `x-open-runtimes-secret` header doesn't match with `401`.
+3. **Reserved headers**: headers prefixed `x-open-runtimes-` are control headers
+   (`-secret`, `-timeout`, `-logging`, `-log-id`) and must be stripped before
+   passing headers to the user's function.
+4. **Build the context** and call the user's function with it:
+   - `context.req` — `bodyBinary` / `bodyText` / `bodyJson` / `body`, `headers`,
+     `method`, `scheme`, `host`, `port`, `path`, `query`, `queryString`, `url`.
+   - `context.res` — `text(body, status?, headers?)`, `json(obj, …)`,
+     `binary(bytes, …)`, `empty()`, `redirect(url, status?, headers?)`,
+     `send(body, …)`.
+   - `context.log(...)` / `context.error(...)` for logging.
+5. **Enforced headers**: merge `OPEN_RUNTIMES_HEADERS` (JSON) over the response headers.
+6. Wrap the user function in try/catch and surface errors via the logger; missing
+   return → `500` with a clear message.
+
+Functions return whatever `context.res.*` produces. Example user function:
+
+```js
+module.exports = async (context) => {
+  if (context.req.headers["x-action"] === "json") {
+    return context.res.json({ message: "Hello Open Runtimes 👋" });
+  }
+  return context.res.text("Hello Open Runtimes 👋");
+};
+```
+
+## 5. Register the runtime
+
+All runtime metadata and image build config lives in `ci/runtimes.toml`. Add a
+top-level section for your runtime, then a build table, then regenerate the bake
+file.
+
+### 5.1 Runtime section
+
+```toml
+[<runtime>]
+entry = "tests.<ext>"                       # default test entrypoint file
+versions = ["1.83"]                          # tested versions, newest first
+commands = { install = "<install cmd>", start = "bash helpers/server.sh" }
+formatter = { prepare = "...", check = "...", write = "..." }
+tools = "<binary> --version"                 # smoke-checked toolchain
+test = "Serverless/<Name>.php"               # PHPUnit test class (see §6)
+# shared = "javascript"                      # only if reusing a shared family
+```
+
+### 5.2 Build table
+
+```toml
+[<runtime>.build.versions]
+"1.83" = { base = "rust:1.83-alpine3.21" }
+```
+
+Always pin the most specific base image (patch version + distro). Optional
+per-version keys: `args` (Dockerfile build args), `platforms`, `version_dir`
+(overlay dir override), `build_base` (php only). A `[<runtime>.build]` table can
+set family-wide `platforms`, `image`, or `runtime_dir`.
+
+Each `[<runtime>.build.versions]` key publishes the image tag
+`openruntimes/<runtime>:v5-<version>`.
+
+### 5.3 Regenerate the bake file
 
 ```bash
-FROM dart:2.12 # Dart is used as an example.
+bun ci/bake.ts
 ```
 
-This will download and require the image when you build your runtime and allow you to use the toolset of the language you are building a runtime for.
+CI rejects the change if `docker-bake.json` is stale or if the `versions` list
+and the build version list drift apart.
 
-Create the folders you will use in your build step:
+## 6. Adding tests
 
-```bash
-RUN mkdir -p /usr/local/src/
-RUN mkdir -p /usr/code
-RUN mkdir -p /usr/workspace
-RUN mkdir -p /usr/builds
-```
+1. Create `tests/resources/functions/<runtime>/latest/` and add a source file
+   matching your `entry` (e.g. `tests.rs`) plus any manifest the language needs
+   (`Cargo.toml`, `package.json`, …). The function should branch on the
+   `x-action` request header and exercise dependency installation by fetching
+   `https://dummyjson.com/todos/{id}` — mirror an existing runtime's test
+   function closely so it passes the shared assertions.
 
-Next copy your source code and set the working directory for the image like so:
+2. Create the PHPUnit test class referenced by `test` in
+   `tests/Serverless/<Name>.php`:
 
-```bash
-WORKDIR /usr/local/src
-COPY . .
-```
+   ```php
+   <?php
 
-Next, you want to make sure you are adding execute permissions to any scripts you may run, the main ones are `build.sh` and `start.sh`. You can run commands in Dockerfile's using the `RUN` prefix like so:
+   namespace Tests\Serverless;
 
-```bash
-RUN chmod +x ./build.sh
-RUN chmod +x ./start.sh
-```
+   use Tests\Serverless;
 
-If needed use the `RUN` commands to install any dependencies you require for the build stage.
+   class Rust extends Serverless
+   {
+       // most runtimes are empty and inherit every shared test
+   }
+   ```
 
-Then you mark port 3000 as exposed, since this is the port runtime's HTTP server will be running on:
+3. Run the tests locally:
 
-```bash
-EXPOSE 3000
-```
+   ```bash
+   make test ID=<runtime>-<version>      # e.g. make test ID=rust-1.83
+   ```
 
-Finally, you'll add a `CMD` command. this should be:
+   This builds the image, stages your fixtures, and runs the suite. See
+   [docs/testing.md](testing.md) for the full local-testing guide (including
+   end-to-end testing against self-hosted cloud and edge).
 
-```bash
-CMD ["/usr/local/src/start.sh"]
-```
+## 7. Update the README
 
-Since this will use your launch script when the runtime starts.
+Update the [Images table](https://github.com/open-runtimes/open-runtimes#images) in the [README](https://github.com/open-runtimes/open-runtimes/blob/main/README.md), sorted alphabetically by image.
 
-## 3. Building your Docker image and adding it to the list
+## 8. Raise a pull request
 
-With your runtime successfully created, you can now move on to building your Docker image and adding it to the script files used for generating all of the image files.
+Commit your changes and push the branch to your fork, then open a pull request
+against `open-runtimes/open-runtimes`. For an initial PR, add **one version
+only** — it is much easier to review.
 
-Open up the `./build.sh` script at the root of the project and add your runtime to it. The runtimes should be ordered alphabetically. The following is an example with dart version 2.12:
-
-```bash
-echo 'Dart 2.12...'
-docker build -t openruntimes/dart:v4-2.12 ./runtimes/dart-2.12
-```
-
-## 4. Adding tests
-
-### 4.1 Creating your test script
-Create a new folder in `./tests` and name it the same name as the folder where you placed your runtime code. For example, if you are creating a runtime for dart 2.12 you would name it `dart-2.12`.
-
-Next create a new PHP file in the `./tests` folder and name it by your language followed by it's version with **no dots and no spaces**. For example, if you are creating a runtime for dart 2.12 you would name it `Dart212.php`. Within this PHP file you will place the following code:
-
-```php
-<?php
-
-namespace Tests;
-
-// Runtime: {{runtime name}}
-// PHP class: {{ file name }}
-// Entrypoint: {{ entrypoint name}}
-
-class {{ file name }} extends Base
-{
-}
-```
-
-Note: Make sure to replace `{{runtime name}}` with the name of your runtime for example: `dart-2.12` and the `{{file name}}` with the same name as the file you are currently working in without `.php` so for example `Dart212`. Also make sure to replace `{{entrypoint name}}` with entrypoint to where your test file will be at, including extention, for instance `lib/tests.dart`.
-
-Next, go back into the folder you created earlier in `./tests/` and create a new source file for your language called `test` with the extension of the language you are adding. This must be exactly same as entrypoint set in the PHP file comment. For example, if you are creating a runtime for dart 2.12 you would name it `lib/test.dart`.
-
-Within the folder you will need to create a function for your runtime that will do the following:
-
-1. Decode the payload as JSON
-
-2. Set a variable called `id` to the value of the `id` key in the payload or to `1` if it doesn't exist. This `id` will be of type string.
-
-3. Fetch `https://dummyjson.com/todos/$id` using a HTTP Client that you got from your language's package manager (This is to test your dependency installation stage is working). Make sure to replace `$id` with the ID provided from payload.
-
-4. Return res.json with the following Schema:
-
-```json5
-    "isTest": true,
-    "message": "Hello Open Runtimes 👋",
-    "header": req.headers['x-test-header'],
-    "variable": req.variables['test-variable'],
-    "todo": {{body from your todo API http response}},
-```
-
-### 4.2 Adding your runtime to Travis
-
-Edit the `.travis.yml` file and add your runtime to the `env.jobs` section of it like so:
-
-```yaml
-# {{Language Name}}
-- RUNTIME={{full runtime name with version, e.g. dart-2.12}}
-  TEST_CLASS=Base
-  ENTRYPOINT={{Name of your entrypoint file, e.g. test.dart}}
-  IMAGE={{Full image name including the openruntime/ prefix and the version placeholder, e.g. openruntimes/dart:${VERSION}-2.12}}
-  ARCH={{List of architecture supported by this runtime seperated by commas, e.g. linux/amd64,linux/arm64}}
-```
-
-You will have to create multiple of these for each version of the language you are adding. Please don't add too many, and for initial pull reuqest, we highly recommend only adding one version, as it will be easier to review and update.
-
-### 4.3 Running the tests
-
-To run your tests locally, go ahead and run the following command in your terminal:
-
-```bash
-make test ID={{your runtime, e.g. dart-2.12}}
-```
-
-Make sure to run the command in the root of the repository.
-
-If all tests pass then move on to the next step, otherwise you will need to troubleshoot the problem before continuing.
-
-## 5. Update the Readme
-
-Update the [Images table](https://github.com/open-runtimes/open-runtimes#images) on the [Readme](https://github.com/open-runtimes/open-runtimes/blob/main/README.md). The table should be sorted alphabetically by image.
-
-## 6. Raise a pull request
-
-First of all, commit the changes with the message `Added XXX Runtime` and push it. This will publish a new branch to your forked version of Open Runtimes. If you visit it at `github.com/YOUR_USERNAME/php-runtimes`, you will see a new alert saying you are ready to submit a pull request. Follow the steps GitHub provides, and at the end, you will have your pull request submitted.
-
-## 🤕 Stuck ?
+## 🤕 Stuck?
 
 If you need any help with the contribution, feel free to head over to our [Discord channel](https://discord.gg/fP6W2qEzfQ) and we'll be happy to help you out.
