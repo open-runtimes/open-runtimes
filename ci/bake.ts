@@ -12,21 +12,7 @@
 import data from './runtimes.toml';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
-
-interface BuildVersion {
-    base: string;
-    build_base?: string;
-    args?: Record<string, string>;
-    platforms?: string[];
-    version_dir?: string;
-}
-
-interface BuildConfig {
-    image?: string;
-    runtime_dir?: string;
-    platforms?: string[];
-    versions: Record<string, BuildVersion>;
-}
+import type { BuildConfig } from './types';
 
 const DEFAULT_PLATFORMS = ['linux/amd64', 'linux/arm64'];
 
