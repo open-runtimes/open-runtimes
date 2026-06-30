@@ -42,18 +42,21 @@ export class Local {
       for (const version of versions) {
         // Base images live in the [<runtime>.build.versions] tables of
         // ci/runtimes.toml (the source docker-bake.json is generated from)
-        const base = data[runtime]?.build?.versions?.[version]?.base;
+        const build = data[runtime]?.build;
+        const versionConfig = build?.versions?.[version];
+        const base = versionConfig?.base;
         if (!base) {
           throw new Error(
             `Failed to find base image for ${runtime} ${version} in ci/runtimes.toml`,
           );
         }
 
-        // Edge case due to "-" in name: report under the directory layout name
-        const key =
-          runtime === "python-ml"
-            ? `python/ml-${version}`
-            : `${runtime}/${version}`;
+        // Report under the on-disk directory layout: runtime_dir/version_dir
+        // override the runtime/version names when a runtime builds into a
+        // different path (e.g. python-ml lives at python/ml-<version>).
+        const dir = build?.runtime_dir ?? runtime;
+        const versionDir = versionConfig?.version_dir ?? version;
+        const key = `${dir}/${versionDir}`;
 
         dockerVersions[key] = base;
       }
