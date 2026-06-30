@@ -1,7 +1,5 @@
 // @ts-ignore
 import data from "../../../../ci/runtimes.toml";
-import { join } from "path";
-import { readFileSync } from "fs";
 
 export class Local {
   static getRuntimesVersions(): Record<string, string[]> {
@@ -41,43 +39,26 @@ export class Local {
       let runtime: string = entries[0] ?? "";
       let versions: string[] = entries[1] ?? [];
 
-      // Edge case due to "-" in name
-      if (runtime === "python-ml") {
-        runtime = "python";
-        versions = versions.map((version) => `ml-${version}`);
-      }
-
       for (const version of versions) {
-        const dockerFilePath = join(
-          process.cwd(),
-          "..",
-          "..",
-          "..",
-          "runtimes",
-          runtime,
-          "versions",
-          version,
-          "Dockerfile",
-        );
-
-        const dockerFile = readFileSync(dockerFilePath, "utf-8");
-
-        const tagMatch = dockerFile.match(/^FROM\s+([^\s]+)/m);
-        if (!tagMatch || !tagMatch[1]) {
+        // Base images live in the [<runtime>.build.versions] tables of
+        // ci/runtimes.toml (the source docker-bake.json is generated from)
+        const build = data[runtime]?.build;
+        const versionConfig = build?.versions?.[version];
+        const base = versionConfig?.base;
+        if (!base) {
           throw new Error(
-            `Failed to extract Docker image tag from ${dockerFilePath}`,
+            `Failed to find base image for ${runtime} ${version} in ci/runtimes.toml`,
           );
         }
 
-        const tag = tagMatch[1];
+        // Report under the on-disk directory layout: runtime_dir/version_dir
+        // override the runtime/version names when a runtime builds into a
+        // different path (e.g. python-ml lives at python/ml-<version>).
+        const dir = build?.runtime_dir ?? runtime;
+        const versionDir = versionConfig?.version_dir ?? version;
+        const key = `${dir}/${versionDir}`;
 
-        const key = `${runtime}/${version}`;
-
-        if (!dockerVersions[key]) {
-          dockerVersions[key] = [];
-        }
-
-        dockerVersions[key] = tag;
+        dockerVersions[key] = base;
       }
     }
 

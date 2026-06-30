@@ -251,17 +251,17 @@ class BuildCache extends TestCase
         $this->assertBuildCacheLogContains('Build cache warning: failed to save cache, build result preserved.', $result['output']);
     }
 
-    public function testBuildLifecycleRunsCacheAutomaticallyInBeforeAndAfterBuild(): void
+    public function testBuildLifecycleRunsCacheAutomatically(): void
     {
-        $build = \file_get_contents($this->helpers . '/build.sh');
-        $beforeBuild = \file_get_contents($this->helpers . '/before-build.sh');
-        $afterBuild = \file_get_contents($this->helpers . '/after-build.sh');
+        // This branch consolidates the build lifecycle into a single
+        // lifecycle/build.sh rather than before-build.sh/after-build.sh.
+        $build = \file_get_contents($this->repoHelpers . '/lifecycle/build.sh');
 
-        self::assertStringNotContainsString('build-cache-restore.sh', $build);
-        self::assertStringNotContainsString('build-cache-save.sh', $build);
-        self::assertStringContainsString('. /usr/local/server/helpers/build-cache-env.sh', $beforeBuild);
-        self::assertLessThan(\strpos($beforeBuild, 'Environment preparation started'), \strpos($beforeBuild, 'build-cache-restore.sh'));
-        self::assertLessThan(\strpos($afterBuild, 'Build finished'), \strpos($afterBuild, 'build-cache-save.sh'));
+        self::assertStringContainsString('. /usr/local/server/helpers/build-cache-env.sh', $build);
+        self::assertLessThan(\strpos($build, 'Environment preparation started'), \strpos($build, 'build-cache-restore.sh'));
+        self::assertLessThan(\strpos($build, 'Build packaging finished'), \strpos($build, 'Build command execution started'));
+        self::assertLessThan(\strpos($build, 'build-cache-save.sh'), \strpos($build, 'Build packaging finished'));
+        self::assertLessThan(\strpos($build, 'Build finished'), \strpos($build, 'build-cache-save.sh'));
     }
 
     public function testBuildCacheEnvUsesFixedPaths(): void
@@ -388,7 +388,7 @@ class BuildCache extends TestCase
     {
         \mkdir($this->helpers, 0777, true);
 
-        foreach (['build-cache-env.sh', 'build-cache-restore.sh', 'build-cache-save.sh', 'build.sh', 'before-build.sh', 'after-build.sh'] as $file) {
+        foreach (['build-cache-env.sh', 'build-cache-restore.sh', 'build-cache-save.sh'] as $file) {
             \copy($this->repoHelpers . '/' . $file, $this->helpers . '/' . $file);
         }
 

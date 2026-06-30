@@ -13,19 +13,21 @@ jobs:
       matrix: ${{ steps.prepare.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v44
+        uses: tj-actions/changed-files@2d756ea4c53f7f6b397767d8723b3a10a9f35bf2 # v44
         with:
           files: |
             ./**
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
+      - name: Check docker-bake.json is up to date
+        run: bun ./ci/bake.ts --check
       - name: Prepare
         id: prepare
         env:
@@ -36,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Install shfmt
         run: |
           wget -O shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
@@ -49,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Install shellcheck
         run: |
           wget -O shellcheck.tar.xz https://github.com/koalaman/shellcheck/releases/download/v0.9.0/shellcheck-v0.9.0.linux.x86_64.tar.xz
@@ -62,7 +64,6 @@ jobs:
           # {} +: Pass multiple files to shellcheck at once for efficiency
           find . -name "*.sh" \
             -not -path "./.git/*" \
-            -not -path "./runtimes/.test/*" \
             -not -path "./**/node_modules/*" \
             -not -path "./runtimes/java/versions/latest/gradlew" \
             -not -path "./runtimes/kotlin/versions/latest/gradlew" \
@@ -80,9 +81,9 @@ jobs:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
       - name: Setup Composer
         run: |
           php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -91,28 +92,19 @@ jobs:
           mv composer.phar /usr/local/bin/composer
       - name: Install dependencies
         run: composer install
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: latest
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Run tests
         timeout-minutes: 15
         working-directory: ./
-        run: bash ci_tests.sh
-        env:
-          RUNTIME: ${{ matrix.RUNTIME }}
-          ENTRYPOINT: ${{ matrix.ENTRYPOINT }}
-          VERSION: ${{ matrix.VERSION }}
-          INSTALL_COMMAND: ${{ matrix.INSTALL_COMMAND }}
-          START_COMMAND: ${{ matrix.START_COMMAND }}
-          TOOLS: ${{ matrix.TOOLS }}
-          FORMATTER_CHECK: ${{ matrix.FORMATTER_CHECK }}
-          FORMATTER_PREPARE: ${{ matrix.FORMATTER_PREPARE }}
-          TEST_CLASS: ${{ matrix.TEST_CLASS }}
-          OUTPUT_DIRECTORY: ${{ matrix.OUTPUT_DIRECTORY }}
-          ENFORCED_RUNTIME: ${{ matrix.ENFORCED_RUNTIME }}
-          ENFORCED_VERSION: ${{ matrix.ENFORCED_VERSION }}
+        run: bun ci/test.ts ${{ matrix.ID }}
       - name: Report image size
         if: always() && matrix.REPORT_SIZE
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const { exitCode, stdout } = await exec.getExecOutput('docker', ['image', 'inspect', 'open-runtimes/test-runtime', '--format={{.Size}}'], { silent: true, ignoreReturnCode: true });
