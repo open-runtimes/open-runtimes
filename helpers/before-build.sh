@@ -3,6 +3,9 @@
 set -e
 shopt -s dotglob
 
+. /usr/local/server/helpers/build-cache-env.sh
+bash /usr/local/server/helpers/build-cache-restore.sh || true
+
 echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Environment preparation started. \e[0m"
 
 # Check if source directory exists and has files

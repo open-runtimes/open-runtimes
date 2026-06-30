@@ -1,0 +1,12 @@
+{
+  "unstable": [
+    "bare-node-builtins",
+    "sloppy-imports",
+    "detect-cjs"
+  ],
+  "imports": {
+    "superjson": "npm:superjson@^2.2.6",
+    "express": "npm:express@^4.21.2",
+    "srvx/node": "npm:srvx@^0.8.16/node"
+  }
+}

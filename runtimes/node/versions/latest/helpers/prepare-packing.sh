@@ -126,8 +126,6 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 			return 0 2>/dev/null || exit 0
 		fi
 
-		echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Tracing from $ENTRYPOINT (node_modules: ${SIZE_BEFORE}MB) \e[0m"
-
 		# Run NFT — capture exit code without triggering set -e
 		NFT_EXIT=0
 		NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?

@@ -35,6 +35,7 @@ jobs:
             const matrix = {
               include: [
                 // Flutter
+                { ID: "flutter-3.44", RUNTIME: "flutter", VERSION: "3.44", IMAGE: "openruntimes/flutter:v5-3.44", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "flutter-3.41", RUNTIME: "flutter", VERSION: "3.41", IMAGE: "openruntimes/flutter:v5-3.41", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "flutter-3.24", RUNTIME: "flutter", VERSION: "3.24", IMAGE: "openruntimes/flutter:v5-3.24", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "flutter-3.27", RUNTIME: "flutter", VERSION: "3.27", IMAGE: "openruntimes/flutter:v5-3.27", ARCH: "linux/amd64,linux/arm64" },
@@ -82,6 +83,7 @@ jobs:
                 { ID: "python-ml-3.11", RUNTIME: "python", VERSION: "ml-3.11", IMAGE: "openruntimes/python-ml:v5-3.11", ARCH: "linux/amd64,linux/arm64" },
 
                 // Dart
+                { ID: "dart-3.12", RUNTIME: "dart", VERSION: "3.12", IMAGE: "openruntimes/dart:v5-3.12", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "dart-3.11", RUNTIME: "dart", VERSION: "3.11", IMAGE: "openruntimes/dart:v5-3.11", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "dart-3.10", RUNTIME: "dart", VERSION: "3.10", IMAGE: "openruntimes/dart:v5-3.10", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "dart-3.9", RUNTIME: "dart", VERSION: "3.9", IMAGE: "openruntimes/dart:v5-3.9", ARCH: "linux/amd64,linux/arm64" },
@@ -154,6 +156,9 @@ jobs:
                 { ID: "go-1.25", RUNTIME: "go", VERSION: "1.25", IMAGE: "openruntimes/go:v5-1.25", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "go-1.24", RUNTIME: "go", VERSION: "1.24", IMAGE: "openruntimes/go:v5-1.24", ARCH: "linux/amd64,linux/arm64" },
                 { ID: "go-1.23", RUNTIME: "go", VERSION: "1.23", IMAGE: "openruntimes/go:v5-1.23", ARCH: "linux/amd64,linux/arm64" },
+
+                // Rust
+                { ID: "rust-1.83", RUNTIME: "rust", VERSION: "1.83", IMAGE: "openruntimes/rust:v5-1.83", ARCH: "linux/amd64,linux/arm64" },
               ]
             };
 
