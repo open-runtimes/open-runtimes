@@ -41,6 +41,15 @@ sanitize_int() {
 	esac
 }
 
+# Follow symlinks in the served dir. Off by default (path-escape defense);
+# enable when code is mounted as symlinks (e.g. sidecar), else those paths 404.
+OPEN_RUNTIMES_STATIC_FOLLOW_SYMLINKS="$(echo "${OPEN_RUNTIMES_STATIC_FOLLOW_SYMLINKS:-false}" | tr '[:upper:]' '[:lower:]')"
+if [ "$OPEN_RUNTIMES_STATIC_FOLLOW_SYMLINKS" = "true" ]; then
+	DISABLE_SYMLINKS="false"
+else
+	DISABLE_SYMLINKS="true"
+fi
+
 # Toggle the in-memory cache.
 OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED="$(echo "${OPEN_RUNTIMES_STATIC_MEMORY_CACHE_ENABLED:-true}" | tr '[:upper:]' '[:lower:]')"
 
@@ -102,7 +111,7 @@ static-web-server \
 	--page404="/mnt/resources/404.html" \
 	--page-fallback="$PAGE_FALLBACK" \
 	--ignore-hidden-files false \
-	--disable-symlinks \
+	--disable-symlinks "$DISABLE_SYMLINKS" \
 	--compression false \
 	--cache-control-headers false \
 	--config-file /tmp/config.toml \
