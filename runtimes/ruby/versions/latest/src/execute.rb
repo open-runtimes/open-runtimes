@@ -1,6 +1,6 @@
 require 'async'
 
-def execute(safe_timeout, main, context) # rubocop:disable Lint/UnusedMethodArgument
+def execute(safe_timeout, context)
   output = nil
   executed = true
 

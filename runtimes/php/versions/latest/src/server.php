@@ -4,7 +4,12 @@ require 'vendor-server/autoload.php';
 require_once 'types.php';
 require_once 'logger.php';
 
-Swoole\Runtime::enableCoroutine($flags = SWOOLE_HOOK_ALL);
+// Use the native curl hook instead of the userland one bundled in
+// SWOOLE_HOOK_ALL. The userland hook only maps a fixed set of curl options and
+// throws on the rest, so HTTP clients that touch newer options break under it
+// (e.g. Guzzle 7.x sets CURLOPT_PREREQFUNCTION). The native hook defers to real
+// curl, so it stays coroutine-friendly while supporting the full option set.
+Swoole\Runtime::enableCoroutine($flags = (SWOOLE_HOOK_ALL | SWOOLE_HOOK_NATIVE_CURL) & ~SWOOLE_HOOK_CURL);
 $payloadSize = 20 * 1024 * 1024;
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 $server->set([

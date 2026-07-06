@@ -1,0 +1,185 @@
+# Test orchestration for a single runtime. Driven by `bun ci/test.ts <id>`,
+# which resolves all ${VAR} values from ci/runtimes.toml and runs the services
+# in order: tools -> build (variants) -> serve trio -> phpunit.
+#
+# Container names, the `openruntimes` network, and mount paths are contracts:
+# tests/Base.php and tests/Serverless.php hardcode them (docker logs/exec via
+# the mounted docker socket).
+
+name: open-runtimes
+
+x-runtime: &runtime
+  image: open-runtimes/test-runtime
+  platform: ${TEST_PLATFORM:-linux/x86_64}
+  networks: [openruntimes]
+
+x-build: &build
+  <<: *runtime
+  command: ['bash', '-c', 'helpers/build.sh "$$INSTALL_COMMAND"']
+  volumes:
+    - /tmp/.build:/usr/local/server/.build
+    - ./.runtime:/mnt/code
+
+x-serve-env: &serve-env
+  START_COMMAND: ${START_COMMAND}
+  OPEN_RUNTIMES_HEADERS: ""
+  OPEN_RUNTIMES_ENV: development
+  OPEN_RUNTIMES_SECRET: ""
+
+services:
+  tools:
+    <<: *runtime
+    profiles: [manual]
+    environment:
+      TOOLS: ${TOOLS:-true}
+    command: ['bash', '-c', 'command -v tar && command -v unzip && command -v mksquashfs && command -v unsquashfs && bash -c "$$TOOLS"']
+
+  build:
+    <<: *build
+    profiles: [manual]
+    environment:
+      INSTALL_COMMAND: ${INSTALL_COMMAND}
+      OPEN_RUNTIMES_OUTPUT_DIRECTORY: ${OUTPUT_DIRECTORY}
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+
+  # Build with the no-export entrypoint (safe entrypoint tests)
+  build-no-export:
+    <<: *build
+    profiles: [manual]
+    environment:
+      INSTALL_COMMAND: ${INSTALL_COMMAND}
+      OPEN_RUNTIMES_OUTPUT_DIRECTORY: ${OUTPUT_DIRECTORY}
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT_NO_EXPORT}
+    volumes:
+      - /tmp/.build:/usr/local/server/.build
+      - ./.runtime/no-export-build/src:/mnt/code
+
+  # Build with all cleanup disabled (baseline for modclean + NFT comparison)
+  build-baseline:
+    <<: *build
+    profiles: [manual]
+    environment:
+      INSTALL_COMMAND: ${INSTALL_COMMAND}
+      OPEN_RUNTIMES_OUTPUT_DIRECTORY: ${OUTPUT_DIRECTORY}
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+      OPEN_RUNTIMES_MODCLEAN: disabled
+      OPEN_RUNTIMES_NFT: disabled
+    volumes:
+      - /tmp/.build:/usr/local/server/.build
+      - ./.runtime/modclean-disabled-build/src:/mnt/code
+
+  # Build with NFT tree-shaking enabled
+  build-nft:
+    <<: *build
+    profiles: [manual]
+    environment:
+      INSTALL_COMMAND: ${INSTALL_COMMAND}
+      OPEN_RUNTIMES_OUTPUT_DIRECTORY: ${OUTPUT_DIRECTORY}
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+      OPEN_RUNTIMES_NFT: enabled
+      OPEN_RUNTIMES_MODCLEAN: disabled
+    volumes:
+      - /tmp/.build:/usr/local/server/.build
+      - ./.runtime/nft-build/src:/mnt/code
+
+  serve:
+    <<: *runtime
+    container_name: open-runtimes-test-serve
+    environment:
+      START_COMMAND: ${START_COMMAND}
+      OPEN_RUNTIMES_STATIC_FALLBACK: index.html
+      OPEN_RUNTIMES_HEADERS: '{"x-custom":"value","X-CUSTOM-UPPERCASE":"Value2","x-open-runtimes-custom":248}'
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+      OPEN_RUNTIMES_SECRET: test-secret-key
+      CUSTOM_ENV_VAR: customValue
+    ports:
+      - '${HOST_PORT_MAIN:-3000}:3000'
+    volumes:
+      - ./resources/telemetry:/mnt/telemetry
+      - /tmp/logs:/mnt/logs
+      - ./.runtime/code.tar.gz:/mnt/code/code.tar.gz:ro
+    command: ['bash', '-c', 'bash helpers/start.sh "$$START_COMMAND"']
+
+  # Secondary variant: empty enforced headers, development mode, empty auth
+  # secret, no custom env var, uncompressed build, custom cache header
+  serve-secondary:
+    <<: *runtime
+    container_name: open-runtimes-test-serve-secondary
+    environment:
+      <<: *serve-env
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+      OPEN_RUNTIMES_CACHE_HEADER: Surrogate-Control
+    ports:
+      - '${HOST_PORT_SECONDARY:-3001}:3000'
+    volumes:
+      - ./resources/telemetry:/mnt/telemetry
+      - /tmp/logs:/mnt/logs
+      - ./.runtime/code.tar.gz:/mnt/code/code.tar.gz:ro
+    command: ['bash', '-c', 'gunzip -ck /mnt/code/code.tar.gz > /mnt/code/code.tar && bash helpers/start.sh "$$START_COMMAND"']
+
+  # Teritary variant: same as secondary plus mounted resource folder (404 page)
+  serve-teritary:
+    <<: *runtime
+    container_name: open-runtimes-test-serve-teritary
+    environment:
+      <<: *serve-env
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+    ports:
+      - '${HOST_PORT_TERITARY:-3002}:3000'
+    volumes:
+      - ./resources/telemetry:/mnt/telemetry
+      - ./.runtime/resources:/mnt/resources
+      - /tmp/logs:/mnt/logs
+      - ./.runtime/code.tar.gz:/mnt/code/code.tar.gz:ro
+    command: ['bash', '-c', 'bash helpers/start.sh "$$START_COMMAND"']
+
+  # No-export entrypoint variant (entrypoint comes from build metadata)
+  serve-no-export:
+    <<: *runtime
+    profiles: [no-export]
+    container_name: open-runtimes-test-serve-no-export
+    environment:
+      <<: *serve-env
+    ports:
+      - '${HOST_PORT_NO_EXPORT:-3004}:3000'
+    volumes:
+      - ./resources/telemetry:/mnt/telemetry
+      - /tmp/logs:/mnt/logs
+      - ./.runtime/no-export-build/src/code.tar.gz:/mnt/code/code.tar.gz:ro
+    command: ['bash', '-c', 'bash helpers/start.sh "$$START_COMMAND"']
+
+  phpunit:
+    image: phpswoole/swoole:5.1.2-php8.3-alpine
+    platform: ${TEST_PLATFORM:-linux/x86_64}
+    networks: [openruntimes]
+    profiles: [manual]
+    working_dir: /app
+    environment:
+      TEST_CLASS: ${TEST_CLASS}
+      RUNTIME_NAME: ${RUNTIME}
+      RUNTIME_VERSION: ${VERSION}
+      OPEN_RUNTIMES_SECRET: test-secret-key
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ..:/app
+      - /tmp:/tmp
+    command: ['sh', '-c', 'apk update && apk add docker-cli && vendor/bin/phpunit --configuration phpunit.xml "tests/$$TEST_CLASS"']
+
+  formatter:
+    <<: *runtime
+    profiles: [manual]
+    working_dir: /mnt/code
+    environment:
+      FORMATTER_PREPARE: ${FORMATTER_PREPARE:-true}
+      FORMATTER_CMD: ${FORMATTER_CMD:-true}
+    volumes:
+      - '${FORMAT_DIR:-..}:/mnt/code'
+    command: ['bash', '-c', 'bash -c "$$FORMATTER_PREPARE" && bash -c "$$FORMATTER_CMD"']
+
+# External so it can coexist with networks created outside compose; the driver
+# creates it if missing.
+networks:
+  openruntimes:
+    name: openruntimes
+    external: true
