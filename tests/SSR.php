@@ -205,28 +205,39 @@ class SSR extends CSR
     public function testModclean(): void
     {
         // Main build has modclean enabled (default behavior)
-        $archive = '/app/tests/.runtime/code.tar.gz';
-        $result = \shell_exec("tar -tzf {$archive} 2>/dev/null | grep 'node_modules/.*\\.md$' | head -1");
-        self::assertEmpty(\trim($result ?? ''), 'Expected no .md files in node_modules when modclean is enabled');
+        $entries = $this->listBuildArchiveEntries('/app/tests/.runtime');
+        self::assertSame(0, \preg_match('/node_modules\/.*\.md$/m', $entries), 'Expected no .md files in node_modules when modclean is enabled');
 
         // Baseline build has all cleanup disabled
-        $archive = '/app/tests/.runtime/modclean-disabled-build/src/code.tar.gz';
-        $result = \shell_exec("tar -tzf {$archive} 2>/dev/null | grep 'node_modules/.*\\.md$' | head -1");
-        self::assertNotEmpty(\trim($result ?? ''), 'Expected .md files in node_modules when modclean is disabled');
+        $entries = $this->listBuildArchiveEntries('/app/tests/.runtime/modclean-disabled-build/src');
+        self::assertSame(1, \preg_match('/node_modules\/.*\.md$/m', $entries), 'Expected .md files in node_modules when modclean is disabled');
     }
 
     public function testNft(): void
     {
         // NFT build has NFT enabled, modclean disabled
-        $archive = '/app/tests/.runtime/nft-build/src/code.tar.gz';
-        $nftCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
+        $nftCount = \substr_count($this->listBuildArchiveEntries('/app/tests/.runtime/nft-build/src'), 'node_modules/');
 
         // Baseline build has all cleanup disabled
-        $archive = '/app/tests/.runtime/modclean-disabled-build/src/code.tar.gz';
-        $fullCount = (int)\shell_exec("tar -tzf {$archive} 2>/dev/null | grep -c 'node_modules/'");
+        $fullCount = \substr_count($this->listBuildArchiveEntries('/app/tests/.runtime/modclean-disabled-build/src'), 'node_modules/');
 
         self::assertGreaterThan(0, $fullCount, 'Expected files in node_modules when cleanup is disabled');
         self::assertLessThan($fullCount, $nftCount, 'Expected fewer files in node_modules after NFT pruning');
+    }
+
+    protected function listBuildArchiveEntries(string $directory): string
+    {
+        $squashfs = $directory . '/code.sqfs';
+        if (\is_file($squashfs) && \filesize($squashfs) > 0) {
+            return \shell_exec('unsquashfs -ll ' . \escapeshellarg($squashfs) . ' 2>/dev/null') ?? '';
+        }
+
+        $tar = $directory . '/code.tar.gz';
+        if (\is_file($tar) && \filesize($tar) > 0) {
+            return \shell_exec('tar -tzf ' . \escapeshellarg($tar) . ' 2>/dev/null') ?? '';
+        }
+
+        self::fail('Build archive not found in ' . $directory);
     }
 
     public function testStaticCache(): void

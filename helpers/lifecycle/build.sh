@@ -82,11 +82,14 @@ echo "OPEN_RUNTIMES_COMPRESSION=$COMPRESSION_METHOD" >>.open-runtimes
 
 OUTPUT_DIR="${OPEN_RUNTIMES_BUILD_OUTPUT_DIR:-/mnt/code}"
 if [ "$COMPRESSION_METHOD" = "none" ]; then
-	tar --exclude code.tar --exclude code.tar.gz -cf "$OUTPUT_DIR/code.tar.gz" .
+	tar --exclude code.sqfs --exclude code.tar --exclude code.tar.gz --exclude code.gz -cf "$OUTPUT_DIR/code.tar.gz" .
+elif [ "$COMPRESSION_METHOD" = "squashfs" ]; then
+	processors=$(nproc 2>/dev/null || echo 1)
+	mksquashfs . "$OUTPUT_DIR/code.sqfs" -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors" -wildcards -e code.sqfs code.tar code.tar.gz code.gz
 elif [ "$COMPRESSION_METHOD" = "zstd" ]; then
-	tar --exclude code.tar --exclude code.tar.gz -cf - . | zstd -qf -o "$OUTPUT_DIR/code.tar.gz"
+	tar --exclude code.sqfs --exclude code.tar --exclude code.tar.gz --exclude code.gz -cf - . | zstd -qf -o "$OUTPUT_DIR/code.tar.gz"
 else
-	tar --exclude code.tar --exclude code.tar.gz -zcf "$OUTPUT_DIR/code.tar.gz" .
+	tar --exclude code.sqfs --exclude code.tar --exclude code.tar.gz --exclude code.gz -zcf "$OUTPUT_DIR/code.tar.gz" .
 fi
 
 opr_log "Build packaging finished."

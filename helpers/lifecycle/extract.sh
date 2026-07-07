@@ -5,14 +5,14 @@
 # Prepare telemetry
 mkdir -p /mnt/telemetry
 
-# Detect archive compression by reading the first 4 magic bytes. The build
-# packs as code.tar.gz regardless of actual compression (helpers/select-
-# compression.sh picks gzip/zstd/none by build size), so the filename can't
-# be trusted.
+# Detect archive compression by reading the first 4 magic bytes. Legacy tar
+# builds pack as code.tar.gz regardless of actual compression, so the filename
+# can't be trusted.
 detect_archive_format() {
 	local magic
 	magic=$(head -c4 "$1" 2>/dev/null | od -An -vtx1 2>/dev/null | tr -d ' \n')
 	case "$magic" in
+	68737173) echo "squashfs" ;;
 	1f8b*) echo "gzip" ;;
 	28b52ffd) echo "zstd" ;;
 	*) echo "tar" ;;
@@ -27,6 +27,7 @@ extract_archive() {
 	local format
 	format=$(detect_archive_format "$archive")
 	case "$format" in
+	squashfs) unsquashfs -q -f -d "$dest" "$archive" ;;
 	gzip) tar -xzf "$archive" -C "$dest" ;;
 	# Subshell with pipefail so a zstd error (corrupt archive, missing
 	# binary) surfaces as a non-zero exit instead of being masked by tar
@@ -36,13 +37,13 @@ extract_archive() {
 	esac
 }
 
-# Locate the build archive in /mnt/code and extract it to dest. The build
-# always writes /mnt/code/code.tar.gz; code.tar and code.gz are accepted as
-# legacy fallbacks. Each branch passes the file that actually exists rather
-# than a hardcoded name.
+# Locate the build archive in /mnt/code and extract it to dest. Squashfs is
+# preferred for auto compression, while legacy tar artifacts remain supported.
 extract_code_archive() {
 	local dest="$1"
-	if [ -f /mnt/code/code.tar ]; then
+	if [ -f /mnt/code/code.sqfs ]; then
+		extract_archive /mnt/code/code.sqfs "$dest"
+	elif [ -f /mnt/code/code.tar ]; then
 		extract_archive /mnt/code/code.tar "$dest"
 	elif [ -f /mnt/code/code.tar.gz ]; then
 		extract_archive /mnt/code/code.tar.gz "$dest"
@@ -71,7 +72,7 @@ if [ -f "/mnt/code/.extracted" ]; then
 	for item in /mnt/code/*; do
 		# Skip archive files and marker
 		case "$(basename "$item")" in
-		code.tar | code.tar.gz | code.gz | .extracted) continue ;;
+		code.sqfs | code.tar | code.tar.gz | code.gz | .extracted) continue ;;
 		esac
 		ln -s "$item" /usr/local/server/src/function/ || symlink_failed=true
 	done
