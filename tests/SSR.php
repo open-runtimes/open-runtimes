@@ -229,7 +229,7 @@ class SSR extends CSR
     {
         $squashfs = $directory . '/code.sqfs';
         if (\is_file($squashfs) && \filesize($squashfs) > 0) {
-            return \shell_exec('unsquashfs -ll ' . \escapeshellarg($squashfs) . ' 2>/dev/null') ?? '';
+            return \shell_exec('unsquashfs -l ' . \escapeshellarg($squashfs) . ' 2>/dev/null') ?? '';
         }
 
         $tar = $directory . '/code.tar.gz';

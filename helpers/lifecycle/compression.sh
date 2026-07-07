@@ -11,12 +11,9 @@ elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "zstd" ]; then
 elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "gzip" ]; then
 	COMPRESSION_METHOD="gzip"
 elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "auto" ]; then
-	TOTAL_SIZE_KB=$(du -sk . 2>/dev/null | cut -f1)
-	TOTAL_SIZE_KB=${TOTAL_SIZE_KB:-0}
-
 	COMPRESSION_METHOD="squashfs"
 
-	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Auto compression: ${COMPRESSION_METHOD} (size=${TOTAL_SIZE_KB}KB) \e[0m"
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Auto compression: ${COMPRESSION_METHOD} \e[0m"
 else
 	# Default: gzip (backward compatible)
 	COMPRESSION_METHOD="gzip"
