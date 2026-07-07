@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export OPEN_RUNTIMES_BUILD_CACHE_ROOT="/usr/local/cache/build"
-export OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="/cache/stores.sqfs"
+export OPEN_RUNTIMES_BUILD_CACHE_ROOT="${OPEN_RUNTIMES_BUILD_CACHE_ROOT:-/usr/local/cache/build}"
+export OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT:-/cache/stores.sqfs}"
 
 export npm_config_cache="$OPEN_RUNTIMES_BUILD_CACHE_ROOT/npm"
 export YARN_CACHE_FOLDER="$OPEN_RUNTIMES_BUILD_CACHE_ROOT/yarn"
