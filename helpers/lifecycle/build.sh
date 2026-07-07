@@ -17,13 +17,14 @@ bash /usr/local/server/helpers/build-cache-restore.sh || true
 opr_log "Environment preparation started."
 
 # Check if source directory exists and has files
-if [ ! -d "/mnt/code" ] || [ -z "$(ls -A /mnt/code 2>/dev/null)" ]; then
+INPUT_DIR="${OPEN_RUNTIMES_BUILD_INPUT_DIR:-/mnt/code}"
+if [ ! -d "$INPUT_DIR" ] || [ -z "$(ls -A "$INPUT_DIR" 2>/dev/null)" ]; then
 	opr_error "Error: No source code found. Ensure your source isn't empty."
 	exit 1
 fi
 
 # Copy from mounted volume to temporary folder
-cp -R /mnt/code/* /usr/local/build
+cp -R "$INPUT_DIR"/* /usr/local/build
 
 # Enter build folder
 cd /usr/local/build
@@ -79,12 +80,13 @@ echo "OPEN_RUNTIMES_CLEANUP=${OPEN_RUNTIMES_CLEANUP:-none}" >>.open-runtimes
 
 echo "OPEN_RUNTIMES_COMPRESSION=$COMPRESSION_METHOD" >>.open-runtimes
 
+OUTPUT_DIR="${OPEN_RUNTIMES_BUILD_OUTPUT_DIR:-/mnt/code}"
 if [ "$COMPRESSION_METHOD" = "none" ]; then
-	tar --exclude code.tar --exclude code.tar.gz -cf /mnt/code/code.tar.gz .
+	tar --exclude code.tar --exclude code.tar.gz -cf "$OUTPUT_DIR/code.tar.gz" .
 elif [ "$COMPRESSION_METHOD" = "zstd" ]; then
-	tar --exclude code.tar --exclude code.tar.gz -cf - . | zstd -qf -o /mnt/code/code.tar.gz
+	tar --exclude code.tar --exclude code.tar.gz -cf - . | zstd -qf -o "$OUTPUT_DIR/code.tar.gz"
 else
-	tar --exclude code.tar --exclude code.tar.gz -zcf /mnt/code/code.tar.gz .
+	tar --exclude code.tar --exclude code.tar.gz -zcf "$OUTPUT_DIR/code.tar.gz" .
 fi
 
 opr_log "Build packaging finished."
