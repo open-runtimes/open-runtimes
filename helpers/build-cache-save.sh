@@ -45,8 +45,8 @@ if [ ! -d "$OPEN_RUNTIMES_BUILD_CACHE_ROOT" ]; then
 	exit 0
 fi
 
-if [ ! -d "$artifact_dir" ]; then
-	log 'Build cache save skipped: artifact directory missing.'
+if [ ! -d "$artifact_dir" ] && ! mkdir -p "$artifact_dir"; then
+	log 'Build cache save skipped: artifact directory could not be created.'
 	exit 0
 fi
 

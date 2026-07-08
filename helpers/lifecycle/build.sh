@@ -81,6 +81,7 @@ echo "OPEN_RUNTIMES_CLEANUP=${OPEN_RUNTIMES_CLEANUP:-none}" >>.open-runtimes
 echo "OPEN_RUNTIMES_COMPRESSION=$COMPRESSION_METHOD" >>.open-runtimes
 
 OUTPUT_DIR="${OPEN_RUNTIMES_BUILD_OUTPUT_DIR:-/mnt/code}"
+mkdir -p "$OUTPUT_DIR"
 if [ "$COMPRESSION_METHOD" = "none" ]; then
 	tar --exclude code.sqfs --exclude code.tar --exclude code.tar.gz --exclude code.gz -cf "$OUTPUT_DIR/code.tar.gz" .
 elif [ "$COMPRESSION_METHOD" = "squashfs" ]; then
