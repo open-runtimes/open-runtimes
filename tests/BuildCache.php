@@ -264,14 +264,12 @@ class BuildCache extends TestCase
         self::assertLessThan(\strpos($build, 'Build finished'), \strpos($build, 'build-cache-save.sh'));
     }
 
-    public function testBuildCacheEnvUsesFixedPaths(): void
+    public function testBuildCacheEnvUsesDefaultPaths(): void
     {
         $env = \file_get_contents($this->repoHelpers . '/build-cache-env.sh');
 
-        self::assertStringContainsString('OPEN_RUNTIMES_BUILD_CACHE_ROOT="/usr/local/cache/build"', $env);
-        self::assertStringContainsString('OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="/cache/stores.sqfs"', $env);
-        self::assertStringNotContainsString('${OPEN_RUNTIMES_BUILD_CACHE_ROOT:-', $env);
-        self::assertStringNotContainsString('${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT:-', $env);
+        self::assertStringContainsString('OPEN_RUNTIMES_BUILD_CACHE_ROOT="${OPEN_RUNTIMES_BUILD_CACHE_ROOT:-/usr/local/cache/build}"', $env);
+        self::assertStringContainsString('OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT:-/cache/stores.sqfs}"', $env);
     }
 
     public function testCacheHitStillWorksOnSecondBuild(): void
@@ -398,8 +396,8 @@ class BuildCache extends TestCase
     private function writeTestCachePaths(string $cacheRoot, string $artifact): void
     {
         $env = \file_get_contents($this->repoHelpers . '/build-cache-env.sh');
-        $env = \str_replace('OPEN_RUNTIMES_BUILD_CACHE_ROOT="/usr/local/cache/build"', 'OPEN_RUNTIMES_BUILD_CACHE_ROOT="' . $cacheRoot . '"', $env);
-        $env = \str_replace('OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="/cache/stores.sqfs"', 'OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="' . $artifact . '"', $env);
+        $env = \str_replace('OPEN_RUNTIMES_BUILD_CACHE_ROOT="${OPEN_RUNTIMES_BUILD_CACHE_ROOT:-/usr/local/cache/build}"', 'OPEN_RUNTIMES_BUILD_CACHE_ROOT="' . $cacheRoot . '"', $env);
+        $env = \str_replace('OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT:-/cache/stores.sqfs}"', 'OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="' . $artifact . '"', $env);
         \file_put_contents($this->helpers . '/build-cache-env.sh', $env);
     }
 
