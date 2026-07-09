@@ -27,15 +27,26 @@ class BuildCompression extends TestCase
         self::assertStringContainsString('METHOD=gzip', $result['output']);
     }
 
-    public function testAutoCompressionUsesSquashfs(): void
+    public function testAutoCompressionSkipsCompressionForSmallOutputs(): void
     {
         $result = $this->runCompressionSelection([
             'OPEN_RUNTIMES_BUILD_COMPRESSION' => 'auto',
         ]);
 
         self::assertSame(0, $result['code']);
-        self::assertStringContainsString('Auto compression: squashfs', $this->stripAnsi($result['output']));
-        self::assertStringContainsString('METHOD=squashfs', $result['output']);
+        self::assertStringContainsString('METHOD=none', $result['output']);
+    }
+
+    public function testAutoCompressionUsesGzipForLargeOutputs(): void
+    {
+        \file_put_contents($this->root . '/large.bin', \str_repeat('x', 6 * 1024 * 1024));
+
+        $result = $this->runCompressionSelection([
+            'OPEN_RUNTIMES_BUILD_COMPRESSION' => 'auto',
+        ]);
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('METHOD=gzip', $result['output']);
     }
 
     public function testExplicitSquashfsCompressionIsSupported(): void

@@ -110,7 +110,7 @@ phases see (e.g. activating a virtualenv, or setting `OPEN_RUNTIMES_CLEANUP`).
 | Install | run the user/install command in `/usr/local/build` | — |
 | Compile | (compiled langs) build the binary | `compile` |
 | Pack | prune/clean build output | `pack` |
-| Archive | package `/usr/local/build` → `/mnt/code/code.tar.gz` by default, or `/mnt/code/code.sqfs` when `OPEN_RUNTIMES_BUILD_COMPRESSION=auto`/`squashfs`; write `.open-runtimes` metadata, save build cache | — |
+| Archive | package `/usr/local/build` → `/mnt/code/code.tar.gz` by default, or `/mnt/code/code.sqfs` when `OPEN_RUNTIMES_BUILD_COMPRESSION=squashfs`; write `.open-runtimes` metadata, save build cache | — |
 
 **Start** (`helpers/lifecycle/start.sh`, invoked as `helpers/start.sh "<start command>"`):
 
@@ -131,10 +131,11 @@ hooks beyond what its shared family already provides.
 > itself), `/mnt/telemetry` (timing files), `/mnt/logs`.
 
 Build output compression is controlled by `OPEN_RUNTIMES_BUILD_COMPRESSION`.
-The default remains `gzip` for downloadable artifact compatibility. `auto` uses
-SquashFS with LZ4 for faster packaging and extraction, and explicit values
-`squashfs`, `gzip`, `zstd`, and `none` are supported. Downloaded SquashFS
-outputs can be extracted with `unsquashfs -d output code.sqfs`.
+The default is `gzip` for downloadable artifact compatibility. `auto` picks by
+output size — skipping compression under 5MB and using `gzip` at or above it —
+and explicit values `squashfs`, `gzip`, `zstd`, and `none` are supported.
+SquashFS packages with LZ4 for faster packaging and extraction; downloaded
+SquashFS outputs can be extracted with `unsquashfs -d output code.sqfs`.
 
 ## 4. Writing the runtime server
 
