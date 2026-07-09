@@ -131,10 +131,11 @@ hooks beyond what its shared family already provides.
 > itself), `/mnt/telemetry` (timing files), `/mnt/logs`.
 
 Build output compression is controlled by `OPEN_RUNTIMES_BUILD_COMPRESSION`.
-The default (and `auto`) is `gzip` for downloadable artifact compatibility, and
-explicit values `squashfs`, `gzip`, `zstd`, and `none` are supported. SquashFS
-packages with LZ4 for faster packaging and extraction; downloaded SquashFS
-outputs can be extracted with `unsquashfs -d output code.sqfs`.
+The default is `gzip` for downloadable artifact compatibility. `auto` picks by
+output size — skipping compression under 5MB and using `gzip` at or above it —
+and explicit values `squashfs`, `gzip`, `zstd`, and `none` are supported.
+SquashFS packages with LZ4 for faster packaging and extraction; downloaded
+SquashFS outputs can be extracted with `unsquashfs -d output code.sqfs`.
 
 ## 4. Writing the runtime server
 
