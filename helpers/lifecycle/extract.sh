@@ -38,7 +38,7 @@ extract_archive() {
 }
 
 # Locate the build archive in /mnt/code and extract it to dest. Squashfs is
-# preferred for auto compression, while legacy tar artifacts remain supported.
+# preferred when present, while legacy tar artifacts remain supported.
 extract_code_archive() {
 	local dest="$1"
 	if [ -f /mnt/code/code.sqfs ]; then

@@ -10,11 +10,7 @@ elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "zstd" ]; then
 	COMPRESSION_METHOD="zstd"
 elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "gzip" ]; then
 	COMPRESSION_METHOD="gzip"
-elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "auto" ]; then
-	COMPRESSION_METHOD="squashfs"
-
-	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Auto compression: ${COMPRESSION_METHOD} \e[0m"
 else
-	# Default: gzip (backward compatible)
+	# Default (and "auto"): gzip (backward compatible)
 	COMPRESSION_METHOD="gzip"
 fi
