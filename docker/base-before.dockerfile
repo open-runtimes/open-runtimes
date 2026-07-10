@@ -7,7 +7,7 @@ ENV OPEN_RUNTIMES_HEADERS="{}"
 
 RUN <<EOR
     if [ -f /etc/alpine-release ]; then
-        apk add util-linux zstd squashfs-tools
+        apk add --no-cache util-linux zstd squashfs-tools
     else
         apt-get update && apt-get install -y util-linux zstd squashfs-tools
     fi

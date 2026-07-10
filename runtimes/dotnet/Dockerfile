@@ -6,7 +6,7 @@ FROM ${BASE_IMAGE}
 
 INCLUDE ./docker/base-before
 
-RUN apk update && apk add bash
+RUN apk add --no-cache bash
 
 ENV OPEN_RUNTIMES_ENTRYPOINT=Index.cs
 

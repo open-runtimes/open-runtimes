@@ -63,7 +63,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME  }}
           password: ${{ secrets.DOCKERHUB_TOKEN  }}
       - name: Build & Publish to DockerHub
-        run: SHA_SUFFIX="-${GITHUB_SHA::12}" docker buildx bake --push "${{ matrix.target }}"
+        # Registry build cache (mode=max) keeps unchanged layers at identical
+        # digests across releases, so Kubernetes nodes pull only changed layers.
+        # zstd compresses new layers for faster decompression on pull; base
+        # layers keep their upstream (gzip) digests so they stay shareable.
+        run: |
+          SHA_SUFFIX="-${GITHUB_SHA::12}" docker buildx bake "${{ matrix.target }}" \
+            --set "*.cache-from=type=registry,ref=openruntimes/buildcache:${{ matrix.target }}" \
+            --set "*.cache-to=type=registry,ref=openruntimes/buildcache:${{ matrix.target }},mode=max,image-manifest=true,oci-mediatypes=true" \
+            --set "*.output=type=registry,compression=zstd,oci-mediatypes=true"
 
   deploy-rc:
     needs: prepare
@@ -87,6 +95,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME  }}
           password: ${{ secrets.DOCKERHUB_TOKEN  }}
       - name: Build & Publish to DockerHub
-        run: docker buildx bake --push "${{ matrix.target }}"
+        run: |
+          docker buildx bake "${{ matrix.target }}" \
+            --set "*.cache-from=type=registry,ref=openruntimes/buildcache:${{ matrix.target }}" \
+            --set "*.cache-to=type=registry,ref=openruntimes/buildcache:${{ matrix.target }},mode=max,image-manifest=true,oci-mediatypes=true" \
+            --set "*.output=type=registry,compression=zstd,oci-mediatypes=true"
         env:
           TAG_SUFFIX: "-rc"

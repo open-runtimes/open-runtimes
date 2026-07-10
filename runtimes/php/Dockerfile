@@ -9,7 +9,7 @@ FROM ${BUILD_BASE_IMAGE} AS step0
 
 # Extra packages only needed to compile extensions (linux-headers on php >= 8.2)
 ARG BUILD_PACKAGES=""
-RUN if [ -n "$BUILD_PACKAGES" ]; then apk update && apk add --no-cache $BUILD_PACKAGES; fi
+RUN if [ -n "$BUILD_PACKAGES" ]; then apk add --no-cache $BUILD_PACKAGES; fi
 
 ARG PHP_SWOOLE_VERSION
 ENV PHP_SWOOLE_VERSION=$PHP_SWOOLE_VERSION
@@ -27,8 +27,7 @@ INCLUDE ./docker/base-before
 ENV OPEN_RUNTIMES_ENTRYPOINT=index.php
 
 RUN \
-  apk update \
-  && apk add --no-cache --virtual .deps \
+  apk add --no-cache --virtual .deps \
   make \
   automake \
   autoconf \
