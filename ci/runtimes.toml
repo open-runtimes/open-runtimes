@@ -325,7 +325,7 @@ output = "./.next"
 "23" = { base = "node:23.11.1-alpine3.22", args = { INSTALL_SSR_TOOLING = "true" } }
 "22" = { base = "node:22.23.1-alpine3.23", args = { INSTALL_SSR_TOOLING = "true" } }
 "21.0" = { base = "node:21.7.3-alpine3.20" }
-"20.0" = { base = "node:20.20.2-alpine3.20" }
+"20.0" = { base = "node:20.20.2-alpine3.22" }
 "19.0" = { base = "node:19.9.0-alpine3.18" }
 "18.0" = { base = "node:18.20.8-alpine3.20", platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64"] }
 "16.0" = { base = "node:16.20.2-alpine3.18", args = { PNPM_VERSION = "8" }, platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64"] }
@@ -388,7 +388,7 @@ platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64"]
 
 [ruby.build.versions]
 "4.0" = { base = "ruby:4.0.5-alpine3.22" }
-"3.4" = { base = "ruby:3.4.10-alpine3.22" }
+"3.4" = { base = "ruby:3.4.10-alpine3.23" }
 "3.3" = { base = "ruby:3.3.10-alpine3.22" }
 "3.2" = { base = "ruby:3.2.10-alpine3.22" }
 "3.1" = { base = "ruby:3.1.7-alpine3.20" }
