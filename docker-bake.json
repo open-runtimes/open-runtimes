@@ -198,7 +198,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:22.22.0-alpine3.23",
+        "BASE_IMAGE": "node:22.23.1-alpine3.23",
         "INSTALL_SSR_TOOLING": "true"
       },
       "platforms": [
@@ -246,7 +246,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:24.13.0-alpine3.23",
+        "BASE_IMAGE": "node:24.18.0-alpine3.23",
         "INSTALL_SSR_TOOLING": "true"
       },
       "platforms": [
@@ -270,7 +270,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:25.5.0-alpine3.23",
+        "BASE_IMAGE": "node:25.9.0-alpine3.23",
         "INSTALL_SSR_TOOLING": "true"
       },
       "platforms": [
@@ -317,7 +317,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:20.17.0-alpine3.20"
+        "BASE_IMAGE": "node:20.20.2-alpine3.20"
       },
       "platforms": [
         "linux/amd64",
@@ -601,7 +601,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.14.2-alpine3.23"
+        "BASE_IMAGE": "python:3.14.6-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -624,7 +624,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.13.11-alpine3.23"
+        "BASE_IMAGE": "python:3.13.14-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -762,7 +762,7 @@
         "version": "./runtimes/python/versions/ml-3.13"
       },
       "args": {
-        "BASE_IMAGE": "python:3.13.11-bookworm",
+        "BASE_IMAGE": "python:3.13.14-bookworm",
         "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
       },
       "platforms": [
@@ -837,7 +837,7 @@
         "version": "./runtimes/dart/versions/3.12"
       },
       "args": {
-        "BASE_IMAGE": "dart:3.12.0"
+        "BASE_IMAGE": "dart:3.12.2"
       },
       "platforms": [
         "linux/amd64",
@@ -860,7 +860,7 @@
         "version": "./runtimes/dart/versions/3.11"
       },
       "args": {
-        "BASE_IMAGE": "dart:3.11.1"
+        "BASE_IMAGE": "dart:3.11.6"
       },
       "platforms": [
         "linux/amd64",
@@ -883,7 +883,7 @@
         "version": "./runtimes/dart/versions/3.10"
       },
       "args": {
-        "BASE_IMAGE": "dart:3.10.8"
+        "BASE_IMAGE": "dart:3.10.9"
       },
       "platforms": [
         "linux/amd64",
@@ -1139,7 +1139,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "ghcr.io/adrianjagielak/flutter:3.44.0"
+        "BASE_IMAGE": "ghcr.io/adrianjagielak/flutter:3.44.6"
       },
       "platforms": [
         "linux/amd64",
@@ -1326,7 +1326,7 @@
         "version": "./runtimes/ruby/versions/4.0"
       },
       "args": {
-        "BASE_IMAGE": "ruby:4.0.1-alpine3.22"
+        "BASE_IMAGE": "ruby:4.0.5-alpine3.22"
       },
       "platforms": [
         "linux/amd64",
@@ -1351,7 +1351,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "ruby:3.4.8-alpine3.22"
+        "BASE_IMAGE": "ruby:3.4.10-alpine3.22"
       },
       "platforms": [
         "linux/amd64",
@@ -1505,7 +1505,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.4.17-cli-alpine3.23",
+        "BASE_IMAGE": "php:8.4.22-cli-alpine3.23",
         "PHP_SWOOLE_VERSION": "v6.1.1",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1530,8 +1530,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.3.27-cli-alpine3.21",
-        "BUILD_BASE_IMAGE": "php:8.3.30-cli-alpine3.22",
+        "BASE_IMAGE": "php:8.3.31-cli-alpine3.22",
         "PHP_SWOOLE_VERSION": "v5.1.2",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1556,7 +1555,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.2.30-cli-alpine3.22",
+        "BASE_IMAGE": "php:8.2.31-cli-alpine3.22",
         "PHP_SWOOLE_VERSION": "v5.1.2",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1634,7 +1633,7 @@
         "version": "./runtimes/swift/versions/6.2"
       },
       "args": {
-        "BASE_IMAGE": "swift:6.2.3-jammy"
+        "BASE_IMAGE": "swift:6.2.4-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -2181,7 +2180,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "golang:1.26.0-alpine3.23"
+        "BASE_IMAGE": "golang:1.26.5-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -2204,7 +2203,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "golang:1.25.6-alpine3.23"
+        "BASE_IMAGE": "golang:1.25.10-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -2227,7 +2226,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "golang:1.24.12-alpine3.23"
+        "BASE_IMAGE": "golang:1.24.13-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
