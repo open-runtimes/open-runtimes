@@ -1,6 +1,7 @@
 #!/bin/bash
 # Build lifecycle: stage -> build-prepare hook -> install command -> compile
-# hook -> pack hook -> archive. Per-runtime steps live in /usr/local/server/hooks/.
+# hook -> pack hook -> archive -> manifest. Per-runtime steps live in
+# /usr/local/server/hooks/.
 # Fail build if any command fails
 set -e
 shopt -s dotglob
@@ -94,6 +95,10 @@ else
 fi
 
 opr_log "Build packaging finished."
+
+# --- Manifest: describe the build output for the orchestrator (opt-in) ---
+
+bash /usr/local/server/helpers/build-manifest.sh || true
 
 # --- Build cache: persist package-manager caches for the next build ---
 
