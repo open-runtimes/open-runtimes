@@ -83,16 +83,17 @@ class BuildCache extends TestCase
         $this->assertBuildCacheLogContains('Build cache save skipped: cache root missing.', $result['output']);
     }
 
-    public function testSaveWithMissingArtifactDirectoryExitsZero(): void
+    public function testSaveWithUncreatableArtifactDirectoryExitsZero(): void
     {
         \mkdir($this->cacheRoot(), 0777, true);
-        $this->writeTestCachePaths($this->cacheRoot(), $this->root . '/missing/stores.sqfs');
+        \file_put_contents($this->root . '/blocker', 'file');
+        $this->writeTestCachePaths($this->cacheRoot(), $this->root . '/blocker/stores.sqfs');
         $bin = $this->createBinDir(['mksquashfs' => "#!/bin/sh\nexit 1\n"]);
 
         $result = $this->runScript('build-cache-save.sh', $bin);
 
         self::assertSame(0, $result['code']);
-        $this->assertBuildCacheLogContains('Build cache save skipped: artifact directory missing.', $result['output']);
+        $this->assertBuildCacheLogContains('Build cache save skipped: artifact directory could not be created.', $result['output']);
     }
 
     public function testSaveFailureExitsZeroAndDeletesTemporaryArtifact(): void
@@ -141,6 +142,28 @@ class BuildCache extends TestCase
         self::assertStringNotContainsString('squashfs stderr', $result['output']);
         self::assertFileExists($this->artifact());
         self::assertFileDoesNotExist($this->artifact() . '.tmp');
+    }
+
+    public function testRelativeArtifactPathWritesFileNotDirectory(): void
+    {
+        \mkdir($this->cacheRoot(), 0777, true);
+        \file_put_contents($this->cacheRoot() . '/store', 'cache');
+        $this->writeTestCachePaths($this->cacheRoot(), 'stores.sqfs');
+        $bin = $this->createBinDir([
+            'mksquashfs' => "#!/bin/sh\nprintf saved > \"$2\"\nexit 0\n",
+        ]);
+
+        $result = $this->runShell(
+            'cd ' . \escapeshellarg($this->root) . ' && /bin/bash ' . \escapeshellarg($this->helpers . '/build-cache-save.sh'),
+            $bin
+        );
+
+        self::assertSame(0, $result['code']);
+        $this->assertBuildCacheLogContains('Build cache saved.', $result['output']);
+        $path = $this->root . '/stores.sqfs';
+        self::assertFileExists($path);
+        self::assertDirectoryDoesNotExist($path);
+        self::assertSame('saved', \file_get_contents($path));
     }
 
     public function testSuccessfulSaveOverwritesExistingArtifact(): void
