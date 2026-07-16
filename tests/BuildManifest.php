@@ -72,13 +72,27 @@ class BuildManifest extends TestCase
 
     public function testEscapesSpecialCharactersInFileNames(): void
     {
-        $name = 'we"ird\\name.html';
+        $name = "we\"ird\\na\tme\r.html";
         \file_put_contents($this->output . '/' . $name, 'html');
 
         $result = $this->runManifest();
 
         self::assertSame(0, $result['code']);
         self::assertSame([$name], $this->readManifest()['files']);
+    }
+
+    public function testRelativeManifestPathWritesFileNotDirectory(): void
+    {
+        \file_put_contents($this->output . '/index.html', 'html');
+
+        $result = $this->runManifest(['OPEN_RUNTIMES_BUILD_MANIFEST' => 'manifest.json']);
+
+        self::assertSame(0, $result['code']);
+        $path = $this->output . '/manifest.json';
+        self::assertFileExists($path);
+        self::assertDirectoryDoesNotExist($path);
+        $manifest = \json_decode((string) \file_get_contents($path), true);
+        self::assertSame(['index.html'], $manifest['files']);
     }
 
     public function testCapsFileCount(): void

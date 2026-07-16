@@ -16,7 +16,7 @@ if [ -z "${OPEN_RUNTIMES_BUILD_MANIFEST:-}" ]; then
 	exit 0
 fi
 
-manifest_dir="${OPEN_RUNTIMES_BUILD_MANIFEST%/*}"
+manifest_dir=$(dirname "$OPEN_RUNTIMES_BUILD_MANIFEST")
 if [ ! -d "$manifest_dir" ] && ! mkdir -p "$manifest_dir"; then
 	log 'Build manifest skipped: manifest directory could not be created.'
 	exit 0
@@ -33,7 +33,9 @@ max_files="${OPEN_RUNTIMES_BUILD_MANIFEST_MAX_FILES:-10000}"
 files=$(find . -name node_modules -prune -o -type f ! -name code.sqfs ! -name code.tar ! -name code.tar.gz ! -name code.gz -print 2>/dev/null | head -n "$max_files" | sed 's|^\./||')
 
 # jq guarantees correct JSON string escaping; the fallback covers the common
-# cases (backslash, double quote) for images without jq.
+# cases (backslash, double quote, tab, carriage return) for images without
+# jq — remaining control characters are rare enough in file names that the
+# consumer's tolerance for an unparseable manifest is the backstop.
 if command -v jq >/dev/null 2>&1; then
 	if ! printf '%s\n' "$files" | jq -R . | jq -s '{version: 1, files: [.[] | select(length > 0)]}' >"$tmp_manifest" 2>/dev/null; then
 		log 'Build manifest warning: failed to encode manifest, continuing without it.'
@@ -47,7 +49,7 @@ else
 			if [ -z "$file" ]; then
 				continue
 			fi
-			escaped=$(printf '%s' "$file" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+			escaped=$(printf '%s' "$file" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e $'s/\t/\\\\t/g' -e $'s/\r/\\\\r/g')
 			if [ "$first" -eq 1 ]; then
 				first=0
 			else
