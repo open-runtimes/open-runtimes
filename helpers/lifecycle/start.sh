@@ -7,6 +7,16 @@ shopt -s dotglob
 
 . /usr/local/server/helpers/lifecycle/lib.sh
 
+# Wall-clock + uptime anchor pair: every other value in timings.txt is an
+# uptime-based delta, which is unmappable to the controller's timeline on its
+# own. The pair lets the controller convert any uptime reading to wall time.
+# Anchor keys are absolute stamps, never durations — the controller excludes
+# them from histograms.
+anchor_wall=$(date +%s.%N)
+[[ "$anchor_wall" == *N* ]] && anchor_wall=$(date +%s) # busybox date without %N
+echo "anchor_wall=$anchor_wall" >>/mnt/telemetry/timings.txt
+echo "anchor_uptime=$(opr_uptime)" >>/mnt/telemetry/timings.txt
+
 # Extract code (handles sidecar pre-extraction)
 . /usr/local/server/helpers/lifecycle/extract.sh
 
@@ -26,9 +36,12 @@ opr_log "Environment preparation finished."
 
 opr_success "Runtime started."
 
-# Capture start time for startup metric
+# Capture start time for startup metric. The anchor stamp marks the exact
+# server-process exec point on the shared uptime timeline, so the controller
+# can compute exec → runtime-main against the process's own timeOrigin.
 start_uptime=$(opr_uptime)
 export start_uptime
+echo "anchor_server_start_uptime=$start_uptime" >>/mnt/telemetry/timings.txt
 
 # Run server and monitor stdout for ready message
 bash -c "$1" 2>&1 | {

@@ -1,9 +1,25 @@
 const micro = require("micro");
 const { buffer, send } = require("micro");
 const fs = require("fs");
+const { performance } = require("perf_hooks");
 const Logger = require("./logger");
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
+const TIMINGS_PATH = "/mnt/telemetry/timings.txt";
+
+// Monotonic offset (seconds since process start) when the server socket
+// started listening; also gates the one-shot first_request stamp.
+let listenedAt;
+let firstRequestRecorded = false;
+let userCodeInitRecorded = false;
+
+const recordTiming = (key, seconds) => {
+  try {
+    fs.appendFileSync(TIMINGS_PATH, `${key}=${seconds.toFixed(6)}\n`);
+  } catch {
+    // Telemetry must never break the runtime.
+  }
+};
 
 const server = micro(async (req, res) => {
   if (req.url === "/__opr/health") {
@@ -23,7 +39,12 @@ const server = micro(async (req, res) => {
   );
 
   try {
-    await action(logger, req, res);
+    const result = await action(logger, req, res);
+    if (!firstRequestRecorded && listenedAt !== undefined) {
+      firstRequestRecorded = true;
+      recordTiming("first_request", (performance.now() - listenedAt) / 1000);
+    }
+    return result;
   } catch (e) {
     logger.write([e], Logger.TYPE_ERROR);
 
@@ -194,6 +215,9 @@ const action = async (logger, req, res) => {
 
   // Guard: Try to load module
   if (output === null) {
+    // User code loads lazily on the first request ("suppressed init"), so
+    // stamp it as an explicit phase instead of losing it in request latency.
+    const userCodeStart = performance.now();
     try {
       try {
         userFunction = require(entrypointFilePath);
@@ -203,6 +227,14 @@ const action = async (logger, req, res) => {
         } else {
           throw err;
         }
+      }
+
+      if (!userCodeInitRecorded) {
+        userCodeInitRecorded = true;
+        recordTiming(
+          "user_code_init",
+          (performance.now() - userCodeStart) / 1000,
+        );
       }
 
       const fn = userFunction.default || userFunction;
@@ -299,6 +331,18 @@ const action = async (logger, req, res) => {
 
 Logger.ready.then(() => {
   server.listen(3000, undefined, undefined, () => {
+    listenedAt = performance.now();
+
+    // Boot milestones as offsets from process start (seconds): Node core
+    // bootstrap, environment ready, and socket listening. Guard for -1
+    // (milestone not reached). anchor_node_wall is the wall-clock epoch of
+    // process start (timeOrigin) — an absolute stamp, not a duration.
+    const nodeTiming = performance.nodeTiming;
+    recordTiming("node_boot", Math.max(0, nodeTiming.bootstrapComplete) / 1000);
+    recordTiming("env_ready", Math.max(0, nodeTiming.environment) / 1000);
+    recordTiming("listen", listenedAt / 1000);
+    recordTiming("anchor_node_wall", performance.timeOrigin / 1000);
+
     console.log("HTTP server successfully started!");
   });
 });
