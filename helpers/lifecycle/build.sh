@@ -87,7 +87,15 @@ if [ "$COMPRESSION_METHOD" = "none" ]; then
 	tar --exclude code.sqfs --exclude code.tar --exclude code.tar.gz --exclude code.gz -cf "$OUTPUT_DIR/code.tar.gz" .
 elif [ "$COMPRESSION_METHOD" = "squashfs" ]; then
 	processors=$(nproc 2>/dev/null || echo 1)
-	mksquashfs . "$OUTPUT_DIR/code.sqfs" -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors" -wildcards -e code.sqfs code.tar code.tar.gz code.gz
+	squashfs_log=$(mktemp)
+	if mksquashfs . "$OUTPUT_DIR/code.sqfs" -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors" -wildcards -e code.sqfs code.tar code.tar.gz code.gz >"$squashfs_log" 2>&1; then
+		rm -f "$squashfs_log"
+	else
+		status=$?
+		cat "$squashfs_log"
+		rm -f "$squashfs_log"
+		exit "$status"
+	fi
 elif [ "$COMPRESSION_METHOD" = "zstd" ]; then
 	tar --exclude code.sqfs --exclude code.tar --exclude code.tar.gz --exclude code.gz -cf - . | zstd -qf -o "$OUTPUT_DIR/code.tar.gz"
 else
