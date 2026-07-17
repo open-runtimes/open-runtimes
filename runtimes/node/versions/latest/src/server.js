@@ -39,12 +39,7 @@ const server = micro(async (req, res) => {
   );
 
   try {
-    const result = await action(logger, req, res);
-    if (!firstRequestRecorded && listenedAt !== undefined) {
-      firstRequestRecorded = true;
-      recordTiming("first_request", (performance.now() - listenedAt) / 1000);
-    }
-    return result;
+    return await action(logger, req, res);
   } catch (e) {
     logger.write([e], Logger.TYPE_ERROR);
 
@@ -52,6 +47,13 @@ const server = micro(async (req, res) => {
     await logger.end();
 
     return send(res, 500, "");
+  } finally {
+    // Stamp the first real request whether it succeeded or threw —
+    // otherwise a later request would be misattributed as first_request.
+    if (!firstRequestRecorded && listenedAt !== undefined) {
+      firstRequestRecorded = true;
+      recordTiming("first_request", (performance.now() - listenedAt) / 1000);
+    }
   }
 });
 
@@ -227,14 +229,16 @@ const action = async (logger, req, res) => {
         } else {
           throw err;
         }
-      }
-
-      if (!userCodeInitRecorded) {
-        userCodeInitRecorded = true;
-        recordTiming(
-          "user_code_init",
-          (performance.now() - userCodeStart) / 1000,
-        );
+      } finally {
+        // Stamp the first load attempt even when it throws — a retry on a
+        // later request would otherwise be recorded as the cold-start cost.
+        if (!userCodeInitRecorded) {
+          userCodeInitRecorded = true;
+          recordTiming(
+            "user_code_init",
+            (performance.now() - userCodeStart) / 1000,
+          );
+        }
       }
 
       const fn = userFunction.default || userFunction;
@@ -334,12 +338,18 @@ Logger.ready.then(() => {
     listenedAt = performance.now();
 
     // Boot milestones as offsets from process start (seconds): Node core
-    // bootstrap, environment ready, and socket listening. Guard for -1
-    // (milestone not reached). anchor_node_wall is the wall-clock epoch of
-    // process start (timeOrigin) — an absolute stamp, not a duration.
+    // bootstrap, environment ready, and socket listening. A milestone of -1
+    // means "not reached" — skip it so a missing key signals that, instead
+    // of masquerading as a zero-duration event. anchor_node_wall is the
+    // wall-clock epoch of process start (timeOrigin) — an absolute stamp,
+    // not a duration.
     const nodeTiming = performance.nodeTiming;
-    recordTiming("node_boot", Math.max(0, nodeTiming.bootstrapComplete) / 1000);
-    recordTiming("env_ready", Math.max(0, nodeTiming.environment) / 1000);
+    if (nodeTiming.bootstrapComplete >= 0) {
+      recordTiming("node_boot", nodeTiming.bootstrapComplete / 1000);
+    }
+    if (nodeTiming.environment >= 0) {
+      recordTiming("env_ready", nodeTiming.environment / 1000);
+    }
     recordTiming("listen", listenedAt / 1000);
     recordTiming("anchor_node_wall", performance.timeOrigin / 1000);
 
