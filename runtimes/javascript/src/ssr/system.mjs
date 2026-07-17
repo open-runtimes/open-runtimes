@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 
+const serverSecret = process.env["OPEN_RUNTIMES_SECRET"];
+
 export function addOprEndpoints(req, res) {
   if (req.method === "GET" && req.url === "/__opr/health") {
     const body = "OK";
@@ -25,7 +27,6 @@ export function addOprEndpoints(req, res) {
 }
 
 export function addAuthenticationCheck(req, res) {
-  const serverSecret = process.env["OPEN_RUNTIMES_SECRET"];
   const headerSecret = req.headers["x-open-runtimes-secret"];
 
   if (serverSecret && serverSecret !== headerSecret) {

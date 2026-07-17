@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json;
 
 namespace DotNetRuntime
 {
@@ -97,8 +96,7 @@ namespace DotNetRuntime
                 ? secretValue.ToString()
                 : string.Empty;
 
-            string serverSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET");
-            if (!string.IsNullOrEmpty(serverSecret) && secret != serverSecret)
+            if (!string.IsNullOrEmpty(OprConfig.Secret) && secret != OprConfig.Secret)
             {
                 return new CustomResponse(
                     "Unauthorized. Provide correct \"x-open-runtimes-secret\" header."u8.ToArray(),
@@ -129,20 +127,9 @@ namespace DotNetRuntime
                 }
             }
 
-            String enforcedHeadersString = Environment.GetEnvironmentVariable(
-                "OPEN_RUNTIMES_HEADERS"
-            );
-            if (string.IsNullOrEmpty(enforcedHeadersString))
+            foreach (var entry in OprConfig.Headers)
             {
-                enforcedHeadersString = "{}";
-            }
-
-            Dictionary<string, object> enforcedHeaders =
-                JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString)
-                ?? new Dictionary<string, object>();
-            foreach (KeyValuePair<string, object> entry in enforcedHeaders)
-            {
-                headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
+                headers[entry.Key] = entry.Value;
             }
 
             var hostHeader = request.Headers.TryGetValue("host", out var hostHeaderValue)

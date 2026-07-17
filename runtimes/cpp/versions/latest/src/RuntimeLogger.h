@@ -1,6 +1,7 @@
 #ifndef CPP_RUNTIME_RUNTIMELOGGER_H
 #define CPP_RUNTIME_RUNTIMELOGGER_H
 
+#include "OprConfig.h"
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
@@ -32,10 +33,7 @@ public:
     }
 
     if (enabled == true) {
-      std::string serverEnv = "";
-      if (std::getenv("OPEN_RUNTIMES_ENV") != nullptr) {
-        serverEnv = std::getenv("OPEN_RUNTIMES_ENV");
-      }
+      std::string serverEnv = config().env;
 
       if (headerId == "") {
         if (serverEnv == "development") {

@@ -1,9 +1,9 @@
 import asyncio
 import importlib
-import json
 import os
 import traceback
 
+import config
 from aiohttp import web, web_exceptions, web_request
 from function_types import Context
 from logger import Logger
@@ -21,9 +21,10 @@ async def action(logger, request: web_request.Request):
 
         safeTimeout = int(timeout)
 
-    if os.getenv("OPEN_RUNTIMES_SECRET", "") != "" and request.headers.get(
-        "x-open-runtimes-secret", ""
-    ) != os.getenv("OPEN_RUNTIMES_SECRET", ""):
+    if (
+        config.SECRET != ""
+        and request.headers.get("x-open-runtimes-secret", "") != config.SECRET
+    ):
         return web.Response(
             text='Unauthorized. Provide correct "x-open-runtimes-secret" header.',
             status=500,
@@ -73,18 +74,15 @@ async def action(logger, request: web_request.Request):
         if not key.lower().startswith("x-open-runtimes-"):
             context.req.headers[key.lower()] = headers[key]
 
-    server_headers = os.getenv("OPEN_RUNTIMES_HEADERS", "")
-    server_headers = server_headers if server_headers else "{}"
-    enforced_headers = json.loads(server_headers)
-    for key in enforced_headers.keys():
-        context.req.headers[key.lower()] = str(enforced_headers[key])
+    for key in config.HEADERS.keys():
+        context.req.headers[key.lower()] = str(config.HEADERS[key])
 
     logger.override_native_logs()
 
     output = None
     userModule = None
 
-    entrypoint = os.getenv("OPEN_RUNTIMES_ENTRYPOINT")
+    entrypoint = config.ENTRYPOINT
     entrypointFilePath = "/usr/local/server/src/function/" + entrypoint
 
     # Guard: Check file exists

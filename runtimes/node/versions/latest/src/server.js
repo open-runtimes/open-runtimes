@@ -2,6 +2,7 @@ const micro = require("micro");
 const { buffer, send } = require("micro");
 const fs = require("fs");
 const Logger = require("./logger");
+const config = require("./config");
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
@@ -50,9 +51,8 @@ const action = async (logger, req, res) => {
   }
 
   if (
-    process.env["OPEN_RUNTIMES_SECRET"] &&
-    req.headers[`x-open-runtimes-secret`] !==
-      process.env["OPEN_RUNTIMES_SECRET"]
+    config.secret &&
+    req.headers[`x-open-runtimes-secret`] !== config.secret
   ) {
     return send(
       res,
@@ -73,13 +73,8 @@ const action = async (logger, req, res) => {
       headers[header.toLowerCase()] = req.headers[header];
     });
 
-  const enforcedHeaders = JSON.parse(
-    process.env.OPEN_RUNTIMES_HEADERS
-      ? process.env.OPEN_RUNTIMES_HEADERS
-      : "{}",
-  );
-  for (const header in enforcedHeaders) {
-    headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
+  for (const header in config.headers) {
+    headers[header.toLowerCase()] = `${config.headers[header]}`;
   }
 
   const scheme = req.headers["x-forwarded-proto"] ?? "http";
@@ -180,7 +175,7 @@ const action = async (logger, req, res) => {
   let output = null;
   let userFunction = null;
 
-  const entrypoint = process.env.OPEN_RUNTIMES_ENTRYPOINT;
+  const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
 
   // Guard: Check file exists

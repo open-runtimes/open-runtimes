@@ -17,8 +17,7 @@ class RuntimeLogger {
 
         if enabled {
             if id == "" {
-                let serverEnv = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_ENV"]
-                if serverEnv == "development" {
+                if OprConfig.env == "development" {
                     self.id = "dev"
                 } else {
                     self.id = generateId()
