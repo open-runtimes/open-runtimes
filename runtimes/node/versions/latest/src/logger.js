@@ -1,4 +1,5 @@
 const fs = require("fs");
+const config = require("./config");
 
 let _superjson;
 const _superjsonReady = import("superjson").then((m) => {
@@ -23,7 +24,7 @@ class Logger {
     if (this.enabled) {
       this.id = id
         ? id
-        : process.env.OPEN_RUNTIMES_ENV === "development"
+        : config.env === "development"
           ? "dev"
           : this.generateId();
       this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`, {

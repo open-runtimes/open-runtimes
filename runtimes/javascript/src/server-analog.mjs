@@ -5,14 +5,14 @@ console.log("Analog server starting ...");
 
 const app = express();
 
+const cacheHeader =
+  process.env.OPEN_RUNTIMES_CACHE_HEADER ?? "CDN-Cache-Control";
+
 // framework-specific logic
 app.use(
   express.static("public", {
     setHeaders: (res, _path) => {
-      res.setHeader(
-        process.env.OPEN_RUNTIMES_CACHE_HEADER ?? "CDN-Cache-Control",
-        "public, max-age=36000",
-      );
+      res.setHeader(cacheHeader, "public, max-age=36000");
     },
   }),
 );

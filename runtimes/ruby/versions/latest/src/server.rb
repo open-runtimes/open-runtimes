@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'json'
 
+require_relative 'config.rb'
 require_relative 'types.rb'
 require_relative 'logger.rb'
 require_relative 'execute.rb'
@@ -23,7 +24,7 @@ def action(request, response, logger)
   end
 
   secret = request.env['HTTP_X_OPEN_RUNTIMES_SECRET'] || ''
-  server_secret = ENV['OPEN_RUNTIMES_SECRET'] || ''
+  server_secret = Config::SECRET
 
   if !(server_secret.empty?) && secret != server_secret
     response.status = 500
@@ -108,8 +109,7 @@ def action(request, response, logger)
     end
   end
 
-  enforced_headers = JSON.parse(ENV['OPEN_RUNTIMES_HEADERS'].empty? ? '{}' : ENV['OPEN_RUNTIMES_HEADERS'])
-  enforced_headers.each do |key, value|
+  Config::HEADERS.each do |key, value|
     headers[key.downcase] = value.to_s
   end
 
@@ -121,7 +121,7 @@ def action(request, response, logger)
   output = nil
   user_function_loaded = false
 
-  entrypoint = ENV['OPEN_RUNTIMES_ENTRYPOINT']
+  entrypoint = Config::ENTRYPOINT
   entrypoint_file_path = USER_CODE_PATH + '/' + entrypoint
 
   # Guard: Check file exists

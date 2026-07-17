@@ -5,6 +5,8 @@ import math
 import os
 from io import StringIO
 
+import config
+
 
 class Logger:
     TYPE_ERROR = "error"
@@ -29,9 +31,7 @@ class Logger:
                 self.enabled = False
 
         if self.enabled is True:
-            is_development = False
-            if os.getenv("OPEN_RUNTIMES_ENV") == "development":
-                is_development = True
+            is_development = config.ENV == "development"
 
             if id is None or id == "":
                 if is_development is True:

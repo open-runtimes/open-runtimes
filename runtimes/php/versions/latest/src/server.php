@@ -3,6 +3,7 @@
 require 'vendor-server/autoload.php';
 require_once 'types.php';
 require_once 'logger.php';
+require_once 'config.php';
 
 // Use the native curl hook instead of the userland one bundled in
 // SWOOLE_HOOK_ALL. The userland hook only maps a fixed set of curl options and
@@ -19,9 +20,10 @@ $server->set([
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
+$config = new Config();
 $userFunction = null;
 
-$action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction) {
+$action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction, $config) {
     $requestHeaders = $req->header;
 
     $cookieHeaders = [];
@@ -46,7 +48,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
         $safeTimeout = \intval($timeout);
     }
 
-    if ((getenv('OPEN_RUNTIMES_SECRET') ?? '') != "" && ($requestHeaders['x-open-runtimes-secret'] ?? '') !== getenv('OPEN_RUNTIMES_SECRET')) {
+    if ($config->secret !== '' && ($requestHeaders['x-open-runtimes-secret'] ?? '') !== $config->secret) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
         return;
@@ -105,8 +107,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
         }
     }
 
-    $enforcedHeaders = json_decode(getenv('OPEN_RUNTIMES_HEADERS') ?? '{}', true);
-    foreach ($enforcedHeaders as $key => $value) {
+    foreach ($config->headers as $key => $value) {
         $context->req->headers[\strtolower($key)] = \strval($value);
     }
 
@@ -114,7 +115,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
 
     $output = null;
 
-    $entrypoint = getenv('OPEN_RUNTIMES_ENTRYPOINT');
+    $entrypoint = $config->entrypoint;
     $entrypointPath = USER_CODE_PATH . '/' . $entrypoint;
 
     // Guard: Check file exists
@@ -216,7 +217,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
     $res->end($output['body']);
 };
 
-$server->on("Request", function ($req, $res) use ($action) {
+$server->on("Request", function ($req, $res) use ($action, $config) {
     if ($req->server['path_info'] === '/__opr/health') {
         $res->status(200);
         $res->end('OK');
@@ -230,7 +231,7 @@ $server->on("Request", function ($req, $res) use ($action) {
         return;
     }
 
-    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '');
+    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '', $config->env);
 
     try {
         $action($logger, $req, $res);

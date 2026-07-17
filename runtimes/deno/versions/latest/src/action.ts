@@ -1,5 +1,6 @@
 import { Logger } from "./logger.ts";
 import { getContextBody } from "./getContextBody.ts";
+import { config } from "./config.ts";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
@@ -18,9 +19,9 @@ export const action = async (logger: Logger, ctx: any) => {
   }
 
   if (
-    Deno.env.get("OPEN_RUNTIMES_SECRET") &&
+    config.secret &&
     (ctx.request.headers.get("x-open-runtimes-secret") ?? "") !==
-      Deno.env.get("OPEN_RUNTIMES_SECRET")
+      config.secret
   ) {
     ctx.response.status = 500;
     ctx.response.body =
@@ -51,13 +52,8 @@ export const action = async (logger: Logger, ctx: any) => {
     headers[header.toLowerCase()] = ctx.request.headers.get(header);
   });
 
-  const enforcedHeaders = JSON.parse(
-    Deno.env.get("OPEN_RUNTIMES_HEADERS")
-      ? (Deno.env.get("OPEN_RUNTIMES_HEADERS") ?? "{}")
-      : "{}",
-  );
-  for (const header in enforcedHeaders) {
-    headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
+  for (const header in config.headers) {
+    headers[header.toLowerCase()] = `${config.headers[header]}`;
   }
 
   const scheme = ctx.request.headers.get("x-forwarded-proto") ?? "http";
@@ -162,7 +158,7 @@ export const action = async (logger: Logger, ctx: any) => {
   let output: any = null;
   let userFunction: any = null;
 
-  const entrypoint = Deno.env.get("OPEN_RUNTIMES_ENTRYPOINT") ?? "";
+  const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
 
   // Guard: Check file exists

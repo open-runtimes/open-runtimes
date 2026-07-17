@@ -38,8 +38,7 @@ namespace DotNetRuntime
             {
                 if (string.IsNullOrEmpty(id))
                 {
-                    String? serverEnv = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_ENV");
-                    if (!string.IsNullOrEmpty(serverEnv) && serverEnv == "development")
+                    if (OprConfig.Env == "development")
                     {
                         this.id = "dev";
                     }

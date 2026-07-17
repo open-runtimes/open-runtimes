@@ -1,8 +1,5 @@
 package io.openruntimes.java;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.ToNumberPolicy;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.io.IOException;
@@ -16,13 +13,6 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 public class Server {
-
-  private static final Gson gson = new GsonBuilder().serializeNulls().create();
-  private static final Gson gsonInternal =
-      new GsonBuilder()
-          .serializeNulls()
-          .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
-          .create();
 
   private static final ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -112,10 +102,7 @@ public class Server {
       }
     }
 
-    String serverSecret = System.getenv("OPEN_RUNTIMES_SECRET");
-    if (serverSecret == null) {
-      serverSecret = "";
-    }
+    String serverSecret = OprConfig.SECRET;
 
     String secret = ctx.header("x-open-runtimes-secret");
 
@@ -139,17 +126,7 @@ public class Server {
       }
     }
 
-    String enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS");
-
-    if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
-      enforcedHeadersString = "{}";
-    }
-
-    Map<String, Object> enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, Map.class);
-
-    for (Map.Entry<String, Object> entry : enforcedHeaders.entrySet()) {
-      headers.put(entry.getKey().toLowerCase(), String.valueOf(entry.getValue()));
-    }
+    headers.putAll(OprConfig.HEADERS);
 
     String scheme = (scheme = ctx.header("x-forwarded-proto")) != null ? scheme : "http";
     String defaultPort = scheme.equals("https") ? "443" : "80";
@@ -203,7 +180,7 @@ public class Server {
     Method classMethod = null;
     Object instance = null;
 
-    String entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
+    String entrypoint = OprConfig.ENTRYPOINT;
 
     // Guard: Try to load module
     try {

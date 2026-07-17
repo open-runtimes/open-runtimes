@@ -1,5 +1,7 @@
 require 'securerandom'
 
+require_relative 'config.rb'
+
 class RuntimeLogger
   TYPE_LOG = "log"
   TYPE_ERROR = "error"
@@ -23,7 +25,7 @@ class RuntimeLogger
     end
 
     if @enabled === true
-      serverEnv = ENV['OPEN_RUNTIMES_ENV'] || ""
+      serverEnv = Config::ENV_NAME
 
       if id.nil? || id.empty?
         if serverEnv === "development"

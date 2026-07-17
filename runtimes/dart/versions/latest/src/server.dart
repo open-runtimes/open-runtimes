@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import '{entrypoint}' as user_code;
+import 'config.dart' as config;
 import 'function_types.dart';
 import 'logger.dart';
 
@@ -21,9 +22,8 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  if ((Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '') != '' &&
-      (req.headers['x-open-runtimes-secret'] ?? '') !=
-          Platform.environment['OPEN_RUNTIMES_SECRET']) {
+  if (config.secret != '' &&
+      (req.headers['x-open-runtimes-secret'] ?? '') != config.secret) {
     return shelf.Response(
       500,
       body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.',
@@ -57,13 +57,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  String? enforcedHeadersString = Platform.environment['OPEN_RUNTIMES_HEADERS'];
-  final enforcedHeaders = jsonDecode(
-    (enforcedHeadersString != null && !enforcedHeadersString.isEmpty)
-        ? enforcedHeadersString
-        : '{}',
-  );
-  enforcedHeaders.forEach((key, value) {
+  config.headers.forEach((key, value) {
     headers[key.toLowerCase()] = '${value}';
   });
 

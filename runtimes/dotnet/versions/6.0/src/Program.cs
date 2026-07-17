@@ -1,6 +1,5 @@
 using System.IO;
 using System.Text;
-using System.Text.Json;
 using System.Web;
 using DotNetRuntime;
 using Microsoft.AspNetCore.Mvc;
@@ -94,8 +93,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         ? secretValue.ToString()
         : string.Empty;
 
-    string serverSecret = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET");
-    if (!string.IsNullOrEmpty(serverSecret) && secret != serverSecret)
+    if (!string.IsNullOrEmpty(OprConfig.Secret) && secret != OprConfig.Secret)
     {
         return new CustomResponse(
             System.Text.Encoding.UTF8.GetBytes(
@@ -127,18 +125,9 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         }
     }
 
-    String enforcedHeadersString = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_HEADERS");
-    if (string.IsNullOrEmpty(enforcedHeadersString))
+    foreach (var entry in OprConfig.Headers)
     {
-        enforcedHeadersString = "{}";
-    }
-
-    Dictionary<string, object> enforcedHeaders =
-        JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString)
-        ?? new Dictionary<string, object>();
-    foreach (KeyValuePair<string, object> entry in enforcedHeaders)
-    {
-        headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
+        headers[entry.Key] = entry.Value;
     }
 
     var hostHeader = request.Headers.TryGetValue("host", out var hostHeaderValue)
