@@ -56,12 +56,14 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.prepare.outputs.builds) }}
     name: ${{ matrix.target }} (${{ matrix.platform }})
-    runs-on: ${{ contains(matrix.platform, 'arm') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    # 32-bit arm stays on amd64+QEMU: the arm64 runner executes arm32 natively
+    # (no QEMU), so uname reports aarch64 and arch-sniffing builds (swoole) break.
+    runs-on: ${{ contains(matrix.platform, 'arm64') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Set up QEMU
-        if: contains(matrix.platform, 'arm/v') # 32-bit arm still emulated on the arm64 runner
+        if: contains(matrix.platform, 'arm/v')
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
