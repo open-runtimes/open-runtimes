@@ -12,10 +12,13 @@ shopt -s dotglob
 # own. The pair lets the controller convert any uptime reading to wall time.
 # Anchor keys are absolute stamps, never durations — the controller excludes
 # them from histograms.
+# Capture both stamps back-to-back before writing — the file appends can
+# stall on disk I/O and would skew the pair.
 anchor_wall=$(date +%s.%N)
+anchor_uptime=$(opr_uptime)
 [[ "$anchor_wall" == *N* ]] && anchor_wall=$(date +%s) # busybox date without %N
 echo "anchor_wall=$anchor_wall" >>/mnt/telemetry/timings.txt
-echo "anchor_uptime=$(opr_uptime)" >>/mnt/telemetry/timings.txt
+echo "anchor_uptime=$anchor_uptime" >>/mnt/telemetry/timings.txt
 
 # Extract code (handles sidecar pre-extraction)
 . /usr/local/server/helpers/lifecycle/extract.sh
