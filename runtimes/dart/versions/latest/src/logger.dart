@@ -21,9 +21,7 @@ class Logger {
     if (this.enabled) {
       this.id = id != null
           ? id
-          : (config.env == 'development'
-                ? 'dev'
-                : this.generateId());
+          : (config.env == 'development' ? 'dev' : this.generateId());
 
       this.streamLogs = File(
         '/mnt/logs/' + this.id + '_logs.log',
