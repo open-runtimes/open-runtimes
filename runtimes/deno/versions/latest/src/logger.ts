@@ -22,9 +22,7 @@ export class Logger {
     if (this.enabled) {
       this.id = id
         ? id
-        : (config.env === "development"
-          ? "dev"
-          : this.generateId());
+        : (config.env === "development" ? "dev" : this.generateId());
     }
   }
 
