@@ -512,8 +512,7 @@
         "BASE_IMAGE": "denoland/deno:alpine-1.40.5"
       },
       "platforms": [
-        "linux/amd64",
-        "linux/arm64"
+        "linux/amd64"
       ],
       "tags": [
         "${REGISTRY}/deno:v5-1.40${TAG_SUFFIX}",

@@ -335,7 +335,7 @@ output = "./.next"
 "2.5" = { base = "denoland/deno:alpine-2.5.7" }
 "2.0" = { base = "denoland/deno:alpine-2.0.6" }
 "1.46" = { base = "denoland/deno:alpine-1.46.3" }
-"1.40" = { base = "denoland/deno:alpine-1.40.5" }
+"1.40" = { base = "denoland/deno:alpine-1.40.5", platforms = ["linux/amd64"] }
 "1.35" = { base = "denoland/deno:alpine-1.35.3", platforms = ["linux/amd64"] }
 "1.24" = { base = "denoland/deno:alpine-1.24.3", platforms = ["linux/amd64"] }
 "1.21" = { base = "denoland/deno:alpine-1.21.3", platforms = ["linux/amd64"] }
