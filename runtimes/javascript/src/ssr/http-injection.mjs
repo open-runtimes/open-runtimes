@@ -8,7 +8,9 @@
 import {
   addOprEndpoints,
   addAuthenticationCheck,
+  addFirstRequestTiming,
   addSafeTimeout,
+  recordServerListening,
 } from "./system.mjs";
 import { Logger, loggingNamespace } from "./logger.mjs";
 
@@ -29,6 +31,8 @@ export function overrideEmit(originalEmit) {
     if (addAuthenticationCheck(req, res)) {
       return;
     }
+
+    addFirstRequestTiming(req, res);
 
     req.loggerId = Logger.start(
       req.headers["x-open-runtimes-logging"],
@@ -79,6 +83,7 @@ export function wrapServer(originalServer) {
   return function (...args) {
     const server = originalServer.apply(this, args);
     server.emit = overrideEmit(server.emit);
+    server.once("listening", recordServerListening);
     return server;
   };
 }
@@ -88,6 +93,7 @@ export function wrapCreateServer(originalCreateServer) {
   return function (...args) {
     const server = new originalCreateServer(...args);
     server.emit = overrideEmit(server.emit);
+    server.once("listening", recordServerListening);
     return server;
   };
 }

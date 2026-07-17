@@ -1,9 +1,27 @@
 const micro = require("micro");
 const { buffer, send } = require("micro");
 const fs = require("fs");
+const { performance } = require("perf_hooks");
 const Logger = require("./logger");
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
+const TIMINGS_PATH = "/mnt/telemetry/timings.txt";
+
+// Monotonic offset (seconds since process start) when the server socket
+// started listening; also gates the one-shot first_request stamp.
+let listenedAt;
+let firstRequestRecorded = false;
+let userCodeInitRecorded = false;
+let userCodeInitSeconds;
+let timingsHeaderSent = false;
+
+const recordTiming = (key, seconds) => {
+  try {
+    fs.appendFileSync(TIMINGS_PATH, `${key}=${seconds.toFixed(6)}\n`);
+  } catch {
+    // Telemetry must never break the runtime.
+  }
+};
 
 const server = micro(async (req, res) => {
   if (req.url === "/__opr/health") {
@@ -23,7 +41,7 @@ const server = micro(async (req, res) => {
   );
 
   try {
-    await action(logger, req, res);
+    return await action(logger, req, res);
   } catch (e) {
     logger.write([e], Logger.TYPE_ERROR);
 
@@ -31,6 +49,13 @@ const server = micro(async (req, res) => {
     await logger.end();
 
     return send(res, 500, "");
+  } finally {
+    // Stamp the first real request whether it succeeded or threw —
+    // otherwise a later request would be misattributed as first_request.
+    if (!firstRequestRecorded && listenedAt !== undefined) {
+      firstRequestRecorded = true;
+      recordTiming("first_request", (performance.now() - listenedAt) / 1000);
+    }
   }
 });
 
@@ -194,6 +219,9 @@ const action = async (logger, req, res) => {
 
   // Guard: Try to load module
   if (output === null) {
+    // User code loads lazily on the first request ("suppressed init"), so
+    // stamp it as an explicit phase instead of losing it in request latency.
+    const userCodeStart = performance.now();
     try {
       try {
         userFunction = require(entrypointFilePath);
@@ -202,6 +230,14 @@ const action = async (logger, req, res) => {
           userFunction = await import(entrypointFilePath);
         } else {
           throw err;
+        }
+      } finally {
+        // Stamp the first load attempt even when it throws — a retry on a
+        // later request would otherwise be recorded as the cold-start cost.
+        if (!userCodeInitRecorded) {
+          userCodeInitRecorded = true;
+          userCodeInitSeconds = (performance.now() - userCodeStart) / 1000;
+          recordTiming("user_code_init", userCodeInitSeconds);
         }
       }
 
@@ -291,6 +327,20 @@ const action = async (logger, req, res) => {
     res.setHeader("content-type", contentTypeValue + "; charset=utf-8");
   }
 
+  // Report first-request timing phases inline on the first response: the
+  // executor's /__opr/timings scrape happens at readiness, before these
+  // exist. The x-open-runtimes- prefix keeps the header executor-internal.
+  if (!timingsHeaderSent && listenedAt !== undefined) {
+    timingsHeaderSent = true;
+    const pairs = [
+      `first_request=${((performance.now() - listenedAt) / 1000).toFixed(6)}`,
+    ];
+    if (userCodeInitSeconds !== undefined) {
+      pairs.unshift(`user_code_init=${userCodeInitSeconds.toFixed(6)}`);
+    }
+    res.setHeader("x-open-runtimes-timings", pairs.join(";"));
+  }
+
   res.setHeader("x-open-runtimes-log-id", logger.id);
   await logger.end();
 
@@ -299,6 +349,24 @@ const action = async (logger, req, res) => {
 
 Logger.ready.then(() => {
   server.listen(3000, undefined, undefined, () => {
+    listenedAt = performance.now();
+
+    // Boot milestones as offsets from process start (seconds): Node core
+    // bootstrap, environment ready, and socket listening. A milestone of -1
+    // means "not reached" — skip it so a missing key signals that, instead
+    // of masquerading as a zero-duration event. anchor_node_wall is the
+    // wall-clock epoch of process start (timeOrigin) — an absolute stamp,
+    // not a duration.
+    const nodeTiming = performance.nodeTiming;
+    if (nodeTiming.bootstrapComplete >= 0) {
+      recordTiming("node_boot", nodeTiming.bootstrapComplete / 1000);
+    }
+    if (nodeTiming.environment >= 0) {
+      recordTiming("env_ready", nodeTiming.environment / 1000);
+    }
+    recordTiming("listen", listenedAt / 1000);
+    recordTiming("anchor_node_wall", performance.timeOrigin / 1000);
+
     console.log("HTTP server successfully started!");
   });
 });
