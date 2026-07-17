@@ -73,7 +73,7 @@ jobs:
       - name: Build & push by digest
         id: build
         run: |
-          IMAGE=$(docker buildx bake --print "$TARGET" | jq -r '.target[].tags[0] | split(":")[0]')
+          IMAGE=$(docker buildx bake --print "$TARGET" | jq -r --arg t "$TARGET" '.target[$t].tags[0] | split(":")[0]')
           docker buildx bake "$TARGET" \
             --set "*.platform=$PLATFORM" \
             --set "*.tags=" \
@@ -96,6 +96,9 @@ jobs:
 
   publish:
     needs: [ prepare, build ]
+    # Publish every target whose builds all succeeded, even if other targets
+    # failed — the digest-count check below fails partially-built targets.
+    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -121,9 +124,15 @@ jobs:
       - name: Create multi-arch manifest
         run: |
           BAKE=$(docker buildx bake --print "$TARGET")
-          IMAGE=$(jq -r '.target[].tags[0] | split(":")[0]' <<< "$BAKE")
-          TAGS=$(jq -r '[.target[].tags[]] | unique | map("-t " + .) | join(" ")' <<< "$BAKE")
+          IMAGE=$(jq -r --arg t "$TARGET" '.target[$t].tags[0] | split(":")[0]' <<< "$BAKE")
+          TAGS=$(jq -r --arg t "$TARGET" '.target[$t].tags | unique | map("-t " + .) | join(" ")' <<< "$BAKE")
+          EXPECTED=$(jq -r --arg t "$TARGET" '.target[$t].platforms | length' <<< "$BAKE")
           cd /tmp/digests
+          ACTUAL=$(ls | wc -l)
+          if [ "$ACTUAL" -ne "$EXPECTED" ]; then
+            echo "::error::$TARGET: expected $EXPECTED platform digests, found $ACTUAL — refusing to publish a partial manifest"
+            exit 1
+          fi
           docker buildx imagetools create $TAGS $(printf "$IMAGE@sha256:%s " *)
         env:
           TARGET: ${{ matrix.target }}
