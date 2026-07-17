@@ -12,6 +12,8 @@ const TIMINGS_PATH = "/mnt/telemetry/timings.txt";
 let listenedAt;
 let firstRequestRecorded = false;
 let userCodeInitRecorded = false;
+let userCodeInitSeconds;
+let timingsHeaderSent = false;
 
 const recordTiming = (key, seconds) => {
   try {
@@ -234,10 +236,8 @@ const action = async (logger, req, res) => {
         // later request would otherwise be recorded as the cold-start cost.
         if (!userCodeInitRecorded) {
           userCodeInitRecorded = true;
-          recordTiming(
-            "user_code_init",
-            (performance.now() - userCodeStart) / 1000,
-          );
+          userCodeInitSeconds = (performance.now() - userCodeStart) / 1000;
+          recordTiming("user_code_init", userCodeInitSeconds);
         }
       }
 
@@ -325,6 +325,20 @@ const action = async (logger, req, res) => {
     !contentTypeValue.includes("charset=")
   ) {
     res.setHeader("content-type", contentTypeValue + "; charset=utf-8");
+  }
+
+  // Report first-request timing phases inline on the first response: the
+  // executor's /__opr/timings scrape happens at readiness, before these
+  // exist. The x-open-runtimes- prefix keeps the header executor-internal.
+  if (!timingsHeaderSent && listenedAt !== undefined) {
+    timingsHeaderSent = true;
+    const pairs = [
+      `first_request=${((performance.now() - listenedAt) / 1000).toFixed(6)}`,
+    ];
+    if (userCodeInitSeconds !== undefined) {
+      pairs.unshift(`user_code_init=${userCodeInitSeconds.toFixed(6)}`);
+    }
+    res.setHeader("x-open-runtimes-timings", pairs.join(";"));
   }
 
   res.setHeader("x-open-runtimes-log-id", logger.id);
