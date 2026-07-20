@@ -4,6 +4,8 @@
 
 if [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "none" ]; then
 	COMPRESSION_METHOD="none"
+elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "skip" ]; then
+	COMPRESSION_METHOD="skip"
 elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "squashfs" ]; then
 	COMPRESSION_METHOD="squashfs"
 elif [ "$OPEN_RUNTIMES_BUILD_COMPRESSION" = "zstd" ]; then

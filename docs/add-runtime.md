@@ -133,9 +133,11 @@ hooks beyond what its shared family already provides.
 Build output compression is controlled by `OPEN_RUNTIMES_BUILD_COMPRESSION`.
 The default is `gzip` for downloadable artifact compatibility. `auto` picks by
 output size — skipping compression under 5MB and using `gzip` at or above it —
-and explicit values `squashfs`, `gzip`, `zstd`, and `none` are supported.
-SquashFS packages with LZ4 for faster packaging and extraction; downloaded
-SquashFS outputs can be extracted with `unsquashfs -d output code.sqfs`.
+and explicit values `squashfs`, `gzip`, `zstd`, `none`, and `skip` are supported.
+`none` writes an uncompressed `code.tar.gz`, whereas `skip` writes no archive at
+all — the raw build output is left in the output dir with a `.extracted` marker so
+start-up symlinks it directly. SquashFS packages with LZ4 for faster packaging and
+extraction; downloaded SquashFS outputs can be extracted with `unsquashfs -d output code.sqfs`.
 
 ## 4. Writing the runtime server
 
