@@ -83,7 +83,12 @@ echo "OPEN_RUNTIMES_COMPRESSION=$COMPRESSION_METHOD" >>.open-runtimes
 
 OUTPUT_DIR="${OPEN_RUNTIMES_BUILD_OUTPUT_DIR:-/mnt/code}"
 mkdir -p "$OUTPUT_DIR"
-if [ "$COMPRESSION_METHOD" = "none" ]; then
+if [ "$COMPRESSION_METHOD" = "skip" ]; then
+	# No archive: drop the raw build output into the output dir and mark it
+	# pre-extracted so start-up symlinks it directly (like a sidecar would).
+	cp -R . "$OUTPUT_DIR/"
+	touch "$OUTPUT_DIR/.extracted"
+elif [ "$COMPRESSION_METHOD" = "none" ]; then
 	tar --exclude code.sqfs --exclude code.tar --exclude code.tar.gz --exclude code.gz -cf "$OUTPUT_DIR/code.tar.gz" .
 elif [ "$COMPRESSION_METHOD" = "squashfs" ]; then
 	processors=$(nproc 2>/dev/null || echo 1)
