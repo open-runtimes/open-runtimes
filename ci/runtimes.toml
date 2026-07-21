@@ -327,8 +327,8 @@ output = "./.next"
 "21.0" = { base = "node:21.7.3-alpine3.20" }
 "20.0" = { base = "node:20.20.2-alpine3.22" }
 "19.0" = { base = "node:19.9.0-alpine3.18" }
-"18.0" = { base = "node:18.20.8-alpine3.20", platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64"] }
-"16.0" = { base = "node:16.20.2-alpine3.18", args = { PNPM_VERSION = "8" }, platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64"] }
+"18.0" = { base = "node:18.20.8-alpine3.20" }
+"16.0" = { base = "node:16.20.2-alpine3.18", args = { PNPM_VERSION = "8" } }
 
 [deno.build.versions]
 "2.6" = { base = "denoland/deno:alpine-2.6.7" }
@@ -383,9 +383,6 @@ image = "python-ml"
 "3.27" = { base = "ghcr.io/cirruslabs/flutter:3.27.3" }
 "3.24" = { base = "ghcr.io/cirruslabs/flutter:3.24.5" }
 
-[ruby.build]
-platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64"]
-
 [ruby.build.versions]
 "4.0" = { base = "ruby:4.0.5-alpine3.22" }
 "3.4" = { base = "ruby:3.4.10-alpine3.23" }
@@ -399,7 +396,7 @@ platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64"]
 "8.3" = { base = "php:8.3.31-cli-alpine3.22", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
 "8.2" = { base = "php:8.2.31-cli-alpine3.22", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
 "8.1" = { base = "php:8.1.34-cli-alpine3.22", args = { PHP_SWOOLE_VERSION = "v5.1.2" } }
-"8.0" = { base = "php:8.0.30-cli-alpine3.16", args = { PHP_SWOOLE_VERSION = "v4.7.0" }, platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64"] }
+"8.0" = { base = "php:8.0.30-cli-alpine3.16", args = { PHP_SWOOLE_VERSION = "v4.7.0" } }
 
 [swift.build.versions]
 "6.2" = { base = "swift:6.2.4-jammy" }
@@ -425,9 +422,6 @@ platforms = ["linux/amd64"]
 "17.0" = { base = "eclipse-temurin:17-jdk-jammy" }
 "11.0" = { base = "eclipse-temurin:11-jdk-jammy" }
 "8.0" = { base = "eclipse-temurin:8-jdk-jammy" }
-
-[cpp.build]
-platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64"]
 
 [cpp.build.versions]
 "23" = { base = "alpine:3.23.3" }
