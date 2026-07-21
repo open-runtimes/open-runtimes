@@ -12,7 +12,7 @@ RUN \
   libmaxminddb-dev \
   openssl-dev
 
-RUN docker-php-ext-install sockets
+RUN docker-php-ext-install -j"$(nproc)" sockets
 
 RUN \
   ## Swoole Extension
@@ -20,6 +20,5 @@ RUN \
   cd swoole-src && \
   phpize && \
   ./configure --enable-http2 --enable-openssl && \
-  make && make install && \
+  make -j"$(nproc)" && make install && \
   cd ..
-
