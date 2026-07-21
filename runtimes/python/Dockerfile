@@ -8,7 +8,7 @@ FROM ${BASE_IMAGE}
 # "gcc pkg-config libhdf5-dev" on a bookworm base)
 ARG SYSTEM_PACKAGES=""
 RUN if [ -n "$SYSTEM_PACKAGES" ]; then \
-        if [ -f /etc/alpine-release ]; then apk update && apk add --no-cache $SYSTEM_PACKAGES; \
+        if [ -f /etc/alpine-release ]; then apk add --no-cache $SYSTEM_PACKAGES; \
         else apt-get update && apt-get install -y $SYSTEM_PACKAGES; fi; \
     fi
 
@@ -16,7 +16,7 @@ INCLUDE ./docker/base-before
 
 RUN <<EOR
     if [ -f /etc/alpine-release ]; then
-        apk update && apk add bash alpine-sdk libffi-dev
+        apk add --no-cache bash alpine-sdk libffi-dev
     else
         apt-get update && apt-get install -y bash
     fi

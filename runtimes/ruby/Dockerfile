@@ -8,7 +8,7 @@ ENV OPEN_RUNTIMES_ENTRYPOINT=index.rb
 
 INCLUDE ./docker/base-before
 
-RUN apk add --update alpine-sdk bash
+RUN apk add --no-cache alpine-sdk bash
 RUN gem install bundler
 ENV OPEN_RUNTIMES_SERVER_COMMAND="bundle exec puma -b tcp://0.0.0.0:3000 -e production"
 

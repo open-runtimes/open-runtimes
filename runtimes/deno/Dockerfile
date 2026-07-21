@@ -6,7 +6,7 @@ FROM ${BASE_IMAGE}
 
 INCLUDE ./docker/base-before
 
-RUN apk update && apk add bash nss font-noto ca-certificates nodejs-current npm python3 make g++ gcc git
+RUN apk add --no-cache bash nss font-noto ca-certificates nodejs-current npm python3 make g++ gcc git
 
 # Deno's alpine image bundles a glibc-shim libgcc_s.so.1 at /usr/local/lib/
 # that conflicts with node's musl-linked expectations. Remove it so node loads
