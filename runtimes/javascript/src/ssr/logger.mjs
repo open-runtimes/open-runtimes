@@ -6,6 +6,8 @@ import superjson from "superjson";
 // and Bun) instead of cls-hooked so both runtimes can consume the same file.
 export const loggingNamespace = new AsyncLocalStorage();
 
+const isDevelopment = process.env.OPEN_RUNTIMES_ENV === "development";
+
 export const nativeLog = console.log.bind(console);
 
 export class Logger {
@@ -20,10 +22,7 @@ export class Logger {
     }
 
     if (!id) {
-      id =
-        process.env.OPEN_RUNTIMES_ENV === "development"
-          ? "dev"
-          : Logger.generateId();
+      id = isDevelopment ? "dev" : Logger.generateId();
     }
 
     return id;

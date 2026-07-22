@@ -30,7 +30,7 @@ RUN git clone --depth 1 --branch $DROGON_VERSION https://github.com/drogonframew
     && git submodule update --init \
     && mkdir build \
     && cd build \
-    && cmake -DCMAKE_BUILD_TYPE=Release .. \
+    && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF .. \
     && make -j"$(nproc)" \
     && make install \
     && cd / \

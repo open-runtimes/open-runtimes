@@ -52,13 +52,8 @@ class RuntimeLogger(
         }
 
         if (this.enabled) {
-            var serverEnv = System.getenv("OPEN_RUNTIMES_ENV")
-            if (serverEnv == null) {
-                serverEnv = ""
-            }
-
             if (this.id.equals("")) {
-                if (serverEnv.equals("development")) {
+                if (OprConfig.env.equals("development")) {
                     this.id = "dev"
                 } else {
                     this.id = this.generateId()

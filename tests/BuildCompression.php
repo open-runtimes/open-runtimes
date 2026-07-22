@@ -49,6 +49,16 @@ class BuildCompression extends TestCase
         self::assertStringContainsString('METHOD=gzip', $result['output']);
     }
 
+    public function testExplicitSkipCompressionIsSupported(): void
+    {
+        $result = $this->runCompressionSelection([
+            'OPEN_RUNTIMES_BUILD_COMPRESSION' => 'skip',
+        ]);
+
+        self::assertSame(0, $result['code']);
+        self::assertStringContainsString('METHOD=skip', $result['output']);
+    }
+
     public function testExplicitSquashfsCompressionIsSupported(): void
     {
         $result = $this->runCompressionSelection([
@@ -67,6 +77,8 @@ class BuildCompression extends TestCase
         self::assertStringContainsString('mksquashfs . "$OUTPUT_DIR/code.sqfs"', $build);
         self::assertStringContainsString('-comp lz4 -b 1M -noappend -no-xattrs -no-progress', $build);
         self::assertStringContainsString('"$COMPRESSION_METHOD" = "none"', $build);
+        self::assertStringContainsString('"$COMPRESSION_METHOD" = "skip"', $build);
+        self::assertStringContainsString('touch "$OUTPUT_DIR/.extracted"', $build);
         self::assertStringContainsString('"$COMPRESSION_METHOD" = "zstd"', $build);
         self::assertStringContainsString('"$OUTPUT_DIR/code.tar.gz"', $build);
     }

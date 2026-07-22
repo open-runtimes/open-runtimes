@@ -17,6 +17,37 @@ import (
 	"github.com/open-runtimes/types-for-go/v4/openruntimes"
 )
 
+var config = struct {
+	secret  string
+	headers map[string]string
+}{
+	secret:  os.Getenv("OPEN_RUNTIMES_SECRET"),
+	headers: loadHeaders(),
+}
+
+func loadHeaders() map[string]string {
+	headers := map[string]string{}
+
+	var parsed map[string]interface{}
+	if err := json.Unmarshal([]byte(os.Getenv("OPEN_RUNTIMES_HEADERS")), &parsed); err != nil {
+		return headers
+	}
+
+	for key, value := range parsed {
+		valueString := ""
+		switch v := value.(type) {
+		default:
+			valueString = fmt.Sprintf("%#v", value)
+		case string:
+			valueString = v
+		}
+
+		headers[strings.ToLower(key)] = valueString
+	}
+
+	return headers
+}
+
 func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) error {
 	timeout := r.Header.Get("x-open-runtimes-timeout")
 
@@ -36,9 +67,8 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	}
 
 	secret := r.Header.Get("x-open-runtimes-secret")
-	serverSecret := os.Getenv("OPEN_RUNTIMES_SECRET")
 
-	if serverSecret != "" && secret != serverSecret {
+	if config.secret != "" && secret != config.secret {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Header().Set("content-type", "text/plain")
 		w.Write([]byte("Unauthorized. Provide correct \"x-open-runtimes-secret\" header."))
@@ -64,27 +94,8 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 		}
 	}
 
-	headersEnv := os.Getenv("OPEN_RUNTIMES_HEADERS")
-	if headersEnv == "" {
-		headersEnv = "{}"
-	}
-
-	var enforcedHeaders map[string]interface{}
-	err = json.Unmarshal([]byte(headersEnv), &enforcedHeaders)
-	if err != nil {
-		enforcedHeaders = map[string]interface{}{}
-	}
-
-	for key, value := range enforcedHeaders {
-		valueString := ""
-		switch v := value.(type) {
-		default:
-			valueString = fmt.Sprintf("%#v", value)
-		case string:
-			valueString = v
-		}
-
-		headers[strings.ToLower(key)] = valueString
+	for key, value := range config.headers {
+		headers[key] = value
 	}
 
 	method := r.Method

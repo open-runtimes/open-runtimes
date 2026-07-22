@@ -42,7 +42,7 @@ RUN \
   libmaxminddb-dev \
   libgomp \
   bash \
-  && docker-php-ext-install opcache \
+  && docker-php-ext-install -j"$(nproc)" opcache \
   && apk del .deps \
   && rm -rf /var/cache/apk/*
 

@@ -1,6 +1,8 @@
 const fs = require("node:fs");
 import superjson from "superjson";
 
+import { config } from "./config";
+
 export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
@@ -19,7 +21,7 @@ export class Logger {
     if (this.enabled) {
       this.id = id
         ? id
-        : process.env.OPEN_RUNTIMES_ENV === "development"
+        : config.env === "development"
           ? "dev"
           : this.generateId();
       this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`, {

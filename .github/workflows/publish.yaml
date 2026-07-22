@@ -17,7 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       targets: ${{ steps.matrix.outputs.targets }}
-      is_rc: ${{ steps.check.outputs.is_rc }}
+      builds: ${{ steps.matrix.outputs.builds }}
+      # RC builds (workflow_dispatch off main) publish "-rc" tags without the SHA-pinned tag
+      tag_suffix: ${{ steps.check.outputs.tag_suffix }}
+      sha_suffix: ${{ steps.check.outputs.sha_suffix }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -31,62 +34,104 @@ jobs:
         id: check
         run: |
           if [[ "${{ github.ref }}" != "refs/heads/main" && "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "is_rc=true" >> $GITHUB_OUTPUT
+            echo "tag_suffix=-rc" >> $GITHUB_OUTPUT
+            echo "sha_suffix=" >> $GITHUB_OUTPUT
           else
-            echo "is_rc=false" >> $GITHUB_OUTPUT
+            echo "tag_suffix=" >> $GITHUB_OUTPUT
+            echo "sha_suffix=-${GITHUB_SHA::12}" >> $GITHUB_OUTPUT
           fi
       - name: Resolve bake targets
         id: matrix
         run: |
-          GROUP="${{ inputs.runtime }}"
-          echo "targets=$(docker buildx bake --print ${GROUP:-default} | jq -c '[.target | keys[]]')" >> "$GITHUB_OUTPUT"
-
-  deploy:
-    needs: prepare
-    if: needs.prepare.outputs.is_rc != 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        target: ${{ fromJson(needs.prepare.outputs.targets) }}
-    name: ${{ matrix.target }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - name: Login to DockerHub
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME  }}
-          password: ${{ secrets.DOCKERHUB_TOKEN  }}
-      - name: Build & Publish to DockerHub
-        run: SHA_SUFFIX="-${GITHUB_SHA::12}" docker buildx bake --push "${{ matrix.target }}"
-
-  deploy-rc:
-    needs: prepare
-    if: needs.prepare.outputs.is_rc == 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        target: ${{ fromJson(needs.prepare.outputs.targets) }}
-    name: ${{ matrix.target }}-rc
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - name: Login to DockerHub
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME  }}
-          password: ${{ secrets.DOCKERHUB_TOKEN  }}
-      - name: Build & Publish to DockerHub
-        run: docker buildx bake --push "${{ matrix.target }}"
+          BAKE=$(docker buildx bake --print ${GROUP:-default})
+          echo "targets=$(jq -c '[.target | keys[]]' <<< "$BAKE")" >> "$GITHUB_OUTPUT"
+          echo "builds=$(jq -c '[.target | to_entries[] | {target: .key, platform: .value.platforms[]}]' <<< "$BAKE")" >> "$GITHUB_OUTPUT"
         env:
-          TAG_SUFFIX: "-rc"
+          GROUP: ${{ inputs.runtime }}
+
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.prepare.outputs.builds) }}
+    name: ${{ matrix.target }} (${{ matrix.platform }})
+    runs-on: ${{ contains(matrix.platform, 'arm64') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Login to DockerHub
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME  }}
+          password: ${{ secrets.DOCKERHUB_TOKEN  }}
+      - name: Build & push by digest
+        id: build
+        run: |
+          IMAGE=$(docker buildx bake --print "$TARGET" | jq -r --arg t "$TARGET" '.target[$t].tags[0] | split(":")[0]')
+          docker buildx bake "$TARGET" \
+            --set "*.platform=$PLATFORM" \
+            --set "*.tags=" \
+            --set "*.output=type=image,name=$IMAGE,push-by-digest=true,name-canonical=true,push=true" \
+            --metadata-file metadata.json
+          DIGEST=$(jq -r --arg t "$TARGET" '.[$t]."containerimage.digest"' metadata.json)
+          mkdir -p /tmp/digests
+          touch "/tmp/digests/${DIGEST#sha256:}"
+          echo "artifact=digests-$TARGET-${PLATFORM//\//-}" >> "$GITHUB_OUTPUT"
+        env:
+          TARGET: ${{ matrix.target }}
+          PLATFORM: ${{ matrix.platform }}
+      - name: Upload digest
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ steps.build.outputs.artifact }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: [ prepare, build ]
+    # Publish every target whose builds all succeeded, even if other targets
+    # failed — the digest-count check below fails partially-built targets.
+    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(needs.prepare.outputs.targets) }}
+    name: publish ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Download digests
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: digests-${{ matrix.target }}-*
+          path: /tmp/digests
+          merge-multiple: true
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Login to DockerHub
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME  }}
+          password: ${{ secrets.DOCKERHUB_TOKEN  }}
+      - name: Create multi-arch manifest
+        run: |
+          BAKE=$(docker buildx bake --print "$TARGET")
+          IMAGE=$(jq -r --arg t "$TARGET" '.target[$t].tags[0] | split(":")[0]' <<< "$BAKE")
+          TAGS=$(jq -r --arg t "$TARGET" '.target[$t].tags | unique | map("-t " + .) | join(" ")' <<< "$BAKE")
+          EXPECTED=$(jq -r --arg t "$TARGET" '.target[$t].platforms | length' <<< "$BAKE")
+          cd /tmp/digests
+          ACTUAL=$(ls | wc -l)
+          if [ "$ACTUAL" -ne "$EXPECTED" ]; then
+            echo "::error::$TARGET: expected $EXPECTED platform digests, found $ACTUAL — refusing to publish a partial manifest"
+            exit 1
+          fi
+          docker buildx imagetools create $TAGS $(printf "$IMAGE@sha256:%s " *)
+        env:
+          TARGET: ${{ matrix.target }}
+          TAG_SUFFIX: ${{ needs.prepare.outputs.tag_suffix }}
+          SHA_SUFFIX: ${{ needs.prepare.outputs.sha_suffix }}

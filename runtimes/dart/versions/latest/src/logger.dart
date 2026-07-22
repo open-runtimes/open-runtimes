@@ -2,6 +2,8 @@ import 'dart:math';
 import 'dart:convert';
 import 'dart:io';
 
+import 'config.dart' as config;
+
 class Logger {
   static final String TYPE_ERROR = 'error';
   static final String TYPE_LOG = 'log';
@@ -19,9 +21,7 @@ class Logger {
     if (this.enabled) {
       this.id = id != null
           ? id
-          : (Platform.environment['OPEN_RUNTIMES_ENV'] == 'development'
-                ? 'dev'
-                : this.generateId());
+          : (config.env == 'development' ? 'dev' : this.generateId());
 
       this.streamLogs = File(
         '/mnt/logs/' + this.id + '_logs.log',

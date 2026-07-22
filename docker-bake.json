@@ -198,7 +198,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:22.22.0-alpine3.23",
+        "BASE_IMAGE": "node:22.23.1-alpine3.23",
         "INSTALL_SSR_TOOLING": "true"
       },
       "platforms": [
@@ -246,7 +246,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:24.13.0-alpine3.23",
+        "BASE_IMAGE": "node:24.18.0-alpine3.23",
         "INSTALL_SSR_TOOLING": "true"
       },
       "platforms": [
@@ -270,7 +270,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:25.5.0-alpine3.23",
+        "BASE_IMAGE": "node:25.9.0-alpine3.23",
         "INSTALL_SSR_TOOLING": "true"
       },
       "platforms": [
@@ -317,7 +317,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:20.17.0-alpine3.20"
+        "BASE_IMAGE": "node:20.20.2-alpine3.22"
       },
       "platforms": [
         "linux/amd64",
@@ -367,8 +367,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -393,8 +391,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -512,8 +508,7 @@
         "BASE_IMAGE": "denoland/deno:alpine-1.40.5"
       },
       "platforms": [
-        "linux/amd64",
-        "linux/arm64"
+        "linux/amd64"
       ],
       "tags": [
         "${REGISTRY}/deno:v5-1.40${TAG_SUFFIX}",
@@ -601,7 +596,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.14.2-alpine3.23"
+        "BASE_IMAGE": "python:3.14.6-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -624,7 +619,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.13.11-alpine3.23"
+        "BASE_IMAGE": "python:3.13.14-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -762,7 +757,7 @@
         "version": "./runtimes/python/versions/ml-3.13"
       },
       "args": {
-        "BASE_IMAGE": "python:3.13.11-bookworm",
+        "BASE_IMAGE": "python:3.13.14-bookworm",
         "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
       },
       "platforms": [
@@ -837,7 +832,7 @@
         "version": "./runtimes/dart/versions/3.12"
       },
       "args": {
-        "BASE_IMAGE": "dart:3.12.0"
+        "BASE_IMAGE": "dart:3.12.2"
       },
       "platforms": [
         "linux/amd64",
@@ -860,7 +855,7 @@
         "version": "./runtimes/dart/versions/3.11"
       },
       "args": {
-        "BASE_IMAGE": "dart:3.11.1"
+        "BASE_IMAGE": "dart:3.11.6"
       },
       "platforms": [
         "linux/amd64",
@@ -883,7 +878,7 @@
         "version": "./runtimes/dart/versions/3.10"
       },
       "args": {
-        "BASE_IMAGE": "dart:3.10.8"
+        "BASE_IMAGE": "dart:3.10.9"
       },
       "platforms": [
         "linux/amd64",
@@ -1139,7 +1134,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "ghcr.io/adrianjagielak/flutter:3.44.0"
+        "BASE_IMAGE": "ghcr.io/adrianjagielak/flutter:3.44.6"
       },
       "platforms": [
         "linux/amd64",
@@ -1326,12 +1321,10 @@
         "version": "./runtimes/ruby/versions/4.0"
       },
       "args": {
-        "BASE_IMAGE": "ruby:4.0.1-alpine3.22"
+        "BASE_IMAGE": "ruby:4.0.5-alpine3.22"
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -1351,12 +1344,10 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "ruby:3.4.8-alpine3.22"
+        "BASE_IMAGE": "ruby:3.4.10-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -1380,8 +1371,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -1405,8 +1394,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -1430,8 +1417,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -1455,8 +1440,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -1491,7 +1474,7 @@
       ]
     },
     "_php": {
-      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\n# Builder stage uses the same base unless a version pins a different one (8.3)\nARG BUILD_BASE_IMAGE=$${BASE_IMAGE}\n\nFROM $${BUILD_BASE_IMAGE} AS step0\n\n# Extra packages only needed to compile extensions (linux-headers on php >= 8.2)\nARG BUILD_PACKAGES=\"\"\nRUN if [ -n \"$BUILD_PACKAGES\" ]; then apk add --no-cache $BUILD_PACKAGES; fi\n\nARG PHP_SWOOLE_VERSION\nENV PHP_SWOOLE_VERSION=$PHP_SWOOLE_VERSION\nRUN \\\n  apk add --no-cache --virtual .deps \\\n  make \\\n  automake \\\n  autoconf \\\n  gcc \\\n  g++ \\\n  git \\\n  zlib-dev \\\n  brotli-dev \\\n  yaml-dev \\\n  libmaxminddb-dev \\\n  openssl-dev\n\nRUN docker-php-ext-install sockets\n\nRUN \\\n  ## Swoole Extension\n  git clone --depth 1 --branch $PHP_SWOOLE_VERSION https://github.com/swoole/swoole-src.git && \\\n  cd swoole-src && \\\n  phpize && \\\n  ./configure --enable-http2 --enable-openssl && \\\n  make && make install && \\\n  cd ..\n\n# Stage compiled extensions at a fixed path so the final stage doesn't need to\n# know the PHP-ABI-versioned extension directory name.\nRUN mkdir -p /opt/ext \\\n    && cp \"$(php-config --extension-dir)/swoole.so\" /opt/ext/ \\\n    && (cp \"$(php-config --extension-dir)\"/yasd.so* /opt/ext/ 2>/dev/null || true)\n\nFROM $${BASE_IMAGE} AS final\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.php\n\nRUN \\\n  apk add --no-cache --virtual .deps \\\n  make \\\n  automake \\\n  autoconf \\\n  gcc \\\n  g++ \\\n  curl-dev \\\n  && apk add --no-cache \\\n  libstdc++ \\\n  certbot \\\n  brotli-dev \\\n  yaml-dev \\\n  libmaxminddb-dev \\\n  libgomp \\\n  bash \\\n  && docker-php-ext-install opcache \\\n  && apk del .deps \\\n  && rm -rf /var/cache/apk/*\n\nCOPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer\n\nRUN composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev\nRUN mv vendor vendor-server\n\nCOPY --from=step0 /opt/ext/ /opt/ext/\nRUN cp /opt/ext/* \"$(php-config --extension-dir)/\" && rm -rf /opt/ext\n\n# Enable Extensions\nRUN echo extension=swoole.so >> /usr/local/etc/php/conf.d/swoole.ini\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"php -d memory_limit=8G src/server.php\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\n# Builder stage uses the same base unless a version pins a different one (8.3)\nARG BUILD_BASE_IMAGE=$${BASE_IMAGE}\n\nFROM $${BUILD_BASE_IMAGE} AS step0\n\n# Extra packages only needed to compile extensions (linux-headers on php >= 8.2)\nARG BUILD_PACKAGES=\"\"\nRUN if [ -n \"$BUILD_PACKAGES\" ]; then apk add --no-cache $BUILD_PACKAGES; fi\n\nARG PHP_SWOOLE_VERSION\nENV PHP_SWOOLE_VERSION=$PHP_SWOOLE_VERSION\nRUN \\\n  apk add --no-cache --virtual .deps \\\n  make \\\n  automake \\\n  autoconf \\\n  gcc \\\n  g++ \\\n  git \\\n  zlib-dev \\\n  brotli-dev \\\n  yaml-dev \\\n  libmaxminddb-dev \\\n  openssl-dev\n\nRUN docker-php-ext-install -j\"$(nproc)\" sockets\n\nRUN \\\n  ## Swoole Extension\n  git clone --depth 1 --branch $PHP_SWOOLE_VERSION https://github.com/swoole/swoole-src.git && \\\n  cd swoole-src && \\\n  phpize && \\\n  ./configure --enable-http2 --enable-openssl && \\\n  make -j\"$(nproc)\" && make install && \\\n  cd ..\n\n# Stage compiled extensions at a fixed path so the final stage doesn't need to\n# know the PHP-ABI-versioned extension directory name.\nRUN mkdir -p /opt/ext \\\n    && cp \"$(php-config --extension-dir)/swoole.so\" /opt/ext/ \\\n    && (cp \"$(php-config --extension-dir)\"/yasd.so* /opt/ext/ 2>/dev/null || true)\n\nFROM $${BASE_IMAGE} AS final\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.php\n\nRUN \\\n  apk add --no-cache --virtual .deps \\\n  make \\\n  automake \\\n  autoconf \\\n  gcc \\\n  g++ \\\n  curl-dev \\\n  && apk add --no-cache \\\n  libstdc++ \\\n  certbot \\\n  brotli-dev \\\n  yaml-dev \\\n  libmaxminddb-dev \\\n  libgomp \\\n  bash \\\n  && docker-php-ext-install -j\"$(nproc)\" opcache \\\n  && apk del .deps \\\n  && rm -rf /var/cache/apk/*\n\nCOPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer\n\nRUN composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev\nRUN mv vendor vendor-server\n\nCOPY --from=step0 /opt/ext/ /opt/ext/\nRUN cp /opt/ext/* \"$(php-config --extension-dir)/\" && rm -rf /opt/ext\n\n# Enable Extensions\nRUN echo extension=swoole.so >> /usr/local/etc/php/conf.d/swoole.ini\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"php -d memory_limit=8G src/server.php\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
     },
     "php-8_4": {
       "inherits": [
@@ -1505,7 +1488,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.4.17-cli-alpine3.23",
+        "BASE_IMAGE": "php:8.4.22-cli-alpine3.23",
         "PHP_SWOOLE_VERSION": "v6.1.1",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1530,8 +1513,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.3.27-cli-alpine3.21",
-        "BUILD_BASE_IMAGE": "php:8.3.30-cli-alpine3.22",
+        "BASE_IMAGE": "php:8.3.31-cli-alpine3.22",
         "PHP_SWOOLE_VERSION": "v5.1.2",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1556,7 +1538,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.2.30-cli-alpine3.22",
+        "BASE_IMAGE": "php:8.2.31-cli-alpine3.22",
         "PHP_SWOOLE_VERSION": "v5.1.2",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1610,8 +1592,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -1634,7 +1614,7 @@
         "version": "./runtimes/swift/versions/6.2"
       },
       "args": {
-        "BASE_IMAGE": "swift:6.2.3-jammy"
+        "BASE_IMAGE": "swift:6.2.4-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -1994,7 +1974,7 @@
       ]
     },
     "_cpp": {
-      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.cc\nARG DEBIAN_FRONTEND=noninteractive\nENV DROGON_VERSION=v1.9.7\n\nRUN apk add --no-cache \\\n    git \\\n    gcc \\\n    g++ \\\n    cmake \\\n    make \\\n    openssl \\\n    doxygen \\\n    jsoncpp-dev \\\n    openssl-dev \\\n    zlib-dev \\\n    curl-dev \\\n    util-linux-dev \\\n    bash\n\nRUN git clone --depth 1 --branch $DROGON_VERSION https://github.com/drogonframework/drogon \\\n    && cd drogon \\\n    && git submodule update --init \\\n    && mkdir build \\\n    && cd build \\\n    && cmake -DCMAKE_BUILD_TYPE=Release .. \\\n    && make -j\"$(nproc)\" \\\n    && make install \\\n    && cd / \\\n    && rm -rf /drogon\n\nEXPOSE 3000\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"src/function/cpp_runtime\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.cc\nARG DEBIAN_FRONTEND=noninteractive\nENV DROGON_VERSION=v1.9.7\n\nRUN apk add --no-cache \\\n    git \\\n    gcc \\\n    g++ \\\n    cmake \\\n    make \\\n    openssl \\\n    doxygen \\\n    jsoncpp-dev \\\n    openssl-dev \\\n    zlib-dev \\\n    curl-dev \\\n    util-linux-dev \\\n    bash\n\nRUN git clone --depth 1 --branch $DROGON_VERSION https://github.com/drogonframework/drogon \\\n    && cd drogon \\\n    && git submodule update --init \\\n    && mkdir build \\\n    && cd build \\\n    && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF .. \\\n    && make -j\"$(nproc)\" \\\n    && make install \\\n    && cd / \\\n    && rm -rf /drogon\n\nEXPOSE 3000\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"src/function/cpp_runtime\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
     },
     "cpp-17": {
       "inherits": [
@@ -2012,8 +1992,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -2037,8 +2015,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -2062,8 +2038,6 @@
       },
       "platforms": [
         "linux/amd64",
-        "linux/arm/v6",
-        "linux/arm/v7",
         "linux/arm64"
       ],
       "tags": [
@@ -2181,7 +2155,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "golang:1.26.0-alpine3.23"
+        "BASE_IMAGE": "golang:1.26.5-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -2204,7 +2178,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "golang:1.25.6-alpine3.23"
+        "BASE_IMAGE": "golang:1.25.10-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -2227,7 +2201,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "golang:1.24.12-alpine3.23"
+        "BASE_IMAGE": "golang:1.24.13-alpine3.23"
       },
       "platforms": [
         "linux/amd64",

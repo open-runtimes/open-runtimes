@@ -1,3 +1,4 @@
+import { config } from "./config";
 import { Logger } from "./logger";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
@@ -19,9 +20,8 @@ const action = async (logger: Logger, request: any) => {
   }
 
   if (
-    Bun.env["OPEN_RUNTIMES_SECRET"] &&
-    (request.headers.get("x-open-runtimes-secret") ?? "") !==
-      Bun.env["OPEN_RUNTIMES_SECRET"]
+    config.secret &&
+    (request.headers.get("x-open-runtimes-secret") ?? "") !== config.secret
   ) {
     return new Response(
       'Unauthorized. Provide correct "x-open-runtimes-secret" header.',
@@ -45,11 +45,8 @@ const action = async (logger: Logger, request: any) => {
       headers[header.toLowerCase()] = request.headers.get(header);
     });
 
-  const enforcedHeaders = JSON.parse(
-    Bun.env["OPEN_RUNTIMES_HEADERS"] ? Bun.env["OPEN_RUNTIMES_HEADERS"] : "{}",
-  );
-  for (const header in enforcedHeaders) {
-    headers[header.toLowerCase()] = `${enforcedHeaders[header]}`;
+  for (const header in config.headers) {
+    headers[header.toLowerCase()] = `${config.headers[header]}`;
   }
 
   const urlObject = new URL(request.url);
@@ -154,7 +151,7 @@ const action = async (logger: Logger, request: any) => {
   let output: any = null;
   let userFunction: any = null;
 
-  const entrypoint = Bun.env["OPEN_RUNTIMES_ENTRYPOINT"] ?? "";
+  const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
   const entrypointFile = Bun.file(entrypointFilePath);
 

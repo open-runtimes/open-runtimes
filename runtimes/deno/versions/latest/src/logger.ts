@@ -1,5 +1,6 @@
 import { fileStreamReady } from "./fileStreamReady.ts";
 import { JSONParse } from "./jsonParser.ts";
+import { config } from "./config.ts";
 
 export class Logger {
   static TYPE_ERROR = "error";
@@ -21,9 +22,7 @@ export class Logger {
     if (this.enabled) {
       this.id = id
         ? id
-        : (Deno.env.get("OPEN_RUNTIMES_ENV") === "development"
-          ? "dev"
-          : this.generateId());
+        : (config.env === "development" ? "dev" : this.generateId());
     }
   }
 

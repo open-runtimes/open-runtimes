@@ -48,13 +48,8 @@ public class RuntimeLogger {
     }
 
     if (this.enabled) {
-      String serverEnv = System.getenv("OPEN_RUNTIMES_ENV");
-      if (serverEnv == null) {
-        serverEnv = "";
-      }
-
       if (id.equals("")) {
-        if (serverEnv.equals("development")) {
+        if (OprConfig.ENV.equals("development")) {
           this.id = "dev";
         } else {
           this.id = this.generateId(7);

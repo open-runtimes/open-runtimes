@@ -9,7 +9,7 @@ log() {
 
 tmp_artifact="${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT}.tmp"
 rm -f "$tmp_artifact"
-artifact_dir="${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT%/*}"
+artifact_dir=$(dirname "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT")
 
 file_size() {
 	wc -c <"$1" | tr -d ' '
