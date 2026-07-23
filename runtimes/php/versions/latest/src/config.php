@@ -2,10 +2,10 @@
 
 final class Config
 {
-    public readonly string $secret;
-    public readonly array $headers;
-    public readonly string $entrypoint;
-    public readonly string $env;
+    public string $secret;
+    public array $headers;
+    public string $entrypoint;
+    public string $env;
 
     public function __construct()
     {
