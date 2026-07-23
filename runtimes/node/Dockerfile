@@ -6,7 +6,7 @@ FROM ${BASE_IMAGE}
 
 INCLUDE ./docker/base-before
 
-RUN apk update && apk add bash nss font-noto ca-certificates gcompat
+RUN apk add --no-cache bash nss font-noto ca-certificates gcompat
 
 # https://pnpm.io/installation#compatibility (node 16 needs pnpm 8)
 ARG PNPM_VERSION=9.15.9
@@ -22,7 +22,7 @@ RUN npm ci && npm cache clean --force
 ARG INSTALL_SSR_TOOLING="false"
 ARG BUN_VERSION=1.3.2
 RUN if [ "$INSTALL_SSR_TOOLING" = "true" ]; then \
-        apk add alpine-sdk python3-dev py3-pip gcompat && \
+        apk add --no-cache alpine-sdk python3-dev py3-pip gcompat && \
         npm install bun@${BUN_VERSION} -g; \
     fi
 
