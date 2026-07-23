@@ -21,9 +21,17 @@ RUN npm ci && npm cache clean --force
 # gcompat - Pre-requirement for Bun
 ARG INSTALL_SSR_TOOLING="false"
 ARG BUN_VERSION=1.3.2
+# The Bun npm package retains multiple platform variants. Keep only the
+# resolved executable and remove npm's downloaded package cache.
 RUN if [ "$INSTALL_SSR_TOOLING" = "true" ]; then \
         apk add --no-cache alpine-sdk python3-dev py3-pip gcompat && \
-        npm install bun@${BUN_VERSION} -g; \
+        npm install bun@${BUN_VERSION} -g && \
+        cp -L /usr/local/bin/bun /tmp/bun && \
+        npm uninstall -g bun && \
+        install -m 0755 /tmp/bun /usr/local/bin/bun && \
+        ln -sf /usr/local/bin/bun /usr/local/bin/bunx && \
+        rm -f /tmp/bun && \
+        npm cache clean --force; \
     fi
 
 ENV OPEN_RUNTIMES_SERVER_COMMAND="node --max_old_space_size=8192 src/server.js"
