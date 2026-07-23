@@ -26,6 +26,8 @@ INCLUDE ./docker/base-before
 
 ENV OPEN_RUNTIMES_ENTRYPOINT=index.php
 
+RUN find src -type f -name '*.php' -exec php -l {} \;
+
 RUN \
   apk add --no-cache --virtual .deps \
   make \
