@@ -75,7 +75,7 @@ class BuildCompression extends TestCase
 
         self::assertStringContainsString('"$COMPRESSION_METHOD" = "squashfs"', $build);
         self::assertStringContainsString('mksquashfs . "$OUTPUT_DIR/code.sqfs"', $build);
-        self::assertStringContainsString('-comp lz4 -b 1M -noappend -no-xattrs -no-progress', $build);
+        self::assertStringContainsString('-comp lz4 -b 128K -noappend -no-xattrs -no-progress', $build);
         self::assertStringContainsString('"$COMPRESSION_METHOD" = "none"', $build);
         self::assertStringContainsString('"$COMPRESSION_METHOD" = "skip"', $build);
         self::assertStringContainsString('touch "$OUTPUT_DIR/.extracted"', $build);
