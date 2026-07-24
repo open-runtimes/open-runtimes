@@ -33,15 +33,24 @@ class Base extends TestCase
     {
     }
 
-    protected function awaitHostReady() {
+    protected function awaitHostReady(): void
+    {
         $attempts = 0;
-        while(true) {
-            $response = Client::execute();
-            if($response['code'] != 0) {
+        while (true) {
+            $response = Client::execute(timeout: 1);
+            if ($response['code'] != 0) {
                 return;
             }
 
-            if($attempts >= 100) {
+            $running = \trim((string) \shell_exec(
+                'docker inspect --format="{{.State.Running}}" ' . \escapeshellarg(Client::$host) . ' 2>/dev/null'
+            ));
+            if ($running === 'false') {
+                $logs = \shell_exec('docker logs ' . \escapeshellarg(Client::$host) . ' 2>&1') ?: 'No container logs available.';
+                throw new \Exception("Server " . Client::$host . " exited before becoming ready:\n" . $logs);
+            }
+
+            if ($attempts >= 100) {
                 break;
             }
 
@@ -50,7 +59,7 @@ class Base extends TestCase
         }
 
         // Getting here means timeout failure
-        throw new \Exception("Server did not start on port :3000 within 100 seconds. Check docker container logs");
+        throw new \Exception("Server " . Client::$host . " did not start on port :3000 within 100 seconds. Check docker container logs");
     }
 
     public function testWrongSecret(): void
