@@ -94,7 +94,7 @@ elif [ "$COMPRESSION_METHOD" = "squashfs" ]; then
 	processors=$(nproc 2>/dev/null || echo 1)
 	squashfs_log=$(mktemp)
 	trap 'rm -f "$squashfs_log"' EXIT
-	if mksquashfs . "$OUTPUT_DIR/code.sqfs" -comp lz4 -b 1M -noappend -no-xattrs -no-progress -processors "$processors" -wildcards -e code.sqfs code.tar code.tar.gz code.gz >"$squashfs_log" 2>&1; then
+	if mksquashfs . "$OUTPUT_DIR/code.sqfs" -comp lz4 -b 128K -noappend -no-xattrs -no-progress -processors "$processors" -wildcards -e code.sqfs code.tar code.tar.gz code.gz >"$squashfs_log" 2>&1; then
 		rm -f "$squashfs_log"
 		trap - EXIT
 	else
