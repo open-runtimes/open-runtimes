@@ -2,6 +2,7 @@
 entry = "tests.js"
 entry_no_export = "no-export.js"
 versions = [
+    "26",
     "25",
     "24",
     "23",
@@ -320,6 +321,7 @@ output = "./.next"
 # ─────────────────────────────────────────────────────────────────────────────
 
 [node.build.versions]
+"26" = { base = "node:26.5.0-alpine3.24", args = { INSTALL_SSR_TOOLING = "true", INSTALL_YARN = "true" } }
 "25" = { base = "node:25.9.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true" } }
 "24" = { base = "node:24.18.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true" } }
 "23" = { base = "node:23.11.1-alpine3.22", args = { INSTALL_SSR_TOOLING = "true" } }
