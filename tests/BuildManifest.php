@@ -38,36 +38,50 @@ class BuildManifest extends TestCase
         self::assertSame([], \glob($this->root . '/*.json'));
     }
 
-    public function testWritesVersionedManifestOfOutputFiles(): void
+    public function testWritesVersionedManifestOfSsrEntrypointsAndHtml(): void
     {
         \file_put_contents($this->output . '/index.html', 'html');
         \mkdir($this->output . '/server', 0777, true);
-        \file_put_contents($this->output . '/server/entry.mjs', 'mjs');
+        \file_put_contents($this->output . '/server/server.js', 'js');
+        \file_put_contents($this->output . '/unrelated.js', 'js');
 
         $result = $this->runManifest();
 
         self::assertSame(0, $result['code']);
         $manifest = $this->readManifest();
         self::assertSame(1, $manifest['version']);
-        $files = $manifest['files'];
-        \sort($files);
-        self::assertSame(['index.html', 'server/entry.mjs'], $files);
+        self::assertSame(['server/server.js', 'index.html'], $manifest['files']);
         self::assertStringContainsString('Build manifest written. (2 files)', $result['output']);
         self::assertFileDoesNotExist($this->manifestPath() . '.tmp');
     }
 
-    public function testPrunesNodeModulesAndExcludesArchiveArtifacts(): void
+    public function testListsEntrypointDirectories(): void
     {
-        \file_put_contents($this->output . '/index.html', 'html');
-        \mkdir($this->output . '/node_modules/pkg', 0777, true);
-        \file_put_contents($this->output . '/node_modules/pkg/index.js', 'js');
-        \file_put_contents($this->output . '/code.tar.gz', 'tar');
-        \file_put_contents($this->output . '/code.sqfs', 'sqfs');
+        \mkdir($this->output . '/.next/turbopack', 0777, true);
 
         $result = $this->runManifest();
 
         self::assertSame(0, $result['code']);
-        self::assertSame(['index.html'], $this->readManifest()['files']);
+        self::assertSame(['.next/turbopack'], $this->readManifest()['files']);
+    }
+
+    public function testListsAtMostTwoHtmlFilesAndPrunesNodeModules(): void
+    {
+        foreach (\range(1, 5) as $i) {
+            \file_put_contents($this->output . '/page-' . $i . '.html', 'html');
+        }
+        \mkdir($this->output . '/node_modules/pkg', 0777, true);
+        \file_put_contents($this->output . '/node_modules/pkg/index.html', 'html');
+        \file_put_contents($this->output . '/code.tar.gz', 'tar');
+
+        $result = $this->runManifest();
+
+        self::assertSame(0, $result['code']);
+        $files = $this->readManifest()['files'];
+        self::assertCount(2, $files);
+        foreach ($files as $file) {
+            self::assertMatchesRegularExpression('/^page-\d\.html$/', $file);
+        }
     }
 
     public function testEscapesSpecialCharactersInFileNames(): void
@@ -93,21 +107,6 @@ class BuildManifest extends TestCase
         self::assertDirectoryDoesNotExist($path);
         $manifest = \json_decode((string) \file_get_contents($path), true);
         self::assertSame(['index.html'], $manifest['files']);
-    }
-
-    public function testCapsFileCount(): void
-    {
-        foreach (\range(1, 5) as $i) {
-            \file_put_contents($this->output . '/file-' . $i . '.html', 'html');
-        }
-
-        $result = $this->runManifest([
-            'OPEN_RUNTIMES_BUILD_MANIFEST' => $this->manifestPath(),
-            'OPEN_RUNTIMES_BUILD_MANIFEST_MAX_FILES' => '2',
-        ]);
-
-        self::assertSame(0, $result['code']);
-        self::assertCount(2, $this->readManifest()['files']);
     }
 
     public function testEmptyOutputWritesEmptyFileList(): void

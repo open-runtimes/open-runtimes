@@ -5,6 +5,11 @@
 # listing). Opt-in: a no-op when the variable is unset. Best-effort: never
 # fails the build.
 #
+# The listing is a whitelist, not a walk: the SSR framework entrypoints below
+# that exist, plus the first two HTML files in the output. Outputs can hold
+# millions of generated files, so everything detection does not look for by
+# name stays out.
+#
 # Manifest shape (v1) — future fields become sibling keys:
 #   {"version":1,"files":["index.html","server/entry.mjs"]}
 
@@ -26,11 +31,30 @@ tmp_manifest="${OPEN_RUNTIMES_BUILD_MANIFEST}.tmp"
 rm -f "$tmp_manifest"
 trap 'rm -f "$tmp_manifest"' EXIT
 
-# The output file listing: dependency directories pruned, archive artifacts
-# excluded (mirroring the archive step's excludes), leading ./ stripped, and
-# capped so a pathological output can't produce an unbounded manifest.
-max_files="${OPEN_RUNTIMES_BUILD_MANIFEST_MAX_FILES:-10000}"
-files=$(find . -name node_modules -prune -o -type f ! -name code.sqfs ! -name code.tar ! -name code.tar.gz ! -name code.gz -print 2>/dev/null | head -n "$max_files" | sed 's|^\./||')
+# SSR entrypoints, mirroring the detector's framework file list. Add a path
+# here when a new SSR framework is supported.
+candidates=(
+	'.next/server/webpack-runtime.js' # nextjs
+	'.next/turbopack'                 # nextjs
+	'server.js'                       # nextjs
+	'server/index.mjs'                # nuxt, analog, tanstack-start
+	'handler.js'                      # sveltekit
+	'server/entry.mjs'                # astro
+	'build/server/index.js'           # remix
+	'server/server.mjs'               # angular
+	'server/server.js'                # tanstack-start
+)
+
+# The candidates that exist (-e, since some markers are directories), then the
+# first two HTML files.
+files=$(
+	for candidate in "${candidates[@]}"; do
+		if [ -e "$candidate" ]; then
+			printf '%s\n' "$candidate"
+		fi
+	done
+	find . -name node_modules -prune -o -type f -name '*.html' -print 2>/dev/null | sed 's|^\./||' | head -n 2
+)
 
 # jq guarantees correct JSON string escaping; the fallback covers the common
 # cases (backslash, double quote, tab, carriage return) for images without

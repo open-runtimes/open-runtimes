@@ -78,7 +78,7 @@ You can also make changes to the example code and apply the changes with the `do
 
 ```python
 def main(context):
-    return context.res.send('Hello Open Runtimes 👋')
+    return context.res.send("Hello Open Runtimes 👋")
 ```
 
 - To handle dependencies, you need to have `requirements.txt` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="pip install -r requirements.txt"` during build.
