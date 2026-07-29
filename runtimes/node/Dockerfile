@@ -12,6 +12,12 @@ RUN apk add --no-cache bash nss font-noto ca-certificates gcompat
 ARG PNPM_VERSION=9.15.9
 RUN npm install pnpm@${PNPM_VERSION} modclean@2.1.2 -g
 
+# Node 26 dropped the bundled Yarn from the official images (Corepack went in
+# 25). Install it there to keep tooling parity; older bases already ship Yarn,
+# and installing over their symlink fails with EEXIST.
+ARG YARN_VERSION=""
+RUN if [ -n "$YARN_VERSION" ]; then npm install yarn@${YARN_VERSION} -g; fi
+
 RUN npm ci && npm cache clean --force
 
 # Additional tooling needed for Node runtimes used for SSR (Sites)
