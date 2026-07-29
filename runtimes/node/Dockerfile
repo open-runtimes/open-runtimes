@@ -15,9 +15,8 @@ RUN npm install pnpm@${PNPM_VERSION} modclean@2.1.2 -g
 # Node 26 dropped the bundled Yarn from the official images (Corepack went in
 # 25). Install it there to keep tooling parity; older bases already ship Yarn,
 # and installing over their symlink fails with EEXIST.
-ARG INSTALL_YARN="false"
-ARG YARN_VERSION=1.22.22
-RUN if [ "$INSTALL_YARN" = "true" ]; then npm install yarn@${YARN_VERSION} -g; fi
+ARG YARN_VERSION=""
+RUN if [ -n "$YARN_VERSION" ]; then npm install yarn@${YARN_VERSION} -g; fi
 
 RUN npm ci && npm cache clean --force
 
