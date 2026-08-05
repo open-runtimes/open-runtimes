@@ -1,10 +1,5 @@
-// Merges Appwrite-provided vars (OPEN_RUNTIMES_BUILD_VARS, a JSON object of
-// strings) with a dart_defines.json the user may have committed to their own
-// repo. Keys already present in the user's file always win — Appwrite only
-// fills in what's missing. Writes nothing if the merged result is empty, so
-// callers can tell "no vars" from "vars written" by checking file existence.
-//
-// Usage: dart merge_dart_defines.dart <existing_path> <output_path>
+// Merges OPEN_RUNTIMES_BUILD_VARS into an existing dart_defines.json, if any.
+// Existing keys win. Usage: dart merge_dart_defines.dart <existing> <output>
 import 'dart:convert';
 import 'dart:io';
 
@@ -32,8 +27,6 @@ void main(List<String> args) {
       ? _decodeObject(existingFile.readAsStringSync())
       : <String, dynamic>{};
 
-  // Map spread: later entries win on key conflict, so existingVars overrides
-  // appwriteVars.
   final merged = {...appwriteVars, ...existingVars};
 
   if (merged.isEmpty) {

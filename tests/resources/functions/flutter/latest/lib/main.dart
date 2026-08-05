@@ -54,8 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            // Verifies build-prepare.sh's dart-defines injection: set via
-            // OPEN_RUNTIMES_BUILD_VARS in tests/compose.yaml's build service.
             const Text(
               'dart-define:${String.fromEnvironment('TEST_DART_DEFINE')}',
             ),

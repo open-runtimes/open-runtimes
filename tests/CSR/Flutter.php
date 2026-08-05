@@ -38,13 +38,8 @@ class Flutter extends CSR
         $this->assertTrue(true);
     }
 
-    // Flutter web is a CSR SPA — the string set via OPEN_RUNTIMES_BUILD_VARS
-    // in tests/compose.yaml's build service never appears in the raw `/`
-    // HTML (that's just the app shell; String.fromEnvironment is resolved by
-    // Flutter's compiler, not the browser). It's baked as a literal into the
-    // compiled bundle instead, which is what this asserts against — the only
-    // point this hook's build-prepare.sh + PATH-shadow wrapper are provable
-    // without a headless browser.
+    // Flutter web is a CSR SPA, so the injected value is baked into the
+    // compiled bundle, not the raw `/` HTML.
     public function testDartDefinesInjected(): void
     {
         $response = Client::execute(url: '/main.dart.js', method: 'GET');
