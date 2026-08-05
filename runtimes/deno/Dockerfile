@@ -13,6 +13,12 @@ RUN apk add --no-cache bash nss font-noto ca-certificates nodejs-current npm pyt
 # the system (alpine) libgcc from /usr/lib instead. Deno stays functional —
 # its binary is statically linked and doesn't need the shim at runtime.
 RUN rm -f /usr/local/lib/libgcc_s.so*
+ARG NPM_VERSION
+RUN npm install npm@${NPM_VERSION} -g && \
+	hash -r && \
+	test "$(npm --version)" = "${NPM_VERSION}" && \
+	test "$(npx --version)" = "${NPM_VERSION}" && \
+	rm -rf /root/.npm
 RUN npm install modclean@2.1.2 -g && \
 	if deno --version | head -1 | grep -qE '^deno 2\.'; then npm install pnpm yarn -g; fi && \
 	npm install --no-save --prefix /usr/local/server @vercel/nft@^0.29.2

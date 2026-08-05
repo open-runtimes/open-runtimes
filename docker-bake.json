@@ -185,7 +185,7 @@
   },
   "target": {
     "_node": {
-      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk add --no-cache bash nss font-noto ca-certificates gcompat\n\n# https://pnpm.io/installation#compatibility (node 16 needs pnpm 8)\nARG PNPM_VERSION=9.15.9\nRUN npm install pnpm@$${PNPM_VERSION} modclean@2.1.2 -g\n\n# Node 26 dropped the bundled Yarn from the official images (Corepack went in\n# 25). Install it there to keep tooling parity; older bases already ship Yarn,\n# and installing over their symlink fails with EEXIST.\nARG YARN_VERSION=\"\"\nRUN if [ -n \"$YARN_VERSION\" ]; then npm install yarn@$${YARN_VERSION} -g; fi\n\nRUN npm ci && npm cache clean --force\n\n# Additional tooling needed for Node runtimes used for SSR (Sites)\n# alpine-sdk - basic tooling like git, gcc, g++, make...\n# python3-dev - Install Python (useful to some NPM libs)\n# py3-pip - Python package manager\n# gcompat - Pre-requirement for Bun\nARG INSTALL_SSR_TOOLING=\"false\"\nARG BUN_VERSION=1.3.2\n# The Bun npm package retains multiple platform variants. Keep only the\n# resolved executable and remove npm's downloaded package cache.\nRUN if [ \"$INSTALL_SSR_TOOLING\" = \"true\" ]; then \\\n        apk add --no-cache alpine-sdk python3-dev py3-pip gcompat && \\\n        npm install bun@$${BUN_VERSION} -g && \\\n        cp -L /usr/local/bin/bun /tmp/bun && \\\n        npm uninstall -g bun && \\\n        install -m 0755 /tmp/bun /usr/local/bin/bun && \\\n        ln -sf /usr/local/bin/bun /usr/local/bin/bunx && \\\n        rm -f /tmp/bun && \\\n        npm cache clean --force; \\\n    fi\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"node --max_old_space_size=8192 src/server.js\"\n\n# Next.js packing: keep node's pre-consolidation behavior (ship node_modules\n# untouched) instead of the shared packer's modclean fallback used by bun/deno.\nENV OPEN_RUNTIMES_NEXTJS_CLEANUP=none\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk add --no-cache bash nss font-noto ca-certificates gcompat\n\nARG NPM_VERSION\nRUN npm install npm@$${NPM_VERSION} -g && \\\n    hash -r && \\\n    test \"$(npm --version)\" = \"$${NPM_VERSION}\" && \\\n    test \"$(npx --version)\" = \"$${NPM_VERSION}\" && \\\n    rm -rf /root/.npm\n\n# https://pnpm.io/installation#compatibility (node 16 needs pnpm 8)\nARG PNPM_VERSION=9.15.9\nRUN npm install pnpm@$${PNPM_VERSION} modclean@2.1.2 -g\n\n# Node 26 dropped the bundled Yarn from the official images (Corepack went in\n# 25). Install it there to keep tooling parity; older bases already ship Yarn,\n# and installing over their symlink fails with EEXIST.\nARG YARN_VERSION=\"\"\nRUN if [ -n \"$YARN_VERSION\" ]; then npm install yarn@$${YARN_VERSION} -g; fi\n\nRUN npm ci && npm cache clean --force\n\n# Additional tooling needed for Node runtimes used for SSR (Sites)\n# alpine-sdk - basic tooling like git, gcc, g++, make...\n# python3-dev - Install Python (useful to some NPM libs)\n# py3-pip - Python package manager\n# gcompat - Pre-requirement for Bun\nARG INSTALL_SSR_TOOLING=\"false\"\nARG BUN_VERSION=1.3.2\n# The Bun npm package retains multiple platform variants. Keep only the\n# resolved executable and remove npm's downloaded package cache.\nRUN if [ \"$INSTALL_SSR_TOOLING\" = \"true\" ]; then \\\n        apk add --no-cache alpine-sdk python3-dev py3-pip gcompat && \\\n        npm install bun@$${BUN_VERSION} -g && \\\n        cp -L /usr/local/bin/bun /tmp/bun && \\\n        npm uninstall -g bun && \\\n        install -m 0755 /tmp/bun /usr/local/bin/bun && \\\n        ln -sf /usr/local/bin/bun /usr/local/bin/bunx && \\\n        rm -f /tmp/bun && \\\n        npm cache clean --force; \\\n    fi\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"node --max_old_space_size=8192 src/server.js\"\n\n# Next.js packing: keep node's pre-consolidation behavior (ship node_modules\n# untouched) instead of the shared packer's modclean fallback used by bun/deno.\nENV OPEN_RUNTIMES_NEXTJS_CLEANUP=none\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
     },
     "node-22": {
       "inherits": [
@@ -200,7 +200,8 @@
       },
       "args": {
         "BASE_IMAGE": "node:22.23.1-alpine3.23",
-        "INSTALL_SSR_TOOLING": "true"
+        "INSTALL_SSR_TOOLING": "true",
+        "NPM_VERSION": "12.0.2"
       },
       "platforms": [
         "linux/amd64",
@@ -224,7 +225,8 @@
       },
       "args": {
         "BASE_IMAGE": "node:23.11.1-alpine3.22",
-        "INSTALL_SSR_TOOLING": "true"
+        "INSTALL_SSR_TOOLING": "true",
+        "NPM_VERSION": "11.19.0"
       },
       "platforms": [
         "linux/amd64",
@@ -248,7 +250,8 @@
       },
       "args": {
         "BASE_IMAGE": "node:24.18.0-alpine3.23",
-        "INSTALL_SSR_TOOLING": "true"
+        "INSTALL_SSR_TOOLING": "true",
+        "NPM_VERSION": "12.0.2"
       },
       "platforms": [
         "linux/amd64",
@@ -272,7 +275,8 @@
       },
       "args": {
         "BASE_IMAGE": "node:25.9.0-alpine3.23",
-        "INSTALL_SSR_TOOLING": "true"
+        "INSTALL_SSR_TOOLING": "true",
+        "NPM_VERSION": "11.19.0"
       },
       "platforms": [
         "linux/amd64",
@@ -297,6 +301,7 @@
       "args": {
         "BASE_IMAGE": "node:26.5.0-alpine3.24",
         "INSTALL_SSR_TOOLING": "true",
+        "NPM_VERSION": "12.0.2",
         "YARN_VERSION": "1.22.22"
       },
       "platforms": [
@@ -320,7 +325,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:21.7.3-alpine3.20"
+        "BASE_IMAGE": "node:21.7.3-alpine3.20",
+        "NPM_VERSION": "10.9.9"
       },
       "platforms": [
         "linux/amd64",
@@ -343,7 +349,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:20.20.2-alpine3.23"
+        "BASE_IMAGE": "node:20.20.2-alpine3.23",
+        "NPM_VERSION": "11.19.0"
       },
       "platforms": [
         "linux/amd64",
@@ -366,7 +373,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:19.9.0-alpine3.18"
+        "BASE_IMAGE": "node:19.9.0-alpine3.18",
+        "NPM_VERSION": "9.9.4"
       },
       "platforms": [
         "linux/amd64",
@@ -389,7 +397,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:18.20.8-alpine3.20"
+        "BASE_IMAGE": "node:18.20.8-alpine3.20",
+        "NPM_VERSION": "10.9.9"
       },
       "platforms": [
         "linux/amd64",
@@ -413,6 +422,7 @@
       },
       "args": {
         "BASE_IMAGE": "node:16.20.2-alpine3.18",
+        "NPM_VERSION": "9.9.4",
         "PNPM_VERSION": "8"
       },
       "platforms": [
@@ -425,7 +435,7 @@
       ]
     },
     "_deno": {
-      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk add --no-cache bash nss font-noto ca-certificates nodejs-current npm python3 make g++ gcc git\n\n# Deno's alpine image bundles a glibc-shim libgcc_s.so.1 at /usr/local/lib/\n# that conflicts with node's musl-linked expectations. Remove it so node loads\n# the system (alpine) libgcc from /usr/lib instead. Deno stays functional —\n# its binary is statically linked and doesn't need the shim at runtime.\nRUN rm -f /usr/local/lib/libgcc_s.so*\nRUN npm install modclean@2.1.2 -g && \\\n\tif deno --version | head -1 | grep -qE '^deno 2\\.'; then npm install pnpm yarn -g; fi && \\\n\tnpm install --no-save --prefix /usr/local/server @vercel/nft@^0.29.2\n\nENV OPEN_RUNTIMES_ENTRYPOINT=mod.ts\nENV DENO_DIR=/usr/builds/deno-cache\n\n# Pre-populate /usr/local/server/node_modules so the shared SSR preload's\n# `import superjson from \"superjson\"` resolves under --node-modules-dir=manual\n# at runtime. We use deno install against the runtimes/javascript/src/ssr/\n# deno.json import map that's already been overlaid into\n# /usr/local/server/src/ssr/.\n#\n# Only deno 2.x exposes the npm-style `deno install` (with --allow-scripts and\n# --node-modules-dir=auto|manual). On deno 1.x the same subcommand is the\n# CLI-script installer where --node-modules-dir takes only true|false and\n# --allow-scripts doesn't exist, so we skip the step there. Deno 1.x also\n# predates --import (required for the SSR preload) so SSR isn't viable on\n# those versions anyway. Probing --allow-scripts is a clean 2.x-only signal.\nRUN if [ -f /usr/local/server/src/ssr/deno.json ] && \\\n\tdeno install --help 2>/dev/null | grep -q -- '--allow-scripts'; then \\\n\tcp /usr/local/server/src/ssr/deno.json /usr/local/server/deno.json && \\\n\tcd /usr/local/server && deno install --node-modules-dir=auto --allow-scripts && \\\n\trm /usr/local/server/deno.json; \\\n\tfi\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"deno run --allow-run --allow-net --allow-write --allow-read --allow-env src/server.ts\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apk add --no-cache bash nss font-noto ca-certificates nodejs-current npm python3 make g++ gcc git\n\n# Deno's alpine image bundles a glibc-shim libgcc_s.so.1 at /usr/local/lib/\n# that conflicts with node's musl-linked expectations. Remove it so node loads\n# the system (alpine) libgcc from /usr/lib instead. Deno stays functional —\n# its binary is statically linked and doesn't need the shim at runtime.\nRUN rm -f /usr/local/lib/libgcc_s.so*\nARG NPM_VERSION\nRUN npm install npm@$${NPM_VERSION} -g && \\\n\thash -r && \\\n\ttest \"$(npm --version)\" = \"$${NPM_VERSION}\" && \\\n\ttest \"$(npx --version)\" = \"$${NPM_VERSION}\" && \\\n\trm -rf /root/.npm\nRUN npm install modclean@2.1.2 -g && \\\n\tif deno --version | head -1 | grep -qE '^deno 2\\.'; then npm install pnpm yarn -g; fi && \\\n\tnpm install --no-save --prefix /usr/local/server @vercel/nft@^0.29.2\n\nENV OPEN_RUNTIMES_ENTRYPOINT=mod.ts\nENV DENO_DIR=/usr/builds/deno-cache\n\n# Pre-populate /usr/local/server/node_modules so the shared SSR preload's\n# `import superjson from \"superjson\"` resolves under --node-modules-dir=manual\n# at runtime. We use deno install against the runtimes/javascript/src/ssr/\n# deno.json import map that's already been overlaid into\n# /usr/local/server/src/ssr/.\n#\n# Only deno 2.x exposes the npm-style `deno install` (with --allow-scripts and\n# --node-modules-dir=auto|manual). On deno 1.x the same subcommand is the\n# CLI-script installer where --node-modules-dir takes only true|false and\n# --allow-scripts doesn't exist, so we skip the step there. Deno 1.x also\n# predates --import (required for the SSR preload) so SSR isn't viable on\n# those versions anyway. Probing --allow-scripts is a clean 2.x-only signal.\nRUN if [ -f /usr/local/server/src/ssr/deno.json ] && \\\n\tdeno install --help 2>/dev/null | grep -q -- '--allow-scripts'; then \\\n\tcp /usr/local/server/src/ssr/deno.json /usr/local/server/deno.json && \\\n\tcd /usr/local/server && deno install --node-modules-dir=auto --allow-scripts && \\\n\trm /usr/local/server/deno.json; \\\n\tfi\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"deno run --allow-run --allow-net --allow-write --allow-read --allow-env src/server.ts\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
     },
     "deno-2_6": {
       "inherits": [
@@ -439,7 +449,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "denoland/deno:alpine-2.6.7"
+        "BASE_IMAGE": "denoland/deno:alpine-2.6.7",
+        "NPM_VERSION": "12.0.2"
       },
       "platforms": [
         "linux/amd64",
@@ -462,7 +473,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "denoland/deno:alpine-2.5.7"
+        "BASE_IMAGE": "denoland/deno:alpine-2.5.7",
+        "NPM_VERSION": "12.0.2"
       },
       "platforms": [
         "linux/amd64",
@@ -485,7 +497,8 @@
         "version": "./runtimes/deno/versions/2.0"
       },
       "args": {
-        "BASE_IMAGE": "denoland/deno:alpine-2.0.6"
+        "BASE_IMAGE": "denoland/deno:alpine-2.0.6",
+        "NPM_VERSION": "10.9.9"
       },
       "platforms": [
         "linux/amd64",
@@ -508,7 +521,8 @@
         "version": "./runtimes/deno/versions/1.46"
       },
       "args": {
-        "BASE_IMAGE": "denoland/deno:alpine-1.46.3"
+        "BASE_IMAGE": "denoland/deno:alpine-1.46.3",
+        "NPM_VERSION": "10.9.9"
       },
       "platforms": [
         "linux/amd64",
@@ -531,7 +545,8 @@
         "version": "./runtimes/deno/versions/1.40"
       },
       "args": {
-        "BASE_IMAGE": "denoland/deno:alpine-1.40.5"
+        "BASE_IMAGE": "denoland/deno:alpine-1.40.5",
+        "NPM_VERSION": "10.9.9"
       },
       "platforms": [
         "linux/amd64"
@@ -553,7 +568,8 @@
         "version": "./runtimes/deno/versions/1.35"
       },
       "args": {
-        "BASE_IMAGE": "denoland/deno:alpine-1.35.3"
+        "BASE_IMAGE": "denoland/deno:alpine-1.35.3",
+        "NPM_VERSION": "9.9.4"
       },
       "platforms": [
         "linux/amd64"
@@ -575,7 +591,8 @@
         "version": "./runtimes/deno/versions/1.24"
       },
       "args": {
-        "BASE_IMAGE": "denoland/deno:alpine-1.24.3"
+        "BASE_IMAGE": "denoland/deno:alpine-1.24.3",
+        "NPM_VERSION": "7.24.2"
       },
       "platforms": [
         "linux/amd64"
@@ -597,7 +614,8 @@
         "version": "./runtimes/deno/versions/1.21"
       },
       "args": {
-        "BASE_IMAGE": "denoland/deno:alpine-1.21.3"
+        "BASE_IMAGE": "denoland/deno:alpine-1.21.3",
+        "NPM_VERSION": "7.24.2"
       },
       "platforms": [
         "linux/amd64"
@@ -2262,7 +2280,7 @@
       ]
     },
     "_bun": {
-      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.ts\n# Bun 1.0 arm64 includes glibc, whose /usr/lib/libc.so conflicts with musl-dev from g++.\nRUN APK_ADD_FLAGS=\"\" \\\n  && if apk info -e glibc > /dev/null 2>&1; then APK_ADD_FLAGS=\"--force-overwrite\"; fi \\\n  && apk add --no-cache $${APK_ADD_FLAGS} bash npm nss font-noto ca-certificates python3 make g++ gcc git\nRUN npm install pnpm@9.15.9 yarn modclean@2.1.2 -g\nRUN bun install && npm install --no-save --prefix /usr/local/server @vercel/nft@^0.29.2\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"bun src/server.ts\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+      "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nENV OPEN_RUNTIMES_ENTRYPOINT=index.ts\n# Bun 1.0 arm64 includes glibc, whose /usr/lib/libc.so conflicts with musl-dev from g++.\nRUN APK_ADD_FLAGS=\"\" \\\n  && if apk info -e glibc > /dev/null 2>&1; then APK_ADD_FLAGS=\"--force-overwrite\"; fi \\\n  && apk add --no-cache $${APK_ADD_FLAGS} bash npm nss font-noto ca-certificates python3 make g++ gcc git\nARG NPM_VERSION\nRUN npm install npm@$${NPM_VERSION} -g && \\\n  hash -r && \\\n  test \"$(npm --version)\" = \"$${NPM_VERSION}\" && \\\n  test \"$(npx --version)\" = \"$${NPM_VERSION}\" && \\\n  rm -rf /root/.npm\nRUN npm install pnpm@9.15.9 yarn modclean@2.1.2 -g\nRUN bun install && npm install --no-save --prefix /usr/local/server @vercel/nft@^0.29.2\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"bun src/server.ts\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
     },
     "bun-1_3": {
       "inherits": [
@@ -2276,7 +2294,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "oven/bun:1.3.8-alpine"
+        "BASE_IMAGE": "oven/bun:1.3.8-alpine",
+        "NPM_VERSION": "12.0.2"
       },
       "platforms": [
         "linux/amd64",
@@ -2299,7 +2318,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "oven/bun:1.2.23-alpine"
+        "BASE_IMAGE": "oven/bun:1.2.23-alpine",
+        "NPM_VERSION": "10.9.9"
       },
       "platforms": [
         "linux/amd64",
@@ -2322,7 +2342,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "oven/bun:1.1.45-alpine"
+        "BASE_IMAGE": "oven/bun:1.1.45-alpine",
+        "NPM_VERSION": "10.9.9"
       },
       "platforms": [
         "linux/amd64",
@@ -2345,7 +2366,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "oven/bun:1.0.36-alpine"
+        "BASE_IMAGE": "oven/bun:1.0.36-alpine",
+        "NPM_VERSION": "10.9.9"
       },
       "platforms": [
         "linux/amd64",

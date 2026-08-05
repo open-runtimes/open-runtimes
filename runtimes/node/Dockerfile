@@ -8,6 +8,13 @@ INCLUDE ./docker/base-before
 
 RUN apk add --no-cache bash nss font-noto ca-certificates gcompat
 
+ARG NPM_VERSION
+RUN npm install npm@${NPM_VERSION} -g && \
+    hash -r && \
+    test "$(npm --version)" = "${NPM_VERSION}" && \
+    test "$(npx --version)" = "${NPM_VERSION}" && \
+    rm -rf /root/.npm
+
 # https://pnpm.io/installation#compatibility (node 16 needs pnpm 8)
 ARG PNPM_VERSION=9.15.9
 RUN npm install pnpm@${PNPM_VERSION} modclean@2.1.2 -g

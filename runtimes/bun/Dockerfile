@@ -11,6 +11,12 @@ ENV OPEN_RUNTIMES_ENTRYPOINT=index.ts
 RUN APK_ADD_FLAGS="" \
   && if apk info -e glibc > /dev/null 2>&1; then APK_ADD_FLAGS="--force-overwrite"; fi \
   && apk add --no-cache ${APK_ADD_FLAGS} bash npm nss font-noto ca-certificates python3 make g++ gcc git
+ARG NPM_VERSION
+RUN npm install npm@${NPM_VERSION} -g && \
+  hash -r && \
+  test "$(npm --version)" = "${NPM_VERSION}" && \
+  test "$(npx --version)" = "${NPM_VERSION}" && \
+  rm -rf /root/.npm
 RUN npm install pnpm@9.15.9 yarn modclean@2.1.2 -g
 RUN bun install && npm install --no-save --prefix /usr/local/server @vercel/nft@^0.29.2
 
