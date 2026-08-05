@@ -41,7 +41,6 @@ services:
       INSTALL_COMMAND: ${INSTALL_COMMAND}
       OPEN_RUNTIMES_OUTPUT_DIRECTORY: ${OUTPUT_DIRECTORY}
       OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
-      # Only consumed by runtimes/flutter's build-prepare.sh; inert elsewhere.
       OPEN_RUNTIMES_BUILD_VARS: '{"TEST_DART_DEFINE":"hello_open_runtimes"}'
 
   # Build with the no-export entrypoint (safe entrypoint tests)

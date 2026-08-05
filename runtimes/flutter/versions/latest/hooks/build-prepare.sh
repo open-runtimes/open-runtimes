@@ -16,7 +16,6 @@ mkdir -p "$OPR_DEFINES_DIR"
 dart /usr/local/server/hooks/merge_dart_defines.dart "dart_defines.json" "$OPR_DEFINES_FILE"
 
 if [ ! -f "$OPR_DEFINES_FILE" ]; then
-	# No Appwrite vars and no user dart_defines.json — nothing to inject.
 	opr_log "No dart-defines found, skipping flutter wrapper."
 	return 0
 fi
