@@ -1514,7 +1514,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.4.22-cli-alpine3.23",
+        "BASE_IMAGE": "php:8.4.24-cli-alpine3.23",
         "PHP_SWOOLE_VERSION": "v6.1.1",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1539,7 +1539,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.3.31-cli-alpine3.23",
+        "BASE_IMAGE": "php:8.3.33-cli-alpine3.23",
         "PHP_SWOOLE_VERSION": "v5.1.2",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1564,7 +1564,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.2.31-cli-alpine3.23",
+        "BASE_IMAGE": "php:8.2.33-cli-alpine3.23",
         "PHP_SWOOLE_VERSION": "v5.1.2",
         "BUILD_PACKAGES": "linux-headers"
       },
