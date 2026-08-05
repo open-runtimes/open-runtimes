@@ -36,14 +36,20 @@ ARG INSTALL_SSR_TOOLING="false"
 ARG BUN_VERSION=1.3.2
 # The Bun npm package retains multiple platform variants. Keep only the
 # resolved executable and remove npm's downloaded package cache.
+# --allow-scripts is required from npm 12 on, which blocks lifecycle scripts by
+# default: Bun ships bin/bun.exe as an empty placeholder that its postinstall
+# replaces with the platform binary, so a blocked install leaves a 0-byte bun
+# that exits 0 and prints nothing on every invocation.
 RUN if [ "$INSTALL_SSR_TOOLING" = "true" ]; then \
         apk add --no-cache alpine-sdk python3-dev py3-pip gcompat && \
-        npm install bun@${BUN_VERSION} -g && \
+        npm install -g --allow-scripts=bun bun@${BUN_VERSION} && \
         cp -L /usr/local/bin/bun /tmp/bun && \
         npm uninstall -g bun && \
         install -m 0755 /tmp/bun /usr/local/bin/bun && \
         ln -sf /usr/local/bin/bun /usr/local/bin/bunx && \
         rm -f /tmp/bun && \
+        test "$(bun --version)" = "${BUN_VERSION}" && \
+        test "$(bunx --version)" = "${BUN_VERSION}" && \
         npm cache clean --force; \
     fi
 
