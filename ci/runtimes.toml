@@ -321,11 +321,11 @@ output = "./.next"
 # ─────────────────────────────────────────────────────────────────────────────
 
 [node.build.versions]
-"26" = { base = "node:26.5.0-alpine3.24", args = { INSTALL_SSR_TOOLING = "true", YARN_VERSION = "1.22.22" } }
+"26" = { base = "node:26.5.1-alpine3.24", args = { INSTALL_SSR_TOOLING = "true", YARN_VERSION = "1.22.22" } }
 "25" = { base = "node:25.9.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true" } }
-"24" = { base = "node:24.18.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true" } }
+"24" = { base = "node:24.19.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true" } }
 "23" = { base = "node:23.11.1-alpine3.22", args = { INSTALL_SSR_TOOLING = "true" } }
-"22" = { base = "node:22.23.1-alpine3.23", args = { INSTALL_SSR_TOOLING = "true" } }
+"22" = { base = "node:22.23.2-alpine3.23", args = { INSTALL_SSR_TOOLING = "true" } }
 "21.0" = { base = "node:21.7.3-alpine3.20" }
 "20.0" = { base = "node:20.20.2-alpine3.23" }
 "19.0" = { base = "node:19.9.0-alpine3.18" }
