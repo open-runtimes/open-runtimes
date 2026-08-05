@@ -2204,7 +2204,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "golang:1.25.10-alpine3.23"
+        "BASE_IMAGE": "golang:1.25.12-alpine3.23"
       },
       "platforms": [
         "linux/amd64",

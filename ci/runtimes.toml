@@ -440,7 +440,7 @@ platforms = ["linux/amd64"]
 
 [go.build.versions]
 "1.26" = { base = "golang:1.26.5-alpine3.23" }
-"1.25" = { base = "golang:1.25.10-alpine3.23" }
+"1.25" = { base = "golang:1.25.12-alpine3.23" }
 "1.24" = { base = "golang:1.24.13-alpine3.23" }
 "1.23" = { base = "golang:1.23.12-alpine3.22" }
 
