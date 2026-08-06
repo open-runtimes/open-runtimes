@@ -24,5 +24,5 @@ bake:
 	bun ci/bake.ts
 
 clean:
-	docker compose -f tests/compose.yaml --profile "*" down --remove-orphans || true
+	docker compose -f tests/compose.yaml --profile "*" down --remove-orphans 2>/dev/null || true
 	rm -rf tests/.runtime /tmp/logs
