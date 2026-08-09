@@ -94,10 +94,12 @@ class Logger {
 
     await Promise.all([
       new Promise((res) => {
-        this.streamLogs.end(undefined, undefined, res);
+        this.streamLogs.on("close", res);
+        this.streamLogs.end();
       }),
       new Promise((res) => {
-        this.streamErrors.end(undefined, undefined, res);
+        this.streamErrors.on("close", res);
+        this.streamErrors.end();
       }),
     ]);
   }
