@@ -45,8 +45,8 @@ class Flutter extends CSR
         $response = Client::execute(url: '/main.dart.js', method: 'GET');
         self::assertEquals(200, $response['code']);
 
-        // dart_defines.json fixture wins over Appwrite's OPEN_RUNTIMES_BUILD_VARS
-        // on the conflicting TEST_DART_DEFINE key.
+        // dart_defines.json fixture wins over the Appwrite-provided
+        // OPEN_RUNTIMES_BUILD_KEYS value on the conflicting TEST_DART_DEFINE key.
         self::assertStringContainsString('fixture_override', $response['body']);
         self::assertStringContainsString('custom_value_from_fixture', $response['body']);
         self::assertStringNotContainsString('hello_open_runtimes', $response['body']);
