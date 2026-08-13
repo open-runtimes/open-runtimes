@@ -12,20 +12,9 @@ OPR_WRAPPER_DIR="/usr/local/opr-wrappers"
 
 mkdir -p "$OPR_DEFINES_DIR"
 
-# Build a JSON object from the keys listed in OPEN_RUNTIMES_BUILD_KEYS,
-# looking each value up from the container's own env.
-OPR_APPWRITE_JSON="{}"
-if [ -n "${OPEN_RUNTIMES_BUILD_KEYS:-}" ]; then
-	OPR_APPWRITE_JSON="$(
-		read -r -a OPR_KEYS <<<"$OPEN_RUNTIMES_BUILD_KEYS"
-		for opr_key in "${OPR_KEYS[@]}"; do
-			opr_key="$(echo "$opr_key" | xargs)"
-			[ -z "$opr_key" ] && continue
-			[[ "$opr_key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || { opr_error "Skipping invalid env var name: $opr_key" >&2; continue; }
-			jq -n --arg k "$opr_key" --arg v "${!opr_key:-}" '{($k): $v}'
-		done | jq -s 'add // {}'
-	)"
-fi
+# Build a JSON object from the keys listed in OPEN_RUNTIMES_BUILD_KEYS
+OPR_APPWRITE_JSON="$(jq -n --arg keys "${OPEN_RUNTIMES_BUILD_KEYS:-}" \
+	'[$keys | split(" ")[] | select(. != "")] | map({(.): (env[.] // "")}) | add // {}')"
 
 # Write Appwrite vars to our defines file. Always (re)write it so a build
 # with no vars this time doesn't inherit a stale file from a previous build.
