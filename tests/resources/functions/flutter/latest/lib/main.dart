@@ -60,6 +60,9 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'dart-define-custom:${String.fromEnvironment('TEST_DART_DEFINE_CUSTOM')}',
             ),
+            const Text(
+              'dart-define-opr-only:${String.fromEnvironment('TEST_DART_DEFINE_OPR_ONLY')}',
+            ),
           ],
         ),
       ),

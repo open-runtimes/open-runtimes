@@ -50,5 +50,9 @@ class Flutter extends CSR
         self::assertStringContainsString('fixture_override', $response['body']);
         self::assertStringContainsString('custom_value_from_fixture', $response['body']);
         self::assertStringNotContainsString('hello_open_runtimes', $response['body']);
+
+        // TEST_DART_DEFINE_OPR_ONLY has no entry in the fixture — proves an
+        // OPR-provided key with nothing to conflict against still lands.
+        self::assertStringContainsString('hello_opr_only', $response['body']);
     }
 }
