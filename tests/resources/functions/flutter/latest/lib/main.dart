@@ -54,6 +54,15 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            const Text(
+              'dart-define:${String.fromEnvironment('TEST_DART_DEFINE')}',
+            ),
+            const Text(
+              'dart-define-custom:${String.fromEnvironment('TEST_DART_DEFINE_CUSTOM')}',
+            ),
+            const Text(
+              'dart-define-opr-only:${String.fromEnvironment('TEST_DART_DEFINE_OPR_ONLY')}',
+            ),
           ],
         ),
       ),

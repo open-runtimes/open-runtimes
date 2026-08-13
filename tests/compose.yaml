@@ -41,6 +41,9 @@ services:
       INSTALL_COMMAND: ${INSTALL_COMMAND}
       OPEN_RUNTIMES_OUTPUT_DIRECTORY: ${OUTPUT_DIRECTORY}
       OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+      TEST_DART_DEFINE: hello_open_runtimes
+      TEST_DART_DEFINE_OPR_ONLY: hello_opr_only
+      OPEN_RUNTIMES_BUILD_KEYS: TEST_DART_DEFINE TEST_DART_DEFINE_OPR_ONLY
 
   # Build with the no-export entrypoint (safe entrypoint tests)
   build-no-export:

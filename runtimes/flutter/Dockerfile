@@ -6,7 +6,7 @@ FROM ${BASE_IMAGE}
 
 INCLUDE ./docker/base-before
 
-RUN apt-get update && apt-get install -y bash
+RUN apt-get update && apt-get install -y bash jq
 
 RUN dart --disable-analytics
 
