@@ -45,6 +45,17 @@ bash -c "$1"
 
 opr_log "Build command execution finished."
 
+# A framework's bundle step is appended to the build command, so it runs in the
+# subshell above and a directory it resolves cannot reach the pack and archive
+# phases through the environment. It leaves the resolved one here instead.
+if [ -s /tmp/.opr-output-directory ]; then
+	OPEN_RUNTIMES_OUTPUT_DIRECTORY="$(cat /tmp/.opr-output-directory)"
+	export OPEN_RUNTIMES_OUTPUT_DIRECTORY
+	rm -f /tmp/.opr-output-directory
+
+	opr_log "Build output resolved to $OPEN_RUNTIMES_OUTPUT_DIRECTORY."
+fi
+
 # --- Compile ---
 
 cd /usr/local/server
