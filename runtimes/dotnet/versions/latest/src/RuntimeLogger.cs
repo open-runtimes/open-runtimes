@@ -116,10 +116,9 @@ namespace DotNetRuntime
                 stringLog += "... Log truncated due to size limit (8000 characters)";
             }
 
+            // Each sink is guarded on its own so one failing never drops the other
             try
             {
-                stream?.WriteLine(stringLog);
-
                 var passthrough = type == RuntimeLogger.TYPE_ERROR ? Stderr : Stdout;
                 passthrough.WriteLine(stringLog);
                 passthrough.Flush();
@@ -128,6 +127,15 @@ namespace DotNetRuntime
             {
                 // Silently fail to prevent 500 errors in runtime
                 // Log write failures should not crash the runtime
+            }
+
+            try
+            {
+                stream?.WriteLine(stringLog);
+            }
+            catch (Exception e)
+            {
+                // Silently fail to prevent 500 errors in runtime
             }
         }
 

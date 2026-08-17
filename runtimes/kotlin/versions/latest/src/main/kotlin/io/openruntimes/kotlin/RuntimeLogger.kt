@@ -114,12 +114,13 @@ class RuntimeLogger(
             stringLog += "... Log truncated due to size limit (8000 characters)"
         }
 
+        // PrintStream swallows its own errors, so the file sink stays guarded alone
+        val passthrough = if (type == RuntimeLogger.TYPE_ERROR) stderr else stdout
+        passthrough.print(stringLog)
+        passthrough.flush()
+
         try {
             stream?.write(stringLog)
-
-            val passthrough = if (type == RuntimeLogger.TYPE_ERROR) stderr else stdout
-            passthrough.print(stringLog)
-            passthrough.flush()
         } catch (e: IOException) {
             // Silently fail to prevent 500 errors in runtime
             // Log write failures should not crash the runtime

@@ -125,14 +125,15 @@ public class RuntimeLogger {
       stringLog += "... Log truncated due to size limit (8000 characters)";
     }
 
+    // PrintStream swallows its own errors, so the file sink stays guarded alone
+    PrintStream passthrough = type == RuntimeLogger.TYPE_ERROR ? stderr : stdout;
+    passthrough.print(stringLog);
+    passthrough.flush();
+
     try {
       if (stream != null) {
         stream.write(stringLog);
       }
-
-      PrintStream passthrough = type == RuntimeLogger.TYPE_ERROR ? stderr : stdout;
-      passthrough.print(stringLog);
-      passthrough.flush();
     } catch (IOException e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime

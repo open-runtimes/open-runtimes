@@ -82,14 +82,20 @@ class Logger {
       stringLog += "... Log truncated due to size limit (8000 characters)";
     }
 
+    // Each sink is guarded on its own so one failing never drops the other
     try {
-      stream?.write(stringLog + "\n");
       (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
         stringLog + "\n",
       );
     } catch (err) {
       // Silently ignore write failures to prevent runtime crashes
       // The logging system should not cause the main execution to fail
+    }
+
+    try {
+      stream?.write(stringLog + "\n");
+    } catch (err) {
+      // Silently ignore write failures to prevent runtime crashes
     }
   }
 

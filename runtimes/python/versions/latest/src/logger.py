@@ -83,10 +83,8 @@ class Logger:
             string_log = string_log[:8000]
             string_log += "... Log truncated due to size limit (8000 characters)"
 
+        # Each sink is guarded on its own so one failing never drops the other
         try:
-            if stream is not None:
-                stream.write(string_log)
-
             passthrough = (
                 sys.__stderr__ if xtype == Logger.TYPE_ERROR else sys.__stdout__
             )
@@ -95,6 +93,13 @@ class Logger:
         except Exception as e:
             # Silently fail to prevent 500 errors in runtime
             # Log write failures should not crash the runtime
+            pass
+
+        try:
+            if stream is not None:
+                stream.write(string_log)
+        except Exception as e:
+            # Silently fail to prevent 500 errors in runtime
             pass
 
     def end(self):

@@ -46,6 +46,15 @@ export class Logger {
       })
       .join(" ");
 
+    // Each sink is guarded on its own so one failing never drops the other
+    try {
+      (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
+        stringLog + "\n",
+      );
+    } catch {
+      // Silently ignore write failures to prevent runtime crashes.
+    }
+
     try {
       if (logsDirectory) {
         appendFileSync(
@@ -53,10 +62,6 @@ export class Logger {
           stringLog + "\n",
         );
       }
-
-      (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
-        stringLog + "\n",
-      );
     } catch {
       // Silently ignore write failures to prevent runtime crashes.
     }
