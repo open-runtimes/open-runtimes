@@ -27,15 +27,20 @@ class Logger {
         : config.env === "development"
           ? "dev"
           : this.generateId();
-      this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
-        flags: "a",
-      });
-      this.streamErrors = fs.createWriteStream(
-        `/mnt/logs/${this.id}_errors.log`,
-        {
-          flags: "a",
-        },
-      );
+      if (config.logsDirectory) {
+        this.streamLogs = fs.createWriteStream(
+          `${config.logsDirectory}/${this.id}_logs.log`,
+          {
+            flags: "a",
+          },
+        );
+        this.streamErrors = fs.createWriteStream(
+          `${config.logsDirectory}/${this.id}_errors.log`,
+          {
+            flags: "a",
+          },
+        );
+      }
     }
   }
 
@@ -78,7 +83,10 @@ class Logger {
     }
 
     try {
-      stream.write(stringLog + "\n");
+      (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
+        stringLog + "\n",
+      );
+      stream?.write(stringLog + "\n");
     } catch (err) {
       // Silently ignore write failures to prevent runtime crashes
       // The logging system should not cause the main execution to fail
@@ -92,16 +100,15 @@ class Logger {
 
     this.enabled = false;
 
-    await Promise.all([
-      new Promise((res) => {
-        this.streamLogs.on("close", res);
-        this.streamLogs.end();
-      }),
-      new Promise((res) => {
-        this.streamErrors.on("close", res);
-        this.streamErrors.end();
-      }),
-    ]);
+    await Promise.all(
+      [this.streamLogs, this.streamErrors].filter(Boolean).map(
+        (stream) =>
+          new Promise((res) => {
+            stream.on("close", res);
+            stream.end();
+          }),
+      ),
+    );
   }
 
   overrideNativeLogs() {

@@ -275,7 +275,7 @@ $server->on("Request", function ($req, $res) use ($action, $config, &$activeRequ
         return;
     }
 
-    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '', $config->env);
+    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '', $config->env, $config->logsDirectory);
     $requestId = \spl_object_id($res);
     $activeRequests[$requestId] = [
         'logger' => $logger,

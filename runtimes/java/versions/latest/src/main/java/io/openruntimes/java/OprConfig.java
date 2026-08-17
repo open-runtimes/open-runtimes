@@ -10,9 +10,13 @@ public final class OprConfig {
   public static final String SECRET;
   public static final String ENTRYPOINT = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
   public static final String ENV;
+  public static final String LOGS_DIRECTORY;
   public static final Map<String, String> HEADERS;
 
   static {
+    String logsDirectory = System.getenv("OPEN_RUNTIMES_LOGS_DIRECTORY");
+    LOGS_DIRECTORY = logsDirectory == null ? "/mnt/logs" : logsDirectory;
+
     String secret = System.getenv("OPEN_RUNTIMES_SECRET");
     SECRET = secret == null ? "" : secret;
 

@@ -37,8 +37,10 @@ class RuntimeLogger
         @id = id
       end
 
-      @stream_logs = File.open("/mnt/logs/" + @id + "_logs.log", 'a')
-      @stream_errors = File.open("/mnt/logs/" + @id + "_errors.log", 'a')
+      unless Config::LOGS_DIRECTORY.empty?
+        @stream_logs = File.open(Config::LOGS_DIRECTORY + "/" + @id + "_logs.log", 'a')
+        @stream_errors = File.open(Config::LOGS_DIRECTORY + "/" + @id + "_errors.log", 'a')
+      end
     end
   end
 
@@ -81,7 +83,11 @@ class RuntimeLogger
     end
 
     begin
-      stream.write(string_log)
+      passthrough = type === RuntimeLogger::TYPE_ERROR ? STDERR : STDOUT
+      passthrough.write(string_log)
+      passthrough.flush
+
+      stream.write(string_log) unless stream.nil?
     rescue
       # Silently fail to prevent 500 errors in runtime
       # Log write failures should not crash the runtime
@@ -95,8 +101,8 @@ class RuntimeLogger
 
     @enabled = false
 
-    @stream_logs.close
-    @stream_errors.close
+    @stream_logs&.close
+    @stream_errors&.close
   end
 
   def override_native_logs()

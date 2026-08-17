@@ -23,12 +23,14 @@ class Logger {
           ? id
           : (config.env == 'development' ? 'dev' : this.generateId());
 
-      this.streamLogs = File(
-        '/mnt/logs/' + this.id + '_logs.log',
-      ).openWrite(mode: FileMode.append);
-      this.streamErrors = File(
-        '/mnt/logs/' + this.id + '_errors.log',
-      ).openWrite(mode: FileMode.append);
+      if (config.logsDirectory.isNotEmpty) {
+        this.streamLogs = File(
+          config.logsDirectory + '/' + this.id + '_logs.log',
+        ).openWrite(mode: FileMode.append);
+        this.streamErrors = File(
+          config.logsDirectory + '/' + this.id + '_errors.log',
+        ).openWrite(mode: FileMode.append);
+      }
     }
   }
 
@@ -50,10 +52,6 @@ class Logger {
         ? this.streamErrors
         : this.streamLogs;
 
-    if (stream == null) {
-      return;
-    }
-
     String stringLog = "";
 
     if (message is List || message is Map) {
@@ -72,7 +70,8 @@ class Logger {
     }
 
     try {
-      stream.write(stringLog + "\n");
+      (type == Logger.TYPE_ERROR ? stderr : stdout).write(stringLog + "\n");
+      stream?.write(stringLog + "\n");
     } catch (e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
@@ -80,7 +79,7 @@ class Logger {
   }
 
   Future<void> end() async {
-    if (!this.enabled || this.streamLogs == null || this.streamErrors == null) {
+    if (!this.enabled) {
       return;
     }
 

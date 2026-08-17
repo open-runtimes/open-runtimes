@@ -6,6 +6,7 @@ final class Config
     public array $headers;
     public string $entrypoint;
     public string $env;
+    public string $logsDirectory;
 
     public function __construct()
     {
@@ -13,5 +14,7 @@ final class Config
         $this->headers = \json_decode(\getenv('OPEN_RUNTIMES_HEADERS') ?: '{}', true) ?: [];
         $this->entrypoint = \getenv('OPEN_RUNTIMES_ENTRYPOINT') ?: '';
         $this->env = \getenv('OPEN_RUNTIMES_ENV') ?: '';
+        $logsDirectory = \getenv('OPEN_RUNTIMES_LOGS_DIRECTORY');
+        $this->logsDirectory = $logsDirectory === false ? '/mnt/logs' : $logsDirectory;
     }
 }

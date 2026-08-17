@@ -13,4 +13,5 @@ object OprConfig {
         }
     val entrypoint: String = System.getenv("OPEN_RUNTIMES_ENTRYPOINT") ?: ""
     val env: String = System.getenv("OPEN_RUNTIMES_ENV") ?: ""
+    val logsDirectory: String = System.getenv("OPEN_RUNTIMES_LOGS_DIRECTORY") ?: "/mnt/logs"
 }

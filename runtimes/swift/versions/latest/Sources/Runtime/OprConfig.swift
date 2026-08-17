@@ -3,6 +3,8 @@ import Foundation
 enum OprConfig {
     static let secret = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_SECRET"] ?? ""
     static let env = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_ENV"] ?? ""
+    static let logsDirectory = ProcessInfo.processInfo
+        .environment["OPEN_RUNTIMES_LOGS_DIRECTORY"] ?? "/mnt/logs"
 
     static let headers: [String: String] = {
         guard

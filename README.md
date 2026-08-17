@@ -148,6 +148,8 @@ Runtime-specific behavior lives in an optional `hooks/` directory next to `helpe
 
 Every request sent to any of the runtimes must have the `x-open-runtimes-secret` header. The value of this header has to match the value of environment variable `OPEN_RUNTIMES_SECRET` set on the runtime. All example scripts use `secret-key` as the key and we strongly recommend changing this key before production use.
 
+Execution logs are always written to the runtime's `stdout` (logs) and `stderr` (errors). In addition, each execution's logs are written to `<id>_logs.log` and `<id>_errors.log` in the directory set by `OPEN_RUNTIMES_LOGS_DIRECTORY`, where `<id>` is the value of the `x-open-runtimes-log-id` response header. The directory defaults to `/mnt/logs` and must already exist; set the variable to an empty value to write logs to `stdout`/`stderr` only.
+
 ## Contributing
 
 All code contributions - including those of people having commit access - must go through a pull request and be approved by a core developer before being merged. This is to ensure a proper review of all the code.

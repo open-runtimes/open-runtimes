@@ -12,15 +12,17 @@ class Logger
     private mixed $streamLogs = null;
     private mixed $streamErrors = null;
 
-    public function __construct(?string $status = null, ?string $id = null, ?string $env = null)
+    public function __construct(?string $status = null, ?string $id = null, ?string $env = null, string $logsDirectory = '/mnt/logs')
     {
         $this->enabled = (!empty($status) ? $status : 'enabled') === 'enabled';
 
         if ($this->enabled) {
             $this->id = !empty($id) ? $id : ($env === 'development' ? 'dev' : $this->generateId());
 
-            $this->streamLogs = \fopen('/mnt/logs/' . $this->id . '_logs.log', 'a');
-            $this->streamErrors = \fopen('/mnt/logs/' . $this->id . '_errors.log', 'a');
+            if (!empty($logsDirectory)) {
+                $this->streamLogs = \fopen($logsDirectory . '/' . $this->id . '_logs.log', 'a');
+                $this->streamErrors = \fopen($logsDirectory . '/' . $this->id . '_errors.log', 'a');
+            }
         }
     }
 
@@ -60,7 +62,11 @@ class Logger
         }
 
         try {
-            \fwrite($stream, $stringLog . "\n");
+            \fwrite($type == Logger::TYPE_ERROR ? \STDERR : \STDOUT, $stringLog . "\n");
+
+            if ($stream !== null) {
+                \fwrite($stream, $stringLog . "\n");
+            }
         } catch (Exception $e) {
             // Silently fail to prevent 500 errors in runtime
             // Log write failures should not crash the runtime
@@ -75,8 +81,10 @@ class Logger
 
         $this->enabled = false;
 
-        \fclose($this->streamLogs);
-        \fclose($this->streamErrors);
+        if ($this->streamLogs !== null) {
+            \fclose($this->streamLogs);
+            \fclose($this->streamErrors);
+        }
     }
 
 

@@ -30,6 +30,10 @@ public class RuntimeLogger {
 
   private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
+  // Captured before any request can redirect System.out/System.err
+  private static final PrintStream stdout = System.out;
+  private static final PrintStream stderr = System.err;
+
   public RuntimeLogger(String status, String id) throws IOException {
     this.customStdStream = new ByteArrayOutputStream();
 
@@ -58,8 +62,12 @@ public class RuntimeLogger {
         this.id = id;
       }
 
-      this.streamLogs = new FileWriter("/mnt/logs/" + this.id + "_logs.log", true);
-      this.streamErrors = new FileWriter("/mnt/logs/" + this.id + "_errors.log", true);
+      if (!OprConfig.LOGS_DIRECTORY.isEmpty()) {
+        this.streamLogs =
+            new FileWriter(OprConfig.LOGS_DIRECTORY + "/" + this.id + "_logs.log", true);
+        this.streamErrors =
+            new FileWriter(OprConfig.LOGS_DIRECTORY + "/" + this.id + "_errors.log", true);
+      }
     }
   }
 
@@ -118,7 +126,13 @@ public class RuntimeLogger {
     }
 
     try {
-      stream.write(stringLog);
+      PrintStream passthrough = type == RuntimeLogger.TYPE_ERROR ? stderr : stdout;
+      passthrough.print(stringLog);
+      passthrough.flush();
+
+      if (stream != null) {
+        stream.write(stringLog);
+      }
     } catch (IOException e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
@@ -132,8 +146,10 @@ public class RuntimeLogger {
 
     this.enabled = false;
 
-    this.streamLogs.close();
-    this.streamErrors.close();
+    if (this.streamLogs != null) {
+      this.streamLogs.close();
+      this.streamErrors.close();
+    }
   }
 
   public void overrideNativeLogs() {

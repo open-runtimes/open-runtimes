@@ -7,6 +7,7 @@ import superjson from "superjson";
 export const loggingNamespace = new AsyncLocalStorage();
 
 const isDevelopment = process.env.OPEN_RUNTIMES_ENV === "development";
+const logsDirectory = process.env.OPEN_RUNTIMES_LOGS_DIRECTORY ?? "/mnt/logs";
 
 export const nativeLog = console.log.bind(console);
 
@@ -45,9 +46,17 @@ export class Logger {
       })
       .join(" ");
 
-    const path = `/mnt/logs/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`;
     try {
-      appendFileSync(path, stringLog + "\n");
+      (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
+        stringLog + "\n",
+      );
+
+      if (logsDirectory) {
+        appendFileSync(
+          `${logsDirectory}/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`,
+          stringLog + "\n",
+        );
+      }
     } catch {
       // Silently ignore write failures to prevent runtime crashes.
     }
