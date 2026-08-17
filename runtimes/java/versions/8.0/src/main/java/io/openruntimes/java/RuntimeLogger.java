@@ -134,13 +134,13 @@ public class RuntimeLogger {
     }
 
     try {
-      PrintStream passthrough = type == RuntimeLogger.TYPE_ERROR ? stderr : stdout;
-      passthrough.print(stringLog);
-      passthrough.flush();
-
       if (stream != null) {
         stream.write(stringLog);
       }
+
+      PrintStream passthrough = type == RuntimeLogger.TYPE_ERROR ? stderr : stdout;
+      passthrough.print(stringLog);
+      passthrough.flush();
     } catch (IOException e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime

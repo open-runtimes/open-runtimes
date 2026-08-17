@@ -115,11 +115,11 @@ class RuntimeLogger(
         }
 
         try {
+            stream?.write(stringLog)
+
             val passthrough = if (type == RuntimeLogger.TYPE_ERROR) stderr else stdout
             passthrough.print(stringLog)
             passthrough.flush()
-
-            stream?.write(stringLog)
         } catch (e: IOException) {
             // Silently fail to prevent 500 errors in runtime
             // Log write failures should not crash the runtime

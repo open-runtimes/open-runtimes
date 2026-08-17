@@ -93,14 +93,14 @@ class RuntimeLogger {
         }
 
         if let stringLogTemp = stringLog.data(using: .utf8) {
+            if let streamTemp = stream {
+                streamTemp.write(stringLogTemp)
+            }
+
             let passthrough = type == RuntimeLogger.TYPE_ERROR
                 ? FileHandle.standardError
                 : FileHandle.standardOutput
             passthrough.write(stringLogTemp)
-
-            if let streamTemp = stream {
-                streamTemp.write(stringLogTemp)
-            }
         }
     }
 

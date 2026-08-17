@@ -62,11 +62,11 @@ class Logger
         }
 
         try {
-            \fwrite($type == Logger::TYPE_ERROR ? \STDERR : \STDOUT, $stringLog . "\n");
-
             if ($stream !== null) {
                 \fwrite($stream, $stringLog . "\n");
             }
+
+            \fwrite($type == Logger::TYPE_ERROR ? \STDERR : \STDOUT, $stringLog . "\n");
         } catch (Exception $e) {
             // Silently fail to prevent 500 errors in runtime
             // Log write failures should not crash the runtime

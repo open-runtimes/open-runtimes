@@ -118,11 +118,11 @@ namespace DotNetRuntime
 
             try
             {
+                stream?.WriteLine(stringLog);
+
                 var passthrough = type == RuntimeLogger.TYPE_ERROR ? Stderr : Stdout;
                 passthrough.WriteLine(stringLog);
                 passthrough.Flush();
-
-                stream?.WriteLine(stringLog);
             }
             catch (Exception e)
             {

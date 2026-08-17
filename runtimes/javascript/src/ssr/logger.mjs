@@ -47,16 +47,16 @@ export class Logger {
       .join(" ");
 
     try {
-      (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
-        stringLog + "\n",
-      );
-
       if (logsDirectory) {
         appendFileSync(
           `${logsDirectory}/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`,
           stringLog + "\n",
         );
       }
+
+      (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
+        stringLog + "\n",
+      );
     } catch {
       // Silently ignore write failures to prevent runtime crashes.
     }

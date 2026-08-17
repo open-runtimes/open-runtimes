@@ -70,8 +70,8 @@ class Logger {
     }
 
     try {
-      (type == Logger.TYPE_ERROR ? stderr : stdout).write(stringLog + "\n");
       stream?.write(stringLog + "\n");
+      (type == Logger.TYPE_ERROR ? stderr : stdout).write(stringLog + "\n");
     } catch (e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime

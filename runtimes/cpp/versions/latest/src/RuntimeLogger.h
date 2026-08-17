@@ -85,13 +85,13 @@ public:
     }
 
     try {
-      // Bypasses std::cout/std::cerr, which are captured during execution
-      std::fputs((truncatedMessage + "\n").c_str(),
-                 type == "error" ? stderr : stdout);
-
       if (stream) {
         *(stream) << (truncatedMessage + "\n");
       }
+
+      // Bypasses std::cout/std::cerr, which are captured during execution
+      std::fputs((truncatedMessage + "\n").c_str(),
+                 type == "error" ? stderr : stdout);
     } catch (const std::exception &e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime

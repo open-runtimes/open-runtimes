@@ -83,11 +83,11 @@ class RuntimeLogger
     end
 
     begin
+      stream.write(string_log) unless stream.nil?
+
       passthrough = type === RuntimeLogger::TYPE_ERROR ? STDERR : STDOUT
       passthrough.write(string_log)
       passthrough.flush
-
-      stream.write(string_log) unless stream.nil?
     rescue
       # Silently fail to prevent 500 errors in runtime
       # Log write failures should not crash the runtime

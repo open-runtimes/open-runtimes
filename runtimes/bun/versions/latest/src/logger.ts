@@ -78,10 +78,10 @@ export class Logger {
     }
 
     try {
+      stream?.write(stringLog + "\n");
       (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
         stringLog + "\n",
       );
-      stream?.write(stringLog + "\n");
     } catch (error) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
