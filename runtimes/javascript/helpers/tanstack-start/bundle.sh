@@ -32,6 +32,8 @@ if [ "$IS_SSR" -eq 0 ]; then
 		fi
 	fi
 
+	# Back to the build root, so .output is looked for beside dist and not inside it
+	cd /usr/local/build
 	if [ -d ".output" ]; then
 		cd ./.output
 		ENTRYPOINT="./server/index.mjs"
@@ -45,7 +47,7 @@ fi
 # Change back to output directory before bundling
 cd /usr/local/build
 if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
-	cd $OPEN_RUNTIMES_OUTPUT_DIRECTORY
+	cd "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"
 fi
 
 if [ "$IS_SSR" -eq 1 ]; then
