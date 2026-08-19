@@ -22,6 +22,50 @@ const USER_CODE_PATH = '/usr/local/server/src/function';
 
 $config = new Config();
 $userFunction = null;
+$activeRequests = [];
+
+$fatalShutdownHandler = function () use (&$activeRequests): void {
+    $error = \error_get_last();
+    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
+
+    if ($error === null || !\in_array($error['type'], $fatalTypes, true)) {
+        return;
+    }
+
+    $message = \sprintf(
+        '%s in %s:%d',
+        $error['message'],
+        $error['file'],
+        $error['line']
+    );
+
+    // A fatal error terminates the worker, so none of its active requests can continue.
+    foreach ($activeRequests as $request) {
+        $logger = $request['logger'];
+        $response = $request['response'];
+
+        try {
+            $logger->write([$message], Logger::TYPE_ERROR);
+        } catch (\Throwable) {
+        }
+
+        try {
+            $logger->end();
+        } catch (\Throwable) {
+        }
+
+        try {
+            $response->header('x-open-runtimes-log-id', $logger->id);
+            $response->status(500);
+            $response->end('');
+        } catch (\Throwable) {
+        }
+    }
+};
+
+$server->on('WorkerStart', function () use ($fatalShutdownHandler): void {
+    \register_shutdown_function($fatalShutdownHandler);
+});
 
 $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction, $config) {
     $requestHeaders = $req->header;
@@ -217,7 +261,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
     $res->end($output['body']);
 };
 
-$server->on("Request", function ($req, $res) use ($action, $config) {
+$server->on("Request", function ($req, $res) use ($action, $config, &$activeRequests) {
     if ($req->server['path_info'] === '/__opr/health') {
         $res->status(200);
         $res->end('OK');
@@ -232,6 +276,11 @@ $server->on("Request", function ($req, $res) use ($action, $config) {
     }
 
     $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '', $config->env);
+    $requestId = \spl_object_id($res);
+    $activeRequests[$requestId] = [
+        'logger' => $logger,
+        'response' => $res,
+    ];
 
     try {
         $action($logger, $req, $res);
@@ -247,6 +296,8 @@ $server->on("Request", function ($req, $res) use ($action, $config) {
 
         $res->status(500);
         $res->end('');
+    } finally {
+        unset($activeRequests[$requestId]);
     }
 });
 

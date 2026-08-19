@@ -103,6 +103,9 @@ export function generateRuntimeObject(runtime: Runtime, key: string): Entry[] {
         if (runtime.entry_no_export) {
             profiles.push('no-export');
         }
+        if (runtimeFolder === 'php') {
+            profiles.push('php-fatal');
+        }
         if ((runtime.test ?? '').startsWith('SSR/') && ['node', 'bun', 'deno'].includes(runtimeFolder)) {
             profiles.push('cleanup-variants');
         }
