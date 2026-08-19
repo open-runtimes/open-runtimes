@@ -2,7 +2,7 @@
 
 class FatalErrorFixture
 {
-    public function updateMfa(): void {}
+    public function handler(): void {}
 
-    public function updateMFA(): void {}
+    public function HANDLER(): void {}
 }

@@ -34,7 +34,7 @@ class PHP extends Serverless
         self::assertArrayHasKey('x-open-runtimes-log-id', $response['headers']);
 
         $errors = Client::getErrors($response['headers']['x-open-runtimes-log-id']);
-        self::assertStringContainsString('Cannot redeclare FatalErrorFixture::updateMFA()', $errors);
+        self::assertStringContainsString('Cannot redeclare FatalErrorFixture::HANDLER()', $errors);
         self::assertStringContainsString('fatal.php', $errors);
     }
 }
