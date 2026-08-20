@@ -30,7 +30,11 @@ opr_success "Runtime started."
 start_uptime=$(opr_uptime)
 export start_uptime
 
-# Run server and monitor stdout for ready message
+# Run server and monitor stdout for ready message.
+# The reader is the last command in the pipeline, so its exit status is the
+# one bash reports — a server that crashes would otherwise leave the container
+# exiting 0 ("Completed"), indistinguishable from a clean shutdown. Take the
+# server's status off PIPESTATUS and exit with it instead.
 bash -c "$1" 2>&1 | {
 	recorded=false
 	while IFS= read -r line; do
@@ -43,3 +47,5 @@ bash -c "$1" 2>&1 | {
 		fi
 	done
 }
+
+exit "${PIPESTATUS[0]}"
