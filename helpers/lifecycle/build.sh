@@ -41,13 +41,17 @@ cd /usr/local/build
 
 opr_log "Build command execution started."
 
+# A framework's bundle step is appended to the build command, so it runs in the
+# subshell below and a directory it resolves cannot reach the pack and archive
+# phases through the environment. It leaves the resolved one in this file
+# instead. Clear it first: the path is fixed, so only a file the build itself
+# wrote may redirect the archive.
+rm -f /tmp/.opr-output-directory
+
 bash -c "$1"
 
 opr_log "Build command execution finished."
 
-# A framework's bundle step is appended to the build command, so it runs in the
-# subshell above and a directory it resolves cannot reach the pack and archive
-# phases through the environment. It leaves the resolved one here instead.
 if [ -s /tmp/.opr-output-directory ]; then
 	OPEN_RUNTIMES_OUTPUT_DIRECTORY="$(cat /tmp/.opr-output-directory)"
 	export OPEN_RUNTIMES_OUTPUT_DIRECTORY
