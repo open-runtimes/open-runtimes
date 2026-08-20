@@ -7,12 +7,9 @@ IS_SSR=0
 
 cd /usr/local/build
 
-# TanStack Start writes .output with a nitro plugin registered and dist without
-# one, and the directory is configured before the build runs. A site created
-# before its layout was known carries no value at all, and an empty one is not a
-# choice to override: resolve it below from what the build wrote, the way the
-# rendering strategy is left for the first build to decide. A directory the user
-# did set is obeyed even when the build wrote elsewhere.
+# TanStack Start writes .output with a nitro plugin registered, dist without one,
+# and the directory is configured before the build runs. Nothing configured means
+# nothing to override, so let the build decide.
 DETECT=0
 if [ -z "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
 	DETECT=1
@@ -33,10 +30,7 @@ if [ -e "$ENTRYPOINT" ]; then
 	IS_SSR=1 # Native SSR (middleware)
 fi
 
-# If SSR not detected yet, try default folders. What this finds is handed back
-# only when nothing was configured; against a directory the user set it stays
-# local to the bundling below, since a static site's directory is not wrong just
-# because the server tree sits next to it.
+# If SSR not detected yet, try default folders
 if [ "$IS_SSR" -eq 0 ]; then
 	cd /usr/local/build
 	if [ -d "dist" ]; then
@@ -63,8 +57,7 @@ fi
 # Change back to output directory before bundling
 cd /usr/local/build
 
-# No server anywhere means the build was prerendered, and its assets sit one
-# level into whichever layout it chose.
+# A prerendered build has no server; its assets sit one level in
 if [ "$DETECT" -eq 1 ] && [ -z "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
 	for CANDIDATE in ./.output/public ./dist/client; do
 		if [ -d "$CANDIDATE" ]; then
@@ -74,9 +67,7 @@ if [ "$DETECT" -eq 1 ] && [ -z "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
 	done
 fi
 
-# This script is appended to the build command, so it runs in that subshell and
-# a directory resolved here cannot reach the pack and archive phases through the
-# environment. Leave it in the file the lifecycle reads instead.
+# Hand it back to the lifecycle, which cannot see a variable set in this subshell
 if [ "$DETECT" -eq 1 ] && [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Build output resolved to $OPEN_RUNTIMES_OUTPUT_DIRECTORY. \e[0m"
 	echo -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" >/tmp/.opr-output-directory
