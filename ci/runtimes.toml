@@ -263,10 +263,9 @@ tools = "node --version && npm --version && npx --version && pnpm --version && y
 test = "SSR/TanstackStart.php"
 output = "./dist"
 
-# Same project as tanstack_start_native, which builds dist, pointed at the nitro
-# layout it never writes. Pins that the build resolves the directory from its own
-# output instead of failing on the configured one.
-[tanstack_start_wrong_output]
+# tanstack_start_native builds dist, so pointing it at the nitro layout pins that
+# the build resolves the directory from its own output rather than failing.
+[tanstack_start_output_fallback]
 report_size = false
 runtime = { name = "node", version = "24" }
 test_resource_dir = "tanstack_start_native"
