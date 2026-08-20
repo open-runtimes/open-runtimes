@@ -27,13 +27,13 @@ export class Logger {
   }
 
   async setup() {
-    if (this.enabled) {
+    if (this.enabled && config.logsDirectory) {
       const [streamLogs, streamErrors] = await Promise.all([
-        Deno.open(`/mnt/logs/${this.id}_logs.log`, {
+        Deno.open(`${config.logsDirectory}/${this.id}_logs.log`, {
           create: true,
           append: true,
         }),
-        Deno.open(`/mnt/logs/${this.id}_errors.log`, {
+        Deno.open(`${config.logsDirectory}/${this.id}_errors.log`, {
           create: true,
           append: true,
         }),
@@ -65,10 +65,6 @@ export class Logger {
       ? this.streamErrors
       : this.streamLogs;
 
-    if (!stream) {
-      return;
-    }
-
     let stringLog = messages
       .map((message) => {
         if (message instanceof Error) {
@@ -91,16 +87,27 @@ export class Logger {
     }
 
     const encoded = new TextEncoder().encode(stringLog + "\n");
+    // Each sink is guarded on its own so one failing never drops the other
     try {
-      this.writePromises.push(stream.write(encoded));
+      (type === Logger.TYPE_ERROR ? Deno.stderr : Deno.stdout).writeSync(
+        encoded,
+      );
     } catch (error) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
     }
+
+    try {
+      if (stream) {
+        this.writePromises.push(stream.write(encoded));
+      }
+    } catch (error) {
+      // Silently fail to prevent 500 errors in runtime
+    }
   }
 
   async end() {
-    if (!this.enabled || !this.streamLogs || !this.streamErrors) {
+    if (!this.enabled) {
       return;
     }
 
@@ -110,10 +117,8 @@ export class Logger {
       await promise;
     }
 
-    await Promise.all([
-      this.streamLogs.close(),
-      this.streamErrors.close(),
-    ]);
+    this.streamLogs?.close();
+    this.streamErrors?.close();
   }
 
   overrideNativeLogs() {

@@ -24,15 +24,20 @@ export class Logger {
         : config.env === "development"
           ? "dev"
           : this.generateId();
-      this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
-        flags: "a",
-      });
-      this.streamErrors = fs.createWriteStream(
-        `/mnt/logs/${this.id}_errors.log`,
-        {
-          flags: "a",
-        },
-      );
+      if (config.logsDirectory) {
+        this.streamLogs = fs.createWriteStream(
+          `${config.logsDirectory}/${this.id}_logs.log`,
+          {
+            flags: "a",
+          },
+        );
+        this.streamErrors = fs.createWriteStream(
+          `${config.logsDirectory}/${this.id}_errors.log`,
+          {
+            flags: "a",
+          },
+        );
+      }
     }
   }
 
@@ -50,10 +55,6 @@ export class Logger {
 
     const stream =
       type === Logger.TYPE_ERROR ? this.streamErrors : this.streamLogs;
-
-    if (!stream) {
-      return;
-    }
 
     let stringLog = messages
       .map((message) => {
@@ -76,11 +77,20 @@ export class Logger {
       stringLog += "... Log truncated due to size limit (8000 characters)";
     }
 
+    // Each sink is guarded on its own so one failing never drops the other
     try {
-      stream.write(stringLog + "\n");
+      (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
+        stringLog + "\n",
+      );
     } catch (error) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
+    }
+
+    try {
+      stream?.write(stringLog + "\n");
+    } catch (error) {
+      // Silently fail to prevent 500 errors in runtime
     }
   }
 
@@ -91,16 +101,17 @@ export class Logger {
 
     this.enabled = false;
 
-    await Promise.all([
-      new Promise((res) => {
-        this.streamLogs?.on("close", res);
-        this.streamLogs?.end();
-      }),
-      new Promise((res) => {
-        this.streamErrors?.on("close", res);
-        this.streamErrors?.end();
-      }),
-    ]);
+    await Promise.all(
+      [this.streamLogs, this.streamErrors]
+        .filter((stream) => stream !== null)
+        .map(
+          (stream) =>
+            new Promise((res) => {
+              stream.on("close", res);
+              stream.end();
+            }),
+        ),
+    );
   }
 
   overrideNativeLogs() {

@@ -41,8 +41,10 @@ class Logger:
             else:
                 self.id = id
 
-            self.stream_logs = open("/mnt/logs/" + self.id + "_logs.log", "a")
-            self.stream_errors = open("/mnt/logs/" + self.id + "_errors.log", "a")
+            if config.LOGS_DIRECTORY:
+                directory = config.LOGS_DIRECTORY
+                self.stream_logs = open(f"{directory}/{self.id}_logs.log", "a")
+                self.stream_errors = open(f"{directory}/{self.id}_errors.log", "a")
 
     def write(self, messages, xtype=None, is_native=False):
         if xtype is None:
@@ -81,11 +83,23 @@ class Logger:
             string_log = string_log[:8000]
             string_log += "... Log truncated due to size limit (8000 characters)"
 
+        # Each sink is guarded on its own so one failing never drops the other
         try:
-            stream.write(string_log)
+            passthrough = (
+                sys.__stderr__ if xtype == Logger.TYPE_ERROR else sys.__stdout__
+            )
+            passthrough.write(string_log)
+            passthrough.flush()
         except Exception as e:
             # Silently fail to prevent 500 errors in runtime
             # Log write failures should not crash the runtime
+            pass
+
+        try:
+            if stream is not None:
+                stream.write(string_log)
+        except Exception as e:
+            # Silently fail to prevent 500 errors in runtime
             pass
 
     def end(self):
@@ -94,8 +108,9 @@ class Logger:
 
         self.enabled = False
 
-        self.stream_logs.close()
-        self.stream_errors.close()
+        if self.stream_logs is not None:
+            self.stream_logs.close()
+            self.stream_errors.close()
 
     def override_native_logs(self):
         sys.stderr = sys.stdout = self.custom_std = StringIO()

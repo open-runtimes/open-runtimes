@@ -10,6 +10,7 @@ struct OprConfig {
   std::string secret;
   Json::Value headers;
   std::string env;
+  std::string logsDirectory = "/mnt/logs";
 };
 
 inline const OprConfig &config() {
@@ -22,6 +23,10 @@ inline const OprConfig &config() {
 
     if (std::getenv("OPEN_RUNTIMES_ENV") != nullptr) {
       config.env = std::getenv("OPEN_RUNTIMES_ENV");
+    }
+
+    if (std::getenv("OPEN_RUNTIMES_LOGS_DIRECTORY") != nullptr) {
+      config.logsDirectory = std::getenv("OPEN_RUNTIMES_LOGS_DIRECTORY");
     }
 
     if (std::getenv("OPEN_RUNTIMES_HEADERS") != nullptr) {

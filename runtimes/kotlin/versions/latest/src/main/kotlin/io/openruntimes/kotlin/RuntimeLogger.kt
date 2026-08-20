@@ -29,6 +29,10 @@ class RuntimeLogger(
 
     companion object {
         private val gson = GsonBuilder().serializeNulls().create()
+
+        // Captured before any request can redirect System.out/System.err
+        private val stdout: PrintStream = System.out
+        private val stderr: PrintStream = System.err
         public val TYPE_ERROR = "error"
         public val TYPE_LOG = "log"
     }
@@ -60,8 +64,10 @@ class RuntimeLogger(
                 }
             }
 
-            this.streamLogs = FileWriter("/mnt/logs/" + this.id + "_logs.log", true)
-            this.streamErrors = FileWriter("/mnt/logs/" + this.id + "_errors.log", true)
+            if (OprConfig.logsDirectory.isNotEmpty()) {
+                this.streamLogs = FileWriter(OprConfig.logsDirectory + "/" + this.id + "_logs.log", true)
+                this.streamErrors = FileWriter(OprConfig.logsDirectory + "/" + this.id + "_errors.log", true)
+            }
         }
     }
 
@@ -103,18 +109,21 @@ class RuntimeLogger(
             i += 1
         }
 
-        if (stream != null) {
-            if (stringLog.length > 8000) {
-                stringLog = stringLog.substring(0, 8000)
-                stringLog += "... Log truncated due to size limit (8000 characters)"
-            }
+        if (stringLog.length > 8000) {
+            stringLog = stringLog.substring(0, 8000)
+            stringLog += "... Log truncated due to size limit (8000 characters)"
+        }
 
-            try {
-                stream.write(stringLog)
-            } catch (e: IOException) {
-                // Silently fail to prevent 500 errors in runtime
-                // Log write failures should not crash the runtime
-            }
+        // PrintStream swallows its own errors, so the file sink stays guarded alone
+        val passthrough = if (type == RuntimeLogger.TYPE_ERROR) stderr else stdout
+        passthrough.print(stringLog)
+        passthrough.flush()
+
+        try {
+            stream?.write(stringLog)
+        } catch (e: IOException) {
+            // Silently fail to prevent 500 errors in runtime
+            // Log write failures should not crash the runtime
         }
     }
 
