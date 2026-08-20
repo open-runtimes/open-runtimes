@@ -9,9 +9,7 @@ RESOLVED=0
 cd /usr/local/build
 
 # TanStack Start writes .output with a nitro plugin registered and dist without
-# one, and the directory is configured before the build runs. When the build
-# went to the other layout, take the same directory there instead of failing on
-# one that was never written.
+# one, and the directory is configured before the build runs.
 if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ] && [ -z "$(ls -A "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" 2>/dev/null)" ]; then
 	CONFIGURED="${OPEN_RUNTIMES_OUTPUT_DIRECTORY#./}"
 	CONFIGURED="${CONFIGURED%/}"
