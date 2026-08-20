@@ -263,10 +263,7 @@ tools = "node --version && npm --version && npx --version && pnpm --version && y
 test = "SSR/TanstackStart.php"
 output = "./dist"
 
-# A site created before its layout was known configures no output directory. The
-# nitro project is the one that pins both halves: the build resolves .output on
-# its own, and it emits dist too, so it only gets there if .output is looked for
-# beside dist rather than inside it.
+# No output directory configured, so the build resolves it from what it wrote
 [tanstack_start_output_detected]
 report_size = false
 runtime = { name = "node", version = "24" }
