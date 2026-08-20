@@ -8,4 +8,5 @@ export const config = {
   headers,
   entrypoint: Bun.env["OPEN_RUNTIMES_ENTRYPOINT"] ?? "",
   env: Bun.env["OPEN_RUNTIMES_ENV"] ?? "",
+  logsDirectory: Bun.env["OPEN_RUNTIMES_LOGS_DIRECTORY"] ?? "/mnt/logs",
 };

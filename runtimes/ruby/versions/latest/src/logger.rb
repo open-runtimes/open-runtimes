@@ -37,8 +37,10 @@ class RuntimeLogger
         @id = id
       end
 
-      @stream_logs = File.open("/mnt/logs/" + @id + "_logs.log", 'a')
-      @stream_errors = File.open("/mnt/logs/" + @id + "_errors.log", 'a')
+      unless Config::LOGS_DIRECTORY.empty?
+        @stream_logs = File.open(Config::LOGS_DIRECTORY + "/" + @id + "_logs.log", 'a')
+        @stream_errors = File.open(Config::LOGS_DIRECTORY + "/" + @id + "_errors.log", 'a')
+      end
     end
   end
 
@@ -80,11 +82,20 @@ class RuntimeLogger
       string_log += "... Log truncated due to size limit (8000 characters)"
     end
 
+    # Each sink is guarded on its own so one failing never drops the other
     begin
-      stream.write(string_log)
+      passthrough = type === RuntimeLogger::TYPE_ERROR ? STDERR : STDOUT
+      passthrough.write(string_log)
+      passthrough.flush
     rescue
       # Silently fail to prevent 500 errors in runtime
       # Log write failures should not crash the runtime
+    end
+
+    begin
+      stream.write(string_log) unless stream.nil?
+    rescue
+      # Silently fail to prevent 500 errors in runtime
     end
   end
 
@@ -95,8 +106,8 @@ class RuntimeLogger
 
     @enabled = false
 
-    @stream_logs.close
-    @stream_errors.close
+    @stream_logs&.close
+    @stream_errors&.close
   end
 
   def override_native_logs()

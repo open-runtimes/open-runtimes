@@ -11,4 +11,5 @@ export const config = {
   headers: parseHeaders(),
   entrypoint: Deno.env.get("OPEN_RUNTIMES_ENTRYPOINT") ?? "",
   env: Deno.env.get("OPEN_RUNTIMES_ENV") ?? "",
+  logsDirectory: Deno.env.get("OPEN_RUNTIMES_LOGS_DIRECTORY") ?? "/mnt/logs",
 };

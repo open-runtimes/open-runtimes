@@ -23,6 +23,10 @@ namespace DotNetRuntime
 
         private StringBuilder? customStdStream = null;
 
+        // Captured before any request can redirect Console.Out/Console.Error
+        private static readonly TextWriter Stdout = Console.Out;
+        private static readonly TextWriter Stderr = Console.Error;
+
         public RuntimeLogger(String? status, String? id)
         {
             if (string.IsNullOrEmpty(status) || status == "enabled")
@@ -53,8 +57,17 @@ namespace DotNetRuntime
                 }
 
                 // Log stream
-                this.streamLogs = new StreamWriter("/mnt/logs/" + this.id + "_logs.log", true);
-                this.streamErrors = new StreamWriter("/mnt/logs/" + this.id + "_errors.log", true);
+                if (!string.IsNullOrEmpty(OprConfig.LogsDirectory))
+                {
+                    this.streamLogs = new StreamWriter(
+                        OprConfig.LogsDirectory + "/" + this.id + "_logs.log",
+                        true
+                    );
+                    this.streamErrors = new StreamWriter(
+                        OprConfig.LogsDirectory + "/" + this.id + "_errors.log",
+                        true
+                    );
+                }
             }
         }
 
@@ -97,23 +110,32 @@ namespace DotNetRuntime
                 stringLog = message.ToString() ?? "";
             }
 
-            if (stream != null)
+            if (stringLog.Length > 8000)
             {
-                if (stringLog.Length > 8000)
-                {
-                    stringLog = stringLog.Substring(0, 8000);
-                    stringLog += "... Log truncated due to size limit (8000 characters)";
-                }
+                stringLog = stringLog.Substring(0, 8000);
+                stringLog += "... Log truncated due to size limit (8000 characters)";
+            }
 
-                try
-                {
-                    stream.WriteLine(stringLog);
-                }
-                catch (Exception e)
-                {
-                    // Silently fail to prevent 500 errors in runtime
-                    // Log write failures should not crash the runtime
-                }
+            // Each sink is guarded on its own so one failing never drops the other
+            try
+            {
+                var passthrough = type == RuntimeLogger.TYPE_ERROR ? Stderr : Stdout;
+                passthrough.WriteLine(stringLog);
+                passthrough.Flush();
+            }
+            catch (Exception e)
+            {
+                // Silently fail to prevent 500 errors in runtime
+                // Log write failures should not crash the runtime
+            }
+
+            try
+            {
+                stream?.WriteLine(stringLog);
+            }
+            catch (Exception e)
+            {
+                // Silently fail to prevent 500 errors in runtime
             }
         }
 

@@ -151,6 +151,21 @@ services:
       - ./.runtime/no-export-build/src/code.tar.gz:/mnt/code/code.tar.gz:ro
     command: ['bash', '-c', 'bash helpers/start.sh "$$START_COMMAND"']
 
+  # PHP fatal-error variant. Kept separate because the test intentionally kills a worker.
+  serve-php-fatal:
+    <<: *runtime
+    profiles: [php-fatal]
+    container_name: open-runtimes-test-serve-php-fatal
+    environment:
+      <<: *serve-env
+      OPEN_RUNTIMES_ENV: production
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+    volumes:
+      - ./resources/telemetry:/mnt/telemetry
+      - /tmp/logs:/mnt/logs
+      - ./.runtime/code.tar.gz:/mnt/code/code.tar.gz:ro
+    command: ['bash', '-c', 'bash helpers/start.sh "$$START_COMMAND"']
+
   phpunit:
     image: phpswoole/swoole:5.1.2-php8.3-alpine
     platform: ${TEST_PLATFORM:-linux/x86_64}
