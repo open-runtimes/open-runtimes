@@ -108,8 +108,9 @@ class Logger:
 
         self.enabled = False
 
-        self.stream_logs.close()
-        self.stream_errors.close()
+        if self.stream_logs is not None:
+            self.stream_logs.close()
+            self.stream_errors.close()
 
     def override_native_logs(self):
         sys.stderr = sys.stdout = self.custom_std = StringIO()
