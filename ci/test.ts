@@ -8,9 +8,10 @@
 //   bun ci/test.ts node-25 --format-write  run formatters in write mode and exit
 //
 // Flow: bake image -> formatter check (latest only) -> stage fixtures ->
-// tools -> build (+ variants by profile) -> serve trio -> phpunit -> down.
+// tools -> build (+ variants by profile) -> serve trio -> startup metrics ->
+// phpunit -> down.
 
-import { existsSync, cpSync, rmSync, mkdirSync, writeFileSync, readdirSync } from 'fs';
+import { existsSync, cpSync, rmSync, mkdirSync, writeFileSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { resolveEntry, type Entry } from './common';
 
@@ -103,6 +104,7 @@ function stageFixtures(): void {
 
     rmSync('/tmp/logs', { recursive: true, force: true });
     mkdirSync('/tmp/logs', { recursive: true });
+    rmSync('/tmp/startup-metrics.json', { force: true });
 }
 
 // Variant build directories: copies of tests/.runtime, staged AFTER the main
@@ -121,6 +123,85 @@ function stageVariant(variant: string): void {
         }
         cpSync(join(runtimeDir, item), join(dir, item), { recursive: true });
     }
+}
+
+// Measure the primary serve container's startup: wall time from the container
+// start until /__opr/health responds, plus the extract/prepare/startup
+// breakdown the runtime reports on /__opr/timings. Results land in
+// /tmp/startup-metrics.json for the CI comment step; failures are left to
+// phpunit, which waits longer and reports container logs.
+async function measureStartup(): Promise<void> {
+    const port = process.env.HOST_PORT_MAIN ?? '3000';
+    const base = `http://127.0.0.1:${port}`;
+    const deadline = Date.now() + 120_000;
+
+    // The compose file sets OPEN_RUNTIMES_SECRET=test-secret-key on the main
+    // serve container; the static runtime gates every route (health included)
+    // behind basic auth, so authenticate and count any HTTP response as ready.
+    const secret = 'test-secret-key';
+    const headers = {
+        'x-open-runtimes-secret': secret,
+        'authorization': `Basic ${Buffer.from(`opr:${secret}`).toString('base64')}`,
+    };
+
+    let ready = 0;
+    while (ready === 0) {
+        try {
+            // Any sub-500 response counts as ready: flutter's dhttpd has no
+            // health route (404) but is serving; 5xx means not healthy yet.
+            const response = await fetch(`${base}/__opr/health`, { headers, signal: AbortSignal.timeout(1000) });
+            if (response.status < 500) {
+                ready = Date.now();
+                break;
+            }
+        } catch {
+            // Server not accepting connections yet
+        }
+        if (Date.now() > deadline) {
+            console.warn('Startup measurement skipped: server not ready within 120s.');
+            return;
+        }
+        await Bun.sleep(50);
+    }
+
+    const inspect = Bun.spawnSync(['docker', 'inspect', '--format', '{{.State.StartedAt}}', 'open-runtimes-test-serve'], { env: composeEnv });
+    const startedAt = Date.parse(inspect.stdout.toString().trim());
+    if (Number.isNaN(startedAt)) {
+        console.warn('Startup measurement skipped: could not inspect container start time.');
+        return;
+    }
+
+    const metrics: Record<string, number> = {
+        cold_start: Number(((ready - startedAt) / 1000).toFixed(3)),
+    };
+
+    // The lifecycle scripts append extract/prepare/startup to the telemetry
+    // file all serve containers mount from the host. Read it directly rather
+    // than via /__opr/timings — static-serving runtimes (flutter, static)
+    // either lack the route or snapshot the file before the server boots.
+    // startup= lands only once the ready log line is processed, so allow it
+    // a moment to appear.
+    const telemetry = join(repoRoot, 'tests/resources/telemetry/timings.txt');
+    for (let attempt = 0; attempt < 10; attempt++) {
+        try {
+            for (const line of readFileSync(telemetry, 'utf8').trim().split('\n')) {
+                const [key, value] = line.split('=', 2);
+                if (['extract', 'prepare', 'startup'].includes(key) && !Number.isNaN(parseFloat(value))) {
+                    metrics[key] = parseFloat(value);
+                }
+            }
+        } catch {
+            // Breakdown is best-effort; cold start alone is still worth reporting
+        }
+        if ('startup' in metrics) {
+            break;
+        }
+        await Bun.sleep(200);
+    }
+
+    const summary = Object.entries(metrics).map(([key, value]) => `${key}=${value.toFixed(3)}s`).join(' ');
+    console.log(`Startup metrics: ${summary}`);
+    writeFileSync('/tmp/startup-metrics.json', JSON.stringify(metrics));
 }
 
 function down(): void {
@@ -185,6 +266,9 @@ if (entry.COMPOSE_PROFILES.includes('cleanup-variants')) {
 
 console.log('Starting runtime servers ...');
 run([...compose, 'up', '-d']);
+
+console.log('Measuring startup time ...');
+await measureStartup();
 
 console.log('Running tests ...');
 run([...compose, 'run', '--rm', 'phpunit']);
