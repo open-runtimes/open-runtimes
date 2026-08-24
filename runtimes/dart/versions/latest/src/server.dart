@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
+
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
+
 import '{entrypoint}' as user_code;
 import 'config.dart' as config;
 import 'function_types.dart';
@@ -16,8 +18,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     if (safeTimeout == null || safeTimeout == 0) {
       return shelf.Response(
         500,
-        body:
-            'Header "x-open-runtimes-timeout" must be an integer greater than 0.',
+        body: 'Header "x-open-runtimes-timeout" must be an integer greater than 0.',
       );
     }
   }
@@ -199,9 +200,8 @@ void main() async {
         return shelf.Response(200, body: 'OK');
       }
       if (req.url.path == '__opr/timings') {
-        String timings = await File(
-          '/mnt/telemetry/timings.txt',
-        ).readAsString();
+        String timings = await File('/mnt/telemetry/timings.txt')
+            .readAsString();
         return shelf.Response.ok(
           timings,
           headers: {'content-type': 'text/plain; charset=utf-8'},

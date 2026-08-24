@@ -16,7 +16,7 @@ tee -a lib/main.dart << END
 import 'dart:async';
 import 'dart:math';
 
-Future<dynamic> main(final context) async {
+Future<dynamic> main(context) async {
   return context.res.json({'n': new Random().nextDouble() });
 }
 
@@ -81,7 +81,7 @@ You can also make changes to the example code and apply the changes with the `do
 ```dart
 import 'dart:async';
 
-Future<dynamic> main(final context) async {
+Future<dynamic> main(context) async {
   return res.send('Hello Open Runtimes 👋');
 }
 ```
