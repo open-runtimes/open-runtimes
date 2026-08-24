@@ -15,5 +15,7 @@ INCLUDE ./docker/base-after
 # Enable web platform
 RUN flutter config --enable-web
 
-# Preinstall the static file server so cold starts don't hit pub
-RUN dart pub global activate dhttpd
+# Preinstall the static file server so cold starts don't hit pub.
+# Pinned so image rebuilds stay reproducible; 4.1.0 supports Dart ^3.0.0,
+# covering every Flutter version in the matrix.
+RUN dart pub global activate dhttpd 4.1.0
