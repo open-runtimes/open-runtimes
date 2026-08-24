@@ -147,9 +147,13 @@ async function measureStartup(): Promise<void> {
     let ready = 0;
     while (ready === 0) {
         try {
-            await fetch(`${base}/__opr/health`, { headers, signal: AbortSignal.timeout(1000) });
-            ready = Date.now();
-            break;
+            // Any sub-500 response counts as ready: flutter's dhttpd has no
+            // health route (404) but is serving; 5xx means not healthy yet.
+            const response = await fetch(`${base}/__opr/health`, { headers, signal: AbortSignal.timeout(1000) });
+            if (response.status < 500) {
+                ready = Date.now();
+                break;
+            }
         } catch {
             // Server not accepting connections yet
         }
