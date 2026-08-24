@@ -3,8 +3,7 @@
 set -e
 shopt -s dotglob
 
-# Install Dart static server
-dart pub global activate dhttpd
+# Dart static server is preinstalled at image build time (see runtimes/flutter/Dockerfile)
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
 # Run HTTP server
