@@ -11,7 +11,7 @@
 // tools -> build (+ variants by profile) -> serve trio -> startup metrics ->
 // phpunit -> down.
 
-import { existsSync, cpSync, rmSync, mkdirSync, writeFileSync, readdirSync } from 'fs';
+import { existsSync, cpSync, rmSync, mkdirSync, writeFileSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { resolveEntry, type Entry } from './common';
 
@@ -171,16 +171,28 @@ async function measureStartup(): Promise<void> {
         cold_start: Number(((ready - startedAt) / 1000).toFixed(3)),
     };
 
-    try {
-        const timings = await (await fetch(`${base}/__opr/timings`, { headers, signal: AbortSignal.timeout(5000) })).text();
-        for (const line of timings.trim().split('\n')) {
-            const [key, value] = line.split('=', 2);
-            if (['extract', 'prepare', 'startup'].includes(key) && !Number.isNaN(parseFloat(value))) {
-                metrics[key] = parseFloat(value);
+    // The lifecycle scripts append extract/prepare/startup to the telemetry
+    // file all serve containers mount from the host. Read it directly rather
+    // than via /__opr/timings — static-serving runtimes (flutter, static)
+    // either lack the route or snapshot the file before the server boots.
+    // startup= lands only once the ready log line is processed, so allow it
+    // a moment to appear.
+    const telemetry = join(repoRoot, 'tests/resources/telemetry/timings.txt');
+    for (let attempt = 0; attempt < 10; attempt++) {
+        try {
+            for (const line of readFileSync(telemetry, 'utf8').trim().split('\n')) {
+                const [key, value] = line.split('=', 2);
+                if (['extract', 'prepare', 'startup'].includes(key) && !Number.isNaN(parseFloat(value))) {
+                    metrics[key] = parseFloat(value);
+                }
             }
+        } catch {
+            // Breakdown is best-effort; cold start alone is still worth reporting
         }
-    } catch {
-        // Breakdown is best-effort; cold start alone is still worth reporting
+        if ('startup' in metrics) {
+            break;
+        }
+        await Bun.sleep(200);
     }
 
     const summary = Object.entries(metrics).map(([key, value]) => `${key}=${value.toFixed(3)}s`).join(' ');
