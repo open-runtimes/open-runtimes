@@ -28,9 +28,7 @@ extract_archive() {
 	format=$(detect_archive_format "$archive")
 	case "$format" in
 	squashfs) unsquashfs -q -f -d "$dest" "$archive" ;;
-	# Prefer igzip (isa-l), then pigz — both decompress gzip streams
-	# several times faster than the zlib built into tar. Subshells with
-	# pipefail so a decompressor error surfaces as a non-zero exit.
+	# Prefer igzip, then pigz — both much faster than tar's built-in zlib
 	gzip)
 		if command -v igzip >/dev/null 2>&1; then
 			(set -o pipefail && igzip -dc "$archive" | tar -xf - -C "$dest")
