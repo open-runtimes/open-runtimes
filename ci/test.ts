@@ -104,6 +104,7 @@ function stageFixtures(): void {
 
     rmSync('/tmp/logs', { recursive: true, force: true });
     mkdirSync('/tmp/logs', { recursive: true });
+    rmSync('/tmp/startup-metrics.json', { force: true });
 }
 
 // Variant build directories: copies of tests/.runtime, staged AFTER the main
