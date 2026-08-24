@@ -8,7 +8,7 @@ if [ -f "/usr/local/server/src/function/Gemfile" ]; then
 	echo "eval_gemfile '/usr/local/server/src/function/Gemfile'" >>/usr/local/server/Gemfile
 fi
 
-# Link dependencies (symlink instead of copy — the bundle can be tens of MB)
+# Link dependencies
 ln -sfn /usr/local/server/src/function/vendor /usr/local/server/vendor
 
 bundle config set --local path 'vendor/bundle'
