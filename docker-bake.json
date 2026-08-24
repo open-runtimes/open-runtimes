@@ -2009,7 +2009,7 @@
         "version": "./runtimes/java/versions/17.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:17-jdk-alpine-3.23"
+        "BASE_IMAGE": "eclipse-temurin:17-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -2032,7 +2032,7 @@
         "version": "./runtimes/java/versions/11.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:11-jdk-alpine-3.23"
+        "BASE_IMAGE": "eclipse-temurin:11-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -2055,7 +2055,7 @@
         "version": "./runtimes/java/versions/8.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:8-jdk-alpine-3.23"
+        "BASE_IMAGE": "eclipse-temurin:8-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",
