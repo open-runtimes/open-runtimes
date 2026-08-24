@@ -7,9 +7,12 @@ ENV OPEN_RUNTIMES_HEADERS="{}"
 
 RUN <<EOR
     if [ -f /etc/alpine-release ]; then
-        apk add --no-cache util-linux zstd squashfs-tools
+        apk add --no-cache util-linux zstd squashfs-tools isa-l
     else
-        apt-get update && apt-get install -y util-linux zstd squashfs-tools
+        apt-get update && apt-get install -y util-linux zstd squashfs-tools pigz
+        # isal (igzip) is only packaged on newer Debian/Ubuntu releases;
+        # older bases fall back to the pigz installed above.
+        apt-get install -y isal || true
     fi
 EOR
 
