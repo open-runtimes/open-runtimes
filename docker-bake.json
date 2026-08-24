@@ -67,6 +67,7 @@
     },
     "dart": {
       "targets": [
+        "dart-3_13",
         "dart-3_12",
         "dart-3_11",
         "dart-3_10",
@@ -864,6 +865,29 @@
     },
     "_dart": {
       "dockerfile-inline": "# syntax=docker/dockerfile:1\n# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the\n# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).\nARG BASE_IMAGE\nFROM $${BASE_IMAGE}\n\nLABEL maintainer=\"team@appwrite.io\"\nLABEL namespace=\"open-runtimes\"\n\nENV OPEN_RUNTIMES_SECRET=open_runtime_secret\nENV OPEN_RUNTIMES_ENV=production\nENV OPEN_RUNTIMES_HEADERS=\"{}\"\n\nRUN <<EOR\n    if [ -f /etc/alpine-release ]; then\n        apk add --no-cache util-linux zstd squashfs-tools\n    else\n        apt-get update && apt-get install -y util-linux zstd squashfs-tools\n    fi\nEOR\n\nRUN mkdir -p /mnt/code /mnt/logs /mnt/telemetry /usr/local/build /usr/local/server/src/function\n\nWORKDIR /usr/local/server\n\n# Assemble /usr/local/server from named build contexts, in overlay precedence\n# order (later layers overwrite earlier ones):\n#   1. helpers  -> repo helpers/ (global lifecycle runner + shims)\n#   2. shared   -> runtimes/<shared family>/ (e.g. javascript/ for node), or empty\n#   3. latest   -> runtimes/<runtime>/versions/latest/\n#   4. version  -> runtimes/<runtime>/versions/<version>/ extras, or empty\nCOPY --from=helpers . /usr/local/server/helpers/\nCOPY --from=shared . /usr/local/server/\nCOPY --from=latest . /usr/local/server/\nCOPY --from=version . /usr/local/server/\nRUN rm -f /usr/local/server/.gitkeep /usr/local/server/Dockerfile /usr/local/server/build.dockerfile\n\nRUN apt-get update && apt-get install -y bash\n\nRUN dart --disable-analytics\n\nENV OPEN_RUNTIMES_SERVER_COMMAND=\"src/function/server\"\n\nRUN chmod -R +x /usr/local/server/helpers\n\nEXPOSE 3000\n"
+    },
+    "dart-3_13": {
+      "inherits": [
+        "_base",
+        "_dart"
+      ],
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dart/versions/latest",
+        "version": "./runtimes/dart/versions/3.13"
+      },
+      "args": {
+        "BASE_IMAGE": "dart:3.13.1"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dart:v5-3.13${TAG_SUFFIX}",
+        "${REGISTRY}/dart:v5-3.13${TAG_SUFFIX}${SHA_SUFFIX}"
+      ]
     },
     "dart-3_12": {
       "inherits": [
