@@ -421,14 +421,15 @@ platforms = ["linux/amd64"]
 
 [java.build.versions]
 "25" = { base = "eclipse-temurin:25-jdk-alpine-3.23", args = { SYSTEM_PACKAGES = "curl" } }
-# Temurin does not publish Alpine 3.23 variants for EOL JDK 18 or 22.
-# The frozen JDK 18 Alpine image is also amd64-only, so keep Jammy for multi-arch builds.
+# Temurin publishes multi-arch Alpine images only for JDK 21+. The Alpine
+# variants of JDK 8/11/17 are amd64-only and JDK 18/22 have no Alpine 3.23
+# build at all, so those five stay on Jammy for linux/arm64 support.
 "22" = { base = "eclipse-temurin:22-jdk-jammy", args = { SYSTEM_PACKAGES = "curl" } }
 "21.0" = { base = "eclipse-temurin:21-jdk-alpine-3.23" }
 "18.0" = { base = "eclipse-temurin:18-jdk-jammy" }
-"17.0" = { base = "eclipse-temurin:17-jdk-alpine-3.23" }
-"11.0" = { base = "eclipse-temurin:11-jdk-alpine-3.23" }
-"8.0" = { base = "eclipse-temurin:8-jdk-alpine-3.23" }
+"17.0" = { base = "eclipse-temurin:17-jdk-jammy" }
+"11.0" = { base = "eclipse-temurin:11-jdk-jammy" }
+"8.0" = { base = "eclipse-temurin:8-jdk-jammy" }
 
 [cpp.build.versions]
 "23" = { base = "alpine:3.23.5" }
