@@ -3,8 +3,7 @@
 set -e
 shopt -s dotglob
 
-# Install Dart static server
-dart pub global activate dhttpd
+# dhttpd is preinstalled at image build time
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
 # Run HTTP server

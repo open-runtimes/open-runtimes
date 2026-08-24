@@ -14,3 +14,7 @@ INCLUDE ./docker/base-after
 
 # Enable web platform
 RUN flutter config --enable-web
+
+# Preinstall the static file server; 4.1.0 is the newest release compatible
+# with every Dart SDK in the matrix
+RUN dart pub global activate dhttpd 4.1.0
