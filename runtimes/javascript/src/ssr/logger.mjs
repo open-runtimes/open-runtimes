@@ -63,7 +63,10 @@ export class Logger {
           return message;
         }
         try {
-          return JSON.stringify(superjson().serialize(message).json);
+          const serializer = superjson();
+          return serializer
+            ? JSON.stringify(serializer.serialize(message).json)
+            : JSON.stringify(message);
         } catch {
           return String(message);
         }
