@@ -1,26 +1,32 @@
 import { reqHandler } from "./server/server.mjs";
-import express from "express";
+import { createServer } from "node:http";
+import serveStatic from "serve-static";
 
 console.log("Angular server starting ...");
-
-const app = express();
 
 const cacheHeader =
   process.env.OPEN_RUNTIMES_CACHE_HEADER ?? "CDN-Cache-Control";
 
 // framework-specific logic
-app.use(
-  express.static("browser", {
-    setHeaders: (res, _path) => {
-      res.setHeader(cacheHeader, "public, max-age=36000");
-    },
-  }),
-);
-app.use(reqHandler);
+const staticHandler = serveStatic("browser", {
+  setHeaders: (res, _path) => {
+    res.setHeader(cacheHeader, "public, max-age=36000");
+  },
+});
+
+// Terminal handler: mirror express's finalhandler for requests the framework
+// hands back (404) or fails on (500).
+const finish = (res) => (error) => {
+  res.statusCode = error ? 500 : 404;
+  res.end();
+};
+const server = createServer((req, res) => {
+  staticHandler(req, res, () => reqHandler(req, res, finish(res)));
+});
 // End of framework-specific logic
 
 const port = +(process.env.PORT || "3000");
 const host = process.env.HOST || "0.0.0.0";
-app.listen(port, host, () => {
+server.listen(port, host, () => {
   console.log(`Angular server started on http://${host}:${port}`);
 });

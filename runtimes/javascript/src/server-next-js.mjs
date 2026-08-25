@@ -1,34 +1,33 @@
 import { parse } from "url";
 import next from "next";
-import express from "express";
+import { createServer } from "node:http";
+import serveStatic from "serve-static";
 
 console.log("Next.js server starting ...");
-
-const app = express();
 
 const cacheHeader =
   process.env.OPEN_RUNTIMES_CACHE_HEADER ?? "CDN-Cache-Control";
 
 // framework-specific logic
-app.use(
-  express.static("public", {
-    setHeaders: (res, _path) => {
-      res.setHeader(cacheHeader, "public, max-age=36000");
-    },
-  }),
-);
+const staticHandler = serveStatic("public", {
+  setHeaders: (res, _path) => {
+    res.setHeader(cacheHeader, "public, max-age=36000");
+  },
+});
 const nextApp = next({});
 const handle = nextApp.getRequestHandler();
-app.use((req, res, next) => {
-  const parsedUrl = parse(req.url, true);
-  handle(req, res, parsedUrl);
+const server = createServer((req, res) => {
+  staticHandler(req, res, () => {
+    const parsedUrl = parse(req.url, true);
+    handle(req, res, parsedUrl);
+  });
 });
 // End of framework-specific logic
 
 nextApp.prepare().then(() => {
   const port = +(process.env.PORT || "3000");
   const host = process.env.HOST || "0.0.0.0";
-  app.listen(port, host, () => {
+  server.listen(port, host, () => {
     console.log(`Next.js server started on http://${host}:${port}`);
   });
 });
