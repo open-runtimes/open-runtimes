@@ -2,29 +2,23 @@ import { appendFileSync } from "node:fs";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createRequire } from "node:module";
 
-// Loaded lazily on the first structured log so the import stays off the SSR
-// boot path; require(esm) keeps it synchronous, so no log is ever serialized
-// without it.
+// Where the ESM-only superjson can be loaded synchronously (Node with
+// require(esm), Bun), it is loaded lazily on the first structured log so the
+// import stays off the SSR boot path. Everywhere else it is awaited eagerly
+// at module load, exactly as before this optimization — either way no log is
+// ever serialized without it.
 const require = createRequire(import.meta.url);
 let _superjson;
-let _superjsonUnavailable = false;
 const superjson = () => {
-  if (!_superjson && !_superjsonUnavailable) {
-    try {
-      const module = require("superjson");
-      _superjson = module.default ?? module;
-    } catch {
-      // Node without require(esm) support — load in the background and fall
-      // back to plain JSON.stringify until it resolves.
-      _superjsonUnavailable = true;
-      import("superjson").then((m) => {
-        _superjson = m.default;
-        _superjsonUnavailable = false;
-      });
-    }
+  if (!_superjson) {
+    const module = require("superjson");
+    _superjson = module.default ?? module;
   }
   return _superjson;
 };
+if (!process.features?.require_module && typeof Bun === "undefined") {
+  _superjson = (await import("superjson")).default;
+}
 
 // Shared between node and bun. Uses AsyncLocalStorage (built into Node 16+
 // and Bun) instead of cls-hooked so both runtimes can consume the same file.
