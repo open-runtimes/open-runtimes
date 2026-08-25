@@ -1,6 +1,30 @@
 import { appendFileSync } from "node:fs";
 import { AsyncLocalStorage } from "node:async_hooks";
-import superjson from "superjson";
+import { createRequire } from "node:module";
+
+// Loaded lazily on the first structured log so the import stays off the SSR
+// boot path; require(esm) keeps it synchronous, so no log is ever serialized
+// without it.
+const require = createRequire(import.meta.url);
+let _superjson;
+let _superjsonUnavailable = false;
+const superjson = () => {
+  if (!_superjson && !_superjsonUnavailable) {
+    try {
+      const module = require("superjson");
+      _superjson = module.default ?? module;
+    } catch {
+      // Node without require(esm) support — load in the background and fall
+      // back to plain JSON.stringify until it resolves.
+      _superjsonUnavailable = true;
+      import("superjson").then((m) => {
+        _superjson = m.default;
+        _superjsonUnavailable = false;
+      });
+    }
+  }
+  return _superjson;
+};
 
 // Shared between node and bun. Uses AsyncLocalStorage (built into Node 16+
 // and Bun) instead of cls-hooked so both runtimes can consume the same file.
@@ -39,7 +63,7 @@ export class Logger {
           return message;
         }
         try {
-          return JSON.stringify(superjson.serialize(message).json);
+          return JSON.stringify(superjson().serialize(message).json);
         } catch {
           return String(message);
         }
@@ -68,10 +92,12 @@ export class Logger {
   }
 
   static overrideNativeLogs(namespace, _rid) {
-    const forward = (type) => (...args) => {
-      const requestId = namespace.getStore()?.id ?? "";
-      Logger.write(requestId, args, type);
-    };
+    const forward =
+      (type) =>
+      (...args) => {
+        const requestId = namespace.getStore()?.id ?? "";
+        Logger.write(requestId, args, type);
+      };
 
     console.log =
       console.info =
