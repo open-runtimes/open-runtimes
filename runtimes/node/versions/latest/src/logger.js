@@ -3,28 +3,27 @@ const config = require("./config");
 
 // Loaded lazily so the ESM loader spin-up stays off the server boot path.
 // On Node with require(esm) support the first structured log loads it
-// synchronously, so no log is ever serialized without it; older Nodes rely
-// on the deferred import below and fall back to plain JSON.stringify for
-// the few milliseconds it takes to resolve.
+// synchronously, so no log is ever serialized without it, and Logger.ready
+// resolves immediately. Older Nodes cannot load an ESM-only package
+// synchronously, so there Logger.ready is the import itself and the server
+// keeps gating listen on it, exactly as before this optimization.
 let _superjson;
-let _superjsonUnavailable = false;
 const superjson = () => {
-  if (!_superjson && !_superjsonUnavailable) {
-    try {
-      const module = require("superjson");
-      _superjson = module.default ?? module;
-    } catch {
-      _superjsonUnavailable = true;
-    }
+  if (!_superjson) {
+    const module = require("superjson");
+    _superjson = module.default ?? module;
   }
   return _superjson;
 };
-setImmediate(() => {
-  import("superjson").then((m) => {
+
+let _ready;
+if (process.features.require_module) {
+  _ready = Promise.resolve();
+} else {
+  _ready = import("superjson").then((m) => {
     _superjson = m.default;
-    _superjsonUnavailable = false;
   });
-});
+}
 
 class Logger {
   static TYPE_ERROR = "error";
@@ -186,4 +185,5 @@ class Logger {
   }
 }
 
+Logger.ready = _ready;
 module.exports = Logger;

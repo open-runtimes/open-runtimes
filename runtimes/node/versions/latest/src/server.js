@@ -360,6 +360,11 @@ const action = async (logger, req, res) => {
   return send(res, output.statusCode, output.body);
 };
 
-server.listen(3000, undefined, undefined, () => {
-  console.log("HTTP server successfully started!");
+// Logger.ready is already resolved on Node with require(esm) support, so
+// listen starts immediately there; legacy Nodes wait for the superjson
+// import, exactly as before.
+Logger.ready.then(() => {
+  server.listen(3000, undefined, undefined, () => {
+    console.log("HTTP server successfully started!");
+  });
 });
