@@ -13,7 +13,6 @@
   "dependencies": {
     "@vercel/nft": "^0.29.2",
     "express": "^4.21.2",
-    "micro": "^9.3.4",
     "serve-static": "^1.16.3",
     "srvx": "^0.8.16",
     "superjson": "^2.2.6"

@@ -1,12 +1,80 @@
-const micro = require("micro");
-const { buffer, send } = require("micro");
+const http = require("http");
 const fs = require("fs");
+
+const BODY_LIMIT = 20 * 1024 * 1024;
+
+const buffer = (req) =>
+  new Promise((resolve, reject) => {
+    const chunks = [];
+    let received = 0;
+    const onData = (chunk) => {
+      received += chunk.length;
+      if (received > BODY_LIMIT) {
+        req.removeListener("data", onData);
+        req.pause();
+        const error = new Error("Request body limit exceeded.");
+        error.statusCode = 413;
+        reject(error);
+        return;
+      }
+      chunks.push(chunk);
+    };
+    req.on("data", onData);
+    req.on("end", () => resolve(Buffer.concat(chunks)));
+    req.on("error", reject);
+  });
+
+const send = (res, statusCode, body = null) => {
+  res.statusCode = statusCode;
+  if (body === null) {
+    res.end();
+    return;
+  }
+  if (Buffer.isBuffer(body)) {
+    if (!res.getHeader("content-type")) {
+      res.setHeader("content-type", "application/octet-stream");
+    }
+    res.setHeader("content-length", body.length);
+    res.end(body);
+    return;
+  }
+  if (typeof body === "object" || typeof body === "number") {
+    if (typeof body?.pipe === "function") {
+      if (!res.getHeader("content-type")) {
+        res.setHeader("content-type", "application/octet-stream");
+      }
+      body.pipe(res);
+      return;
+    }
+    const json = JSON.stringify(body);
+    if (!res.getHeader("content-type")) {
+      res.setHeader("content-type", "application/json; charset=utf-8");
+    }
+    res.setHeader("content-length", Buffer.byteLength(json));
+    res.end(json);
+    return;
+  }
+  res.setHeader("content-length", Buffer.byteLength(String(body)));
+  res.end(String(body));
+};
 const Logger = require("./logger");
 const config = require("./config");
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
-const server = micro(async (req, res) => {
+const server = http.createServer(async (req, res) => {
+  try {
+    await handle(req, res);
+  } catch (e) {
+    if (!res.headersSent) {
+      send(res, e.statusCode ?? 500, "");
+    } else {
+      res.end();
+    }
+  }
+});
+
+const handle = async (req, res) => {
   if (req.url === "/__opr/health") {
     return send(res, 200, "OK");
   }
@@ -33,7 +101,7 @@ const server = micro(async (req, res) => {
 
     return send(res, 500, "");
   }
-});
+};
 
 const action = async (logger, req, res) => {
   const timeout = req.headers[`x-open-runtimes-timeout`] ?? "";
@@ -64,7 +132,7 @@ const action = async (logger, req, res) => {
   const contentType = (
     req.headers["content-type"] ?? "text/plain"
   ).toLowerCase();
-  const bodyBinary = await buffer(req, { limit: "20mb" });
+  const bodyBinary = await buffer(req);
 
   const headers = {};
   Object.keys(req.headers)
@@ -292,6 +360,9 @@ const action = async (logger, req, res) => {
   return send(res, output.statusCode, output.body);
 };
 
+// Logger.ready is already resolved on Node with require(esm) support, so
+// listen starts immediately there; legacy Nodes wait for the superjson
+// import, exactly as before.
 Logger.ready.then(() => {
   server.listen(3000, undefined, undefined, () => {
     console.log("HTTP server successfully started!");
