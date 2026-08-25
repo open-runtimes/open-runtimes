@@ -1,9 +1,9 @@
 // Shared HTTP server wrappers used by both the node and bun SSR injection
 // entrypoints. Contains the per-request logic (Open Runtimes endpoints, secret
 // auth, per-request log id, safe execution timeout, error capture) plus the
-// constructor wrappers that install it. Runtime entrypoints decide *how* these
-// get applied (node: import-in-the-middle + require-in-the-middle; bun: direct
-// Server.prototype.emit patch at preload time).
+// constructor wrappers that install it. Runtime entrypoints apply these via a
+// direct Server.prototype.emit patch at preload time (node: --import, bun:
+// --preload, deno: --import).
 
 import {
   addOprEndpoints,
@@ -72,47 +72,4 @@ export function overrideEmit(originalEmit) {
       dispatch();
     });
   };
-}
-
-// Wrap a Server constructor (used by Nitro's `new Server()` path).
-export function wrapServer(originalServer) {
-  return function (...args) {
-    const server = originalServer.apply(this, args);
-    server.emit = overrideEmit(server.emit);
-    return server;
-  };
-}
-
-// Wrap createServer (used by native http, express, koa, ...).
-export function wrapCreateServer(originalCreateServer) {
-  return function (...args) {
-    const server = new originalCreateServer(...args);
-    server.emit = overrideEmit(server.emit);
-    return server;
-  };
-}
-
-// Apply wrapServer/wrapCreateServer to a loaded http/https module's exports.
-// Handles both CJS and ESM shapes. Used by node's import-in-the-middle hook.
-export function wrapHttp(moduleExports) {
-  if (moduleExports.Server) {
-    moduleExports.Server = wrapServer(moduleExports.Server);
-  }
-  if (moduleExports.createServer) {
-    moduleExports.createServer = wrapCreateServer(moduleExports.createServer);
-  }
-
-  const isESM = moduleExports[Symbol.toStringTag] === "Module";
-  if (isESM) {
-    if (moduleExports.default.Server) {
-      moduleExports.default.Server = wrapServer(moduleExports.default.Server);
-    }
-    if (moduleExports.default.createServer) {
-      moduleExports.default.createServer = wrapCreateServer(
-        moduleExports.default.createServer,
-      );
-    }
-  }
-
-  return moduleExports;
 }
