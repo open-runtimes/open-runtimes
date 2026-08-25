@@ -1,9 +1,14 @@
 const fs = require("fs");
 const config = require("./config");
 
+// Deferred so the ESM loader spin-up stays off the server boot path; the
+// import resolves long before any real execution reaches the logger. Until
+// it does, write() falls back to plain JSON.stringify.
 let _superjson;
-const _superjsonReady = import("superjson").then((m) => {
-  _superjson = m.default;
+setImmediate(() => {
+  import("superjson").then((m) => {
+    _superjson = m.default;
+  });
 });
 
 class Logger {
@@ -165,5 +170,4 @@ class Logger {
   }
 }
 
-Logger.ready = _superjsonReady;
 module.exports = Logger;
