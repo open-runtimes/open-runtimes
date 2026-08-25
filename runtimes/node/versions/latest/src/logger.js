@@ -1,13 +1,28 @@
 const fs = require("fs");
 const config = require("./config");
 
-// Deferred so the ESM loader spin-up stays off the server boot path; the
-// import resolves long before any real execution reaches the logger. Until
-// it does, write() falls back to plain JSON.stringify.
+// Loaded lazily so the ESM loader spin-up stays off the server boot path.
+// On Node with require(esm) support the first structured log loads it
+// synchronously, so no log is ever serialized without it; older Nodes rely
+// on the deferred import below and fall back to plain JSON.stringify for
+// the few milliseconds it takes to resolve.
 let _superjson;
+let _superjsonUnavailable = false;
+const superjson = () => {
+  if (!_superjson && !_superjsonUnavailable) {
+    try {
+      const module = require("superjson");
+      _superjson = module.default ?? module;
+    } catch {
+      _superjsonUnavailable = true;
+    }
+  }
+  return _superjson;
+};
 setImmediate(() => {
   import("superjson").then((m) => {
     _superjson = m.default;
+    _superjsonUnavailable = false;
   });
 });
 
@@ -73,8 +88,9 @@ class Logger {
           return message;
         }
         try {
-          return _superjson
-            ? JSON.stringify(_superjson.serialize(message).json)
+          const serializer = superjson();
+          return serializer
+            ? JSON.stringify(serializer.serialize(message).json)
             : JSON.stringify(message);
         } catch {
           return String(message);
