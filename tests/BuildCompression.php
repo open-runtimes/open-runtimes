@@ -93,6 +93,18 @@ class BuildCompression extends TestCase
         self::assertStringContainsString('code.sqfs | code.tar | code.tar.gz | code.gz | .extracted', $extract);
     }
 
+    public function testExtractionHonorsCodePathEnvironmentAndMarker(): void
+    {
+        $extract = \file_get_contents(\dirname(__DIR__) . '/helpers/lifecycle/extract.sh');
+
+        self::assertStringContainsString('code_path="$OPEN_RUNTIMES_CODE_PATH"', $extract);
+        self::assertStringContainsString('[ -z "$code_path" ] && [ -f "/mnt/code/.extracted" ]', $extract);
+        self::assertStringContainsString('[ -f "$code_path" ]', $extract);
+        self::assertStringContainsString('extract_archive "$code_path" /usr/local/server/src/function', $extract);
+        self::assertStringContainsString('[ "$code_path" = "/usr/local/server/src/function" ]', $extract);
+        self::assertStringContainsString('for item in "$code_path"/*', $extract);
+    }
+
     private function runCompressionSelection(array $env): array
     {
         $script = \dirname(__DIR__) . '/helpers/lifecycle/compression.sh';
