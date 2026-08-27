@@ -1,0 +1,5 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.pub-cache/
+.pub/
+/build/

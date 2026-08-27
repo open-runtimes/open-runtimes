@@ -290,6 +290,15 @@ tools = "node --version && npm --version && npx --version && pnpm --version && y
 test = "SSR/Analog.php"
 output = "./dist/analog"
 
+[jaspr]
+report_size = false
+runtime = { name = "flutter", version = "3.44" }
+commands = { install = "dart pub get && dart run jaspr_cli:jaspr build", start = "bash helpers/jaspr/server.sh" }
+formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
+tools = "dart --version && flutter --version"
+test = "SSR/Jaspr.php"
+output = "./build/jaspr"
+
 [next-js_bun]
 report_size = false
 versions = ["1.3"]
