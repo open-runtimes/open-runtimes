@@ -41,9 +41,22 @@ cd /usr/local/build
 
 opr_log "Build command execution started."
 
+# A bundle step appended to the build command runs in the subshell below and
+# cannot export to the phases after it, so it leaves a resolved output directory
+# here. Clear it first: only what this build wrote may redirect the archive.
+rm -f /tmp/.opr-output-directory
+
 bash -c "$1"
 
 opr_log "Build command execution finished."
+
+if [ -s /tmp/.opr-output-directory ]; then
+	OPEN_RUNTIMES_OUTPUT_DIRECTORY="$(cat /tmp/.opr-output-directory)"
+	export OPEN_RUNTIMES_OUTPUT_DIRECTORY
+	rm -f /tmp/.opr-output-directory
+
+	opr_log "Build output resolved to $OPEN_RUNTIMES_OUTPUT_DIRECTORY."
+fi
 
 # --- Compile ---
 
