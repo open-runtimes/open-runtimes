@@ -146,6 +146,9 @@ The contract (see `runtimes/node/versions/latest/src/server.js` for the
 reference implementation):
 
 1. **Health/timings**: respond to `GET /__opr/health` and `GET /__opr/timings`.
+   The timings endpoint returns `/mnt/telemetry/timings.txt` verbatim as
+   `text/plain` — read it, do not parse or reformat it. See
+   [the timings file contract](#the-timings-file-contract) below.
 2. **Auth**: if `OPEN_RUNTIMES_SECRET` is set, reject requests whose
    `x-open-runtimes-secret` header doesn't match with `401`.
 3. **Reserved headers**: headers prefixed `x-open-runtimes-` are control headers
@@ -172,6 +175,44 @@ module.exports = async (context) => {
   return context.res.text("Hello Open Runtimes 👋");
 };
 ```
+
+### The timings file contract
+
+`/mnt/telemetry/timings.txt` is a shared append-only log inside the runtime pod. More
+than one process writes to it — the lifecycle scripts in this repo (`start.sh`,
+`extract.sh`) plus, in Appwrite's edge deployment, an init container and the storage
+layer. The orchestrator scrapes `GET /__opr/timings` once the pod is ready and turns
+each line into a metric series. A runtime server's only job is to return the file
+unmodified.
+
+**Format.** One `key=value` per line. Keys are lowercase with underscores. Blank
+lines are ignored.
+
+```
+prepare=0.047
+extract=1.662
+startup=0.811
+```
+
+**Rules if you add a key:**
+
+- **Values are seconds, as a decimal.** A key whose value is not a duration ends up in
+  a duration histogram, where it is indistinguishable from a real measurement. Counts,
+  byte sizes, status codes and absolute timestamps do not belong here.
+- **Namespace by writer.** Keys written from the app container should carry an `app_`
+  prefix so they cannot collide with a key of the same name written by an init
+  container earlier in the pod's life. The reader keeps the last occurrence of a
+  duplicate key, so a collision silently discards one of the two measurements.
+- **One key per concept, and never conditionally reuse a name.** `extract.sh` writes
+  `extract` when it unpacks an archive and `symlink` when the code was already
+  unpacked — two names because they are two different operations. If it emitted
+  `extract` for both, the metric would silently average them.
+- **Keys are additive but not free.** Every distinct key becomes its own metric series
+  in the consumer, multiplied by whatever labels it attaches. Add one when it answers
+  a question, not to record that a line of code ran.
+
+Keys the lifecycle scripts currently emit: `prepare` and `startup` (`start.sh`),
+`extract` and `symlink` (`extract.sh`).
 
 ## 5. Register the runtime
 
