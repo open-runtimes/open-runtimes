@@ -72,14 +72,16 @@ if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
 	cd "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"
 fi
 
-# Store build metadata. Will be used during start process
+# Store build metadata. Will be used during start process. Values are
+# shell-quoted: the file is sourced at startup and the entrypoint is
+# user-controlled text.
 touch .open-runtimes
-echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" >.open-runtimes
-echo "OPEN_RUNTIMES_CLEANUP=${OPEN_RUNTIMES_CLEANUP:-none}" >>.open-runtimes
+echo "OPEN_RUNTIMES_ENTRYPOINT=$(opr_quote "$OPEN_RUNTIMES_ENTRYPOINT")" >.open-runtimes
+echo "OPEN_RUNTIMES_CLEANUP=$(opr_quote "${OPEN_RUNTIMES_CLEANUP:-none}")" >>.open-runtimes
 
 . /usr/local/server/helpers/lifecycle/compression.sh
 
-echo "OPEN_RUNTIMES_COMPRESSION=$COMPRESSION_METHOD" >>.open-runtimes
+echo "OPEN_RUNTIMES_COMPRESSION=$(opr_quote "$COMPRESSION_METHOD")" >>.open-runtimes
 
 OUTPUT_DIR="${OPEN_RUNTIMES_BUILD_OUTPUT_DIR:-/mnt/code}"
 mkdir -p "$OUTPUT_DIR"
