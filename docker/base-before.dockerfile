@@ -5,6 +5,10 @@ ENV OPEN_RUNTIMES_SECRET=open_runtime_secret
 ENV OPEN_RUNTIMES_ENV=production
 ENV OPEN_RUNTIMES_HEADERS="{}"
 
+# Disable registry audit requests while constructing runtime images. Keeping
+# this as an ARG prevents the setting from leaking into the published image.
+ARG npm_config_audit=false
+
 RUN <<EOR
     if [ -f /etc/alpine-release ]; then
         apk add --no-cache util-linux zstd squashfs-tools

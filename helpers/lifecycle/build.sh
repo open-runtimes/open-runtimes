@@ -39,6 +39,8 @@ opr_log "Environment preparation finished."
 # Enter build folder
 cd /usr/local/build
 
+export npm_config_audit="${npm_config_audit:-false}"
+
 opr_log "Build command execution started."
 
 bash -c "$1"
