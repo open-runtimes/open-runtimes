@@ -180,10 +180,8 @@ console.log('child ready');
 
     def test_matrix_drain_check(self):
         (self.path / 'index.js').write_text("""
-module.exports = async ({log, res}) => {
-  log('Timeout start.');
+module.exports = async ({res}) => {
   await new Promise(resolve => setTimeout(resolve, 1500));
-  log('Timeout end.');
   return res.text('Successful response.');
 };
 """)

@@ -9,20 +9,31 @@ export async function checkShutdown(container: string, baseUrl: string, drain: b
 
     let response: Promise<{ status: number; body: string }> | undefined;
     if (drain) {
-        const since = new Date().toISOString();
+        const logId = `shutdown-${crypto.randomUUID()}`;
+        let completed = false;
         response = fetch(baseUrl, {
             method: 'POST',
-            headers: { 'x-open-runtimes-secret': 'test-secret-key', 'x-action': 'timeout' },
+            headers: {
+                'x-open-runtimes-secret': 'test-secret-key',
+                'x-action': 'timeout',
+                'x-open-runtimes-log-id': logId,
+            },
             signal: AbortSignal.timeout(15_000),
-        }).then(async (res) => ({ status: res.status, body: await res.text() }));
+        }).then(async (res) => {
+            const result = { status: res.status, body: await res.text() };
+            completed = true;
+            return result;
+        });
         // Keep early request failures handled while waiting for the start marker.
-        response.catch(() => {});
+        response.catch(() => { completed = true; });
 
         const deadline = Date.now() + 10_000;
         while (true) {
-            const logs = docker('logs', '--since', since, container);
-            if (logs.includes('Timeout end.')) throw new Error('Request finished before shutdown could be tested');
-            if (logs.includes('Timeout start.')) break;
+            if (completed) throw new Error(`Request finished before shutdown could be tested: ${JSON.stringify(await response)}`);
+            // The per-request log file is created when the runtime accepts the
+            // request. Its contents/stdout may be buffered until the request ends.
+            const started = Bun.spawnSync(['docker', 'exec', container, 'test', '-f', `/mnt/logs/${logId}_logs.log`]);
+            if (started.exitCode === 0) break;
             if (Date.now() >= deadline) throw new Error('Shutdown test request did not start');
             await Bun.sleep(50);
         }

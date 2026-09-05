@@ -20,17 +20,18 @@ val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrateg
 suspend fun main() {
     println("HTTP server successfully started!")
 
-    val app = Javalin
-        .create { config ->
-            config.maxRequestSize = 20L * 1024 * 1024
-        }.start(3000)
-        .get("/*") { runBlocking { execute(it) } }
-        .post("/*") { runBlocking { execute(it) } }
-        .put("/*") { runBlocking { execute(it) } }
-        .delete("/*") { runBlocking { execute(it) } }
-        .patch("/*") { runBlocking { execute(it) } }
-        .options("/*") { runBlocking { execute(it) } }
-        .head("/*") { runBlocking { execute(it) } }
+    val app =
+        Javalin
+            .create { config ->
+                config.maxRequestSize = 20L * 1024 * 1024
+            }.start(3000)
+            .get("/*") { runBlocking { execute(it) } }
+            .post("/*") { runBlocking { execute(it) } }
+            .put("/*") { runBlocking { execute(it) } }
+            .delete("/*") { runBlocking { execute(it) } }
+            .patch("/*") { runBlocking { execute(it) } }
+            .options("/*") { runBlocking { execute(it) } }
+            .head("/*") { runBlocking { execute(it) } }
     app.jettyServer()!!.server().stopTimeout = 30_000
     Runtime.getRuntime().addShutdownHook(Thread { app.stop() })
 }
