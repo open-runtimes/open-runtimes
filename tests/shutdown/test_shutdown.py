@@ -4,6 +4,7 @@ import http.client
 import os
 from pathlib import Path
 import subprocess
+import shutil
 import tempfile
 import time
 import unittest
@@ -39,6 +40,7 @@ require('/usr/local/server/helpers/http-shutdown.cjs')(server);
 server.listen(3000, '0.0.0.0', () => console.log('HTTP server successfully started!'));
 ''')
         self.container = None
+        self.helpers = ROOT / "helpers"
 
     def tearDown(self):
         if self.container:
@@ -49,7 +51,7 @@ server.listen(3000, '0.0.0.0', () => console.log('HTTP server successfully start
         self.container = docker(
             'create', '--entrypoint', 'bash', '-p', '127.0.0.1::3000',
             '-e', 'OPEN_RUNTIMES_SECRET=', '-e', 'OPEN_RUNTIMES_ENTRYPOINT=index.js',
-            '-v', f'{ROOT / "helpers"}:/usr/local/server/helpers:ro',
+            '-v', f'{self.helpers}:/usr/local/server/helpers:ro',
             '-v', f'{ROOT / "runtimes/node/versions/latest/src/server.js"}:/usr/local/server/src/server.js:ro',
             '-v', f'{ROOT / "runtimes/node/versions/latest/src/logger.js"}:/usr/local/server/src/logger.js:ro',
             '-v', f'{ROOT / "runtimes/node/versions/latest/src/config.js"}:/usr/local/server/src/config.js:ro',
@@ -161,6 +163,39 @@ console.log('child ready');
         self.wait_log('startup-active')
         self.signal()
         self.assertEqual(self.exit_code(), 143)
+
+    def test_signal_during_launch_window(self):
+        self.helpers = self.path / 'helpers'
+        shutil.copytree(ROOT / 'helpers', self.helpers)
+        lifecycle = self.helpers / 'lifecycle/start.sh'
+        lifecycle.write_text(lifecycle.read_text().replace(
+            'bash -c "$1" 2>&1',
+            'echo launch-window; sleep 60\nbash -c "$1" 2>&1',
+        ))
+        self.start()
+        self.wait_log('launch-window')
+        self.signal()
+        self.assertEqual(self.exit_code(), 143)
+        self.assertNotIn('HTTP server successfully started!', docker('logs', self.container))
+
+    def test_matrix_drain_check(self):
+        (self.path / 'index.js').write_text("""
+module.exports = async ({log, res}) => {
+  log('Timeout start.');
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  log('Timeout end.');
+  return res.text('Successful response.');
+};
+""")
+        self.start('exec bash helpers/server.sh')
+        self.ready()
+        check = self.path / 'check.ts'
+        check.write_text(
+            f'import {{checkShutdown}} from "{ROOT / "ci/shutdown.ts"}";\n'
+            'await checkShutdown(Bun.argv[2], Bun.argv[3], true);\n'
+        )
+        subprocess.run(['bun', str(check), self.container, f'http://127.0.0.1:{self.port}'], check=True, timeout=15)
+        self.assertEqual(self.exit_code(), 0)
 
     def test_node_function_drain(self):
         (self.path / 'index.js').write_text('''

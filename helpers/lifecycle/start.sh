@@ -32,7 +32,8 @@ export start_uptime
 
 # Tini forwards signals to the whole process group. Keep the shell and log
 # reader alive until the server finishes; the container manager owns the deadline.
-trap ':' TERM INT
+# Bash defers this trap during the pipeline, but exits if signaled before launch.
+trap 'exit "${PIPESTATUS[0]}"' TERM INT
 bash -c "$1" 2>&1 | {
 	trap '' TERM INT
 	recorded=false

@@ -28,8 +28,9 @@ writes should tolerate retries and interrupted executions.
 
 ## Verification
 
-`make test ID=...` checks that the runtime container stops without a forced
-kill after PHPUnit. For detailed launcher and Node HTTP regressions:
+`make test ID=...` stops function runtimes during the existing timeout
+fixture and verifies the complete response. Static and SSR images retain
+an idle stop check. For detailed launcher and Node HTTP regressions:
 
 ```sh
 make image ID=node

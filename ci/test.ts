@@ -14,6 +14,7 @@
 import { existsSync, cpSync, rmSync, mkdirSync, writeFileSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { resolveEntry, type Entry } from './common';
+import { checkShutdown } from './shutdown';
 
 const repoRoot = join(dirname(Bun.main), '..');
 const args = process.argv.slice(2);
@@ -273,19 +274,12 @@ await measureStartup();
 console.log('Running tests ...');
 run([...compose, 'run', '--rm', 'phpunit']);
 
-// Exercise the real executor launch command in every runtime/SSR matrix entry.
-// Docker stop succeeds even when it resorts to SIGKILL, so inspect the exit too.
 console.log('Checking graceful shutdown ...');
-run(['docker', 'stop', '--time', '35', 'open-runtimes-test-serve']);
-const stopped = Bun.spawnSync([
-    'docker', 'inspect', '--format', '{{.State.ExitCode}}', 'open-runtimes-test-serve',
-], { cwd: repoRoot, env: composeEnv });
-const stopCode = stopped.stdout.toString().trim();
-if (stopped.exitCode !== 0 || !['0', '143'].includes(stopCode)) {
-    console.error(`Runtime did not shut down cleanly (exit ${stopCode || 'unknown'}).`);
-    process.exit(1);
-}
-
+await checkShutdown(
+    'open-runtimes-test-serve',
+    `http://127.0.0.1:${process.env.HOST_PORT_MAIN ?? '3000'}`,
+    entry.TEST_CLASS.startsWith('Serverless/'),
+);
 
 down();
 console.log('Done.');

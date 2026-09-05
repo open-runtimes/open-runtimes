@@ -323,10 +323,15 @@ async function shutdown() {
   stopping = true;
   await server.stop();
   // Bun 1.0/1.1 return void from stop(); newer versions return a Promise.
-  while (server.pendingRequests > 0 || server.pendingWebSockets > 0) {
-    await Bun.sleep(10);
-  }
-  process.exit(0);
+  // Older Bun can retain a stale pending count after rejecting a large upload.
+  // Let the event loop exit naturally when only this poller remains.
+  server.unref();
+  const drained = setInterval(() => {
+    if (server.pendingRequests === 0 && server.pendingWebSockets === 0) {
+      process.exit(0);
+    }
+  }, 10);
+  drained.unref();
 }
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);

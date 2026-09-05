@@ -46,6 +46,3 @@ const shutdown = () => controller.abort();
 Deno.addSignalListener("SIGTERM", shutdown);
 Deno.addSignalListener("SIGINT", shutdown);
 await app.listen({ port: 3000, signal: controller.signal });
-Deno.removeSignalListener("SIGTERM", shutdown);
-Deno.removeSignalListener("SIGINT", shutdown);
-Deno.exit(0);
