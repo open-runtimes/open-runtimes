@@ -179,8 +179,20 @@ console.log('child ready');
         self.assertNotIn('HTTP server successfully started!', docker('logs', self.container))
 
     def test_matrix_drain_check(self):
+        self.check_matrix_drain("")
+
+    def test_matrix_drain_check_without_live_logs(self):
+        self.check_matrix_drain("""
+  const fs = require('fs');
+  const id = req.headers['x-shutdown-id'];
+  fs.unlinkSync(`/mnt/logs/${id}_logs.log`);
+  fs.writeFileSync(`/tmp/${id}.started`, '');
+""")
+
+    def check_matrix_drain(self, setup):
         (self.path / 'index.js').write_text("""
-module.exports = async ({res}) => {
+module.exports = async ({req, res}) => {
+""" + setup + """
   await new Promise(resolve => setTimeout(resolve, 1500));
   return res.text('Successful response.');
 };

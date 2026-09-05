@@ -17,6 +17,7 @@ export async function checkShutdown(container: string, baseUrl: string, drain: b
                 'x-open-runtimes-secret': 'test-secret-key',
                 'x-action': 'timeout',
                 'x-open-runtimes-log-id': logId,
+                'x-shutdown-id': logId,
             },
             signal: AbortSignal.timeout(15_000),
         }).then(async (res) => {
@@ -30,9 +31,12 @@ export async function checkShutdown(container: string, baseUrl: string, drain: b
         const deadline = Date.now() + 10_000;
         while (true) {
             if (completed) throw new Error(`Request finished before shutdown could be tested: ${JSON.stringify(await response)}`);
-            // The per-request log file is created when the runtime accepts the
-            // request. Its contents/stdout may be buffered until the request ends.
-            const started = Bun.spawnSync(['docker', 'exec', container, 'test', '-f', `/mnt/logs/${logId}_logs.log`]);
+            // Most runtimes create their log file on acceptance. Rust buffers
+            // logs until completion, so its fixture publishes a readiness file.
+            const started = Bun.spawnSync([
+                'docker', 'exec', container, 'sh', '-c', 'test -f "$1" || test -f "$2"', 'sh',
+                `/mnt/logs/${logId}_logs.log`, `/tmp/${logId}.started`,
+            ]);
             if (started.exitCode === 0) break;
             if (Date.now() >= deadline) throw new Error('Shutdown test request did not start');
             await Bun.sleep(50);
