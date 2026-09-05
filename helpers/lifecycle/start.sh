@@ -30,14 +30,15 @@ opr_success "Runtime started."
 start_uptime=$(opr_uptime)
 export start_uptime
 
-# Run server and monitor stdout for ready message.
-# The reader is the last command in the pipeline, so its exit status is the
-# one bash reports — a server that crashes would otherwise leave the container
-# exiting 0 ("Completed"), indistinguishable from a clean shutdown. Take the
-# server's status off PIPESTATUS and exit with it instead.
-bash -c "$1" 2>&1 | {
+# Keep the lifecycle alive until both the server and its log reader finish.
+# The supervisor signals the whole group; the server handles TERM itself.
+stopping=false
+trap 'stopping=true; wait_interrupted=true' TERM INT
+exec 3> >(
+	# Keep draining output when the supervisor signals the runtime group.
+	trap '' TERM INT
 	recorded=false
-	while IFS= read -r line; do
+	while IFS= read -r line || [ -n "$line" ]; do
 		printf '%s\n' "$line"
 		if [ "$recorded" = false ] && [[ "$line" == *"HTTP server successfully started"* || "$line" == *"server started on http://"* ]]; then
 			end_uptime=$(awk '{print $1}' /proc/uptime)
@@ -46,6 +47,24 @@ bash -c "$1" 2>&1 | {
 			recorded=true
 		fi
 	done
-}
+)
+log_reader=$!
+bash -c "$1" >&3 2>&1 &
+server=$!
+# Cover TERM arriving while the log reader/server were being started.
+if [ "$stopping" = true ]; then kill -TERM "$server" 2>/dev/null || true; fi
+exec 3>&-
 
-exit "${PIPESTATUS[0]}"
+wait_for() {
+	local pid=$1 status
+	while true; do
+		status=0
+		wait_interrupted=false
+		wait "$pid" || status=$?
+		if [ "$wait_interrupted" = false ]; then return "$status"; fi
+	done
+}
+status=0
+wait_for "$server" || status=$?
+wait_for "$log_reader" || true
+exit "$status"

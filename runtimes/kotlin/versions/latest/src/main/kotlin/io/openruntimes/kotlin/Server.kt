@@ -20,7 +20,7 @@ val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrateg
 suspend fun main() {
     println("HTTP server successfully started!")
 
-    Javalin
+    val app = Javalin
         .create { config ->
             config.maxRequestSize = 20L * 1024 * 1024
         }.start(3000)
@@ -31,6 +31,9 @@ suspend fun main() {
         .patch("/*") { runBlocking { execute(it) } }
         .options("/*") { runBlocking { execute(it) } }
         .head("/*") { runBlocking { execute(it) } }
+    app.jettyServer().server().stopTimeout =
+        (System.getenv("OPEN_RUNTIMES_SHUTDOWN_TIMEOUT") ?: "30").toLong() * 1000
+    Runtime.getRuntime().addShutdownHook(Thread { app.stop() })
 }
 
 suspend fun execute(ctx: Context) {

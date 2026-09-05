@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,8 +11,10 @@ import (
 	"net/url"
 	"openruntimes/handler"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/open-runtimes/types-for-go/v4/openruntimes"
@@ -320,8 +323,22 @@ func main() {
 
 	fmt.Println("HTTP server successfully started!")
 
-	err = http.Serve(listener, http.MaxBytesHandler(http.HandlerFunc(handler), 20*1024*1024))
-	if err != nil {
+	server := &http.Server{Handler: http.MaxBytesHandler(http.HandlerFunc(handler), 20*1024*1024)}
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGTERM, os.Interrupt)
+	defer signal.Stop(signals)
+	drained := make(chan struct{})
+	go func() {
+		<-signals
+		// The shared supervisor bounds shutdown, including blocked user code.
+		if err := server.Shutdown(context.Background()); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+		close(drained)
+	}()
+	err = server.Serve(listener)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		panic(err)
 	}
+	<-drained
 }

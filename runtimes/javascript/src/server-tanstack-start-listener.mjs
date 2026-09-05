@@ -1,3 +1,4 @@
+import installShutdown from "/usr/local/server/helpers/http-shutdown.cjs";
 import { listener } from "./server/index.mjs";
 import { createServer } from "node:http";
 import serveStatic from "serve-static";
@@ -23,6 +24,7 @@ const finish = (res) => (error) => {
 const server = createServer((req, res) => {
   staticHandler(req, res, () => listener(req, res, finish(res)));
 });
+installShutdown(server);
 // End of framework-specific logic
 
 const port = +(process.env.PORT || "3000");

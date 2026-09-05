@@ -360,6 +360,8 @@ const action = async (logger, req, res) => {
   return send(res, output.statusCode, output.body);
 };
 
+require("/usr/local/server/helpers/http-shutdown.cjs")(server);
+
 // Logger.ready is already resolved on Node with require(esm) support, so
 // listen starts immediately there; legacy Nodes wait for the superjson
 // import, exactly as before.

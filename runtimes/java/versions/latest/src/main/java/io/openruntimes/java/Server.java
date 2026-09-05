@@ -19,18 +19,30 @@ public class Server {
   public static void main(String[] args) {
     System.out.println("HTTP server successfully started!");
 
-    Javalin.create(
-            config -> {
-              config.http.maxRequestSize = 20L * 1024 * 1024;
-            })
-        .start(3000)
-        .get("/*", Server::execute)
-        .post("/*", Server::execute)
-        .put("/*", Server::execute)
-        .delete("/*", Server::execute)
-        .patch("/*", Server::execute)
-        .options("/*", Server::execute)
-        .head("/*", Server::execute);
+    Javalin app =
+        Javalin.create(
+                config -> {
+                  config.http.maxRequestSize = 20L * 1024 * 1024;
+                })
+            .start(3000)
+            .get("/*", Server::execute)
+            .post("/*", Server::execute)
+            .put("/*", Server::execute)
+            .delete("/*", Server::execute)
+            .patch("/*", Server::execute)
+            .options("/*", Server::execute)
+            .head("/*", Server::execute);
+    String shutdownTimeout = System.getenv("OPEN_RUNTIMES_SHUTDOWN_TIMEOUT");
+    app.jettyServer()
+        .server()
+        .setStopTimeout(Long.parseLong(shutdownTimeout == null ? "30" : shutdownTimeout) * 1000);
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  app.stop();
+                  executor.shutdown();
+                }));
   }
 
   public static Context execute(Context ctx) {

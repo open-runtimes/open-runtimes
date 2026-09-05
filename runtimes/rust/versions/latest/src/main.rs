@@ -411,19 +411,42 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     let listener = TcpListener::bind(addr).await?;
 
+    let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+    let (shutdown, _) = tokio::sync::watch::channel(false);
+    let mut connections = tokio::task::JoinSet::new();
+
     println!("HTTP server successfully started!");
 
     loop {
-        let (stream, _) = listener.accept().await?;
-        let io = TokioIo::new(stream);
-
-        tokio::task::spawn(async move {
-            if let Err(err) = http1::Builder::new()
-                .serve_connection(io, service_fn(handle_request))
-                .await
-            {
-                eprintln!("Error serving connection: {:?}", err);
+        tokio::select! {
+            _ = terminate.recv() => break,
+            _ = tokio::signal::ctrl_c() => break,
+            Some(_) = connections.join_next(), if !connections.is_empty() => {},
+            accepted = listener.accept() => {
+                let (stream, _) = accepted?;
+                let io = TokioIo::new(stream);
+                let mut stopping = shutdown.subscribe();
+                connections.spawn(async move {
+                    let builder = http1::Builder::new();
+                    let connection = builder.serve_connection(io, service_fn(handle_request));
+                    tokio::pin!(connection);
+                    let result = tokio::select! {
+                        result = &mut connection => result,
+                        _ = stopping.changed() => {
+                            connection.as_mut().graceful_shutdown();
+                            connection.await
+                        }
+                    };
+                    if let Err(err) = result {
+                        eprintln!("Error serving connection: {:?}", err);
+                    }
+                });
             }
-        });
+        }
     }
+    drop(listener);
+    let _ = shutdown.send(true);
+    // The shared supervisor enforces the deadline for stalled requests.
+    while connections.join_next().await.is_some() {}
+    Ok(())
 }

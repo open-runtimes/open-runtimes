@@ -194,7 +194,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 }
 
 void main() async {
-  await shelf_io.serve(
+  final server = await shelf_io.serve(
     (req) async {
       if (req.url.path == '__opr/health') {
         return shelf.Response(200, body: 'OK');
@@ -234,6 +234,21 @@ void main() async {
     '0.0.0.0',
     3000,
   );
+
+  final subscriptions = <StreamSubscription<ProcessSignal>>[];
+  bool stopping = false;
+  Future<void> shutdown(ProcessSignal signal) async {
+    if (stopping) return;
+    stopping = true;
+    await server.close(force: false);
+    // close() stops accepting but active responses still need the event loop.
+    for (final subscription in subscriptions) {
+      await subscription.cancel();
+    }
+  }
+
+  subscriptions.add(ProcessSignal.sigterm.watch().listen(shutdown));
+  subscriptions.add(ProcessSignal.sigint.watch().listen(shutdown));
 
   print("HTTP server successfully started!");
 }

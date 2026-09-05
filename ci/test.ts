@@ -273,5 +273,19 @@ await measureStartup();
 console.log('Running tests ...');
 run([...compose, 'run', '--rm', 'phpunit']);
 
+// Exercise the real executor launch command in every runtime/SSR matrix entry.
+// Docker stop succeeds even when it resorts to SIGKILL, so inspect the exit too.
+console.log('Checking graceful shutdown ...');
+run(['docker', 'stop', '--time', '35', 'open-runtimes-test-serve']);
+const stopped = Bun.spawnSync([
+    'docker', 'inspect', '--format', '{{.State.ExitCode}}', 'open-runtimes-test-serve',
+], { cwd: repoRoot, env: composeEnv });
+const stopCode = stopped.stdout.toString().trim();
+if (stopped.exitCode !== 0 || !['0', '143'].includes(stopCode)) {
+    console.error(`Runtime did not shut down cleanly (exit ${stopCode || 'unknown'}).`);
+    process.exit(1);
+}
+
+
 down();
 console.log('Done.');

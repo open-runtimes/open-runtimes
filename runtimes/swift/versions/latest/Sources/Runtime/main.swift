@@ -4,6 +4,7 @@ import Vapor
 var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
 let app = Application(env)
+defer { app.shutdown() }
 
 app.on(.GET, "", body: .collect(maxSize: "20mb"), use: execute)
 app.on(.GET, "**", body: .collect(maxSize: "20mb"), use: execute)

@@ -277,7 +277,7 @@ const action = async (logger: Logger, request: any) => {
   });
 };
 
-Bun.serve({
+const server = Bun.serve({
   port: 3000,
   maxRequestBodySize: 20 * 1024 * 1024,
   idleTimeout: 0,
@@ -316,3 +316,17 @@ Bun.serve({
 });
 
 console.log("HTTP server successfully started!");
+
+let stopping = false;
+async function shutdown() {
+  if (stopping) return;
+  stopping = true;
+  await server.stop();
+  // Bun 1.0/1.1 return void from stop(); newer versions return a Promise.
+  while (server.pendingRequests > 0 || server.pendingWebSockets > 0) {
+    await Bun.sleep(10);
+  }
+  process.exit(0);
+}
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
