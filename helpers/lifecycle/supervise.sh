@@ -23,7 +23,7 @@ stop() {
 		watchdog=$!
 	fi
 }
-trap 'wait_interrupted=true; stop' TERM INT
+trap stop TERM INT
 
 setsid "$@" &
 child=$!
@@ -35,10 +35,9 @@ fi
 
 # A trapped signal interrupts wait; wait again to collect the actual exit code.
 while true; do
-	wait_interrupted=false
 	wait "$child"
 	status=$?
-	if [ "$wait_interrupted" = false ]; then break; fi
+	if ! kill -0 "$child" 2>/dev/null; then break; fi
 done
 
 if [ -n "$watchdog" ]; then

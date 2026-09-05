@@ -33,7 +33,7 @@ export start_uptime
 # Keep the lifecycle alive until both the server and its log reader finish.
 # The supervisor signals the whole group; the server handles TERM itself.
 stopping=false
-trap 'stopping=true; wait_interrupted=true' TERM INT
+trap 'stopping=true' TERM INT
 exec 3> >(
 	# Keep draining output when the supervisor signals the runtime group.
 	trap '' TERM INT
@@ -59,9 +59,8 @@ wait_for() {
 	local pid=$1 status
 	while true; do
 		status=0
-		wait_interrupted=false
 		wait "$pid" || status=$?
-		if [ "$wait_interrupted" = false ]; then return "$status"; fi
+		if ! kill -0 "$pid" 2>/dev/null; then return "$status"; fi
 	done
 }
 status=0
