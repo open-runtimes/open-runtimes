@@ -1,3 +1,4 @@
+import installShutdown from "/usr/local/server/helpers/http-shutdown.cjs";
 import { createRequestHandler } from "@remix-run/express";
 import * as build from "./build/server/index.js";
 import express from "express";
@@ -30,6 +31,8 @@ app.all(
 
 const port = +(process.env.PORT || "3000");
 const host = process.env.HOST || "0.0.0.0";
-app.listen(port, host, () => {
-  console.log(`Remix server started on http://${host}:${port}`);
-});
+installShutdown(
+  app.listen(port, host, () => {
+    console.log(`Remix server started on http://${host}:${port}`);
+  }),
+);

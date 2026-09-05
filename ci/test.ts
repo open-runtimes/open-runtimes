@@ -14,6 +14,7 @@
 import { existsSync, cpSync, rmSync, mkdirSync, writeFileSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { resolveEntry, type Entry } from './common';
+import { checkShutdown } from './shutdown';
 
 const repoRoot = join(dirname(Bun.main), '..');
 const args = process.argv.slice(2);
@@ -272,6 +273,13 @@ await measureStartup();
 
 console.log('Running tests ...');
 run([...compose, 'run', '--rm', 'phpunit']);
+
+console.log('Checking graceful shutdown ...');
+await checkShutdown(
+    'open-runtimes-test-serve',
+    `http://127.0.0.1:${process.env.HOST_PORT_MAIN ?? '3000'}`,
+    entry.TEST_CLASS.startsWith('Serverless/'),
+);
 
 down();
 console.log('Done.');

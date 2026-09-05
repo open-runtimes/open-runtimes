@@ -1,3 +1,4 @@
+import installShutdown from "/usr/local/server/helpers/http-shutdown.cjs";
 import { parse } from "url";
 import next from "next";
 import { createServer } from "node:http";
@@ -22,6 +23,7 @@ const server = createServer((req, res) => {
     handle(req, res, parsedUrl);
   });
 });
+installShutdown(server);
 // End of framework-specific logic
 
 nextApp.prepare().then(() => {

@@ -1,3 +1,4 @@
+import installShutdown from "/usr/local/server/helpers/http-shutdown.cjs";
 import handler from "./server/server.js";
 import { toNodeHandler } from "srvx/node";
 import { createServer } from "node:http";
@@ -24,6 +25,7 @@ const finish = (res) => (error) => {
 const server = createServer((req, res) => {
   staticHandler(req, res, () => nodeHandler(req, res, finish(res)));
 });
+installShutdown(server);
 // End of framework-specific logic
 
 const port = +(process.env.PORT || "3000");

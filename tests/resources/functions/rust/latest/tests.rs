@@ -249,6 +249,13 @@ When you can have two!
 
         "timeout" => {
             context.log("Timeout start.");
+            // Rust's logger only writes files at the end of execution.
+            // Publish readiness for the CI drain check before blocking.
+            if let Some(id) = context.req.headers.get("x-shutdown-id") {
+                if id.starts_with("shutdown-") {
+                    std::fs::write(format!("/tmp/{}.started", id), "").unwrap();
+                }
+            }
 
             thread::sleep(Duration::from_secs(3));
 
