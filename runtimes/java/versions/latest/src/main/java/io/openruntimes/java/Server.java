@@ -32,10 +32,7 @@ public class Server {
             .patch("/*", Server::execute)
             .options("/*", Server::execute)
             .head("/*", Server::execute);
-    String shutdownTimeout = System.getenv("OPEN_RUNTIMES_SHUTDOWN_TIMEOUT");
-    app.jettyServer()
-        .server()
-        .setStopTimeout(Long.parseLong(shutdownTimeout == null ? "30" : shutdownTimeout) * 1000);
+    app.jettyServer().server().setStopTimeout(30_000);
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(

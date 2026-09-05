@@ -17,7 +17,7 @@ $server->set([
     'package_max_length' => $payloadSize,
     'buffer_output_size' => $payloadSize,
     'reload_async' => true,
-    'max_wait_time' => (int) (getenv('OPEN_RUNTIMES_SHUTDOWN_TIMEOUT') ?: 30),
+    'max_wait_time' => 30,
 ]);
 
 const USER_CODE_PATH = '/usr/local/server/src/function';

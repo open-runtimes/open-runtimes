@@ -330,7 +330,7 @@ func main() {
 	drained := make(chan struct{})
 	go func() {
 		<-signals
-		// The shared supervisor bounds shutdown, including blocked user code.
+		// The container manager bounds shutdown, including blocked user code.
 		if err := server.Shutdown(context.Background()); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}

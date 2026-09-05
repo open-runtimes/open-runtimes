@@ -6,14 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.Configure<Microsoft.Extensions.Hosting.HostOptions>(options =>
-{
-    options.ShutdownTimeout = TimeSpan.FromSeconds(
-        int.Parse(
-            Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SHUTDOWN_TIMEOUT") ?? "30"
-        )
-    );
-});
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.Limits.MaxRequestBodySize = 20 * 1024 * 1024;

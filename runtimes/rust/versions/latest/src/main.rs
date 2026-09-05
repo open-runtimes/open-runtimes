@@ -412,8 +412,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind(addr).await?;
 
     let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
-    let (shutdown, _) = tokio::sync::watch::channel(false);
-    let mut connections = tokio::task::JoinSet::new();
+    let graceful = hyper_util::server::graceful::GracefulShutdown::new();
 
     println!("HTTP server successfully started!");
 
@@ -421,23 +420,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tokio::select! {
             _ = terminate.recv() => break,
             _ = tokio::signal::ctrl_c() => break,
-            Some(_) = connections.join_next(), if !connections.is_empty() => {},
             accepted = listener.accept() => {
                 let (stream, _) = accepted?;
                 let io = TokioIo::new(stream);
-                let mut stopping = shutdown.subscribe();
-                connections.spawn(async move {
-                    let builder = http1::Builder::new();
-                    let connection = builder.serve_connection(io, service_fn(handle_request));
-                    tokio::pin!(connection);
-                    let result = tokio::select! {
-                        result = &mut connection => result,
-                        _ = stopping.changed() => {
-                            connection.as_mut().graceful_shutdown();
-                            connection.await
-                        }
-                    };
-                    if let Err(err) = result {
+                let watcher = graceful.watcher();
+                tokio::spawn(async move {
+                    let connection = http1::Builder::new()
+                        .serve_connection(io, service_fn(handle_request));
+                    if let Err(err) = watcher.watch(connection).await {
                         eprintln!("Error serving connection: {:?}", err);
                     }
                 });
@@ -445,8 +435,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     drop(listener);
-    let _ = shutdown.send(true);
-    // The shared supervisor enforces the deadline for stalled requests.
-    while connections.join_next().await.is_some() {}
+    graceful.shutdown().await;
     Ok(())
 }

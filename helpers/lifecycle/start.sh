@@ -30,12 +30,10 @@ opr_success "Runtime started."
 start_uptime=$(opr_uptime)
 export start_uptime
 
-# Keep the lifecycle alive until both the server and its log reader finish.
-# The supervisor signals the whole group; the server handles TERM itself.
-stopping=false
-trap 'stopping=true' TERM INT
-exec 3> >(
-	# Keep draining output when the supervisor signals the runtime group.
+# Tini forwards signals to the whole process group. Keep the shell and log
+# reader alive until the server finishes; the container manager owns the deadline.
+trap ':' TERM INT
+bash -c "$1" 2>&1 | {
 	trap '' TERM INT
 	recorded=false
 	while IFS= read -r line || [ -n "$line" ]; do
@@ -47,23 +45,6 @@ exec 3> >(
 			recorded=true
 		fi
 	done
-)
-log_reader=$!
-bash -c "$1" >&3 2>&1 &
-server=$!
-# Cover TERM arriving while the log reader/server were being started.
-if [ "$stopping" = true ]; then kill -TERM "$server" 2>/dev/null || true; fi
-exec 3>&-
-
-wait_for() {
-	local pid=$1 status
-	while true; do
-		status=0
-		wait "$pid" || status=$?
-		if ! kill -0 "$pid" 2>/dev/null; then return "$status"; fi
-	done
 }
-status=0
-wait_for "$server" || status=$?
-wait_for "$log_reader" || true
-exit "$status"
+
+exit "${PIPESTATUS[0]}"

@@ -31,8 +31,7 @@ suspend fun main() {
         .patch("/*") { runBlocking { execute(it) } }
         .options("/*") { runBlocking { execute(it) } }
         .head("/*") { runBlocking { execute(it) } }
-    app.jettyServer().server().stopTimeout =
-        (System.getenv("OPEN_RUNTIMES_SHUTDOWN_TIMEOUT") ?: "30").toLong() * 1000
+    app.jettyServer().server().stopTimeout = 30_000
     Runtime.getRuntime().addShutdownHook(Thread { app.stop() })
 }
 

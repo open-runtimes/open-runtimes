@@ -22,5 +22,4 @@ exec python3 /usr/local/server/server-env/bin/gunicorn \
 	--worker-class custom_worker.CustomGunicornWebWorker \
 	--preload \
 	--timeout 0 \
-	--graceful-timeout "${OPEN_RUNTIMES_SHUTDOWN_TIMEOUT:-30}" \
 	'server:app'

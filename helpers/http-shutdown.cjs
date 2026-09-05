@@ -19,7 +19,7 @@ module.exports = function installShutdown(server) {
   function shutdown() {
     if (stopping) return;
     stopping = true;
-    // The supervisor enforces the deadline even if user code blocks this loop.
+    // The container manager enforces the deadline even if user code blocks this loop.
     server.close(() => {
       process.stdout.write("", () => {
         process.stderr.write("", () => process.exit(0));

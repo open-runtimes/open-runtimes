@@ -45,10 +45,9 @@ server.listen(3000, '0.0.0.0', () => console.log('HTTP server successfully start
             subprocess.run(['docker', 'rm', '-f', self.container], capture_output=True)
         self.directory.cleanup()
 
-    def start(self, command='exec node src/function/server.cjs', timeout=5):
+    def start(self, command='exec node src/function/server.cjs'):
         self.container = docker(
             'create', '--entrypoint', 'bash', '-p', '127.0.0.1::3000',
-            '-e', f'OPEN_RUNTIMES_SHUTDOWN_TIMEOUT={timeout}',
             '-e', 'OPEN_RUNTIMES_SECRET=', '-e', 'OPEN_RUNTIMES_ENTRYPOINT=index.js',
             '-v', f'{ROOT / "helpers"}:/usr/local/server/helpers:ro',
             '-v', f'{ROOT / "runtimes/node/versions/latest/src/server.js"}:/usr/local/server/src/server.js:ro',
@@ -118,13 +117,13 @@ server.listen(3000, '0.0.0.0', () => console.log('HTTP server successfully start
         self.assertEqual(self.exit_code(), 0)
 
     def test_hung_request_is_bounded(self):
-        self.start(timeout=1)
+        self.start()
         self.ready()
         with concurrent.futures.ThreadPoolExecutor() as pool:
             response = pool.submit(self.request, '/hang')
             self.wait_log('request started')
             started = time.monotonic()
-            self.signal()
+            docker('stop', '--time', '1', self.container)
             self.assertEqual(self.exit_code(), 137)
             self.assertLess(time.monotonic() - started, 5)
             with self.assertRaises((OSError, http.client.HTTPException)):
@@ -162,10 +161,6 @@ console.log('child ready');
         self.wait_log('startup-active')
         self.signal()
         self.assertEqual(self.exit_code(), 143)
-
-    def test_invalid_deadline(self):
-        self.start(timeout='invalid')
-        self.assertEqual(self.exit_code(), 1)
 
     def test_node_function_drain(self):
         (self.path / 'index.js').write_text('''
