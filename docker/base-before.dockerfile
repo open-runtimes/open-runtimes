@@ -9,6 +9,12 @@ ENV OPEN_RUNTIMES_HEADERS="{}"
 # this as an ARG prevents the setting from leaking into the published image.
 ARG npm_config_audit=false
 
+# Debian releases past EOL serve security metadata whose Valid-Until has
+# lapsed, which makes every later apt-get update exit 100.
+RUN if [ ! -f /etc/alpine-release ]; then \
+        printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99no-check-valid-until; \
+    fi
+
 RUN <<EOR
     if [ -f /etc/alpine-release ]; then
         apk add --no-cache util-linux zstd squashfs-tools tini
