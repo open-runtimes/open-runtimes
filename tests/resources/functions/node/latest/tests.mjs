@@ -3,6 +3,9 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import { execSync } from "child_process";
 
+// Keep the entrypoint asynchronous to exercise the runtime's import fallback.
+await Promise.resolve();
+
 export default async (context) => {
 	const action = context.req.headers["x-action"];
 
