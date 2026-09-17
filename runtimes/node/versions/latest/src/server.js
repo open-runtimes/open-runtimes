@@ -261,7 +261,10 @@ const action = async (logger, req, res) => {
       try {
         userFunction = require(entrypointFilePath);
       } catch (err) {
-        if (err.code === "ERR_REQUIRE_ESM") {
+        if (
+          err.code === "ERR_REQUIRE_ESM" ||
+          err.code === "ERR_REQUIRE_ASYNC_MODULE"
+        ) {
           userFunction = await import(entrypointFilePath);
         } else {
           throw err;
