@@ -52,3 +52,15 @@ RUN flutter config --enable-web \
 # Preinstall the static file server; 4.1.0 is the newest release compatible
 # with every Dart SDK in the matrix
 RUN cd /usr/local/server/static-server && dart pub get
+
+# Preinstall the Jaspr CLI so Jaspr sites build without declaring jaspr_cli as
+# a project dependency, matching the Dockerfile Jaspr's own docs prescribe.
+# `jaspr create` does not add it to pubspec.yaml, so `dart run jaspr_cli:jaspr`
+# cannot resolve it from a stock project. PUB_CACHE/bin is already on PATH.
+# Skipped below Dart 3.8, the CLI's minimum, which Flutter 3.24-3.29 predate.
+RUN DART_VERSION="$(dart --version 2>&1 | sed -E 's/.*version: ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')" \
+    && if [ "$(printf '%s\n3.8.0\n' "$DART_VERSION" | sort -V | head -n1)" = "3.8.0" ]; then \
+           dart pub global activate jaspr_cli; \
+       else \
+           echo "Skipping jaspr_cli: Dart ${DART_VERSION} is below the required 3.8.0"; \
+       fi
