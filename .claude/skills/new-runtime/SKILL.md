@@ -10,6 +10,11 @@ allowed-tools: Read Write Edit Glob Grep Bash Agent WebSearch WebFetch
 
 Generate a complete, test-passing runtime for the open-runtimes project.
 
+The canonical contributor guides are `docs/add-runtime.md` (layout, Dockerfile,
+lifecycle hooks, registration) and `docs/testing.md` (local harness). Read both
+before generating anything; when this skill and those docs disagree, the docs win.
+
+
 ## Arguments
 
 The user provides: `{language} {version}`
@@ -46,36 +51,52 @@ Before writing any code, gather the information needed to make correct decisions
 
 Create ALL of the following files. Every file is required for the runtime to work.
 
-#### 2.1 Runtime Dockerfile: `runtimes/{language}/{language}.dockerfile`
+#### 2.1 Runtime Dockerfile: `runtimes/{language}/Dockerfile`
 
-This is the language-specific Dockerfile fragment that gets INCLUDEd between `base-before` and `base-after`. Pattern:
+One family `Dockerfile` serves every version. It starts from the `BASE_IMAGE`
+build arg (supplied per version from `ci/runtimes.toml`), `INCLUDE`s the shared
+base fragments from `docker/`, installs the language's system packages, and
+declares the command that launches the server:
 
 ```dockerfile
-RUN apk add bash
+# syntax=docker/dockerfile:1
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+INCLUDE ./docker/base-before
+
+RUN apk add --no-cache bash
 # Add any language-specific system dependencies here
 
 ENV OPEN_RUNTIMES_ENTRYPOINT={default_entrypoint}
 # For interpreted: main source file (e.g. index.js, main.py)
 # For compiled: main source file before compilation (e.g. main.go, main.rs)
+
+ENV OPEN_RUNTIMES_SERVER_COMMAND="{command that starts the server}"
+# For interpreted: the interpreter on the server source (e.g. python3 src/server.py)
+# For compiled: the built binary (e.g. src/function/server)
+
+INCLUDE ./docker/base-after
 ```
 
-For compiled languages, also copy helpers and any build tool configs. For interpreted languages, copy dependency files, install runtime dependencies, then copy the rest.
+`bun ci/bake.ts` inlines `docker/base-before.dockerfile` and
+`docker/base-after.dockerfile`, which create `/mnt/code`, `/mnt/logs`,
+`/mnt/telemetry`, `/usr/local/build`, assemble `/usr/local/server` from the
+`helpers`, `shared`, `latest` and `version` build contexts, set the default
+env, and `EXPOSE 3000`. Always keep both INCLUDEs.
 
 Study these existing examples to match the exact pattern:
-- **Interpreted (simple)**: `runtimes/python/python.dockerfile`, `runtimes/ruby/ruby.dockerfile`
-- **Compiled (simple)**: `runtimes/go/go.dockerfile`
-- **Compiled (Gradle-based)**: `runtimes/kotlin/kotlin.dockerfile`
+- **Interpreted (simple)**: `runtimes/python/Dockerfile`, `runtimes/ruby/Dockerfile`
+- **Compiled (simple)**: `runtimes/go/Dockerfile`, `runtimes/rust/Dockerfile`
+- **Compiled (Gradle-based)**: `runtimes/kotlin/Dockerfile`
 
-#### 2.2 Version Dockerfile: `runtimes/{language}/versions/{version}/Dockerfile`
+#### 2.2 Per-version overlay (optional): `runtimes/{language}/versions/{version}/`
 
-```dockerfile
-# syntax = devthefuture/dockerfile-x:1.4.2
-FROM {exact_docker_image_tag}
-
-INCLUDE ./base-before
-INCLUDE ./{language}
-INCLUDE ./base-after
-```
+There is no per-version Dockerfile. The base image for each version comes from
+the build table in `ci/runtimes.toml` (see 2.10). Only create
+`runtimes/{language}/versions/{version}/` when a version needs files that differ
+from `versions/latest/` (a custom `build.gradle`, different sources); anything
+placed there overlays `versions/latest/` at image-build time.
 
 #### 2.3 Server Implementation: `runtimes/{language}/versions/latest/src/`
 
@@ -149,48 +170,34 @@ The server **must** implement this exact protocol. Study multiple existing serve
 - `log(vararg messages)` - calls logger.write(messages, "log") then logger.write(["\n"], "log")
 - `error(vararg messages)` - calls logger.write(messages, "error") then logger.write(["\n"], "error")
 
-#### 2.4 Helper Scripts: `runtimes/{language}/versions/latest/helpers/`
+#### 2.4 Lifecycle Hooks: `runtimes/{language}/versions/latest/hooks/`
 
-**Required: `server.sh`** - How to start the server
+The global lifecycle runner (`helpers/lifecycle/build.sh` and
+`helpers/lifecycle/start.sh`) is shared by every runtime. A runtime customizes
+it by dropping scripts into `versions/latest/hooks/`. A missing hook is a no-op.
+Hooks are **sourced, not executed**, so they can export environment (activate a
+virtualenv, set `OPEN_RUNTIMES_CLEANUP`) for later phases.
 
-For interpreted:
+Every hook starts with:
 ```bash
 #!/bin/bash
+# Fail build if any command fails
 set -e
 shopt -s dotglob
-{command_to_run_server}
-# e.g.: python src/server.py
-# e.g.: ruby src/server.rb
-# e.g.: node src/server.js
 ```
 
-For compiled:
-```bash
-#!/bin/bash
-set -e
-shopt -s dotglob
-src/function/server
-# or: java -jar src/function/{jarname}
-```
+**Build** (`helpers/build.sh "<install command>"`):
 
-**Optional helpers** (only create if needed, otherwise the global empty stubs are used):
+- `build-prepare.sh` - after the build cache is restored and `/mnt/code` is copied to `/usr/local/build`, before the install command runs. Used for creating virtual environments (Python) or merging user dependency files with server dependency files.
+- `compile.sh` - compiled languages only: copy `/usr/local/build` into the server's source tree, run the compiler, move the binary back to `/usr/local/build/` (see `runtimes/rust/versions/latest/hooks/compile.sh`, `runtimes/go/versions/latest/hooks/compile.sh`).
+- `pack.sh` - prune the build output before it is archived; set `OPEN_RUNTIMES_CLEANUP` if needed.
 
-- `prepare-build.sh` - Runtime-specific setup before user's install command runs. Used for things like:
-  - Copying user code into the server's source tree (compiled languages)
-  - Setting up virtual environments (Python)
-  - Merging user dependency files with server dependency files
+**Start** (`helpers/start.sh "<start command>"`):
 
-- `prepare-compile.sh` - Compile step for compiled languages:
-  - Run the compiler/build tool
-  - Move binary output to `/usr/local/build/`
+- `start-prepare.sh` - after the archive is extracted, before the server starts: move dependencies or binaries into place, activate environments (see `runtimes/python/versions/latest/hooks/start-prepare.sh`).
+- `server.sh` - only when starting the server takes more than the single `OPEN_RUNTIMES_SERVER_COMMAND` from the Dockerfile (worker counts, `exec` with computed flags). When present it takes precedence over `OPEN_RUNTIMES_SERVER_COMMAND` in `helpers/server.sh`. It must print `HTTP server successfully started!` before `exec`ing the server if the server itself does not (see `runtimes/python/versions/latest/hooks/server.sh`).
 
-- `prepare-packing.sh` - Adjust build output before tarball creation:
-  - Move compiled artifacts to clean locations
-  - Set `OPEN_RUNTIMES_CLEANUP` if needed
-
-- `prepare-start.sh` - Pre-start preparation:
-  - Copy server dependencies to runtime location
-  - Activate virtual environments
+Most interpreted runtimes need no hooks at all; a compiled runtime typically needs only `compile.sh`.
 
 #### 2.5 Dependency File
 
@@ -315,7 +322,7 @@ Note: `testDeprecatedMethodsBytesBody` should return 500/"Unknown action" for co
 
 #### 2.10 CI Configuration: `ci/runtimes.toml`
 
-Add a new entry in alphabetical order among the runtime entries (before the framework entries like `[astro]`, `[sveltekit]`, etc.):
+Add a runtime section in alphabetical order among the runtime entries (before the framework entries like `[astro]`, `[sveltekit]`, etc.), then a build table:
 
 ```toml
 [{language}]
@@ -326,32 +333,52 @@ commands = { install = "{install_command}", start = "bash helpers/server.sh" }
 formatter = { prepare = "{formatter_install}", check = "{formatter_check}", write = "{formatter_write}" }
 tools = "{tools_check_command}"
 test = "Serverless/{Language}.php"
+
+[{language}.build.versions]
+"{version}" = { base = "{exact_docker_image_tag}" }
 ```
+
+Always pin the most specific base image (patch version + distro). Optional
+per-version keys: `args` (Dockerfile build args), `platforms`, `version_dir`.
+Each `[{language}.build.versions]` key publishes `openruntimes/{language}:v5-{version}`.
+
+Then regenerate the bake file:
+
+```bash
+bun ci/bake.ts
+```
+
+CI rejects the change if `docker-bake.json` is stale or if the `versions` list and the build version list drift apart.
+
+#### 2.11 README images table
+
+Add the new image to the Images table in the root `README.md`, sorted alphabetically.
 
 ### Phase 3: Verify
 
 After generating all files, perform these verification steps:
 
 1. **File inventory check** - Confirm every required file exists:
-   - `runtimes/{language}/{language}.dockerfile`
+   - `runtimes/{language}/Dockerfile`
    - `runtimes/{language}/README.md`
    - `runtimes/{language}/versions/latest/src/` (server + logger + types)
-   - `runtimes/{language}/versions/latest/helpers/server.sh`
+   - `runtimes/{language}/versions/latest/hooks/` (only the hooks the runtime needs; `compile.sh` for compiled languages)
    - `runtimes/{language}/versions/latest/{dependency_file}`
    - `runtimes/{language}/versions/latest/.dockerignore`
    - `runtimes/{language}/versions/latest/.gitignore`
-   - `runtimes/{language}/versions/{version}/Dockerfile`
    - `tests/resources/functions/{language}/latest/{test_file}`
    - `tests/resources/functions/{language}/latest/{no_export_file}`
    - `tests/resources/functions/{language}/latest/{test_dependency_file}`
    - `tests/Serverless/{Language}.php`
-   - Entry in `ci/runtimes.toml`
+   - Runtime section and build table in `ci/runtimes.toml`
+   - Regenerated `docker-bake.json`
+   - Row in the root `README.md` Images table
 
 2. **Protocol compliance** - Review the server implementation against the protocol spec above. Check every endpoint, every header, every edge case.
 
 3. **Test completeness** - Verify every action from the test action list is implemented in the test function.
 
-4. **Build test** - Run `bash tests.sh {language}-{version}` to build and test the runtime. Fix any failures.
+4. **Build test** - Run `make test ID={language}-{version}` (which is `bun ci/test.ts {language}-{version}`) to build the image, run the formatter check, stage fixtures and run the PHPUnit suite. Use `--skip-image` to iterate without rebuilding. Fix any failures. See `docs/testing.md`.
 
 ## Critical Rules
 
@@ -369,5 +396,6 @@ After generating all files, perform these verification steps:
 - The `empty()` response MUST return status 204
 - Error responses from the runtime itself (not user code) MUST return status 500 with empty body
 - Module-not-found errors MUST return status 503
-- The Dockerfile MUST use `# syntax = devthefuture/dockerfile-x:1.4.2` as the first line
-- The Dockerfile MUST use the three-INCLUDE pattern: `base-before`, `{language}`, `base-after`
+- The Dockerfile MUST start with `# syntax=docker/dockerfile:1`, take `ARG BASE_IMAGE`, and keep both `INCLUDE ./docker/base-before` and `INCLUDE ./docker/base-after`
+- The Dockerfile MUST set `OPEN_RUNTIMES_SERVER_COMMAND` (or the runtime MUST ship `hooks/server.sh`)
+- `docker-bake.json` MUST be regenerated with `bun ci/bake.ts` after editing `ci/runtimes.toml`
