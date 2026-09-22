@@ -1,8 +1,3 @@
 #!/bin/bash
-# Fail build if any command fails
-set -e
-shopt -s dotglob
-
-. /usr/local/server/helpers/before-build.sh
-bash -c "$1"
-. /usr/local/server/helpers/after-build.sh
+# Executor contract: helpers/build.sh "<install command>"
+exec bash /usr/local/server/helpers/lifecycle/build.sh "$@"

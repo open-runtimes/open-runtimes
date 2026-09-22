@@ -1,0 +1,6 @@
+name: open_runtimes_flutter_server
+publish_to: none
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  dhttpd: 4.1.0

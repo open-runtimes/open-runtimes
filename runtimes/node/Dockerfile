@@ -1,0 +1,62 @@
+# syntax=docker/dockerfile:1
+# INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the
+# referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+INCLUDE ./docker/base-before
+
+RUN apk add --no-cache bash nss font-noto ca-certificates gcompat
+
+ARG NPM_VERSION
+RUN npm install npm@${NPM_VERSION} -g && \
+    hash -r && \
+    test "$(npm --version)" = "${NPM_VERSION}" && \
+    test "$(npx --version)" = "${NPM_VERSION}" && \
+    rm -rf /root/.npm
+
+# https://pnpm.io/installation#compatibility (node 16 needs pnpm 8)
+ARG PNPM_VERSION=9.15.9
+RUN npm install pnpm@${PNPM_VERSION} modclean@2.1.2 -g
+
+# Node 26 dropped the bundled Yarn from the official images (Corepack went in
+# 25). Install it there to keep tooling parity; older bases already ship Yarn,
+# and installing over their symlink fails with EEXIST.
+ARG YARN_VERSION=""
+RUN if [ -n "$YARN_VERSION" ]; then npm install yarn@${YARN_VERSION} -g; fi
+
+RUN npm ci && npm cache clean --force
+
+# Additional tooling needed for Node runtimes used for SSR (Sites)
+# alpine-sdk - basic tooling like git, gcc, g++, make...
+# python3-dev - Install Python (useful to some NPM libs)
+# py3-pip - Python package manager
+# gcompat - Pre-requirement for Bun
+ARG INSTALL_SSR_TOOLING="false"
+ARG BUN_VERSION=1.3.2
+# The Bun npm package retains multiple platform variants. Keep only the
+# resolved executable and remove npm's downloaded package cache.
+# --allow-scripts is required from npm 12 on, which blocks lifecycle scripts by
+# default: Bun ships bin/bun.exe as an empty placeholder that its postinstall
+# replaces with the platform binary, so a blocked install leaves a 0-byte bun
+# that exits 0 and prints nothing on every invocation.
+RUN if [ "$INSTALL_SSR_TOOLING" = "true" ]; then \
+        apk add --no-cache alpine-sdk python3-dev py3-pip gcompat && \
+        npm install -g --allow-scripts=bun bun@${BUN_VERSION} && \
+        cp -L /usr/local/bin/bun /tmp/bun && \
+        npm uninstall -g bun && \
+        install -m 0755 /tmp/bun /usr/local/bin/bun && \
+        ln -sf /usr/local/bin/bun /usr/local/bin/bunx && \
+        rm -f /tmp/bun && \
+        test "$(bun --version)" = "${BUN_VERSION}" && \
+        test "$(bunx --version)" = "${BUN_VERSION}" && \
+        npm cache clean --force; \
+    fi
+
+ENV OPEN_RUNTIMES_SERVER_COMMAND="node --max_old_space_size=8192 src/server.js"
+
+# Next.js packing: keep node's pre-consolidation behavior (ship node_modules
+# untouched) instead of the shared packer's modclean fallback used by bun/deno.
+ENV OPEN_RUNTIMES_NEXTJS_CLEANUP=none
+
+INCLUDE ./docker/base-after

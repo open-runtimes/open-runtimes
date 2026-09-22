@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,12 +11,45 @@ import (
 	"net/url"
 	"openruntimes/handler"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/open-runtimes/types-for-go/v4/openruntimes"
 )
+
+var config = struct {
+	secret  string
+	headers map[string]string
+}{
+	secret:  os.Getenv("OPEN_RUNTIMES_SECRET"),
+	headers: loadHeaders(),
+}
+
+func loadHeaders() map[string]string {
+	headers := map[string]string{}
+
+	var parsed map[string]interface{}
+	if err := json.Unmarshal([]byte(os.Getenv("OPEN_RUNTIMES_HEADERS")), &parsed); err != nil {
+		return headers
+	}
+
+	for key, value := range parsed {
+		valueString := ""
+		switch v := value.(type) {
+		default:
+			valueString = fmt.Sprintf("%#v", value)
+		case string:
+			valueString = v
+		}
+
+		headers[strings.ToLower(key)] = valueString
+	}
+
+	return headers
+}
 
 func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) error {
 	timeout := r.Header.Get("x-open-runtimes-timeout")
@@ -36,9 +70,8 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	}
 
 	secret := r.Header.Get("x-open-runtimes-secret")
-	serverSecret := os.Getenv("OPEN_RUNTIMES_SECRET")
 
-	if serverSecret != "" && secret != serverSecret {
+	if config.secret != "" && secret != config.secret {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Header().Set("content-type", "text/plain")
 		w.Write([]byte("Unauthorized. Provide correct \"x-open-runtimes-secret\" header."))
@@ -64,27 +97,8 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 		}
 	}
 
-	headersEnv := os.Getenv("OPEN_RUNTIMES_HEADERS")
-	if headersEnv == "" {
-		headersEnv = "{}"
-	}
-
-	var enforcedHeaders map[string]interface{}
-	err = json.Unmarshal([]byte(headersEnv), &enforcedHeaders)
-	if err != nil {
-		enforcedHeaders = map[string]interface{}{}
-	}
-
-	for key, value := range enforcedHeaders {
-		valueString := ""
-		switch v := value.(type) {
-		default:
-			valueString = fmt.Sprintf("%#v", value)
-		case string:
-			valueString = v
-		}
-
-		headers[strings.ToLower(key)] = valueString
+	for key, value := range config.headers {
+		headers[key] = value
 	}
 
 	method := r.Method
@@ -309,8 +323,22 @@ func main() {
 
 	fmt.Println("HTTP server successfully started!")
 
-	err = http.Serve(listener, http.MaxBytesHandler(http.HandlerFunc(handler), 20*1024*1024))
-	if err != nil {
+	server := &http.Server{Handler: http.MaxBytesHandler(http.HandlerFunc(handler), 20*1024*1024)}
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGTERM, os.Interrupt)
+	defer signal.Stop(signals)
+	drained := make(chan struct{})
+	go func() {
+		<-signals
+		// The container manager bounds shutdown, including blocked user code.
+		if err := server.Shutdown(context.Background()); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+		close(drained)
+	}()
+	err = server.Serve(listener)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		panic(err)
 	}
+	<-drained
 }

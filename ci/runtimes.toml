@@ -2,6 +2,7 @@
 entry = "tests.js"
 entry_no_export = "no-export.js"
 versions = [
+    "26",
     "25",
     "24",
     "23",
@@ -24,6 +25,7 @@ commands = { install = "npm install", start = "bash helpers/server.sh" }
 formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && modclean --version"
 test = "Serverless/Node.php"
+shared = "javascript"
 
 [deno]
 entry = "tests.ts"
@@ -31,8 +33,9 @@ entry_no_export = "no-export.ts"
 versions = ["2.6", "2.5", "2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt ." }
-tools = "deno --version" # TODO: NPM, PNPM and Yarn dont work in Deno alpine currently: https://github.com/denoland/deno_docker/issues/373
+tools = "deno --version && node --version && npm --version && npx --version && modclean --version"
 test = "Serverless/Deno.php"
+shared = "javascript"
 
 [python]
 entry = "tests.py"
@@ -46,7 +49,7 @@ test = "Serverless/Python.php"
 [python-ml]
 entry = "tests.py"
 versions = ["3.13", "3.12", "3.11"]
-commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "bash helpers/server.sh" }
+commands = { install = "pip install --no-cache-dir --timeout 120 -r requirements.txt", start = "bash helpers/server.sh" }
 formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
 tools = "python --version && pip --version && poetry --version"
 test = "Serverless/PythonML.php"
@@ -54,6 +57,8 @@ test = "Serverless/PythonML.php"
 [dart]
 entry = "lib/tests.dart"
 versions = [
+    "3.13",
+    "3.12",
     "3.11",
     "3.10",
     "3.9",
@@ -73,8 +78,7 @@ tools = "dart --version"
 test = "Serverless/Dart.php"
 
 [flutter]
-report_size = false
-versions = ["3.41", "3.38", "3.35", "3.32", "3.29", "3.27", "3.24"]
+versions = ["3.47", "3.44", "3.41", "3.38", "3.35", "3.32", "3.29", "3.27", "3.24"]
 commands = { install = "flutter build web", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
 test = "CSR/Flutter.php"
@@ -89,6 +93,14 @@ commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "gem install rubocop", check = "rubocop --lint .", write = "rubocop --fix-layout --lint ." }
 tools = "ruby --version && gem --version"
 test = "Serverless/Ruby.php"
+
+[rust]
+entry = "tests.rs"
+versions = ["1.83"]
+commands = { install = "", start = "bash helpers/server.sh" }
+formatter = { prepare = "echo \"Using native formatter\"", check = "find ./ -name '*.rs' -type f -print | xargs rustfmt --check --edition 2021", write = "find ./ -name '*.rs' -type f -print | xargs rustfmt --edition 2021" }
+tools = "rustc --version && cargo --version"
+test = "Serverless/Rust.php"
 
 [php]
 entry = "tests.php"
@@ -136,7 +148,9 @@ test = "Serverless/CPP.php"
 
 [dotnet]
 entry = "Tests.cs"
-entry_no_export = "NoExport.cs"
+# No entry_no_export: the dotnet runtime binds `new Handler()` at compile time
+# and compiles every .cs file, so entrypoint-based no-export detection (503 on
+# missing export) cannot work with the current build model.
 versions = ["10", "8.0", "7.0", "6.0"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "dotnet tool install --global csharpier", check = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier check .'", write = "bash -c 'PATH=\\$PATH:/root/.dotnet/tools && /root/.dotnet/tools/csharpier format .'" }
@@ -154,11 +168,12 @@ test = "Serverless/Go.php"
 [bun]
 entry = "tests.ts"
 entry_no_export = "no-export.ts"
-versions = ["1.3", "1.2", "1.1", "1.0"]
+versions = ["1.4", "1.3", "1.2", "1.1", "1.0"]
 commands = { install = "bun install", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using bunx biome formatter\"", check = "bunx @biomejs/biome format .", write = "bunx @biomejs/biome format --write ." }
-tools = "bun --version && npm --version && npx --version && pnpm --version && yarn --version"
+tools = "bun --version && npm --version && npx --version && pnpm --version && yarn --version && modclean --version"
 test = "Serverless/Bun.php"
+shared = "javascript"
 
 [static]
 versions = ["1"]
@@ -230,6 +245,15 @@ tools = "node --version && npm --version && npx --version && pnpm --version && y
 test = "SSR/TanstackStartNitro.php"
 output = "./.output"
 
+[tanstack_start_nitro_listener]
+report_size = false
+runtime = { name = "node", version = "24" }
+commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
+test = "SSR/TanstackStartNitroListener.php"
+output = "./.output"
+
 [tanstack_start_native]
 report_size = false
 runtime = { name = "node", version = "24" }
@@ -265,3 +289,186 @@ formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", wri
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/Analog.php"
 output = "./dist/analog"
+
+[jaspr]
+report_size = false
+runtime = { name = "flutter", version = "3.44" }
+commands = { install = "dart pub get && jaspr build", start = "bash helpers/jaspr/server.sh" }
+formatter = { prepare = "echo \"Using native formatter\"", check = "dart format -o none --set-exit-if-changed .", write = "dart format ." }
+tools = "dart --version && flutter --version"
+test = "SSR/Jaspr.php"
+output = "./build/jaspr"
+
+[next-js_bun]
+report_size = false
+versions = ["1.3"]
+runtime = { name = "bun", version = "1.3" }
+test_resource_dir = "next-js"
+commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
+test = "SSR/NextJS.php"
+output = "./.next"
+
+[next-js_deno]
+report_size = false
+versions = ["2.6"]
+runtime = { name = "deno", version = "2.6" }
+test_resource_dir = "next-js"
+commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+tools = "deno --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
+test = "SSR/NextJS.php"
+output = "./.next"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Image build configuration, consumed by `bun ci/bake.ts` to generate
+# docker-bake.json. Every key under [<runtime>.build.versions] produces a
+# published image tag: openruntimes/<runtime>:v5-<version>.
+# Per-version keys: base (FROM image), args (build args), platforms (override),
+# build_base (php: builder-stage base), version_dir (overlay dir override).
+# Set build.audit = false when the runtime version is not supplied by its base.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[node.build.versions]
+"26" = { base = "node:26.5.1-alpine3.24", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "12.0.2", YARN_VERSION = "1.22.22" } }
+"25" = { base = "node:25.9.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "11.19.0" } }
+"24" = { base = "node:24.19.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "12.0.2" } }
+"23" = { base = "node:23.11.1-alpine3.22", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "11.19.0" } }
+"22" = { base = "node:22.23.2-alpine3.23", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "12.0.2" } }
+"21.0" = { base = "node:21.7.3-alpine3.20", args = { NPM_VERSION = "10.9.9" } }
+"20.0" = { base = "node:20.20.2-alpine3.23", args = { NPM_VERSION = "11.19.0" } }
+"19.0" = { base = "node:19.9.0-alpine3.18", args = { NPM_VERSION = "9.9.4" } }
+"18.0" = { base = "node:18.20.8-alpine3.20", args = { NPM_VERSION = "10.9.9" } }
+"16.0" = { base = "node:16.20.2-alpine3.18", args = { NPM_VERSION = "9.9.4", PNPM_VERSION = "8" } }
+
+[deno.build.versions]
+"2.6" = { base = "denoland/deno:alpine-2.6.7", args = { NPM_VERSION = "12.0.2" } }
+"2.5" = { base = "denoland/deno:alpine-2.5.7", args = { NPM_VERSION = "12.0.2" } }
+"2.0" = { base = "denoland/deno:alpine-2.0.6", args = { NPM_VERSION = "10.9.9" } }
+"1.46" = { base = "denoland/deno:alpine-1.46.3", args = { NPM_VERSION = "10.9.9" } }
+"1.40" = { base = "denoland/deno:alpine-1.40.5", args = { NPM_VERSION = "10.9.9" }, platforms = ["linux/amd64"] }
+"1.35" = { base = "denoland/deno:alpine-1.35.3", args = { NPM_VERSION = "9.9.4" }, platforms = ["linux/amd64"] }
+"1.24" = { base = "denoland/deno:alpine-1.24.3", args = { NPM_VERSION = "7.24.2" }, platforms = ["linux/amd64"] }
+"1.21" = { base = "denoland/deno:alpine-1.21.3", args = { NPM_VERSION = "7.24.2" }, platforms = ["linux/amd64"] }
+
+[python.build.versions]
+"3.14" = { base = "python:3.14.6-alpine3.23" }
+"3.13" = { base = "python:3.13.14-alpine3.23" }
+"3.12" = { base = "python:3.12.13-alpine3.23" }
+"3.11" = { base = "python:3.11.15-alpine3.23" }
+"3.10" = { base = "python:3.10.20-alpine3.23" }
+"3.9" = { base = "python:3.9.25-alpine3.22" }
+"3.8" = { base = "python:3.8.20-alpine3.20" }
+
+[python-ml.build]
+runtime_dir = "python"
+image = "python-ml"
+
+[python-ml.build.versions]
+"3.13" = { base = "python:3.13.14-bookworm", version_dir = "ml-3.13", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
+"3.12" = { base = "python:3.12.13-bookworm", version_dir = "ml-3.12", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
+"3.11" = { base = "python:3.11.15-bookworm", version_dir = "ml-3.11", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
+
+[dart.build.versions]
+"3.13" = { base = "dart:3.13.1" }
+"3.12" = { base = "dart:3.12.2" }
+"3.11" = { base = "dart:3.11.6" }
+"3.10" = { base = "dart:3.10.9" }
+"3.9" = { base = "dart:3.9.4" }
+"3.8" = { base = "dart:3.8.3" }
+"3.5" = { base = "dart:3.5.4" }
+"3.3" = { base = "dart:3.3.4" }
+"3.1" = { base = "dart:3.1.5" }
+"3.0" = { base = "dart:3.0.7" }
+"2.19" = { base = "dart:2.19.6" }
+"2.18" = { base = "dart:2.18.7" }
+"2.17" = { base = "dart:2.17.7" }
+"2.16" = { base = "dart:2.16.2" }
+
+[flutter.build]
+audit = false
+
+[flutter.build.versions]
+"3.47" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.47.1" } }
+"3.44" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.44.6" } }
+"3.41" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.41.2" } }
+"3.38" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.38.9" } }
+"3.35" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.35.7" } }
+"3.32" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.32.6" } }
+"3.29" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.29.3" } }
+"3.27" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.27.3" } }
+"3.24" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.24.5" } }
+
+[ruby.build.versions]
+"4.0" = { base = "ruby:4.0.5-alpine3.23" }
+"3.4" = { base = "ruby:3.4.10-alpine3.23" }
+"3.3" = { base = "ruby:3.3.10-alpine3.23" }
+"3.2" = { base = "ruby:3.2.10-alpine3.23" }
+"3.1" = { base = "ruby:3.1.7-alpine3.20" }
+"3.0" = { base = "ruby:3.0.7-alpine3.16" }
+
+[php.build.versions]
+"8.4" = { base = "php:8.4.24-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v6.1.1", BUILD_PACKAGES = "linux-headers" } }
+"8.3" = { base = "php:8.3.33-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
+"8.2" = { base = "php:8.2.33-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
+"8.1" = { base = "php:8.1.34-cli-alpine3.22", args = { PHP_SWOOLE_VERSION = "v5.1.2" } }
+"8.0" = { base = "php:8.0.30-cli-alpine3.16", args = { PHP_SWOOLE_VERSION = "v4.7.0" } }
+
+[swift.build.versions]
+"6.2" = { base = "swift:6.2.4-jammy" }
+"5.10" = { base = "swift:5.10.1-jammy" }
+"5.9" = { base = "swift:5.9.2-jammy" }
+"5.8" = { base = "swift:5.8.1-jammy" }
+
+[kotlin.build]
+platforms = ["linux/amd64"]
+
+[kotlin.build.versions]
+"2.3" = { base = "eclipse-temurin:25-jdk-alpine-3.23" }
+"2.0" = { base = "eclipse-temurin:22-jdk-alpine" }
+"1.9" = { base = "eclipse-temurin:19-jdk-alpine" }
+"1.8" = { base = "eclipse-temurin:19-jdk-alpine" }
+"1.6" = { base = "eclipse-temurin:18-jdk-alpine" }
+
+[java.build.versions]
+"25" = { base = "eclipse-temurin:25-jdk-alpine-3.23", args = { SYSTEM_PACKAGES = "curl" } }
+# Temurin publishes multi-arch Alpine images only for JDK 21+. The Alpine
+# variants of JDK 8/11/17 are amd64-only and JDK 18/22 have no Alpine 3.23
+# build at all, so those five stay on Jammy for linux/arm64 support.
+"22" = { base = "eclipse-temurin:22-jdk-jammy", args = { SYSTEM_PACKAGES = "curl" } }
+"21.0" = { base = "eclipse-temurin:21-jdk-alpine-3.23" }
+"18.0" = { base = "eclipse-temurin:18-jdk-jammy" }
+"17.0" = { base = "eclipse-temurin:17-jdk-jammy" }
+"11.0" = { base = "eclipse-temurin:11-jdk-jammy" }
+"8.0" = { base = "eclipse-temurin:8-jdk-jammy" }
+
+[cpp.build.versions]
+"23" = { base = "alpine:3.23.5" }
+"20" = { base = "alpine:3.23.5" }
+"17" = { base = "alpine:3.23.5" }
+
+[dotnet.build.versions]
+"10" = { base = "mcr.microsoft.com/dotnet/sdk:10.0.102-alpine3.23" }
+"8.0" = { base = "mcr.microsoft.com/dotnet/sdk:8.0.417-alpine3.23" }
+"7.0" = { base = "mcr.microsoft.com/dotnet/sdk:7.0.410-alpine3.19" }
+"6.0" = { base = "mcr.microsoft.com/dotnet/sdk:6.0.428-1-alpine3.20" }
+
+[go.build.versions]
+"1.26" = { base = "golang:1.26.5-alpine3.23" }
+"1.25" = { base = "golang:1.25.12-alpine3.23" }
+"1.24" = { base = "golang:1.24.13-alpine3.23" }
+"1.23" = { base = "golang:1.23.12-alpine3.22" }
+
+[bun.build.versions]
+"1.4" = { base = "oven/bun:1.4.0-alpine", args = { NPM_VERSION = "12.0.2" } }
+"1.3" = { base = "oven/bun:1.3.8-alpine", args = { NPM_VERSION = "12.0.2" } }
+"1.2" = { base = "oven/bun:1.2.23-alpine", args = { NPM_VERSION = "10.9.9" } }
+"1.1" = { base = "oven/bun:1.1.45-alpine", args = { NPM_VERSION = "10.9.9" } }
+"1.0" = { base = "oven/bun:1.0.36-alpine", args = { NPM_VERSION = "10.9.9" } }
+
+[rust.build.versions]
+"1.83" = { base = "rust:1.83-alpine" }
+
+[static.build.versions]
+"1" = { base = "joseluisq/static-web-server:2.39.0-alpine" }

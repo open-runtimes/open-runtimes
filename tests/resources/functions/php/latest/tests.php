@@ -169,6 +169,8 @@ When you can have two!
         case 'errorTest':
             $context->log('Before error...');
             throw new Exception('Error!');
+        case 'fatalError':
+            require __DIR__.'/fatal.php';
         default:
             throw new Exception('Unknown action');
     }

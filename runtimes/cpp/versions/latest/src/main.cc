@@ -4,6 +4,7 @@
 #include "RuntimeRequest.h"
 #include "RuntimeOutput.h"
 #include "RuntimeContext.h"
+#include "OprConfig.h"
 #include "RuntimeLogger.h"
 #include "{entrypointFile}"
 #include <vector>
@@ -80,16 +81,14 @@ int main()
                         }
                     }
 
-                    if(std::getenv("OPEN_RUNTIMES_SECRET") != nullptr) {
-                        std::string serverSecret(std::getenv("OPEN_RUNTIMES_SECRET"));
-                        std::string secret = req->getHeader("x-open-runtimes-secret");
+                    const std::string &serverSecret = runtime::config().secret;
+                    std::string secret = req->getHeader("x-open-runtimes-secret");
 
-                        if(serverSecret != "" && secret != serverSecret) {
-                            res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
-                            res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
-                            callback(res);
-                            return;
-                        }
+                    if(serverSecret != "" && secret != serverSecret) {
+                        res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
+                        res->setBody("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.");
+                        callback(res);
+                        return;
                     }
 
                     std::string method = req->getMethodString();
@@ -296,35 +295,19 @@ int main()
                         headers["cookie"] = cookieHeadersString;
                     }
 
-                    char* serverHeadersChar = std::getenv("OPEN_RUNTIMES_HEADERS");
-                    if(serverHeadersChar != nullptr) {
-                        std::string serverHeadersString(serverHeadersChar);
+                    const Json::Value &serverHeaders = runtime::config().headers;
+                    for (const std::string &key : serverHeaders.getMemberNames())
+                    {
+                        std::string headerKey = key;
+                        std::transform(
+                            headerKey.begin(),
+                            headerKey.end(),
+                            headerKey.begin(),
+                            [](unsigned char c){ return std::tolower(c); }
+                        );
 
-                        if(serverHeadersString.empty()) {
-                            serverHeadersString = "{}";
-                        }
-
-                        Json::Value serverHeaders;
-                        Json::Reader serverHeadersReader;
-                        bool parsingResult = serverHeadersReader.parse(serverHeadersString, serverHeaders);
-                        if(!parsingResult)
-                        {
-                            throw std::runtime_error("Invalid JSON body.");
-                        }
-
-                        for (const std::string &key : serverHeaders.getMemberNames())
-                        {
-                            std::string headerKey = key;
-                            std::transform(
-                                headerKey.begin(),
-                                headerKey.end(),
-                                headerKey.begin(),
-                                [](unsigned char c){ return std::tolower(c); }
-                            );
-
-                            auto value = serverHeaders[key];
-                            headers[headerKey] = value.asString();
-                        }
+                        auto value = serverHeaders[key];
+                        headers[headerKey] = value.asString();
                     }
 
                     runtimeRequest.headers = headers;

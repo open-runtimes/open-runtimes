@@ -3,20 +3,73 @@
 require 'vendor-server/autoload.php';
 require_once 'types.php';
 require_once 'logger.php';
+require_once 'config.php';
 
-Swoole\Runtime::enableCoroutine($flags = SWOOLE_HOOK_ALL);
+// Use the native curl hook instead of the userland one bundled in
+// SWOOLE_HOOK_ALL. The userland hook only maps a fixed set of curl options and
+// throws on the rest, so HTTP clients that touch newer options break under it
+// (e.g. Guzzle 7.x sets CURLOPT_PREREQFUNCTION). The native hook defers to real
+// curl, so it stays coroutine-friendly while supporting the full option set.
+Swoole\Runtime::enableCoroutine($flags = (SWOOLE_HOOK_ALL | SWOOLE_HOOK_NATIVE_CURL) & ~SWOOLE_HOOK_CURL);
 $payloadSize = 20 * 1024 * 1024;
 $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 $server->set([
     'package_max_length' => $payloadSize,
     'buffer_output_size' => $payloadSize,
+    'reload_async' => true,
+    'max_wait_time' => 30,
 ]);
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
+$config = new Config();
 $userFunction = null;
+$activeRequests = [];
 
-$action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction) {
+$fatalShutdownHandler = function () use (&$activeRequests): void {
+    $error = \error_get_last();
+    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
+
+    if ($error === null || !\in_array($error['type'], $fatalTypes, true)) {
+        return;
+    }
+
+    $message = \sprintf(
+        '%s in %s:%d',
+        $error['message'],
+        $error['file'],
+        $error['line']
+    );
+
+    // A fatal error terminates the worker, so none of its active requests can continue.
+    foreach ($activeRequests as $request) {
+        $logger = $request['logger'];
+        $response = $request['response'];
+
+        try {
+            $logger->write([$message], Logger::TYPE_ERROR);
+        } catch (\Throwable) {
+        }
+
+        try {
+            $logger->end();
+        } catch (\Throwable) {
+        }
+
+        try {
+            $response->header('x-open-runtimes-log-id', $logger->id);
+            $response->status(500);
+            $response->end('');
+        } catch (\Throwable) {
+        }
+    }
+};
+
+$server->on('WorkerStart', function () use ($fatalShutdownHandler): void {
+    \register_shutdown_function($fatalShutdownHandler);
+});
+
+$action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction, $config) {
     $requestHeaders = $req->header;
 
     $cookieHeaders = [];
@@ -41,7 +94,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
         $safeTimeout = \intval($timeout);
     }
 
-    if ((getenv('OPEN_RUNTIMES_SECRET') ?? '') != "" && ($requestHeaders['x-open-runtimes-secret'] ?? '') !== getenv('OPEN_RUNTIMES_SECRET')) {
+    if ($config->secret !== '' && ($requestHeaders['x-open-runtimes-secret'] ?? '') !== $config->secret) {
         $res->status(500);
         $res->end('Unauthorized. Provide correct "x-open-runtimes-secret" header.');
         return;
@@ -100,8 +153,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
         }
     }
 
-    $enforcedHeaders = json_decode(getenv('OPEN_RUNTIMES_HEADERS') ?? '{}', true);
-    foreach ($enforcedHeaders as $key => $value) {
+    foreach ($config->headers as $key => $value) {
         $context->req->headers[\strtolower($key)] = \strval($value);
     }
 
@@ -109,7 +161,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
 
     $output = null;
 
-    $entrypoint = getenv('OPEN_RUNTIMES_ENTRYPOINT');
+    $entrypoint = $config->entrypoint;
     $entrypointPath = USER_CODE_PATH . '/' . $entrypoint;
 
     // Guard: Check file exists
@@ -211,7 +263,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction)
     $res->end($output['body']);
 };
 
-$server->on("Request", function ($req, $res) use ($action) {
+$server->on("Request", function ($req, $res) use ($action, $config, &$activeRequests) {
     if ($req->server['path_info'] === '/__opr/health') {
         $res->status(200);
         $res->end('OK');
@@ -225,7 +277,12 @@ $server->on("Request", function ($req, $res) use ($action) {
         return;
     }
 
-    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '');
+    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '', $config->env, $config->logsDirectory);
+    $requestId = \spl_object_id($res);
+    $activeRequests[$requestId] = [
+        'logger' => $logger,
+        'response' => $res,
+    ];
 
     try {
         $action($logger, $req, $res);
@@ -241,6 +298,8 @@ $server->on("Request", function ($req, $res) use ($action) {
 
         $res->status(500);
         $res->end('');
+    } finally {
+        unset($activeRequests[$requestId]);
     }
 });
 
