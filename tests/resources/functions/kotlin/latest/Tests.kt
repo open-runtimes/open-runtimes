@@ -3,6 +3,7 @@ package io.openruntimes.kotlin
 import com.google.gson.Gson
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import org.apache.commons.lang3.StringUtils
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -15,7 +16,8 @@ public class Tests {
     suspend fun main(context: RuntimeContext): RuntimeOutput {
         when (context.req.headers["x-action"]) {
             "plaintextResponse" -> {
-                return context.res.text("Hello World 👋")
+                // Resolved from the user's own dependency file, not bundled by the runtime
+                return context.res.text(StringUtils.normalizeSpace("Hello  World  👋"))
             }
             "jsonResponse" -> {
                 return context.res.json(

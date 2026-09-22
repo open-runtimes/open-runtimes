@@ -6,14 +6,45 @@ shopt -s dotglob
 # Keep only top-level repositories/dependencies/configurations blocks so a
 # user build file cannot redefine plugins, tasks or source sets of the server
 sanitize_gradle() {
-	awk '
-	BEGIN { capture = 0; depth = 0 }
+	awk -v sq="'" '
+	# Only structural braces may open or close a block, so comments and string
+	# literals are removed before counting. Counting them made a commented-out
+	# or quoted brace truncate the block and drop real dependencies.
+	function code(line,   out, i, n, c, two) {
+		out = ""
+		n = length(line)
+		i = 1
+		while (i <= n) {
+			c = substr(line, i, 1)
+			two = substr(line, i, 2)
+			if (block) {
+				if (two == "*/") { block = 0; i += 2 } else { i++ }
+				continue
+			}
+			if (quote != "") {
+				if (substr(line, i, length(quote)) == quote) { i += length(quote); quote = "" }
+				else if (c == "\\") { i += 2 }
+				else { i++ }
+				continue
+			}
+			if (two == "/*") { block = 1; i += 2; continue }
+			if (two == "//") { break }
+			if (substr(line, i, 3) == "\"\"\"" || substr(line, i, 3) == sq sq sq) { quote = substr(line, i, 3); i += 3; continue }
+			if (c == "\"" || c == sq) { quote = c; i++; continue }
+			out = out c
+			i++
+		}
+		return out
+	}
+	BEGIN { capture = 0; depth = 0; block = 0; quote = "" }
 	{
-		if (!capture && depth == 0 && $0 ~ /^[[:space:]]*(repositories|dependencies|configurations)[[:space:]]*\{/) {
+		stripped = code($0)
+		if (!capture && depth == 0 && stripped ~ /^[[:space:]]*(repositories|dependencies|configurations)[[:space:]]*\{/) {
 			capture = 1
 		}
-		for (i = 1; i <= length($0); i++) {
-			c = substr($0, i, 1)
+		n = length(stripped)
+		for (i = 1; i <= n; i++) {
+			c = substr(stripped, i, 1)
 			if (c == "{") depth++
 			if (c == "}") depth--
 		}
