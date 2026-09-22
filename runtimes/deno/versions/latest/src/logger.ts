@@ -1,5 +1,6 @@
 import { fileStreamReady } from "./fileStreamReady.ts";
 import { JSONParse } from "./jsonParser.ts";
+import { config } from "./config.ts";
 
 export class Logger {
   static TYPE_ERROR = "error";
@@ -21,20 +22,18 @@ export class Logger {
     if (this.enabled) {
       this.id = id
         ? id
-        : (Deno.env.get("OPEN_RUNTIMES_ENV") === "development"
-          ? "dev"
-          : this.generateId());
+        : (config.env === "development" ? "dev" : this.generateId());
     }
   }
 
   async setup() {
-    if (this.enabled) {
+    if (this.enabled && config.logsDirectory) {
       const [streamLogs, streamErrors] = await Promise.all([
-        Deno.open(`/mnt/logs/${this.id}_logs.log`, {
+        Deno.open(`${config.logsDirectory}/${this.id}_logs.log`, {
           create: true,
           append: true,
         }),
-        Deno.open(`/mnt/logs/${this.id}_errors.log`, {
+        Deno.open(`${config.logsDirectory}/${this.id}_errors.log`, {
           create: true,
           append: true,
         }),
@@ -66,10 +65,6 @@ export class Logger {
       ? this.streamErrors
       : this.streamLogs;
 
-    if (!stream) {
-      return;
-    }
-
     let stringLog = messages
       .map((message) => {
         if (message instanceof Error) {
@@ -92,16 +87,27 @@ export class Logger {
     }
 
     const encoded = new TextEncoder().encode(stringLog + "\n");
+    // Each sink is guarded on its own so one failing never drops the other
     try {
-      this.writePromises.push(stream.write(encoded));
+      (type === Logger.TYPE_ERROR ? Deno.stderr : Deno.stdout).writeSync(
+        encoded,
+      );
     } catch (error) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
     }
+
+    try {
+      if (stream) {
+        this.writePromises.push(stream.write(encoded));
+      }
+    } catch (error) {
+      // Silently fail to prevent 500 errors in runtime
+    }
   }
 
   async end() {
-    if (!this.enabled || !this.streamLogs || !this.streamErrors) {
+    if (!this.enabled) {
       return;
     }
 
@@ -111,10 +117,8 @@ export class Logger {
       await promise;
     }
 
-    await Promise.all([
-      this.streamLogs.close(),
-      this.streamErrors.close(),
-    ]);
+    this.streamLogs?.close();
+    this.streamErrors?.close();
   }
 
   overrideNativeLogs() {

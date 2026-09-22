@@ -1,0 +1,4 @@
+{
+    "TEST_DART_DEFINE_CUSTOM": "custom_value_from_fixture",
+    "TEST_DART_DEFINE": "fixture_override"
+}

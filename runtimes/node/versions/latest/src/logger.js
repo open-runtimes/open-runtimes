@@ -1,9 +1,29 @@
 const fs = require("fs");
+const config = require("./config");
 
+// Loaded lazily so the ESM loader spin-up stays off the server boot path.
+// On Node with require(esm) support the first structured log loads it
+// synchronously, so no log is ever serialized without it, and Logger.ready
+// resolves immediately. Older Nodes cannot load an ESM-only package
+// synchronously, so there Logger.ready is the import itself and the server
+// keeps gating listen on it, exactly as before this optimization.
 let _superjson;
-const _superjsonReady = import("superjson").then((m) => {
-  _superjson = m.default;
-});
+const superjson = () => {
+  if (!_superjson) {
+    const module = require("superjson");
+    _superjson = module.default ?? module;
+  }
+  return _superjson;
+};
+
+let _ready;
+if (process.features.require_module) {
+  _ready = Promise.resolve();
+} else {
+  _ready = import("superjson").then((m) => {
+    _superjson = m.default;
+  });
+}
 
 class Logger {
   static TYPE_ERROR = "error";
@@ -23,18 +43,23 @@ class Logger {
     if (this.enabled) {
       this.id = id
         ? id
-        : process.env.OPEN_RUNTIMES_ENV === "development"
+        : config.env === "development"
           ? "dev"
           : this.generateId();
-      this.streamLogs = fs.createWriteStream(`/mnt/logs/${this.id}_logs.log`, {
-        flags: "a",
-      });
-      this.streamErrors = fs.createWriteStream(
-        `/mnt/logs/${this.id}_errors.log`,
-        {
-          flags: "a",
-        },
-      );
+      if (config.logsDirectory) {
+        this.streamLogs = fs.createWriteStream(
+          `${config.logsDirectory}/${this.id}_logs.log`,
+          {
+            flags: "a",
+          },
+        );
+        this.streamErrors = fs.createWriteStream(
+          `${config.logsDirectory}/${this.id}_errors.log`,
+          {
+            flags: "a",
+          },
+        );
+      }
     }
   }
 
@@ -62,8 +87,9 @@ class Logger {
           return message;
         }
         try {
-          return _superjson
-            ? JSON.stringify(_superjson.serialize(message).json)
+          const serializer = superjson();
+          return serializer
+            ? JSON.stringify(serializer.serialize(message).json)
             : JSON.stringify(message);
         } catch {
           return String(message);
@@ -76,11 +102,20 @@ class Logger {
       stringLog += "... Log truncated due to size limit (8000 characters)";
     }
 
+    // Each sink is guarded on its own so one failing never drops the other
     try {
-      stream.write(stringLog + "\n");
+      (type === Logger.TYPE_ERROR ? process.stderr : process.stdout).write(
+        stringLog + "\n",
+      );
     } catch (err) {
       // Silently ignore write failures to prevent runtime crashes
       // The logging system should not cause the main execution to fail
+    }
+
+    try {
+      stream?.write(stringLog + "\n");
+    } catch (err) {
+      // Silently ignore write failures to prevent runtime crashes
     }
   }
 
@@ -91,14 +126,15 @@ class Logger {
 
     this.enabled = false;
 
-    await Promise.all([
-      new Promise((res) => {
-        this.streamLogs.end(undefined, undefined, res);
-      }),
-      new Promise((res) => {
-        this.streamErrors.end(undefined, undefined, res);
-      }),
-    ]);
+    await Promise.all(
+      [this.streamLogs, this.streamErrors].filter(Boolean).map(
+        (stream) =>
+          new Promise((res) => {
+            stream.on("close", res);
+            stream.end();
+          }),
+      ),
+    );
   }
 
   overrideNativeLogs() {
@@ -149,5 +185,5 @@ class Logger {
   }
 }
 
-Logger.ready = _superjsonReady;
+Logger.ready = _ready;
 module.exports = Logger;

@@ -106,7 +106,7 @@ class Node extends Serverless
      public function testHeadlessBrowser(): void
      {   
          $response = Client::execute(body: '', headers: ['x-action' => 'headlessBrowser'], timeout: 15);
-         self::assertEquals(200, $response['code']);
+         self::assertEquals(200, $response['code'], $response['body'] . PHP_EOL . Client::getErrors($response['headers']['x-open-runtimes-log-id'] ?? ''));
          self::assertEquals('image/png; charset=utf-8', $response['headers']['content-type']);
          self::assertGreaterThanOrEqual(100000, \mb_strlen($response['body'])); // Should be 1.355MB
      }

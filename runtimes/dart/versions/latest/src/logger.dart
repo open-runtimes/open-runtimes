@@ -2,6 +2,8 @@ import 'dart:math';
 import 'dart:convert';
 import 'dart:io';
 
+import 'config.dart' as config;
+
 class Logger {
   static final String TYPE_ERROR = 'error';
   static final String TYPE_LOG = 'log';
@@ -19,16 +21,16 @@ class Logger {
     if (this.enabled) {
       this.id = id != null
           ? id
-          : (Platform.environment['OPEN_RUNTIMES_ENV'] == 'development'
-                ? 'dev'
-                : this.generateId());
+          : (config.env == 'development' ? 'dev' : this.generateId());
 
-      this.streamLogs = File(
-        '/mnt/logs/' + this.id + '_logs.log',
-      ).openWrite(mode: FileMode.append);
-      this.streamErrors = File(
-        '/mnt/logs/' + this.id + '_errors.log',
-      ).openWrite(mode: FileMode.append);
+      if (config.logsDirectory.isNotEmpty) {
+        this.streamLogs = File(
+          config.logsDirectory + '/' + this.id + '_logs.log',
+        ).openWrite(mode: FileMode.append);
+        this.streamErrors = File(
+          config.logsDirectory + '/' + this.id + '_errors.log',
+        ).openWrite(mode: FileMode.append);
+      }
     }
   }
 
@@ -50,10 +52,6 @@ class Logger {
         ? this.streamErrors
         : this.streamLogs;
 
-    if (stream == null) {
-      return;
-    }
-
     String stringLog = "";
 
     if (message is List || message is Map) {
@@ -71,16 +69,23 @@ class Logger {
       stringLog += "... Log truncated due to size limit (8000 characters)";
     }
 
+    // Each sink is guarded on its own so one failing never drops the other
     try {
-      stream.write(stringLog + "\n");
+      (type == Logger.TYPE_ERROR ? stderr : stdout).write(stringLog + "\n");
     } catch (e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
     }
+
+    try {
+      stream?.write(stringLog + "\n");
+    } catch (e) {
+      // Silently fail to prevent 500 errors in runtime
+    }
   }
 
   Future<void> end() async {
-    if (!this.enabled || this.streamLogs == null || this.streamErrors == null) {
+    if (!this.enabled) {
       return;
     }
 

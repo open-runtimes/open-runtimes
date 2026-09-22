@@ -1,0 +1,22 @@
+[package]
+name = "handler"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.83"
+
+[lib]
+name = "handler"
+path = "tests.rs"
+
+[dependencies]
+openruntimes = { version = "1.0", package = "openruntimes-types-for-rust" }
+serde_json = "1.0"
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+md5 = "0.7"
+base64 = "0.22"
+indexmap = "=2.13.0"
+icu_collections = "=2.1.1"
+icu_normalizer = "=2.1.1"
+icu_properties = "=2.1.1"
+icu_locale_core = "=2.1.1"
+icu_provider = "=2.1.1"

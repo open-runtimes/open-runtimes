@@ -1,48 +1,18 @@
-// @ts-ignore
-import data from './runtimes.toml'
+// Generates the GitHub Actions test matrix from ci/runtimes.toml, filtered by
+// changed files. Each matrix entry is a runtime ID consumed by `bun ci/test.ts`.
+
 import { appendFileSync } from 'fs';
-
-interface RuntimeCommands {
-    install: string,
-    start: string
-}
-
-interface RuntimeFormatter {
-    check: string,
-    write: string,
-    prepare: string,
-}
-
-interface Runtime {
-    runtime?: {
-        name: string
-        version: string
-    },
-    test: string,
-    versions?: string[],
-    tools: string,
-    commands: RuntimeCommands,
-    formatter: RuntimeFormatter,
-    report_size?: boolean,
-
-    // Website metadata
-    output: string,
-
-    // Serverless metadata
-    entry: string,
-    entry_no_export: string,
-}
+import { runtimes, generateRuntimeObject, type Entry } from './common';
 
 let perRuntime = true;
-const runtimes: Record<string, Runtime> = data;
-const matrix: Record<string, any>[] = [];
+const matrix: Entry[] = [];
 const files = (process.env.ALL_CHANGED_FILES ?? '').split(' ');
 const folders = getFolders(files);
 
-for(const file of files) {
-    if(file.startsWith("runtimes/")) {
+for (const file of files) {
+    if (file.startsWith("runtimes/")) {
         continue;
-    } else if(file.startsWith("tests/resources/functions/")) {
+    } else if (file.startsWith("tests/resources/functions/")) {
         continue;
     } else {
         perRuntime = false;
@@ -53,12 +23,12 @@ for(const file of files) {
 let isGlobal = false;
 
 // Global folders
-if(['ci', '.github', 'helpers'].some(path => folders.includes(path))) {
+if (['ci', '.github', 'helpers', 'docker'].some(path => folders.includes(path))) {
     isGlobal = true;
 }
 
 // Global files
-if(['tests/Base.php', 'tests/CSR.php', 'tests/SSR.php', 'tests/Serverless.php'].some(file => files.includes(file))) {
+if (['tests/Base.php', 'tests/CSR.php', 'tests/SSR.php', 'tests/Serverless.php', 'tests/compose.yaml', 'docker-bake.hcl', 'docker-bake.json'].some(file => files.includes(file))) {
     isGlobal = true;
 }
 
@@ -75,12 +45,12 @@ if (perRuntime) {
 
         const dependingRuntimes: string[] = [];
         Object.keys(runtimes).forEach((name) => {
-            if((runtimes[name].runtime?.name ?? '') === folder) {
+            if ((runtimes[name].runtime?.name ?? '') === folder) {
                 dependingRuntimes.push(name);
             }
         });
 
-        for(const runtime of dependingRuntimes) {
+        for (const runtime of dependingRuntimes) {
             matrix.push(...generateRuntimeObject(runtimes[runtime], runtime));
         }
     });
@@ -92,58 +62,19 @@ if (perRuntime) {
 
 const uniqueMatrix: Record<string, any>[] = [];
 const uniqueKeys: string[] = [];
-for(const entry of matrix) {
+for (const entry of matrix) {
     const key = entry.ID;
 
-    if(!entry.TEST_CLASS) {
+    if (!entry.TEST_CLASS) {
         continue;
     }
 
-    if(!uniqueKeys.includes(key)) {
+    if (!uniqueKeys.includes(key)) {
         uniqueKeys.push(key);
-        uniqueMatrix.push(entry);
+        uniqueMatrix.push({ ID: entry.ID, REPORT_SIZE: entry.REPORT_SIZE });
     }
 }
-appendFileSync(process.env.GITHUB_OUTPUT ?? '', `matrix=${JSON.stringify({include: uniqueMatrix})}`);
-
-function generateRuntimeObject(runtime: Runtime, key: string) {
-    const object: Record<string, any>[] = [];
-
-    (runtime.versions ?? ['']).forEach((version) => {
-        if (key === 'node' && version.includes('mjs')) {
-            runtime.entry = "tests.mjs";
-        }
-
-        const id = `${key}${version ? `-${version}` : ''}`;
-        const reportSize = (key === 'node' && version.includes('mjs'))
-            ? false
-            : (runtime.report_size !== false);
-
-        object.push({
-            ID: id,
-            RUNTIME: key,
-            VERSION: cleanVersion(version),
-            TEST_CLASS: runtime.test,
-            ENTRYPOINT: runtime.entry,
-            ENTRYPOINT_NO_EXPORT: runtime.entry_no_export,
-            OUTPUT_DIRECTORY: runtime.output,
-            INSTALL_COMMAND: runtime.commands.install,
-            START_COMMAND: runtime.commands.start,
-            TOOLS: runtime.tools,
-            FORMATTER_CHECK: runtime.formatter.check,
-            FORMATTER_PREPARE: runtime.formatter.prepare,
-            ENFORCED_RUNTIME: runtime.runtime?.name ?? "",
-            ENFORCED_VERSION: runtime.runtime?.version ?? "",
-            REPORT_SIZE: reportSize,
-        })
-    });
-
-    return object;
-}
-
-function cleanVersion(version: string): string {
-    return version.replace('-mjs', '');
-}
+appendFileSync(process.env.GITHUB_OUTPUT ?? '', `matrix=${JSON.stringify({ include: uniqueMatrix })}`);
 
 function getFolders(changes: string[]): string[] {
     const folders = new Set();

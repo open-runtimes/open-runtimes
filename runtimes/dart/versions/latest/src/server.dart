@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
+
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
+
 import '{entrypoint}' as user_code;
+import 'config.dart' as config;
 import 'function_types.dart';
 import 'logger.dart';
 
@@ -15,15 +18,13 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     if (safeTimeout == null || safeTimeout == 0) {
       return shelf.Response(
         500,
-        body:
-            'Header "x-open-runtimes-timeout" must be an integer greater than 0.',
+        body: 'Header "x-open-runtimes-timeout" must be an integer greater than 0.',
       );
     }
   }
 
-  if ((Platform.environment['OPEN_RUNTIMES_SECRET'] ?? '') != '' &&
-      (req.headers['x-open-runtimes-secret'] ?? '') !=
-          Platform.environment['OPEN_RUNTIMES_SECRET']) {
+  if (config.secret != '' &&
+      (req.headers['x-open-runtimes-secret'] ?? '') != config.secret) {
     return shelf.Response(
       500,
       body: 'Unauthorized. Provide correct "x-open-runtimes-secret" header.',
@@ -57,13 +58,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  String? enforcedHeadersString = Platform.environment['OPEN_RUNTIMES_HEADERS'];
-  final enforcedHeaders = jsonDecode(
-    (enforcedHeadersString != null && !enforcedHeadersString.isEmpty)
-        ? enforcedHeadersString
-        : '{}',
-  );
-  enforcedHeaders.forEach((key, value) {
+  config.headers.forEach((key, value) {
     headers[key.toLowerCase()] = '${value}';
   });
 
@@ -199,15 +194,14 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
 }
 
 void main() async {
-  await shelf_io.serve(
+  final server = await shelf_io.serve(
     (req) async {
       if (req.url.path == '__opr/health') {
         return shelf.Response(200, body: 'OK');
       }
       if (req.url.path == '__opr/timings') {
-        String timings = await File(
-          '/mnt/telemetry/timings.txt',
-        ).readAsString();
+        String timings = await File('/mnt/telemetry/timings.txt')
+            .readAsString();
         return shelf.Response.ok(
           timings,
           headers: {'content-type': 'text/plain; charset=utf-8'},
@@ -240,6 +234,21 @@ void main() async {
     '0.0.0.0',
     3000,
   );
+
+  final subscriptions = <StreamSubscription<ProcessSignal>>[];
+  bool stopping = false;
+  Future<void> shutdown(ProcessSignal signal) async {
+    if (stopping) return;
+    stopping = true;
+    await server.close(force: false);
+    // close() stops accepting but active responses still need the event loop.
+    for (final subscription in subscriptions) {
+      await subscription.cancel();
+    }
+  }
+
+  subscriptions.add(ProcessSignal.sigterm.watch().listen(shutdown));
+  subscriptions.add(ProcessSignal.sigint.watch().listen(shutdown));
 
   print("HTTP server successfully started!");
 }

@@ -1,7 +1,9 @@
 #ifndef CPP_RUNTIME_RUNTIMELOGGER_H
 #define CPP_RUNTIME_RUNTIMELOGGER_H
 
+#include "OprConfig.h"
 #include <chrono>
+#include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
@@ -32,10 +34,7 @@ public:
     }
 
     if (enabled == true) {
-      std::string serverEnv = "";
-      if (std::getenv("OPEN_RUNTIMES_ENV") != nullptr) {
-        serverEnv = std::getenv("OPEN_RUNTIMES_ENV");
-      }
+      std::string serverEnv = config().env;
 
       if (headerId == "") {
         if (serverEnv == "development") {
@@ -47,10 +46,14 @@ public:
         id = headerId;
       }
 
-      streamLogs = std::make_shared<std::ofstream>(
-          "/mnt/logs/" + id + "_logs.log", std::ios_base::app);
-      streamErrors = std::make_shared<std::ofstream>(
-          "/mnt/logs/" + id + "_errors.log", std::ios_base::app);
+      const std::string logsDirectory = config().logsDirectory;
+
+      if (!logsDirectory.empty()) {
+        streamLogs = std::make_shared<std::ofstream>(
+            logsDirectory + "/" + id + "_logs.log", std::ios_base::app);
+        streamErrors = std::make_shared<std::ofstream>(
+            logsDirectory + "/" + id + "_errors.log", std::ios_base::app);
+      }
     }
   }
 
@@ -81,11 +84,22 @@ public:
           "... Log truncated due to size limit (8000 characters)";
     }
 
+    // Each sink is guarded on its own so one failing never drops the other
     try {
-      *(stream) << (truncatedMessage + "\n");
+      // Bypasses std::cout/std::cerr, which are captured during execution
+      std::fputs((truncatedMessage + "\n").c_str(),
+                 type == "error" ? stderr : stdout);
     } catch (const std::exception &e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
+    }
+
+    try {
+      if (stream) {
+        *(stream) << (truncatedMessage + "\n");
+      }
+    } catch (const std::exception &e) {
+      // Silently fail to prevent 500 errors in runtime
     }
   }
 
@@ -96,8 +110,10 @@ public:
 
     enabled = false;
 
-    streamLogs->close();
-    streamErrors->close();
+    if (streamLogs) {
+      streamLogs->close();
+      streamErrors->close();
+    }
   }
 
   void overrideNativeLogs() {

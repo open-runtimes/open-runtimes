@@ -47,7 +47,7 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 
 ```python
 def main(context):
-    return context.res.send('Hello Open Runtimes 👋')
+    return context.res.send("Hello Open Runtimes 👋")
 ```
 
 - To handle dependencies, you need to have `requirements.txt` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="pip install -r requirements.txt"` during build.

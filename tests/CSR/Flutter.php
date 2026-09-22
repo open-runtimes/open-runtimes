@@ -3,6 +3,7 @@
 namespace Tests\CSR;
 
 use Tests\CSR;
+use Tests\Client;
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -35,5 +36,23 @@ class Flutter extends CSR
     public function testTimings(): void
     {
         $this->assertTrue(true);
+    }
+
+    // Flutter web is a CSR SPA, so the injected value is baked into the
+    // compiled bundle, not the raw `/` HTML.
+    public function testDartDefinesInjected(): void
+    {
+        $response = Client::execute(url: '/main.dart.js', method: 'GET');
+        self::assertEquals(200, $response['code']);
+
+        // dart_defines.json fixture wins over the Appwrite-provided
+        // OPEN_RUNTIMES_BUILD_KEYS value on the conflicting TEST_DART_DEFINE key.
+        self::assertStringContainsString('fixture_override', $response['body']);
+        self::assertStringContainsString('custom_value_from_fixture', $response['body']);
+        self::assertStringNotContainsString('hello_open_runtimes', $response['body']);
+
+        // TEST_DART_DEFINE_OPR_ONLY has no entry in the fixture — proves an
+        // OPR-provided key with nothing to conflict against still lands.
+        self::assertStringContainsString('hello_opr_only', $response['body']);
     }
 }

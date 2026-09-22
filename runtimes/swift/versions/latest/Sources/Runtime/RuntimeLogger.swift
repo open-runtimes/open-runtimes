@@ -16,9 +16,10 @@ class RuntimeLogger {
         }
 
         if enabled {
+            let logsDirectory = OprConfig.logsDirectory
+
             if id == "" {
-                let serverEnv = ProcessInfo.processInfo.environment["OPEN_RUNTIMES_ENV"]
-                if serverEnv == "development" {
+                if OprConfig.env == "development" {
                     self.id = "dev"
                 } else {
                     self.id = generateId()
@@ -27,8 +28,12 @@ class RuntimeLogger {
                 self.id = id
             }
 
-            let logsUrl = URL(fileURLWithPath: "/mnt/logs/" + self.id + "_logs.log")
-            let errorsUrl = URL(fileURLWithPath: "/mnt/logs/" + self.id + "_errors.log")
+            if logsDirectory == "" {
+                return
+            }
+
+            let logsUrl = URL(fileURLWithPath: logsDirectory + "/" + self.id + "_logs.log")
+            let errorsUrl = URL(fileURLWithPath: logsDirectory + "/" + self.id + "_errors.log")
 
             if !FileManager.default.fileExists(atPath: logsUrl.path) {
                 _ = FileManager.default.createFile(atPath: logsUrl.path, contents: nil, attributes: nil)
@@ -88,6 +93,11 @@ class RuntimeLogger {
         }
 
         if let stringLogTemp = stringLog.data(using: .utf8) {
+            let passthrough = type == RuntimeLogger.TYPE_ERROR
+                ? FileHandle.standardError
+                : FileHandle.standardOutput
+            passthrough.write(stringLogTemp)
+
             if let streamTemp = stream {
                 streamTemp.write(stringLogTemp)
             }

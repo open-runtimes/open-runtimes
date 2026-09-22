@@ -20,17 +20,20 @@ val gsonInternal: Gson = GsonBuilder().serializeNulls().setObjectToNumberStrateg
 suspend fun main() {
     println("HTTP server successfully started!")
 
-    Javalin
-        .create { config ->
-            config.maxRequestSize = 20L * 1024 * 1024
-        }.start(3000)
-        .get("/*") { runBlocking { execute(it) } }
-        .post("/*") { runBlocking { execute(it) } }
-        .put("/*") { runBlocking { execute(it) } }
-        .delete("/*") { runBlocking { execute(it) } }
-        .patch("/*") { runBlocking { execute(it) } }
-        .options("/*") { runBlocking { execute(it) } }
-        .head("/*") { runBlocking { execute(it) } }
+    val app =
+        Javalin
+            .create { config ->
+                config.maxRequestSize = 20L * 1024 * 1024
+            }.start(3000)
+            .get("/*") { runBlocking { execute(it) } }
+            .post("/*") { runBlocking { execute(it) } }
+            .put("/*") { runBlocking { execute(it) } }
+            .delete("/*") { runBlocking { execute(it) } }
+            .patch("/*") { runBlocking { execute(it) } }
+            .options("/*") { runBlocking { execute(it) } }
+            .head("/*") { runBlocking { execute(it) } }
+    app.jettyServer()!!.server().stopTimeout = 30_000
+    Runtime.getRuntime().addShutdownHook(Thread { app.stop() })
 }
 
 suspend fun execute(ctx: Context) {
@@ -84,7 +87,7 @@ suspend fun action(
     }
 
     val secret = ctx.header("x-open-runtimes-secret") ?: ""
-    val serverSecret = System.getenv("OPEN_RUNTIMES_SECRET") ?: ""
+    val serverSecret = OprConfig.secret
 
     if (serverSecret != "" && secret != serverSecret) {
         ctx.status(500).result("Unauthorized. Provide correct \"x-open-runtimes-secret\" header.")
@@ -102,16 +105,7 @@ suspend fun action(
         }
     }
 
-    var enforcedHeadersString = System.getenv("OPEN_RUNTIMES_HEADERS")
-    if (enforcedHeadersString == null || enforcedHeadersString.isEmpty()) {
-        enforcedHeadersString = "{}"
-    }
-    val enforcedHeaders = gsonInternal.fromJson(enforcedHeadersString, MutableMap::class.java)
-
-    for (entry in enforcedHeaders.entries.iterator()) {
-        val header = "${entry.key}".lowercase()
-        headers[header] = "${entry.value}"
-    }
+    headers.putAll(OprConfig.headers)
 
     val hostHeader = ctx.header("host") ?: ""
     val protoHeader = ctx.header("x-forwarded-proto") ?: "http"
@@ -176,7 +170,7 @@ suspend fun action(
     var classMethod: kotlin.reflect.KFunction<*>? = null
     var instance: Any? = null
 
-    val entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT")
+    val entrypoint = OprConfig.entrypoint
 
     // Guard: Try to load module
     try {
