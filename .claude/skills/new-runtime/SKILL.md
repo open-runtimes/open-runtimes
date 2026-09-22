@@ -2,7 +2,7 @@
 name: new-runtime
 description: Add an entirely new function runtime to open-runtimes. Generates all required files (server, Dockerfile, helpers, tests, CI config) so the runtime passes the test suite in one shot.
 disable-model-invocation: true
-argument-hint: {language} {version}
+argument-hint: "{language} {version}"
 allowed-tools: Read Write Edit Glob Grep Bash Agent WebSearch WebFetch
 ---
 
@@ -12,7 +12,10 @@ Generate a complete, test-passing runtime for the open-runtimes project.
 
 The canonical contributor guides are `docs/add-runtime.md` (layout, Dockerfile,
 lifecycle hooks, registration) and `docs/testing.md` (local harness). Read both
-before generating anything; when this skill and those docs disagree, the docs win.
+before generating anything; when this skill and those docs disagree, the docs
+win — except where the generated runtime would then fail `make test`, in which
+case the suite in `tests/Serverless.php` and `tests/Base.php` is the real
+contract and the doc is a bug worth fixing in the same change.
 
 
 ## Arguments
@@ -28,7 +31,9 @@ The user provides: `{language} {version}`
 
 Before writing any code, gather the information needed to make correct decisions. Run these research steps **in parallel** using subagents:
 
-1. **Docker image**: Find the official alpine-based Docker image for the language + version on Docker Hub. Prefer `{language}:{version}-alpine` images. If no alpine variant exists, use the smallest official image (slim, bookworm-slim, etc.). Record the exact image tag including patch version and alpine/distro version (e.g. `rust:1.80.1-alpine3.20`).
+1. **Docker image**: Find the official alpine-based Docker image for the language + version on Docker Hub. Prefer `{language}:{version}-alpine` images. If no alpine variant exists, use the smallest official image (slim, bookworm-slim, etc.). Record the exact image tag including patch version and alpine/distro version (e.g. `rust:1.80.1-alpine3.20`), and record whether the image is Alpine or Debian based — the Dockerfile package command depends on it (see 2.1).
+
+   Check the image's manifest for **every platform the bake file will publish**. `ci/bake.ts` defaults to `linux/amd64` and `linux/arm64`, while `make test` builds only `linux/x86_64` unless `TEST_PLATFORM` says otherwise, so an image with no arm64 manifest passes the whole local workflow and still fails to publish. Either pick a base that covers both, or set an intentional `platforms` override on the version in `ci/runtimes.toml` (as the deno versions do) and say why.
 
 2. **HTTP framework**: Identify the most popular, lightweight HTTP server library for the language that can:
    - Listen on a configurable port
@@ -66,6 +71,9 @@ FROM ${BASE_IMAGE}
 INCLUDE ./docker/base-before
 
 RUN apk add --no-cache bash
+# Alpine bases only. On a slim/bookworm base use
+# `RUN apt-get update && apt-get install -y --no-install-recommends bash && rm -rf /var/lib/apt/lists/*`
+# instead, or branch on `/etc/alpine-release` the way `docker/base-before.dockerfile` does.
 # Add any language-specific system dependencies here
 
 ENV OPEN_RUNTIMES_ENTRYPOINT={default_entrypoint}
@@ -106,6 +114,16 @@ The server **must** implement this exact protocol. Study multiple existing serve
 - Print `HTTP server successfully started!` to stdout when ready (this string is detected by `helpers/start.sh` for telemetry)
 - Listen on `0.0.0.0:3000`
 - Handle ALL HTTP methods on ALL paths
+
+**Shutdown:**
+- On SIGTERM, use the HTTP framework's graceful shutdown: stop accepting new
+  connections and let in-flight requests finish before exiting. Tini and
+  `helpers/start.sh` forward the signal and reap children, but nothing in the
+  shared helpers drains requests for you — a server that exits immediately
+  passes every protocol rule above and still fails verification, because
+  `bun ci/test.ts` sends SIGTERM during the three-second `timeout` fixture and
+  requires that request to complete and the container to exit 0 or 143.
+  Read `docs/shutdown.md` before implementing this.
 
 **Built-in endpoints (handle before user function):**
 - `GET /__opr/health` -> respond `200 OK` with body `OK`
@@ -249,7 +267,12 @@ uppercaseCharsetResponse -> return context.res.text("\u{00C5}\u{00C6}", 200, {"c
 multipartResponse     -> return multipart body with boundary=12345 and content-type multipart/form-data
 redirectResponse      -> return context.res.redirect("https://github.com/")
 emptyResponse         -> return context.res.empty()
-noResponse            -> call context.res.text() but DON'T return it. Then: context.error("Return statement missing...") and return context.res.text("", 500)
+noResponse            -> call context.res.text("This should be ignored, as it is not returned.") and
+                         DON'T return it, so the runtime's own missing-return detection produces the
+                         error log and the empty 500 (see python's tests.py). Only when the language
+                         cannot express a missing return (Go, Rust, Java) may the fixture simulate it
+                         by logging "Return statement missing. return context.res.empty() if no
+                         response is expected." and returning context.res.text("", 500)
 doubleResponse        -> call context.res.text("ignored") then RETURN context.res.text("This should be returned.")
 enforcedHeaders       -> return JSON with x-custom, x-custom-uppercase, x-open-runtimes-custom from req.headers
 headersResponse       -> return text "OK" with headers: first-header, second-header (from x-open-runtimes-custom-in-header), cookie, x-open-runtimes-custom-out-header
@@ -282,6 +305,12 @@ timeout               -> context.log("Timeout start."), sleep 3 seconds, context
                          return context.res.text("Successful response.")
 deprecatedMethods     -> return context.res.send(context.req.bodyRaw)
 deprecatedMethodsUntypedBody -> return context.res.send("50")
+deprecatedMethodsBytesBody -> return context.res.send(<the fixed PNG bytes>, 200, {"content-type": "image/png"}).
+                         Copy the base64 blob from tests/resources/functions/python/latest/tests.py;
+                         testDeprecatedMethodsBytesBody asserts 200, a content-type starting with
+                         image/png, and md5(body) == 2a8fdeea08e939e9a7c05653544a1374.
+                         Omit this action only if send() in this language cannot carry bytes at all
+                         (see 2.9)
 spreadOperatorLogs    -> context.log("engine:", "open-runtimes"), context.error("engine:", "open-runtimes"),
                          return context.res.text("OK")
 errorTest             -> context.log("Before error..."), throw/raise/panic "Error!"
@@ -290,9 +319,12 @@ default/unknown       -> throw/raise/panic "Unknown action"
 
 Also create:
 - The test dependency file (e.g. `go.mod`, `requirements.txt`, `Cargo.toml`) including the HTTP client library
-- A `no-export` test file (e.g. `no-export.{ext}`) that exists but does NOT export/define a `main` function with the correct signature. This tests error handling for missing function exports.
+- A `no-export` test file (e.g. `no-export.{ext}`) that exists but does NOT export/define a `main` function with the correct signature. This tests error handling for missing function exports. Create it **only** if the runtime loads the entrypoint dynamically and can therefore start and answer 503; skip it, and leave `entry_no_export` out of `ci/runtimes.toml`, for statically linked handlers (see 2.10).
 
 #### 2.9 PHP Test Class: `tests/Serverless/{Language}.php`
+
+Start from an empty subclass and add an override only for a capability the
+runtime genuinely cannot provide:
 
 ```php
 <?php
@@ -304,21 +336,26 @@ use Tests\Serverless;
 
 class {Language} extends Serverless
 {
-    public function testSetCookie(): void
-    {
-        self::assertTrue(true); // Disable test till implemented
-    }
-
-    public function testDeprecatedMethodsBytesBody(): void
-    {
-        $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethodsBytesBody']);
-        self::assertEquals(500, $response['code']);
-        self::assertStringContainsString('Unknown action', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
-    }
 }
 ```
 
-Note: `testDeprecatedMethodsBytesBody` should return 500/"Unknown action" for compiled/typed languages where `send()` only accepts String (the test sends bytes via body but the action tries to return bodyRaw as string - if the language auto-converts, remove this override). For interpreted/dynamically-typed languages that handle this naturally, you may not need this override.
+The inherited suite in `tests/Serverless.php` is the contract. **Do not neuter
+an inherited test with `self::assertTrue(true)` to get green** — implement the
+fixture action instead. Two overrides exist today and both are debts, not
+patterns to copy:
+
+- `testSetCookie` is stubbed out in every runtime because no fixture implements
+  the `setCookie` / `setCookie2` actions yet. If your runtime's response builder
+  can emit repeated `set-cookie` headers, implement the actions and inherit the
+  real test rather than adding a fourteenth stub.
+- `testDeprecatedMethodsBytesBody` is overridden to expect `500` / `Unknown
+  action` only in runtimes whose `send()` cannot carry bytes (Go), where the
+  fixture deliberately omits the action. If `send()` in your language accepts
+  bytes, ship the `deprecatedMethodsBytesBody` action from 2.8 and inherit the
+  real assertions (200, `image/png`, md5 `2a8fdeea08e939e9a7c05653544a1374`).
+
+An override that asserts a *different* observable outcome for a genuinely
+unsupported capability is fine; an override that asserts nothing is not.
 
 #### 2.10 CI Configuration: `ci/runtimes.toml`
 
@@ -327,7 +364,7 @@ Add a runtime section in alphabetical order among the runtime entries (before th
 ```toml
 [{language}]
 entry = "{test_entrypoint}"
-entry_no_export = "{no_export_file}"
+entry_no_export = "{no_export_file}"   # omit when the runtime cannot express a missing export
 versions = ["{version}"]
 commands = { install = "{install_command}", start = "bash helpers/server.sh" }
 formatter = { prepare = "{formatter_install}", check = "{formatter_check}", write = "{formatter_write}" }
@@ -337,6 +374,14 @@ test = "Serverless/{Language}.php"
 [{language}.build.versions]
 "{version}" = { base = "{exact_docker_image_tag}" }
 ```
+
+`entry_no_export` is **optional and must be omitted for runtimes that bind the
+handler at compile time**. When it is present the harness builds that variant
+before running PHPUnit and expects a server that answers 503; a statically
+linked handler (Rust, Go, .NET, Swift, C++, Dart) simply fails to compile
+instead, so those runtimes deliberately have no `entry_no_export` — follow
+them rather than the template comment. Only declare it, and ship the matching
+`no-export` fixture from 2.8, when the entrypoint is loaded dynamically.
 
 Always pin the most specific base image (patch version + distro). Optional
 per-version keys: `args` (Dockerfile build args), `platforms`, `version_dir`.
@@ -387,15 +432,26 @@ After generating all files, perform these verification steps:
 - ALL response header keys MUST be lowercased
 - `x-open-runtimes-*` headers MUST be filtered from both request headers passed to user and response headers returned
 - The `x-open-runtimes-log-id` header MUST always be set on the response
-- Log IDs MUST be exactly 20 hex characters (unless in dev mode where it's `dev`)
+- A **generated** log ID MUST be exactly 20 hex characters; in development
+  (`OPEN_RUNTIMES_ENV=development`) it is `dev`. A caller-supplied
+  `x-open-runtimes-log-id` MUST be echoed back unchanged, whatever its shape
+  (`customLogs`, `myLog`), and when logging is disabled the response header MUST
+  be empty — `testLogs` asserts all three
 - Logs MUST be truncated at 8000 characters
 - JSON responses MUST serialize nulls
 - Content-type MUST default to `text/plain; charset=utf-8` when not set
 - Multipart content-types MUST NOT have charset appended
 - Content-type values MUST be lowercased (except multipart)
 - The `empty()` response MUST return status 204
-- Error responses from the runtime itself (not user code) MUST return status 500 with empty body
+- Errors raised while loading or executing user code MUST return status 500 with
+  an empty body (the detail goes to the error log). The runtime's own **request
+  validation** responses are the exception and MUST carry their message in the
+  body: `Header "x-open-runtimes-timeout" must be an integer greater than 0.` and
+  `Unauthorized. Provide correct "x-open-runtimes-secret" header.` — `testTimeout`,
+  `testWrongSecret` and `testEmptySecret` assert those exact strings
 - Module-not-found errors MUST return status 503
 - The Dockerfile MUST start with `# syntax=docker/dockerfile:1`, take `ARG BASE_IMAGE`, and keep both `INCLUDE ./docker/base-before` and `INCLUDE ./docker/base-after`
 - The Dockerfile MUST set `OPEN_RUNTIMES_SERVER_COMMAND` (or the runtime MUST ship `hooks/server.sh`)
 - `docker-bake.json` MUST be regenerated with `bun ci/bake.ts` after editing `ci/runtimes.toml`
+- The server MUST drain in-flight requests on SIGTERM and then exit cleanly (see `docs/shutdown.md`)
+- Every platform in the version's bake target MUST have a manifest on the chosen base image
