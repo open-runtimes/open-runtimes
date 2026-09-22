@@ -23,7 +23,7 @@ sanitize_gradle() {
 			}
 			if (quote != "") {
 				if (substr(line, i, length(quote)) == quote) { i += length(quote); quote = "" }
-				else if (c == "\\") { i += 2 }
+				else if (c == "\\" && length(quote) == 1) { i += 2 }
 				else { i++ }
 				continue
 			}
