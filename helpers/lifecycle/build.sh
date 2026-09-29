@@ -74,7 +74,14 @@ if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
 	cd "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"
 fi
 
-# Store build metadata. Will be used during start process
+# Store build metadata. Will be used during start process.
+# Some runtime hooks (e.g. Flutter dart-defines) create `.open-runtimes/` as a
+# directory under the build root. When packaging CWD is that same root — empty
+# or unresolved OPEN_RUNTIMES_OUTPUT_DIRECTORY — `>` would fail with
+# "Is a directory". Clear a colliding directory before writing the metadata file.
+if [ -d .open-runtimes ]; then
+	rm -rf .open-runtimes
+fi
 touch .open-runtimes
 echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" >.open-runtimes
 echo "OPEN_RUNTIMES_CLEANUP=${OPEN_RUNTIMES_CLEANUP:-none}" >>.open-runtimes
