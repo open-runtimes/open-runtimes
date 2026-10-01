@@ -74,10 +74,9 @@ if [ -n "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" ]; then
 	cd "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"
 fi
 
-# Store build metadata. Will be used during start process
-touch .open-runtimes
-echo "OPEN_RUNTIMES_ENTRYPOINT=$OPEN_RUNTIMES_ENTRYPOINT" >.open-runtimes
-echo "OPEN_RUNTIMES_CLEANUP=${OPEN_RUNTIMES_CLEANUP:-none}" >>.open-runtimes
+# Store build metadata. Will be used during start process.
+# shellcheck disable=SC1091
+. /usr/local/server/helpers/lifecycle/write-build-metadata.sh
 
 . /usr/local/server/helpers/lifecycle/compression.sh
 
