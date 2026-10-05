@@ -277,7 +277,7 @@ const action = async (logger: Logger, request: any) => {
   });
 };
 
-Bun.serve({
+const server = Bun.serve({
   port: 3000,
   maxRequestBodySize: 20 * 1024 * 1024,
   idleTimeout: 0,
@@ -316,3 +316,22 @@ Bun.serve({
 });
 
 console.log("HTTP server successfully started!");
+
+let stopping = false;
+async function shutdown() {
+  if (stopping) return;
+  stopping = true;
+  await server.stop();
+  // Bun 1.0/1.1 return void from stop(); newer versions return a Promise.
+  // Older Bun can retain a stale pending count after rejecting a large upload.
+  // Let the event loop exit naturally when only this poller remains.
+  server.unref();
+  const drained = setInterval(() => {
+    if (server.pendingRequests === 0 && server.pendingWebSockets === 0) {
+      process.exit(0);
+    }
+  }, 10);
+  drained.unref();
+}
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);

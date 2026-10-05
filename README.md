@@ -150,6 +150,8 @@ Every request sent to any of the runtimes must have the `x-open-runtimes-secret`
 
 Execution logs are always written to the runtime's `stdout` (logs) and `stderr` (errors). In addition, each execution's logs are written to `<id>_logs.log` and `<id>_errors.log` in the directory set by `OPEN_RUNTIMES_LOGS_DIRECTORY`, where `<id>` is the value of the `x-open-runtimes-log-id` response header. The directory defaults to `/mnt/logs` and must already exist; set the variable to an empty value to write logs to `stdout`/`stderr` only.
 
+Runtime shutdown behavior, grace periods, and signal handling are documented in [Runtime shutdown](docs/shutdown.md).
+
 ## Contributing
 
 All code contributions - including those of people having commit access - must go through a pull request and be approved by a core developer before being merged. This is to ensure a proper review of all the code.

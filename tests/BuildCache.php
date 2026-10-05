@@ -295,6 +295,15 @@ class BuildCache extends TestCase
         self::assertStringContainsString('OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT="${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT:-/cache/stores.sqfs}"', $env);
     }
 
+    public function testBuildLifecycleDisablesNpmAuditUnlessExplicitlyEnabled(): void
+    {
+        $build = \file_get_contents($this->repoHelpers . '/lifecycle/build.sh');
+        $default = 'export npm_config_audit="${npm_config_audit:-false}"';
+
+        self::assertStringContainsString($default, $build);
+        self::assertLessThan(\strpos($build, 'bash -c "$1"'), \strpos($build, $default));
+    }
+
     public function testCacheHitStillWorksOnSecondBuild(): void
     {
         \mkdir($this->cacheRoot(), 0777, true);

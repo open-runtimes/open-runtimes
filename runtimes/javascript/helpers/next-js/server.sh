@@ -27,4 +27,4 @@ fi
 
 HOST=0.0.0.0 \
 	PORT=3000 \
-	$START_COMMAND
+	exec $START_COMMAND

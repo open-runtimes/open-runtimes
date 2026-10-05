@@ -411,19 +411,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     let listener = TcpListener::bind(addr).await?;
 
+    let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+    let graceful = hyper_util::server::graceful::GracefulShutdown::new();
+
     println!("HTTP server successfully started!");
 
     loop {
-        let (stream, _) = listener.accept().await?;
-        let io = TokioIo::new(stream);
-
-        tokio::task::spawn(async move {
-            if let Err(err) = http1::Builder::new()
-                .serve_connection(io, service_fn(handle_request))
-                .await
-            {
-                eprintln!("Error serving connection: {:?}", err);
+        tokio::select! {
+            _ = terminate.recv() => break,
+            _ = tokio::signal::ctrl_c() => break,
+            accepted = listener.accept() => {
+                let (stream, _) = accepted?;
+                let io = TokioIo::new(stream);
+                let watcher = graceful.watcher();
+                tokio::spawn(async move {
+                    let connection = http1::Builder::new()
+                        .serve_connection(io, service_fn(handle_request));
+                    if let Err(err) = watcher.watch(connection).await {
+                        eprintln!("Error serving connection: {:?}", err);
+                    }
+                });
             }
-        });
+        }
     }
+    drop(listener);
+    graceful.shutdown().await;
+    Ok(())
 }

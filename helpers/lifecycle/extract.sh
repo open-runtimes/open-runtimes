@@ -28,7 +28,16 @@ extract_archive() {
 	format=$(detect_archive_format "$archive")
 	case "$format" in
 	squashfs) unsquashfs -q -f -d "$dest" "$archive" ;;
-	gzip) tar -xzf "$archive" -C "$dest" ;;
+	# Prefer igzip, then pigz — both much faster than tar's built-in zlib
+	gzip)
+		if command -v igzip >/dev/null 2>&1; then
+			(set -o pipefail && igzip -dc "$archive" | tar -xf - -C "$dest")
+		elif command -v pigz >/dev/null 2>&1; then
+			(set -o pipefail && pigz -dc "$archive" | tar -xf - -C "$dest")
+		else
+			tar -xzf "$archive" -C "$dest"
+		fi
+		;;
 	# Subshell with pipefail so a zstd error (corrupt archive, missing
 	# binary) surfaces as a non-zero exit instead of being masked by tar
 	# choking on a truncated stream.
@@ -55,8 +64,38 @@ extract_code_archive() {
 	fi
 }
 
-# Check if code is pre-extracted (e.g., by sidecar)
-if [ -f "/mnt/code/.extracted" ]; then
+# Where the code is, declared by the orchestrator on the runtime container:
+# OPEN_RUNTIMES_CODE_PATH names a directory already holding the servable tree
+# (symlinked in, or served in place when it is the function path itself), or an
+# archive file to extract into the function path. Unset falls back to the
+# legacy signals: the .extracted marker on the code volume, else an archive
+# hunted down in /mnt/code.
+code_path="$OPEN_RUNTIMES_CODE_PATH"
+if [ -z "$code_path" ] && [ -f "/mnt/code/.extracted" ]; then
+	code_path="/mnt/code"
+fi
+
+if [ -n "$code_path" ] && [ ! -e "$code_path" ]; then
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code path $code_path not found. \e[0m"
+	exit 1
+fi
+
+if [ -f "$code_path" ]; then
+	# An archive: extract it into the function path.
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code extraction started. \e[0m"
+
+	start=$(awk '{print $1}' /proc/uptime)
+	extract_archive "$code_path" /usr/local/server/src/function
+
+	end=$(awk '{print $1}' /proc/uptime)
+	elapsed=$(awk "BEGIN{printf \"%.3f\", $end - $start}")
+	echo "extract=$elapsed" >>/mnt/telemetry/timings.txt
+elif [ "$code_path" = "/usr/local/server/src/function" ]; then
+	# The servable tree already sits at the function path (e.g. the
+	# orchestrator mounted it there) — nothing to clear, link, or extract.
+	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code mounted in place, skipping extraction. \e[0m"
+	echo "symlink=0" >>/mnt/telemetry/timings.txt
+elif [ -n "$code_path" ]; then
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Code already extracted, skipping extraction. \e[0m"
 
 	start=$(awk '{print $1}' /proc/uptime)
@@ -69,7 +108,7 @@ if [ -f "/mnt/code/.extracted" ]; then
 	rm -rf /usr/local/server/src/function/*
 
 	symlink_failed=false
-	for item in /mnt/code/*; do
+	for item in "$code_path"/*; do
 		# Skip archive files and marker
 		case "$(basename "$item")" in
 		code.sqfs | code.tar | code.tar.gz | code.gz | .extracted) continue ;;

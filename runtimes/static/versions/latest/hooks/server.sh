@@ -104,7 +104,7 @@ EOF
 
 # Start server
 echo "HTTP server successfully started!"
-static-web-server \
+exec static-web-server \
 	-p 3000 \
 	--log-level info \
 	--basic-auth="$AUTH" \

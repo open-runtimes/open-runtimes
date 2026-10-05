@@ -43,6 +43,11 @@ export class Local {
         // Base images live in the [<runtime>.build.versions] tables of
         // ci/runtimes.toml (the source docker-bake.json is generated from)
         const build = data[runtime]?.build;
+        // Some runtimes install their SDK onto a generic base, so the base tag
+        // does not represent the runtime version and cannot be audited as one.
+        if (build?.audit === false) {
+          continue;
+        }
         const versionConfig = build?.versions?.[version];
         const base = versionConfig?.base;
         if (!base) {

@@ -1,26 +1,36 @@
+import installShutdown from "/usr/local/server/helpers/http-shutdown.cjs";
 import { listener } from "./server/index.mjs";
-import express from "express";
+import { createServer } from "node:http";
+import serveStatic from "serve-static";
 
 console.log("TanStack Start (Nitro listener) server starting ...");
 
-const app = express();
+const cacheHeader =
+  process.env.OPEN_RUNTIMES_CACHE_HEADER ?? "CDN-Cache-Control";
 
 // framework-specific logic
-app.use(
-  express.static("public", {
-    setHeaders: (res, _path) => {
-      res.setHeader(
-        process.env.OPEN_RUNTIMES_CACHE_HEADER ?? "CDN-Cache-Control",
-        "public, max-age=36000",
-      );
-    },
-  }),
-);
-app.use(listener);
+const staticHandler = serveStatic("public", {
+  setHeaders: (res, _path) => {
+    res.setHeader(cacheHeader, "public, max-age=36000");
+  },
+});
+
+// Terminal handler: mirror express's finalhandler for requests the framework
+// hands back (404) or fails on (500).
+const finish = (res) => (error) => {
+  res.statusCode = error ? 500 : 404;
+  res.end();
+};
+const server = createServer((req, res) => {
+  staticHandler(req, res, () => listener(req, res, finish(res)));
+});
+installShutdown(server);
 // End of framework-specific logic
 
 const port = +(process.env.PORT || "3000");
 const host = process.env.HOST || "0.0.0.0";
-app.listen(port, host, () => {
-  console.log(`TanStack Start server started on http://${host}:${port}`);
+server.listen(port, host, () => {
+  console.log(
+    `TanStack Start (Nitro listener) server started on http://${host}:${port}`,
+  );
 });

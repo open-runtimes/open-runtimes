@@ -7,6 +7,7 @@ export interface BuildVersion {
 }
 
 export interface BuildConfig {
+    audit?: boolean;
     image?: string;
     runtime_dir?: string;
     platforms?: string[];

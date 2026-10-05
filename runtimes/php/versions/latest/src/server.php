@@ -16,6 +16,8 @@ $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 $server->set([
     'package_max_length' => $payloadSize,
     'buffer_output_size' => $payloadSize,
+    'reload_async' => true,
+    'max_wait_time' => 30,
 ]);
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
