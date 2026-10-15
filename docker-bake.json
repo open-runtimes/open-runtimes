@@ -2352,7 +2352,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "oven/bun:1.4.0-alpine",
+        "BASE_IMAGE": "oven/bun:1.4.3-alpine",
         "NPM_VERSION": "12.0.2"
       },
       "platforms": [
