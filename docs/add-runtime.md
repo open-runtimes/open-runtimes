@@ -158,7 +158,10 @@ reference implementation):
      `binary(bytes, …)`, `empty()`, `redirect(url, status?, headers?)`,
      `send(body, …)`.
    - `context.log(...)` / `context.error(...)` for logging.
-5. **Enforced headers**: merge `OPEN_RUNTIMES_HEADERS` (JSON) over the response headers.
+5. **Enforced headers**: merge `OPEN_RUNTIMES_HEADERS` (JSON) over the **request**
+   headers in `context.req.headers`, after the reserved headers are stripped, so the
+   configured values win over anything the caller sent. `testEnforcedHeaders` reads
+   them back out of `context.req.headers`; they are not response headers.
 6. Wrap the user function in try/catch and surface errors via the logger; missing
    return → `500` with a clear message.
 
