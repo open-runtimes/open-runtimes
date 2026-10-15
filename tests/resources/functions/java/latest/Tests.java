@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import org.apache.commons.lang3.StringUtils;
 
 public class Tests {
   final Gson gson = new Gson();
@@ -23,7 +24,8 @@ public class Tests {
 
     switch (action) {
       case "plaintextResponse" -> {
-        return context.getRes().text("Hello World 👋");
+        // Resolved from the user's own dependency file, not bundled by the runtime
+        return context.getRes().text(StringUtils.normalizeSpace("Hello  World  👋"));
       }
       case "jsonResponse" -> {
         json.put("json", true);

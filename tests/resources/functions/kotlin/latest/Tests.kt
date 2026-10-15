@@ -3,6 +3,7 @@ package io.openruntimes.kotlin
 import com.google.gson.Gson
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import org.apache.commons.lang3.StringUtils
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -15,7 +16,8 @@ public class Tests {
     suspend fun main(context: RuntimeContext): RuntimeOutput {
         when (context.req.headers["x-action"]) {
             "plaintextResponse" -> {
-                return context.res.text("Hello World 👋")
+                // Resolved from the user's own dependency file, not bundled by the runtime
+                return context.res.text(StringUtils.normalizeSpace("Hello  World  👋"))
             }
             "jsonResponse" -> {
                 return context.res.json(
@@ -229,8 +231,8 @@ When you can have two!
                     ),
                 )
 
-                context.log(String(CharArray(9000) { 'A' }))
-                context.error(String(CharArray(9000) { 'B' }))
+                context.log(CharArray(9000) { 'A' }.concatToString())
+                context.error(CharArray(9000) { 'B' }.concatToString())
 
                 return context.res.text("")
             }
@@ -310,6 +312,6 @@ When you can have two!
             result[index * 2 + 1] = (lower + (if (lower < 10) 48 else 65 - 10)).toChar()
         }
 
-        return kotlin.text.String(result)
+        return result.concatToString()
     }
 }

@@ -13,7 +13,7 @@ data class RuntimeRequest(
     val url: String,
 ) {
     val bodyText: String
-        get() = String(bodyBinary)
+        get() = bodyBinary.decodeToString()
     val bodyJson: MutableMap<String, Any>
         get() = gson.fromJson(bodyText, MutableMap::class.java) as MutableMap<String, Any>
     val bodyRaw: String

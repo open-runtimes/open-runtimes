@@ -1,0 +1,8 @@
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // A closing brace in a comment must not truncate this block: }
+    implementation "org.apache.commons:commons-lang3:3.12.0"
+}
