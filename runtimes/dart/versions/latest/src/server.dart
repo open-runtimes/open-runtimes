@@ -36,19 +36,25 @@ Future<Uint8List> _readRequestBody(
   if (contentLength != null) {
     final Uint8List body = Uint8List(contentLength);
     int offset = 0;
+    bool exceeded = false;
 
     await for (final List<int> chunk in bodyStream) {
-      if (chunk.isEmpty) {
+      if (exceeded || chunk.isEmpty) {
         continue;
       }
 
       final int end = offset + chunk.length;
       if (end > maxSize || end > contentLength) {
-        throw 'Request body size exceeds the size limit.';
+        exceeded = true;
+        continue;
       }
 
       body.setRange(offset, end, chunk);
       offset = end;
+    }
+
+    if (exceeded) {
+      throw 'Request body size exceeds the size limit.';
     }
 
     if (offset == contentLength) {
@@ -60,13 +66,22 @@ Future<Uint8List> _readRequestBody(
 
   final BytesBuilder builder = BytesBuilder();
   int received = 0;
+  bool exceeded = false;
 
   await for (final List<int> chunk in bodyStream) {
+    if (exceeded) {
+      continue;
+    }
     received += chunk.length;
     if (received > maxSize) {
-      throw 'Request body size exceeds the size limit.';
+      exceeded = true;
+      continue;
     }
     builder.add(chunk);
+  }
+
+  if (exceeded) {
+    throw 'Request body size exceeds the size limit.';
   }
 
   return builder.takeBytes();
