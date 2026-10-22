@@ -26,7 +26,8 @@ done
 
 # Next.js project directory, parent of the output directory. Differs from the
 # build root in monorepos (e.g. output "./apps/web/.next" -> "./apps/web").
-PROJECT_DIR="/usr/local/build/$(dirname "${OPEN_RUNTIMES_OUTPUT_DIRECTORY:-.}")"
+PROJECT_PATH="$(dirname "${OPEN_RUNTIMES_OUTPUT_DIRECTORY:-.}")"
+PROJECT_DIR="/usr/local/build/$PROJECT_PATH"
 
 # Move project node_modules entries into the root node_modules, so dependencies
 # installed only in the project directory are bundled too. Symlinks into the
@@ -63,7 +64,8 @@ merge_node_modules() {
 
 WEBPACK_ENTRYPOINT="./server/webpack-runtime.js"
 TURBOPACK_ENTRYPOINT="./turbopack"
-STANDALONE_ENTRYPOINT="./standalone/server.js"
+# Monorepo standalone builds keep the tree: standalone/apps/web/server.js
+STANDALONE_ENTRYPOINT="./standalone/$PROJECT_PATH/server.js"
 
 if [ -e "$STANDALONE_ENTRYPOINT" ]; then
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Detected standalone Next.js build. \e[0m"
@@ -82,13 +84,19 @@ if [ -e "$STANDALONE_ENTRYPOINT" ]; then
 
 	# Only copy public and static, rest is there
 	if [ -d "$PROJECT_DIR/public/" ]; then
-		mkdir -p ./public
-		mv "$PROJECT_DIR"/public/* ./public/
+		mkdir -p "./$PROJECT_PATH/public"
+		mv "$PROJECT_DIR"/public/* "./$PROJECT_PATH/public/"
 	fi
 
 	if [ -d "/tmp/.opr-tmp/.next/static/" ]; then
-		mkdir -p ./.next/static
-		mv /tmp/.opr-tmp/.next/static/* ./.next/static/
+		mkdir -p "./$PROJECT_PATH/.next/static"
+		mv /tmp/.opr-tmp/.next/static/* "./$PROJECT_PATH/.next/static/"
+	fi
+
+	# The server starts ./server.js; import() loads the project's server.js
+	# whether the root package.json is CommonJS or ESM
+	if [ "$PROJECT_PATH" != "." ]; then
+		echo "import('./$PROJECT_PATH/server.js');" >./server.js
 	fi
 
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR finished. \e[0m"
@@ -98,7 +106,7 @@ elif [ -e "$WEBPACK_ENTRYPOINT" ] || [ -e "$TURBOPACK_ENTRYPOINT" ]; then
 
 	cd /usr/local/build
 
-	if [ "$PROJECT_DIR" != "/usr/local/build/." ] && [ -d "$PROJECT_DIR/node_modules/" ]; then
+	if [ "$PROJECT_PATH" != "." ] && [ -d "$PROJECT_DIR/node_modules/" ]; then
 		merge_node_modules "$PROJECT_DIR/node_modules" /usr/local/build/node_modules ""
 	fi
 
