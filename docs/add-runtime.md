@@ -187,7 +187,7 @@ file.
 ```toml
 [<runtime>]
 entry = "tests.<ext>"                       # default test entrypoint file
-versions = ["1.99"]                          # tested versions, newest first
+versions = ["1"]                            # tested versions, newest first
 commands = { install = "<install cmd>", start = "bash helpers/server.sh" }
 formatter = { prepare = "...", check = "...", write = "..." }
 tools = "<binary> --version"                 # smoke-checked toolchain
@@ -199,7 +199,7 @@ test = "Serverless/<Name>.php"               # PHPUnit test class (see §6)
 
 ```toml
 [<runtime>.build.versions]
-"1.99" = { base = "rust:1.99.1-alpine3.24" }
+"1" = { base = "rust:1.99.1-alpine3.24" }
 ```
 
 Always pin the most specific base image (patch version + distro). Optional
@@ -247,7 +247,7 @@ and the build version list drift apart.
 3. Run the tests locally:
 
    ```bash
-   make test ID=<runtime>-<version>      # e.g. make test ID=rust-1.99
+   make test ID=<runtime>-<version>      # e.g. make test ID=rust-1
    ```
 
    This builds the image, stages your fixtures, and runs the suite. See
