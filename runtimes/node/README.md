@@ -46,7 +46,6 @@ module.exports = (req, res) => {
 ```
 
 - The `res` parameter has two methods:
-
   - `send()`: Send a string response to the client.
   - `json()`: Send a JSON response to the client.
 
