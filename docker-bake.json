@@ -160,6 +160,7 @@
     "dotnet": {
       "targets": [
         "dotnet-10",
+        "dotnet-11",
         "dotnet-8_0",
         "dotnet-7_0",
         "dotnet-6_0"
@@ -2222,6 +2223,29 @@
       "tags": [
         "${REGISTRY}/dotnet:v5-10${TAG_SUFFIX}",
         "${REGISTRY}/dotnet:v5-10${TAG_SUFFIX}${SHA_SUFFIX}"
+      ]
+    },
+    "dotnet-11": {
+      "inherits": [
+        "_base",
+        "_dotnet"
+      ],
+      "contexts": {
+        "helpers": "./helpers",
+        "shared": "./docker/empty",
+        "latest": "./runtimes/dotnet/versions/latest",
+        "version": "./runtimes/dotnet/versions/11"
+      },
+      "args": {
+        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:11.0.100-rc.2-alpine3.24"
+      },
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "tags": [
+        "${REGISTRY}/dotnet:v5-11${TAG_SUFFIX}",
+        "${REGISTRY}/dotnet:v5-11${TAG_SUFFIX}${SHA_SUFFIX}"
       ]
     },
     "dotnet-8_0": {
