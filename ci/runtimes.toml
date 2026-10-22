@@ -340,7 +340,7 @@ output = "./.next"
 "20.0" = { base = "node:20.20.2-alpine3.23", args = { NPM_VERSION = "11.21.1" } }
 "19.0" = { base = "node:19.9.0-alpine3.18", args = { NPM_VERSION = "9.9.4" } }
 "18.0" = { base = "node:18.20.8-alpine3.20", args = { NPM_VERSION = "10.9.9" } }
-"16.0" = { base = "node:16.20.2-alpine3.18", args = { NPM_VERSION = "9.9.4", PNPM_VERSION = "8" } }
+"16.0" = { base = "node:16.20.2-alpine3.18", args = { NPM_VERSION = "9.9.4", PNPM_VERSION = "8.15.9" } }
 
 [deno.build.versions]
 "2.6" = { base = "denoland/deno:alpine-2.6.10", args = { NPM_VERSION = "12.2.1" } }
