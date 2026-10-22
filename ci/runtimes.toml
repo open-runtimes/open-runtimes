@@ -455,8 +455,8 @@ platforms = ["linux/amd64"]
 "6.0" = { base = "mcr.microsoft.com/dotnet/sdk:6.0.428-1-alpine3.20" }
 
 [go.build.versions]
-"1.26" = { base = "golang:1.26.5-alpine3.23" }
-"1.25" = { base = "golang:1.25.12-alpine3.23" }
+"1.26" = { base = "golang:1.26.10-alpine3.24" }
+"1.25" = { base = "golang:1.25.14-alpine3.24" }
 "1.24" = { base = "golang:1.24.13-alpine3.23" }
 "1.23" = { base = "golang:1.23.12-alpine3.22" }
 
