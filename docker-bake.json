@@ -1423,7 +1423,7 @@
         "version": "./runtimes/ruby/versions/4.0"
       },
       "args": {
-        "BASE_IMAGE": "ruby:4.0.5-alpine3.23"
+        "BASE_IMAGE": "ruby:4.0.7-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -1446,7 +1446,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "ruby:3.4.10-alpine3.23"
+        "BASE_IMAGE": "ruby:3.4.11-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -1469,7 +1469,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "ruby:3.3.10-alpine3.23"
+        "BASE_IMAGE": "ruby:3.3.12-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -1492,7 +1492,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "ruby:3.2.10-alpine3.23"
+        "BASE_IMAGE": "ruby:3.2.11-alpine3.23"
       },
       "platforms": [
         "linux/amd64",
