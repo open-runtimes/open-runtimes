@@ -7,9 +7,7 @@ ARG BUILD_BASE_IMAGE=${BASE_IMAGE}
 
 FROM ${BUILD_BASE_IMAGE} AS step0
 
-# Extra packages only needed to compile extensions (linux-headers: php >= 8.2,
-# and Swoole 6 everywhere - without it Swoole skips futex support and its
-# fallback path fails to compile)
+# Extra packages only needed to compile extensions (linux-headers on php >= 8.2)
 ARG BUILD_PACKAGES=""
 RUN if [ -n "$BUILD_PACKAGES" ]; then apk add --no-cache $BUILD_PACKAGES; fi
 

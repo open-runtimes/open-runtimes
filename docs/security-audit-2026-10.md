@@ -12,7 +12,7 @@
   - musl CVE-2026-107891
   - OpenSSL 2026-09-29 advisory (CVE-2026-84782)
 - **Decided 2026-10-22** (details in §1d and §4a):
-  - Move Swoole to 6.x on every PHP line that supports it (8.1–8.4)
+  - Keep existing PHP lines on Swoole 5: 8.1–8.3 move to the final 5.1 release (`v5.1.8`); Swoole 6 only on 8.4 and new lines
   - Add Deno 2.9, Python 3.15 and Go 1.27
   - Add .NET 11 once it reaches GA
   - Add Rust 1.99 alongside 1.83
@@ -44,9 +44,9 @@ Targets use the `docker buildx bake` target names, e.g. `node-26` or `python-ml-
 
 | Status (after §1, incl. new lines) | Version lines |
 |---|---|
-| `safe` | 22 |
+| `safe` | 20 |
 | `needs more patches` | 15 |
-| `other` | 63 |
+| `other` | 65 |
 | **Total** | **100** |
 
 The total is the original 96, plus 4 new lines (`deno-2_9`, `python-3_15`, `go-1_27`, `rust-1_99`). `dotnet-11` is planned but can't be built until GA, so it isn't counted.
@@ -86,9 +86,9 @@ All changes are in `ci/runtimes.toml` unless noted. Afterwards, run `bun ci/bake
 | [x] | `ruby-3_3` | `ruby:3.3.10-alpine3.23` | `ruby:3.3.12-alpine3.24` | needs more patches | erb CVE-2026-41316 (H). net-imap CVE-2026-42246 (H) plus 7 more. zlib CVE-2026-27820 |
 | [x] | `ruby-3_2` | `ruby:3.2.10-alpine3.23` | `ruby:3.2.11-alpine3.23` | other | CVE-2026-27820 (L) |
 | [x] | `php-8_4` | `php:8.4.27-cli-alpine3.23` + Swoole `v6.1.1` | `php:8.4.27-cli-alpine3.24` + Swoole `v6.1.10` | safe | PHP was already patched. Swoole fixes: HTTP/2 UAF, WebSocket control-frame leak, Redis integer overflow (no CVE IDs) |
-| [x] | `php-8_3` | `php:8.3.36-cli-alpine3.23` + Swoole `v5.1.2` | `php:8.3.36-cli-alpine3.24` + Swoole `v6.1.10` | safe | Swoole 5 → 6 (D2): CVE-2026-24814 (bundled hiredis), path-validation bypass, and the 6.1.x memory-safety fixes. `php-8_4` already runs the runtime on Swoole 6 |
-| [x] | `php-8_2` | `php:8.2.35-cli-alpine3.23` + Swoole `v5.1.2` | `php:8.2.35-cli-alpine3.24` + Swoole `v6.1.10` | safe | Same as 8.3. PHP 8.2 security support ends 2026-12-31 |
-| [x] | `php-8_1` | `php:8.1.34-cli-alpine3.22` + Swoole `v5.1.2` | base unchanged + Swoole `v6.1.10` | other | Swoole CVE-2026-24814 is fixed, but PHP 8.1 itself is EOL. Swoole 6.1 is the last line supporting PHP 8.1. The builder stage now installs `linux-headers`: without `linux/futex.h`, Swoole 6.1.10 compiles a fallback path that calls an undeclared `sw_usleep()` and fails. `php-8_0` stays on Swoole 4.x (Swoole 6 needs PHP ≥8.1) |
+| [x] | `php-8_3` | `php:8.3.36-cli-alpine3.23` + Swoole `v5.1.2` | `php:8.3.36-cli-alpine3.24` + Swoole `v5.1.8` | other | PHP is patched (CVE-2026-109618/-109619 fixed in 8.3.36). Swoole stays on 5.x (D2): `v5.1.8` is the final 5.1 release and adds the 5.1.3–5.1.8 bug fixes, incl. the relative-path validation bypass (5.1.5). Swoole 5.1 is unmaintained, so CVE-2026-24814 (hiredis, only reachable via `Coroutine\Redis`) and the 6.x HTTP/2-server, Redis-server and static-handler fixes stay open; the runtime enables none of those |
+| [x] | `php-8_2` | `php:8.2.35-cli-alpine3.23` + Swoole `v5.1.2` | `php:8.2.35-cli-alpine3.24` + Swoole `v5.1.8` | other | Same as 8.3. PHP 8.2 security support ends 2026-12-31 |
+| [x] | `php-8_1` | `php:8.1.34-cli-alpine3.22` + Swoole `v5.1.2` | base unchanged + Swoole `v5.1.8` | other | PHP 8.1 is EOL: CVE-2026-109618/-109619 have no fix for it, so users must move to 8.2+ (ideally 8.3/8.4). Swoole moves to the final 5.1 release like 8.2/8.3 (D2). `php-8_0` stays on Swoole 4.x |
 | [x] | `go-1_26` | `golang:1.26.5-alpine3.23` | `golang:1.26.10-alpine3.24` | safe | 26 CVEs, including CVE-2026-39821 (9.6), CVE-2026-78663 (9.1, HTTP/2) and CVE-2026-111943 (x509 eMudhra) |
 | [x] | `go-1_25` | `golang:1.25.12-alpine3.23` | `golang:1.25.14-alpine3.24` | other | August fixes, incl. CVE-2026-39821 (9.6) |
 | [x] | `dotnet-10` | `mcr.microsoft.com/dotnet/sdk:10.0.102-alpine3.23` | `mcr.microsoft.com/dotnet/sdk:10.0.402-alpine3.24` | safe | 93 CVEs, incl. CVE-2026-105016 (9.8, MsQuic RCE) and CVE-2026-88092 (9.4). The SDK band change is forced (D5) |
@@ -172,7 +172,7 @@ Rows 1–2 are tracked in [#580](https://github.com/open-runtimes/open-runtimes/
 | 6 | `ruby-3_3` | 3.3.13 with resolv 0.3.2 (already committed as 619ea0f602) | Bump, drop §2 #7 | https://www.ruby-lang.org/en/news/ |
 | 7 | `ruby-4_0` | `ruby:4.0.8-alpine3.24` tag. Non-security; UAF fixes | Bump | Docker Hub `ruby` tags |
 | 8 | `node-26`, `node-24` | 26.12.2 / 24.22.2 reverting regression #66906 (webstreams lose AsyncLocalStorage context). Non-security | Bump if SSR frameworks are affected | nodejs/node #66913, #66914 |
-| 9 | `php-8_4/8_3/8_2/8_1` | Swoole 6.1.11 with unreleased hardening: oversized Upgrade values, EOF packet limits, SOCKS5 lengths, compressed WebSocket control frames | Bump | https://github.com/swoole/swoole-src/compare/v6.1.10...6.1 |
+| 9 | `php-8_4` | Swoole 6.1.11 with unreleased hardening: oversized Upgrade values, EOF packet limits, SOCKS5 lengths, compressed WebSocket control frames | Bump | https://github.com/swoole/swoole-src/compare/v6.1.10...6.1 |
 | 10 | `flutter-*`, `python-ml-*` | Debian 12 DLA for OpenSSL CVE-2026-84782 (H) and curl CVE-2026-8286, or move off bookworm (D3/D4) | Rebuild | https://security-tracker.debian.org/tracker/CVE-2026-84782 |
 | 11 | `static-1` | Upstream image rebuilt on Alpine ≥3.23.7 (or do §2 #1) | Bump | Docker Hub `joseluisq/static-web-server` |
 | 12 | `cpp-*` | Drogon fix for ORM SQLi CVE-2026-94143 / -94144 (issues #2575, #2576). Low exposure: no DB client libs in the image | Bump | https://github.com/drogonframework/drogon/releases |
@@ -190,7 +190,7 @@ Open items are tracked in [#582](https://github.com/open-runtimes/open-runtimes/
 | # | Decision | Status | Outcome / options | Recommendation |
 |---|---|---|---|---|
 | D1 | Alpine 3.23 → 3.24 for bumped lines | Open | Keep `-alpine3.23` tags where they're published, or move to `-alpine3.24` | `-alpine3.24`. Supported to 2028-06, already used by `node-26`, and forced for .NET and the new lines. 3.23 is supported to 2027-11, so staying is also acceptable (`-alpine3.23` availability was only verified for Node and Python) |
-| D2 | Swoole for PHP 8.1–8.3 | **Decided:** Swoole 6 | `v6.1.10` for `php-8_4/8_3/8_2/8_1` (Swoole 6.1 supports PHP 8.1–8.4). `php-8_0` stays on 4.x | — |
+| D2 | Swoole for PHP 8.1–8.3 | **Decided:** stay on Swoole 5 | Swoole 6 removed APIs user functions may call (`Coroutine\MySQL`, `Coroutine\Redis`, `Coroutine\System::fread/fwrite/fgets`, `Lock::trylock/lockwait`), so it can't go behind existing tags. 8.1–8.3 move to `v5.1.8` (final 5.1). The hiredis CVE only affects `Coroutine\Redis`, the API Swoole 6 removes. Swoole 6 comes with new lines (PHP 8.5 needs 6.2.x). `php-8_4` already ran on 6.x | — |
 | D3 | Flutter base OS | Open | `debian:12.15-slim` (LTS-only, OpenSSL High open), or `debian:13.7-slim` | `debian:13.7-slim` |
 | D4 | Python ML base OS | Open | `-bookworm` or `-trixie` (the default variant now) | `-trixie` |
 | D5 | .NET 10 SDK band | Forced | 10.0.402 (4xx) is the only patched image. The 1xx band stops at 10.0.103 and `alpine3.23` was dropped | 10.0.402 |
@@ -217,7 +217,7 @@ Open items are tracked in [#582](https://github.com/open-runtimes/open-runtimes/
 | Python | 3.9, 3.8 | EOL 2025-10-31 / 2024-10-07 | CVE-2026-19445, -6100 (C) | 3.8 is on Alpine 3.20 (EOL) |
 | Ruby | 3.2 | EOL 2026-04-01 | CVE-2026-41316, -80212, -42246 (H) | Docker stopped building it |
 | Ruby | 3.1, 3.0 | EOL 2025-03 / 2024-04 | All of the above, plus REXML and others | 3.1 is on Alpine 3.20, 3.0 on 3.16 (both EOL) |
-| PHP | 8.1, 8.0 | EOL 2025-12-31 / 2023-11 | CVE-2026-109618 / -109619 (C, probable) | 8.1 moves to Swoole 6 (D2). 8.0 stays on Swoole 4.x (EOL, CVE-2026-24814) and Alpine 3.16 |
+| PHP | 8.1, 8.0 | EOL 2025-12-31 / 2023-11 | CVE-2026-109618 / -109619 (C, probable) | No PHP fix exists for 8.1/8.0; deprecate and move users to 8.2+. 8.1 gets Swoole `v5.1.8` (D2). 8.0 stays on Swoole 4.x (EOL, CVE-2026-24814) and Alpine 3.16 |
 | Go | 1.25, 1.24, 1.23 | EOL 2026-08-19 / 2026-02-10 / 2025-08-12 | CVE-2026-78663 (9.1), CVE-2026-111943 | Supported lines 1.26 and 1.27 are covered (`go-1_27` added, D7) |
 | Java | 22, 18.0 | EOL | CVE-2026-91403 (9.1), plus every CPU since 2024-10 / 2022-10 | — |
 | Kotlin | 2.0 (JDK 22), 1.9 / 1.8 (JDK 19), 1.6 (JDK 18) | EOL JDKs | Same as Java EOL | See D9 |
@@ -302,9 +302,9 @@ Each target's state after the recommended bumps. `=` means no change, and `—` 
 | `ruby-3_1` | ruby:3.1.7-alpine3.20 | = | other | §4b |
 | `ruby-3_0` | ruby:3.0.7-alpine3.16 | = | other | §4b |
 | `php-8_4` | php:8.4.27-cli-alpine3.23 + swoole v6.1.1 | php:8.4.27-cli-alpine3.24 + v6.1.10 | safe | §1a, §3 #9 |
-| `php-8_3` | php:8.3.36-cli-alpine3.23 + swoole v5.1.2 | php:8.3.36-cli-alpine3.24 + v6.1.10 | safe | §1a, D2, §3 #9 |
-| `php-8_2` | php:8.2.35-cli-alpine3.23 + swoole v5.1.2 | php:8.2.35-cli-alpine3.24 + v6.1.10 | safe | §1a, D2, §3 #9 |
-| `php-8_1` | php:8.1.34-cli-alpine3.22 + swoole v5.1.2 | = + v6.1.10 | other | §1a, D2, §4b |
+| `php-8_3` | php:8.3.36-cli-alpine3.23 + swoole v5.1.2 | php:8.3.36-cli-alpine3.24 + v5.1.8 | other | §1a, D2 |
+| `php-8_2` | php:8.2.35-cli-alpine3.23 + swoole v5.1.2 | php:8.2.35-cli-alpine3.24 + v5.1.8 | other | §1a, D2 |
+| `php-8_1` | php:8.1.34-cli-alpine3.22 + swoole v5.1.2 | = + v5.1.8 | other | §1a, D2, §4b |
 | `php-8_0` | php:8.0.30-cli-alpine3.16 + swoole v4.7.0 | = | other | §4b |
 | `swift-6_2` | swift:6.2.4-jammy | = | safe | — |
 | `swift-5_10` | swift:5.10.1-jammy | = | other | §4b |
@@ -359,7 +359,7 @@ Each target's state after the recommended bumps. `=` means no change, and `—` 
 | CVE-2026-80212 | Ruby resolv | High 7.5 | 4.0.7, 3.4.11. 3.3 pending | [ruby-lang.org](https://www.ruby-lang.org/en/news/2026/08/27/multiple-vulnerabilities-in-resolv/) |
 | CVE-2026-41316 | Ruby erb | High 8.1 | 3.3.12 | [ruby-lang.org](https://www.ruby-lang.org/en/news/2026/04/21/erb-cve-2026-41316/) |
 | CVE-2026-109618, -109619 | PHP | Critical (RCE) | 8.4.27, 8.3.36, 8.2.35 | [PHP ChangeLog](https://www.php.net/ChangeLog-8.php) |
-| CVE-2026-24814 | Swoole bundled hiredis | Critical per CNA (likely overstated) | Swoole 6.1.x only (adopted for PHP 8.1–8.4, D2). Still open on `php-8_0` (Swoole 4.x) | [NVD](https://nvd.nist.gov/vuln/detail/CVE-2026-24814) |
+| CVE-2026-24814 | Swoole bundled hiredis | Critical per CNA (likely overstated) | Swoole 6.1.x only (`php-8_4`). Still open on `php-8_3/8_2/8_1` (Swoole 5.1, D2: only reachable via `Coroutine\Redis`) and `php-8_0` (Swoole 4.x) | [NVD](https://nvd.nist.gov/vuln/detail/CVE-2026-24814) |
 | CVE-2026-105016 | .NET MsQuic RCE | 9.8 | 10.0.13, 8.0.32 | [.NET 10.0.13 notes](https://github.com/dotnet/core/blob/main/release-notes/10.0/10.0.13/10.0.13.md) |
 | CVE-2026-27190 | Deno `child_process` injection | High 8.1 | 2.6.8 | [GHSA-hmh4-3xvx-q5hr](https://github.com/denoland/deno/security/advisories/GHSA-hmh4-3xvx-q5hr) |
 | CVE-2026-22863 | Deno | Critical 9.2 | 2.6.0 (2.5.7 backport likely, unconfirmed) | [GHSA-5379-f5hf-w38v](https://github.com/denoland/deno/security/advisories/GHSA-5379-f5hf-w38v) |
@@ -413,7 +413,7 @@ Primary sources:
 ## 8. Caveats
 
 - Testing so far:
-  - Local `linux/arm64` image builds (build only, no PHPUnit) pass for `php-8_1`, `php-8_3`, `static-1`, `python-3_15`, `python-3_8`, `rust-1_99`, `ruby-3_0`, `dart-2_16`, `go-1_27`, `deno-2_9` and `cpp-23`.
+  - Local `linux/arm64` image builds (build only, no PHPUnit) pass for `static-1`, `python-3_15`, `python-3_8`, `rust-1_99`, `ruby-3_0`, `dart-2_16`, `go-1_27`, `deno-2_9` and `cpp-23`.
   - All 89 base images exist for the platforms they're built for.
   - The full test matrix runs in CI on the PR.
 - `apt-get upgrade` can't succeed on the Debian 11 bases (Dart 2.16–3.0): the bullseye security pool 404s on dpkg, glibc and perl. Those five lines skip the upgrade via `OS_UPGRADE = "false"` and stay unpatched. Every other base was checked to upgrade cleanly under `set -eu`.

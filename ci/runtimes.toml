@@ -414,10 +414,13 @@ audit = false
 "3.0" = { base = "ruby:3.0.7-alpine3.16" }
 
 [php.build.versions]
+# Swoole 6 removed APIs user code may call (Coroutine\\MySQL/Redis, System::fread/
+# fwrite/fgets, Lock::trylock/lockwait), so existing lines stay on the final
+# Swoole 5.1 release; only 8.4 (already on 6.x) and new lines use Swoole 6.
 "8.4" = { base = "php:8.4.27-cli-alpine3.24", args = { PHP_SWOOLE_VERSION = "v6.1.10", BUILD_PACKAGES = "linux-headers" } }
-"8.3" = { base = "php:8.3.36-cli-alpine3.24", args = { PHP_SWOOLE_VERSION = "v6.1.10", BUILD_PACKAGES = "linux-headers" } }
-"8.2" = { base = "php:8.2.35-cli-alpine3.24", args = { PHP_SWOOLE_VERSION = "v6.1.10", BUILD_PACKAGES = "linux-headers" } }
-"8.1" = { base = "php:8.1.34-cli-alpine3.22", args = { PHP_SWOOLE_VERSION = "v6.1.10", BUILD_PACKAGES = "linux-headers" } }
+"8.3" = { base = "php:8.3.36-cli-alpine3.24", args = { PHP_SWOOLE_VERSION = "v5.1.8", BUILD_PACKAGES = "linux-headers" } }
+"8.2" = { base = "php:8.2.35-cli-alpine3.24", args = { PHP_SWOOLE_VERSION = "v5.1.8", BUILD_PACKAGES = "linux-headers" } }
+"8.1" = { base = "php:8.1.34-cli-alpine3.22", args = { PHP_SWOOLE_VERSION = "v5.1.8" } }
 "8.0" = { base = "php:8.0.30-cli-alpine3.16", args = { PHP_SWOOLE_VERSION = "v4.7.0" } }
 
 [swift.build.versions]
