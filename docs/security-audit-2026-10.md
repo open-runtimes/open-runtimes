@@ -15,7 +15,7 @@
   - Move Swoole to 6.x on every PHP line that supports it (8.1–8.4)
   - Add Deno 2.9, Python 3.15 and Go 1.27
   - Add .NET 11 once it reaches GA
-  - Add a floating Rust `1` line (on 1.99) alongside 1.83
+  - Add Rust 1.99 alongside 1.83
 
 The doc is organised around the work to be done:
 
@@ -49,7 +49,7 @@ Targets use the `docker buildx bake` target names, e.g. `node-26` or `python-ml-
 | `other` | 63 |
 | **Total** | **100** |
 
-The total is the original 96, plus 4 new lines (`deno-2_9`, `python-3_15`, `go-1_27`, `rust-1`). `dotnet-11` is planned but can't be built until GA, so it isn't counted.
+The total is the original 96, plus 4 new lines (`deno-2_9`, `python-3_15`, `go-1_27`, `rust-1_99`). `dotnet-11` is planned but can't be built until GA, so it isn't counted.
 
 | Work bucket | Size |
 |---|---|
@@ -138,7 +138,7 @@ Process: [`docs/add-version.md`](add-version.md).
 | [x] | `deno-2_9` | `denoland/deno:alpine-2.9.8` (amd64 + arm64, 2026-10-21) | `args = { NPM_VERSION = "12.2.1" }`. No overlay needed: 2.x uses `versions/latest` | safe | The only maintained Deno line. 2.9.8 adds a compile read-permission check, a napi overflow check, npm link-name validation and eMudhra CA distrust. CVE-2026-103473 is Windows-only and unfixed, so it doesn't apply. See §2 #5 |
 | [x] | `python-3_15` | `python:3.15.1-alpine3.24` (amd64 + arm64, 2026-10-21) | None | safe | 3.15 is in bugfix support until 2031-10. 3.15.1 bundles pip 26.2.2, with the certifi eMudhra fix. It also includes the CVE-2026-12345 fix (backport #158431, merged 2026-10-02, before 3.15.0), which 3.11–3.13 still lack. **No `python-ml-3_15` / `python-ml-3_14`:** TensorFlow 2.21.0 still ships wheels only up to cp313 (`runtimes/python/versions/ml-3.14/NOTE.md`) |
 | [x] | `go-1_27` | `golang:1.27.3-alpine3.24` (amd64 + arm64, 2026-10-22) | None | safe | 1.27.2 (Oct 8) and 1.27.3 (Oct 19) carry the same security fixes as 1.26.9 and 1.26.10, incl. CVE-2026-78663 and CVE-2026-111943. With 1.27 added, Go's two supported lines (1.27, 1.26) are both covered |
-| [x] | `rust-1` (added next to `rust-1_83`) | `rust:1.99.1-alpine3.24` (amd64 + arm64) | Add `"1"` to the `versions` list and `[rust.build.versions]`, keeping `"1.83"`. `rust-version = "1.83"` stays in the Cargo manifests: it's an MSRV, so both lines build the same sources. Point the examples in `runtimes/rust/README.md` and `docs/add-runtime.md` at `v5-1` | safe | Fixes every Rust CVE since 1.83, incl. Cargo CVE-2026-55200 (C) and CVE-2026-33055 (H), on an Alpine 3.24 base. Named `1` like `node-26`: the base pin moves to each new stable, published as `openruntimes/rust:v5-1` (see D6). `rust-1_83` keeps publishing `v5-1.83`, so existing consumers don't have to switch; it stays frozen on 1.83.0 (§4b) |
+| [x] | `rust-1_99` (added next to `rust-1_83`) | `rust:1.99.1-alpine3.24` (amd64 + arm64) | Add `"1.99"` to the `versions` list and `[rust.build.versions]`, keeping `"1.83"`. `rust-version = "1.83"` stays in the Cargo manifests: it's an MSRV, so both lines build the same sources. Point the examples in `runtimes/rust/README.md` and `docs/add-runtime.md` at 1.99 | safe | Fixes every Rust CVE since 1.83, incl. Cargo CVE-2026-55200 (C) and CVE-2026-33055 (H), on an Alpine 3.24 base, published as `openruntimes/rust:v5-1.99`. `rust-1_83` keeps publishing `v5-1.83`, so existing consumers don't have to switch; it stays frozen on 1.83.0 (§4b) |
 | [ ] | `dotnet-11` | At GA: `mcr.microsoft.com/dotnet/sdk:11.0.1xx-alpine3.24` (RC2 today: `11.0.100-rc.2-alpine3.24`, 2026-10-13) | New overlay `runtimes/dotnet/versions/11/`, copied from `versions/8.0/` (not 10; see D11) with `<TargetFramework>net11.0</TargetFramework>`. New test fixture `tests/resources/functions/dotnet/11/` | other (pre-GA) | .NET 11 is STS; GA is expected in November 2026. Left out of this PR and added in its own PR on the GA tag (§3 #14); the RC2 version was reverted so a release can't publish `v5-11` from a preview SDK. Adding .NET 9 instead isn't worth it: it reaches EOL on 2026-11-10, the same day as .NET 8 |
 
 ---
@@ -194,7 +194,7 @@ Open items are tracked in [#582](https://github.com/open-runtimes/open-runtimes/
 | D3 | Flutter base OS | Open | `debian:12.15-slim` (LTS-only, OpenSSL High open), or `debian:13.7-slim` | `debian:13.7-slim` |
 | D4 | Python ML base OS | Open | `-bookworm` or `-trixie` (the default variant now) | `-trixie` |
 | D5 | .NET 10 SDK band | Forced | 10.0.402 (4xx) is the only patched image. The 1xx band stops at 10.0.103 and `alpine3.23` was dropped | 10.0.402 |
-| D6 | Rust | **Decided:** add a floating `1` line, keep 1.83 | `rust-1` (currently 1.99.1) added next to `rust-1_83` (§1d). Rust ships a 1.x minor every 6 weeks under its backward-compatibility promise, editions are opt-in per crate, and only the latest stable gets fixes, so per-minor lines would be frozen and unpatched by the time they publish. The `1` line follows the latest stable like `node-26` follows Node 26. 1.83 stays published for existing consumers | — |
+| D6 | Rust | **Decided:** add 1.99 as its own line, keep 1.83 | `rust-1_99` added next to `rust-1_83` (§1d); existing lines are never replaced. Rust only patches the latest stable (a new 1.x every 6 weeks), so each pinned line is frozen once the next stable ships; new Rust lines get added the way Bun and Deno lines are | — |
 | D7 | Add newer supported lines | **Decided** (partly) | Adding Deno 2.9, Python 3.15, Go 1.27, and .NET 11 at GA (§1d). Still open: PHP 8.5 (8.5.12; needs Swoole 6.2.x, which supports PHP 8.2–8.5), Swift 6.3 / 6.4 | Revisit PHP 8.5 together with Swoole 6.2 |
 | D8 | .NET 8 EOL on 2026-11-10 | Open | — | Plan the deprecation notice; `dotnet-11` lands around the same time |
 | D9 | Kotlin on EOL JDKs (22 / 19 / 18) | Open | Keep, or move to a JDK 21 LTS base (compiler compatibility untested) | Test `kotlin-2_0` on Temurin 21 |
@@ -335,7 +335,7 @@ Each target's state after the recommended bumps. `=` means no change, and `—` 
 | `go-1_25` | golang:1.25.12-alpine3.23 | golang:1.25.14-alpine3.24 | other | §1a, D7 |
 | `go-1_24` | golang:1.24.13-alpine3.23 | = | other | §4b |
 | `go-1_23` | golang:1.23.12-alpine3.22 | = | other | §4b |
-| `rust-1` | — | rust:1.99.1-alpine3.24 | safe | §1d (new), D6 |
+| `rust-1_99` | — | rust:1.99.1-alpine3.24 | safe | §1d (new), D6 |
 | `rust-1_83` | rust:1.83-alpine | = | other | §4b, D6 |
 | `static-1` | joseluisq/static-web-server:2.39.0-alpine | 2.44.1-alpine | needs more patches | §1a, §2 #3, §3 #11 |
 
@@ -413,7 +413,7 @@ Primary sources:
 ## 8. Caveats
 
 - Testing so far:
-  - Local `linux/arm64` image builds (build only, no PHPUnit) pass for `php-8_1`, `php-8_3`, `static-1`, `python-3_15`, `python-3_8`, `rust-1_99` (now `rust-1`), `ruby-3_0`, `dart-2_16`, `go-1_27`, `deno-2_9` and `cpp-23`.
+  - Local `linux/arm64` image builds (build only, no PHPUnit) pass for `php-8_1`, `php-8_3`, `static-1`, `python-3_15`, `python-3_8`, `rust-1_99`, `ruby-3_0`, `dart-2_16`, `go-1_27`, `deno-2_9` and `cpp-23`.
   - All 89 base images exist for the platforms they're built for.
   - The full test matrix runs in CI on the PR.
 - `apt-get upgrade` can't succeed on the Debian 11 bases (Dart 2.16–3.0): the bullseye security pool 404s on dpkg, glibc and perl. Those five lines skip the upgrade via `OS_UPGRADE = "false"` and stay unpatched. Every other base was checked to upgrade cleanly under `set -eu`.

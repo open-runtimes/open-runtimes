@@ -96,7 +96,7 @@ test = "Serverless/Ruby.php"
 
 [rust]
 entry = "tests.rs"
-versions = ["1", "1.83"]
+versions = ["1.99", "1.83"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "find ./ -name '*.rs' -type f -print | xargs rustfmt --check --edition 2021", write = "find ./ -name '*.rs' -type f -print | xargs rustfmt --edition 2021" }
 tools = "rustc --version && cargo --version"
@@ -474,7 +474,7 @@ platforms = ["linux/amd64"]
 "1.0" = { base = "oven/bun:1.0.36-alpine", args = { NPM_VERSION = "10.9.9" } }
 
 [rust.build.versions]
-"1" = { base = "rust:1.99.1-alpine3.24" }
+"1.99" = { base = "rust:1.99.1-alpine3.24" }
 "1.83" = { base = "rust:1.83-alpine" }
 
 [static.build.versions]

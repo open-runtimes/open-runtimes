@@ -43,16 +43,16 @@ END
 ```
 
 3. Build the code:
-> Examples use rust-1, but you can use any from `versions` directory.
+> Examples use rust-1.99, but you can use any from `versions` directory.
 
 ```bash
-docker run -e OPEN_RUNTIMES_ENTRYPOINT=main.rs --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/rust:v5-1 sh helpers/build.sh
+docker run -e OPEN_RUNTIMES_ENTRYPOINT=main.rs --rm --interactive --tty --volume $PWD:/mnt/code openruntimes/rust:v5-1.99 sh helpers/build.sh
 ```
 
 4. Spin-up open-runtime:
 
 ```bash
-docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/rust:v5-1 sh helpers/start.sh
+docker run -p 3000:3000 -e OPEN_RUNTIMES_SECRET=secret-key --rm --interactive --tty --volume $PWD/code.tar.gz:/mnt/code/code.tar.gz:ro openruntimes/rust:v5-1.99 sh helpers/start.sh
 ```
 
 5. In new terminal window, execute function:
