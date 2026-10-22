@@ -2,7 +2,7 @@
 
 - **Audited:** 2026-10-22
 - **Scope:** every image in `ci/runtimes.toml` `[*.build.versions]` (96 version lines), plus tool versions pinned in Dockerfiles
-- **State:** §1 and §2 are implemented in the draft PR from branch `chore-security-patches-2026-10` (one commit per task). Follow-ups are tracked in [#580](https://github.com/open-runtimes/open-runtimes/issues/580) (Java/Kotlin October JDK update), [#581](https://github.com/open-runtimes/open-runtimes/issues/581) (other pending upstream releases) and [#582](https://github.com/open-runtimes/open-runtimes/issues/582) (open decisions).
+- **State:** §1 and §2 are implemented in PR [#583](https://github.com/open-runtimes/open-runtimes/pull/583) from branch `chore-security-patches-2026-10` (one commit per task). Follow-ups are tracked in [#580](https://github.com/open-runtimes/open-runtimes/issues/580) (Java/Kotlin October JDK update), [#581](https://github.com/open-runtimes/open-runtimes/issues/581) (other pending upstream releases) and [#582](https://github.com/open-runtimes/open-runtimes/issues/582) (open decisions).
 - **Trigger:** a wave of CVEs in Sept–Oct 2026:
   - Node security release (Oct 21)
   - OpenJDK October CPU (Oct 20), plus the eMudhra CA compromise CVE-2026-91403 (Oct 21)
@@ -139,7 +139,7 @@ Process: [`docs/add-version.md`](add-version.md).
 | [x] | `python-3_15` | `python:3.15.1-alpine3.24` (amd64 + arm64, 2026-10-21) | None | safe | 3.15 is in bugfix support until 2031-10. 3.15.1 bundles pip 26.2.2, with the certifi eMudhra fix. It also includes the CVE-2026-12345 fix (backport #158431, merged 2026-10-02, before 3.15.0), which 3.11–3.13 still lack. **No `python-ml-3_15` / `python-ml-3_14`:** TensorFlow 2.21.0 still ships wheels only up to cp313 (`runtimes/python/versions/ml-3.14/NOTE.md`) |
 | [x] | `go-1_27` | `golang:1.27.3-alpine3.24` (amd64 + arm64, 2026-10-22) | None | safe | 1.27.2 (Oct 8) and 1.27.3 (Oct 19) carry the same security fixes as 1.26.9 and 1.26.10, incl. CVE-2026-78663 and CVE-2026-111943. With 1.27 added, Go's two supported lines (1.27, 1.26) are both covered |
 | [x] | `rust-1` (added next to `rust-1_83`) | `rust:1.99.1-alpine3.24` (amd64 + arm64) | Add `"1"` to the `versions` list and `[rust.build.versions]`, keeping `"1.83"`. `rust-version = "1.83"` stays in the Cargo manifests: it's an MSRV, so both lines build the same sources. Point the examples in `runtimes/rust/README.md` and `docs/add-runtime.md` at `v5-1` | safe | Fixes every Rust CVE since 1.83, incl. Cargo CVE-2026-55200 (C) and CVE-2026-33055 (H), on an Alpine 3.24 base. Named `1` like `node-26`: the base pin moves to each new stable, published as `openruntimes/rust:v5-1` (see D6). `rust-1_83` keeps publishing `v5-1.83`, so existing consumers don't have to switch; it stays frozen on 1.83.0 (§4b) |
-| [x] | `dotnet-11` | At GA: `mcr.microsoft.com/dotnet/sdk:11.0.1xx-alpine3.24`. Today: `11.0.100-rc.2-alpine3.24` (RC2, 2026-10-13) | New overlay `runtimes/dotnet/versions/11/`, copied from `versions/8.0/` (not 10; see D11) with `<TargetFramework>net11.0</TargetFramework>`. New test fixture `tests/resources/functions/dotnet/11/`. The base carries a TODO in `runtimes.toml` | other (pre-GA) | .NET 11 is STS; GA is expected in November 2026. The PR builds it on RC2 and **must swap to the GA tag before merging** (§3 #14). Adding .NET 9 instead isn't worth it: it reaches EOL on 2026-11-10, the same day as .NET 8 |
+| [ ] | `dotnet-11` | At GA: `mcr.microsoft.com/dotnet/sdk:11.0.1xx-alpine3.24` (RC2 today: `11.0.100-rc.2-alpine3.24`, 2026-10-13) | New overlay `runtimes/dotnet/versions/11/`, copied from `versions/8.0/` (not 10; see D11) with `<TargetFramework>net11.0</TargetFramework>`. New test fixture `tests/resources/functions/dotnet/11/` | other (pre-GA) | .NET 11 is STS; GA is expected in November 2026. Left out of this PR and added in its own PR on the GA tag (§3 #14); the RC2 version was reverted so a release can't publish `v5-11` from a preview SDK. Adding .NET 9 instead isn't worth it: it reaches EOL on 2026-11-10, the same day as .NET 8 |
 
 ---
 
@@ -147,7 +147,7 @@ Process: [`docs/add-version.md`](add-version.md).
 
 | Done | # | Change | File | Why | Affects |
 |---|---|---|---|---|---|
-| [x] | 1 | Add `apk upgrade --no-cache` (Alpine) or `apt-get upgrade -y` (Debian) | `docker/base-before.dockerfile` | Nothing upgrades OS packages today. Bases that are no longer rebuilt never get musl, OpenSSL or ca-certificates fixes, even when we rebuild | Every image on Alpine 3.21–3.24 or Debian 12–13, including EOL runtime lines and static-web-server. Alpine 3.20 only gets the ca-certificates 20261020 update. No effect on Alpine ≤3.19 or Debian 11 |
+| [x] | 1 | Add `apk upgrade --no-cache` (Alpine) or `apt-get upgrade -y` (Debian) | `docker/base-before.dockerfile` | Nothing upgrades OS packages today. Bases that are no longer rebuilt never get musl, OpenSSL or ca-certificates fixes, even when we rebuild | Every image on Alpine 3.21–3.24, Debian 12–13 or Ubuntu 22.04, including EOL runtime lines and static-web-server. Alpine 3.20 only gets the ca-certificates 20261020 update. No effect on Alpine ≤3.19. The step runs with `set -eu`, so a failed upgrade or install fails the build. Debian 11 bases (`dart-3_0`…`dart-2_16`) set `OS_UPGRADE = "false"`: their security pool 404s on dpkg, glibc and perl, so the upgrade can't succeed there |
 | [x] | 2 | Write `/etc/pip.conf` with `cert = /etc/ssl/certs/ca-certificates.crt`, then `pip install -U pip==${PIP_VERSION}` globally and inside `server-env` | `runtimes/python/Dockerfile`, `PIP_VERSION` in toml | 3.12 and older ship pip 23.0.1–25.0.1. Its vendored certifi still trusts eMudhra (GHSA-6q48-6c7w-9gw2, Critical), and pip itself has CVE-2026-3219, -6357, -8643 and -13346 | `python-*`, `python-ml-*`. The global config makes every pip, including the bundled one in the `runtime-env` venv that user builds create, use the OS trust store, which #1 keeps current. `PIP_VERSION` defaults to 26.2.2. Python 3.9 gets 26.0.1 and 3.8 gets 25.0.1, the last releases they support (pip ≥26.1 needs 3.10) |
 | [x] | 3 | `USER root` before the `apk add` steps | `runtimes/static/Dockerfile` | static-web-server ≥2.40 runs as `sws:sws` with WORKDIR `/home/sws` | `static-1`. Required for the §1a bump |
 | [x] | 4 | Exact Temurin tags | `ci/runtimes.toml` | See §1b | `java-*`, `kotlin-*` |
@@ -199,7 +199,7 @@ Open items are tracked in [#582](https://github.com/open-runtimes/open-runtimes/
 | D8 | .NET 8 EOL on 2026-11-10 | Open | — | Plan the deprecation notice; `dotnet-11` lands around the same time |
 | D9 | Kotlin on EOL JDKs (22 / 19 / 18) | Open | Keep, or move to a JDK 21 LTS base (compiler compatibility untested) | Test `kotlin-2_0` on Temurin 21 |
 | D10 | Policy for EOL lines in §4b | Open | Publish as-is, rebuild with §2 #1 (now done for all), or deprecate | Consider deprecating anything on Alpine ≤3.20 or Debian 11, where §2 #1 can't help |
-| D11 | Stale `dotnet-10` overlay (found while adding .NET 11) | Open | `runtimes/dotnet/versions/10/Program.cs` predates the safe-entrypoint (753a7f13) and env-config-at-startup (dc4a3bca) changes that 6.0–8.0 have | Sync it with 8.0 in a separate PR. `dotnet-11` is already based on 8.0 |
+| D11 | Stale `dotnet-10` overlay (found while adding .NET 11) | Open | `runtimes/dotnet/versions/10/Program.cs` predates the safe-entrypoint (753a7f13) and env-config-at-startup (dc4a3bca) changes that 6.0–8.0 have | Sync it with 8.0 in a separate PR. Base `dotnet-11` on 8.0 when it's added |
 
 ### 4b. EOL / frozen lines (status `other`)
 
@@ -225,7 +225,7 @@ Open items are tracked in [#582](https://github.com/open-runtimes/open-runtimes/
 | Swift | 5.10, 5.9, 5.8 | Final; images no longer rebuilt | No toolchain CVEs | Ubuntu packages are stale (fix: §2 #1) |
 | Dart | 3.12, 3.11 | Frozen | Missing the Sept/Oct Debian DSAs | Fix: §2 #1 |
 | Dart | 3.10, 3.9, 3.8, 3.5, 3.3, 3.1 | Frozen | CVE-2026-27704 (L, pub zip-slip) | — |
-| Dart | 3.0, 2.19, 2.18, 2.17, 2.16 | Frozen; Debian 11 LTS ended 2026-08-31 | CVE-2026-27704. 2.17 / 2.16 also CVE-2022-3095 | `apt-get update` will break once bullseye moves to archive.debian.org |
+| Dart | 3.0, 2.19, 2.18, 2.17, 2.16 | Frozen; Debian 11 LTS ended 2026-08-31 | CVE-2026-27704. 2.17 / 2.16 also CVE-2022-3095 | Built with `OS_UPGRADE = "false"` (§2 #1): the bullseye security pool already 404s. `apt-get update` will break once bullseye moves to archive.debian.org |
 | Rust | 1.83 | Final (Rust only patches the latest stable) | Cargo CVE-2026-55200 (C), CVE-2026-33055 (H) | Kept for existing consumers (D6). On Alpine 3.21, EOL 2026-11-01; OS packages come from §2 #1 until then |
 | Flutter | 3.44, 3.41, 3.38, 3.35, 3.32, 3.29, 3.27, 3.24 | Only 3.47 gets hotfixes | libpng CVE-2026-25646 / -33636 / -33416. ≤3.38 also has CVE-2026-27704 | — |
 
@@ -413,10 +413,10 @@ Primary sources:
 ## 8. Caveats
 
 - Testing so far:
-  - Local `linux/arm64` image builds (build only, no PHPUnit) pass for `php-8_1`, `php-8_3`, `static-1`, `python-3_15`, `python-3_8`, `rust-1_99` (now `rust-1`), `dotnet-11`, `ruby-3_0`, `dart-2_16`, `go-1_27`, `deno-2_9` and `cpp-23`.
+  - Local `linux/arm64` image builds (build only, no PHPUnit) pass for `php-8_1`, `php-8_3`, `static-1`, `python-3_15`, `python-3_8`, `rust-1_99` (now `rust-1`), `ruby-3_0`, `dart-2_16`, `go-1_27`, `deno-2_9` and `cpp-23`.
   - All 89 base images exist for the platforms they're built for.
   - The full test matrix runs in CI on the PR.
-- The new `apt-get upgrade` is a no-op on Debian 11 bases (Dart 2.16–3.0). Their stale package index points at security packages that now 404. That's non-fatal, but those images stay unpatched.
+- `apt-get upgrade` can't succeed on the Debian 11 bases (Dart 2.16–3.0): the bullseye security pool 404s on dpkg, glibc and perl. Those five lines skip the upgrade via `OS_UPGRADE = "false"` and stay unpatched. Every other base was checked to upgrade cleanly under `set -eu`.
 - Python 3.15.1: the CVE-2026-12345 fix and pip 26.2.2 are verified. The other October CPython fixes (e.g. CVE-2026-19445) are assumed to be included because 3.15.1 shipped the same day as 3.14.9, but weren't checked one by one.
 - The .NET 11 GA date (November 2026) is the usual .NET Conf timing, not a confirmed date.
 - The October Node CVE IDs aren't on cve.org yet. They match between the Node blog and the GitHub release notes.
