@@ -73,12 +73,10 @@ class RuntimeLogger {
         }
 
         var stringLog = ""
-        if message is CollectionType {
-            if let data = try? JSONSerialization.data(withJSONObject: message),
-               let stringTemp = String(data: data, encoding: .utf8)
-            {
-                stringLog = stringTemp
-            }
+        if message is CollectionType, let data = try? JSONSerialization.data(withJSONObject: message),
+           let stringTemp = String(data: data, encoding: .utf8)
+        {
+            stringLog = stringTemp
         }
 
         if stringLog == "" {
