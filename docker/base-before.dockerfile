@@ -9,13 +9,18 @@ ENV OPEN_RUNTIMES_HEADERS="{}"
 # this as an ARG prevents the setting from leaking into the published image.
 ARG npm_config_audit=false
 
+# Upgrade OS packages first: many pinned bases (EOL runtime versions, frozen
+# upstream images) are never rebuilt, so without this they keep shipping
+# outdated musl/glibc, OpenSSL, ca-certificates, ... even when we rebuild.
 RUN <<EOR
     if [ -f /etc/alpine-release ]; then
-        apk add --no-cache util-linux zstd squashfs-tools tini
+        apk upgrade --no-cache && apk add --no-cache util-linux zstd squashfs-tools tini
         # isa-l (igzip) needs alpine 3.19+; older bases get pigz
         apk add --no-cache isa-l || apk add --no-cache pigz
     else
-        apt-get update && apt-get install -y util-linux zstd squashfs-tools tini pigz
+        apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
+            -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold
+        apt-get install -y util-linux zstd squashfs-tools tini pigz
         # isal (igzip) is only packaged on newer debian/ubuntu; pigz covers the rest
         apt-get install -y isal || true
     fi
