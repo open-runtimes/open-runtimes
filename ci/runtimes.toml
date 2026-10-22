@@ -343,7 +343,7 @@ output = "./.next"
 "16.0" = { base = "node:16.20.2-alpine3.18", args = { NPM_VERSION = "9.9.4", PNPM_VERSION = "8" } }
 
 [deno.build.versions]
-"2.6" = { base = "denoland/deno:alpine-2.6.7", args = { NPM_VERSION = "12.2.1" } }
+"2.6" = { base = "denoland/deno:alpine-2.6.10", args = { NPM_VERSION = "12.2.1" } }
 "2.5" = { base = "denoland/deno:alpine-2.5.7", args = { NPM_VERSION = "12.2.1" } }
 "2.0" = { base = "denoland/deno:alpine-2.0.6", args = { NPM_VERSION = "10.9.9" } }
 "1.46" = { base = "denoland/deno:alpine-1.46.3", args = { NPM_VERSION = "10.9.9" } }
@@ -462,7 +462,7 @@ platforms = ["linux/amd64"]
 
 [bun.build.versions]
 "1.4" = { base = "oven/bun:1.4.3-alpine", args = { NPM_VERSION = "12.2.1" } }
-"1.3" = { base = "oven/bun:1.3.8-alpine", args = { NPM_VERSION = "12.2.1" } }
+"1.3" = { base = "oven/bun:1.3.14-alpine", args = { NPM_VERSION = "12.2.1" } }
 "1.2" = { base = "oven/bun:1.2.23-alpine", args = { NPM_VERSION = "10.9.9" } }
 "1.1" = { base = "oven/bun:1.1.45-alpine", args = { NPM_VERSION = "10.9.9" } }
 "1.0" = { base = "oven/bun:1.0.36-alpine", args = { NPM_VERSION = "10.9.9" } }
