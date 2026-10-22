@@ -879,7 +879,7 @@
         "version": "./runtimes/dart/versions/3.13"
       },
       "args": {
-        "BASE_IMAGE": "dart:3.13.1"
+        "BASE_IMAGE": "dart:3.13.6"
       },
       "platforms": [
         "linux/amd64",
@@ -1205,7 +1205,7 @@
       },
       "args": {
         "BASE_IMAGE": "debian:12.15-slim",
-        "FLUTTER_VERSION": "3.47.1"
+        "FLUTTER_VERSION": "3.47.7"
       },
       "platforms": [
         "linux/amd64",
@@ -1229,7 +1229,7 @@
       },
       "args": {
         "BASE_IMAGE": "debian:12.15-slim",
-        "FLUTTER_VERSION": "3.44.6"
+        "FLUTTER_VERSION": "3.44.9"
       },
       "platforms": [
         "linux/amd64",
@@ -1253,7 +1253,7 @@
       },
       "args": {
         "BASE_IMAGE": "debian:12.15-slim",
-        "FLUTTER_VERSION": "3.41.2"
+        "FLUTTER_VERSION": "3.41.9"
       },
       "platforms": [
         "linux/amd64",
@@ -1277,7 +1277,7 @@
       },
       "args": {
         "BASE_IMAGE": "debian:12.15-slim",
-        "FLUTTER_VERSION": "3.38.9"
+        "FLUTTER_VERSION": "3.38.10"
       },
       "platforms": [
         "linux/amd64",
@@ -1325,7 +1325,7 @@
       },
       "args": {
         "BASE_IMAGE": "debian:12.15-slim",
-        "FLUTTER_VERSION": "3.32.6"
+        "FLUTTER_VERSION": "3.32.8"
       },
       "platforms": [
         "linux/amd64",
@@ -1373,7 +1373,7 @@
       },
       "args": {
         "BASE_IMAGE": "debian:12.15-slim",
-        "FLUTTER_VERSION": "3.27.3"
+        "FLUTTER_VERSION": "3.27.4"
       },
       "platforms": [
         "linux/amd64",

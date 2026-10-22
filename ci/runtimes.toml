@@ -371,7 +371,7 @@ image = "python-ml"
 "3.11" = { base = "python:3.11.17-bookworm", version_dir = "ml-3.11", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
 
 [dart.build.versions]
-"3.13" = { base = "dart:3.13.1" }
+"3.13" = { base = "dart:3.13.6" }
 "3.12" = { base = "dart:3.12.2" }
 "3.11" = { base = "dart:3.11.6" }
 "3.10" = { base = "dart:3.10.9" }
@@ -390,14 +390,14 @@ image = "python-ml"
 audit = false
 
 [flutter.build.versions]
-"3.47" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.47.1" } }
-"3.44" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.44.6" } }
-"3.41" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.41.2" } }
-"3.38" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.38.9" } }
+"3.47" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.47.7" } }
+"3.44" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.44.9" } }
+"3.41" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.41.9" } }
+"3.38" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.38.10" } }
 "3.35" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.35.7" } }
-"3.32" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.32.6" } }
+"3.32" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.32.8" } }
 "3.29" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.29.3" } }
-"3.27" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.27.3" } }
+"3.27" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.27.4" } }
 "3.24" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.24.5" } }
 
 [ruby.build.versions]
