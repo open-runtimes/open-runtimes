@@ -382,11 +382,14 @@ image = "python-ml"
 "3.5" = { base = "dart:3.5.4" }
 "3.3" = { base = "dart:3.3.4" }
 "3.1" = { base = "dart:3.1.5" }
-"3.0" = { base = "dart:3.0.7" }
-"2.19" = { base = "dart:2.19.6" }
-"2.18" = { base = "dart:2.18.7" }
-"2.17" = { base = "dart:2.17.7" }
-"2.16" = { base = "dart:2.16.2" }
+# Debian 11 bases: the bullseye security pool 404s on dpkg, glibc and perl, so
+# `apt-get upgrade` can't succeed there. Skip only the upgrade (OS_UPGRADE in
+# docker/base-before.dockerfile); these lines stay unpatched until deprecated.
+"3.0" = { base = "dart:3.0.7", args = { OS_UPGRADE = "false" } }
+"2.19" = { base = "dart:2.19.6", args = { OS_UPGRADE = "false" } }
+"2.18" = { base = "dart:2.18.7", args = { OS_UPGRADE = "false" } }
+"2.17" = { base = "dart:2.17.7", args = { OS_UPGRADE = "false" } }
+"2.16" = { base = "dart:2.16.2", args = { OS_UPGRADE = "false" } }
 
 [flutter.build]
 audit = false
