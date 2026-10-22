@@ -33,7 +33,7 @@ RUN npm ci && npm cache clean --force
 # py3-pip - Python package manager
 # gcompat - Pre-requirement for Bun
 ARG INSTALL_SSR_TOOLING="false"
-ARG BUN_VERSION=1.3.2
+ARG BUN_VERSION=1.3.14
 # The Bun npm package retains multiple platform variants. Keep only the
 # resolved executable and remove npm's downloaded package cache.
 # --allow-scripts is required from npm 12 on, which blocks lifecycle scripts by

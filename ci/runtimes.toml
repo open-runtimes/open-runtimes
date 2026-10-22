@@ -30,7 +30,7 @@ shared = "javascript"
 [deno]
 entry = "tests.ts"
 entry_no_export = "no-export.ts"
-versions = ["2.6", "2.5", "2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
+versions = ["2.9", "2.6", "2.5", "2.0", "1.46", "1.40", "1.35", "1.24", "1.21"]
 commands = { install = "deno cache tests.ts", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "deno fmt --check", write = "deno fmt ." }
 tools = "deno --version && node --version && npm --version && npx --version && modclean --version"
@@ -40,7 +40,7 @@ shared = "javascript"
 [python]
 entry = "tests.py"
 entry_no_export = "no-export.py"
-versions = ["3.14", "3.13", "3.12", "3.11", "3.10", "3.9", "3.8"]
+versions = ["3.15", "3.14", "3.13", "3.12", "3.11", "3.10", "3.9", "3.8"]
 commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "bash helpers/server.sh" }
 formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
 tools = "python --version && pip --version && poetry --version"
@@ -96,7 +96,7 @@ test = "Serverless/Ruby.php"
 
 [rust]
 entry = "tests.rs"
-versions = ["1.83"]
+versions = ["1.99", "1.83"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "find ./ -name '*.rs' -type f -print | xargs rustfmt --check --edition 2021", write = "find ./ -name '*.rs' -type f -print | xargs rustfmt --edition 2021" }
 tools = "rustc --version && cargo --version"
@@ -159,7 +159,7 @@ test = "Serverless/Dotnet.php"
 
 [go]
 entry = "tests.go"
-versions = ["1.26", "1.25", "1.24", "1.23"]
+versions = ["1.27", "1.26", "1.25", "1.24", "1.23"]
 commands = { install = "", start = "bash helpers/server.sh" }
 formatter = { prepare = "echo \"Using native formatter\"", check = "if [ \"$(gofmt -s -l . | wc -l)\" -gt 0 ]; then echo 'Formatting errors:' && gofmt -s -l . && exit 1; fi", write = "gofmt -w -s ." }
 tools = "go version"
@@ -331,20 +331,21 @@ output = "./.next"
 # ─────────────────────────────────────────────────────────────────────────────
 
 [node.build.versions]
-"26" = { base = "node:26.5.1-alpine3.24", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "12.0.2", YARN_VERSION = "1.22.22" } }
-"25" = { base = "node:25.9.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "11.19.0" } }
-"24" = { base = "node:24.19.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "12.0.2" } }
-"23" = { base = "node:23.11.1-alpine3.22", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "11.19.0" } }
-"22" = { base = "node:22.23.2-alpine3.23", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "12.0.2" } }
+"26" = { base = "node:26.12.1-alpine3.24", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "12.2.1", YARN_VERSION = "1.22.22" } }
+"25" = { base = "node:25.9.0-alpine3.23", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "11.21.1" } }
+"24" = { base = "node:24.22.1-alpine3.24", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "12.2.1" } }
+"23" = { base = "node:23.11.1-alpine3.22", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "11.21.1" } }
+"22" = { base = "node:22.23.4-alpine3.24", args = { INSTALL_SSR_TOOLING = "true", NPM_VERSION = "12.2.1" } }
 "21.0" = { base = "node:21.7.3-alpine3.20", args = { NPM_VERSION = "10.9.9" } }
-"20.0" = { base = "node:20.20.2-alpine3.23", args = { NPM_VERSION = "11.19.0" } }
+"20.0" = { base = "node:20.20.2-alpine3.23", args = { NPM_VERSION = "11.21.1" } }
 "19.0" = { base = "node:19.9.0-alpine3.18", args = { NPM_VERSION = "9.9.4" } }
 "18.0" = { base = "node:18.20.8-alpine3.20", args = { NPM_VERSION = "10.9.9" } }
-"16.0" = { base = "node:16.20.2-alpine3.18", args = { NPM_VERSION = "9.9.4", PNPM_VERSION = "8" } }
+"16.0" = { base = "node:16.20.2-alpine3.18", args = { NPM_VERSION = "9.9.4", PNPM_VERSION = "8.15.9" } }
 
 [deno.build.versions]
-"2.6" = { base = "denoland/deno:alpine-2.6.7", args = { NPM_VERSION = "12.0.2" } }
-"2.5" = { base = "denoland/deno:alpine-2.5.7", args = { NPM_VERSION = "12.0.2" } }
+"2.9" = { base = "denoland/deno:alpine-2.9.8", args = { NPM_VERSION = "12.2.1" } }
+"2.6" = { base = "denoland/deno:alpine-2.6.10", args = { NPM_VERSION = "12.2.1" } }
+"2.5" = { base = "denoland/deno:alpine-2.5.7", args = { NPM_VERSION = "12.2.1" } }
 "2.0" = { base = "denoland/deno:alpine-2.0.6", args = { NPM_VERSION = "10.9.9" } }
 "1.46" = { base = "denoland/deno:alpine-1.46.3", args = { NPM_VERSION = "10.9.9" } }
 "1.40" = { base = "denoland/deno:alpine-1.40.5", args = { NPM_VERSION = "10.9.9" }, platforms = ["linux/amd64"] }
@@ -353,25 +354,26 @@ output = "./.next"
 "1.21" = { base = "denoland/deno:alpine-1.21.3", args = { NPM_VERSION = "7.24.2" }, platforms = ["linux/amd64"] }
 
 [python.build.versions]
-"3.14" = { base = "python:3.14.6-alpine3.23" }
-"3.13" = { base = "python:3.13.14-alpine3.23" }
-"3.12" = { base = "python:3.12.13-alpine3.23" }
-"3.11" = { base = "python:3.11.15-alpine3.23" }
-"3.10" = { base = "python:3.10.20-alpine3.23" }
-"3.9" = { base = "python:3.9.25-alpine3.22" }
-"3.8" = { base = "python:3.8.20-alpine3.20" }
+"3.15" = { base = "python:3.15.1-alpine3.24" }
+"3.14" = { base = "python:3.14.9-alpine3.24" }
+"3.13" = { base = "python:3.13.17-alpine3.24" }
+"3.12" = { base = "python:3.12.15-alpine3.24" }
+"3.11" = { base = "python:3.11.17-alpine3.24" }
+"3.10" = { base = "python:3.10.22-alpine3.24" }
+"3.9" = { base = "python:3.9.25-alpine3.22", args = { PIP_VERSION = "26.0.1" } }
+"3.8" = { base = "python:3.8.20-alpine3.20", args = { PIP_VERSION = "25.0.1" } }
 
 [python-ml.build]
 runtime_dir = "python"
 image = "python-ml"
 
 [python-ml.build.versions]
-"3.13" = { base = "python:3.13.14-bookworm", version_dir = "ml-3.13", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
-"3.12" = { base = "python:3.12.13-bookworm", version_dir = "ml-3.12", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
-"3.11" = { base = "python:3.11.15-bookworm", version_dir = "ml-3.11", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
+"3.13" = { base = "python:3.13.17-bookworm", version_dir = "ml-3.13", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
+"3.12" = { base = "python:3.12.15-bookworm", version_dir = "ml-3.12", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
+"3.11" = { base = "python:3.11.17-bookworm", version_dir = "ml-3.11", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
 
 [dart.build.versions]
-"3.13" = { base = "dart:3.13.1" }
+"3.13" = { base = "dart:3.13.6" }
 "3.12" = { base = "dart:3.12.2" }
 "3.11" = { base = "dart:3.11.6" }
 "3.10" = { base = "dart:3.10.9" }
@@ -380,39 +382,45 @@ image = "python-ml"
 "3.5" = { base = "dart:3.5.4" }
 "3.3" = { base = "dart:3.3.4" }
 "3.1" = { base = "dart:3.1.5" }
-"3.0" = { base = "dart:3.0.7" }
-"2.19" = { base = "dart:2.19.6" }
-"2.18" = { base = "dart:2.18.7" }
-"2.17" = { base = "dart:2.17.7" }
-"2.16" = { base = "dart:2.16.2" }
+# Debian 11 bases: the bullseye security pool 404s on dpkg, glibc and perl, so
+# `apt-get upgrade` can't succeed there. Skip only the upgrade (OS_UPGRADE in
+# docker/base-before.dockerfile); these lines stay unpatched until deprecated.
+"3.0" = { base = "dart:3.0.7", args = { OS_UPGRADE = "false" } }
+"2.19" = { base = "dart:2.19.6", args = { OS_UPGRADE = "false" } }
+"2.18" = { base = "dart:2.18.7", args = { OS_UPGRADE = "false" } }
+"2.17" = { base = "dart:2.17.7", args = { OS_UPGRADE = "false" } }
+"2.16" = { base = "dart:2.16.2", args = { OS_UPGRADE = "false" } }
 
 [flutter.build]
 audit = false
 
 [flutter.build.versions]
-"3.47" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.47.1" } }
-"3.44" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.44.6" } }
-"3.41" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.41.2" } }
-"3.38" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.38.9" } }
+"3.47" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.47.7" } }
+"3.44" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.44.9" } }
+"3.41" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.41.9" } }
+"3.38" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.38.10" } }
 "3.35" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.35.7" } }
-"3.32" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.32.6" } }
+"3.32" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.32.8" } }
 "3.29" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.29.3" } }
-"3.27" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.27.3" } }
+"3.27" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.27.4" } }
 "3.24" = { base = "debian:12.15-slim", args = { FLUTTER_VERSION = "3.24.5" } }
 
 [ruby.build.versions]
-"4.0" = { base = "ruby:4.0.5-alpine3.23" }
-"3.4" = { base = "ruby:3.4.10-alpine3.23" }
-"3.3" = { base = "ruby:3.3.10-alpine3.23" }
-"3.2" = { base = "ruby:3.2.10-alpine3.23" }
+"4.0" = { base = "ruby:4.0.7-alpine3.24" }
+"3.4" = { base = "ruby:3.4.11-alpine3.24" }
+"3.3" = { base = "ruby:3.3.12-alpine3.24" }
+"3.2" = { base = "ruby:3.2.11-alpine3.23" }
 "3.1" = { base = "ruby:3.1.7-alpine3.20" }
 "3.0" = { base = "ruby:3.0.7-alpine3.16" }
 
 [php.build.versions]
-"8.4" = { base = "php:8.4.27-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v6.1.1", BUILD_PACKAGES = "linux-headers" } }
-"8.3" = { base = "php:8.3.36-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
-"8.2" = { base = "php:8.2.35-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
-"8.1" = { base = "php:8.1.34-cli-alpine3.22", args = { PHP_SWOOLE_VERSION = "v5.1.2" } }
+# Swoole 6 removed APIs user code may call (Coroutine\\MySQL/Redis, System::fread/
+# fwrite/fgets, Lock::trylock/lockwait), so existing lines stay on the final
+# Swoole 5.1 release; only 8.4 (already on 6.x) and new lines use Swoole 6.
+"8.4" = { base = "php:8.4.27-cli-alpine3.24", args = { PHP_SWOOLE_VERSION = "v6.1.10", BUILD_PACKAGES = "linux-headers" } }
+"8.3" = { base = "php:8.3.36-cli-alpine3.24", args = { PHP_SWOOLE_VERSION = "v5.1.8", BUILD_PACKAGES = "linux-headers" } }
+"8.2" = { base = "php:8.2.35-cli-alpine3.24", args = { PHP_SWOOLE_VERSION = "v5.1.8", BUILD_PACKAGES = "linux-headers" } }
+"8.1" = { base = "php:8.1.34-cli-alpine3.22", args = { PHP_SWOOLE_VERSION = "v5.1.8" } }
 "8.0" = { base = "php:8.0.30-cli-alpine3.16", args = { PHP_SWOOLE_VERSION = "v4.7.0" } }
 
 [swift.build.versions]
@@ -425,50 +433,52 @@ audit = false
 platforms = ["linux/amd64"]
 
 [kotlin.build.versions]
-"2.3" = { base = "eclipse-temurin:25-jdk-alpine-3.23" }
-"2.0" = { base = "eclipse-temurin:22-jdk-alpine" }
-"1.9" = { base = "eclipse-temurin:19-jdk-alpine" }
-"1.8" = { base = "eclipse-temurin:19-jdk-alpine" }
-"1.6" = { base = "eclipse-temurin:18-jdk-alpine" }
+"2.3" = { base = "eclipse-temurin:25.0.4.1_1-jdk-alpine-3.23" }
+"2.0" = { base = "eclipse-temurin:22.0.2_9-jdk-alpine" }
+"1.9" = { base = "eclipse-temurin:19.0.2_7-jdk-alpine" }
+"1.8" = { base = "eclipse-temurin:19.0.2_7-jdk-alpine" }
+"1.6" = { base = "eclipse-temurin:18.0.2.1_1-jdk-alpine" }
 
 [java.build.versions]
-"25" = { base = "eclipse-temurin:25-jdk-alpine-3.23", args = { SYSTEM_PACKAGES = "curl" } }
+"25" = { base = "eclipse-temurin:25.0.4.1_1-jdk-alpine-3.23", args = { SYSTEM_PACKAGES = "curl" } }
 # Temurin publishes multi-arch Alpine images only for JDK 21+. The Alpine
 # variants of JDK 8/11/17 are amd64-only and JDK 18/22 have no Alpine 3.23
 # build at all, so those five stay on Jammy for linux/arm64 support.
-"22" = { base = "eclipse-temurin:22-jdk-jammy", args = { SYSTEM_PACKAGES = "curl" } }
-"21.0" = { base = "eclipse-temurin:21-jdk-alpine-3.23" }
-"18.0" = { base = "eclipse-temurin:18-jdk-jammy" }
-"17.0" = { base = "eclipse-temurin:17-jdk-jammy" }
-"11.0" = { base = "eclipse-temurin:11-jdk-jammy" }
-"8.0" = { base = "eclipse-temurin:8-jdk-jammy" }
+"22" = { base = "eclipse-temurin:22.0.2_9-jdk-jammy", args = { SYSTEM_PACKAGES = "curl" } }
+"21.0" = { base = "eclipse-temurin:21.0.12.1_1-jdk-alpine-3.23" }
+"18.0" = { base = "eclipse-temurin:18.0.2.1_1-jdk-jammy" }
+"17.0" = { base = "eclipse-temurin:17.0.20.1_1-jdk-jammy" }
+"11.0" = { base = "eclipse-temurin:11.0.32.1_1-jdk-jammy" }
+"8.0" = { base = "eclipse-temurin:8u504-b01-jdk-jammy" }
 
 [cpp.build.versions]
-"23" = { base = "alpine:3.23.5" }
-"20" = { base = "alpine:3.23.5" }
-"17" = { base = "alpine:3.23.5" }
+"23" = { base = "alpine:3.23.7" }
+"20" = { base = "alpine:3.23.7" }
+"17" = { base = "alpine:3.23.7" }
 
 [dotnet.build.versions]
-"10" = { base = "mcr.microsoft.com/dotnet/sdk:10.0.102-alpine3.23" }
-"8.0" = { base = "mcr.microsoft.com/dotnet/sdk:8.0.417-alpine3.23" }
+"10" = { base = "mcr.microsoft.com/dotnet/sdk:10.0.402-alpine3.24" }
+"8.0" = { base = "mcr.microsoft.com/dotnet/sdk:8.0.426-alpine3.24" }
 "7.0" = { base = "mcr.microsoft.com/dotnet/sdk:7.0.410-alpine3.19" }
 "6.0" = { base = "mcr.microsoft.com/dotnet/sdk:6.0.428-1-alpine3.20" }
 
 [go.build.versions]
-"1.26" = { base = "golang:1.26.5-alpine3.23" }
-"1.25" = { base = "golang:1.25.12-alpine3.23" }
+"1.27" = { base = "golang:1.27.3-alpine3.24" }
+"1.26" = { base = "golang:1.26.10-alpine3.24" }
+"1.25" = { base = "golang:1.25.14-alpine3.24" }
 "1.24" = { base = "golang:1.24.13-alpine3.23" }
 "1.23" = { base = "golang:1.23.12-alpine3.22" }
 
 [bun.build.versions]
-"1.4" = { base = "oven/bun:1.4.3-alpine", args = { NPM_VERSION = "12.0.2" } }
-"1.3" = { base = "oven/bun:1.3.8-alpine", args = { NPM_VERSION = "12.0.2" } }
+"1.4" = { base = "oven/bun:1.4.3-alpine", args = { NPM_VERSION = "12.2.1" } }
+"1.3" = { base = "oven/bun:1.3.14-alpine", args = { NPM_VERSION = "12.2.1" } }
 "1.2" = { base = "oven/bun:1.2.23-alpine", args = { NPM_VERSION = "10.9.9" } }
 "1.1" = { base = "oven/bun:1.1.45-alpine", args = { NPM_VERSION = "10.9.9" } }
 "1.0" = { base = "oven/bun:1.0.36-alpine", args = { NPM_VERSION = "10.9.9" } }
 
 [rust.build.versions]
+"1.99" = { base = "rust:1.99.1-alpine3.24" }
 "1.83" = { base = "rust:1.83-alpine" }
 
 [static.build.versions]
-"1" = { base = "joseluisq/static-web-server:2.39.0-alpine" }
+"1" = { base = "joseluisq/static-web-server:2.44.1-alpine" }
