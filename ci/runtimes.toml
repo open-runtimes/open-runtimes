@@ -22,7 +22,7 @@ versions = [
     "16.0-mjs",
 ]
 commands = { install = "npm install", start = "bash helpers/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && modclean --version"
 test = "Serverless/Node.php"
 shared = "javascript"
@@ -115,7 +115,7 @@ test = "Serverless/PHP.php"
 entry = "Tests.swift"
 versions = ["6.2", "5.10", "5.9", "5.8"]
 commands = { install = "", start = "bash helpers/server.sh" }
-formatter = { prepare = "rm -rf SwiftFormat && git clone https://github.com/nicklockwood/SwiftFormat && cd SwiftFormat && swift build -c release && mv /mnt/code/SwiftFormat/.build/release/swiftformat /tmp/swiftformat && cd .. && rm -rf SwiftFormat", check = "/tmp/swiftformat . --lint --swiftversion 5.8", write = "/tmp/swiftformat . --verbose --swiftversion 5.8" }
+formatter = { prepare = "rm -rf SwiftFormat && git clone --depth 1 --branch 0.64.0 https://github.com/nicklockwood/SwiftFormat && cd SwiftFormat && swift build -c release && mv /mnt/code/SwiftFormat/.build/release/swiftformat /tmp/swiftformat && cd .. && rm -rf SwiftFormat", check = "/tmp/swiftformat . --lint --swiftversion 5.8", write = "/tmp/swiftformat . --verbose --swiftversion 5.8" }
 tools = "swift --version"
 test = "Serverless/Swift.php"
 
@@ -170,7 +170,7 @@ entry = "tests.ts"
 entry_no_export = "no-export.ts"
 versions = ["1.4", "1.3", "1.2", "1.1", "1.0"]
 commands = { install = "bun install", start = "bash helpers/server.sh" }
-formatter = { prepare = "echo \"Using bunx biome formatter\"", check = "bunx @biomejs/biome format .", write = "bunx @biomejs/biome format --write ." }
+formatter = { prepare = "echo \"Using bunx biome@2.6.2 formatter\"", check = "bunx @biomejs/biome@2.6.2 format .", write = "bunx @biomejs/biome@2.6.2 format --write ." }
 tools = "bun --version && npm --version && npx --version && pnpm --version && yarn --version && modclean --version"
 test = "Serverless/Bun.php"
 shared = "javascript"
@@ -186,7 +186,7 @@ test = "XStatic.php"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/astro/env.sh && npm install && npm run build && bash /usr/local/server/helpers/astro/bundle.sh", start = "bash helpers/astro/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/Astro.php"
 output = "./dist"
@@ -195,7 +195,7 @@ output = "./dist"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/sveltekit/env.sh && npm install && npm run build && bash /usr/local/server/helpers/sveltekit/bundle.sh", start = "bash helpers/sveltekit/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/SvelteKit.php"
 output = "./build"
@@ -204,7 +204,7 @@ output = "./build"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/NextJS.php"
 output = "./.next"
@@ -213,7 +213,7 @@ output = "./.next"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/NextJS.php"
 output = "./.next"
@@ -222,7 +222,7 @@ output = "./.next"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/nuxt/env.sh && npm install && npm run build && bash /usr/local/server/helpers/nuxt/bundle.sh", start = "bash helpers/nuxt/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/Nuxt.php"
 output = "./.output"
@@ -231,7 +231,7 @@ output = "./.output"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/TanstackStartNitro.php"
 output = "./.output"
@@ -240,7 +240,7 @@ output = "./.output"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/TanstackStartNitro.php"
 output = "./.output"
@@ -249,7 +249,7 @@ output = "./.output"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/TanstackStartNitroListener.php"
 output = "./.output"
@@ -258,7 +258,7 @@ output = "./.output"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/tanstack-start/env.sh && npm install && npm run build && bash /usr/local/server/helpers/tanstack-start/bundle.sh", start = "bash helpers/tanstack-start/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/TanstackStart.php"
 output = "./dist"
@@ -267,7 +267,7 @@ output = "./dist"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/remix/env.sh && npm install && npm run build && bash /usr/local/server/helpers/remix/bundle.sh", start = "bash helpers/remix/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/Remix.php"
 output = "./build"
@@ -276,7 +276,7 @@ output = "./build"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/angular/env.sh && npm install && npm run build && bash /usr/local/server/helpers/angular/bundle.sh", start = "bash helpers/angular/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/Angular.php"
 output = "./dist/angular"
@@ -285,7 +285,7 @@ output = "./dist/angular"
 report_size = false
 runtime = { name = "node", version = "24" }
 commands = { install = "source /usr/local/server/helpers/analog/env.sh && npm install && npm run build && bash /usr/local/server/helpers/analog/bundle.sh", start = "bash helpers/analog/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "node --version && npm --version && npx --version && pnpm --version && yarn --version && bun --version && python --version && pip --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/Analog.php"
 output = "./dist/analog"
@@ -305,7 +305,7 @@ versions = ["1.3"]
 runtime = { name = "bun", version = "1.3" }
 test_resource_dir = "next-js"
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "bun --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/NextJS.php"
 output = "./.next"
@@ -316,7 +316,7 @@ versions = ["2.6"]
 runtime = { name = "deno", version = "2.6" }
 test_resource_dir = "next-js"
 commands = { install = "source /usr/local/server/helpers/next-js/env.sh && npm install && npm run build && bash /usr/local/server/helpers/next-js/bundle.sh", start = "bash helpers/next-js/server.sh" }
-formatter = { prepare = "npm i -g @biomejs/biome", check = "biome format .", write = "biome format --write ." }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
 tools = "deno --version && node --version && npm --version && npx --version && pnpm --version && yarn --version && python3 --version && make --version && git --version && g++ --version && gcc --version && modclean --version"
 test = "SSR/NextJS.php"
 output = "./.next"
@@ -409,9 +409,9 @@ audit = false
 "3.0" = { base = "ruby:3.0.7-alpine3.16" }
 
 [php.build.versions]
-"8.4" = { base = "php:8.4.24-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v6.1.1", BUILD_PACKAGES = "linux-headers" } }
-"8.3" = { base = "php:8.3.33-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
-"8.2" = { base = "php:8.2.33-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
+"8.4" = { base = "php:8.4.27-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v6.1.1", BUILD_PACKAGES = "linux-headers" } }
+"8.3" = { base = "php:8.3.36-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
+"8.2" = { base = "php:8.2.35-cli-alpine3.23", args = { PHP_SWOOLE_VERSION = "v5.1.2", BUILD_PACKAGES = "linux-headers" } }
 "8.1" = { base = "php:8.1.34-cli-alpine3.22", args = { PHP_SWOOLE_VERSION = "v5.1.2" } }
 "8.0" = { base = "php:8.0.30-cli-alpine3.16", args = { PHP_SWOOLE_VERSION = "v4.7.0" } }
 
