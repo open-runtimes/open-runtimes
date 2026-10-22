@@ -1812,7 +1812,7 @@
         "version": "./runtimes/kotlin/versions/2.3"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:25-jdk-alpine-3.23"
+        "BASE_IMAGE": "eclipse-temurin:25.0.4.1_1-jdk-alpine-3.23"
       },
       "platforms": [
         "linux/amd64"
@@ -1834,7 +1834,7 @@
         "version": "./runtimes/kotlin/versions/2.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:22-jdk-alpine"
+        "BASE_IMAGE": "eclipse-temurin:22.0.2_9-jdk-alpine"
       },
       "platforms": [
         "linux/amd64"
@@ -1856,7 +1856,7 @@
         "version": "./runtimes/kotlin/versions/1.9"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:19-jdk-alpine"
+        "BASE_IMAGE": "eclipse-temurin:19.0.2_7-jdk-alpine"
       },
       "platforms": [
         "linux/amd64"
@@ -1878,7 +1878,7 @@
         "version": "./runtimes/kotlin/versions/1.8"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:19-jdk-alpine"
+        "BASE_IMAGE": "eclipse-temurin:19.0.2_7-jdk-alpine"
       },
       "platforms": [
         "linux/amd64"
@@ -1900,7 +1900,7 @@
         "version": "./runtimes/kotlin/versions/1.6"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:18-jdk-alpine"
+        "BASE_IMAGE": "eclipse-temurin:18.0.2.1_1-jdk-alpine"
       },
       "platforms": [
         "linux/amd64"
@@ -1925,7 +1925,7 @@
         "version": "./runtimes/java/versions/22"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:22-jdk-jammy",
+        "BASE_IMAGE": "eclipse-temurin:22.0.2_9-jdk-jammy",
         "SYSTEM_PACKAGES": "curl"
       },
       "platforms": [
@@ -1949,7 +1949,7 @@
         "version": "./runtimes/java/versions/25"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:25-jdk-alpine-3.23",
+        "BASE_IMAGE": "eclipse-temurin:25.0.4.1_1-jdk-alpine-3.23",
         "SYSTEM_PACKAGES": "curl"
       },
       "platforms": [
@@ -1973,7 +1973,7 @@
         "version": "./runtimes/java/versions/21.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:21-jdk-alpine-3.23"
+        "BASE_IMAGE": "eclipse-temurin:21.0.12.1_1-jdk-alpine-3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -1996,7 +1996,7 @@
         "version": "./runtimes/java/versions/18.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:18-jdk-jammy"
+        "BASE_IMAGE": "eclipse-temurin:18.0.2.1_1-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -2019,7 +2019,7 @@
         "version": "./runtimes/java/versions/17.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:17-jdk-jammy"
+        "BASE_IMAGE": "eclipse-temurin:17.0.20.1_1-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -2042,7 +2042,7 @@
         "version": "./runtimes/java/versions/11.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:11-jdk-jammy"
+        "BASE_IMAGE": "eclipse-temurin:11.0.32.1_1-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -2065,7 +2065,7 @@
         "version": "./runtimes/java/versions/8.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:8-jdk-jammy"
+        "BASE_IMAGE": "eclipse-temurin:8u504-b01-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",

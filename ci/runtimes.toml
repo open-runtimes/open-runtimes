@@ -425,23 +425,23 @@ audit = false
 platforms = ["linux/amd64"]
 
 [kotlin.build.versions]
-"2.3" = { base = "eclipse-temurin:25-jdk-alpine-3.23" }
-"2.0" = { base = "eclipse-temurin:22-jdk-alpine" }
-"1.9" = { base = "eclipse-temurin:19-jdk-alpine" }
-"1.8" = { base = "eclipse-temurin:19-jdk-alpine" }
-"1.6" = { base = "eclipse-temurin:18-jdk-alpine" }
+"2.3" = { base = "eclipse-temurin:25.0.4.1_1-jdk-alpine-3.23" }
+"2.0" = { base = "eclipse-temurin:22.0.2_9-jdk-alpine" }
+"1.9" = { base = "eclipse-temurin:19.0.2_7-jdk-alpine" }
+"1.8" = { base = "eclipse-temurin:19.0.2_7-jdk-alpine" }
+"1.6" = { base = "eclipse-temurin:18.0.2.1_1-jdk-alpine" }
 
 [java.build.versions]
-"25" = { base = "eclipse-temurin:25-jdk-alpine-3.23", args = { SYSTEM_PACKAGES = "curl" } }
+"25" = { base = "eclipse-temurin:25.0.4.1_1-jdk-alpine-3.23", args = { SYSTEM_PACKAGES = "curl" } }
 # Temurin publishes multi-arch Alpine images only for JDK 21+. The Alpine
 # variants of JDK 8/11/17 are amd64-only and JDK 18/22 have no Alpine 3.23
 # build at all, so those five stay on Jammy for linux/arm64 support.
-"22" = { base = "eclipse-temurin:22-jdk-jammy", args = { SYSTEM_PACKAGES = "curl" } }
-"21.0" = { base = "eclipse-temurin:21-jdk-alpine-3.23" }
-"18.0" = { base = "eclipse-temurin:18-jdk-jammy" }
-"17.0" = { base = "eclipse-temurin:17-jdk-jammy" }
-"11.0" = { base = "eclipse-temurin:11-jdk-jammy" }
-"8.0" = { base = "eclipse-temurin:8-jdk-jammy" }
+"22" = { base = "eclipse-temurin:22.0.2_9-jdk-jammy", args = { SYSTEM_PACKAGES = "curl" } }
+"21.0" = { base = "eclipse-temurin:21.0.12.1_1-jdk-alpine-3.23" }
+"18.0" = { base = "eclipse-temurin:18.0.2.1_1-jdk-jammy" }
+"17.0" = { base = "eclipse-temurin:17.0.20.1_1-jdk-jammy" }
+"11.0" = { base = "eclipse-temurin:11.0.32.1_1-jdk-jammy" }
+"8.0" = { base = "eclipse-temurin:8u504-b01-jdk-jammy" }
 
 [cpp.build.versions]
 "23" = { base = "alpine:3.23.7" }
