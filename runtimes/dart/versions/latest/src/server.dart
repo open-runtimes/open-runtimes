@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data' show Uint8List;
 
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
@@ -9,6 +10,82 @@ import '{entrypoint}' as user_code;
 import 'config.dart' as config;
 import 'function_types.dart';
 import 'logger.dart';
+
+int? _parseContentLength(String? header) {
+  if (header == null || header.isEmpty) {
+    return null;
+  }
+
+  final int? value = int.tryParse(header);
+  if (value == null || value < 0) {
+    return null;
+  }
+
+  return value;
+}
+
+Future<Uint8List> _readRequestBody(
+  Stream<List<int>> bodyStream,
+  int maxSize,
+  int? contentLength,
+) async {
+  if (contentLength != null && contentLength > maxSize) {
+    throw 'Request body size exceeds the size limit.';
+  }
+
+  if (contentLength != null) {
+    final Uint8List body = Uint8List(contentLength);
+    int offset = 0;
+    bool exceeded = false;
+
+    await for (final List<int> chunk in bodyStream) {
+      if (exceeded || chunk.isEmpty) {
+        continue;
+      }
+
+      final int end = offset + chunk.length;
+      if (end > maxSize || end > contentLength) {
+        exceeded = true;
+        continue;
+      }
+
+      body.setRange(offset, end, chunk);
+      offset = end;
+    }
+
+    if (exceeded) {
+      throw 'Request body size exceeds the size limit.';
+    }
+
+    if (offset == contentLength) {
+      return body;
+    }
+
+    return Uint8List.view(body.buffer, 0, offset);
+  }
+
+  final BytesBuilder builder = BytesBuilder();
+  int received = 0;
+  bool exceeded = false;
+
+  await for (final List<int> chunk in bodyStream) {
+    if (exceeded) {
+      continue;
+    }
+    received += chunk.length;
+    if (received > maxSize) {
+      exceeded = true;
+      continue;
+    }
+    builder.add(chunk);
+  }
+
+  if (exceeded) {
+    throw 'Request body size exceeds the size limit.';
+  }
+
+  return builder.takeBytes();
+}
 
 Future<shelf.Response> action(Logger logger, dynamic req) async {
   int? safeTimeout = null;
@@ -32,21 +109,12 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   }
 
   int maxSize = 20 * 1024 * 1024;
-
-  final contentLength = req.headers['content-length'];
-  if (contentLength != null && int.parse(contentLength) > maxSize) {
-    throw 'Request body size exceeds the size limit.';
-  }
-
-  Stream<List<int>> bodyStream = await req.read();
-  List<int> bodyBinary = [];
-  await for (List<int> data in bodyStream) {
-    bodyBinary.addAll(data);
-  }
-
-  if (bodyBinary.length > maxSize) {
-    throw 'Request body size exceeds the size limit.';
-  }
+  final int? contentLength = _parseContentLength(req.headers['content-length']);
+  final List<int> bodyBinary = await _readRequestBody(
+    req.read(),
+    maxSize,
+    contentLength,
+  );
 
   String method = req.method;
   Map<String, dynamic> headers = {};
