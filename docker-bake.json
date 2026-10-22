@@ -2163,7 +2163,7 @@
         "version": "./runtimes/dotnet/versions/10"
       },
       "args": {
-        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:10.0.102-alpine3.23"
+        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:10.0.402-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -2186,7 +2186,7 @@
         "version": "./runtimes/dotnet/versions/8.0"
       },
       "args": {
-        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:8.0.417-alpine3.23"
+        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:8.0.426-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
