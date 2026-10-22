@@ -22,6 +22,16 @@ RUN <<EOR
     fi
 EOR
 
+# Older Pythons bundle a pip whose vendored certifi still trusts the
+# compromised eMudhra CAs (GHSA-6q48-6c7w-9gw2). Point every pip, including the
+# ensurepip copy in venvs created at build time, at the OS trust store, and
+# upgrade the image's own pips. pip >= 26.1 needs Python 3.10+, so 3.8/3.9 pin
+# their last compatible release via PIP_VERSION.
+ARG PIP_VERSION=26.2.2
+RUN test -f /etc/ssl/certs/ca-certificates.crt && \
+    printf '[global]\ncert = /etc/ssl/certs/ca-certificates.crt\n' > /etc/pip.conf && \
+    pip3 install --no-cache-dir --upgrade "pip==${PIP_VERSION}"
+
 # Install Poetry package manager
 RUN pip3 install --no-cache-dir poetry
 
@@ -29,6 +39,7 @@ ENV OPEN_RUNTIMES_ENTRYPOINT=main.py
 
 # Create a virtual environment for the server dependencies
 RUN python3 -m venv server-env
-RUN server-env/bin/pip install --no-cache-dir -r requirements.txt
+RUN server-env/bin/pip install --no-cache-dir --upgrade "pip==${PIP_VERSION}" && \
+    server-env/bin/pip install --no-cache-dir -r requirements.txt
 
 INCLUDE ./docker/base-after

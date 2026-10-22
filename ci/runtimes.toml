@@ -360,8 +360,8 @@ output = "./.next"
 "3.12" = { base = "python:3.12.15-alpine3.24" }
 "3.11" = { base = "python:3.11.17-alpine3.24" }
 "3.10" = { base = "python:3.10.22-alpine3.24" }
-"3.9" = { base = "python:3.9.25-alpine3.22" }
-"3.8" = { base = "python:3.8.20-alpine3.20" }
+"3.9" = { base = "python:3.9.25-alpine3.22", args = { PIP_VERSION = "26.0.1" } }
+"3.8" = { base = "python:3.8.20-alpine3.20", args = { PIP_VERSION = "25.0.1" } }
 
 [python-ml.build]
 runtime_dir = "python"
