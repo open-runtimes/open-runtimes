@@ -353,11 +353,11 @@ output = "./.next"
 "1.21" = { base = "denoland/deno:alpine-1.21.3", args = { NPM_VERSION = "7.24.2" }, platforms = ["linux/amd64"] }
 
 [python.build.versions]
-"3.14" = { base = "python:3.14.6-alpine3.23" }
-"3.13" = { base = "python:3.13.14-alpine3.23" }
-"3.12" = { base = "python:3.12.13-alpine3.23" }
-"3.11" = { base = "python:3.11.15-alpine3.23" }
-"3.10" = { base = "python:3.10.20-alpine3.23" }
+"3.14" = { base = "python:3.14.9-alpine3.24" }
+"3.13" = { base = "python:3.13.17-alpine3.24" }
+"3.12" = { base = "python:3.12.15-alpine3.24" }
+"3.11" = { base = "python:3.11.17-alpine3.24" }
+"3.10" = { base = "python:3.10.22-alpine3.24" }
 "3.9" = { base = "python:3.9.25-alpine3.22" }
 "3.8" = { base = "python:3.8.20-alpine3.20" }
 
@@ -366,9 +366,9 @@ runtime_dir = "python"
 image = "python-ml"
 
 [python-ml.build.versions]
-"3.13" = { base = "python:3.13.14-bookworm", version_dir = "ml-3.13", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
-"3.12" = { base = "python:3.12.13-bookworm", version_dir = "ml-3.12", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
-"3.11" = { base = "python:3.11.15-bookworm", version_dir = "ml-3.11", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
+"3.13" = { base = "python:3.13.17-bookworm", version_dir = "ml-3.13", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
+"3.12" = { base = "python:3.12.15-bookworm", version_dir = "ml-3.12", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
+"3.11" = { base = "python:3.11.17-bookworm", version_dir = "ml-3.11", args = { SYSTEM_PACKAGES = "gcc pkg-config libhdf5-dev" } }
 
 [dart.build.versions]
 "3.13" = { base = "dart:3.13.1" }

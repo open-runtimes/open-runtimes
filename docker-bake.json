@@ -643,7 +643,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.14.6-alpine3.23"
+        "BASE_IMAGE": "python:3.14.9-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -666,7 +666,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.13.14-alpine3.23"
+        "BASE_IMAGE": "python:3.13.17-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -689,7 +689,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.12.13-alpine3.23"
+        "BASE_IMAGE": "python:3.12.15-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -712,7 +712,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.11.15-alpine3.23"
+        "BASE_IMAGE": "python:3.11.17-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -735,7 +735,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.10.20-alpine3.23"
+        "BASE_IMAGE": "python:3.10.22-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -804,7 +804,7 @@
         "version": "./runtimes/python/versions/ml-3.13"
       },
       "args": {
-        "BASE_IMAGE": "python:3.13.14-bookworm",
+        "BASE_IMAGE": "python:3.13.17-bookworm",
         "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
       },
       "platforms": [
@@ -828,7 +828,7 @@
         "version": "./runtimes/python/versions/ml-3.12"
       },
       "args": {
-        "BASE_IMAGE": "python:3.12.13-bookworm",
+        "BASE_IMAGE": "python:3.12.15-bookworm",
         "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
       },
       "platforms": [
@@ -852,7 +852,7 @@
         "version": "./runtimes/python/versions/ml-3.11"
       },
       "args": {
-        "BASE_IMAGE": "python:3.11.15-bookworm",
+        "BASE_IMAGE": "python:3.11.17-bookworm",
         "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
       },
       "platforms": [
