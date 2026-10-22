@@ -471,4 +471,4 @@ platforms = ["linux/amd64"]
 "1.83" = { base = "rust:1.83-alpine" }
 
 [static.build.versions]
-"1" = { base = "joseluisq/static-web-server:2.39.0-alpine" }
+"1" = { base = "joseluisq/static-web-server:2.44.1-alpine" }
