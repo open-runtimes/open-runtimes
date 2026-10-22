@@ -45,8 +45,8 @@ Output `{"n":0.7232589496628183}` with random float will be displayed after the 
 - When writing function for this runtime, ensure it is exported as default one. An example of this is:
 
 ```typescript
-export default async function(context: any) {
-    return context.res.send('Hello Open Runtimes 👋');
+export default async function (context: any) {
+  return context.res.send("Hello Open Runtimes 👋");
 }
 ```
 
