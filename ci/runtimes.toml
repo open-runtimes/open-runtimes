@@ -444,9 +444,9 @@ platforms = ["linux/amd64"]
 "8.0" = { base = "eclipse-temurin:8-jdk-jammy" }
 
 [cpp.build.versions]
-"23" = { base = "alpine:3.23.5" }
-"20" = { base = "alpine:3.23.5" }
-"17" = { base = "alpine:3.23.5" }
+"23" = { base = "alpine:3.23.7" }
+"20" = { base = "alpine:3.23.7" }
+"17" = { base = "alpine:3.23.7" }
 
 [dotnet.build.versions]
 "10" = { base = "mcr.microsoft.com/dotnet/sdk:10.0.402-alpine3.24" }
