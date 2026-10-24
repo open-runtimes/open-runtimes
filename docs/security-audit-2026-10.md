@@ -44,12 +44,12 @@ Targets use the `docker buildx bake` target names, e.g. `node-26` or `python-ml-
 
 | Status (after §1, incl. new lines) | Version lines |
 |---|---|
-| `safe` | 20 |
-| `needs more patches` | 15 |
+| `safe` | 21 |
+| `needs more patches` | 14 |
 | `other` | 65 |
 | **Total** | **100** |
 
-The total is the original 96, plus 4 new lines (`deno-2_9`, `python-3_15`, `go-1_27`, `rust-1_99`). `dotnet-11` is planned but can't be built until GA, so it isn't counted.
+`ruby-3_3` moved from `needs more patches` to `safe` with the 2026-10-24 bump to 3.3.13. The total is the original 96, plus 4 new lines (`deno-2_9`, `python-3_15`, `go-1_27`, `rust-1_99`). `dotnet-11` is planned but can't be built until GA, so it isn't counted.
 
 | Work bucket | Size |
 |---|---|
@@ -81,9 +81,9 @@ All changes are in `ci/runtimes.toml` unless noted. Afterwards, run `bun ci/bake
 | [x] | `python-ml-3_13` | `python:3.13.14-bookworm` | `python:3.13.17-bookworm` | needs more patches | Same as `python-3_13`. Base OS question: see D4 |
 | [x] | `python-ml-3_12` | `python:3.12.13-bookworm` | `python:3.12.15-bookworm` | needs more patches | Same as `python-3_12` |
 | [x] | `python-ml-3_11` | `python:3.11.15-bookworm` | `python:3.11.17-bookworm` | needs more patches | Same as `python-3_11` |
-| [x] | `ruby-4_0` | `ruby:4.0.5-alpine3.23` | `ruby:4.0.7-alpine3.24` | safe | resolv CVE-2026-80212 (H) and CVE-2026-80213. net-imap CVE-2026-42246 (H) plus 7 more |
-| [x] | `ruby-3_4` | `ruby:3.4.10-alpine3.23` | `ruby:3.4.11-alpine3.24` | safe | CVE-2026-80212 (H), CVE-2026-80213 |
-| [x] | `ruby-3_3` | `ruby:3.3.10-alpine3.23` | `ruby:3.3.12-alpine3.24` | needs more patches | erb CVE-2026-41316 (H). net-imap CVE-2026-42246 (H) plus 7 more. zlib CVE-2026-27820 |
+| [x] | `ruby-4_0` | `ruby:4.0.5-alpine3.23` | `ruby:4.0.9-alpine3.24` | safe | resolv CVE-2026-80212 (H) and CVE-2026-80213. net-imap CVE-2026-42246 (H) plus 7 more. 4.0.9 (2026-10-24 follow-up) adds the Regexp compiler fixes, see §6 |
+| [x] | `ruby-3_4` | `ruby:3.4.10-alpine3.23` | `ruby:3.4.12-alpine3.24` | safe | CVE-2026-80212 (H), CVE-2026-80213. 3.4.12 (2026-10-24 follow-up) adds the Regexp compiler fixes, see §6 |
+| [x] | `ruby-3_3` | `ruby:3.3.10-alpine3.23` | `ruby:3.3.13-alpine3.24` | safe | erb CVE-2026-41316 (H). net-imap CVE-2026-42246 (H) plus 7 more. zlib CVE-2026-27820. 3.3.13 (2026-10-24 follow-up) adds resolv 0.3.2 and the Regexp compiler fixes, see §6 |
 | [x] | `ruby-3_2` | `ruby:3.2.10-alpine3.23` | `ruby:3.2.11-alpine3.23` | other | CVE-2026-27820 (L) |
 | [x] | `php-8_4` | `php:8.4.27-cli-alpine3.23` + Swoole `v6.1.1` | `php:8.4.27-cli-alpine3.24` + Swoole `v6.1.10` | safe | PHP was already patched. Swoole fixes: HTTP/2 UAF, WebSocket control-frame leak, Redis integer overflow (no CVE IDs) |
 | [x] | `php-8_3` | `php:8.3.36-cli-alpine3.23` + Swoole `v5.1.2` | `php:8.3.36-cli-alpine3.24` + Swoole `v5.1.8` | other | PHP is patched (CVE-2026-109618/-109619 fixed in 8.3.36). Swoole stays on 5.x (D2): `v5.1.8` is the final 5.1 release and adds the 5.1.3–5.1.8 bug fixes, incl. the relative-path validation bypass (5.1.5). Swoole 5.1 is unmaintained, so CVE-2026-24814 (hiredis, only reachable via `Coroutine\Redis`) and the 6.x HTTP/2-server, Redis-server and static-handler fixes stay open; the runtime enables none of those |
@@ -153,7 +153,7 @@ Process: [`docs/add-version.md`](add-version.md).
 | [x] | 4 | Exact Temurin tags | `ci/runtimes.toml` | See §1b | `java-*`, `kotlin-*` |
 | [x] | 5 | Check that the Alpine `nodejs` / `nodejs-current` package satisfies the npm 12.2.1 engines | `runtimes/deno/Dockerfile`, `runtimes/bun/Dockerfile` | npm 12.2.1 requires Node `^22.22.2 \|\| ^24.15.0 \|\| >=26`. Verified: engines are identical to 12.0.2 (and 11.21.1 to 11.19.0), so nothing changes | `deno-2_6/2_5`, `bun-1_4/1_3` |
 | [ ] | 6 | *Optional:* remove the emSign ECC Root CA - G3 alias from `cacerts` until the Temurin October builds ship | `runtimes/java/Dockerfile`, `runtimes/kotlin/Dockerfile` | Interim mitigation for CVE-2026-91403 (9.1) | `java-*`, `kotlin-*` |
-| [ ] | 7 | *Optional:* `gem install resolv -v 0.3.2` | `ruby-3_3` version overlay | Workaround for CVE-2026-80212 (H) until 3.3.13 | `ruby-3_3` |
+| [x] | 7 | ~~*Optional:* `gem install resolv -v 0.3.2`~~ | `ruby-3_3` version overlay | Not needed: 3.3.13 ships resolv 0.3.2 | `ruby-3_3` |
 | [x] | 8 | Regenerate and verify the bake file | `bun ci/bake.ts && bun ci/bake.ts --check` | `docker-bake.json` is generated from the toml | all |
 
 ---
@@ -169,8 +169,8 @@ Rows 1–2 are tracked in [#580](https://github.com/open-runtimes/open-runtimes/
 | 3 | `bun-1_4` | Bun 1.4.4 with the TLS fixes from PR #44618 (+#45124, #45139, #45422): client-cert disclosure, plain TCP when `tls:` is set, mTLS `crl` ignored | Bump | https://github.com/oven-sh/bun/releases |
 | 4 | `python-3_13`, `python-ml-3_13` | 3.13.18 with the CVE-2026-12345 backport (PR #158429) | Bump | https://www.python.org/downloads/ |
 | 5 | `python-3_12/3_11`, `python-ml-3_12/3_11` | CVE-2026-12345 (3.12 PR #159074 open; no 3.11 PR), CVE-2026-3446, CVE-2026-6019 (no backport PRs) | Bump | https://devguide.python.org/versions/ |
-| 6 | `ruby-3_3` | 3.3.13 with resolv 0.3.2 (already committed as 619ea0f602) | Bump, drop §2 #7 | https://www.ruby-lang.org/en/news/ |
-| 7 | `ruby-4_0` | `ruby:4.0.8-alpine3.24` tag. Non-security; UAF fixes | Bump | Docker Hub `ruby` tags |
+| 6 | `ruby-3_3` | ~~3.3.13 with resolv 0.3.2~~ Done 2026-10-24: bumped to 3.3.13 | — | https://www.ruby-lang.org/en/news/ |
+| 7 | `ruby-4_0` | ~~`ruby:4.0.8-alpine3.24` tag~~ Done 2026-10-24: bumped to 4.0.9 | — | Docker Hub `ruby` tags |
 | 8 | `node-26`, `node-24` | 26.12.2 / 24.22.2 reverting regression #66906 (webstreams lose AsyncLocalStorage context). Non-security | Bump if SSR frameworks are affected | nodejs/node #66913, #66914 |
 | 9 | `php-8_4` | Swoole 6.1.11 with unreleased hardening: oversized Upgrade values, EOF packet limits, SOCKS5 lengths, compressed WebSocket control frames | Bump | https://github.com/swoole/swoole-src/compare/v6.1.10...6.1 |
 | 10 | `flutter-*`, `python-ml-*` | Debian 12 DLA for OpenSSL CVE-2026-84782 (H) and curl CVE-2026-8286, or move off bookworm (D3/D4) | Rebuild | https://security-tracker.debian.org/tracker/CVE-2026-84782 |
@@ -295,9 +295,9 @@ Each target's state after the recommended bumps. `=` means no change, and `—` 
 | `flutter-3_29` | 3.29.3 | = | other | §4b |
 | `flutter-3_27` | 3.27.3 | 3.27.4 | other | §1a, §4b |
 | `flutter-3_24` | 3.24.5 | = | other | §4b |
-| `ruby-4_0` | ruby:4.0.5-alpine3.23 | ruby:4.0.7-alpine3.24 | safe | §1a, §3 #7 |
-| `ruby-3_4` | ruby:3.4.10-alpine3.23 | ruby:3.4.11-alpine3.24 | safe | §1a |
-| `ruby-3_3` | ruby:3.3.10-alpine3.23 | ruby:3.3.12-alpine3.24 | needs more patches | §1a, §2 #7, §3 #6 |
+| `ruby-4_0` | ruby:4.0.5-alpine3.23 | ruby:4.0.9-alpine3.24 | safe | §1a, §3 #7 |
+| `ruby-3_4` | ruby:3.4.10-alpine3.23 | ruby:3.4.12-alpine3.24 | safe | §1a |
+| `ruby-3_3` | ruby:3.3.10-alpine3.23 | ruby:3.3.13-alpine3.24 | safe | §1a, §2 #7, §3 #6 |
 | `ruby-3_2` | ruby:3.2.10-alpine3.23 | ruby:3.2.11-alpine3.23 | other | §1a, §4b |
 | `ruby-3_1` | ruby:3.1.7-alpine3.20 | = | other | §4b |
 | `ruby-3_0` | ruby:3.0.7-alpine3.16 | = | other | §4b |
@@ -346,6 +346,8 @@ Each target's state after the recommended bumps. `=` means no change, and `—` 
 | CVE | Component | Severity | Fixed in | Source |
 |---|---|---|---|---|
 | CVE-2026-111497 | Node (Brotli OOB write → RCE) | High | 26.12.1, 24.22.1, 22.23.4 | [Node Oct 2026](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases) |
+| CVE-2026-111497 | PyPI `Brotli` / `brotlicffi` (same libbrotli bug) | Critical 9.2 | Brotli 1.2.1, brotlicffi 1.2.1.0. Not in our images, but aiohttp in the Python server decodes `br` request bodies with whichever version the function installs, before the secret check. The server now disables Brotli in aiohttp when the installed version is vulnerable | [GHSA-9v8h-qqgm-4m35](https://github.com/advisories/GHSA-9v8h-qqgm-4m35) |
+| CVE-2026-111497 | Bun (bundled Brotli) | Critical 9.2 | 1.4.4 | [oven-sh/bun #46352](https://github.com/oven-sh/bun/issues/46352) |
 | CVE-2026-105482, -105483, -106069 | Node | High | Same as above (-105483 not in 22) | Same as above |
 | CVE-2026-91403 | OpenJDK (compromised eMudhra intermediates) | 9.1 | Pending (see §3 #2) | [OpenJDK 2026-10-21](https://openjdk.org/groups/vulnerability/advisories/2026-10-21) |
 | CVE-2026-91415 (+39 more) | OpenJDK October CPU | 7.0 (top) | 25.0.5, 21.0.13, 17.0.21, 11.0.33, 8u512 | [OpenJDK 2026-10-20](https://openjdk.org/groups/vulnerability/advisories/2026-10-20) |
@@ -356,8 +358,9 @@ Each target's state after the recommended bumps. `=` means no change, and `—` 
 | CVE-2026-6100 | CPython | Critical | 3.12.15, 3.11.17, 3.10.22 (and earlier in 3.13 / 3.14) | Same as above |
 | CVE-2026-12345 | CPython tempfile race (gh-157579) | Medium | main, 3.15.0+, 3.14.9. The 3.13 and 3.12 backports are open. The CVE record wrongly lists 3.12.15 | Same as above |
 | GHSA-6q48-6c7w-9gw2 | certifi (eMudhra) | Critical | certifi 2026.10.19, pip 26.2.2 | Same as above |
-| CVE-2026-80212 | Ruby resolv | High 7.5 | 4.0.7, 3.4.11. 3.3 pending | [ruby-lang.org](https://www.ruby-lang.org/en/news/2026/08/27/multiple-vulnerabilities-in-resolv/) |
+| CVE-2026-80212 | Ruby resolv | High 7.5 | 4.0.7, 3.4.11, 3.3.13 | [ruby-lang.org](https://www.ruby-lang.org/en/news/2026/08/27/multiple-vulnerabilities-in-resolv/) |
 | CVE-2026-41316 | Ruby erb | High 8.1 | 3.3.12 | [ruby-lang.org](https://www.ruby-lang.org/en/news/2026/04/21/erb-cve-2026-41316/) |
+| CVE-2026-89078, -93577, -97229, -110264 | Ruby Regexp compiler (double free, integer overflows → memory corruption when compiling an attacker-controlled pattern) | n/a (RCE per GitLab) | 4.0.9, 3.4.12, 3.3.13. No fix for 3.2 and older | [ruby-lang.org](https://www.ruby-lang.org/en/news/2026/10/23/regexp-fixes-for-gitlab-cves/) |
 | CVE-2026-109618, -109619 | PHP | Critical (RCE) | 8.4.27, 8.3.36, 8.2.35 | [PHP ChangeLog](https://www.php.net/ChangeLog-8.php) |
 | CVE-2026-24814 | Swoole bundled hiredis | Critical per CNA (likely overstated) | Swoole 6.1.x only (`php-8_4`). Still open on `php-8_3/8_2/8_1` (Swoole 5.1, D2: only reachable via `Coroutine\Redis`) and `php-8_0` (Swoole 4.x) | [NVD](https://nvd.nist.gov/vuln/detail/CVE-2026-24814) |
 | CVE-2026-105016 | .NET MsQuic RCE | 9.8 | 10.0.13, 8.0.32 | [.NET 10.0.13 notes](https://github.com/dotnet/core/blob/main/release-notes/10.0/10.0.13/10.0.13.md) |
