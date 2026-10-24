@@ -5,8 +5,11 @@ import traceback
 
 import config
 from aiohttp import web, web_exceptions, web_request
+from brotli_guard import disable_vulnerable_brotli
 from function_types import Context
 from logger import Logger
+
+disable_vulnerable_brotli()
 
 
 async def action(logger, request: web_request.Request):
