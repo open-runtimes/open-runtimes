@@ -1,0 +1,8 @@
+{
+  "name": "next-js-monorepo",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "build": "npm run build --workspace=apps/web"
+  }
+}
