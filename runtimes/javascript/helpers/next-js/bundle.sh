@@ -74,7 +74,10 @@ elif [ -e "$WEBPACK_ENTRYPOINT" ] || [ -e "$TURBOPACK_ENTRYPOINT" ]; then
 	fi
 
 	mv /usr/local/build/package*.json ./
-	mv /usr/local/build/next.config.* ./
+	# next.config is optional; an unguarded glob would abort the build
+	if compgen -G "/usr/local/build/next.config.*" >/dev/null; then
+		mv /usr/local/build/next.config.* ./
+	fi
 	mv /usr/local/build/node_modules/ ./node_modules/
 
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR finished. \e[0m"
