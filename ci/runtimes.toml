@@ -470,7 +470,7 @@ platforms = ["linux/amd64"]
 "1.23" = { base = "golang:1.23.12-alpine3.22" }
 
 [bun.build.versions]
-"1.4" = { base = "oven/bun:1.4.3-alpine", args = { NPM_VERSION = "12.2.1" } }
+"1.4" = { base = "oven/bun:1.4.4-alpine", args = { NPM_VERSION = "12.2.1" } }
 "1.3" = { base = "oven/bun:1.3.14-alpine", args = { NPM_VERSION = "12.2.1" } }
 "1.2" = { base = "oven/bun:1.2.23-alpine", args = { NPM_VERSION = "10.9.9" } }
 "1.1" = { base = "oven/bun:1.1.45-alpine", args = { NPM_VERSION = "10.9.9" } }
