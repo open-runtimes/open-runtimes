@@ -27,6 +27,7 @@ done
 # Next.js project directory, parent of the output directory. Differs from the
 # build root in monorepos (e.g. output "./apps/web/.next" -> "./apps/web").
 PROJECT_PATH="$(dirname "${OPEN_RUNTIMES_OUTPUT_DIRECTORY:-.}")"
+PROJECT_PATH="${PROJECT_PATH#./}"
 PROJECT_DIR="/usr/local/build/$PROJECT_PATH"
 
 # Move project node_modules entries into the root node_modules, so dependencies
