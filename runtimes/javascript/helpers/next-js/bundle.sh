@@ -30,39 +30,6 @@ PROJECT_PATH="$(dirname "${OPEN_RUNTIMES_OUTPUT_DIRECTORY:-.}")"
 PROJECT_PATH="${PROJECT_PATH#./}"
 PROJECT_DIR="/usr/local/build/$PROJECT_PATH"
 
-# Move project node_modules entries into the root node_modules, so dependencies
-# installed only in the project directory are bundled too. Symlinks into the
-# root store (pnpm, bun isolated) are rewritten relative to their new location;
-# other symlinks (workspace packages) are copied.
-merge_node_modules() {
-	local source="$1" destination="$2" prefix="$3" entry name target
-	mkdir -p "$destination"
-	for entry in "$source"/*; do
-		[ -e "$entry" ] || [ -L "$entry" ] || continue
-		name="$(basename "$entry")"
-		[ "$name" = ".bin" ] && continue
-		if [[ "$name" == @* ]] && [ ! -L "$entry" ]; then
-			merge_node_modules "$entry" "$destination/$name" "../$prefix"
-			continue
-		fi
-		target="$(readlink -f "$entry")"
-		# Already provided by the root node_modules
-		if [[ "$target" == "$destination/$name" || "$target" == "$destination/$name/"* ]]; then
-			continue
-		fi
-		rm -rf "${destination:?}/$name"
-		if [ -L "$entry" ]; then
-			if [[ "$target" == /usr/local/build/node_modules/* ]]; then
-				ln -s "$prefix${target#/usr/local/build/node_modules/}" "$destination/$name"
-			else
-				cp -R "$target" "$destination/$name"
-			fi
-		else
-			mv "$entry" "$destination/$name"
-		fi
-	done
-}
-
 WEBPACK_ENTRYPOINT="./server/webpack-runtime.js"
 TURBOPACK_ENTRYPOINT="./turbopack"
 # Monorepo standalone builds keep the tree: standalone/apps/web/server.js
@@ -108,7 +75,32 @@ elif [ -e "$WEBPACK_ENTRYPOINT" ] || [ -e "$TURBOPACK_ENTRYPOINT" ]; then
 	cd /usr/local/build
 
 	if [ "$PROJECT_PATH" != "." ] && [ -d "$PROJECT_DIR/node_modules/" ]; then
-		merge_node_modules "$PROJECT_DIR/node_modules" /usr/local/build/node_modules ""
+		# Move project node_modules entries into the root node_modules, so
+		# dependencies installed only in the project are bundled too. Symlinks
+		# into the root store (pnpm, bun isolated) are rewritten relative to
+		# their new location; other symlinks (workspace packages) are copied.
+		ROOT_MODULES=/usr/local/build/node_modules
+		for entry in "$PROJECT_DIR"/node_modules/* "$PROJECT_DIR"/node_modules/@*/*; do
+			[ -e "$entry" ] || [ -L "$entry" ] || continue
+			name="${entry#"$PROJECT_DIR"/node_modules/}"
+			[ "$name" = ".bin" ] && continue
+			# Scope directories are walked by the second glob
+			[[ "$name" == @* && "$name" != */* && ! -L "$entry" ]] && continue
+			target="$(readlink -f "$entry")"
+			# Already provided by the root node_modules
+			[[ "$target" == "$ROOT_MODULES/$name" || "$target" == "$ROOT_MODULES/$name/"* ]] && continue
+			mkdir -p "$(dirname "$ROOT_MODULES/$name")"
+			rm -rf "${ROOT_MODULES:?}/$name"
+			if [ ! -L "$entry" ]; then
+				mv "$entry" "$ROOT_MODULES/$name"
+			elif [[ "$target" == "$ROOT_MODULES/"* ]]; then
+				prefix=""
+				[[ "$name" == */* ]] && prefix="../"
+				ln -s "$prefix${target#"$ROOT_MODULES"/}" "$ROOT_MODULES/$name"
+			else
+				cp -R "$target" "$ROOT_MODULES/$name"
+			fi
+		done
 	fi
 
 	mkdir -p /tmp/.opr-tmp
