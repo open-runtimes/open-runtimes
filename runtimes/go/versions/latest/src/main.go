@@ -248,6 +248,98 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 		outputHeaders["content-type"] = contentTypeValue + "; charset=utf-8"
 	}
 
+	if output.Stream != nil {
+		// A streamed response is chunked, so its length is unknown.
+		delete(outputHeaders, "content-length")
+
+		w.Header().Set("x-open-runtimes-log-id", logger.Id)
+		for key, value := range outputHeaders {
+			w.Header().Set(key, value)
+		}
+
+		// Status and headers leave with the first chunk, so they are final from here on.
+		w.WriteHeader(output.StatusCode)
+
+		chunks := make(chan []byte)
+		failures := make(chan error, 1)
+		done := make(chan struct{})
+
+		go func() {
+			defer close(chunks)
+			defer func() {
+				if r := recover(); r != nil {
+					failures <- fmt.Errorf("%v", r)
+				}
+			}()
+
+			for chunk, err := range output.Stream {
+				if err != nil {
+					failures <- err
+					return
+				}
+
+				select {
+				case chunks <- chunk:
+				case <-done:
+					return
+				}
+			}
+		}()
+
+		var deadline <-chan time.Time
+		if safeTimeout != 0 {
+			deadline = time.After(time.Duration(safeTimeout) * time.Second)
+		}
+
+		failure := ""
+		flusher, _ := w.(http.Flusher)
+
+		logger.OverrideNativeLogs()
+	write:
+		for {
+			select {
+			case chunk, ok := <-chunks:
+				if !ok {
+					break write
+				}
+
+				if len(chunk) > 0 {
+					w.Write(chunk)
+					if flusher != nil {
+						flusher.Flush()
+					}
+				}
+			case <-deadline:
+				failure = "Execution timed out."
+				break write
+			}
+		}
+		close(done)
+		logger.RevertNativeLogs()
+
+		if failure == "" {
+			select {
+			case err := <-failures:
+				failure = err.Error()
+			default:
+			}
+		}
+
+		if failure != "" {
+			context.Error(failure)
+		}
+
+		// Logs are read once the response finishes, so they are flushed first.
+		logger.End()
+
+		// Content is already on the wire, so a failure can only reach the caller as a truncation.
+		if failure != "" {
+			panic(http.ErrAbortHandler)
+		}
+
+		return nil
+	}
+
 	logger.End()
 	w.Header().Set("x-open-runtimes-log-id", logger.Id)
 

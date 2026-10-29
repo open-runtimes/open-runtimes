@@ -130,6 +130,24 @@ When you can have two!
 	case "binaryResponse5":
 		bytes := []byte{0, 50, 255}
 		return Context.Res.Binary(bytes) // Just a filler
+	case "streamResponse":
+		return Context.Res.Stream(func(yield func([]byte, error) bool) {
+			for index, text := range []string{"first", "second", "third"} {
+				if index > 0 {
+					time.Sleep(time.Second)
+				}
+				if !yield([]byte(text+"\n"), nil) {
+					return
+				}
+			}
+		}, Context.Res.WithStatusCode(201), Context.Res.WithHeaders(map[string]string{"x-stream": "yes"}))
+	case "streamException":
+		return Context.Res.Stream(func(yield func([]byte, error) bool) {
+			if !yield([]byte("first\n"), nil) {
+				return
+			}
+			yield(nil, errors.New("Stream failed"))
+		})
 	case "envVars":
 		var emptyVar *string
 		varValue := os.Getenv("NOT_DEFINED_VAR")
