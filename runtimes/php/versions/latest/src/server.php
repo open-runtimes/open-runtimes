@@ -250,6 +250,11 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
         $headers['content-type'] .= '; charset=utf-8';
     }
 
+    // A streamed response is chunked, so its length is unknown.
+    if (isset($output['stream'])) {
+        unset($headers['content-length']);
+    }
+
     foreach ($headers as $header => $value) {
         if (!(\str_starts_with($header, 'x-open-runtimes-'))) {
             $res->header($header, $value);
@@ -257,6 +262,54 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
     }
 
     $res->header('x-open-runtimes-log-id', $logger->id);
+
+    if (isset($output['stream'])) {
+        // Status and headers leave with the first chunk, so they are final from here on.
+        $res->status($output['statusCode']);
+
+        $completed = false;
+        $failed = false;
+        $write = function () use ($output, $res, $logger, $context, &$completed, &$failed) {
+            $logger->overrideNativeLogs();
+            try {
+                foreach ($output['stream'] as $chunk) {
+                    // Swoole rejects an empty write.
+                    if ($chunk !== '') {
+                        $res->write($chunk);
+                    }
+                }
+                $completed = true;
+            } catch (\Throwable $e) {
+                $failed = true;
+                $context->error($e->getMessage() . "\n" . $e->getTraceAsString());
+            } finally {
+                $logger->revertNativeLogs();
+            }
+        };
+
+        if ($safeTimeout !== null) {
+            Swoole\Coroutine\batch([$write], $safeTimeout);
+        } else {
+            \call_user_func($write);
+        }
+
+        if (!$completed && !$failed) {
+            $context->error('Execution timed out.');
+        }
+
+        // Logs are read once the response finishes, so they are flushed first.
+        $logger->end();
+
+        // Content is already on the wire, so a failure can only reach the caller as a truncation.
+        if ($completed) {
+            $res->end();
+        } else {
+            $res->close();
+        }
+
+        return;
+    }
+
     $logger->end();
 
     $res->status($output['statusCode']);
