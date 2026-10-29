@@ -404,6 +404,64 @@ int main()
                     
                     res->setContentTypeString(contentTypeHeader);
 
+                    if (output.stream)
+                    {
+                        auto next = output.stream;
+                        auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeout);
+
+                        const std::shared_ptr<drogon::HttpResponse> streamRes = drogon::HttpResponse::newAsyncStreamResponse(
+                            [next, context, logger, timeout, deadline](drogon::ResponseStreamPtr responseStream) {
+                                std::thread([next, context, logger, timeout, deadline, responseStream = std::shared_ptr<drogon::ResponseStream>(std::move(responseStream))]() mutable {
+                                    logger->overrideNativeLogs();
+                                    try {
+                                        while (true)
+                                        {
+                                            if (timeout != -1 && std::chrono::steady_clock::now() > deadline)
+                                            {
+                                                context.error("Execution timed out.");
+                                                break;
+                                            }
+
+                                            auto chunk = next();
+                                            if (!chunk)
+                                            {
+                                                break;
+                                            }
+
+                                            if (!chunk->empty())
+                                            {
+                                                responseStream->send(*chunk);
+                                            }
+                                        }
+                                    } catch (const std::exception &e)
+                                    {
+                                        context.error(e.what());
+                                    }
+                                    logger->revertNativeLogs();
+
+                                    // Logs are read once the response finishes, so they are flushed first.
+                                    logger->end();
+                                    responseStream->close();
+                                }).detach();
+                            });
+
+                        for (const auto &[key, value] : res->headers())
+                        {
+                            // A streamed response is chunked, so its length is unknown.
+                            if (key != "content-length")
+                            {
+                                streamRes->addHeader(key, value);
+                            }
+                        }
+
+                        // Status and headers leave with the first chunk, so they are final from here on.
+                        streamRes->setContentTypeString(contentTypeHeader);
+                        streamRes->addHeader("x-open-runtimes-log-id", logger->id);
+                        streamRes->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
+                        callback(streamRes);
+                        return;
+                    }
+
                     logger->end();
                     res->addHeader("x-open-runtimes-log-id", logger->id);
 

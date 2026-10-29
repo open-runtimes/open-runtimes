@@ -12,6 +12,9 @@
 #include <openssl/md5.h>
 #include <iomanip>
 #include <sstream>
+#include <thread>
+#include <optional>
+#include <vector>
 
 namespace runtime {
     class Handler {
@@ -163,6 +166,29 @@ namespace runtime {
                 auto hex = Handler::md5HexDigest(bytes);
                 headers["x-method"] = req.method;
                 return context.res.text(hex, 200, headers);
+            } else if (action == "streamResponse") {
+                auto index = std::make_shared<size_t>(0);
+                Json::Value headers;
+                headers["x-stream"] = "yes";
+                return context.res.stream([index]() -> std::optional<std::string> {
+                    const std::vector<std::string> texts = {"first", "second", "third"};
+                    if (*index >= texts.size()) {
+                        return std::nullopt;
+                    }
+                    if (*index > 0) {
+                        std::this_thread::sleep_for(std::chrono::seconds(1));
+                    }
+                    return texts[(*index)++] + "\n";
+                }, 201, headers);
+            } else if (action == "streamException") {
+                auto sent = std::make_shared<bool>(false);
+                return context.res.stream([sent]() -> std::optional<std::string> {
+                    if (*sent) {
+                        throw std::runtime_error("Stream failed");
+                    }
+                    *sent = true;
+                    return std::string("first\n");
+                });
             } else if (action == "envVars") {
                 auto customEnvVar = std::getenv("CUSTOM_ENV_VAR");
                 auto notDefinedVar = std::getenv("NOT_DEFINED_VAR");
