@@ -169,6 +169,52 @@ public class Tests {
         headers.put("x-method", context.getReq().getMethod());
         return context.getRes().text(hex, 200, headers);
       }
+      case "streamResponse" -> {
+        Map<String, String> streamHeaders = new HashMap<>();
+        streamHeaders.put("x-stream", "yes");
+        return context.getRes().stream(
+            () ->
+                new java.util.Iterator<String>() {
+                  private int index = 0;
+                  private final String[] texts = {"first", "second", "third"};
+
+                  public boolean hasNext() {
+                    return index < texts.length;
+                  }
+
+                  public String next() {
+                    if (index > 0) {
+                      try {
+                        Thread.sleep(1000);
+                      } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                      }
+                    }
+                    return texts[index++] + "\n";
+                  }
+                },
+            201,
+            streamHeaders);
+      }
+      case "streamException" -> {
+        return context.getRes().stream(
+            () ->
+                new java.util.Iterator<String>() {
+                  private boolean sent = false;
+
+                  public boolean hasNext() {
+                    return true;
+                  }
+
+                  public String next() {
+                    if (sent) {
+                      throw new RuntimeException("Stream failed");
+                    }
+                    sent = true;
+                    return "first\n";
+                  }
+                });
+      }
       case "envVars" -> {
         json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
         json.put("emptyVar", System.getenv().getOrDefault("NOT_DEFINED_VAR", null));
