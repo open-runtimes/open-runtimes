@@ -7,7 +7,7 @@ class Client {
     public static $port = 3000;
     public static $secret = '';
 
-    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], int $timeout = 5) {
+    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], int $timeout = 5, ?callable $onChunk = null) {
         $ch = \curl_init();
 
         $initHeaders = [];
@@ -66,6 +66,14 @@ class Client {
             $optArray[CURLOPT_POSTFIELDS] = \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body;
         }
         
+        if ($onChunk !== null) {
+            unset($optArray[CURLOPT_RETURNTRANSFER]);
+            $optArray[CURLOPT_WRITEFUNCTION] = function ($curl, $data) use ($onChunk) {
+                $onChunk($data);
+                return \strlen($data);
+            };
+        }
+
         \curl_setopt_array($ch, $optArray);
 
         $body = curl_exec($ch);

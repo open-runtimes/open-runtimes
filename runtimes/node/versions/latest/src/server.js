@@ -229,6 +229,13 @@ const action = async (logger, req, res) => {
         headers["location"] = url;
         return this.text("", statusCode, headers);
       },
+      stream: function (source, statusCode = 200, headers = {}) {
+        return {
+          stream: source,
+          statusCode: statusCode,
+          headers: headers,
+        };
+      },
     },
     log: function (...messages) {
       logger.write(messages, Logger.TYPE_LOG);
@@ -358,9 +365,65 @@ const action = async (logger, req, res) => {
   }
 
   res.setHeader("x-open-runtimes-log-id", logger.id);
+
+  if (output.stream !== undefined) {
+    // Status and headers leave with the first chunk, so they are final from here on.
+    res.removeHeader("content-length");
+    res.statusCode = output.statusCode;
+    res.flushHeaders();
+
+    logger.overrideNativeLogs();
+    try {
+      await pipe(output.stream, res, safeTimeout);
+      res.end();
+    } catch (e) {
+      // Content is already on the wire, so the caller can only learn of it as a truncation.
+      context.error(e.stack || e);
+      res.destroy();
+    } finally {
+      logger.revertNativeLogs();
+      await logger.end();
+    }
+    return;
+  }
+
   await logger.end();
 
   return send(res, output.statusCode, output.body);
+};
+
+const pipe = async (source, res, timeout) => {
+  // ReadableStream is not async iterable before Node 18.
+  if (typeof source.getReader === "function") {
+    const reader = source.getReader();
+    source = (async function* () {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) return;
+        yield value;
+      }
+    })();
+  }
+
+  const write = async () => {
+    for await (const chunk of source) {
+      if (!res.write(typeof chunk === "string" ? chunk : Buffer.from(chunk))) {
+        await new Promise((resolve) => res.once("drain", resolve));
+      }
+    }
+  };
+
+  if (timeout === null) {
+    return write();
+  }
+
+  let timer;
+  await Promise.race([
+    write(),
+    new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("Execution timed out.")), timeout * 1000);
+    }),
+  ]).finally(() => clearTimeout(timer));
 };
 
 require("/usr/local/server/helpers/http-shutdown.cjs")(server);
