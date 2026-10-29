@@ -282,8 +282,9 @@ export const action = async (logger: Logger, ctx: any) => {
     ctx.response.headers.delete("content-length");
 
     const iterator = output.stream[Symbol.asyncIterator]();
-    const deadline =
-      safeTimeout === null ? null : Date.now() + safeTimeout * 1000;
+    const deadline = safeTimeout === null
+      ? null
+      : Date.now() + safeTimeout * 1000;
 
     logger.overrideNativeLogs();
 
@@ -297,17 +298,16 @@ export const action = async (logger: Logger, ctx: any) => {
       async pull(controller) {
         try {
           const next = iterator.next();
-          const { done, value } = await (deadline === null
-            ? next
-            : Promise.race([
-                next,
-                new Promise<never>((_, reject) =>
-                  setTimeout(
-                    () => reject(new Error("Execution timed out.")),
-                    deadline - Date.now(),
-                  ),
-                ),
-              ]));
+          const { done, value } =
+            await (deadline === null ? next : Promise.race([
+              next,
+              new Promise<never>((_, reject) =>
+                setTimeout(
+                  () => reject(new Error("Execution timed out.")),
+                  deadline - Date.now(),
+                )
+              ),
+            ]));
 
           if (done) {
             await finish();

@@ -429,7 +429,10 @@ const pipe = async (source, res, timeout) => {
   await Promise.race([
     write(),
     new Promise((_, reject) => {
-      timer = setTimeout(() => reject(new Error("Execution timed out.")), timeout * 1000);
+      timer = setTimeout(
+        () => reject(new Error("Execution timed out.")),
+        timeout * 1000,
+      );
     }),
   ]).finally(() => clearTimeout(timer));
 };
