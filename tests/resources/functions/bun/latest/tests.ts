@@ -109,6 +109,24 @@ When you can have two!
 			return context.res.text(hash, 200, {
 				"x-method": context.req.method,
 			});
+		case "streamResponse":
+			return context.res.stream(
+				(async function* () {
+					for (const text of ["first", "second", "third"]) {
+						yield text + "\n";
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+					}
+				})(),
+				201,
+				{ "x-stream": "yes" },
+			);
+		case "streamException":
+			return context.res.stream(
+				(async function* () {
+					yield "first\n";
+					throw new Error("Stream failed");
+				})(),
+			);
 		case "envVars":
 			return context.res.json({
 				var: Bun.env["CUSTOM_ENV_VAR"] ?? null,
