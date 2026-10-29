@@ -251,6 +251,19 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   responseHeaders['content-type'] = contentTypeValue;
 
   responseHeaders['x-open-runtimes-log-id'] = logger.id;
+
+  if (output['stream'] != null) {
+    // Status and headers leave with the first chunk, so they are final from here on.
+    responseHeaders.remove('content-length');
+
+    return shelf.Response(
+      output['statusCode'],
+      body: stream(output['stream'], context, logger, safeTimeout),
+      headers: responseHeaders,
+      context: {'shelf.io.buffer_output': false},
+    );
+  }
+
   await logger.end();
 
   return shelf.Response(
@@ -259,6 +272,71 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     body: output['body'],
     headers: responseHeaders,
   );
+}
+
+Stream<List<int>> stream(
+  Stream<dynamic> source,
+  RuntimeContext context,
+  Logger logger,
+  int? safeTimeout,
+) {
+  final controller = StreamController<List<int>>();
+  StreamSubscription<dynamic>? subscription;
+  Timer? timer;
+  bool finished = false;
+
+  Future<void> finish(Object? failure) async {
+    if (finished) {
+      return;
+    }
+    finished = true;
+    timer?.cancel();
+
+    if (failure != null) {
+      await subscription?.cancel();
+      context.error(failure.toString());
+    }
+
+    // Logs are read once the response finishes, so they are flushed first.
+    await logger.end();
+
+    // Content is already on the wire, so a failure can only reach the caller as a truncation.
+    if (failure != null) {
+      controller.addError(failure);
+    }
+    await controller.close();
+  }
+
+  controller.onListen = () {
+    runZoned(
+      () {
+        subscription = source.listen(
+          (chunk) =>
+              controller.add(chunk is String ? utf8.encode(chunk) : chunk),
+          onError: (e, s) => finish('$e\n$s'),
+          onDone: () => finish(null),
+          cancelOnError: true,
+        );
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+          logger.write(line, Logger.TYPE_LOG, true);
+        },
+      ),
+    );
+
+    if (safeTimeout != null) {
+      timer = Timer(
+        Duration(seconds: safeTimeout),
+        () => finish('Execution timed out.'),
+      );
+    }
+  };
+  controller.onPause = () => subscription?.pause();
+  controller.onResume = () => subscription?.resume();
+  controller.onCancel = () => subscription?.cancel();
+
+  return controller.stream;
 }
 
 void main() async {

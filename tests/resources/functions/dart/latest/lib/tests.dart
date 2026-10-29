@@ -164,6 +164,26 @@ When you can have two!
           'x-method': context.req.method,
         });
       }
+    case 'streamResponse':
+      {
+        Stream<String> chunks() async* {
+          for (final text in ['first', 'second', 'third']) {
+            yield '$text\n';
+            await Future.delayed(Duration(seconds: 1));
+          }
+        }
+
+        return context.res.stream(chunks(), 201, {'x-stream': 'yes'});
+      }
+    case 'streamException':
+      {
+        Stream<String> chunks() async* {
+          yield 'first\n';
+          throw Exception('Stream failed');
+        }
+
+        return context.res.stream(chunks());
+      }
     case 'envVars':
       {
         return context.res.json({
