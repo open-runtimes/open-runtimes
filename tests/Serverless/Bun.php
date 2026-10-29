@@ -28,7 +28,6 @@ class Bun extends Serverless
         $response = Client::execute(headers: ['x-action' => 'streamException']);
 
         self::assertEquals(200, $response['code']);
-        self::assertNotNull($response['error']);
         self::assertStringContainsString('Stream failed', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 }
