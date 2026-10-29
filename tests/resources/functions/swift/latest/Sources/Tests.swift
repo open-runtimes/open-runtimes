@@ -124,6 +124,23 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return context.res.text(hex, statusCode: 200, headers: [
             "x-method": context.req.method,
         ])
+    case "streamResponse":
+        let chunks = AsyncThrowingStream<String, Error> { continuation in
+            Task {
+                for text in ["first", "second", "third"] {
+                    continuation.yield(text + "\n")
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                }
+                continuation.finish()
+            }
+        }
+        return context.res.stream(chunks, statusCode: 201, headers: ["x-stream": "yes"])
+    case "streamException":
+        let chunks = AsyncThrowingStream<String, Error> { continuation in
+            continuation.yield("first\n")
+            continuation.finish(throwing: NSError(domain: "Stream failed", code: 1))
+        }
+        return context.res.stream(chunks)
     case "envVars":
         return try context.res.json([
             "var": ProcessInfo.processInfo.environment["CUSTOM_ENV_VAR"],

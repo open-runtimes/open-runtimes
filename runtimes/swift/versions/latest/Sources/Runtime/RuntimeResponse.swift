@@ -69,4 +69,21 @@ class RuntimeResponse {
 
         return text("", statusCode: statusCode, headers: outputHeaders)
     }
+
+    func stream(
+        _ source: some AsyncSequence & Sendable,
+        statusCode: Int = 200,
+        headers: [String: String] = [:]
+    ) -> RuntimeOutput {
+        RuntimeOutput(
+            body: Data(),
+            statusCode: statusCode,
+            headers: headers,
+            stream: { write in
+                for try await chunk in source {
+                    try await write(chunk as? Data ?? Data(String(describing: chunk).utf8))
+                }
+            }
+        )
+    }
 }

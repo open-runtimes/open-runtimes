@@ -71,6 +71,11 @@ func execute(req: Request) async throws -> Response {
     }
 }
 
+/// Vapor's body writer is not Sendable; each response's writer is only used by the task that streams it.
+struct StreamWriter: @unchecked Sendable {
+    let writer: BodyStreamWriter
+}
+
 func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     var safeTimeout = -1
     let timeout = req.headers["x-open-runtimes-timeout"]
@@ -231,6 +236,63 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     if !contentTypeValue.starts(with: "multipart/"), !contentTypeValue.contains("charset=") {
         outputHeaders.replaceOrAdd(
             name: "content-type", value: contentTypeValue + "; charset=utf-8"
+        )
+    }
+
+    if let stream = output.stream {
+        // A streamed response is chunked, so its length is unknown.
+        outputHeaders.remove(name: "content-length")
+        outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
+
+        let timeout = safeTimeout
+
+        // Status and headers leave with the first chunk, so they are final from here on.
+        return Response(
+            status: .custom(code: UInt(output.statusCode), reasonPhrase: ""),
+            headers: outputHeaders,
+            body: .init(stream: { writer in
+                let streamWriter = StreamWriter(writer: writer)
+                Task {
+                    // The writer may only be used on its channel's event loop.
+                    let write: @Sendable (Data) async throws -> Void = { data in
+                        try await streamWriter.writer.eventLoop.flatSubmit {
+                            streamWriter.writer.write(.buffer(ByteBuffer(bytes: data)))
+                        }.get()
+                    }
+
+                    var failure: Error?
+                    do {
+                        if timeout > 0 {
+                            try await withThrowingTaskGroup(of: Void.self) { group in
+                                group.addTask {
+                                    try await stream(write)
+                                }
+                                group.addTask {
+                                    try await Task.sleep(nanoseconds: UInt64(timeout) * 1_000_000_000)
+                                    throw CancellationError()
+                                }
+
+                                try await group.next()
+                                group.cancelAll()
+                            }
+                        } else {
+                            try await stream(write)
+                        }
+                    } catch {
+                        failure = error
+                        context.error(error is CancellationError ? "Execution timed out." : error)
+                    }
+
+                    // Logs are read once the response finishes, so they are flushed first.
+                    context.logger.end()
+
+                    // Content is already on the wire, so a failure can only reach the caller as a truncation.
+                    let result: BodyStreamResult = failure.map { .error($0) } ?? .end
+                    streamWriter.writer.eventLoop.execute {
+                        streamWriter.writer.write(result, promise: nil)
+                    }
+                }
+            })
         )
     }
 
