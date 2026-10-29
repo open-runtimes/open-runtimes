@@ -171,7 +171,10 @@ async def action(logger, request: web_request.Request):
     output["body"] = output.get("body", "")
     output["statusCode"] = output.get("statusCode", 200)
     output["headers"] = output.get("headers", {})
-    resp = web.Response(body=output["body"], status=output["statusCode"])
+    if "stream" in output:
+        resp = web.StreamResponse(status=output["statusCode"])
+    else:
+        resp = web.Response(body=output["body"], status=output["statusCode"])
 
     for key in output["headers"].keys():
         if not key.lower().startswith("x-open-runtimes-"):
@@ -187,9 +190,63 @@ async def action(logger, request: web_request.Request):
         resp.headers["content-type"] += "; charset=utf-8"
 
     resp.headers["x-open-runtimes-log-id"] = logger.id
+
+    if "stream" in output:
+        # Status and headers leave with the first chunk, so they are final from here on.
+        resp.headers.pop("content-length", None)
+        await resp.prepare(request)
+
+        failed = False
+        logger.override_native_logs()
+        try:
+            if safeTimeout is not None:
+                await asyncio.wait_for(
+                    write(resp, output["stream"]), timeout=safeTimeout
+                )
+            else:
+                await write(resp, output["stream"])
+        except asyncio.TimeoutError:
+            failed = True
+            context.error("Execution timed out.")
+        except Exception as e:
+            failed = True
+            context.error(
+                "".join(traceback.TracebackException.from_exception(e).format())
+            )
+        finally:
+            logger.revert_native_logs()
+
+        # Logs are read once the response finishes, so they are flushed first.
+        logger.end()
+
+        # Content is already on the wire, so a failure can only reach the caller as a truncation.
+        if failed:
+            request.transport.close()
+        else:
+            await resp.write_eof()
+
+        return resp
+
     logger.end()
 
     return resp
+
+
+async def write(resp, source):
+    if hasattr(source, "__aiter__"):
+        async for chunk in source:
+            await resp.write(chunk.encode("utf-8") if isinstance(chunk, str) else chunk)
+        return
+
+    # A plain generator would block the event loop while it waits between chunks.
+    loop = asyncio.get_running_loop()
+    iterator = iter(source)
+    done = object()
+    while True:
+        chunk = await loop.run_in_executor(None, next, iterator, done)
+        if chunk is done:
+            return
+        await resp.write(chunk.encode("utf-8") if isinstance(chunk, str) else chunk)
 
 
 async def handler(request) -> web.Response:
