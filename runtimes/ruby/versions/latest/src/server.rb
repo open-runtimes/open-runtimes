@@ -1,5 +1,6 @@
 require 'sinatra'
 require 'json'
+require 'timeout'
 
 require_relative 'config.rb'
 require_relative 'types.rb'
@@ -205,7 +206,6 @@ def action(request, response, logger)
     end
   end
 
-  logger.end
   response.headers['x-open-runtimes-log-id'] = logger.id
 
   response.headers['content-type'] = 'text/plain' if response.headers['content-type'].nil?
@@ -218,6 +218,41 @@ def action(request, response, logger)
   end
 
   response.status = output['statusCode']
+
+  unless output['stream'].nil?
+    # Status and headers leave with the first chunk, so they are final from here on.
+    response.headers.delete('content-length')
+
+    response.body = Enumerator.new do |out|
+      failure = nil
+      logger.override_native_logs
+      begin
+        Timeout.timeout(safe_timeout) do
+          output['stream'].each do |chunk|
+            out << chunk.to_s unless chunk.to_s.empty?
+          end
+        end
+      rescue Timeout::Error
+        failure = 'Execution timed out.'
+      rescue StandardError => e
+        failure = e.full_message + "\n" + e.backtrace.join("\n")
+      ensure
+        logger.revert_native_logs
+      end
+
+      context.error(failure) unless failure.nil?
+
+      # Logs are read once the response finishes, so they are flushed first.
+      logger.end
+
+      # Content is already on the wire, so a failure can only reach the caller as a truncation.
+      raise failure unless failure.nil?
+    end
+
+    return response
+  end
+
+  logger.end
   response.body = output['body']
   response
 end
