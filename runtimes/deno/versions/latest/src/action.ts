@@ -144,6 +144,13 @@ export const action = async (logger: Logger, ctx: any) => {
         headers["location"] = url;
         return this.text("", statusCode, headers);
       },
+      stream: function (source: any, statusCode = 200, headers: any = {}) {
+        return {
+          stream: source,
+          statusCode: statusCode,
+          headers: headers,
+        };
+      },
     },
     log: function (...messages: any) {
       logger.write(messages, Logger.TYPE_LOG);
@@ -269,6 +276,62 @@ export const action = async (logger: Logger, ctx: any) => {
   }
 
   ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
+
+  if (output.stream !== undefined) {
+    // Status and headers leave with the first chunk, so they are final from here on.
+    ctx.response.headers.delete("content-length");
+
+    const iterator = output.stream[Symbol.asyncIterator]();
+    const deadline =
+      safeTimeout === null ? null : Date.now() + safeTimeout * 1000;
+
+    logger.overrideNativeLogs();
+
+    // Logs are read once the response finishes, so they are flushed before it closes.
+    const finish = async () => {
+      logger.revertNativeLogs();
+      await logger.end();
+    };
+
+    const body = new ReadableStream({
+      async pull(controller) {
+        try {
+          const next = iterator.next();
+          const { done, value } = await (deadline === null
+            ? next
+            : Promise.race([
+                next,
+                new Promise<never>((_, reject) =>
+                  setTimeout(
+                    () => reject(new Error("Execution timed out.")),
+                    deadline - Date.now(),
+                  ),
+                ),
+              ]));
+
+          if (done) {
+            await finish();
+            controller.close();
+            return;
+          }
+
+          controller.enqueue(
+            typeof value === "string" ? new TextEncoder().encode(value) : value,
+          );
+        } catch (e: any) {
+          // Content is already on the wire, so a failure can only reach the caller as a truncation.
+          context.error(e.stack || e);
+          await finish();
+          controller.error(e);
+        }
+      },
+    });
+
+    ctx.response.status = output.statusCode;
+    ctx.response.body = body;
+    return;
+  }
+
   await logger.end();
 
   ctx.response.status = output.statusCode;
