@@ -320,6 +320,19 @@ namespace DotNetRuntime
                 }
             }
 
+            if (output.Stream != null)
+            {
+                outputHeaders.Add("x-open-runtimes-log-id", logger.id);
+                return new StreamResponse(
+                    output.Stream,
+                    output.StatusCode,
+                    outputHeaders,
+                    context,
+                    logger,
+                    safeTimout
+                );
+            }
+
             logger.End();
 
             outputHeaders.Add("x-open-runtimes-log-id", logger.id);
