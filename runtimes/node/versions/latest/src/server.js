@@ -372,17 +372,25 @@ const action = async (logger, req, res) => {
     res.statusCode = output.statusCode;
     res.flushHeaders();
 
+    let failed = false;
     logger.overrideNativeLogs();
     try {
       await pipe(output.stream, res, safeTimeout);
-      res.end();
     } catch (e) {
-      // Content is already on the wire, so the caller can only learn of it as a truncation.
+      failed = true;
       context.error(e.stack || e);
-      res.destroy();
     } finally {
       logger.revertNativeLogs();
-      await logger.end();
+    }
+
+    // Logs are read once the response finishes, so they are flushed first.
+    await logger.end();
+
+    // Content is already on the wire, so a failure can only reach the caller as a truncation.
+    if (failed) {
+      res.destroy();
+    } else {
+      res.end();
     }
     return;
   }
