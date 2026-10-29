@@ -5,8 +5,11 @@ import com.google.gson.GsonBuilder
 import com.google.gson.ToNumberPolicy
 import io.javalin.Javalin
 import io.javalin.http.Context
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import org.eclipse.jetty.server.Request
+import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.reflect.full.callSuspend
@@ -263,6 +266,11 @@ suspend fun action(
         }
     }
 
+    // A streamed response is chunked, so its length is unknown.
+    if (output.stream != null) {
+        resHeaders.remove("content-length")
+    }
+
     resHeaders.forEach { (key, value) ->
         if (!key.startsWith("x-open-runtimes-")) {
             ctx.header(key, value)
@@ -271,7 +279,64 @@ suspend fun action(
 
     ctx.header("x-open-runtimes-log-id", logger.id ?: "")
 
+    if (output.stream != null) {
+        // Status and headers leave with the first chunk, so they are final from here on.
+        ctx.status(output.statusCode)
+        stream(ctx, output.stream, context, logger, safeTimeout)
+        return
+    }
+
     logger.end()
 
     ctx.status(output.statusCode).result(output.body)
+}
+
+suspend fun stream(
+    ctx: Context,
+    source: Flow<Any>,
+    context: RuntimeContext,
+    logger: RuntimeLogger,
+    safeTimeout: Int,
+) {
+    val out = ctx.res.outputStream
+    val write: suspend () -> Unit = {
+        source.collect { chunk ->
+            val bytes = if (chunk is ByteArray) chunk else chunk.toString().toByteArray()
+            if (bytes.isNotEmpty()) {
+                out.write(bytes)
+                out.flush()
+            }
+        }
+    }
+
+    var failure: String? = null
+    logger.overrideNativeLogs()
+    try {
+        if (safeTimeout > 0) {
+            if (withTimeoutOrNull(safeTimeout.seconds) { write() } == null) {
+                failure = "Execution timed out."
+            }
+        } else {
+            write()
+        }
+    } catch (e: Exception) {
+        val sw = StringWriter()
+        val pw = PrintWriter(sw)
+        e.printStackTrace(pw)
+        failure = sw.toString()
+    } finally {
+        logger.revertNativeLogs()
+    }
+
+    if (failure != null) {
+        context.error(failure)
+    }
+
+    // Logs are read once the response finishes, so they are flushed first.
+    logger.end()
+
+    // Content is already on the wire, so a failure can only reach the caller as a truncation.
+    if (failure != null) {
+        Request.getBaseRequest(ctx.req).httpChannel.abort(IOException(failure))
+    }
 }

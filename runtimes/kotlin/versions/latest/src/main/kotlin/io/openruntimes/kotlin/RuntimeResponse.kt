@@ -1,6 +1,8 @@
 package io.openruntimes.kotlin
 
 import com.google.gson.GsonBuilder
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 
 public class RuntimeResponse {
     companion object {
@@ -44,4 +46,16 @@ public class RuntimeResponse {
         headers["location"] = url
         return this.text("", statusCode, headers)
     }
+
+    fun stream(
+        source: Flow<Any>,
+        statusCode: Int = 200,
+        headers: Map<String, String> = mapOf(),
+    ): RuntimeOutput = RuntimeOutput(ByteArray(0), statusCode, headers, source)
+
+    fun stream(
+        source: Sequence<Any>,
+        statusCode: Int = 200,
+        headers: Map<String, String> = mapOf(),
+    ): RuntimeOutput = stream(source.asFlow(), statusCode, headers)
 }
