@@ -167,10 +167,12 @@ When you can have two!
     case 'streamResponse':
       {
         Stream<String> chunks() async* {
-          for (final text in ['first', 'second', 'third']) {
-            yield '$text\n';
-            await Future.delayed(Duration(seconds: 1));
-          }
+          context.log('Stream log.');
+          yield 'first\n';
+          await Future.delayed(Duration(seconds: 1));
+          yield 'second\n';
+          await Future.delayed(Duration(seconds: 1));
+          yield 'third\n';
         }
 
         return context.res.stream(chunks(), 201, {'x-stream': 'yes'});
@@ -182,6 +184,17 @@ When you can have two!
           throw Exception('Stream failed');
         }
 
+        return context.res.stream(chunks());
+      }
+    case 'streamTimeout':
+      {
+        Stream<String> chunks() async* {
+          yield 'first\n';
+          await Future.delayed(Duration(seconds: 5));
+          yield 'second\n';
+        }
+
+        await Future.delayed(Duration(seconds: 1));
         return context.res.stream(chunks());
       }
     case 'envVars':
