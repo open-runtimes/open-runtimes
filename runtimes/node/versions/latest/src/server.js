@@ -1,5 +1,6 @@
 const http = require("http");
 const fs = require("fs");
+const { Readable } = require("stream");
 
 const BODY_LIMIT = 20 * 1024 * 1024;
 
@@ -249,6 +250,7 @@ const action = async (logger, req, res) => {
 
   let output = null;
   let userFunction = null;
+  let deadline = null;
 
   const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
@@ -311,6 +313,7 @@ const action = async (logger, req, res) => {
     try {
       if (safeTimeout !== null) {
         let executed = true;
+        deadline = Date.now() + safeTimeout * 1000;
 
         const timeoutPromise = new Promise((promiseRes) => {
           setTimeout(() => {
@@ -367,26 +370,42 @@ const action = async (logger, req, res) => {
   res.setHeader("x-open-runtimes-log-id", logger.id);
 
   if (output.stream !== undefined) {
-    // Status and headers leave with the first chunk, so they are final from here on.
+    const source = Readable.from(output.stream);
     res.removeHeader("content-length");
     res.statusCode = output.statusCode;
     res.flushHeaders();
 
     let failed = false;
+    let timer = null;
     logger.overrideNativeLogs();
     try {
-      await pipe(output.stream, res, safeTimeout);
+      await new Promise((resolve, reject) => {
+        if (deadline !== null) {
+          timer = setTimeout(() => {
+            failed = true;
+            context.error("Execution timed out.");
+            resolve();
+          }, deadline - Date.now());
+        }
+        res.on("close", resolve);
+        if (res.destroyed) {
+          resolve();
+        }
+        source.on("end", resolve);
+        source.on("error", reject);
+        source.pipe(res, { end: false });
+      });
     } catch (e) {
       failed = true;
       context.error(e.stack || e);
     } finally {
+      clearTimeout(timer);
+      source.destroy();
       logger.revertNativeLogs();
     }
 
-    // Logs are read once the response finishes, so they are flushed first.
     await logger.end();
 
-    // Content is already on the wire, so a failure can only reach the caller as a truncation.
     if (failed) {
       res.destroy();
     } else {
@@ -398,43 +417,6 @@ const action = async (logger, req, res) => {
   await logger.end();
 
   return send(res, output.statusCode, output.body);
-};
-
-const pipe = async (source, res, timeout) => {
-  // ReadableStream is not async iterable before Node 18.
-  if (typeof source.getReader === "function") {
-    const reader = source.getReader();
-    source = (async function* () {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) return;
-        yield value;
-      }
-    })();
-  }
-
-  const write = async () => {
-    for await (const chunk of source) {
-      if (!res.write(typeof chunk === "string" ? chunk : Buffer.from(chunk))) {
-        await new Promise((resolve) => res.once("drain", resolve));
-      }
-    }
-  };
-
-  if (timeout === null) {
-    return write();
-  }
-
-  let timer;
-  await Promise.race([
-    write(),
-    new Promise((_, reject) => {
-      timer = setTimeout(
-        () => reject(new Error("Execution timed out.")),
-        timeout * 1000,
-      );
-    }),
-  ]).finally(() => clearTimeout(timer));
 };
 
 require("/usr/local/server/helpers/http-shutdown.cjs")(server);
