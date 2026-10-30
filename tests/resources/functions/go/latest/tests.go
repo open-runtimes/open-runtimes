@@ -132,14 +132,16 @@ When you can have two!
 		return Context.Res.Binary(bytes) // Just a filler
 	case "streamResponse":
 		return Context.Res.Stream(func(yield func([]byte, error) bool) {
-			for index, text := range []string{"first", "second", "third"} {
-				if index > 0 {
-					time.Sleep(time.Second)
-				}
-				if !yield([]byte(text+"\n"), nil) {
-					return
-				}
+			Context.Log("Stream log.")
+			if !yield([]byte("first\n"), nil) {
+				return
 			}
+			time.Sleep(time.Second)
+			if !yield([]byte("second\n"), nil) {
+				return
+			}
+			time.Sleep(time.Second)
+			yield([]byte("third\n"), nil)
 		}, Context.Res.WithStatusCode(201), Context.Res.WithHeaders(map[string]string{"x-stream": "yes"}))
 	case "streamException":
 		return Context.Res.Stream(func(yield func([]byte, error) bool) {
@@ -147,6 +149,15 @@ When you can have two!
 				return
 			}
 			yield(nil, errors.New("Stream failed"))
+		})
+	case "streamTimeout":
+		time.Sleep(time.Second)
+		return Context.Res.Stream(func(yield func([]byte, error) bool) {
+			if !yield([]byte("first\n"), nil) {
+				return
+			}
+			time.Sleep(5 * time.Second)
+			yield([]byte("second\n"), nil)
 		})
 	case "envVars":
 		var emptyVar *string
