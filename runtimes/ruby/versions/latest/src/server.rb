@@ -229,7 +229,7 @@ def action(request, response, logger)
       begin
         Timeout.timeout(safe_timeout) do
           output['stream'].each do |chunk|
-            out << chunk.to_s unless chunk.to_s.empty?
+            out << chunk.to_s
           end
         end
       rescue Timeout::Error
