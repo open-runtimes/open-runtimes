@@ -125,20 +125,37 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
             "x-method": context.req.method,
         ])
     case "streamResponse":
-        let chunks = AsyncThrowingStream<String, Error> { continuation in
-            Task {
-                for text in ["first", "second", "third"] {
-                    continuation.yield(text + "\n")
-                    try await Task.sleep(nanoseconds: 1_000_000_000)
-                }
-                continuation.finish()
+        let chunks = AsyncStream<String> { continuation in
+            for chunk in ["first\n", "second\n", "third\n"] {
+                continuation.yield(chunk)
             }
+            continuation.finish()
+        }.map { chunk in
+            if chunk == "first\n" {
+                context.log("Stream log.")
+            } else {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+            }
+            return chunk
         }
         return context.res.stream(chunks, statusCode: 201, headers: ["x-stream": "yes"])
     case "streamException":
         let chunks = AsyncThrowingStream<String, Error> { continuation in
             continuation.yield("first\n")
-            continuation.finish(throwing: NSError(domain: "Stream failed", code: 1))
+            continuation.finish(throwing: annotatedError(NSError(domain: "Stream failed", code: 500)))
+        }
+        return context.res.stream(chunks)
+    case "streamTimeout":
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        let chunks = AsyncStream<String> { continuation in
+            continuation.yield("first\n")
+            continuation.yield("second\n")
+            continuation.finish()
+        }.map { chunk in
+            if chunk == "second\n" {
+                try await Task.sleep(nanoseconds: 5_000_000_000)
+            }
+            return chunk
         }
         return context.res.stream(chunks)
     case "envVars":

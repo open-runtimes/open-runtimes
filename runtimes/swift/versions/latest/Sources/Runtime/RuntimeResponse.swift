@@ -70,20 +70,31 @@ class RuntimeResponse {
         return text("", statusCode: statusCode, headers: outputHeaders)
     }
 
-    func stream(
-        _ source: some AsyncSequence & Sendable,
+    func stream<S: AsyncSequence & Sendable>(
+        _ source: S,
         statusCode: Int = 200,
         headers: [String: String] = [:]
-    ) -> RuntimeOutput {
+    ) -> RuntimeOutput where S.Element == Data {
         RuntimeOutput(
             body: Data(),
             statusCode: statusCode,
             headers: headers,
             stream: { write in
                 for try await chunk in source {
-                    try await write(chunk as? Data ?? Data(String(describing: chunk).utf8))
+                    try Task.checkCancellation()
+                    guard await write(chunk) else {
+                        return
+                    }
                 }
             }
         )
+    }
+
+    func stream<S: AsyncSequence & Sendable>(
+        _ source: S,
+        statusCode: Int = 200,
+        headers: [String: String] = [:]
+    ) -> RuntimeOutput where S.Element: StringProtocol & Sendable {
+        stream(source.map { Data($0.utf8) }, statusCode: statusCode, headers: headers)
     }
 }
