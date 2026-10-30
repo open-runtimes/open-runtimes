@@ -182,21 +182,30 @@ When you can have two!
                 case "streamResponse":
                     async IAsyncEnumerable<object> StreamChunks()
                     {
-                        foreach (var text in new[] { "first", "second", "third" })
-                        {
-                            yield return text + "\n";
-                            await Task.Delay(1000);
-                        }
+                        context.Log("Stream log.");
+                        yield return "first\n";
+                        await Task.Delay(1000);
+                        yield return "second\n";
+                        await Task.Delay(1000);
+                        yield return "third\n";
                     }
                     return context.Res.Stream(StreamChunks(), 201, new() { { "x-stream", "yes" } });
                 case "streamException":
                     async IAsyncEnumerable<object> FailingChunks()
                     {
                         yield return "first\n";
-                        await Task.Yield();
                         throw new Exception("Stream failed");
                     }
                     return context.Res.Stream(FailingChunks());
+                case "streamTimeout":
+                    async IAsyncEnumerable<object> SlowChunks()
+                    {
+                        yield return "first\n";
+                        await Task.Delay(5000);
+                        yield return "second\n";
+                    }
+                    await Task.Delay(1000);
+                    return context.Res.Stream(SlowChunks());
                 case "envVars":
                     return context.Res.Json(
                         new Dictionary<string, object?>()

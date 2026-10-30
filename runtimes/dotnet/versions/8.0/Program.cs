@@ -209,6 +209,7 @@ namespace DotNetRuntime
             logger.OverrideNativeLogs();
 
             RuntimeOutput? output = null;
+            DateTime? deadline = null;
             Handler? handler = null;
 
             // Guard: Try to load module
@@ -260,6 +261,7 @@ namespace DotNetRuntime
                 {
                     if (safeTimout != -1)
                     {
+                        deadline = DateTime.UtcNow.AddSeconds(safeTimout);
                         var result = await await Task.WhenAny<RuntimeOutput?>(
                             Task.Run<RuntimeOutput?>(async () =>
                             {
@@ -320,22 +322,20 @@ namespace DotNetRuntime
                 }
             }
 
+            outputHeaders.Add("x-open-runtimes-log-id", logger.id);
+
             if (output.Stream != null)
             {
-                outputHeaders.Add("x-open-runtimes-log-id", logger.id);
-                return new StreamResponse(
+                return new CustomResponse(
                     output.Stream,
                     output.StatusCode,
                     outputHeaders,
                     context,
-                    logger,
-                    safeTimout
+                    deadline
                 );
             }
 
             logger.End();
-
-            outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
             return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
         }

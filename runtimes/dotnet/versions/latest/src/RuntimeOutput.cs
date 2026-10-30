@@ -19,11 +19,9 @@ namespace DotNetRuntime
             int statusCode,
             Dictionary<string, string> headers
         )
+            : this(new byte[0], statusCode, headers)
         {
-            Body = new byte[0];
             Stream = stream;
-            StatusCode = statusCode;
-            Headers = headers;
         }
     }
 }
