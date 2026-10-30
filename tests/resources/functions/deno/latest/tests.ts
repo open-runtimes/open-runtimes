@@ -100,10 +100,12 @@ When you can have two!
     case "streamResponse":
       return context.res.stream(
         (async function* () {
-          for (const text of ["first", "second", "third"]) {
-            yield text + "\n";
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
+          context.log("Stream log.");
+          yield "first\n";
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          yield "second\n";
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          yield "third\n";
         })(),
         201,
         { "x-stream": "yes" },
@@ -113,6 +115,15 @@ When you can have two!
         (async function* () {
           yield "first\n";
           throw new Error("Stream failed");
+        })(),
+      );
+    case "streamTimeout":
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return context.res.stream(
+        (async function* () {
+          yield "first\n";
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          yield "second\n";
         })(),
       );
     case "envVars":

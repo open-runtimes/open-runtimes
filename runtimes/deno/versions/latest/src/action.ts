@@ -164,6 +164,7 @@ export const action = async (logger: Logger, ctx: any) => {
 
   let output: any = null;
   let userFunction: any = null;
+  let deadline: number | null = null;
 
   const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
@@ -219,6 +220,7 @@ export const action = async (logger: Logger, ctx: any) => {
       if (safeTimeout !== null) {
         const safeTimeoutConst: number = safeTimeout;
         let executed = true;
+        deadline = Date.now() + safeTimeoutConst * 1000;
 
         const timeoutPromise = new Promise((promiseRes) => {
           setTimeout(() => {
@@ -277,53 +279,59 @@ export const action = async (logger: Logger, ctx: any) => {
 
   ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
 
-  if (output.stream !== undefined) {
-    // Status and headers leave with the first chunk, so they are final from here on.
+  if (output.stream !== undefined && output.statusCode !== 204) {
     ctx.response.headers.delete("content-length");
 
     const iterator = output.stream[Symbol.asyncIterator]();
-    const deadline = safeTimeout === null
-      ? null
-      : Date.now() + safeTimeout * 1000;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     logger.overrideNativeLogs();
 
-    // Logs are read once the response finishes, so they are flushed before it closes.
     const finish = async () => {
+      clearTimeout(timer);
       logger.revertNativeLogs();
       await logger.end();
     };
 
     const body = new ReadableStream({
+      start(controller) {
+        if (deadline === null) {
+          return;
+        }
+
+        timer = setTimeout(async () => {
+          context.error("Execution timed out.");
+          Promise.resolve(iterator.return?.()).catch(() => {});
+          await finish().catch(() => {});
+          controller.error(new Error("Execution timed out."));
+        }, deadline - Date.now());
+      },
       async pull(controller) {
+        let next;
         try {
-          const next = iterator.next();
-          const { done, value } =
-            await (deadline === null ? next : Promise.race([
-              next,
-              new Promise<never>((_, reject) =>
-                setTimeout(
-                  () => reject(new Error("Execution timed out.")),
-                  deadline - Date.now(),
-                )
-              ),
-            ]));
-
-          if (done) {
-            await finish();
-            controller.close();
-            return;
-          }
-
-          controller.enqueue(
-            typeof value === "string" ? new TextEncoder().encode(value) : value,
-          );
+          next = await iterator.next();
         } catch (e: any) {
-          // Content is already on the wire, so a failure can only reach the caller as a truncation.
           context.error(e.stack || e);
           await finish();
           controller.error(e);
+          return;
         }
+
+        if (next.done) {
+          await finish();
+          controller.close();
+          return;
+        }
+
+        controller.enqueue(
+          typeof next.value === "string"
+            ? new TextEncoder().encode(next.value)
+            : next.value,
+        );
+      },
+      cancel() {
+        Promise.resolve(iterator.return?.()).catch(() => {});
+        return finish();
       },
     });
 
