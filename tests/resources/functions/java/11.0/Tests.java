@@ -142,39 +142,36 @@ public class Tests {
         headers.put("x-method", context.getReq().getMethod());
         return context.getRes().text(hex, 200, headers);
       case "streamResponse":
-        Map<String, String> streamHeaders = new HashMap<>();
-        streamHeaders.put("x-stream", "yes");
+        headers.put("x-stream", "yes");
+        String[] chunks = {"first\n", "second\n", "third\n"};
         return context.getRes().stream(
-            new Iterable<String>() {
-              public java.util.Iterator<String> iterator() {
-                return new java.util.Iterator<String>() {
+            () ->
+                new Iterator<String>() {
                   private int index = 0;
-                  private final String[] texts = {"first", "second", "third"};
 
                   public boolean hasNext() {
-                    return index < texts.length;
+                    return index < chunks.length;
                   }
 
                   public String next() {
-                    if (index > 0) {
+                    if (index == 0) {
+                      context.log("Stream log.");
+                    } else {
                       try {
                         Thread.sleep(1000);
                       } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                       }
                     }
-                    return texts[index++] + "\n";
+                    return chunks[index++];
                   }
-                };
-              }
-            },
+                },
             201,
-            streamHeaders);
+            headers);
       case "streamException":
         return context.getRes().stream(
-            new Iterable<String>() {
-              public java.util.Iterator<String> iterator() {
-                return new java.util.Iterator<String>() {
+            () ->
+                new Iterator<String>() {
                   private boolean sent = false;
 
                   public boolean hasNext() {
@@ -188,9 +185,30 @@ public class Tests {
                     sent = true;
                     return "first\n";
                   }
-                };
-              }
-            });
+                });
+      case "streamTimeout":
+        Thread.sleep(1000);
+        return context.getRes().stream(
+            () ->
+                new Iterator<String>() {
+                  private int index = 0;
+
+                  public boolean hasNext() {
+                    return index < 2;
+                  }
+
+                  public String next() {
+                    if (index++ == 0) {
+                      return "first\n";
+                    }
+                    try {
+                      Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                      throw new RuntimeException(e);
+                    }
+                    return "second\n";
+                  }
+                });
       case "envVars":
         json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
         json.put("emptyVar", System.getenv().getOrDefault("NOT_DEFINED_VAR", null));

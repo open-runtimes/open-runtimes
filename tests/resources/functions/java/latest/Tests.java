@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import org.apache.commons.lang3.StringUtils;
@@ -170,36 +171,37 @@ public class Tests {
         return context.getRes().text(hex, 200, headers);
       }
       case "streamResponse" -> {
-        Map<String, String> streamHeaders = new HashMap<>();
-        streamHeaders.put("x-stream", "yes");
+        headers.put("x-stream", "yes");
+        String[] chunks = {"first\n", "second\n", "third\n"};
         return context.getRes().stream(
             () ->
-                new java.util.Iterator<String>() {
+                new Iterator<String>() {
                   private int index = 0;
-                  private final String[] texts = {"first", "second", "third"};
 
                   public boolean hasNext() {
-                    return index < texts.length;
+                    return index < chunks.length;
                   }
 
                   public String next() {
-                    if (index > 0) {
+                    if (index == 0) {
+                      context.log("Stream log.");
+                    } else {
                       try {
                         Thread.sleep(1000);
                       } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                       }
                     }
-                    return texts[index++] + "\n";
+                    return chunks[index++];
                   }
                 },
             201,
-            streamHeaders);
+            headers);
       }
       case "streamException" -> {
         return context.getRes().stream(
             () ->
-                new java.util.Iterator<String>() {
+                new Iterator<String>() {
                   private boolean sent = false;
 
                   public boolean hasNext() {
@@ -212,6 +214,30 @@ public class Tests {
                     }
                     sent = true;
                     return "first\n";
+                  }
+                });
+      }
+      case "streamTimeout" -> {
+        Thread.sleep(1000);
+        return context.getRes().stream(
+            () ->
+                new Iterator<String>() {
+                  private int index = 0;
+
+                  public boolean hasNext() {
+                    return index < 2;
+                  }
+
+                  public String next() {
+                    if (index++ == 0) {
+                      return "first\n";
+                    }
+                    try {
+                      Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                      throw new RuntimeException(e);
+                    }
+                    return "second\n";
                   }
                 });
       }
