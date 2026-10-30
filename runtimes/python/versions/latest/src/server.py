@@ -1,7 +1,9 @@
 import asyncio
 import importlib
 import os
+import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 
 import config
 from aiohttp import web, web_exceptions, web_request
@@ -145,6 +147,7 @@ async def action(logger, request: web_request.Request):
 
         try:
             if safeTimeout is not None:
+                deadline = time.monotonic() + safeTimeout
                 try:
                     output = await asyncio.wait_for(
                         execute(context), timeout=safeTimeout
@@ -192,38 +195,34 @@ async def action(logger, request: web_request.Request):
     resp.headers["x-open-runtimes-log-id"] = logger.id
 
     if "stream" in output:
-        # Status and headers leave with the first chunk, so they are final from here on.
         resp.headers.pop("content-length", None)
-        await resp.prepare(request)
 
         failed = False
         logger.override_native_logs()
         try:
             if safeTimeout is not None:
-                await asyncio.wait_for(
-                    write(resp, output["stream"]), timeout=safeTimeout
-                )
+                try:
+                    await asyncio.wait_for(
+                        write(request, resp, output["stream"]),
+                        timeout=deadline - time.monotonic(),
+                    )
+                except asyncio.TimeoutError:
+                    context.error("Execution timed out.")
+                    failed = True
             else:
-                await write(resp, output["stream"])
-        except asyncio.TimeoutError:
-            failed = True
-            context.error("Execution timed out.")
+                await write(request, resp, output["stream"])
         except Exception as e:
-            failed = True
             context.error(
                 "".join(traceback.TracebackException.from_exception(e).format())
             )
+            failed = True
         finally:
             logger.revert_native_logs()
 
-        # Logs are read once the response finishes, so they are flushed first.
         logger.end()
 
-        # Content is already on the wire, so a failure can only reach the caller as a truncation.
-        if failed:
+        if failed and request.transport is not None:
             request.transport.close()
-        else:
-            await resp.write_eof()
 
         return resp
 
@@ -232,21 +231,43 @@ async def action(logger, request: web_request.Request):
     return resp
 
 
-async def write(resp, source):
-    if hasattr(source, "__aiter__"):
-        async for chunk in source:
-            await resp.write(chunk.encode("utf-8") if isinstance(chunk, str) else chunk)
-        return
+async def write(request, resp, source):
+    if not hasattr(source, "__aiter__"):
+        source = pull(source)
 
-    # A plain generator would block the event loop while it waits between chunks.
+    try:
+        try:
+            await resp.prepare(request)
+        except ConnectionError:
+            return
+        async for chunk in source:
+            try:
+                await resp.write(
+                    chunk.encode("utf-8") if isinstance(chunk, str) else chunk
+                )
+            except ConnectionError:
+                return
+    finally:
+        if hasattr(source, "aclose"):
+            await source.aclose()
+
+
+async def pull(source):
+    # A thread of its own keeps a blocking next() off the event loop and close() from overlapping it
     loop = asyncio.get_running_loop()
+    executor = ThreadPoolExecutor(max_workers=1)
     iterator = iter(source)
     done = object()
-    while True:
-        chunk = await loop.run_in_executor(None, next, iterator, done)
-        if chunk is done:
-            return
-        await resp.write(chunk.encode("utf-8") if isinstance(chunk, str) else chunk)
+    try:
+        while True:
+            chunk = await loop.run_in_executor(executor, next, iterator, done)
+            if chunk is done:
+                return
+            yield chunk
+    finally:
+        if hasattr(iterator, "close"):
+            executor.submit(iterator.close)
+        executor.shutdown(wait=False)
 
 
 async def handler(request) -> web.Response:

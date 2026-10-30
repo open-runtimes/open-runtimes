@@ -108,9 +108,12 @@ When you can have two!
     elif action == "streamResponse":
 
         def chunks():
-            for text in ["first", "second", "third"]:
-                yield text + "\n"
-                time.sleep(1)
+            context.log("Stream log.")
+            yield "first\n"
+            time.sleep(1)
+            yield "second\n"
+            time.sleep(1)
+            yield "third\n"
 
         return context.res.stream(chunks(), 201, {"x-stream": "yes"})
     elif action == "streamException":
@@ -119,6 +122,15 @@ When you can have two!
             yield "first\n"
             raise Exception("Stream failed")
 
+        return context.res.stream(chunks())
+    elif action == "streamTimeout":
+
+        def chunks():
+            yield "first\n"
+            time.sleep(5)
+            yield "second\n"
+
+        await asyncio.sleep(1)
         return context.res.stream(chunks())
     elif action == "envVars":
         return context.res.json(
