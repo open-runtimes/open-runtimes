@@ -165,6 +165,7 @@ def action(request, response, logger)
       logger.override_native_logs
 
       unless safe_timeout.nil?
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + safe_timeout
         results = execute(safe_timeout, context)
         executed = results[0]
         output = results[1]
@@ -220,35 +221,33 @@ def action(request, response, logger)
   response.status = output['statusCode']
 
   unless output['stream'].nil?
-    # Status and headers leave with the first chunk, so they are final from here on.
-    response.headers.delete('content-length')
+    body = Enumerator.new do |out|
+      # Puma corks the socket, which holds each chunk back for up to 200ms
+      request.env['puma.socket'].setsockopt(Socket::IPPROTO_TCP, Socket::TCP_CORK, 0)
+      remaining = [deadline - Process.clock_gettime(Process::CLOCK_MONOTONIC), 0.001].max unless deadline.nil?
 
-    response.body = Enumerator.new do |out|
-      failure = nil
-      logger.override_native_logs
       begin
-        Timeout.timeout(safe_timeout) do
+        Timeout.timeout(remaining) do
           output['stream'].each do |chunk|
             out << chunk.to_s
           end
         end
-      rescue Timeout::Error
-        failure = 'Execution timed out.'
+      rescue Puma::ConnectionError
+        raise
       rescue StandardError => e
-        failure = e.full_message + "\n" + e.backtrace.join("\n")
+        if !deadline.nil? && Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+          context.error('Execution timed out.')
+        else
+          context.error(e.full_message + "\n" + e.backtrace.join("\n"))
+        end
+        raise Puma::ConnectionError
       ensure
-        logger.revert_native_logs
+        logger.end
       end
-
-      context.error(failure) unless failure.nil?
-
-      # Logs are read once the response finishes, so they are flushed first.
-      logger.end
-
-      # Content is already on the wire, so a failure can only reach the caller as a truncation.
-      raise failure unless failure.nil?
     end
 
+    # HEAD, 204 and 304 responses close the body without iterating it
+    response.body = Rack::BodyProxy.new(body) { logger.end }
     return response
   end
 
