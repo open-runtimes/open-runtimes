@@ -207,6 +207,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     logger.OverrideNativeLogs();
 
     RuntimeOutput? output = null;
+    DateTime? deadline = null;
     Handler? handler = null;
 
     // Guard: Try to load module
@@ -258,6 +259,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         {
             if (safeTimout != -1)
             {
+                deadline = DateTime.UtcNow.AddSeconds(safeTimout);
                 var result = await await Task.WhenAny<RuntimeOutput?>(
                     Task.Run<RuntimeOutput?>(async () =>
                     {
@@ -318,9 +320,20 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         }
     }
 
-    logger.End();
-
     outputHeaders.Add("x-open-runtimes-log-id", logger.id);
+
+    if (output.Stream != null)
+    {
+        return new CustomResponse(
+            output.Stream,
+            output.StatusCode,
+            outputHeaders,
+            context,
+            deadline
+        );
+    }
+
+    logger.End();
 
     return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
 }

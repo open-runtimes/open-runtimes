@@ -5,13 +5,19 @@ import com.google.gson.GsonBuilder
 import com.google.gson.ToNumberPolicy
 import io.javalin.Javalin
 import io.javalin.http.Context
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import org.eclipse.jetty.server.Request
+import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberFunctions
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 
 val gson: Gson = GsonBuilder().serializeNulls().create()
@@ -207,6 +213,8 @@ suspend fun action(
         output = context.res.text("", 503, mutableMapOf())
     }
 
+    val deadline = System.nanoTime() + safeTimeout.seconds.inWholeNanoseconds
+
     // Execute user function
     if (output == null && classMethod != null && instance != null) {
         try {
@@ -263,6 +271,11 @@ suspend fun action(
         }
     }
 
+    val source = output.stream
+    if (source != null) {
+        resHeaders.remove("content-length")
+    }
+
     resHeaders.forEach { (key, value) ->
         if (!key.startsWith("x-open-runtimes-")) {
             ctx.header(key, value)
@@ -271,7 +284,56 @@ suspend fun action(
 
     ctx.header("x-open-runtimes-log-id", logger.id ?: "")
 
+    if (source != null) {
+        val remaining = if (safeTimeout > 0) (deadline - System.nanoTime()).nanoseconds else Duration.INFINITE
+        ctx.status(output.statusCode)
+        stream(ctx, source, context, logger, remaining)
+        return
+    }
+
     logger.end()
 
     ctx.status(output.statusCode).result(output.body)
+}
+
+suspend fun stream(
+    ctx: Context,
+    source: Flow<Any>,
+    context: RuntimeContext,
+    logger: RuntimeLogger,
+    timeout: Duration,
+) {
+    val out = ctx.res.outputStream
+    var failed = false
+
+    try {
+        val completed =
+            withTimeoutOrNull(timeout) {
+                source
+                    .catch { e ->
+                        val sw = StringWriter()
+                        val pw = PrintWriter(sw)
+                        e.printStackTrace(pw)
+
+                        context.error(sw.toString())
+                        failed = true
+                    }.collect { chunk ->
+                        out.write(if (chunk is ByteArray) chunk else chunk.toString().toByteArray())
+                        out.flush()
+                    }
+            }
+
+        if (completed == null) {
+            context.error("Execution timed out.")
+            failed = true
+        }
+    } catch (e: IOException) {
+        // The client disconnected
+    }
+
+    logger.end()
+
+    if (failed) {
+        Request.getBaseRequest(ctx.req).httpChannel.abort(IOException("Stream aborted"))
+    }
 }

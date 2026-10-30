@@ -87,7 +87,11 @@ Future<Uint8List> _readRequestBody(
   return builder.takeBytes();
 }
 
-Future<shelf.Response> action(Logger logger, dynamic req) async {
+Future<shelf.Response> action(
+  Logger logger,
+  dynamic req,
+  Future<void> done,
+) async {
   int? safeTimeout = null;
   String timeout = req.headers['x-open-runtimes-timeout'] ?? '';
   if (timeout.isNotEmpty) {
@@ -186,32 +190,32 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   RuntimeResponse contextRes = new RuntimeResponse();
   RuntimeContext context = new RuntimeContext(contextReq, contextRes, logger);
 
+  final ZoneSpecification nativeLogs = ZoneSpecification(
+    print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+      logger.write(line, Logger.TYPE_LOG, true);
+    },
+  );
+  final Stopwatch execution = Stopwatch()..start();
+
   dynamic output = null;
   try {
-    await runZoned(
-      () async {
-        if (safeTimeout != null) {
-          dynamic result = await Future.any(<Future<dynamic>>[
-            Future.delayed(Duration(seconds: safeTimeout)),
-            user_code.main(context),
-          ]);
+    await runZoned(() async {
+      if (safeTimeout != null) {
+        dynamic result = await Future.any(<Future<dynamic>>[
+          Future.delayed(Duration(seconds: safeTimeout)),
+          user_code.main(context),
+        ]);
 
-          if (result != null) {
-            output = result;
-          } else {
-            context.error('Execution timed out.');
-            output = context.res.text('', 500, const {});
-          }
+        if (result != null) {
+          output = result;
         } else {
-          output = await user_code.main(context);
+          context.error('Execution timed out.');
+          output = context.res.text('', 500, const {});
         }
-      },
-      zoneSpecification: ZoneSpecification(
-        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-          logger.write(line, Logger.TYPE_LOG, true);
-        },
-      ),
-    );
+      } else {
+        output = await user_code.main(context);
+      }
+    }, zoneSpecification: nativeLogs);
   } catch (e, s) {
     context.error(e.toString());
     context.error(s.toString());
@@ -251,6 +255,22 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   responseHeaders['content-type'] = contentTypeValue;
 
   responseHeaders['x-open-runtimes-log-id'] = logger.id;
+
+  if (output['stream'] != null) {
+    responseHeaders.remove('content-length');
+
+    Duration? remaining = safeTimeout == null
+        ? null
+        : Duration(seconds: safeTimeout) - execution.elapsed;
+
+    return shelf.Response(
+      output['statusCode'],
+      body: _streamBody(output['stream'], context, remaining, nativeLogs, done),
+      headers: responseHeaders,
+      context: {'shelf.io.buffer_output': false},
+    );
+  }
+
   await logger.end();
 
   return shelf.Response(
@@ -261,46 +281,109 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   );
 }
 
+Stream<List<int>> _streamBody(
+  Stream<dynamic> source,
+  RuntimeContext context,
+  Duration? timeout,
+  ZoneSpecification nativeLogs,
+  Future<void> done,
+) {
+  final controller = StreamController<List<int>>();
+  StreamSubscription<List<int>>? subscription;
+  Timer? timer;
+  bool finished = false;
+
+  Future<void> finish([Object? error, StackTrace? stackTrace]) async {
+    if (finished) {
+      return;
+    }
+    finished = true;
+    timer?.cancel();
+    subscription?.cancel();
+
+    if (error != null) {
+      context.error(error.toString());
+    }
+    if (stackTrace != null) {
+      context.error(stackTrace.toString());
+    }
+    await context.logger.end();
+
+    if (error != null) {
+      controller.addError(error);
+    }
+    controller.close();
+  }
+
+  controller.onListen = () {
+    subscription = runZoned(
+      () => source
+          .map<List<int>>(
+            (chunk) => chunk is String ? utf8.encode(chunk) : chunk,
+          )
+          .listen(
+            controller.add,
+            onError: finish,
+            onDone: finish,
+            cancelOnError: true,
+          ),
+      zoneSpecification: nativeLogs,
+    );
+
+    if (timeout != null) {
+      timer = Timer(timeout, () => finish('Execution timed out.'));
+    }
+  };
+  controller.onPause = () => subscription?.pause();
+  controller.onResume = () => subscription?.resume();
+  // Dart 2.16 never cancels the body when the client disconnects.
+  done.then((_) => finish(), onError: (_) => finish());
+
+  return controller.stream;
+}
+
 void main() async {
-  final server = await shelf_io.serve(
-    (req) async {
-      if (req.url.path == '__opr/health') {
-        return shelf.Response(200, body: 'OK');
-      }
-      if (req.url.path == '__opr/timings') {
-        String timings = await File('/mnt/telemetry/timings.txt')
-            .readAsString();
-        return shelf.Response.ok(
-          timings,
-          headers: {'content-type': 'text/plain; charset=utf-8'},
+  final server = await HttpServer.bind('0.0.0.0', 3000);
+  runZonedGuarded(
+    () => server.listen(
+      (request) => shelf_io.handleRequest(request, (req) async {
+        if (req.url.path == '__opr/health') {
+          return shelf.Response(200, body: 'OK');
+        }
+        if (req.url.path == '__opr/timings') {
+          String timings = await File('/mnt/telemetry/timings.txt')
+              .readAsString();
+          return shelf.Response.ok(
+            timings,
+            headers: {'content-type': 'text/plain; charset=utf-8'},
+          );
+        }
+
+        Logger logger = new Logger(
+          req.headers['x-open-runtimes-logging'],
+          req.headers['x-open-runtimes-log-id'],
         );
-      }
 
-      Logger logger = new Logger(
-        req.headers['x-open-runtimes-logging'],
-        req.headers['x-open-runtimes-log-id'],
-      );
+        try {
+          return await action(logger, req, request.response.done);
+        } catch (e, s) {
+          logger.write(e, Logger.TYPE_ERROR);
+          logger.write(s, Logger.TYPE_ERROR);
 
-      try {
-        return await action(logger, req);
-      } catch (e, s) {
-        logger.write(e, Logger.TYPE_ERROR);
-        logger.write(s, Logger.TYPE_ERROR);
+          Map<String, String> responseHeaders = {};
+          responseHeaders['x-open-runtimes-log-id'] = logger.id;
+          await logger.end();
 
-        Map<String, String> responseHeaders = {};
-        responseHeaders['x-open-runtimes-log-id'] = logger.id;
-        await logger.end();
-
-        return shelf.Response(
-          500,
-          encoding: Encoding.getByName('utf-8'),
-          body: '',
-          headers: responseHeaders,
-        );
-      }
-    },
-    '0.0.0.0',
-    3000,
+          return shelf.Response(
+            500,
+            encoding: Encoding.getByName('utf-8'),
+            body: '',
+            headers: responseHeaders,
+          );
+        }
+      }),
+    ),
+    (error, stackTrace) => stderr.writeln('$error\n$stackTrace'),
   );
 
   final subscriptions = <StreamSubscription<ProcessSignal>>[];

@@ -74,5 +74,18 @@ namespace DotNetRuntime
 
             return Text("", statusCode, headers);
         }
+
+        public RuntimeOutput Stream(
+            IAsyncEnumerable<object> source,
+            int statusCode = 200,
+            Dictionary<string, string>? headers = null
+        )
+        {
+            return new RuntimeOutput(
+                source,
+                statusCode,
+                headers ?? new Dictionary<string, string>()
+            );
+        }
     }
 }

@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import org.apache.commons.lang3.StringUtils;
@@ -168,6 +169,77 @@ public class Tests {
         String hex = bytesToHex(digestBytes).toLowerCase();
         headers.put("x-method", context.getReq().getMethod());
         return context.getRes().text(hex, 200, headers);
+      }
+      case "streamResponse" -> {
+        headers.put("x-stream", "yes");
+        String[] chunks = {"first\n", "second\n", "third\n"};
+        return context.getRes().stream(
+            () ->
+                new Iterator<String>() {
+                  private int index = 0;
+
+                  public boolean hasNext() {
+                    return index < chunks.length;
+                  }
+
+                  public String next() {
+                    if (index == 0) {
+                      context.log("Stream log.");
+                    } else {
+                      try {
+                        Thread.sleep(1000);
+                      } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                      }
+                    }
+                    return chunks[index++];
+                  }
+                },
+            201,
+            headers);
+      }
+      case "streamException" -> {
+        return context.getRes().stream(
+            () ->
+                new Iterator<String>() {
+                  private boolean sent = false;
+
+                  public boolean hasNext() {
+                    return true;
+                  }
+
+                  public String next() {
+                    if (sent) {
+                      throw new RuntimeException("Stream failed");
+                    }
+                    sent = true;
+                    return "first\n";
+                  }
+                });
+      }
+      case "streamTimeout" -> {
+        Thread.sleep(1000);
+        return context.getRes().stream(
+            () ->
+                new Iterator<String>() {
+                  private int index = 0;
+
+                  public boolean hasNext() {
+                    return index < 2;
+                  }
+
+                  public String next() {
+                    if (index++ == 0) {
+                      return "first\n";
+                    }
+                    try {
+                      Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                      throw new RuntimeException(e);
+                    }
+                    return "second\n";
+                  }
+                });
       }
       case "envVars" -> {
         json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));

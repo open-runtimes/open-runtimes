@@ -31,6 +31,13 @@ class Response:
         headers["location"] = url
         return self.text("", statusCode, headers)
 
+    def stream(self, source, statusCode=200, headers={}):
+        return {
+            "stream": source,
+            "statusCode": statusCode,
+            "headers": headers,
+        }
+
 
 class Request:
     body_binary = None

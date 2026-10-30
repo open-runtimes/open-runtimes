@@ -104,6 +104,30 @@ When you can have two!
         'x-method': context.req.method
       }
     )
+  when 'streamResponse'
+    chunks = Enumerator.new do |out|
+      context.log('Stream log.')
+      out << "first\n"
+      sleep 1
+      out << "second\n"
+      sleep 1
+      out << "third\n"
+    end
+    return context.res.stream(chunks, 201, { 'x-stream' => 'yes' })
+  when 'streamException'
+    chunks = Enumerator.new do |out|
+      out << "first\n"
+      raise 'Stream failed'
+    end
+    return context.res.stream(chunks)
+  when 'streamTimeout'
+    chunks = Enumerator.new do |out|
+      out << "first\n"
+      sleep 5
+      out << "second\n"
+    end
+    sleep 1
+    return context.res.stream(chunks)
   when 'envVars'
     return context.res.json(
       {

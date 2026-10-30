@@ -3,6 +3,7 @@ package io.openruntimes.kotlin
 import com.google.gson.Gson
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import org.apache.commons.lang3.StringUtils
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -198,6 +199,38 @@ When you can have two!
                     mapOf(
                         "x-method" to context.req.method,
                     ),
+                )
+            }
+            "streamResponse" -> {
+                return context.res.stream(
+                    flow {
+                        context.log("Stream log.")
+                        emit("first\n")
+                        delay(1000)
+                        emit("second\n")
+                        delay(1000)
+                        emit("third\n")
+                    },
+                    201,
+                    mapOf("x-stream" to "yes"),
+                )
+            }
+            "streamException" -> {
+                return context.res.stream(
+                    flow {
+                        emit("first\n")
+                        throw Exception("Stream failed")
+                    },
+                )
+            }
+            "streamTimeout" -> {
+                delay(1000)
+                return context.res.stream(
+                    flow {
+                        emit("first\n")
+                        delay(5000)
+                        emit("second\n")
+                    },
                 )
             }
             "envVars" -> {

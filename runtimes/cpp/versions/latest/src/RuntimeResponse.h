@@ -56,6 +56,16 @@ public:
     headers["location"] = url;
     return this->text("", statusCode, headers);
   }
+
+  RuntimeOutput stream(const std::function<std::optional<std::string>()> &next,
+                       const int statusCode = 200,
+                       const Json::Value &headers = {}) {
+    RuntimeOutput output;
+    output.statusCode = statusCode;
+    output.headers = headers;
+    output.stream = next;
+    return output;
+  }
 };
 } // namespace runtime
 

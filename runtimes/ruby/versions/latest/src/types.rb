@@ -33,6 +33,14 @@ class RuntimeResponse
 
     self.text('', status_code, headers)
   end
+
+  def stream(source, status_code = 200, headers = {})
+    {
+      'stream' => source,
+      'statusCode' => status_code,
+      'headers' => headers
+    }
+  end
 end
 
 class RuntimeRequest

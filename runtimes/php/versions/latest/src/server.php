@@ -206,6 +206,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
         try {
             if ($safeTimeout !== null) {
                 $executed = false;
+                $deadline = \microtime(true) + $safeTimeout;
                 Swoole\Coroutine\batch([
                     function () use ($execute, &$executed) {
                         \call_user_func($execute);
@@ -250,6 +251,10 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
         $headers['content-type'] .= '; charset=utf-8';
     }
 
+    if (isset($output['stream'])) {
+        unset($headers['content-length']);
+    }
+
     foreach ($headers as $header => $value) {
         if (!(\str_starts_with($header, 'x-open-runtimes-'))) {
             $res->header($header, $value);
@@ -257,6 +262,57 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
     }
 
     $res->header('x-open-runtimes-log-id', $logger->id);
+
+    if (isset($output['stream'])) {
+        $res->status($output['statusCode']);
+
+        $completed = false;
+        $finished = false;
+        $timedOut = false;
+        $write = function () use (&$output, $res, $logger, $context, &$completed, &$finished, &$timedOut) {
+            $logger->overrideNativeLogs();
+            try {
+                foreach ($output['stream'] as $chunk) {
+                    // Swoole rejects an empty write.
+                    if ($timedOut || ($chunk !== '' && !$res->write($chunk))) {
+                        return;
+                    }
+                }
+                $completed = true;
+            } catch (\Throwable $e) {
+                $context->error($e->getMessage()."\n".$e->getTraceAsString());
+                $context->error('At ' . $e->getFile() . ':' . $e->getLine());
+            } finally {
+                // Releasing an unfinished generator runs its finally blocks.
+                $output = null;
+                $logger->revertNativeLogs();
+                $finished = true;
+            }
+        };
+
+        if ($safeTimeout !== null) {
+            // batch() ignores a timeout of 0 or less.
+            Swoole\Coroutine\batch([$write], \max($deadline - \microtime(true), 0.001));
+        } else {
+            \call_user_func($write);
+        }
+
+        if (!$finished) {
+            $timedOut = true;
+            $context->error('Execution timed out.');
+        }
+
+        $logger->end();
+
+        if ($completed) {
+            $res->end();
+        } else {
+            $res->close();
+        }
+
+        return;
+    }
+
     $logger->end();
 
     $res->status($output['statusCode']);

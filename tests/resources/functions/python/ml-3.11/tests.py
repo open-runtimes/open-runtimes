@@ -2,6 +2,7 @@ from hashlib import md5
 import requests
 import os
 import asyncio
+import time
 import base64
 import tensorflow as tf
 
@@ -105,6 +106,33 @@ When you can have two!
         bytes_body = context.req.body_binary
         hex = md5(bytes_body).hexdigest()
         return context.res.text(hex, 200, {"x-method": context.req.method})
+    elif action == "streamResponse":
+
+        def chunks():
+            context.log("Stream log.")
+            yield "first\n"
+            time.sleep(1)
+            yield "second\n"
+            time.sleep(1)
+            yield "third\n"
+
+        return context.res.stream(chunks(), 201, {"x-stream": "yes"})
+    elif action == "streamException":
+
+        async def chunks():
+            yield "first\n"
+            raise Exception("Stream failed")
+
+        return context.res.stream(chunks())
+    elif action == "streamTimeout":
+
+        def chunks():
+            yield "first\n"
+            time.sleep(5)
+            yield "second\n"
+
+        await asyncio.sleep(1)
+        return context.res.stream(chunks())
     elif action == "envVars":
         return context.res.json(
             {

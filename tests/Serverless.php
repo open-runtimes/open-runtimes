@@ -506,6 +506,52 @@ class Serverless extends Base
         self::assertEquals('Header "x-open-runtimes-timeout" must be an integer greater than 0.', $response['body']);
     }
 
+    public function testStreamResponse(): void
+    {
+        $start = \microtime(true);
+        $received = '';
+        $arrivals = [];
+        $response = Client::execute(headers: ['x-action' => 'streamResponse'], timeout: 10, bodyCallback: function (string $chunk) use (&$received, &$arrivals) {
+            $received .= $chunk;
+            while (\count($arrivals) < \substr_count($received, "\n")) {
+                $arrivals[] = \microtime(true);
+            }
+        });
+
+        self::assertEquals(201, $response['code']);
+        self::assertEquals('yes', $response['headers']['x-stream']);
+        self::assertEquals("first\nsecond\nthird\n", $response['body']);
+        self::assertStringContainsString('Stream log.', Client::getLogs($response['headers']['x-open-runtimes-log-id']));
+        self::assertLessThan(0.5, $arrivals[0] - $start);
+        self::assertEqualsWithDelta(1, $arrivals[1] - $arrivals[0], 0.4);
+        self::assertEqualsWithDelta(1, $arrivals[2] - $arrivals[1], 0.4);
+    }
+
+    public function testStreamException(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'streamException'], bodyCallback: fn () => null);
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals("first\n", $response['body']);
+        self::assertStringContainsString('Stream failed', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+
+        // These servers can only end an errored response cleanly
+        if (!\in_array($this->runtimeName, ['bun', 'deno', 'swift', 'cpp'])) {
+            self::assertNotNull($response['errorNumber']);
+        }
+    }
+
+    public function testStreamTimeout(): void
+    {
+        $start = \microtime(true);
+        $response = Client::execute(headers: ['x-action' => 'streamTimeout', 'x-open-runtimes-timeout' => '2'], timeout: 10, bodyCallback: fn () => null);
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals("first\n", $response['body']);
+        self::assertLessThan(2.5, \microtime(true) - $start);
+        self::assertEquals(1, \substr_count(Client::getErrors($response['headers']['x-open-runtimes-log-id']), 'Execution timed out.'));
+    }
+
     public function testDeprecatedMethods(): void
     {
         $response = Client::execute(body: 'Hello', headers: ['x-action' => 'deprecatedMethods']);

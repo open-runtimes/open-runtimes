@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -185,13 +186,6 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 		Headers:    map[string]string{},
 	}
 
-	timeoutPromise := func(ch chan openruntimes.Response) {
-		time.Sleep(time.Duration(safeTimeout) * time.Second)
-
-		context.Error("Execution timed out.")
-		ch <- context.Res.Text("", context.Res.WithStatusCode(500))
-	}
-
 	actionPromise := func(ch chan openruntimes.Response) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -199,21 +193,26 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 				ch <- context.Res.Text("", context.Res.WithStatusCode(500))
 			}
 		}()
-		output = handler.Main(context)
-		ch <- output
+		ch <- handler.Main(context)
 	}
 
 	outputChan := make(chan openruntimes.Response, 1)
 
 	logger.OverrideNativeLogs()
 
+	var deadline <-chan time.Time
 	if safeTimeout != 0 {
-		go timeoutPromise(outputChan)
+		deadline = time.After(time.Duration(safeTimeout) * time.Second)
 	}
 
 	go actionPromise(outputChan)
 
-	output = <-outputChan
+	select {
+	case output = <-outputChan:
+	case <-deadline:
+		context.Error("Execution timed out.")
+		output = context.Res.Text("", context.Res.WithStatusCode(500))
+	}
 
 	logger.RevertNativeLogs()
 
@@ -246,6 +245,81 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 
 	if strings.HasPrefix(contentTypeValue, "multipart/") == false && strings.Contains(contentTypeValue, "charset=") == false {
 		outputHeaders["content-type"] = contentTypeValue + "; charset=utf-8"
+	}
+
+	if output.Stream != nil {
+		delete(outputHeaders, "content-length")
+
+		w.Header().Set("x-open-runtimes-log-id", logger.Id)
+		for key, value := range outputHeaders {
+			w.Header().Set(key, value)
+		}
+
+		w.WriteHeader(output.StatusCode)
+
+		chunks := make(chan []byte)
+		done := make(chan struct{})
+		var sourceErr error
+
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					sourceErr = fmt.Errorf("%v", r)
+				}
+				close(chunks)
+			}()
+
+			for chunk, err := range output.Stream {
+				if err != nil {
+					sourceErr = err
+					return
+				}
+
+				select {
+				// The source may reuse the slice once yield returns.
+				case chunks <- bytes.Clone(chunk):
+				case <-done:
+					return
+				}
+			}
+		}()
+
+		var failure error
+		controller := http.NewResponseController(w)
+
+	write:
+		for {
+			select {
+			case chunk, ok := <-chunks:
+				if !ok {
+					failure = sourceErr
+					break write
+				}
+
+				w.Write(chunk)
+				if controller.Flush() != nil {
+					break write
+				}
+			case <-deadline:
+				failure = errors.New("Execution timed out.")
+				break write
+			case <-r.Context().Done():
+				break write
+			}
+		}
+		close(done)
+
+		if failure != nil {
+			context.Error(failure.Error())
+		}
+
+		logger.End()
+
+		if failure != nil {
+			panic(http.ErrAbortHandler)
+		}
+
+		return nil
 	}
 
 	logger.End()

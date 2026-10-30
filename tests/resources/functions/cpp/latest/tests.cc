@@ -163,6 +163,43 @@ namespace runtime {
                 auto hex = Handler::md5HexDigest(bytes);
                 headers["x-method"] = req.method;
                 return context.res.text(hex, 200, headers);
+            } else if (action == "streamResponse") {
+                headers["x-stream"] = "yes";
+                return context.res.stream([context, index = 0]() mutable -> std::optional<std::string> {
+                    switch (index++) {
+                        case 0:
+                            context.log("Stream log.");
+                            return "first\n";
+                        case 1:
+                            std::this_thread::sleep_for(std::chrono::seconds(1));
+                            return "second\n";
+                        case 2:
+                            std::this_thread::sleep_for(std::chrono::seconds(1));
+                            return "third\n";
+                        default:
+                            return std::nullopt;
+                    }
+                }, 201, headers);
+            } else if (action == "streamException") {
+                return context.res.stream([index = 0]() mutable -> std::optional<std::string> {
+                    if (index++ == 0) {
+                        return "first\n";
+                    }
+                    throw std::runtime_error("Stream failed");
+                });
+            } else if (action == "streamTimeout") {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                return context.res.stream([index = 0]() mutable -> std::optional<std::string> {
+                    switch (index++) {
+                        case 0:
+                            return "first\n";
+                        case 1:
+                            std::this_thread::sleep_for(std::chrono::seconds(5));
+                            return "second\n";
+                        default:
+                            return std::nullopt;
+                    }
+                });
             } else if (action == "envVars") {
                 auto customEnvVar = std::getenv("CUSTOM_ENV_VAR");
                 auto notDefinedVar = std::getenv("NOT_DEFINED_VAR");

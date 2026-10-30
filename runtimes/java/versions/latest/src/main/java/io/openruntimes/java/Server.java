@@ -3,14 +3,19 @@ package io.openruntimes.java;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.eclipse.jetty.server.Request;
 
 public class Server {
 
@@ -188,6 +193,7 @@ public class Server {
     RuntimeOutput output = null;
     Method classMethod = null;
     Object instance = null;
+    long deadline = 0;
 
     String entrypoint = OprConfig.ENTRYPOINT;
 
@@ -228,6 +234,7 @@ public class Server {
 
       try {
         if (safeTimeout > 0) {
+          deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(safeTimeout);
           Future<RuntimeOutput> future =
               executor.submit(
                   () -> {
@@ -283,6 +290,10 @@ public class Server {
         continue;
       }
 
+      if (output.getStream() != null && header.equals("content-length")) {
+        continue;
+      }
+
       if (header.equals("content-type") && !headerValue.startsWith("multipart/")) {
         headerValue = headerValue.toLowerCase();
 
@@ -295,6 +306,12 @@ public class Server {
     }
     ctx.header("x-open-runtimes-log-id", logger.getId());
 
+    if (output.getStream() != null) {
+      ctx.status(output.getStatusCode());
+      stream(ctx, output.getStream(), context, logger, safeTimeout, deadline);
+      return ctx;
+    }
+
     try {
       logger.end();
     } catch (IOException e) {
@@ -302,5 +319,74 @@ public class Server {
     }
 
     return ctx.status(output.getStatusCode()).result(output.getBody());
+  }
+
+  private static void stream(
+      Context ctx,
+      Iterable<?> source,
+      RuntimeContext context,
+      RuntimeLogger logger,
+      int safeTimeout,
+      long deadline) {
+    AtomicBoolean timedOut = new AtomicBoolean();
+    Callable<Void> write =
+        () -> {
+          OutputStream out = ctx.res().getOutputStream();
+          Iterator<?> iterator = source.iterator();
+          while (!timedOut.get() && iterator.hasNext()) {
+            Object chunk = iterator.next();
+            if (timedOut.get()) {
+              break;
+            }
+            byte[] bytes =
+                chunk instanceof byte[]
+                    ? (byte[]) chunk
+                    : String.valueOf(chunk).getBytes(StandardCharsets.UTF_8);
+            try {
+              out.write(bytes);
+              out.flush();
+            } catch (IOException e) {
+              // Connection closed
+              break;
+            }
+          }
+          return null;
+        };
+
+    String failure = null;
+    try {
+      if (safeTimeout > 0) {
+        Future<Void> future = executor.submit(write);
+        try {
+          future.get(deadline - System.nanoTime(), TimeUnit.NANOSECONDS);
+        } catch (TimeoutException e) {
+          timedOut.set(true);
+          future.cancel(true);
+          failure = "Execution timed out.";
+        }
+      } else {
+        write.call();
+      }
+    } catch (Throwable e) {
+      Throwable cause = e instanceof ExecutionException ? e.getCause() : e;
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      cause.printStackTrace(pw);
+      failure = sw.toString();
+    }
+
+    if (failure != null) {
+      context.error(failure);
+    }
+
+    try {
+      logger.end();
+    } catch (IOException e) {
+      // Ignore missing logs
+    }
+
+    if (failure != null) {
+      Request.getBaseRequest(ctx.req()).getHttpChannel().abort(new IOException(failure));
+    }
   }
 }

@@ -73,4 +73,16 @@ public class RuntimeResponse {
   public RuntimeOutput redirect(String url) {
     return this.redirect(url, 301, new HashMap<>());
   }
+
+  public <T> RuntimeOutput stream(Iterable<T> source, int statusCode, Map<String, String> headers) {
+    return new RuntimeOutput(source, statusCode, headers);
+  }
+
+  public <T> RuntimeOutput stream(Iterable<T> source, int statusCode) {
+    return this.stream(source, statusCode, new HashMap<>());
+  }
+
+  public <T> RuntimeOutput stream(Iterable<T> source) {
+    return this.stream(source, 200, new HashMap<>());
+  }
 }

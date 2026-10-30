@@ -38,6 +38,15 @@ class RuntimeResponse
         $headers['location'] = $url;
         return $this->text('', $statusCode, $headers);
     }
+
+    public function stream(iterable $source, int $statusCode = 200, array $headers = []): array
+    {
+        return [
+            'stream' => $source,
+            'statusCode' => $statusCode,
+            'headers' => $headers,
+        ];
+    }
 }
 
 class RuntimeRequest

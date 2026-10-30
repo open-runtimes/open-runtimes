@@ -144,6 +144,13 @@ export const action = async (logger: Logger, ctx: any) => {
         headers["location"] = url;
         return this.text("", statusCode, headers);
       },
+      stream: function (source: any, statusCode = 200, headers: any = {}) {
+        return {
+          stream: source,
+          statusCode: statusCode,
+          headers: headers,
+        };
+      },
     },
     log: function (...messages: any) {
       logger.write(messages, Logger.TYPE_LOG);
@@ -157,6 +164,7 @@ export const action = async (logger: Logger, ctx: any) => {
 
   let output: any = null;
   let userFunction: any = null;
+  let deadline: number | null = null;
 
   const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
@@ -212,6 +220,7 @@ export const action = async (logger: Logger, ctx: any) => {
       if (safeTimeout !== null) {
         const safeTimeoutConst: number = safeTimeout;
         let executed = true;
+        deadline = Date.now() + safeTimeoutConst * 1000;
 
         const timeoutPromise = new Promise((promiseRes) => {
           setTimeout(() => {
@@ -269,6 +278,68 @@ export const action = async (logger: Logger, ctx: any) => {
   }
 
   ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
+
+  if (output.stream !== undefined && output.statusCode !== 204) {
+    ctx.response.headers.delete("content-length");
+
+    const iterator = output.stream[Symbol.asyncIterator]();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    logger.overrideNativeLogs();
+
+    const finish = async () => {
+      clearTimeout(timer);
+      logger.revertNativeLogs();
+      await logger.end();
+    };
+
+    const body = new ReadableStream({
+      start(controller) {
+        if (deadline === null) {
+          return;
+        }
+
+        timer = setTimeout(async () => {
+          context.error("Execution timed out.");
+          Promise.resolve(iterator.return?.()).catch(() => {});
+          await finish().catch(() => {});
+          controller.error(new Error("Execution timed out."));
+        }, deadline - Date.now());
+      },
+      async pull(controller) {
+        let next;
+        try {
+          next = await iterator.next();
+        } catch (e: any) {
+          context.error(e.stack || e);
+          await finish();
+          controller.error(e);
+          return;
+        }
+
+        if (next.done) {
+          await finish();
+          controller.close();
+          return;
+        }
+
+        controller.enqueue(
+          typeof next.value === "string"
+            ? new TextEncoder().encode(next.value)
+            : next.value,
+        );
+      },
+      cancel() {
+        Promise.resolve(iterator.return?.()).catch(() => {});
+        return finish();
+      },
+    });
+
+    ctx.response.status = output.statusCode;
+    ctx.response.body = body;
+    return;
+  }
+
   await logger.end();
 
   ctx.response.status = output.statusCode;
