@@ -322,6 +322,7 @@ int main()
                     logger->overrideNativeLogs();
 
                     runtime::RuntimeOutput output;
+                    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeout);
 
                     try {
                         if (timeout != -1)
@@ -338,7 +339,7 @@ int main()
 
                             std::future<void> waiter = std::async(std::launch::async, &std::thread::join, &thread);
 
-                            if (waiter.wait_for(std::chrono::seconds(timeout)) == std::future_status::timeout) {
+                            if (waiter.wait_until(deadline) == std::future_status::timeout) {
                                 context.error("Execution timed out.");
                                 output = context.res.text("", 500, {});
                                 pthread_cancel(thread.native_handle());
@@ -406,55 +407,49 @@ int main()
 
                     if (output.stream)
                     {
-                        auto next = output.stream;
-                        auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeout);
-
                         const std::shared_ptr<drogon::HttpResponse> streamRes = drogon::HttpResponse::newAsyncStreamResponse(
-                            [next, context, logger, timeout, deadline](drogon::ResponseStreamPtr responseStream) {
-                                std::thread([next, context, logger, timeout, deadline, responseStream = std::shared_ptr<drogon::ResponseStream>(std::move(responseStream))]() mutable {
-                                    logger->overrideNativeLogs();
-                                    try {
-                                        while (true)
+                            [stream = output.stream, context, logger, timeout, deadline](drogon::ResponseStreamPtr responseStream) {
+                                std::thread([stream, context, logger, timeout, deadline, responseStream = std::move(responseStream)]() mutable {
+                                    std::thread thread([&]() {
+                                        try {
+                                            while (const auto chunk = stream())
+                                            {
+                                                // drogon frames an empty chunk as the end of the stream
+                                                if (!chunk->empty() && !responseStream->send(*chunk))
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                        } catch (const std::exception &e)
                                         {
-                                            if (timeout != -1 && std::chrono::steady_clock::now() > deadline)
-                                            {
-                                                context.error("Execution timed out.");
-                                                break;
-                                            }
-
-                                            auto chunk = next();
-                                            if (!chunk)
-                                            {
-                                                break;
-                                            }
-
-                                            if (!chunk->empty())
-                                            {
-                                                responseStream->send(*chunk);
-                                            }
+                                            context.error(e.what());
+                                        } catch (...)
+                                        {
+                                            context.error("Unknown exception");
                                         }
-                                    } catch (const std::exception &e)
-                                    {
-                                        context.error(e.what());
-                                    }
-                                    logger->revertNativeLogs();
+                                    });
 
-                                    // Logs are read once the response finishes, so they are flushed first.
+                                    std::future<void> waiter = std::async(std::launch::async, &std::thread::join, &thread);
+
+                                    if (timeout != -1 && waiter.wait_until(deadline) == std::future_status::timeout) {
+                                        context.error("Execution timed out.");
+                                        pthread_cancel(thread.native_handle());
+                                    }
+
+                                    waiter.wait();
                                     logger->end();
                                     responseStream->close();
                                 }).detach();
-                            });
+                            }, true);
 
                         for (const auto &[key, value] : res->headers())
                         {
-                            // A streamed response is chunked, so its length is unknown.
                             if (key != "content-length")
                             {
                                 streamRes->addHeader(key, value);
                             }
                         }
 
-                        // Status and headers leave with the first chunk, so they are final from here on.
                         streamRes->setContentTypeString(contentTypeHeader);
                         streamRes->addHeader("x-open-runtimes-log-id", logger->id);
                         streamRes->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));

@@ -12,9 +12,6 @@
 #include <openssl/md5.h>
 #include <iomanip>
 #include <sstream>
-#include <thread>
-#include <optional>
-#include <vector>
 
 namespace runtime {
     class Handler {
@@ -167,27 +164,41 @@ namespace runtime {
                 headers["x-method"] = req.method;
                 return context.res.text(hex, 200, headers);
             } else if (action == "streamResponse") {
-                auto index = std::make_shared<size_t>(0);
-                Json::Value headers;
                 headers["x-stream"] = "yes";
-                return context.res.stream([index]() -> std::optional<std::string> {
-                    const std::vector<std::string> texts = {"first", "second", "third"};
-                    if (*index >= texts.size()) {
-                        return std::nullopt;
+                return context.res.stream([context, index = 0]() mutable -> std::optional<std::string> {
+                    switch (index++) {
+                        case 0:
+                            context.log("Stream log.");
+                            return "first\n";
+                        case 1:
+                            std::this_thread::sleep_for(std::chrono::seconds(1));
+                            return "second\n";
+                        case 2:
+                            std::this_thread::sleep_for(std::chrono::seconds(1));
+                            return "third\n";
+                        default:
+                            return std::nullopt;
                     }
-                    if (*index > 0) {
-                        std::this_thread::sleep_for(std::chrono::seconds(1));
-                    }
-                    return texts[(*index)++] + "\n";
                 }, 201, headers);
             } else if (action == "streamException") {
-                auto sent = std::make_shared<bool>(false);
-                return context.res.stream([sent]() -> std::optional<std::string> {
-                    if (*sent) {
-                        throw std::runtime_error("Stream failed");
+                return context.res.stream([index = 0]() mutable -> std::optional<std::string> {
+                    if (index++ == 0) {
+                        return "first\n";
                     }
-                    *sent = true;
-                    return std::string("first\n");
+                    throw std::runtime_error("Stream failed");
+                });
+            } else if (action == "streamTimeout") {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                return context.res.stream([index = 0]() mutable -> std::optional<std::string> {
+                    switch (index++) {
+                        case 0:
+                            return "first\n";
+                        case 1:
+                            std::this_thread::sleep_for(std::chrono::seconds(5));
+                            return "second\n";
+                        default:
+                            return std::nullopt;
+                    }
                 });
             } else if (action == "envVars") {
                 auto customEnvVar = std::getenv("CUSTOM_ENV_VAR");
