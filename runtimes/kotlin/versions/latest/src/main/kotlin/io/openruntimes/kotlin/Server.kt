@@ -6,6 +6,7 @@ import com.google.gson.ToNumberPolicy
 import io.javalin.Javalin
 import io.javalin.http.Context
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.eclipse.jetty.server.Request
@@ -15,6 +16,8 @@ import java.io.StringWriter
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberFunctions
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 
 val gson: Gson = GsonBuilder().serializeNulls().create()
@@ -210,6 +213,8 @@ suspend fun action(
         output = context.res.text("", 503, mutableMapOf())
     }
 
+    val deadline = System.nanoTime() + safeTimeout.seconds.inWholeNanoseconds
+
     // Execute user function
     if (output == null && classMethod != null && instance != null) {
         try {
@@ -266,8 +271,8 @@ suspend fun action(
         }
     }
 
-    // A streamed response is chunked, so its length is unknown.
-    if (output.stream != null) {
+    val source = output.stream
+    if (source != null) {
         resHeaders.remove("content-length")
     }
 
@@ -279,10 +284,10 @@ suspend fun action(
 
     ctx.header("x-open-runtimes-log-id", logger.id ?: "")
 
-    if (output.stream != null) {
-        // Status and headers leave with the first chunk, so they are final from here on.
+    if (source != null) {
+        val remaining = if (safeTimeout > 0) (deadline - System.nanoTime()).nanoseconds else Duration.INFINITE
         ctx.status(output.statusCode)
-        stream(ctx, output.stream, context, logger, safeTimeout)
+        stream(ctx, source, context, logger, remaining)
         return
     }
 
@@ -296,47 +301,39 @@ suspend fun stream(
     source: Flow<Any>,
     context: RuntimeContext,
     logger: RuntimeLogger,
-    safeTimeout: Int,
+    timeout: Duration,
 ) {
     val out = ctx.res.outputStream
-    val write: suspend () -> Unit = {
-        source.collect { chunk ->
-            val bytes = if (chunk is ByteArray) chunk else chunk.toString().toByteArray()
-            if (bytes.isNotEmpty()) {
-                out.write(bytes)
-                out.flush()
-            }
-        }
-    }
+    var failed = false
 
-    var failure: String? = null
-    logger.overrideNativeLogs()
     try {
-        if (safeTimeout > 0) {
-            if (withTimeoutOrNull(safeTimeout.seconds) { write() } == null) {
-                failure = "Execution timed out."
+        val completed =
+            withTimeoutOrNull(timeout) {
+                source
+                    .catch { e ->
+                        val sw = StringWriter()
+                        val pw = PrintWriter(sw)
+                        e.printStackTrace(pw)
+
+                        context.error(sw.toString())
+                        failed = true
+                    }.collect { chunk ->
+                        out.write(if (chunk is ByteArray) chunk else chunk.toString().toByteArray())
+                        out.flush()
+                    }
             }
-        } else {
-            write()
+
+        if (completed == null) {
+            context.error("Execution timed out.")
+            failed = true
         }
-    } catch (e: Exception) {
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        e.printStackTrace(pw)
-        failure = sw.toString()
-    } finally {
-        logger.revertNativeLogs()
+    } catch (e: IOException) {
+        // The client disconnected
     }
 
-    if (failure != null) {
-        context.error(failure)
-    }
-
-    // Logs are read once the response finishes, so they are flushed first.
     logger.end()
 
-    // Content is already on the wire, so a failure can only reach the caller as a truncation.
-    if (failure != null) {
-        Request.getBaseRequest(ctx.req).httpChannel.abort(IOException(failure))
+    if (failed) {
+        Request.getBaseRequest(ctx.req).httpChannel.abort(IOException("Stream aborted"))
     }
 }

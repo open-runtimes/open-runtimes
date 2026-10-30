@@ -204,10 +204,12 @@ When you can have two!
             "streamResponse" -> {
                 return context.res.stream(
                     flow {
-                        for (text in listOf("first", "second", "third")) {
-                            emit("$text\n")
-                            delay(1000)
-                        }
+                        context.log("Stream log.")
+                        emit("first\n")
+                        delay(1000)
+                        emit("second\n")
+                        delay(1000)
+                        emit("third\n")
                     },
                     201,
                     mapOf("x-stream" to "yes"),
@@ -218,6 +220,16 @@ When you can have two!
                     flow {
                         emit("first\n")
                         throw Exception("Stream failed")
+                    },
+                )
+            }
+            "streamTimeout" -> {
+                delay(1000)
+                return context.res.stream(
+                    flow {
+                        emit("first\n")
+                        delay(5000)
+                        emit("second\n")
                     },
                 )
             }
