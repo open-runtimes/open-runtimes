@@ -39,3 +39,17 @@ if [ "$PROJECT_DIR" != "/usr/local/build" ]; then
 		fi
 	done
 fi
+
+# pnpm links only direct dependencies at the top level and hoists the rest into
+# .pnpm/node_modules. Runtime servers and Nitro output import framework
+# dependencies (express, vue-bundle-renderer) directly, so link those too.
+for entry in "$ROOT_MODULES"/.pnpm/node_modules/* "$ROOT_MODULES"/.pnpm/node_modules/@*/*; do
+	[ -e "$entry" ] || [ -L "$entry" ] || continue
+	name="${entry#"$ROOT_MODULES"/.pnpm/node_modules/}"
+	[[ "$name" == @* && "$name" != */* && ! -L "$entry" ]] && continue
+	[ -e "$ROOT_MODULES/$name" ] || [ -L "$ROOT_MODULES/$name" ] && continue
+	prefix=""
+	[[ "$name" == */* ]] && prefix="../"
+	mkdir -p "$(dirname "$ROOT_MODULES/$name")"
+	ln -s "$prefix.pnpm/node_modules/$name" "$ROOT_MODULES/$name"
+done
