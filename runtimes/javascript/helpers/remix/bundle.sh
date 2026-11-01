@@ -20,8 +20,8 @@ if [ -e "$ENTRYPOINT" ]; then
 	cd "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"
 	mv /tmp/.opr-tmp/* build/
 
-	mv /usr/local/build/package*.json ./
 	bash /usr/local/server/helpers/node-modules/bundle.sh
+	mv /usr/local/build/package*.json ./
 	mv /usr/local/build/node_modules/ ./node_modules/
 
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR finished. \e[0m"

@@ -11,6 +11,7 @@ ENTRYPOINT="./handler.js"
 if [ -e "$ENTRYPOINT" ]; then
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR started. \e[0m"
 
+	bash /usr/local/server/helpers/node-modules/bundle.sh
 	mv /usr/local/build/package*.json ./
 	mv /usr/local/build/node_modules/ ./node_modules/
 
