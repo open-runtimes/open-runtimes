@@ -1,0 +1,10 @@
+{
+  "name": "sveltekit-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "pnpm --filter web build"
+  },
+  "dependencies": {
+    "@repo/greeting": "file:./vendor/greeting"
+  }
+}
