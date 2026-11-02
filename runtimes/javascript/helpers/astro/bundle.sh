@@ -11,6 +11,7 @@ ENTRYPOINT="./server/entry.mjs"
 if [ -e "$ENTRYPOINT" ]; then
 	echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[97m Bundling for SSR started. \e[0m"
 
+	node /usr/local/server/src/node-modules.mjs
 	mv /usr/local/build/package*.json ./
 	mv /usr/local/build/node_modules/ ./node_modules/
 

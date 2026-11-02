@@ -20,6 +20,7 @@ if [ -e "$ENTRYPOINT" ]; then
 	cd "$OPEN_RUNTIMES_OUTPUT_DIRECTORY"
 	mv /tmp/.opr-tmp/* build/
 
+	node /usr/local/server/src/node-modules.mjs
 	mv /usr/local/build/package*.json ./
 	mv /usr/local/build/node_modules/ ./node_modules/
 
