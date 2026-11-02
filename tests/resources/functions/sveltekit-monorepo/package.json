@@ -5,6 +5,6 @@
     "build": "pnpm --filter web build"
   },
   "dependencies": {
-    "@repo/greeting": "file:./vendor/greeting"
+    "@repo/greeting": "file:./root-greeting"
   }
 }

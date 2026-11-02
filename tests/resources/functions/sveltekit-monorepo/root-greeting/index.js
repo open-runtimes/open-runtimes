@@ -1,0 +1,1 @@
+export default () => "Root greeting";

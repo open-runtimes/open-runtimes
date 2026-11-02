@@ -12,6 +12,7 @@ import {
   renameSync,
   rmSync,
   symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
@@ -162,7 +163,14 @@ if (project !== buildDir) {
       // Made relative or copied below
       symlinkSync(target, root);
     } else {
-      renameSync(entry, root);
+      try {
+        renameSync(entry, root);
+      } catch (error) {
+        // node_modules on another mount
+        if (error.code !== "EXDEV") throw error;
+        copy(entry, root);
+        rmSync(entry, { recursive: true, force: true });
+      }
     }
   }
 }
@@ -183,6 +191,7 @@ const pending = names(readJson(join(buildDir, "package.json")), [
   "devDependencies",
 ]);
 const copies = new Map();
+const nestedCopies = new Map();
 
 function copyWorkspace(entry, source, ancestors) {
   rmSync(entry, { recursive: true, force: true });
@@ -193,7 +202,7 @@ function copyWorkspace(entry, source, ancestors) {
     const file = join(modules, name);
     if (!isLink(file)) continue;
     const dependency = realpath(join(source, "node_modules", name));
-    rmSync(file, { force: true });
+    unlinkSync(file);
     if (!dependency) continue;
     if (inside(dependency, rootModules)) {
       link(file, dependency);
@@ -208,9 +217,15 @@ function copyWorkspace(entry, source, ancestors) {
       mkdirSync(dirname(root), { recursive: true });
       symlinkSync(dependency, root);
     } else if (
-      realpath(root) !== dependency &&
-      copies.get(dependency) !== root
+      realpath(root) === dependency ||
+      copies.get(dependency) === root
     ) {
+      continue;
+    } else if (nestedCopies.has(dependency)) {
+      // One instance, as in the install
+      link(file, nestedCopies.get(dependency));
+    } else {
+      nestedCopies.set(dependency, file);
       copyWorkspace(file, dependency, [...ancestors, dependency]);
     }
   }
@@ -236,7 +251,7 @@ for (const name of pending) {
 // Absolute links left over point at workspace packages the app does not use
 for (const name of packages(rootModules)) {
   const entry = join(rootModules, name);
-  if (isLink(entry) && isAbsolute(readlinkSync(entry))) rmSync(entry);
+  if (isLink(entry) && isAbsolute(readlinkSync(entry))) unlinkSync(entry);
 }
 
 // pnpm and bun (isolated linker) link only direct dependencies at the top level
