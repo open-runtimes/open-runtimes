@@ -74,7 +74,7 @@ elif [ -e "$WEBPACK_ENTRYPOINT" ] || [ -e "$TURBOPACK_ENTRYPOINT" ]; then
 
 	cd /usr/local/build
 
-	bash /usr/local/server/helpers/node-modules/bundle.sh
+	node /usr/local/server/src/node-modules.mjs
 
 	mkdir -p /tmp/.opr-tmp
 	mv "$OPEN_RUNTIMES_OUTPUT_DIRECTORY" /tmp/.opr-tmp
