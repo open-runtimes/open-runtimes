@@ -1,9 +1,0 @@
-{
-  "name": "@repo/ui",
-  "version": "1.0.0",
-  "type": "module",
-  "exports": "./index.js",
-  "dependencies": {
-    "@repo/greeting": "workspace:*"
-  }
-}
