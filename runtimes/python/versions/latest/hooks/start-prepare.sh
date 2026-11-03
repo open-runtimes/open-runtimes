@@ -3,11 +3,11 @@
 set -e
 shopt -s dotglob
 
-# Expose the server-env packages to the runtime-env interpreter via a .pth
-# file instead of copying the whole virtual env on every cold start
-server_site=$(echo /usr/local/server/server-env/lib/python*/site-packages)
+# Builds made before build-prepare.sh wrote server-env.pth still need it
 runtime_site=$(echo /usr/local/server/src/function/runtime-env/lib/python*/site-packages)
-echo "$server_site" >"$runtime_site/server-env.pth"
+if [ ! -f "$runtime_site/server-env.pth" ]; then
+	echo /usr/local/server/server-env/lib/python*/site-packages >"$runtime_site/server-env.pth"
+fi
 
 # Activate virtual env
 source /usr/local/server/src/function/runtime-env/bin/activate
