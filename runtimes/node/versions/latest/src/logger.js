@@ -28,16 +28,22 @@ if (process.features.require_module) {
 class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
+  // Matches the executor's MAX_LOG_SIZE, so inline logs truncate where file logs did
+  static INLINE_LIMIT = 5 * 1024 * 1024;
 
   id = "";
   enabled = false;
   includesNativeInfo = false;
+  inline = false;
 
   streamLogs = null;
   streamErrors = null;
   nativeLogsCache = {};
+  // Inline mode returns logs on the response instead of writing files
+  inlineLogs = new InlineBuffer(Logger.INLINE_LIMIT);
+  inlineErrors = new InlineBuffer(Logger.INLINE_LIMIT);
 
-  constructor(status, id) {
+  constructor(status, id, inline = false) {
     this.enabled = (status ? status : "enabled") === "enabled";
 
     if (this.enabled) {
@@ -46,7 +52,8 @@ class Logger {
         : config.env === "development"
           ? "dev"
           : this.generateId();
-      if (config.logsDirectory) {
+      this.inline = inline;
+      if (config.logsDirectory && !inline) {
         this.streamLogs = fs.createWriteStream(
           `${config.logsDirectory}/${this.id}_logs.log`,
           {
@@ -110,6 +117,12 @@ class Logger {
     } catch (err) {
       // Silently ignore write failures to prevent runtime crashes
       // The logging system should not cause the main execution to fail
+    }
+
+    if (this.inline) {
+      (type === Logger.TYPE_ERROR ? this.inlineErrors : this.inlineLogs).write(
+        stringLog + "\n",
+      );
     }
 
     try {
@@ -182,6 +195,40 @@ class Logger {
       randomPadding += randomHexDigit;
     }
     return baseId + randomPadding;
+  }
+}
+
+class InlineBuffer {
+  chunks = [];
+  length = 0;
+  truncated = false;
+
+  constructor(limit) {
+    this.limit = limit;
+  }
+
+  write(text) {
+    if (this.truncated) {
+      return;
+    }
+    let chunk = Buffer.from(text);
+    if (this.length + chunk.length > this.limit) {
+      chunk = chunk.subarray(0, this.limit - this.length);
+      this.truncated = true;
+    }
+    this.chunks.push(chunk);
+    this.length += chunk.length;
+    if (this.truncated) {
+      this.chunks.push(
+        Buffer.from(
+          `\nLog file has been truncated to ${(this.limit / 1048576).toFixed(2)}MB.`,
+        ),
+      );
+    }
+  }
+
+  toBuffer() {
+    return Buffer.concat(this.chunks);
   }
 }
 

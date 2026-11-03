@@ -150,6 +150,8 @@ Every request sent to any of the runtimes must have the `x-open-runtimes-secret`
 
 Execution logs are always written to the runtime's `stdout` (logs) and `stderr` (errors). In addition, each execution's logs are written to `<id>_logs.log` and `<id>_errors.log` in the directory set by `OPEN_RUNTIMES_LOGS_DIRECTORY`, where `<id>` is the value of the `x-open-runtimes-log-id` response header. The directory defaults to `/mnt/logs` and must already exist; set the variable to an empty value to write logs to `stdout`/`stderr` only.
 
+A caller that cannot share a directory with the runtime can send `x-open-runtimes-logs-inline: enabled` instead. The runtime then writes no log files: it appends the logs, then the errors, to the response body and sends their byte lengths as the `x-open-runtimes-logs-length` and `x-open-runtimes-errors-length` trailers, so the caller splits them off the end of the body. Only the lengths travel as trailers because HTTP clients cap trailer size far below what logs can reach (curl at 4KB). `HEAD` responses carry no body, so they keep writing log files. Supported by the Node runtime.
+
 Runtime shutdown behavior, grace periods, and signal handling are documented in [Runtime shutdown](docs/shutdown.md).
 
 ## Contributing

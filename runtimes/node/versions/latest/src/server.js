@@ -24,39 +24,80 @@ const buffer = (req) =>
     req.on("error", reject);
   });
 
-const send = (res, statusCode, body = null) => {
-  res.statusCode = statusCode;
-  if (body === null) {
-    res.end();
-    return;
-  }
-  if (Buffer.isBuffer(body)) {
-    if (!res.getHeader("content-type")) {
+// Normalizes a body to a Buffer or a stream, defaulting its content-type
+const encode = (res, body) => {
+  if (body === null || Buffer.isBuffer(body)) {
+    if (body !== null && !res.getHeader("content-type")) {
       res.setHeader("content-type", "application/octet-stream");
     }
-    res.setHeader("content-length", body.length);
-    res.end(body);
-    return;
+    return body;
   }
   if (typeof body === "object" || typeof body === "number") {
     if (typeof body?.pipe === "function") {
       if (!res.getHeader("content-type")) {
         res.setHeader("content-type", "application/octet-stream");
       }
-      body.pipe(res);
-      return;
+      return body;
     }
-    const json = JSON.stringify(body);
     if (!res.getHeader("content-type")) {
       res.setHeader("content-type", "application/json; charset=utf-8");
     }
-    res.setHeader("content-length", Buffer.byteLength(json));
-    res.end(json);
+    return Buffer.from(JSON.stringify(body));
+  }
+  return Buffer.from(String(body));
+};
+
+const send = (res, statusCode, body = null) => {
+  res.statusCode = statusCode;
+  body = encode(res, body);
+  if (body === null) {
+    res.end();
     return;
   }
-  res.setHeader("content-length", Buffer.byteLength(String(body)));
-  res.end(String(body));
+  if (typeof body.pipe === "function") {
+    body.pipe(res);
+    return;
+  }
+  res.setHeader("content-length", body.length);
+  res.end(body);
 };
+
+// Appends the logs to the body and sends their byte lengths as trailers, so
+// the caller splits them off the end. Trailers carry only the lengths: HTTP
+// clients cap trailer size (curl at 4KB) far below what logs can reach.
+const LOG_TRAILERS = [
+  "x-open-runtimes-logs-length",
+  "x-open-runtimes-errors-length",
+];
+const sendInline = (res, statusCode, body, logger) => {
+  res.statusCode = statusCode;
+  // A content-length would stop chunking, and with it the trailers
+  res.removeHeader("content-length");
+  res.setHeader("trailer", LOG_TRAILERS.join(", "));
+  body = encode(res, body ?? "");
+  const logs = logger.inlineLogs.toBuffer();
+  const errors = logger.inlineErrors.toBuffer();
+  const finish = () => {
+    res.addTrailers({
+      [LOG_TRAILERS[0]]: logs.length,
+      [LOG_TRAILERS[1]]: errors.length,
+    });
+    res.end(Buffer.concat([logs, errors]));
+  };
+  if (typeof body.pipe === "function") {
+    body.on("end", finish);
+    body.pipe(res, { end: false });
+    return;
+  }
+  res.write(body);
+  finish();
+};
+
+const respond = (res, logger, statusCode, body) =>
+  logger.inline
+    ? sendInline(res, statusCode, body, logger)
+    : send(res, statusCode, body);
+
 const Logger = require("./logger");
 const config = require("./config");
 
@@ -89,6 +130,8 @@ const handle = async (req, res) => {
   const logger = new Logger(
     req.headers[`x-open-runtimes-logging`],
     req.headers[`x-open-runtimes-log-id`],
+    req.headers[`x-open-runtimes-logs-inline`] === "enabled" &&
+      req.method !== "HEAD",
   );
 
   try {
@@ -99,7 +142,7 @@ const handle = async (req, res) => {
     res.setHeader("x-open-runtimes-log-id", logger.id);
     await logger.end();
 
-    return send(res, 500, "");
+    return respond(res, logger, 500, "");
   }
 };
 
@@ -360,7 +403,7 @@ const action = async (logger, req, res) => {
   res.setHeader("x-open-runtimes-log-id", logger.id);
   await logger.end();
 
-  return send(res, output.statusCode, output.body);
+  return respond(res, logger, output.statusCode, output.body);
 };
 
 require("/usr/local/server/helpers/http-shutdown.cjs")(server);
