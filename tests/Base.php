@@ -140,7 +140,7 @@ class Base extends TestCase
         self::assertIsFloat($timings['local_download']);
         self::assertArrayHasKey('remote_download', $timings);
         self::assertIsFloat($timings['remote_download']);
-        self::assertArrayHasKey('extract', $timings);
-        self::assertIsFloat($timings['extract']);
+        // An archive is extracted; code already mounted at the function path is not
+        self::assertIsFloat($timings['extract'] ?? $timings['symlink'] ?? null);
     }
 }
