@@ -1,5 +1,6 @@
 const http = require("http");
 const fs = require("fs");
+const { Transform } = require("stream");
 
 const BODY_LIMIT = 20 * 1024 * 1024;
 
@@ -62,40 +63,65 @@ const send = (res, statusCode, body = null) => {
   res.end(body);
 };
 
-// Appends the logs to the body and sends their byte lengths as trailers, so
-// the caller splits them off the end. Trailers carry only the lengths: HTTP
-// clients cap trailer size (curl at 4KB) far below what logs can reach.
-const LOG_TRAILERS = [
-  "x-open-runtimes-logs-length",
-  "x-open-runtimes-errors-length",
-];
-const sendInline = (res, statusCode, body, logger) => {
-  res.statusCode = statusCode;
-  // A content-length would stop chunking, and with it the trailers
+// When edge asks for logs inline, the body goes out in `b` frames and the logs
+// and errors follow in `l` and `e` frames, so edge splits them off a body it
+// streams. Each frame is its type, the payload's byte length in hex and a
+// newline, then the payload.
+const frame = (type, bytes) =>
+  Buffer.concat([Buffer.from(`${type}${bytes.length.toString(16)}\n`), bytes]);
+
+const sendFramed = (res, statusCode, body, logger) => {
+  // Framing gives the body a length of its own and needs a status that allows
+  // a body, so the real ones travel in headers
+  const length = res.getHeader("content-length");
   res.removeHeader("content-length");
-  res.setHeader("trailer", LOG_TRAILERS.join(", "));
+  res.statusCode = statusCode;
+  if (statusCode === 204 || statusCode === 304) {
+    res.setHeader("x-open-runtimes-status-code", statusCode);
+    res.statusCode = 200;
+  }
+  res.setHeader("x-open-runtimes-logs-inline", "enabled");
+
   body = encode(res, body ?? "");
-  const logs = logger.inlineLogs.toBuffer();
-  const errors = logger.inlineErrors.toBuffer();
   const finish = () => {
-    res.addTrailers({
-      [LOG_TRAILERS[0]]: logs.length,
-      [LOG_TRAILERS[1]]: errors.length,
-    });
-    res.end(Buffer.concat([logs, errors]));
+    for (const [type, buffer] of [
+      ["l", logger.inlineLogs],
+      ["e", logger.inlineErrors],
+    ]) {
+      if (buffer.length > 0) {
+        res.write(frame(type, buffer.toBuffer()));
+      }
+    }
+    res.end();
   };
+
   if (typeof body.pipe === "function") {
-    body.on("end", finish);
-    body.pipe(res, { end: false });
+    if (length !== undefined) {
+      res.setHeader("x-open-runtimes-content-length", length);
+    }
+    body
+      .pipe(
+        new Transform({
+          transform(chunk, encoding, callback) {
+            callback(null, frame("b", Buffer.from(chunk, encoding)));
+          },
+        }),
+      )
+      .on("end", finish)
+      .pipe(res, { end: false });
     return;
   }
-  res.write(body);
+
+  res.setHeader("x-open-runtimes-content-length", body.length);
+  if (body.length > 0) {
+    res.write(frame("b", body));
+  }
   finish();
 };
 
 const respond = (res, logger, statusCode, body) =>
   logger.inline
-    ? sendInline(res, statusCode, body, logger)
+    ? sendFramed(res, statusCode, body, logger)
     : send(res, statusCode, body);
 
 const Logger = require("./logger");

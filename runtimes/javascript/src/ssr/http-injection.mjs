@@ -10,7 +10,8 @@ import {
   addAuthenticationCheck,
   addSafeTimeout,
 } from "./system.mjs";
-import { Logger, loggingNamespace } from "./logger.mjs";
+import { frameResponse } from "./frames.mjs";
+import { InlineLogs, Logger, loggingNamespace } from "./logger.mjs";
 
 // Core: replace an http.Server's `emit` so "request" events flow through the
 // Open Runtimes contract before hitting the user-owned listener.
@@ -40,9 +41,20 @@ export function overrideEmit(originalEmit) {
       return;
     }
 
+    // A HEAD response has no body to carry them, so its logs stay in files
+    const inline =
+      req.headers["x-open-runtimes-logs-inline"] === "enabled" &&
+      req.method !== "HEAD" &&
+      req.loggerId
+        ? new InlineLogs()
+        : null;
+    if (inline) {
+      frameResponse(res, () => inline.take());
+    }
+
     const self = this;
 
-    loggingNamespace.run({ id: req.loggerId }, () => {
+    loggingNamespace.run({ id: req.loggerId, inline }, () => {
       Logger.overrideNativeLogs(loggingNamespace, req.loggerId);
 
       const dispatch = () => {
@@ -50,7 +62,7 @@ export function overrideEmit(originalEmit) {
           originalEmit.call(self, event, ...emitArgs);
         } catch (error) {
           if (!res.headersSent) {
-            Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);
+            Logger.write(req.loggerId, [error], Logger.TYPE_ERROR, inline);
             res.writeHead(500, { "Content-Type": "text/plain" });
             res.end("");
           }

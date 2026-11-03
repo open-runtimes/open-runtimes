@@ -28,8 +28,8 @@ if (process.features.require_module) {
 class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
-  // Matches the executor's MAX_LOG_SIZE, so inline logs truncate where file logs did
-  static INLINE_LIMIT = 5 * 1024 * 1024;
+  // One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+  static INLINE_LIMIT = 5 * 1024 * 1024 + 1;
 
   id = "";
   enabled = false;
@@ -201,30 +201,15 @@ class Logger {
 class InlineBuffer {
   chunks = [];
   length = 0;
-  truncated = false;
 
   constructor(limit) {
     this.limit = limit;
   }
 
   write(text) {
-    if (this.truncated) {
-      return;
-    }
-    let chunk = Buffer.from(text);
-    if (this.length + chunk.length > this.limit) {
-      chunk = chunk.subarray(0, this.limit - this.length);
-      this.truncated = true;
-    }
+    const chunk = Buffer.from(text).subarray(0, this.limit - this.length);
     this.chunks.push(chunk);
     this.length += chunk.length;
-    if (this.truncated) {
-      this.chunks.push(
-        Buffer.from(
-          `\nLog file has been truncated to ${(this.limit / 1048576).toFixed(2)}MB.`,
-        ),
-      );
-    }
   }
 
   toBuffer() {
