@@ -24,8 +24,9 @@ else
 fi
 
 # 404 page design fallback
-if [ ! -e "/mnt/resources/404.html" ]; then
-	cp /usr/local/server/404.html /mnt/resources/404.html
+PAGE_404="/mnt/resources/404.html"
+if [ ! -e "$PAGE_404" ]; then
+	PAGE_404="/usr/local/server/404.html"
 fi
 
 # Generate dynamic config.toml with HEADER_NAME support
@@ -108,7 +109,7 @@ exec static-web-server \
 	-p 3000 \
 	--log-level info \
 	--basic-auth="$AUTH" \
-	--page404="/mnt/resources/404.html" \
+	--page404="$PAGE_404" \
 	--page-fallback="$PAGE_FALLBACK" \
 	--ignore-hidden-files false \
 	--disable-symlinks "$DISABLE_SYMLINKS" \

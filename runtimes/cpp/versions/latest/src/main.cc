@@ -29,6 +29,9 @@ int main()
 
     drogon::app()
         .setClientMaxBodySize(20 * 1024 * 1024)
+        // Bodies over 64 KiB are buffered here; the default is ./uploads,
+        // which a non-root runtime cannot write
+        .setUploadPath("/tmp/uploads")
         .addListener("0.0.0.0", 3000)
         .registerHandlerViaRegex(
             "/.*",

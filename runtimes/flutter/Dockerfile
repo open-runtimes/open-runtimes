@@ -50,8 +50,9 @@ RUN flutter config --enable-web \
     && dart --disable-analytics
 
 # Preinstall the static file server; 4.1.0 is the newest release compatible
-# with every Dart SDK in the matrix
-RUN cd /usr/local/server/static-server && dart pub get
+# with every Dart SDK in the matrix. It is compiled here so that start-up runs
+# no Flutter tooling (git, the pub cache) and works as any user.
+RUN cd /usr/local/server/static-server && dart pub get && dart compile exe server.dart -o server
 
 # Preinstall the Jaspr CLI so Jaspr sites build without declaring jaspr_cli as
 # a project dependency, matching the Dockerfile Jaspr's own docs prescribe.
