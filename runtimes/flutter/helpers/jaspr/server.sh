@@ -6,7 +6,7 @@ shopt -s dotglob
 cd /usr/local/server/src/function/
 
 if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
-	chmod +x ./app
+	[ -x ./app ] || chmod +x ./app
 	START_COMMAND="./app"
 else
 	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
