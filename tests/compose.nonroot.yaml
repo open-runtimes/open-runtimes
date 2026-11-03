@@ -20,7 +20,9 @@ x-init: &init
         28b52ffd) zstd -dc /a | tar -xf - -C /code ;;
         *) tar -xf /a -C /code ;;
       esac
-      chown -R 0:0 /code && chmod -R go-w /code && chmod 777 /code && ls -A /code | head -20
+      chown -R 0:0 /code && chmod -R go-w /code && chmod 777 /code
+      for d in /copies/*; do find "$$d" -mindepth 1 -delete; cp -a /code/. "$$d"/; chmod 777 "$$d"; done
+      ls -A /code | head -20
 
 x-nonroot: &nonroot
   user: "65532:65532"
@@ -28,11 +30,15 @@ x-nonroot: &nonroot
   security_opt: [no-new-privileges:true]
 
 services:
+  # Each serve container gets its own copy, as each pod has its own overlay
   code-init:
     <<: *init
     volumes:
       - ./.runtime/code.tar.gz:/a:ro
       - nr-code:/code
+      - nr-code-secondary:/copies/secondary
+      - nr-code-teritary:/copies/teritary
+      - nr-code-php-fatal:/copies/php-fatal
   code-init-no-export:
     <<: *init
     profiles: [no-export]
@@ -47,9 +53,14 @@ services:
     volumes: [nr-code:/usr/local/server/src/function]
   serve-secondary:
     <<: *serve
+    volumes: [nr-code-secondary:/usr/local/server/src/function]
     command: ['bash', '-c', 'bash helpers/start.sh "$$START_COMMAND"']
-  serve-teritary: *serve
-  serve-php-fatal: *serve
+  serve-teritary:
+    <<: *serve
+    volumes: [nr-code-teritary:/usr/local/server/src/function]
+  serve-php-fatal:
+    <<: *serve
+    volumes: [nr-code-php-fatal:/usr/local/server/src/function]
   serve-no-export:
     <<: *nonroot
     depends_on: {code-init-no-export: {condition: service_completed_successfully}}
@@ -58,4 +69,7 @@ services:
 
 volumes:
   nr-code:
+  nr-code-secondary:
+  nr-code-teritary:
+  nr-code-php-fatal:
   nr-code-no-export:
