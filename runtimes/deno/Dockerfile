@@ -45,6 +45,6 @@ RUN if [ -f /usr/local/server/src/ssr/deno.json ] && \
 	rm /usr/local/server/deno.json; \
 	fi
 
-ENV OPEN_RUNTIMES_SERVER_COMMAND="deno run --allow-run --allow-net --allow-write --allow-read --allow-env src/server.ts"
+ENV OPEN_RUNTIMES_SERVER_COMMAND="deno run --no-check --allow-run --allow-net --allow-write --allow-read --allow-env src/server.ts"
 
 INCLUDE ./docker/base-after
