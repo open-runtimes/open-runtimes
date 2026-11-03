@@ -3,6 +3,16 @@ import { Logger } from "./logger";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
+// User functions may return a native (Fetch API) Response instead of a
+// context.res.* result. Converts it into the internal
+// { body, statusCode, headers } shape so the rest of the pipeline (reserved
+// header filtering, charset defaults, logging headers) applies to it as well.
+const fromNativeResponse = async (response: Response) => ({
+  body: new Uint8Array(await response.arrayBuffer()),
+  statusCode: response.status,
+  headers: response.headers,
+});
+
 const action = async (logger: Logger, request: any) => {
   const timeout = request.headers.get(`x-open-runtimes-timeout`) ?? "";
   let safeTimeout: number | null = null;
@@ -192,6 +202,9 @@ const action = async (logger: Logger, request: any) => {
   if (output === null) {
     async function execute() {
       output = await userFunction(context);
+      if (output instanceof Response) {
+        output = await fromNativeResponse(output);
+      }
     }
 
     try {

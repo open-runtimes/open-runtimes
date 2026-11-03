@@ -4,6 +4,16 @@ import { config } from "./config.ts";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
+// User functions may return a native (Fetch API) Response instead of a
+// context.res.* result. Converts it into the internal
+// { body, statusCode, headers } shape so the rest of the pipeline (reserved
+// header filtering, charset defaults, logging headers) applies to it as well.
+const fromNativeResponse = async (response: Response) => ({
+  body: new Uint8Array(await response.arrayBuffer()),
+  statusCode: response.status,
+  headers: response.headers,
+});
+
 export const action = async (logger: Logger, ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? "";
   let safeTimeout: number | null = null;
@@ -206,6 +216,9 @@ export const action = async (logger: Logger, ctx: any) => {
   if (output === null) {
     async function execute() {
       output = await userFunction(context);
+      if (output instanceof Response) {
+        output = await fromNativeResponse(output);
+      }
     }
 
     try {
@@ -248,12 +261,22 @@ export const action = async (logger: Logger, ctx: any) => {
   output.statusCode = output.statusCode ?? 200;
   output.headers = output.headers ?? {};
 
-  for (const header in output.headers) {
-    if (header.toLowerCase().startsWith("x-open-runtimes-")) {
-      continue;
-    }
+  if (output.headers instanceof Headers) {
+    for (const [header, value] of output.headers) {
+      if (header.toLowerCase().startsWith("x-open-runtimes-")) {
+        continue;
+      }
 
-    ctx.response.headers.set(header.toLowerCase(), output.headers[header]);
+      ctx.response.headers.append(header.toLowerCase(), value);
+    }
+  } else {
+    for (const header in output.headers) {
+      if (header.toLowerCase().startsWith("x-open-runtimes-")) {
+        continue;
+      }
+
+      ctx.response.headers.set(header.toLowerCase(), output.headers[header]);
+    }
   }
 
   const contentTypeValue =

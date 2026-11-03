@@ -50,6 +50,17 @@ export default async function (context: any) {
 }
 ```
 
+- Instead of `context.res.*`, a function can also return a native [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) object. Its status, headers and body are sent to the client as-is:
+
+```typescript
+export default async function (context: any) {
+  return new Response(JSON.stringify({ message: "Hello Open Runtimes 👋" }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+```
+
 - To handle dependencies, you need to have `package.json` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="bun install"` during build.
 
 - The default entrypoint is `index.ts`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.ts`.
