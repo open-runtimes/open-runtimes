@@ -39,7 +39,7 @@ const composeEnv: Record<string, string> = {
     COMPOSE_PROFILES: entry.COMPOSE_PROFILES.join(','),
 };
 
-const compose = ['docker', 'compose', '-f', join(repoRoot, 'tests/compose.yaml')];
+const compose = ['docker', 'compose', '-f', join(repoRoot, 'tests/compose.yaml'), ...(process.env.NONROOT ? ['-f', join(repoRoot, 'tests/compose.nonroot.yaml')] : [])];
 
 function run(cmd: string[], env: Record<string, string> = composeEnv): void {
     console.log(`+ ${cmd.join(' ')}`);
