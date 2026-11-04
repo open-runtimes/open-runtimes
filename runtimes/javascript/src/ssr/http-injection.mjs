@@ -10,8 +10,16 @@ import {
   addAuthenticationCheck,
   addSafeTimeout,
 } from "./system.mjs";
+import { Buffer } from "node:buffer";
 import { frameResponse } from "./frames.mjs";
-import { InlineLogs, Logger, loggingNamespace } from "./logger.mjs";
+import {
+  InlineLogs,
+  Logger,
+  inlineLogs,
+  loggingNamespace,
+} from "./logger.mjs";
+
+const EMPTY = Buffer.alloc(0);
 
 // Core: replace an http.Server's `emit` so "request" events flow through the
 // Open Runtimes contract before hitting the user-owned listener.
@@ -41,15 +49,11 @@ export function overrideEmit(originalEmit) {
       return;
     }
 
-    // A HEAD response has no body to carry them, so its logs stay in files
-    const inline =
-      req.headers["x-open-runtimes-logs-inline"] === "enabled" &&
-      req.method !== "HEAD" &&
-      req.loggerId
-        ? new InlineLogs()
-        : null;
-    if (inline) {
-      frameResponse(res, () => inline.take());
+    // A HEAD response has no body to carry them, so its logs are dropped
+    let inline = null;
+    if (inlineLogs && req.method !== "HEAD") {
+      inline = req.loggerId ? new InlineLogs() : null;
+      frameResponse(res, () => inline?.take() ?? [EMPTY, EMPTY]);
     }
 
     const self = this;

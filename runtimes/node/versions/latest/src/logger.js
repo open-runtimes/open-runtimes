@@ -45,6 +45,7 @@ class Logger {
 
   constructor(status, id, inline = false) {
     this.enabled = (status ? status : "enabled") === "enabled";
+    this.inline = inline;
 
     if (this.enabled) {
       this.id = id
@@ -52,8 +53,7 @@ class Logger {
         : config.env === "development"
           ? "dev"
           : this.generateId();
-      this.inline = inline;
-      if (config.logsDirectory && !inline) {
+      if (config.logsDirectory) {
         this.streamLogs = fs.createWriteStream(
           `${config.logsDirectory}/${this.id}_logs.log`,
           {

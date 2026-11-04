@@ -11,11 +11,13 @@ public final class OprConfig {
   public static final String ENTRYPOINT = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
   public static final String ENV;
   public static final String LOGS_DIRECTORY;
+  // Inline logs travel on the response, so no log files are written
+  public static final boolean INLINE_LOGS = "inline".equals(System.getenv("OPEN_RUNTIMES_LOGGING"));
   public static final Map<String, String> HEADERS;
 
   static {
     String logsDirectory = System.getenv("OPEN_RUNTIMES_LOGS_DIRECTORY");
-    LOGS_DIRECTORY = logsDirectory == null ? "/mnt/logs" : logsDirectory;
+    LOGS_DIRECTORY = INLINE_LOGS ? "" : logsDirectory == null ? "/mnt/logs" : logsDirectory;
 
     String secret = System.getenv("OPEN_RUNTIMES_SECRET");
     SECRET = secret == null ? "" : secret;

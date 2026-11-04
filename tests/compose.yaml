@@ -136,6 +136,23 @@ services:
       - ./.runtime/code.tar.gz:/mnt/code/code.tar.gz:ro
     command: ['bash', '-c', 'bash helpers/start.sh "$$START_COMMAND"']
 
+  # Inline logs variant: logs travel on a framed response instead of files
+  serve-inline:
+    <<: *runtime
+    container_name: open-runtimes-test-serve-inline
+    environment:
+      START_COMMAND: ${START_COMMAND}
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+      OPEN_RUNTIMES_SECRET: test-secret-key
+      OPEN_RUNTIMES_LOGGING: inline
+    ports:
+      - '${HOST_PORT_INLINE:-3005}:3000'
+    volumes:
+      - ./resources/telemetry:/mnt/telemetry
+      - /tmp/logs:/mnt/logs
+      - ./.runtime/code.tar.gz:/mnt/code/code.tar.gz:ro
+    command: ['bash', '-c', 'bash helpers/start.sh "$$START_COMMAND"']
+
   # No-export entrypoint variant (entrypoint comes from build metadata)
   serve-no-export:
     <<: *runtime

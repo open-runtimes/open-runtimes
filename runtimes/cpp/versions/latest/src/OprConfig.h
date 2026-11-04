@@ -11,6 +11,7 @@ struct OprConfig {
   Json::Value headers;
   std::string env;
   std::string logsDirectory = "/mnt/logs";
+  bool inlineLogs = false;
 };
 
 inline const OprConfig &config() {
@@ -27,6 +28,13 @@ inline const OprConfig &config() {
 
     if (std::getenv("OPEN_RUNTIMES_LOGS_DIRECTORY") != nullptr) {
       config.logsDirectory = std::getenv("OPEN_RUNTIMES_LOGS_DIRECTORY");
+    }
+
+    // Inline logs travel on the response, so no log files are written
+    const char *logging = std::getenv("OPEN_RUNTIMES_LOGGING");
+    if (logging != nullptr && std::string(logging) == "inline") {
+      config.inlineLogs = true;
+      config.logsDirectory = "";
     }
 
     if (std::getenv("OPEN_RUNTIMES_HEADERS") != nullptr) {

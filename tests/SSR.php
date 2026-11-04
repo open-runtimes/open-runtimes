@@ -39,6 +39,30 @@ class SSR extends CSR
         self::assertNotEquals($date1, $date2);
     }
 
+    public function testInlineLogs(): void
+    {
+        Client::$host = 'open-runtimes-test-serve-inline';
+        $this->awaitHostReady();
+
+        try {
+            $response = Client::execute(url: '/logs', method: 'GET');
+            self::assertEquals(200, $response['code']);
+            self::assertEquals('enabled', $response['headers']['x-open-runtimes-logs-inline'] ?? '');
+            $frames = Client::decodeFrames($response['body']);
+            self::assertStringContainsString('All logs printed', $frames['body']);
+            self::assertStringContainsString('A log printed', $frames['logs']);
+            self::assertStringContainsString('An error printed', $frames['errors']);
+            $logId = $response['headers']['x-open-runtimes-log-id'];
+            self::assertFileDoesNotExist("/tmp/logs/{$logId}_logs.log");
+
+            $response = Client::execute(url: '/', method: 'GET');
+            self::assertEquals(200, $response['code']);
+            self::assertStringContainsString('Hello Open Runtimes', Client::decodeFrames($response['body'])['body']);
+        } finally {
+            Client::$host = 'open-runtimes-test-serve';
+        }
+    }
+
     public function testServerLogs(): void
     {
         $response = Client::execute(url: '/logs', method: 'GET');

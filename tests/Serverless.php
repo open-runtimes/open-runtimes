@@ -451,6 +451,105 @@ class Serverless extends Base
         self::assertStringContainsString('Error log', $errors);
     }
 
+    public function testInlineLogs(): void
+    {
+        Client::$host = 'open-runtimes-test-serve-inline';
+        $this->awaitHostReady();
+
+        try {
+            $response = Client::execute(headers: ['x-action' => 'logs']);
+            self::assertEquals(200, $response['code']);
+            self::assertEquals('enabled', $response['headers']['x-open-runtimes-logs-inline'] ?? '');
+            $frames = Client::decodeFrames($response['body']);
+            self::assertEmpty($frames['body']);
+            self::assertStringContainsString('Debug log', $frames['logs']);
+            self::assertStringContainsString('Native log', $frames['logs']);
+            self::assertStringContainsString('objectKey', $frames['logs']);
+            self::assertStringContainsString('Log+With+Plus+Symbol', $frames['logs']);
+            self::assertStringContainsString('Error log', $frames['errors']);
+            $logId = $response['headers']['x-open-runtimes-log-id'];
+            self::assertNotEmpty($logId);
+            self::assertFileDoesNotExist("/tmp/logs/{$logId}_logs.log");
+            self::assertFileDoesNotExist("/tmp/logs/{$logId}_errors.log");
+
+            // Bodies decode to exactly what an unframed response carries
+            $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
+            self::assertEquals(200, $response['code']);
+            self::assertEquals('Hello World 👋', Client::decodeFrames($response['body'])['body']);
+            self::assertEqualsIgnoringWhitespace('text/plain; charset=utf-8', $response['headers']['content-type']);
+            self::assertEquals((string) \strlen('Hello World 👋'), $response['headers']['x-open-runtimes-content-length'] ?? '');
+
+            $response = Client::execute(headers: ['x-action' => 'jsonResponse']);
+            self::assertEquals(200, $response['code']);
+            $body = \json_decode(Client::decodeFrames($response['body'])['body'], true);
+            self::assertEquals(true, $body['json']);
+            self::assertEquals('Developers are awesome.', $body['message']);
+
+            $response = Client::execute(body: '', headers: ['x-action' => 'binaryResponse1']);
+            self::assertEquals(200, $response['code']);
+            self::assertEquals("\x00\x0a\xff", Client::decodeFrames($response['body'])['body']);
+
+            $large = \file_get_contents(__DIR__.'/resources/large-file-17mb.zip');
+            $response = Client::execute(body: $large, headers: ['x-action' => 'binaryResponseLarge'], method: 'POST', timeout: 30);
+            self::assertEquals(200, $response['code']);
+            self::assertContains(Client::decodeFrames($response['body'])['body'], [\md5($large), \base64_encode($large)]);
+
+            $response = Client::execute(headers: ['x-action' => 'statusResponse']);
+            self::assertEquals(404, $response['code']);
+            self::assertEquals('FAIL', Client::decodeFrames($response['body'])['body']);
+
+            $response = Client::execute(headers: ['x-action' => 'redirectResponse']);
+            self::assertEquals(301, $response['code']);
+            self::assertEquals('https://github.com/', $response['headers']['location']);
+            self::assertEmpty(Client::decodeFrames($response['body'])['body']);
+
+            $response = Client::execute(headers: ['x-action' => 'headersResponse', 'x-open-runtimes-custom-in-header' => 'notMissing']);
+            self::assertEquals(200, $response['code']);
+            self::assertEquals('first-value', $response['headers']['first-header']);
+            self::assertEquals('OK', Client::decodeFrames($response['body'])['body']);
+
+            // A 204 cannot carry frames, so it travels as a 200 with the real status in a header
+            $response = Client::execute(headers: ['x-action' => 'emptyResponse']);
+            self::assertEquals(200, $response['code']);
+            self::assertEquals('204', $response['headers']['x-open-runtimes-status-code'] ?? '');
+            self::assertEmpty(Client::decodeFrames($response['body'])['body']);
+
+            $response = Client::execute(headers: ['x-action' => 'errorTest']);
+            self::assertEquals(500, $response['code']);
+            $frames = Client::decodeFrames($response['body']);
+            self::assertEmpty($frames['body']);
+            self::assertStringContainsString('Before error...', $frames['logs']);
+            self::assertStringContainsString('Error!', $frames['errors']);
+
+            $response = Client::execute(headers: ['x-action' => 'timeout', 'x-open-runtimes-timeout' => '1']);
+            self::assertEquals(500, $response['code']);
+            $frames = Client::decodeFrames($response['body']);
+            self::assertEmpty($frames['body']);
+            self::assertStringContainsString('Timeout start.', $frames['logs']);
+            self::assertStringContainsString('Execution timed out.', $frames['errors']);
+
+            // With logging disabled the response is still framed, without logs
+            $response = Client::execute(headers: ['x-action' => 'logs', 'x-open-runtimes-logging' => 'disabled']);
+            self::assertEquals(200, $response['code']);
+            self::assertEquals('enabled', $response['headers']['x-open-runtimes-logs-inline'] ?? '');
+            $frames = Client::decodeFrames($response['body']);
+            self::assertEmpty($frames['logs']);
+            self::assertEmpty($frames['errors']);
+
+            // A HEAD response has no body to frame, and writes no files
+            $response = Client::execute(body: null, method: 'HEAD', headers: ['x-action' => 'logs']);
+            self::assertEquals(200, $response['code']);
+            self::assertArrayNotHasKey('x-open-runtimes-logs-inline', $response['headers']);
+            self::assertEmpty($response['body']);
+            $logId = $response['headers']['x-open-runtimes-log-id'] ?? '';
+            if ($logId !== '') {
+                self::assertFileDoesNotExist("/tmp/logs/{$logId}_logs.log");
+            }
+        } finally {
+            Client::$host = 'open-runtimes-test-serve';
+        }
+    }
+
     public function testLibrary(): void
     {
         $response = Client::execute(headers: ['x-action' => 'library'], body: '5');

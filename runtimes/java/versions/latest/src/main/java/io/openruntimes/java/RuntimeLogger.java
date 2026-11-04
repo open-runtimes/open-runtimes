@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -15,13 +16,20 @@ import java.util.Set;
 public class RuntimeLogger {
   public static final String TYPE_ERROR = "error";
   public static final String TYPE_LOG = "log";
+  // One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+  public static final int INLINE_LIMIT = 5 * 1024 * 1024 + 1;
 
   private String id = "";
   private boolean enabled = false;
   private boolean includesNativeInfo = false;
+  private boolean inline = false;
 
   private FileWriter streamLogs = null;
   private FileWriter streamErrors = null;
+
+  // Inline mode returns logs on the response instead of writing files
+  private final ByteArrayOutputStream inlineLogs = new ByteArrayOutputStream();
+  private final ByteArrayOutputStream inlineErrors = new ByteArrayOutputStream();
 
   private ByteArrayOutputStream customStdStream;
 
@@ -34,7 +42,8 @@ public class RuntimeLogger {
   private static final PrintStream stdout = System.out;
   private static final PrintStream stderr = System.err;
 
-  public RuntimeLogger(String status, String id) throws IOException {
+  public RuntimeLogger(String status, String id, boolean inline) throws IOException {
+    this.inline = inline;
     this.customStdStream = new ByteArrayOutputStream();
 
     if (status == null) {
@@ -73,6 +82,18 @@ public class RuntimeLogger {
 
   public String getId() {
     return this.id;
+  }
+
+  public boolean isInline() {
+    return this.inline;
+  }
+
+  public byte[] getInlineLogs() {
+    return this.inlineLogs.toByteArray();
+  }
+
+  public byte[] getInlineErrors() {
+    return this.inlineErrors.toByteArray();
   }
 
   public void write(Object[] messages, String type, Boolean xnative) throws IOException {
@@ -129,6 +150,13 @@ public class RuntimeLogger {
     PrintStream passthrough = type == RuntimeLogger.TYPE_ERROR ? stderr : stdout;
     passthrough.print(stringLog);
     passthrough.flush();
+
+    if (this.inline) {
+      ByteArrayOutputStream buffer =
+          type == RuntimeLogger.TYPE_ERROR ? this.inlineErrors : this.inlineLogs;
+      byte[] bytes = stringLog.getBytes(StandardCharsets.UTF_8);
+      buffer.write(bytes, 0, Math.min(bytes.length, INLINE_LIMIT - buffer.size()));
+    }
 
     try {
       if (stream != null) {

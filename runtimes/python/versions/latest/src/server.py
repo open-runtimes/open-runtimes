@@ -12,6 +12,38 @@ from logger import Logger
 disable_vulnerable_brotli()
 
 
+# With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the logs
+# and errors follow in `l` and `e` frames, so edge splits them off the body. Each
+# frame is its type, the payload's byte length in hex and a newline, then the payload.
+def frame(type, payload):
+    return f"{type}{len(payload):x}\n".encode() + payload if payload else b""
+
+
+def respond(resp, body, logger):
+    if not logger.inline:
+        return resp
+
+    if isinstance(body, str):
+        body = body.encode("utf-8")
+    body = body or b""
+
+    # Framing gives the body a length of its own and needs a status that allows
+    # a body, so the real ones travel in headers
+    resp.headers.pop("content-length", None)
+    resp.headers["x-open-runtimes-content-length"] = str(len(body))
+    resp.headers["x-open-runtimes-logs-inline"] = "enabled"
+    if resp.status in (204, 304):
+        resp.headers["x-open-runtimes-status-code"] = str(resp.status)
+        resp.set_status(200)
+
+    resp.body = (
+        frame("b", body)
+        + frame("l", logger.inline_logs)
+        + frame("e", logger.inline_errors)
+    )
+    return resp
+
+
 async def action(logger, request: web_request.Request):
     timeout = request.headers.get("x-open-runtimes-timeout", "")
     safeTimeout = None
@@ -189,7 +221,7 @@ async def action(logger, request: web_request.Request):
     resp.headers["x-open-runtimes-log-id"] = logger.id
     logger.end()
 
-    return resp
+    return respond(resp, output["body"], logger)
 
 
 async def handler(request) -> web.Response:
@@ -206,6 +238,8 @@ async def handler(request) -> web.Response:
     logger = Logger(
         request.headers.get("x-open-runtimes-logging", ""),
         request.headers.get("x-open-runtimes-log-id", ""),
+        # A HEAD response has no body to carry them, so its logs are dropped
+        config.INLINE_LOGS and request.method != "HEAD",
     )
 
     try:
@@ -219,7 +253,7 @@ async def handler(request) -> web.Response:
     resp = web.Response(status=500, headers={"x-open-runtimes-log-id": logger.id})
     logger.end()
 
-    return resp
+    return respond(resp, b"", logger)
 
 
 app = web.Application(client_max_size=20 * 1024 * 1024)

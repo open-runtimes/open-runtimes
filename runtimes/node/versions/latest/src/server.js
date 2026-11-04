@@ -63,7 +63,7 @@ const send = (res, statusCode, body = null) => {
   res.end(body);
 };
 
-// When edge asks for logs inline, the body goes out in `b` frames and the logs
+// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in `b` frames and the logs
 // and errors follow in `l` and `e` frames, so edge splits them off a body it
 // streams. Each frame is its type, the payload's byte length in hex and a
 // newline, then the payload.
@@ -156,8 +156,8 @@ const handle = async (req, res) => {
   const logger = new Logger(
     req.headers[`x-open-runtimes-logging`],
     req.headers[`x-open-runtimes-log-id`],
-    req.headers[`x-open-runtimes-logs-inline`] === "enabled" &&
-      req.method !== "HEAD",
+    // A HEAD response has no body to carry them, so its logs are dropped
+    config.inlineLogs && req.method !== "HEAD",
   );
 
   try {

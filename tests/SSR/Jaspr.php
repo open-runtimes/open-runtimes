@@ -37,6 +37,11 @@ class Jaspr extends SSR
         $this->markTestSkipped('Jaspr SSR compiles to native Dart AOT — stdout capture not supported yet');
     }
 
+    public function testInlineLogs(): void
+    {
+        $this->markTestSkipped('Jaspr SSR compiles to native Dart AOT — stdout capture not supported yet');
+    }
+
     public function testHiddenFile(): void
     {
         $response = Client::execute(url: '/hidden', method: 'GET');

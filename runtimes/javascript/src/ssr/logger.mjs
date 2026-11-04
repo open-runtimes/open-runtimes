@@ -26,7 +26,11 @@ if (!process.features?.require_module && typeof Bun === "undefined") {
 export const loggingNamespace = new AsyncLocalStorage();
 
 const isDevelopment = process.env.OPEN_RUNTIMES_ENV === "development";
-const logsDirectory = process.env.OPEN_RUNTIMES_LOGS_DIRECTORY ?? "/mnt/logs";
+// Inline logs travel on the response, so no log files are written
+export const inlineLogs = process.env.OPEN_RUNTIMES_LOGGING === "inline";
+const logsDirectory = inlineLogs
+  ? ""
+  : (process.env.OPEN_RUNTIMES_LOGS_DIRECTORY ?? "/mnt/logs");
 
 export const nativeLog = console.log.bind(console);
 
@@ -143,7 +147,7 @@ class CappedBuffer {
   }
 }
 
-// A request's logs held for its response, when edge asks for them inline
+// A request's logs held for its response, with OPEN_RUNTIMES_LOGGING=inline
 export class InlineLogs {
   logs = new CappedBuffer();
   errors = new CappedBuffer();

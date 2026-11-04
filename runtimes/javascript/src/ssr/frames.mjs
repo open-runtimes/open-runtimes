@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 
-// When edge asks for logs inline, the body goes out in `b` frames and the logs
+// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in `b` frames and the logs
 // and errors follow in `l` and `e` frames, so edge splits them off a body it
 // streams. Each frame is its type, the payload's byte length in hex and a
 // newline, then the payload.

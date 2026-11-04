@@ -3,14 +3,22 @@ import Foundation
 class RuntimeLogger {
     static let TYPE_LOG = "log"
     static let TYPE_ERROR = "error"
+    /// One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+    static let INLINE_LIMIT = 5 * 1024 * 1024 + 1
 
     var enabled = false
     var id = ""
+    var inline = false
 
     var streamLogs: FileHandle?
     var streamErrors: FileHandle?
+    // Inline mode returns logs on the response instead of writing files
+    var inlineLogs = Data()
+    var inlineErrors = Data()
 
-    init(status: String, id: String) {
+    init(status: String, id: String, inline: Bool = false) {
+        self.inline = inline
+
         if status == "enabled" || status == "" {
             enabled = true
         }
@@ -95,6 +103,14 @@ class RuntimeLogger {
                 ? FileHandle.standardError
                 : FileHandle.standardOutput
             passthrough.write(stringLogTemp)
+
+            if inline {
+                if type == RuntimeLogger.TYPE_ERROR {
+                    inlineErrors.append(stringLogTemp.prefix(RuntimeLogger.INLINE_LIMIT - inlineErrors.count))
+                } else {
+                    inlineLogs.append(stringLogTemp.prefix(RuntimeLogger.INLINE_LIMIT - inlineLogs.count))
+                }
+            }
 
             if let streamTemp = stream {
                 streamTemp.write(stringLogTemp)

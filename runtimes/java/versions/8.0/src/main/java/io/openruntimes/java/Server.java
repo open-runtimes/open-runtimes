@@ -5,10 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.ToNumberPolicy;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -64,15 +66,17 @@ public class Server {
     }
 
     RuntimeLogger logger = null;
+    // A HEAD response has no body to carry them, so its logs are dropped
+    boolean inline = OprConfig.INLINE_LOGS && !ctx.method().toString().equals("HEAD");
 
     try {
       logger =
           new RuntimeLogger(
-              ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"));
+              ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"), inline);
     } catch (IOException e) {
       // Ignore missing logs
       try {
-        logger = new RuntimeLogger("disabled", "");
+        logger = new RuntimeLogger("disabled", "", inline);
       } catch (IOException e2) {
         // Never happens
       }
@@ -97,8 +101,42 @@ public class Server {
         // Ignore missing logs
       }
 
-      return ctx.status(500).result("");
+      return respond(ctx, logger, 500, new byte[0]);
     }
+  }
+
+  // With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the logs
+  // and errors follow in `l` and `e` frames, so edge splits them off the body. Each
+  // frame is its type, the payload's byte length in hex and a newline, then the payload.
+  private static Context respond(Context ctx, RuntimeLogger logger, int statusCode, byte[] body) {
+    if (!logger.isInline()) {
+      return ctx.status(statusCode).result(body);
+    }
+
+    // Framing gives the body a length of its own and needs a status that allows
+    // a body, so the real ones travel in headers
+    ctx.header("x-open-runtimes-logs-inline", "enabled");
+    ctx.header("x-open-runtimes-content-length", String.valueOf(body.length));
+    if (statusCode == 204 || statusCode == 304) {
+      ctx.header("x-open-runtimes-status-code", String.valueOf(statusCode));
+      statusCode = 200;
+    }
+
+    ByteArrayOutputStream framed = new ByteArrayOutputStream();
+    frame(framed, 'b', body);
+    frame(framed, 'l', logger.getInlineLogs());
+    frame(framed, 'e', logger.getInlineErrors());
+    return ctx.status(statusCode).result(framed.toByteArray());
+  }
+
+  private static void frame(ByteArrayOutputStream out, char type, byte[] payload) {
+    if (payload.length == 0) {
+      return;
+    }
+    byte[] header =
+        (type + Integer.toHexString(payload.length) + "\n").getBytes(StandardCharsets.UTF_8);
+    out.write(header, 0, header.length);
+    out.write(payload, 0, payload.length);
   }
 
   public static Context action(RuntimeLogger logger, Context ctx) {
@@ -301,7 +339,9 @@ public class Server {
       String header = entry.getKey().toLowerCase();
       String headerValue = entry.getValue();
 
-      if (header.startsWith("x-open-runtimes-")) {
+      // A framed body has a length of its own, sent as x-open-runtimes-content-length
+      if (header.startsWith("x-open-runtimes-")
+          || (logger.isInline() && header.equals("content-length"))) {
         continue;
       }
 
@@ -323,6 +363,6 @@ public class Server {
       // Ignore missing logs
     }
 
-    return ctx.status(output.getStatusCode()).result(output.getBody());
+    return respond(ctx, logger, output.getStatusCode(), output.getBody());
   }
 }
