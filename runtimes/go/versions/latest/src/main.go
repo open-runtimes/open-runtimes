@@ -89,12 +89,16 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	for key, value := range r.Header {
 		key = strings.ToLower(key)
 
+		// Copy the value instead of lowercasing r.Header in place, so
+		// context.Req.Raw keeps the original (multipart boundaries are
+		// case-sensitive).
+		headerValue := value[0]
 		if key == "content-type" {
-			value[0] = strings.ToLower(value[0])
+			headerValue = strings.ToLower(headerValue)
 		}
 
 		if strings.HasPrefix(key, "x-open-runtimes-") == false {
-			headers[key] = value[0]
+			headers[key] = headerValue
 		}
 	}
 

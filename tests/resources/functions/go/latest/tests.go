@@ -108,6 +108,8 @@ When you can have two!
 			"bodyText":      string(rawBody),
 			"controlHeader": raw.Header.Get("x-open-runtimes-custom-header"),
 		})
+	case "rawRequestContentType":
+		return Context.Res.Text(Context.Req.Raw.Header.Get("Content-Type"))
 	case "requestHeaders":
 		return Context.Res.Json(Context.Req.Headers)
 	case "requestBodyText":
