@@ -61,6 +61,15 @@ export default async function (context: any) {
 }
 ```
 
+- The incoming request is also available as a native [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) through `context.req.raw`. It is built lazily from the same data as `context.req`: the URL matches `context.req.url`, `x-open-runtimes-*` control headers are removed and enforced headers are included. Like any `Request`, its body can be read once:
+
+```typescript
+export default async function (context: any) {
+  const form = await context.req.raw.formData();
+  return context.res.text(`Hello ${form.get("name")}`);
+}
+```
+
 - To handle dependencies, you need to have `package.json` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="bun install"` during build.
 
 - The default entrypoint is `index.ts`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.ts`.

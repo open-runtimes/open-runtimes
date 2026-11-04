@@ -8,6 +8,7 @@ use Tests\Serverless;
 class Node extends Serverless
 {
     use NativeResponse;
+    use RawRequest;
 
     public function testSetCookie(): void
     {

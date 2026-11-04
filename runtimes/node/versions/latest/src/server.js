@@ -195,6 +195,9 @@ const action = async (logger, req, res) => {
 
   const url = `${scheme}://${host}${port.toString() === defaultPort ? "" : `:${port}`}${path}${queryString === "" ? "" : `?${queryString}`}`;
 
+  // Lazily built native (Fetch API) Request, see context.req.raw
+  let rawRequest = null;
+
   const context = {
     req: {
       get body() {
@@ -217,6 +220,24 @@ const action = async (logger, req, res) => {
       },
       get bodyBinary() {
         return bodyBinary;
+      },
+      get raw() {
+        if (typeof Request === "undefined") {
+          throw new Error(
+            "context.req.raw requires Node.js 18 or newer, which provides the Request class.",
+          );
+        }
+        if (rawRequest === null) {
+          rawRequest = new Request(this.url, {
+            method: this.method,
+            headers: this.headers,
+            // GET and HEAD requests must not carry a body
+            body: ["GET", "HEAD"].includes(this.method)
+              ? undefined
+              : this.bodyBinary,
+          });
+        }
+        return rawRequest;
       },
       headers,
       method: req.method,

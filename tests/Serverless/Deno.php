@@ -7,6 +7,7 @@ use Tests\Serverless;
 class Deno extends Serverless
 {
     use NativeResponse;
+    use RawRequest;
 
     public function testSetCookie(): void
     {

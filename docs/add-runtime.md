@@ -154,6 +154,9 @@ reference implementation):
 4. **Build the context** and call the user's function with it:
    - `context.req` — `bodyBinary` / `bodyText` / `bodyJson` / `body`, `headers`,
      `method`, `scheme`, `host`, `port`, `path`, `query`, `queryString`, `url`.
+     The JavaScript runtimes (Node.js, Bun, Deno) additionally expose `raw`, a
+     lazily built native Fetch API `Request` carrying the same URL, headers and
+     body as `context.req`.
    - `context.res` — `text(body, status?, headers?)`, `json(obj, …)`,
      `binary(bytes, …)`, `empty()`, `redirect(url, status?, headers?)`,
      `send(body, …)`.

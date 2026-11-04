@@ -73,6 +73,15 @@ module.exports = async (context) => {
 };
 ```
 
+- The incoming request is also available as a native [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) through `context.req.raw` (Node.js 18 and newer). It is built lazily from the same data as `context.req`: the URL matches `context.req.url`, `x-open-runtimes-*` control headers are removed and enforced headers are included. Like any `Request`, its body can be read once:
+
+```js
+module.exports = async (context) => {
+  const form = await context.req.raw.formData();
+  return context.res.text(`Hello ${form.get("name")}`);
+};
+```
+
 - To handle dependencies, you need to have `package.json` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="npm install"` during build.
 
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.js`.
