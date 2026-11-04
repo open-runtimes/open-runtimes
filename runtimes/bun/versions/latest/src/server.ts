@@ -1,6 +1,10 @@
 import { config } from "./config";
 import { Logger } from "./logger";
 
+// The Fetch API Request constructor rejects these methods, so context.req.raw
+// cannot be built for them.
+const FORBIDDEN_REQUEST_METHODS = ["CONNECT", "TRACE", "TRACK"];
+
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
 // User functions may return a native (Fetch API) Response instead of a
@@ -112,6 +116,11 @@ const action = async (logger: Logger, request: any) => {
         return bodyBinary;
       },
       get raw() {
+        if (FORBIDDEN_REQUEST_METHODS.includes(this.method.toUpperCase())) {
+          throw new Error(
+            `context.req.raw is not available for ${this.method} requests, because the Fetch API Request class does not allow this method.`,
+          );
+        }
         if (rawRequest === null) {
           rawRequest = new Request(this.url, {
             method: this.method,

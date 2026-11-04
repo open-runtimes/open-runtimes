@@ -45,5 +45,10 @@ trait RawRequest
         $body = \json_decode($response['body'], true);
         self::assertEquals('GET', $body['method']);
         self::assertFalse($body['hasBody']);
+
+        // Methods the Fetch API forbids cannot be represented; expect a descriptive error
+        $response = Client::execute(method: 'TRACE', headers: ['x-action' => 'rawRequestEmpty']);
+        self::assertEquals(500, $response['code']);
+        self::assertStringContainsString('context.req.raw is not available for TRACE requests', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
 }

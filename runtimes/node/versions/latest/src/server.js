@@ -88,6 +88,10 @@ const fromNativeResponse = async (response) => {
   };
 };
 
+// The Fetch API Request constructor rejects these methods, so context.req.raw
+// cannot be built for them.
+const FORBIDDEN_REQUEST_METHODS = ["CONNECT", "TRACE", "TRACK"];
+
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
 const server = http.createServer(async (req, res) => {
@@ -225,6 +229,11 @@ const action = async (logger, req, res) => {
         if (typeof Request === "undefined") {
           throw new Error(
             "context.req.raw requires Node.js 18 or newer, which provides the Request class.",
+          );
+        }
+        if (FORBIDDEN_REQUEST_METHODS.includes(this.method.toUpperCase())) {
+          throw new Error(
+            `context.req.raw is not available for ${this.method} requests, because the Fetch API Request class does not allow this method.`,
           );
         }
         if (rawRequest === null) {
