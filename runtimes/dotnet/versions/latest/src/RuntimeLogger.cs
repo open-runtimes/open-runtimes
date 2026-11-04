@@ -11,9 +11,17 @@ namespace DotNetRuntime
         public static String TYPE_LOG = "log";
         public static String TYPE_ERROR = "error";
 
+        // One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+        private const int INLINE_LIMIT = 5 * 1024 * 1024 + 1;
+
         public String id = "";
         private bool enabled = false;
         private bool includesNativeInfo = false;
+
+        // Inline mode returns logs on the response instead of writing files
+        public readonly bool inline;
+        public readonly MemoryStream inlineLogs = new MemoryStream();
+        public readonly MemoryStream inlineErrors = new MemoryStream();
 
         private StreamWriter? streamLogs = null;
         private StreamWriter? streamErrors = null;
@@ -27,8 +35,10 @@ namespace DotNetRuntime
         private static readonly TextWriter Stdout = Console.Out;
         private static readonly TextWriter Stderr = Console.Error;
 
-        public RuntimeLogger(String? status, String? id)
+        public RuntimeLogger(String? status, String? id, bool inline = false)
         {
+            this.inline = inline;
+
             if (string.IsNullOrEmpty(status) || status == "enabled")
             {
                 this.enabled = true;
@@ -127,6 +137,13 @@ namespace DotNetRuntime
             {
                 // Silently fail to prevent 500 errors in runtime
                 // Log write failures should not crash the runtime
+            }
+
+            if (this.inline)
+            {
+                var buffer = type == RuntimeLogger.TYPE_ERROR ? this.inlineErrors : this.inlineLogs;
+                var bytes = Encoding.UTF8.GetBytes(stringLog + "\n");
+                buffer.Write(bytes, 0, (int)Math.Min(bytes.Length, INLINE_LIMIT - buffer.Length));
             }
 
             try

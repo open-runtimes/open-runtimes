@@ -15,12 +15,17 @@ import kotlin.random.Random
 class RuntimeLogger(
     var status: String?,
     var id: String?,
+    val inline: Boolean = false,
 ) {
     var enabled = false
     var includesNativeInfo = false
 
     var streamLogs: FileWriter? = null
     var streamErrors: FileWriter? = null
+
+    // Inline mode returns logs on the response instead of writing files
+    val inlineLogs = ByteArrayOutputStream()
+    val inlineErrors = ByteArrayOutputStream()
 
     var customStdStream: ByteArrayOutputStream? = null
 
@@ -35,6 +40,9 @@ class RuntimeLogger(
         private val stderr: PrintStream = System.err
         public val TYPE_ERROR = "error"
         public val TYPE_LOG = "log"
+
+        // One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+        const val INLINE_LIMIT = 5 * 1024 * 1024 + 1
     }
 
     init {
@@ -118,6 +126,12 @@ class RuntimeLogger(
         val passthrough = if (type == RuntimeLogger.TYPE_ERROR) stderr else stdout
         passthrough.print(stringLog)
         passthrough.flush()
+
+        if (this.inline) {
+            val buffer = if (type == RuntimeLogger.TYPE_ERROR) this.inlineErrors else this.inlineLogs
+            val bytes = stringLog.toByteArray()
+            buffer.write(bytes, 0, minOf(bytes.size, INLINE_LIMIT - buffer.size()))
+        }
 
         try {
             stream?.write(stringLog)

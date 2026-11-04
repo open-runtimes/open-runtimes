@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { appendFileSync } from "node:fs";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createRequire } from "node:module";
@@ -25,7 +26,11 @@ if (!process.features?.require_module && typeof Bun === "undefined") {
 export const loggingNamespace = new AsyncLocalStorage();
 
 const isDevelopment = process.env.OPEN_RUNTIMES_ENV === "development";
-const logsDirectory = process.env.OPEN_RUNTIMES_LOGS_DIRECTORY ?? "/mnt/logs";
+// Inline logs travel on the response, so no log files are written
+export const inlineLogs = process.env.OPEN_RUNTIMES_LOGGING === "inline";
+const logsDirectory = inlineLogs
+  ? ""
+  : (process.env.OPEN_RUNTIMES_LOGS_DIRECTORY ?? "/mnt/logs");
 
 export const nativeLog = console.log.bind(console);
 
@@ -47,7 +52,7 @@ export class Logger {
     return id;
   }
 
-  static write(id, messages, type = Logger.TYPE_LOG) {
+  static write(id, messages, type = Logger.TYPE_LOG, inline = null) {
     const stringLog = messages
       .map((message) => {
         if (message instanceof Error) {
@@ -76,8 +81,13 @@ export class Logger {
       // Silently ignore write failures to prevent runtime crashes.
     }
 
+    if (inline) {
+      inline.write(type, stringLog + "\n");
+      return;
+    }
+
     try {
-      if (logsDirectory) {
+      if (logsDirectory && id) {
         appendFileSync(
           `${logsDirectory}/${id}_${type === Logger.TYPE_ERROR ? "errors" : "logs"}.log`,
           stringLog + "\n",
@@ -92,8 +102,8 @@ export class Logger {
     const forward =
       (type) =>
       (...args) => {
-        const requestId = namespace.getStore()?.id ?? "";
-        Logger.write(requestId, args, type);
+        const store = namespace.getStore();
+        Logger.write(store?.id ?? "", args, type, store?.inline);
       };
 
     console.log =
@@ -116,5 +126,37 @@ export class Logger {
       randomPadding += randomHexDigit;
     }
     return baseId + randomPadding;
+  }
+}
+
+// One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+const INLINE_LIMIT = 5 * 1024 * 1024 + 1;
+
+class CappedBuffer {
+  chunks = [];
+  length = 0;
+
+  write(text) {
+    const chunk = Buffer.from(text).subarray(0, INLINE_LIMIT - this.length);
+    this.chunks.push(chunk);
+    this.length += chunk.length;
+  }
+
+  toBuffer() {
+    return Buffer.concat(this.chunks);
+  }
+}
+
+// A request's logs held for its response, with OPEN_RUNTIMES_LOGGING=inline
+export class InlineLogs {
+  logs = new CappedBuffer();
+  errors = new CappedBuffer();
+
+  write(type, text) {
+    (type === Logger.TYPE_ERROR ? this.errors : this.logs).write(text);
+  }
+
+  take() {
+    return [this.logs.toBuffer(), this.errors.toBuffer()];
   }
 }

@@ -10,8 +10,13 @@ namespace DotNetRuntime
             Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? "";
         public static readonly String Env =
             Environment.GetEnvironmentVariable("OPEN_RUNTIMES_ENV") ?? "";
-        public static readonly String LogsDirectory =
-            Environment.GetEnvironmentVariable("OPEN_RUNTIMES_LOGS_DIRECTORY") ?? "/mnt/logs";
+
+        // Inline logs travel on the response, so no log files are written
+        public static readonly bool InlineLogs =
+            Environment.GetEnvironmentVariable("OPEN_RUNTIMES_LOGGING") == "inline";
+        public static readonly String LogsDirectory = InlineLogs
+            ? ""
+            : Environment.GetEnvironmentVariable("OPEN_RUNTIMES_LOGS_DIRECTORY") ?? "/mnt/logs";
         public static readonly Dictionary<string, string> Headers = LoadHeaders();
 
         private static Dictionary<string, string> LoadHeaders()

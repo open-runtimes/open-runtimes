@@ -13,5 +13,8 @@ object OprConfig {
         }
     val entrypoint: String = System.getenv("OPEN_RUNTIMES_ENTRYPOINT") ?: ""
     val env: String = System.getenv("OPEN_RUNTIMES_ENV") ?: ""
-    val logsDirectory: String = System.getenv("OPEN_RUNTIMES_LOGS_DIRECTORY") ?: "/mnt/logs"
+
+    // Inline logs travel on the response, so no log files are written
+    val inlineLogs: Boolean = System.getenv("OPEN_RUNTIMES_LOGGING") == "inline"
+    val logsDirectory: String = if (inlineLogs) "" else System.getenv("OPEN_RUNTIMES_LOGS_DIRECTORY") ?: "/mnt/logs"
 }

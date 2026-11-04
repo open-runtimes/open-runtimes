@@ -1,5 +1,6 @@
 import { Logger } from "./logger.ts";
-import { action } from "./action.ts";
+import { action, respondInline } from "./action.ts";
+import { config } from "./config.ts";
 import { createApp } from "./app.ts";
 
 const app = createApp();
@@ -25,6 +26,8 @@ app.use(async (ctx: any) => {
   const logger = new Logger(
     ctx.request.headers.get("x-open-runtimes-logging"),
     ctx.request.headers.get("x-open-runtimes-log-id"),
+    // A HEAD response has no body to carry them, so its logs are dropped
+    config.inlineLogs && ctx.request.method !== "HEAD",
   );
   await logger.setup();
 
@@ -35,6 +38,10 @@ app.use(async (ctx: any) => {
 
     ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
     await logger.end();
+
+    if (logger.inline) {
+      return await respondInline(ctx, logger, 500, "");
+    }
 
     ctx.response.status = 500;
     ctx.response.body = "";

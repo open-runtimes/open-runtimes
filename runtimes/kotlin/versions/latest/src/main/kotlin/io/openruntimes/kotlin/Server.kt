@@ -7,6 +7,7 @@ import io.javalin.Javalin
 import io.javalin.http.Context
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import java.io.ByteArrayOutputStream
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.reflect.full.callSuspend
@@ -47,7 +48,13 @@ suspend fun execute(ctx: Context) {
         return
     }
 
-    val logger = RuntimeLogger(ctx.header("x-open-runtimes-logging"), ctx.header("x-open-runtimes-log-id"))
+    // A HEAD response has no body to carry them, so its logs are dropped
+    val logger =
+        RuntimeLogger(
+            ctx.header("x-open-runtimes-logging"),
+            ctx.header("x-open-runtimes-log-id"),
+            OprConfig.inlineLogs && ctx.method().toString() != "HEAD",
+        )
     try {
         action(logger, ctx)
     } catch (e: Exception) {
@@ -62,8 +69,42 @@ suspend fun execute(ctx: Context) {
         logger.write(arrayOf(message), RuntimeLogger.TYPE_ERROR, false)
         logger.end()
 
-        ctx.status(500).result("")
+        respond(ctx, logger, 500, ByteArray(0))
     }
+}
+
+// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the logs
+// and errors follow in `l` and `e` frames, so edge splits them off the body. Each
+// frame is its type, the payload's byte length in hex and a newline, then the payload.
+fun respond(
+    ctx: Context,
+    logger: RuntimeLogger,
+    statusCode: Int,
+    body: ByteArray,
+) {
+    if (!logger.inline) {
+        ctx.status(statusCode).result(body)
+        return
+    }
+
+    // Framing gives the body a length of its own and needs a status that allows
+    // a body, so the real ones travel in headers
+    ctx.header("x-open-runtimes-logs-inline", "enabled")
+    ctx.header("x-open-runtimes-content-length", body.size.toString())
+    var status = statusCode
+    if (status == 204 || status == 304) {
+        ctx.header("x-open-runtimes-status-code", status.toString())
+        status = 200
+    }
+
+    val framed = ByteArrayOutputStream()
+    for ((type, payload) in listOf('b' to body, 'l' to logger.inlineLogs.toByteArray(), 'e' to logger.inlineErrors.toByteArray())) {
+        if (payload.isNotEmpty()) {
+            framed.write("$type${payload.size.toString(16)}\n".toByteArray())
+            framed.write(payload)
+        }
+    }
+    ctx.status(status).result(framed.toByteArray())
 }
 
 suspend fun action(
@@ -264,7 +305,8 @@ suspend fun action(
     }
 
     resHeaders.forEach { (key, value) ->
-        if (!key.startsWith("x-open-runtimes-")) {
+        // A framed body has a length of its own, sent as x-open-runtimes-content-length
+        if (!key.startsWith("x-open-runtimes-") && !(logger.inline && key == "content-length")) {
             ctx.header(key, value)
         }
     }
@@ -273,5 +315,5 @@ suspend fun action(
 
     logger.end()
 
-    ctx.status(output.statusCode).result(output.body)
+    respond(ctx, logger, output.statusCode, output.body)
 }

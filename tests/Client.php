@@ -57,6 +57,7 @@ class Client {
                 return $len;
             },
             CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_NOBODY => $method === 'HEAD',
             CURLOPT_HEADEROPT => \CURLHEADER_UNIFIED,
             CURLOPT_HTTPHEADER => $headersParsed,
             CURLOPT_TIMEOUT => $timeout
@@ -347,6 +348,35 @@ class Client {
 
     public static function getErrors(string $id) {
         return self::getFile("/tmp/logs/{$id}_errors.log");
+    }
+
+    /**
+     * Splits a response framed with OPEN_RUNTIMES_LOGGING=inline into its body, logs and errors.
+     * Each frame is a type byte (b, l or e), the payload's byte length in hex and a newline, then the payload.
+     */
+    public static function decodeFrames(string $data): array {
+        $parts = ['b' => '', 'l' => '', 'e' => ''];
+        $offset = 0;
+        while ($offset < \strlen($data)) {
+            $newline = \strpos($data, "\n", $offset);
+            if ($newline === false) {
+                throw new \Exception('Frame header without newline at byte ' . $offset);
+            }
+            $type = $data[$offset];
+            $hex = \substr($data, $offset + 1, $newline - $offset - 1);
+            if (!\array_key_exists($type, $parts) || $hex === '' || !\ctype_xdigit($hex)) {
+                throw new \Exception('Malformed frame header at byte ' . $offset);
+            }
+            $length = \hexdec($hex);
+            $payload = \substr($data, $newline + 1, $length);
+            if (\strlen($payload) !== $length) {
+                throw new \Exception('Frame cut short at byte ' . $offset);
+            }
+            $parts[$type] .= $payload;
+            $offset = $newline + 1 + $length;
+        }
+
+        return ['body' => $parts['b'], 'logs' => $parts['l'], 'errors' => $parts['e']];
     }
 
     public static function getLogs(string $id) {

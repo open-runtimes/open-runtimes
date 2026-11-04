@@ -2,6 +2,7 @@
 #define CPP_RUNTIME_RUNTIMELOGGER_H
 
 #include "OprConfig.h"
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -18,6 +19,15 @@ public:
   bool enabled = false;
   std::string id = "";
   bool includesNativeInfo = false;
+  bool inlineMode = false;
+
+  // One byte past edge's limit, so edge sees the overflow and truncates as it
+  // does for files
+  static constexpr size_t INLINE_LIMIT = 5 * 1024 * 1024 + 1;
+
+  // Inline mode returns logs on the response instead of writing files
+  std::string inlineLogs;
+  std::string inlineErrors;
 
   std::shared_ptr<std::ofstream> streamLogs;
   std::shared_ptr<std::ofstream> streamErrors;
@@ -28,7 +38,9 @@ public:
   std::streambuf *nativeLogsCache;
   std::streambuf *nativeErrorsCache;
 
-  RuntimeLogger(std::string headerStatus, std::string headerId) {
+  RuntimeLogger(std::string headerStatus, std::string headerId,
+                bool inlineMode = false)
+      : inlineMode(inlineMode) {
     if (headerStatus == "" || headerStatus == "enabled") {
       enabled = true;
     }
@@ -92,6 +104,12 @@ public:
     } catch (const std::exception &e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
+    }
+
+    if (inlineMode) {
+      std::string &buffer = type == "error" ? inlineErrors : inlineLogs;
+      buffer.append(truncatedMessage + "\n", 0,
+                    INLINE_LIMIT - std::min(INLINE_LIMIT, buffer.size()));
     }
 
     try {

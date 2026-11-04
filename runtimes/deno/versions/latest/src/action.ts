@@ -4,6 +4,55 @@ import { config } from "./config.ts";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
+// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the
+// logs and errors follow in `l` and `e` frames, so edge splits them off the
+// body. Each frame is its type, the payload's byte length in hex and a
+// newline, then the payload.
+export const respondInline = async (
+  ctx: any,
+  logger: Logger,
+  status: number,
+  body: any,
+) => {
+  // Oak sends plain objects and arrays as JSON
+  if (
+    body !== null && typeof body === "object" &&
+    (Array.isArray(body) || Object.getPrototypeOf(body) === Object.prototype)
+  ) {
+    body = JSON.stringify(body);
+  }
+  const bytes = new Uint8Array(await new Response(body).arrayBuffer());
+
+  // Framing gives the body a length of its own and needs a status that allows
+  // a body, so the real ones travel in headers
+  ctx.response.headers.delete("content-length");
+  ctx.response.headers.set("x-open-runtimes-logs-inline", "enabled");
+  ctx.response.headers.set("x-open-runtimes-content-length", `${bytes.length}`);
+  if (status === 204 || status === 304) {
+    ctx.response.headers.set("x-open-runtimes-status-code", `${status}`);
+    status = 200;
+  }
+
+  const parts: Uint8Array[] = [];
+  for (
+    const [type, buffer] of [
+      ["b", { chunks: [bytes], length: bytes.length }],
+      ["l", logger.inlineLogs],
+      ["e", logger.inlineErrors],
+    ] as const
+  ) {
+    if (buffer.length > 0) {
+      parts.push(
+        new TextEncoder().encode(`${type}${buffer.length.toString(16)}\n`),
+      );
+      parts.push(...buffer.chunks);
+    }
+  }
+
+  ctx.response.status = status;
+  ctx.response.body = new Uint8Array(await new Blob(parts).arrayBuffer());
+};
+
 export const action = async (logger: Logger, ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? "";
   let safeTimeout: number | null = null;
@@ -270,6 +319,16 @@ export const action = async (logger: Logger, ctx: any) => {
 
   ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
   await logger.end();
+
+  if (logger.inline) {
+    // A 204 drops its body, as it does unframed
+    return await respondInline(
+      ctx,
+      logger,
+      output.statusCode,
+      output.statusCode !== 204 ? output.body : "",
+    );
+  }
 
   ctx.response.status = output.statusCode;
   if (output.statusCode !== 204) {

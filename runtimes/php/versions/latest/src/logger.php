@@ -4,6 +4,8 @@ class Logger
 {
     public const TYPE_ERROR = 'error';
     public const TYPE_LOG = 'log';
+    // One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+    public const INLINE_LIMIT = 5 * 1024 * 1024 + 1;
 
     public string $id = '';
     private bool $enabled = false;
@@ -12,9 +14,15 @@ class Logger
     private mixed $streamLogs = null;
     private mixed $streamErrors = null;
 
-    public function __construct(?string $status = null, ?string $id = null, ?string $env = null, string $logsDirectory = '/mnt/logs')
+    // Inline mode returns logs on the response instead of writing files
+    public bool $inline = false;
+    public string $inlineLogs = '';
+    public string $inlineErrors = '';
+
+    public function __construct(?string $status = null, ?string $id = null, ?string $env = null, string $logsDirectory = '/mnt/logs', bool $inline = false)
     {
         $this->enabled = (!empty($status) ? $status : 'enabled') === 'enabled';
+        $this->inline = $inline;
 
         if ($this->enabled) {
             $this->id = !empty($id) ? $id : ($env === 'development' ? 'dev' : $this->generateId());
@@ -67,6 +75,14 @@ class Logger
         } catch (Exception $e) {
             // Silently fail to prevent 500 errors in runtime
             // Log write failures should not crash the runtime
+        }
+
+        if ($this->inline) {
+            if ($type == Logger::TYPE_ERROR) {
+                $this->inlineErrors .= \substr($stringLog . "\n", 0, Logger::INLINE_LIMIT - \strlen($this->inlineErrors));
+            } else {
+                $this->inlineLogs .= \substr($stringLog . "\n", 0, Logger::INLINE_LIMIT - \strlen($this->inlineLogs));
+            }
         }
 
         try {

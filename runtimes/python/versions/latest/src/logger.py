@@ -11,17 +11,25 @@ import config
 class Logger:
     TYPE_ERROR = "error"
     TYPE_LOG = "log"
+    # One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+    INLINE_LIMIT = 5 * 1024 * 1024 + 1
 
     id = ""
     enabled = False
     includes_native_info = False
+    inline = False
 
     stream_logs = None
     stream_errors = None
 
     custom_std = None
 
-    def __init__(self, status=None, id=None):
+    def __init__(self, status=None, id=None, inline=False):
+        self.inline = inline
+        # Inline mode returns logs on the response instead of writing files
+        self.inline_logs = bytearray()
+        self.inline_errors = bytearray()
+
         if status is None or status == "":
             self.enabled = True
         else:
@@ -94,6 +102,14 @@ class Logger:
             # Silently fail to prevent 500 errors in runtime
             # Log write failures should not crash the runtime
             pass
+
+        if self.inline:
+            buffer = (
+                self.inline_errors if xtype == Logger.TYPE_ERROR else self.inline_logs
+            )
+            buffer += string_log.encode("utf-8", "replace")[
+                : Logger.INLINE_LIMIT - len(buffer)
+            ]
 
         try:
             if stream is not None:

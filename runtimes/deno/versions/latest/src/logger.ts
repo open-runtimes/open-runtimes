@@ -2,22 +2,46 @@ import { fileStreamReady } from "./fileStreamReady.ts";
 import { JSONParse } from "./jsonParser.ts";
 import { config } from "./config.ts";
 
+export class InlineBuffer {
+  chunks: Uint8Array[] = [];
+  length = 0;
+
+  constructor(private limit: number) {}
+
+  write(bytes: Uint8Array) {
+    const chunk = bytes.subarray(0, this.limit - this.length);
+    this.chunks.push(chunk);
+    this.length += chunk.length;
+  }
+}
+
 export class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
+  // One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+  static INLINE_LIMIT = 5 * 1024 * 1024 + 1;
 
   writePromises: Promise<any>[] = [];
 
   id = "";
   enabled = false;
   includesNativeInfo = false;
+  inline = false;
 
   streamLogs: Deno.FsFile | null = null;
   streamErrors: Deno.FsFile | null = null;
   nativeLogsCache: { [key: string]: any } = {};
+  // Inline mode returns logs on the response instead of writing files
+  inlineLogs = new InlineBuffer(Logger.INLINE_LIMIT);
+  inlineErrors = new InlineBuffer(Logger.INLINE_LIMIT);
 
-  constructor(status: string | null = null, id: string | null = null) {
+  constructor(
+    status: string | null = null,
+    id: string | null = null,
+    inline = false,
+  ) {
     this.enabled = (status ? status : "enabled") === "enabled";
+    this.inline = inline;
 
     if (this.enabled) {
       this.id = id
@@ -95,6 +119,12 @@ export class Logger {
     } catch (error) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
+    }
+
+    if (this.inline) {
+      (type === Logger.TYPE_ERROR ? this.inlineErrors : this.inlineLogs).write(
+        encoded,
+      );
     }
 
     try {

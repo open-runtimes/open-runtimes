@@ -10,7 +10,16 @@ import {
   addAuthenticationCheck,
   addSafeTimeout,
 } from "./system.mjs";
-import { Logger, loggingNamespace } from "./logger.mjs";
+import { Buffer } from "node:buffer";
+import { frameResponse } from "./frames.mjs";
+import {
+  InlineLogs,
+  Logger,
+  inlineLogs,
+  loggingNamespace,
+} from "./logger.mjs";
+
+const EMPTY = Buffer.alloc(0);
 
 // Core: replace an http.Server's `emit` so "request" events flow through the
 // Open Runtimes contract before hitting the user-owned listener.
@@ -40,9 +49,16 @@ export function overrideEmit(originalEmit) {
       return;
     }
 
+    // A HEAD response has no body to carry them, so its logs are dropped
+    let inline = null;
+    if (inlineLogs && req.method !== "HEAD") {
+      inline = req.loggerId ? new InlineLogs() : null;
+      frameResponse(res, () => inline?.take() ?? [EMPTY, EMPTY]);
+    }
+
     const self = this;
 
-    loggingNamespace.run({ id: req.loggerId }, () => {
+    loggingNamespace.run({ id: req.loggerId, inline }, () => {
       Logger.overrideNativeLogs(loggingNamespace, req.loggerId);
 
       const dispatch = () => {
@@ -50,7 +66,7 @@ export function overrideEmit(originalEmit) {
           originalEmit.call(self, event, ...emitArgs);
         } catch (error) {
           if (!res.headersSent) {
-            Logger.write(req.loggerId, [error], Logger.TYPE_ERROR);
+            Logger.write(req.loggerId, [error], Logger.TYPE_ERROR, inline);
             res.writeHead(500, { "Content-Type": "text/plain" });
             res.end("");
           }

@@ -8,6 +8,34 @@ require_relative 'execute.rb'
 
 USER_CODE_PATH = '/usr/local/server/src/function';
 
+# With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the logs
+# and errors follow in `l` and `e` frames, so edge splits them off the body. Each
+# frame is its type, the payload's byte length in hex and a newline, then the payload.
+def frame(type, payload)
+  payload.empty? ? ''.b : "#{type}#{payload.bytesize.to_s(16)}\n".b + payload
+end
+
+def respond(response, body, logger)
+  if logger.inline
+    body = body.to_s.b
+
+    # Framing gives the body a length of its own and needs a status that allows
+    # a body, so the real ones travel in headers
+    response.headers.delete('content-length')
+    response.headers['x-open-runtimes-content-length'] = body.bytesize.to_s
+    response.headers['x-open-runtimes-logs-inline'] = 'enabled'
+    if response.status == 204 || response.status == 304
+      response.headers['x-open-runtimes-status-code'] = response.status.to_s
+      response.status = 200
+    end
+
+    body = frame('b', body) + frame('l', logger.inline_logs) + frame('e', logger.inline_errors)
+  end
+
+  response.body = body
+  response
+end
+
 def action(request, response, logger)
   safe_timeout = nil
 
@@ -218,12 +246,13 @@ def action(request, response, logger)
   end
 
   response.status = output['statusCode']
-  response.body = output['body']
-  response
+  respond(response, output['body'], logger)
 end
 
 def handle(request, response)
-  logger = RuntimeLogger.new(request.env['HTTP_X_OPEN_RUNTIMES_LOGGING'], request.env['HTTP_X_OPEN_RUNTIMES_LOG_ID'])
+  # A HEAD response has no body to carry them, so its logs are dropped
+  logger = RuntimeLogger.new(request.env['HTTP_X_OPEN_RUNTIMES_LOGGING'], request.env['HTTP_X_OPEN_RUNTIMES_LOG_ID'],
+                             Config::INLINE_LOGS && request.request_method != 'HEAD')
   begin
     action(request, response, logger)
     response
@@ -239,8 +268,7 @@ def handle(request, response)
     response.headers['x-open-runtimes-log-id'] = logger.id
     response.headers['content-type'] = 'text/plain'
     response.status = 500
-    response.body = ''
-    response
+    respond(response, '', logger)
   end
 end
 

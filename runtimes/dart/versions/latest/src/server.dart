@@ -87,6 +87,62 @@ Future<Uint8List> _readRequestBody(
   return builder.takeBytes();
 }
 
+// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the
+// logs and errors follow in `l` and `e` frames, so edge splits them off the
+// body. Each frame is its type, the payload's byte length in hex and a
+// newline, then the payload.
+void _frame(BytesBuilder out, String type, List<int> bytes) {
+  if (bytes.isEmpty) {
+    return;
+  }
+  out.add(utf8.encode(type + bytes.length.toRadixString(16) + '\n'));
+  out.add(bytes);
+}
+
+shelf.Response _respond(
+  Logger logger,
+  int statusCode,
+  dynamic body,
+  Map<String, String> headers, [
+  Encoding? encoding = null,
+]) {
+  if (!logger.inline) {
+    return shelf.Response(
+      statusCode,
+      encoding: encoding,
+      body: body,
+      headers: headers,
+    );
+  }
+
+  final List<int> bytes = body is List<int>
+      ? body
+      : (encoding ?? utf8).encode(body.toString());
+
+  // Framing gives the body a length of its own and needs a status that allows
+  // a body, so the real ones travel in headers
+  final Map<String, String> framedHeaders = Map.of(headers);
+  framedHeaders.remove('content-length');
+  framedHeaders['x-open-runtimes-logs-inline'] = 'enabled';
+  framedHeaders['x-open-runtimes-content-length'] = bytes.length.toString();
+  if (statusCode == 204 || statusCode == 304) {
+    framedHeaders['x-open-runtimes-status-code'] = statusCode.toString();
+    statusCode = 200;
+  }
+
+  final BytesBuilder out = BytesBuilder(copy: false);
+  _frame(out, 'b', bytes);
+  _frame(out, 'l', logger.inlineLogs.toBytes());
+  _frame(out, 'e', logger.inlineErrors.toBytes());
+
+  return shelf.Response(
+    statusCode,
+    encoding: encoding,
+    body: out.takeBytes(),
+    headers: framedHeaders,
+  );
+}
+
 Future<shelf.Response> action(Logger logger, dynamic req) async {
   int? safeTimeout = null;
   String timeout = req.headers['x-open-runtimes-timeout'] ?? '';
@@ -253,11 +309,12 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   responseHeaders['x-open-runtimes-log-id'] = logger.id;
   await logger.end();
 
-  return shelf.Response(
+  return _respond(
+    logger,
     output['statusCode'],
-    encoding: encoding,
-    body: output['body'],
-    headers: responseHeaders,
+    output['body'],
+    responseHeaders,
+    encoding,
   );
 }
 
@@ -279,6 +336,8 @@ void main() async {
       Logger logger = new Logger(
         req.headers['x-open-runtimes-logging'],
         req.headers['x-open-runtimes-log-id'],
+        // A HEAD response has no body to carry them, so its logs are dropped
+        config.inlineLogs && req.method != 'HEAD',
       );
 
       try {
@@ -291,11 +350,12 @@ void main() async {
         responseHeaders['x-open-runtimes-log-id'] = logger.id;
         await logger.end();
 
-        return shelf.Response(
+        return _respond(
+          logger,
           500,
-          encoding: Encoding.getByName('utf-8'),
-          body: '',
-          headers: responseHeaders,
+          '',
+          responseHeaders,
+          Encoding.getByName('utf-8'),
         );
       }
     },

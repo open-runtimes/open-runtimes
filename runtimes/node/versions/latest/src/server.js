@@ -1,5 +1,6 @@
 const http = require("http");
 const fs = require("fs");
+const { Transform } = require("stream");
 
 const BODY_LIMIT = 20 * 1024 * 1024;
 
@@ -24,39 +25,105 @@ const buffer = (req) =>
     req.on("error", reject);
   });
 
-const send = (res, statusCode, body = null) => {
-  res.statusCode = statusCode;
-  if (body === null) {
-    res.end();
-    return;
-  }
-  if (Buffer.isBuffer(body)) {
-    if (!res.getHeader("content-type")) {
+// Normalizes a body to a Buffer or a stream, defaulting its content-type
+const encode = (res, body) => {
+  if (body === null || Buffer.isBuffer(body)) {
+    if (body !== null && !res.getHeader("content-type")) {
       res.setHeader("content-type", "application/octet-stream");
     }
-    res.setHeader("content-length", body.length);
-    res.end(body);
-    return;
+    return body;
   }
   if (typeof body === "object" || typeof body === "number") {
     if (typeof body?.pipe === "function") {
       if (!res.getHeader("content-type")) {
         res.setHeader("content-type", "application/octet-stream");
       }
-      body.pipe(res);
-      return;
+      return body;
     }
-    const json = JSON.stringify(body);
     if (!res.getHeader("content-type")) {
       res.setHeader("content-type", "application/json; charset=utf-8");
     }
-    res.setHeader("content-length", Buffer.byteLength(json));
-    res.end(json);
+    return Buffer.from(JSON.stringify(body));
+  }
+  return Buffer.from(String(body));
+};
+
+const send = (res, statusCode, body = null) => {
+  res.statusCode = statusCode;
+  body = encode(res, body);
+  if (body === null) {
+    res.end();
     return;
   }
-  res.setHeader("content-length", Buffer.byteLength(String(body)));
-  res.end(String(body));
+  if (typeof body.pipe === "function") {
+    body.pipe(res);
+    return;
+  }
+  res.setHeader("content-length", body.length);
+  res.end(body);
 };
+
+// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in `b` frames and the logs
+// and errors follow in `l` and `e` frames, so edge splits them off a body it
+// streams. Each frame is its type, the payload's byte length in hex and a
+// newline, then the payload.
+const frame = (type, bytes) =>
+  Buffer.concat([Buffer.from(`${type}${bytes.length.toString(16)}\n`), bytes]);
+
+const sendFramed = (res, statusCode, body, logger) => {
+  // Framing gives the body a length of its own and needs a status that allows
+  // a body, so the real ones travel in headers
+  const length = res.getHeader("content-length");
+  res.removeHeader("content-length");
+  res.statusCode = statusCode;
+  if (statusCode === 204 || statusCode === 304) {
+    res.setHeader("x-open-runtimes-status-code", statusCode);
+    res.statusCode = 200;
+  }
+  res.setHeader("x-open-runtimes-logs-inline", "enabled");
+
+  body = encode(res, body ?? "");
+  const finish = () => {
+    for (const [type, buffer] of [
+      ["l", logger.inlineLogs],
+      ["e", logger.inlineErrors],
+    ]) {
+      if (buffer.length > 0) {
+        res.write(frame(type, buffer.toBuffer()));
+      }
+    }
+    res.end();
+  };
+
+  if (typeof body.pipe === "function") {
+    if (length !== undefined) {
+      res.setHeader("x-open-runtimes-content-length", length);
+    }
+    body
+      .pipe(
+        new Transform({
+          transform(chunk, encoding, callback) {
+            callback(null, frame("b", Buffer.from(chunk, encoding)));
+          },
+        }),
+      )
+      .on("end", finish)
+      .pipe(res, { end: false });
+    return;
+  }
+
+  res.setHeader("x-open-runtimes-content-length", body.length);
+  if (body.length > 0) {
+    res.write(frame("b", body));
+  }
+  finish();
+};
+
+const respond = (res, logger, statusCode, body) =>
+  logger.inline
+    ? sendFramed(res, statusCode, body, logger)
+    : send(res, statusCode, body);
+
 const Logger = require("./logger");
 const config = require("./config");
 
@@ -89,6 +156,8 @@ const handle = async (req, res) => {
   const logger = new Logger(
     req.headers[`x-open-runtimes-logging`],
     req.headers[`x-open-runtimes-log-id`],
+    // A HEAD response has no body to carry them, so its logs are dropped
+    config.inlineLogs && req.method !== "HEAD",
   );
 
   try {
@@ -99,7 +168,7 @@ const handle = async (req, res) => {
     res.setHeader("x-open-runtimes-log-id", logger.id);
     await logger.end();
 
-    return send(res, 500, "");
+    return respond(res, logger, 500, "");
   }
 };
 
@@ -360,7 +429,7 @@ const action = async (logger, req, res) => {
   res.setHeader("x-open-runtimes-log-id", logger.id);
   await logger.end();
 
-  return send(res, output.statusCode, output.body);
+  return respond(res, logger, output.statusCode, output.body);
 };
 
 require("/usr/local/server/helpers/http-shutdown.cjs")(server);

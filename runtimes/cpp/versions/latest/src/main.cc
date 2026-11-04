@@ -23,6 +23,45 @@ std::vector<std::string> split(const std::string &s, const char delim) {
     return result;
 }
 
+// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the logs
+// and errors follow in `l` and `e` frames, so edge splits them off a body it
+// streams. Each frame is its type, the payload's byte length in hex and a
+// newline, then the payload.
+void frame(std::string &out, const char type, const std::string &payload) {
+    if (payload.empty()) {
+        return;
+    }
+    std::stringstream header;
+    header << type << std::hex << payload.size() << '\n';
+    out += header.str();
+    out += payload;
+}
+
+void respond(const drogon::HttpResponsePtr &res, const runtime::RuntimeLogger &logger, int statusCode, const std::string &body) {
+    if (!logger.inlineMode) {
+        res->setStatusCode(static_cast<drogon::HttpStatusCode>(statusCode));
+        res->setBody(body);
+        return;
+    }
+
+    // Framing gives the body a length of its own and needs a status that allows
+    // a body, so the real ones travel in headers
+    res->removeHeader("content-length");
+    res->addHeader("x-open-runtimes-content-length", std::to_string(body.size()));
+    if (statusCode == 204 || statusCode == 304) {
+        res->addHeader("x-open-runtimes-status-code", std::to_string(statusCode));
+        statusCode = 200;
+    }
+    res->addHeader("x-open-runtimes-logs-inline", "enabled");
+
+    std::string framed;
+    frame(framed, 'b', body);
+    frame(framed, 'l', logger.inlineLogs);
+    frame(framed, 'e', logger.inlineErrors);
+    res->setStatusCode(static_cast<drogon::HttpStatusCode>(statusCode));
+    res->setBody(framed);
+}
+
 int main()
 {
     std::cout << "HTTP server successfully started!" << std::endl;
@@ -56,7 +95,11 @@ int main()
                     return;
                 }
 
-                std::shared_ptr<runtime::RuntimeLogger> logger = std::make_shared<runtime::RuntimeLogger>(req->getHeader("x-open-runtimes-logging"), req->getHeader("x-open-runtimes-log-id"));
+                std::shared_ptr<runtime::RuntimeLogger> logger = std::make_shared<runtime::RuntimeLogger>(
+                    req->getHeader("x-open-runtimes-logging"),
+                    req->getHeader("x-open-runtimes-log-id"),
+                    // A HEAD response has no body to carry them, so its logs are dropped
+                    runtime::config().inlineLogs && !req->isHead());
 
                 try {
                     const std::shared_ptr<drogon::HttpResponse> res = drogon::HttpResponse::newHttpResponse();
@@ -410,14 +453,12 @@ int main()
                     logger->end();
                     res->addHeader("x-open-runtimes-log-id", logger->id);
 
-                    res->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
-
                     std::string outputBodyString;
                     for (const auto& byte : output.body) {
                         outputBodyString += static_cast<char>(byte);
                     }
 
-                    res->setBody(outputBodyString);
+                    respond(res, *logger, output.statusCode, outputBodyString);
                     callback(res);
                 } catch(const std::exception& e)
                 {
@@ -428,8 +469,7 @@ int main()
 
                     res->addHeader("x-open-runtimes-log-id", logger->id);
 
-                    res->setStatusCode(static_cast<drogon::HttpStatusCode>(500));
-                    res->setBody("");
+                    respond(res, *logger, 500, "");
                     callback(res);
                 }
             },

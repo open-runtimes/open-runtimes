@@ -22,6 +22,34 @@ $server->set([
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
 
+// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the logs
+// and errors follow in `l` and `e` frames, so edge splits them off the body.
+// Each frame is its type, the payload's byte length in hex and a newline, then the payload.
+function frame(string $type, string $bytes): string
+{
+    return $bytes === '' ? '' : $type . \dechex(\strlen($bytes)) . "\n" . $bytes;
+}
+
+function respond(Logger $logger, mixed $res, int $statusCode, mixed $body): void
+{
+    if (!$logger->inline) {
+        $res->status($statusCode);
+        $res->end($body);
+        return;
+    }
+
+    // Framing needs a status that allows a body, so the real one travels in a header
+    if ($statusCode === 204 || $statusCode === 304) {
+        $res->header('x-open-runtimes-status-code', \strval($statusCode));
+        $statusCode = 200;
+    }
+    $body = \strval($body);
+    $res->header('x-open-runtimes-logs-inline', 'enabled');
+    $res->header('x-open-runtimes-content-length', \strval(\strlen($body)));
+    $res->status($statusCode);
+    $res->end(frame('b', $body) . frame('l', $logger->inlineLogs) . frame('e', $logger->inlineErrors));
+}
+
 $config = new Config();
 $userFunction = null;
 $activeRequests = [];
@@ -58,8 +86,7 @@ $fatalShutdownHandler = function () use (&$activeRequests): void {
 
         try {
             $response->header('x-open-runtimes-log-id', $logger->id);
-            $response->status(500);
-            $response->end('');
+            respond($logger, $response, 500, '');
         } catch (\Throwable) {
         }
     }
@@ -251,6 +278,10 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
     }
 
     foreach ($headers as $header => $value) {
+        // A framed body has a length of its own
+        if ($logger->inline && $header === 'content-length') {
+            continue;
+        }
         if (!(\str_starts_with($header, 'x-open-runtimes-'))) {
             $res->header($header, $value);
         }
@@ -259,8 +290,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
     $res->header('x-open-runtimes-log-id', $logger->id);
     $logger->end();
 
-    $res->status($output['statusCode']);
-    $res->end($output['body']);
+    respond($logger, $res, $output['statusCode'], $output['body']);
 };
 
 $server->on("Request", function ($req, $res) use ($action, $config, &$activeRequests) {
@@ -277,7 +307,7 @@ $server->on("Request", function ($req, $res) use ($action, $config, &$activeRequ
         return;
     }
 
-    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '', $config->env, $config->logsDirectory);
+    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '', $config->env, $config->logsDirectory, $config->inlineLogs && $req->getMethod() !== 'HEAD');
     $requestId = \spl_object_id($res);
     $activeRequests[$requestId] = [
         'logger' => $logger,
@@ -296,8 +326,7 @@ $server->on("Request", function ($req, $res) use ($action, $config, &$activeRequ
         $res->header('x-open-runtimes-log-id', $logger->id);
         $logger->end();
 
-        $res->status(500);
-        $res->end('');
+        respond($logger, $res, 500, '');
     } finally {
         unset($activeRequests[$requestId]);
     }

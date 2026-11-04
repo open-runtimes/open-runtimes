@@ -50,7 +50,12 @@ func execute(req: Request) async throws -> Response {
         logId = headerLogId.first ?? ""
     }
 
-    let logger = RuntimeLogger(status: loggerStatus, id: logId)
+    // A HEAD response has no body to carry them, so its logs are dropped
+    let logger = RuntimeLogger(
+        status: loggerStatus,
+        id: logId,
+        inline: OprConfig.inlineLogs && req.method != .HEAD
+    )
     do {
         return try await action(logger: logger, req: req)
     } catch {
@@ -60,15 +65,46 @@ func execute(req: Request) async throws -> Response {
         var outputHeaders = HTTPHeaders()
         outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
 
-        let code: HTTPResponseStatus = .custom(code: UInt(500), reasonPhrase: "")
-        let resBody: Response.Body = .init(string: "")
-
-        return Response(
-            status: code,
-            headers: outputHeaders,
-            body: resBody
-        )
+        return respond(logger: logger, statusCode: 500, headers: outputHeaders, body: Data())
     }
+}
+
+/// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the
+/// logs and errors follow in `l` and `e` frames, so edge splits them off the
+/// body. Each frame is its type, the payload's byte length in hex and a
+/// newline, then the payload.
+func frame(_ type: String, _ bytes: Data) -> Data {
+    if bytes.isEmpty {
+        return Data()
+    }
+    var out = Data("\(type)\(String(bytes.count, radix: 16))\n".utf8)
+    out.append(bytes)
+    return out
+}
+
+func respond(logger: RuntimeLogger, statusCode: Int, headers: HTTPHeaders, body: Data) -> Response {
+    var statusCode = statusCode
+    var headers = headers
+    var body = body
+
+    if logger.inline {
+        // Framing gives the body a length of its own and needs a status that allows
+        // a body, so the real ones travel in headers
+        headers.remove(name: "content-length")
+        headers.replaceOrAdd(name: "x-open-runtimes-logs-inline", value: "enabled")
+        headers.replaceOrAdd(name: "x-open-runtimes-content-length", value: String(body.count))
+        if statusCode == 204 || statusCode == 304 {
+            headers.replaceOrAdd(name: "x-open-runtimes-status-code", value: String(statusCode))
+            statusCode = 200
+        }
+        body = frame("b", body) + frame("l", logger.inlineLogs) + frame("e", logger.inlineErrors)
+    }
+
+    return Response(
+        status: .custom(code: UInt(statusCode), reasonPhrase: ""),
+        headers: headers,
+        body: .init(data: body)
+    )
 }
 
 func action(logger: RuntimeLogger, req: Request) async throws -> Response {
@@ -237,14 +273,7 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     logger.end()
     outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
 
-    let code: HTTPResponseStatus = .custom(code: UInt(output.statusCode), reasonPhrase: "")
-    let resBody: Response.Body = .init(data: output.body)
-
-    return Response(
-        status: code,
-        headers: outputHeaders,
-        body: resBody
-    )
+    return respond(logger: logger, statusCode: output.statusCode, headers: outputHeaders, body: output.body)
 }
 
 print("HTTP server successfully started!")

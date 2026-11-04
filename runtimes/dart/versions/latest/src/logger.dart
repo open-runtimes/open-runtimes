@@ -7,16 +7,23 @@ import 'config.dart' as config;
 class Logger {
   static final String TYPE_ERROR = 'error';
   static final String TYPE_LOG = 'log';
+  // One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+  static final int INLINE_LIMIT = 5 * 1024 * 1024 + 1;
 
   String id = '';
   bool enabled = false;
   bool includesNativeInfo = false;
+  bool inline = false;
 
   IOSink? streamLogs;
   IOSink? streamErrors;
+  // Inline mode returns logs on the response instead of writing files
+  final BytesBuilder inlineLogs = BytesBuilder();
+  final BytesBuilder inlineErrors = BytesBuilder();
 
-  Logger([String? status = null, String? id = null]) {
+  Logger([String? status = null, String? id = null, bool inline = false]) {
     this.enabled = (status != null ? status : 'enabled') == 'enabled';
+    this.inline = inline;
 
     if (this.enabled) {
       this.id = id != null
@@ -75,6 +82,15 @@ class Logger {
     } catch (e) {
       // Silently fail to prevent 500 errors in runtime
       // Log write failures should not crash the runtime
+    }
+
+    if (this.inline) {
+      final buffer = type == Logger.TYPE_ERROR
+          ? this.inlineErrors
+          : this.inlineLogs;
+      final bytes = utf8.encode(stringLog + "\n");
+      final room = Logger.INLINE_LIMIT - buffer.length;
+      buffer.add(bytes.length > room ? bytes.sublist(0, room) : bytes);
     }
 
     try {

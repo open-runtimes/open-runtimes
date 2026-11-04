@@ -28,17 +28,24 @@ if (process.features.require_module) {
 class Logger {
   static TYPE_ERROR = "error";
   static TYPE_LOG = "log";
+  // One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+  static INLINE_LIMIT = 5 * 1024 * 1024 + 1;
 
   id = "";
   enabled = false;
   includesNativeInfo = false;
+  inline = false;
 
   streamLogs = null;
   streamErrors = null;
   nativeLogsCache = {};
+  // Inline mode returns logs on the response instead of writing files
+  inlineLogs = new InlineBuffer(Logger.INLINE_LIMIT);
+  inlineErrors = new InlineBuffer(Logger.INLINE_LIMIT);
 
-  constructor(status, id) {
+  constructor(status, id, inline = false) {
     this.enabled = (status ? status : "enabled") === "enabled";
+    this.inline = inline;
 
     if (this.enabled) {
       this.id = id
@@ -112,6 +119,12 @@ class Logger {
       // The logging system should not cause the main execution to fail
     }
 
+    if (this.inline) {
+      (type === Logger.TYPE_ERROR ? this.inlineErrors : this.inlineLogs).write(
+        stringLog + "\n",
+      );
+    }
+
     try {
       stream?.write(stringLog + "\n");
     } catch (err) {
@@ -182,6 +195,25 @@ class Logger {
       randomPadding += randomHexDigit;
     }
     return baseId + randomPadding;
+  }
+}
+
+class InlineBuffer {
+  chunks = [];
+  length = 0;
+
+  constructor(limit) {
+    this.limit = limit;
+  }
+
+  write(text) {
+    const chunk = Buffer.from(text).subarray(0, this.limit - this.length);
+    this.chunks.push(chunk);
+    this.length += chunk.length;
+  }
+
+  toBuffer() {
+    return Buffer.concat(this.chunks);
   }
 }
 

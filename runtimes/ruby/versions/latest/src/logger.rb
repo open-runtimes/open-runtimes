@@ -5,6 +5,8 @@ require_relative 'config.rb'
 class RuntimeLogger
   TYPE_LOG = "log"
   TYPE_ERROR = "error"
+  # One byte past edge's limit, so edge sees the overflow and truncates as it does for files
+  INLINE_LIMIT = 5 * 1024 * 1024 + 1
 
   attr_accessor :enabled
   attr_accessor :id
@@ -14,9 +16,16 @@ class RuntimeLogger
   attr_accessor :custom_std_stream
   attr_accessor :native_logs_cache
   attr_accessor :native_errors_cache
+  attr_reader :inline
+  attr_reader :inline_logs
+  attr_reader :inline_errors
 
-  def initialize(status, id)
+  def initialize(status, id, inline = false)
     @includes_native_info = false
+    @inline = inline
+    # Inline mode returns logs on the response instead of writing files
+    @inline_logs = String.new
+    @inline_errors = String.new
 
     @enabled = false
 
@@ -90,6 +99,11 @@ class RuntimeLogger
     rescue
       # Silently fail to prevent 500 errors in runtime
       # Log write failures should not crash the runtime
+    end
+
+    if @inline
+      buffer = type === RuntimeLogger::TYPE_ERROR ? @inline_errors : @inline_logs
+      buffer << string_log.b.byteslice(0, INLINE_LIMIT - buffer.bytesize)
     end
 
     begin

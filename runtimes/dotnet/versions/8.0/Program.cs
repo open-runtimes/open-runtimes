@@ -53,7 +53,12 @@ namespace DotNetRuntime
                 ? logIdHeaderValue.ToString()
                 : string.Empty;
 
-            RuntimeLogger logger = new RuntimeLogger(loggingHeader, logIdHeader);
+            // A HEAD response has no body to carry them, so its logs are dropped
+            RuntimeLogger logger = new RuntimeLogger(
+                loggingHeader,
+                logIdHeader,
+                OprConfig.InlineLogs && !HttpMethods.IsHead(request.Method)
+            );
 
             try
             {
@@ -67,7 +72,7 @@ namespace DotNetRuntime
                 var outputHeaders = new Dictionary<string, string>();
                 outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
-                return new CustomResponse(Encoding.UTF8.GetBytes(""), 500, outputHeaders);
+                return new CustomResponse(Encoding.UTF8.GetBytes(""), 500, outputHeaders, logger);
             }
         }
 
@@ -324,7 +329,7 @@ namespace DotNetRuntime
 
             outputHeaders.Add("x-open-runtimes-log-id", logger.id);
 
-            return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
+            return new CustomResponse(output.Body, output.StatusCode, outputHeaders, logger);
         }
     }
 }

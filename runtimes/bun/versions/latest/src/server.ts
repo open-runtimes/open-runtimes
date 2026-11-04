@@ -3,6 +3,45 @@ import { Logger } from "./logger";
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
+// With OPEN_RUNTIMES_LOGGING=inline, the body goes out in a `b` frame and the
+// logs and errors follow in `l` and `e` frames, so edge splits them off the
+// body. Each frame is its type, the payload's byte length in hex and a
+// newline, then the payload.
+const respond = async (
+  logger: Logger,
+  status: number,
+  headers: Headers,
+  body: any,
+) => {
+  if (!logger.inline) {
+    return new Response(body, { status, headers });
+  }
+
+  // Framing gives the body a length of its own and needs a status that allows
+  // a body, so the real ones travel in headers
+  const bytes = new Uint8Array(await new Response(body).arrayBuffer());
+  headers.delete("content-length");
+  headers.set("x-open-runtimes-logs-inline", "enabled");
+  headers.set("x-open-runtimes-content-length", `${bytes.length}`);
+  if (status === 204 || status === 304) {
+    headers.set("x-open-runtimes-status-code", `${status}`);
+    status = 200;
+  }
+
+  const parts: Uint8Array[] = [];
+  for (const [type, buffer] of [
+    ["b", { chunks: [bytes], length: bytes.length }],
+    ["l", logger.inlineLogs],
+    ["e", logger.inlineErrors],
+  ] as const) {
+    if (buffer.length > 0) {
+      parts.push(Buffer.from(`${type}${buffer.length.toString(16)}\n`));
+      parts.push(...buffer.chunks);
+    }
+  }
+  return new Response(Buffer.concat(parts), { status, headers });
+};
+
 const action = async (logger: Logger, request: any) => {
   const timeout = request.headers.get(`x-open-runtimes-timeout`) ?? "";
   let safeTimeout: number | null = null;
@@ -271,10 +310,7 @@ const action = async (logger: Logger, request: any) => {
   responseHeaders.set("x-open-runtimes-log-id", logger.id);
   await logger.end();
 
-  return new Response(output.body, {
-    status: output.statusCode,
-    headers: responseHeaders,
-  });
+  return respond(logger, output.statusCode, responseHeaders, output.body);
 };
 
 const server = Bun.serve({
@@ -295,6 +331,8 @@ const server = Bun.serve({
     const logger = new Logger(
       request.headers.get("x-open-runtimes-logging"),
       request.headers.get("x-open-runtimes-log-id"),
+      // A HEAD response has no body to carry them, so its logs are dropped
+      config.inlineLogs && request.method !== "HEAD",
     );
 
     try {
@@ -302,15 +340,12 @@ const server = Bun.serve({
     } catch (e) {
       logger.write([e], Logger.TYPE_ERROR);
 
-      const responseHeaders: any = {};
-      responseHeaders["x-open-runtimes-log-id"] = logger.id;
+      const responseHeaders = new Headers();
+      responseHeaders.set("x-open-runtimes-log-id", logger.id);
 
       await logger.end();
 
-      return new Response("", {
-        status: 500,
-        headers: responseHeaders,
-      });
+      return respond(logger, 500, responseHeaders, "");
     }
   },
 });
