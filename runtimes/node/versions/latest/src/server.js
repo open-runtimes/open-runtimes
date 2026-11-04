@@ -60,6 +60,34 @@ const send = (res, statusCode, body = null) => {
 const Logger = require("./logger");
 const config = require("./config");
 
+// User functions may return a native (Fetch API) Response instead of a
+// context.res.* result. The Response global only exists on Node.js 18+.
+const isNativeResponse = (value) =>
+  typeof Response !== "undefined" && value instanceof Response;
+
+// Converts a native Response into the internal { body, statusCode, headers }
+// shape so the rest of the pipeline (reserved header filtering, charset
+// defaults, logging headers) applies to it as well.
+const fromNativeResponse = async (response) => {
+  const headers = {};
+  for (const [key, value] of response.headers) {
+    headers[key] = value;
+  }
+  // Iterating Headers joins multiple set-cookie values into one string;
+  // getSetCookie() (Node.js 19.7+) keeps them separate.
+  if (typeof response.headers.getSetCookie === "function") {
+    const cookies = response.headers.getSetCookie();
+    if (cookies.length > 0) {
+      headers["set-cookie"] = cookies;
+    }
+  }
+  return {
+    body: Buffer.from(await response.arrayBuffer()),
+    statusCode: response.status,
+    headers,
+  };
+};
+
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
 const server = http.createServer(async (req, res) => {
@@ -298,6 +326,9 @@ const action = async (logger, req, res) => {
         output = await userFunction.default(context);
       } else {
         output = await userFunction(context);
+      }
+      if (isNativeResponse(output)) {
+        output = await fromNativeResponse(output);
       }
     }
 

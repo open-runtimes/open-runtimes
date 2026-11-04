@@ -165,6 +165,44 @@ When you can have two!
 			context.log("engine:", engine);
 			context.error("engine:", engine);
 			return context.res.text("OK");
+		case "nativeResponseText":
+			return new Response("Hello Native 👋");
+		case "nativeResponseJson":
+			return new Response(
+				JSON.stringify({
+					json: true,
+					message: "Native responses are awesome.",
+				}),
+				{ status: 201, headers: { "content-type": "application/json" } },
+			);
+		case "nativeResponseHeaders":
+			return new Response("OK", {
+				status: 404,
+				headers: {
+					"first-header": "first-value",
+					"x-open-runtimes-custom-out-header": "third-value",
+				},
+			});
+		case "nativeResponseBinary":
+			return new Response(Uint8Array.from([0, 10, 255]), {
+				headers: { "content-type": "application/octet-stream" },
+			});
+		case "nativeResponseStream":
+			return new Response(
+				new ReadableStream({
+					start(controller) {
+						const encoder = new TextEncoder();
+						controller.enqueue(encoder.encode("Hello "));
+						controller.enqueue(encoder.encode("Stream"));
+						controller.close();
+					},
+				}),
+				{ headers: { "content-type": "text/plain" } },
+			);
+		case "nativeResponseEmpty":
+			return new Response(null, { status: 204 });
+		case "nativeResponseRedirect":
+			return Response.redirect("https://github.com/", 301);
 		case "errorTest":
 			context.log("Before error...");
 			throw new Error("Error!");

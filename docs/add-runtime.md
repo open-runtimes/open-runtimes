@@ -165,7 +165,10 @@ reference implementation):
 6. Wrap the user function in try/catch and surface errors via the logger; missing
    return → `500` with a clear message.
 
-Functions return whatever `context.res.*` produces. Example user function:
+Functions return whatever `context.res.*` produces. The JavaScript runtimes
+(Node.js, Bun, Deno) additionally accept a native Fetch API `Response` object
+and convert it to the same `{ body, statusCode, headers }` shape. Example user
+function:
 
 ```js
 module.exports = async (context) => {

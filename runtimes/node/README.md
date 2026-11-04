@@ -62,6 +62,17 @@ module.exports = (req, res) => {
 };
 ```
 
+- Instead of `context.res.*`, a function can also return a native [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) object (Node.js 18 and newer). Its status, headers and body are sent to the client as-is:
+
+```js
+module.exports = async (context) => {
+  return new Response(JSON.stringify({ message: "Hello Open Runtimes 👋" }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+};
+```
+
 - To handle dependencies, you need to have `package.json` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="npm install"` during build.
 
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.js`.

@@ -55,6 +55,19 @@ export default async function (context: any) {
 }
 ```
 
+- Instead of `context.res.*`, a function can also return a native
+  [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response)
+  object. Its status, headers and body are sent to the client as-is:
+
+```typescript
+export default async function (context: any) {
+  return new Response(JSON.stringify({ message: "Hello Open Runtimes 👋" }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+```
+
 - Dependencies are handeled automatically. To install those dependencies during
   build, pass `OPEN_RUNTIMES_BUILD_COMMAND="deno cache YOUR_ENTRYPOINT"` during
   build.
