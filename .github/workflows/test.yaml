@@ -101,6 +101,8 @@ jobs:
       - name: Run tests
         timeout-minutes: 30
         working-directory: ./
+        env:
+          NONROOT: "1"
         run: bun ci/test.ts ${{ matrix.ID }}
       - name: Upload startup metrics
         if: always()

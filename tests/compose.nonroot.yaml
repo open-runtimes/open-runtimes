@@ -1,0 +1,75 @@
+# Local experiment: run the serve containers the way edge runs them in
+# production, with the code extracted by root (the sidecar's job) and the
+# runtime itself as uid 65532 with every capability dropped. The top of the
+# tree is 0777 like the orchestrator's overlay upper; everything below stays
+# root-owned.
+x-init: &init
+  image: open-runtimes/test-runtime
+  platform: ${TEST_PLATFORM:-linux/x86_64}
+  user: "0:0"
+  entrypoint: []
+  command:
+    - bash
+    - -c
+    - |
+      set -e
+      find /code -mindepth 1 -delete
+      case "$$(head -c4 /a | od -An -vtx1 | tr -d ' \n')" in
+        68737173) unsquashfs -q -f -d /code /a ;;
+        1f8b*) tar -xzf /a -C /code ;;
+        28b52ffd) zstd -dc /a | tar -xf - -C /code ;;
+        *) tar -xf /a -C /code ;;
+      esac
+      chown -R 0:0 /code && chmod -R go-w /code && chmod 777 /code
+      for d in /copies/*; do [ -d "$$d" ] || continue; find "$$d" -mindepth 1 -delete; cp -a /code/. "$$d"/; chmod 777 "$$d"; done
+      ls -A /code | head -20
+
+x-nonroot: &nonroot
+  user: "65532:65532"
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+
+services:
+  # Each serve container gets its own copy, as each pod has its own overlay
+  code-init:
+    <<: *init
+    volumes:
+      - ./.runtime/code.tar.gz:/a:ro
+      - nr-code:/code
+      - nr-code-secondary:/copies/secondary
+      - nr-code-teritary:/copies/teritary
+      - nr-code-php-fatal:/copies/php-fatal
+  code-init-no-export:
+    <<: *init
+    profiles: [no-export]
+    volumes:
+      - ./.runtime/no-export-build/src/code.tar.gz:/a:ro
+      - nr-code-no-export:/code
+
+  serve: &serve
+    <<: *nonroot
+    depends_on: {code-init: {condition: service_completed_successfully}}
+    environment: {OPEN_RUNTIMES_CODE_PATH: /usr/local/server/src/function}
+    volumes: [nr-code:/usr/local/server/src/function]
+  serve-secondary:
+    <<: *serve
+    volumes: [nr-code-secondary:/usr/local/server/src/function]
+    command: ['bash', '-c', 'bash helpers/start.sh "$$START_COMMAND"']
+  serve-teritary:
+    <<: *serve
+    volumes: [nr-code-teritary:/usr/local/server/src/function]
+  serve-php-fatal:
+    <<: *serve
+    volumes: [nr-code-php-fatal:/usr/local/server/src/function]
+  serve-no-export:
+    <<: *nonroot
+    depends_on: {code-init-no-export: {condition: service_completed_successfully}}
+    environment: {OPEN_RUNTIMES_CODE_PATH: /usr/local/server/src/function}
+    volumes: [nr-code-no-export:/usr/local/server/src/function]
+
+volumes:
+  nr-code:
+  nr-code-secondary:
+  nr-code-teritary:
+  nr-code-php-fatal:
+  nr-code-no-export:

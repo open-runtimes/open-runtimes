@@ -11,7 +11,7 @@
 // tools -> build (+ variants by profile) -> serve trio -> startup metrics ->
 // phpunit -> down.
 
-import { existsSync, cpSync, rmSync, mkdirSync, writeFileSync, readdirSync, readFileSync } from 'fs';
+import { chmodSync, existsSync, cpSync, rmSync, mkdirSync, writeFileSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { resolveEntry, type Entry } from './common';
 import { checkShutdown } from './shutdown';
@@ -39,7 +39,7 @@ const composeEnv: Record<string, string> = {
     COMPOSE_PROFILES: entry.COMPOSE_PROFILES.join(','),
 };
 
-const compose = ['docker', 'compose', '-f', join(repoRoot, 'tests/compose.yaml')];
+const compose = ['docker', 'compose', '-f', join(repoRoot, 'tests/compose.yaml'), ...(process.env.NONROOT ? ['-f', join(repoRoot, 'tests/compose.nonroot.yaml')] : [])];
 
 function run(cmd: string[], env: Record<string, string> = composeEnv): void {
     console.log(`+ ${cmd.join(' ')}`);
@@ -106,6 +106,13 @@ function stageFixtures(): void {
     rmSync('/tmp/logs', { recursive: true, force: true });
     mkdirSync('/tmp/logs', { recursive: true });
     rmSync('/tmp/startup-metrics.json', { force: true });
+
+    // Production gives the runtime world-writable telemetry and logs mounts
+    if (process.env.NONROOT) {
+        chmodSync(telemetry, 0o777);
+        chmodSync(join(telemetry, 'timings.txt'), 0o666);
+        chmodSync('/tmp/logs', 0o777);
+    }
 }
 
 // Variant build directories: copies of tests/.runtime, staged AFTER the main
