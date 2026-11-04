@@ -213,6 +213,27 @@ When you can have two!
 			return new Response(null, { status: 204 });
 		case "nativeResponseRedirect":
 			return Response.redirect("https://github.com/", 301);
+		case "rawRequest": {
+			const raw = context.req.raw;
+			return context.res.json({
+				isRequest: raw instanceof Request,
+				isMemoized: raw === context.req.raw,
+				method: raw.method,
+				url: raw.url,
+				contextUrl: context.req.url,
+				headers: Object.fromEntries(raw.headers),
+				bodyText: await raw.text(),
+			});
+		}
+		case "rawRequestJson":
+			return context.res.json(await context.req.raw.json());
+		case "rawRequestEmpty": {
+			const raw = context.req.raw;
+			return context.res.json({
+				method: raw.method,
+				hasBody: raw.body !== null,
+			});
+		}
 		case "errorTest":
 			context.log("Before error...");
 			throw new Error("Error!");

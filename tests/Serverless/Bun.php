@@ -7,4 +7,5 @@ use Tests\Serverless;
 class Bun extends Serverless
 {
     use NativeResponse;
+    use RawRequest;
 }

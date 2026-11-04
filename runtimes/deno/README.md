@@ -68,6 +68,20 @@ export default async function (context: any) {
 }
 ```
 
+- The incoming request is also available as a native
+  [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) through
+  `context.req.raw`. It is built lazily from the same data as `context.req`: the
+  URL matches `context.req.url`, `x-open-runtimes-*` control headers are removed
+  and enforced headers are included. Like any `Request`, its body can be read
+  once:
+
+```typescript
+export default async function (context: any) {
+  const form = await context.req.raw.formData();
+  return context.res.text(`Hello ${form.get("name")}`);
+}
+```
+
 - Dependencies are handeled automatically. To install those dependencies during
   build, pass `OPEN_RUNTIMES_BUILD_COMMAND="deno cache YOUR_ENTRYPOINT"` during
   build.

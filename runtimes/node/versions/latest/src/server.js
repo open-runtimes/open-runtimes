@@ -88,6 +88,10 @@ const fromNativeResponse = async (response) => {
   };
 };
 
+// The Fetch API Request constructor rejects these methods, so context.req.raw
+// cannot be built for them.
+const FORBIDDEN_REQUEST_METHODS = ["CONNECT", "TRACE", "TRACK"];
+
 const USER_CODE_PATH = "/usr/local/server/src/function";
 
 const server = http.createServer(async (req, res) => {
@@ -195,6 +199,9 @@ const action = async (logger, req, res) => {
 
   const url = `${scheme}://${host}${port.toString() === defaultPort ? "" : `:${port}`}${path}${queryString === "" ? "" : `?${queryString}`}`;
 
+  // Lazily built native (Fetch API) Request, see context.req.raw
+  let rawRequest = null;
+
   const context = {
     req: {
       get body() {
@@ -217,6 +224,29 @@ const action = async (logger, req, res) => {
       },
       get bodyBinary() {
         return bodyBinary;
+      },
+      get raw() {
+        if (typeof Request === "undefined") {
+          throw new Error(
+            "context.req.raw requires Node.js 18 or newer, which provides the Request class.",
+          );
+        }
+        if (FORBIDDEN_REQUEST_METHODS.includes(this.method.toUpperCase())) {
+          throw new Error(
+            `context.req.raw is not available for ${this.method} requests, because the Fetch API Request class does not allow this method.`,
+          );
+        }
+        if (rawRequest === null) {
+          rawRequest = new Request(this.url, {
+            method: this.method,
+            headers: this.headers,
+            // GET and HEAD requests must not carry a body
+            body: ["GET", "HEAD"].includes(this.method)
+              ? undefined
+              : this.bodyBinary,
+          });
+        }
+        return rawRequest;
       },
       headers,
       method: req.method,
