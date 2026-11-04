@@ -144,6 +144,13 @@ When you can have two!
         ]),
         headers: {'content-type': 'text/plain'},
       );
+    case 'nativeResponseCookies':
+      return shelf.Response.ok(
+        'OK',
+        headers: {
+          'set-cookie': ['first=1', 'second=2'],
+        },
+      );
     case 'nativeResponseEmpty':
       return shelf.Response(204);
     case 'nativeResponseRedirect':

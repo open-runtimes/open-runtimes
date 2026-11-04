@@ -95,8 +95,14 @@ Future<Map<String, dynamic>> fromNativeResponse(shelf.Response response) async {
     builder.add(chunk);
   }
 
-  // The server computes these from the buffered body.
-  final Map<String, String> headers = Map<String, String>.from(response.headers)
+  // Keep repeated headers (notably set-cookie) as lists instead of the
+  // comma-joined form of response.headers. The server computes
+  // content-length and transfer-encoding from the buffered body.
+  final Map<String, Object> headers = {};
+  response.headersAll.forEach((String key, List<String> values) {
+    headers[key] = values.length == 1 ? values.first : values;
+  });
+  headers
     ..remove('content-length')
     ..remove('transfer-encoding');
 
@@ -260,7 +266,8 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   output['statusCode'] = output['statusCode'] ?? 200;
   output['headers'] = output['headers'] ?? {};
 
-  Map<String, String> responseHeaders = {};
+  // Values are either a String or a List<String> for repeated headers.
+  Map<String, Object> responseHeaders = {};
 
   for (MapEntry entry in output['headers'].entries) {
     String header = entry.key.toLowerCase();
@@ -269,7 +276,13 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  String contentTypeValue = (responseHeaders['content-type'] ?? 'text/plain')
+  Object? contentTypeHeader = responseHeaders['content-type'];
+  if (contentTypeHeader is List) {
+    contentTypeHeader = contentTypeHeader.isEmpty
+        ? null
+        : contentTypeHeader.first;
+  }
+  String contentTypeValue = (contentTypeHeader as String? ?? 'text/plain')
       .toLowerCase();
   Encoding? encoding = null;
 

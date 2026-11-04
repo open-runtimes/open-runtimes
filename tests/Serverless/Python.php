@@ -21,4 +21,15 @@ class Python extends Serverless
         self::assertEquals(500, $response['code']);
         self::assertStringContainsString('not supported', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
     }
+
+    public function testNativeResponseCookies(): void
+    {
+        // Repeated headers such as multiple set-cookie values are forwarded one by one
+        $response = Client::execute(headers: ['x-action' => 'nativeResponseCookies']);
+        self::assertEquals(200, $response['code']);
+        $cookies = (array) ($response['headers']['set-cookie'] ?? []);
+        self::assertCount(2, $cookies);
+        self::assertStringStartsWith('first=1', $cookies[0]);
+        self::assertStringStartsWith('second=2', $cookies[1]);
+    }
 }

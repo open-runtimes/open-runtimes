@@ -100,6 +100,11 @@ When you can have two!
         )
     elif action == "nativeResponseStream":
         return web.StreamResponse()
+    elif action == "nativeResponseCookies":
+        response = web.Response(text="OK")
+        response.set_cookie("first", "1")
+        response.set_cookie("second", "2")
+        return response
     elif action == "nativeResponseEmpty":
         return web.Response(status=204)
     elif action == "nativeResponseRedirect":

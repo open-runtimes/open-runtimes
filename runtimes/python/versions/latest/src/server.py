@@ -23,9 +23,19 @@ def from_native_response(response):
             "Streamed, file and payload bodies are not supported, use context.res.* instead."
         )
 
-    headers = {}
+    # Keep repeated headers (notably set-cookie) as lists instead of
+    # collapsing them to the last value.
+    grouped = {}
     for key, value in response.headers.items():
-        headers[key.lower()] = value
+        grouped.setdefault(key.lower(), []).append(value)
+    # Cookies added with response.set_cookie() only become headers once
+    # aiohttp prepares the response, so materialize them the same way.
+    for cookie in response.cookies.values():
+        grouped.setdefault("set-cookie", []).append(cookie.output(header="")[1:])
+    headers = {
+        key: values[0] if len(values) == 1 else values
+        for key, values in grouped.items()
+    }
 
     return {
         "body": bytes(response.body or b""),
@@ -202,7 +212,12 @@ async def action(logger, request: web_request.Request):
 
     for key in output["headers"].keys():
         if not key.lower().startswith("x-open-runtimes-"):
-            resp.headers[key.lower()] = output["headers"][key]
+            value = output["headers"][key]
+            if isinstance(value, list):
+                for item in value:
+                    resp.headers.add(key.lower(), item)
+            else:
+                resp.headers[key.lower()] = value
 
     resp.headers["content-type"] = (
         output["headers"].get("content-type", "text/plain").lower()
