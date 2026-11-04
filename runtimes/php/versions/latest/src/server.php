@@ -136,6 +136,7 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
     }
 
     $context = new RuntimeContext($logger);
+    $context->req->raw = $req;
     $context->req->bodyBinary = $req->getContent();
     $context->req->method = $req->getMethod();
     $context->req->url = $url;

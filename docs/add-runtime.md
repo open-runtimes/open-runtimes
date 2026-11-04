@@ -154,9 +154,13 @@ reference implementation):
 4. **Build the context** and call the user's function with it:
    - `context.req` — `bodyBinary` / `bodyText` / `bodyJson` / `body`, `headers`,
      `method`, `scheme`, `host`, `port`, `path`, `query`, `queryString`, `url`.
-     The JavaScript runtimes (Node.js, Bun, Deno) additionally expose `raw`, a
-     lazily built native Fetch API `Request` carrying the same URL, headers and
-     body as `context.req`.
+     `raw` exposes the underlying request object of the HTTP library the
+     runtime is built on (for example aiohttp's `web.Request` in Python, or
+     Javalin's `Context` in Java and Kotlin). It is passed through as-is, so it
+     still carries the `x-open-runtimes-*` control headers; make sure its body
+     stays readable after the runtime has buffered it. The JavaScript runtimes
+     (Node.js, Bun, Deno) instead build a native Fetch API `Request` carrying
+     the same URL, headers and body as `context.req`.
    - `context.res` — `text(body, status?, headers?)`, `json(obj, …)`,
      `binary(bytes, …)`, `empty()`, `redirect(url, status?, headers?)`,
      `send(body, …)`.

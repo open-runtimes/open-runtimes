@@ -115,6 +115,13 @@ public class Tests {
         json.put("host", context.getReq().getHost());
         return context.getRes().json(json);
       }
+      case "rawRequest" -> {
+        var raw = context.getReq().getRaw();
+        json.put("method", raw.method());
+        json.put("path", raw.path());
+        json.put("bodyText", raw.body());
+        return context.getRes().json(json);
+      }
       case "requestHeaders" -> {
         for (Map.Entry<String, String> entry : context.getReq().getHeaders().entrySet()) {
           json.put(entry.getKey(), entry.getValue());

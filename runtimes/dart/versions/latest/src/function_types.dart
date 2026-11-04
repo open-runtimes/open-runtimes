@@ -1,8 +1,12 @@
 import 'dart:convert';
 
+import 'package:shelf/shelf.dart' as shelf;
+
 import 'logger.dart';
 
 class RuntimeRequest {
+  // The underlying shelf Request, see context.req.raw
+  shelf.Request? raw;
   List<int> bodyBinary;
   Map<String, dynamic> headers;
   String method;
@@ -52,6 +56,7 @@ class RuntimeRequest {
     Map<String, dynamic> headers = const {},
     List<int> bodyBinary = const [],
     String url = '',
+    shelf.Request? raw = null,
   }) : method = method,
        scheme = scheme,
        host = host,
@@ -61,7 +66,8 @@ class RuntimeRequest {
        queryString = queryString,
        headers = headers,
        bodyBinary = bodyBinary,
-       url = url {}
+       url = url,
+       raw = raw {}
 }
 
 class RuntimeResponse {

@@ -61,6 +61,8 @@ public class Handler {
 
 - To handle dependencies, you need to have `csproj` file containing the `PackageReferences` you desire. Dependencies will be automatically installed.
 
+- The underlying ASP.NET Core `HttpRequest` is available as `context.Req.Raw`. It is passed through as-is, so unlike `context.Req` it still carries the `x-open-runtimes-*` control headers. The body is buffered, so it can be read again after resetting `Raw.Body.Position`.
+
 - The default entrypoint is `Index.cs`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/App.cs`.
 
 - F# can be used in .NET runtime:

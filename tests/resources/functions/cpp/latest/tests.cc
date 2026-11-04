@@ -96,6 +96,11 @@ namespace runtime {
                 json["host"] = req.host;
 
                 return res.json(json);
+            } else if (action == "rawRequest") {
+                json["method"] = req.raw->getMethodString();
+                json["path"] = req.raw->getPath();
+                json["bodyText"] = std::string(req.raw->getBody());
+                return res.json(json);
             } else if (action == "requestHeaders") {
                 return res.json(req.headers);
             } else if (action == "requestBodyText") {

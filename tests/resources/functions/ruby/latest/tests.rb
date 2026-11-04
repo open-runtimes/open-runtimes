@@ -72,6 +72,16 @@ When you can have two!
         'host': context.req.host,
       }
     )
+  when 'rawRequest'
+    raw = context.req.raw
+    raw.body.rewind
+    return context.res.json(
+      {
+        'method': raw.request_method,
+        'path': raw.path,
+        'bodyText': raw.body.read,
+      }
+    )
   when 'requestHeaders'
     return context.res.json(context.req.headers)
   when 'requestBodyText'

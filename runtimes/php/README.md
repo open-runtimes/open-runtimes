@@ -61,6 +61,8 @@ return function($context) {
 require 'vendor/autoload.php';
 ```
 
+- The underlying `Swoole\Http\Request` is available as `$context->req->raw`. It is passed through as-is, so unlike `$context->req` it still carries the `x-open-runtimes-*` control headers.
+
 - The default entrypoint is `index.php`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.php`.
 
 ## Contributing

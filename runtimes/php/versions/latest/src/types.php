@@ -42,6 +42,8 @@ class RuntimeResponse
 
 class RuntimeRequest
 {
+    /** The underlying Swoole\Http\Request, see $context->req->raw */
+    public mixed $raw = null;
     public string $bodyBinary = '';
     public array $headers = [];
     public string $method = '';

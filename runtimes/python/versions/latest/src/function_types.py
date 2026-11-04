@@ -33,6 +33,8 @@ class Response:
 
 
 class Request:
+    # The underlying aiohttp.web.Request, see context.req.raw
+    raw = None
     body_binary = None
     headers = None
     method = None

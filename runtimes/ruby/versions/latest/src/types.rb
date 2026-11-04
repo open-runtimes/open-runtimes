@@ -36,6 +36,7 @@ class RuntimeResponse
 end
 
 class RuntimeRequest
+  attr_accessor :raw
   attr_accessor :body_binary
   attr_accessor :headers
   attr_accessor :method
@@ -47,7 +48,8 @@ class RuntimeRequest
   attr_accessor :query
   attr_accessor :query_string
 
-  def initialize(url, method, scheme, host, port, path, query, query_string, headers, body_binary)
+  def initialize(url, method, scheme, host, port, path, query, query_string, headers, body_binary, raw = nil)
+    @raw = raw
     @body_binary = body_binary
     @headers = headers
     @method = method

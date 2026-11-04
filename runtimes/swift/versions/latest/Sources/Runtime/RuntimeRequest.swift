@@ -1,6 +1,9 @@
 import Foundation
+import Vapor
 
 class RuntimeRequest {
+    /// The underlying Vapor Request, see context.req.raw
+    let raw: Request
     let bodyBinary: Data
     let headers: [String: String]
     let method: String
@@ -22,8 +25,10 @@ class RuntimeRequest {
         port: Int?,
         path: String,
         queryString: String?,
-        query: [String: String]?
+        query: [String: String]?,
+        raw: Request
     ) {
+        self.raw = raw
         self.bodyBinary = bodyBinary
         self.headers = headers
         self.method = method

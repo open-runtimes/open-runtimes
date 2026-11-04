@@ -99,6 +99,7 @@ int main()
                     std::string queryString = req->getQuery();
 
                     runtime::RuntimeRequest runtimeRequest;
+                    runtimeRequest.raw = req;
                     runtimeRequest.method = method;
                     runtimeRequest.queryString = queryString;
 

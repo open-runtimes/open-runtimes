@@ -107,6 +107,15 @@ When you can have two!
           'host': context.req.host,
         });
       }
+    case 'rawRequest':
+      {
+        final raw = context.req.raw;
+        return context.res.json({
+          'method': raw.method,
+          'path': raw.requestedUri.path,
+          'bodyText': await raw.readAsString(),
+        });
+      }
     case 'requestHeaders':
       {
         return context.res.json(context.req.headers);

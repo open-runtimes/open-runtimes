@@ -99,6 +99,11 @@ public class Tests {
         json.put("scheme", context.getReq().getScheme());
         json.put("host", context.getReq().getHost());
         return context.getRes().json(json);
+      case "rawRequest":
+        json.put("method", context.getReq().getRaw().method());
+        json.put("path", context.getReq().getRaw().path());
+        json.put("bodyText", context.getReq().getRaw().body());
+        return context.getRes().json(json);
       case "requestHeaders":
         for (Map.Entry<String, String> entry : context.getReq().getHeaders().entrySet()) {
           json.put(entry.getKey(), entry.getValue());

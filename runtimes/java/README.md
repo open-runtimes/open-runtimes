@@ -63,6 +63,8 @@ public class Index {
 
 - To handle dependencies, you need to have any `.gradle` file including a `dependencies` block. Dependencies will be automatically installed.
 
+- The underlying [Javalin](https://javalin.io/) `Context` is available as `context.getReq().getRaw()`. It is passed through as-is, so unlike `context.getReq()` it still carries the `x-open-runtimes-*` control headers.
+
 - The default entrypoint is `Index.java`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/App.java`.
 
 ## Contributing
