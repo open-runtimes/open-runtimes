@@ -88,6 +88,22 @@ Future<dynamic> main(context) async {
 
 - To handle dependencies, you need to have `pubspec.yaml` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"` during build.
 
+- Instead of `context.res.*`, a function can also return a [shelf](https://pub.dev/packages/shelf) `Response`. Its status, headers and body, including a streamed body, are sent to the client as-is. Add `shelf` to your `pubspec.yaml` to use it. Note that shelf labels a non-ASCII `String` body as `application/octet-stream` unless you set a `content-type` header yourself.
+
+```dart
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:shelf/shelf.dart' as shelf;
+
+Future<dynamic> main(context) async {
+  return shelf.Response.ok(
+    jsonEncode({'message': 'Hello Open Runtimes 👋'}),
+    headers: {'content-type': 'application/json'},
+  );
+}
+```
+
 - The underlying [shelf](https://pub.dev/packages/shelf) `Request` is available as `context.req.raw`. It is a copy of the original request that carries the buffered body, so `context.req.raw.readAsString()` works. Unlike `context.req`, it still carries the `x-open-runtimes-*` control headers.
 
 - The default entrypoint is `lib/main.dart`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=lib/app.dart`.

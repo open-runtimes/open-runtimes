@@ -7,6 +7,8 @@ use Tests\Serverless;
 
 class Dart extends Serverless
 {
+    use NativeResponse;
+
     public function testSetCookie(): void
     {
         self::assertTrue(true); // Disable test till implemented

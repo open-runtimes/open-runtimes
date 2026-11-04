@@ -12,6 +12,28 @@ from logger import Logger
 disable_vulnerable_brotli()
 
 
+def from_native_response(response):
+    """Convert an aiohttp web.Response returned by the function into the
+    {body, statusCode, headers} shape that context.res.* produces."""
+    if not isinstance(response, web.Response) or (
+        response.body is not None and not isinstance(response.body, (bytes, bytearray))
+    ):
+        raise TypeError(
+            "Only an aiohttp web.Response with an in-memory body can be returned. "
+            "Streamed, file and payload bodies are not supported, use context.res.* instead."
+        )
+
+    headers = {}
+    for key, value in response.headers.items():
+        headers[key.lower()] = value
+
+    return {
+        "body": bytes(response.body or b""),
+        "statusCode": response.status,
+        "headers": headers,
+    }
+
+
 async def action(logger, request: web_request.Request):
     timeout = request.headers.get("x-open-runtimes-timeout", "")
     safeTimeout = None
@@ -141,8 +163,12 @@ async def action(logger, request: web_request.Request):
 
         async def execute(context):
             if asyncio.iscoroutinefunction(userModule.main):
-                return await userModule.main(context)
-            return userModule.main(context)
+                output = await userModule.main(context)
+            else:
+                output = userModule.main(context)
+            if isinstance(output, web.StreamResponse):
+                output = from_native_response(output)
+            return output
 
         try:
             if safeTimeout is not None:

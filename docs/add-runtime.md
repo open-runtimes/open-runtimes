@@ -172,10 +172,13 @@ reference implementation):
 6. Wrap the user function in try/catch and surface errors via the logger; missing
    return → `500` with a clear message.
 
-Functions return whatever `context.res.*` produces. The JavaScript runtimes
-(Node.js, Bun, Deno) additionally accept a native Fetch API `Response` object
-and convert it to the same `{ body, statusCode, headers }` shape. Example user
-function:
+Functions return whatever `context.res.*` produces. Runtimes whose HTTP library
+has a value-type response additionally accept that native response object and
+convert it to the same `{ body, statusCode, headers }` shape: a Fetch API
+`Response` in the JavaScript runtimes (Node.js, Bun, Deno), aiohttp's
+`web.Response` in Python and shelf's `Response` in Dart. The body is read into
+memory during the conversion; bodies that cannot be read (for example aiohttp's
+`StreamResponse`) are rejected with a clear error. Example user function:
 
 ```js
 module.exports = async (context) => {

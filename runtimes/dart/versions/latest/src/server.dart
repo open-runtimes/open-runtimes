@@ -87,6 +87,26 @@ Future<Uint8List> _readRequestBody(
   return builder.takeBytes();
 }
 
+/// Converts a shelf Response returned by the function into the
+/// {body, statusCode, headers} shape that context.res.* produces.
+Future<Map<String, dynamic>> fromNativeResponse(shelf.Response response) async {
+  final BytesBuilder builder = BytesBuilder(copy: false);
+  await for (final List<int> chunk in response.read()) {
+    builder.add(chunk);
+  }
+
+  // The server computes these from the buffered body.
+  final Map<String, String> headers = Map<String, String>.from(response.headers)
+    ..remove('content-length')
+    ..remove('transfer-encoding');
+
+  return {
+    'body': builder.takeBytes(),
+    'statusCode': response.statusCode,
+    'headers': headers,
+  };
+}
+
 Future<shelf.Response> action(Logger logger, dynamic req) async {
   int? safeTimeout = null;
   String timeout = req.headers['x-open-runtimes-timeout'] ?? '';
@@ -193,10 +213,18 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   try {
     await runZoned(
       () async {
+        Future<dynamic> execute() async {
+          dynamic result = await user_code.main(context);
+          if (result is shelf.Response) {
+            result = await fromNativeResponse(result);
+          }
+          return result;
+        }
+
         if (safeTimeout != null) {
           dynamic result = await Future.any(<Future<dynamic>>[
             Future.delayed(Duration(seconds: safeTimeout)),
-            user_code.main(context),
+            execute(),
           ]);
 
           if (result != null) {
@@ -206,7 +234,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
             output = context.res.text('', 500, const {});
           }
         } else {
-          output = await user_code.main(context);
+          output = await execute();
         }
       },
       zoneSpecification: ZoneSpecification(

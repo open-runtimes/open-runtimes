@@ -5,17 +5,23 @@ namespace Tests\Serverless;
 use Tests\Client;
 
 /**
- * Shared test for runtimes whose functions may return a native (Fetch API)
- * Response object instead of a context.res.* result. Used by the JavaScript
- * runtimes (Node.js, Bun, Deno).
+ * Shared test for runtimes whose functions may return the native response
+ * object of the HTTP library they are built on instead of a context.res.*
+ * result: the Fetch API Response in Node.js, Bun and Deno, aiohttp's
+ * web.Response in Python and shelf's Response in Dart.
  */
 trait NativeResponse
 {
-    public function testNativeResponse(): void
+    private function skipWithoutNativeResponse(): void
     {
         if ($this->runtimeName === 'node' && \version_compare($this->runtimeVersion, '18.0', '<')) {
             $this->markTestSkipped('The global Response class requires Node.js 18 or newer.');
         }
+    }
+
+    public function testNativeResponse(): void
+    {
+        $this->skipWithoutNativeResponse();
 
         // Plain text, default status and content-type
         $response = Client::execute(headers: ['x-action' => 'nativeResponseText']);
@@ -50,11 +56,6 @@ trait NativeResponse
         self::assertEquals(10, $bytes['byte2']);
         self::assertEquals(255, $bytes['byte3']);
 
-        // Streamed body is fully consumed
-        $response = Client::execute(headers: ['x-action' => 'nativeResponseStream']);
-        self::assertEquals(200, $response['code']);
-        self::assertEquals('Hello Stream', $response['body']);
-
         // Empty body
         $response = Client::execute(headers: ['x-action' => 'nativeResponseEmpty']);
         self::assertEquals(204, $response['code']);
@@ -65,5 +66,15 @@ trait NativeResponse
         self::assertEquals(301, $response['code']);
         self::assertEmpty($response['body']);
         self::assertEquals('https://github.com/', $response['headers']['location']);
+    }
+
+    public function testNativeResponseStream(): void
+    {
+        $this->skipWithoutNativeResponse();
+
+        // Streamed body is fully consumed
+        $response = Client::execute(headers: ['x-action' => 'nativeResponseStream']);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('Hello Stream', $response['body']);
     }
 }
