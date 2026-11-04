@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "packageRules": [
+    {
+      "description": "aiohttp 3.10 is the last line for Python 3.8",
+      "matchPackageNames": ["aiohttp"],
+      "matchCurrentValue": "/^==3\\.10\\./",
+      "allowedVersions": "<3.11"
+    },
+    {
+      "description": "aiohttp 3.13 is the last line for Python 3.9",
+      "matchPackageNames": ["aiohttp"],
+      "matchCurrentValue": "/^==3\\.13\\./",
+      "allowedVersions": "<3.14"
+    }
+  ]
+}
