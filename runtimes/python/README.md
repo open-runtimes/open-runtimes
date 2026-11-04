@@ -52,6 +52,16 @@ def main(context):
 
 - To handle dependencies, you need to have `requirements.txt` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="pip install -r requirements.txt"` during build.
 
+- Instead of `context.res.*`, a function can also return an [aiohttp](https://docs.aiohttp.org/) `web.Response`, including the one from `web.json_response()`. Its status, headers and body are sent to the client as-is. Only responses with an in-memory body are supported; `web.StreamResponse` and `web.FileResponse` are rejected with an error.
+
+```python
+from aiohttp import web
+
+
+def main(context):
+    return web.json_response({"message": "Hello Open Runtimes 👋"})
+```
+
 - The underlying [aiohttp](https://docs.aiohttp.org/) `web.Request` is available as `context.req.raw`. Unlike `context.req`, it is passed through as-is, so it still carries the `x-open-runtimes-*` control headers. Its body can be read again with `await context.req.raw.read()`.
 
 - The default entrypoint is `main.py`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.py`.

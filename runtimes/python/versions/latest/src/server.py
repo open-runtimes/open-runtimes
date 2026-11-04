@@ -12,6 +12,38 @@ from logger import Logger
 disable_vulnerable_brotli()
 
 
+def from_native_response(response):
+    """Convert an aiohttp web.Response returned by the function into the
+    {body, statusCode, headers} shape that context.res.* produces."""
+    if not isinstance(response, web.Response) or (
+        response.body is not None and not isinstance(response.body, (bytes, bytearray))
+    ):
+        raise TypeError(
+            "Only an aiohttp web.Response with an in-memory body can be returned. "
+            "Streamed, file and payload bodies are not supported, use context.res.* instead."
+        )
+
+    # Keep repeated headers (notably set-cookie) as lists instead of
+    # collapsing them to the last value.
+    grouped = {}
+    for key, value in response.headers.items():
+        grouped.setdefault(key.lower(), []).append(value)
+    # Cookies added with response.set_cookie() only become headers once
+    # aiohttp prepares the response, so materialize them the same way.
+    for cookie in response.cookies.values():
+        grouped.setdefault("set-cookie", []).append(cookie.output(header="")[1:])
+    headers = {
+        key: values[0] if len(values) == 1 else values
+        for key, values in grouped.items()
+    }
+
+    return {
+        "body": bytes(response.body or b""),
+        "statusCode": response.status,
+        "headers": headers,
+    }
+
+
 async def action(logger, request: web_request.Request):
     timeout = request.headers.get("x-open-runtimes-timeout", "")
     safeTimeout = None
@@ -141,8 +173,12 @@ async def action(logger, request: web_request.Request):
 
         async def execute(context):
             if asyncio.iscoroutinefunction(userModule.main):
-                return await userModule.main(context)
-            return userModule.main(context)
+                output = await userModule.main(context)
+            else:
+                output = userModule.main(context)
+            if isinstance(output, web.StreamResponse):
+                output = from_native_response(output)
+            return output
 
         try:
             if safeTimeout is not None:
@@ -176,7 +212,12 @@ async def action(logger, request: web_request.Request):
 
     for key in output["headers"].keys():
         if not key.lower().startswith("x-open-runtimes-"):
-            resp.headers[key.lower()] = output["headers"][key]
+            value = output["headers"][key]
+            if isinstance(value, list):
+                for item in value:
+                    resp.headers.add(key.lower(), item)
+            else:
+                resp.headers[key.lower()] = value
 
     resp.headers["content-type"] = (
         output["headers"].get("content-type", "text/plain").lower()

@@ -7,6 +7,8 @@ use Tests\Serverless;
 
 class Dart extends Serverless
 {
+    use NativeResponse;
+
     public function testSetCookie(): void
     {
         self::assertTrue(true); // Disable test till implemented
@@ -70,5 +72,16 @@ class Dart extends Serverless
             self::assertEquals(200, $response['code'], $response['error'] ?? '');
             self::assertEquals($body, $response['body']);
         }
+    }
+
+    public function testNativeResponseCookies(): void
+    {
+        // Repeated headers such as multiple set-cookie values are forwarded one by one
+        $response = Client::execute(headers: ['x-action' => 'nativeResponseCookies']);
+        self::assertEquals(200, $response['code']);
+        $cookies = (array) ($response['headers']['set-cookie'] ?? []);
+        self::assertCount(2, $cookies);
+        self::assertStringStartsWith('first=1', $cookies[0]);
+        self::assertStringStartsWith('second=2', $cookies[1]);
     }
 }

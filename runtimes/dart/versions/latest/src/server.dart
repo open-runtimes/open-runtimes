@@ -87,6 +87,32 @@ Future<Uint8List> _readRequestBody(
   return builder.takeBytes();
 }
 
+/// Converts a shelf Response returned by the function into the
+/// {body, statusCode, headers} shape that context.res.* produces.
+Future<Map<String, dynamic>> fromNativeResponse(shelf.Response response) async {
+  final BytesBuilder builder = BytesBuilder(copy: false);
+  await for (final List<int> chunk in response.read()) {
+    builder.add(chunk);
+  }
+
+  // Keep repeated headers (notably set-cookie) as lists instead of the
+  // comma-joined form of response.headers. The server computes
+  // content-length and transfer-encoding from the buffered body.
+  final Map<String, Object> headers = {};
+  response.headersAll.forEach((String key, List<String> values) {
+    headers[key] = values.length == 1 ? values.first : values;
+  });
+  headers
+    ..remove('content-length')
+    ..remove('transfer-encoding');
+
+  return {
+    'body': builder.takeBytes(),
+    'statusCode': response.statusCode,
+    'headers': headers,
+  };
+}
+
 Future<shelf.Response> action(Logger logger, dynamic req) async {
   int? safeTimeout = null;
   String timeout = req.headers['x-open-runtimes-timeout'] ?? '';
@@ -193,10 +219,18 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   try {
     await runZoned(
       () async {
+        Future<dynamic> execute() async {
+          dynamic result = await user_code.main(context);
+          if (result is shelf.Response) {
+            result = await fromNativeResponse(result);
+          }
+          return result;
+        }
+
         if (safeTimeout != null) {
           dynamic result = await Future.any(<Future<dynamic>>[
             Future.delayed(Duration(seconds: safeTimeout)),
-            user_code.main(context),
+            execute(),
           ]);
 
           if (result != null) {
@@ -206,7 +240,7 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
             output = context.res.text('', 500, const {});
           }
         } else {
-          output = await user_code.main(context);
+          output = await execute();
         }
       },
       zoneSpecification: ZoneSpecification(
@@ -232,7 +266,8 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
   output['statusCode'] = output['statusCode'] ?? 200;
   output['headers'] = output['headers'] ?? {};
 
-  Map<String, String> responseHeaders = {};
+  // Values are either a String or a List<String> for repeated headers.
+  Map<String, Object> responseHeaders = {};
 
   for (MapEntry entry in output['headers'].entries) {
     String header = entry.key.toLowerCase();
@@ -241,7 +276,13 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     }
   }
 
-  String contentTypeValue = (responseHeaders['content-type'] ?? 'text/plain')
+  Object? contentTypeHeader = responseHeaders['content-type'];
+  if (contentTypeHeader is List) {
+    contentTypeHeader = contentTypeHeader.isEmpty
+        ? null
+        : contentTypeHeader.first;
+  }
+  String contentTypeValue = (contentTypeHeader as String? ?? 'text/plain')
       .toLowerCase();
   Encoding? encoding = null;
 

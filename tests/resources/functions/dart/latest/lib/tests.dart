@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:shelf/shelf.dart' as shelf;
 
 Future<dynamic> main(context) async {
   String action = context.req.headers['x-action'] ?? '';
@@ -107,6 +108,53 @@ When you can have two!
           'host': context.req.host,
         });
       }
+    case 'nativeResponseText':
+      // shelf labels non-ASCII strings application/octet-stream unless told otherwise
+      return shelf.Response.ok(
+        'Hello Native 👋',
+        headers: {'content-type': 'text/plain'},
+      );
+    case 'nativeResponseJson':
+      return shelf.Response(
+        201,
+        body: jsonEncode({
+          'json': true,
+          'message': 'Native responses are awesome.',
+        }),
+        headers: {'content-type': 'application/json'},
+      );
+    case 'nativeResponseHeaders':
+      return shelf.Response.notFound(
+        'OK',
+        headers: {
+          'first-header': 'first-value',
+          'x-open-runtimes-custom-out-header': 'third-value',
+        },
+      );
+    case 'nativeResponseBinary':
+      return shelf.Response.ok(
+        Uint8List.fromList([0, 10, 255]),
+        headers: {'content-type': 'application/octet-stream'},
+      );
+    case 'nativeResponseStream':
+      return shelf.Response.ok(
+        Stream<List<int>>.fromIterable([
+          utf8.encode('Hello '),
+          utf8.encode('Stream'),
+        ]),
+        headers: {'content-type': 'text/plain'},
+      );
+    case 'nativeResponseCookies':
+      return shelf.Response.ok(
+        'OK',
+        headers: {
+          'set-cookie': ['first=1', 'second=2'],
+        },
+      );
+    case 'nativeResponseEmpty':
+      return shelf.Response(204);
+    case 'nativeResponseRedirect':
+      return shelf.Response.movedPermanently('https://github.com/');
     case 'rawRequest':
       {
         final raw = context.req.raw;

@@ -2,6 +2,7 @@ from hashlib import md5
 import requests
 import os
 import asyncio
+from aiohttp import web
 import base64
 
 
@@ -78,6 +79,36 @@ When you can have two!
                 "host": context.req.host,
             }
         )
+    elif action == "nativeResponseText":
+        return web.Response(text="Hello Native 👋")
+    elif action == "nativeResponseJson":
+        return web.json_response(
+            {"json": True, "message": "Native responses are awesome."}, status=201
+        )
+    elif action == "nativeResponseHeaders":
+        return web.Response(
+            text="OK",
+            status=404,
+            headers={
+                "first-header": "first-value",
+                "x-open-runtimes-custom-out-header": "third-value",
+            },
+        )
+    elif action == "nativeResponseBinary":
+        return web.Response(
+            body=bytes([0, 10, 255]), content_type="application/octet-stream"
+        )
+    elif action == "nativeResponseStream":
+        return web.StreamResponse()
+    elif action == "nativeResponseCookies":
+        response = web.Response(text="OK")
+        response.set_cookie("first", "1")
+        response.set_cookie("second", "2")
+        return response
+    elif action == "nativeResponseEmpty":
+        return web.Response(status=204)
+    elif action == "nativeResponseRedirect":
+        return web.Response(status=301, headers={"location": "https://github.com/"})
     elif action == "rawRequest":
         raw = context.req.raw
         return context.res.json(
