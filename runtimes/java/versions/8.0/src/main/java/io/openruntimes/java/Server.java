@@ -201,7 +201,7 @@ public class Server {
 
     RuntimeRequest runtimeRequest =
         new RuntimeRequest(
-            method, scheme, host, port, path, query, queryString, headers, bodyBinary, url);
+            method, scheme, host, port, path, query, queryString, headers, bodyBinary, url, ctx);
     RuntimeResponse runtimeResponse = new RuntimeResponse();
     RuntimeContext context = new RuntimeContext(runtimeRequest, runtimeResponse, logger);
 

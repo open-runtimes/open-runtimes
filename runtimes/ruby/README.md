@@ -55,6 +55,8 @@ end
 
 - To handle dependencies, you need to have `Gemfile` file. Dependencies will be automatically installed.
 
+- The underlying [Sinatra](https://sinatrarb.com/) request is available as `context.req.raw`. It is passed through as-is, so unlike `context.req` it still carries the `x-open-runtimes-*` control headers. The body is rewound, so `context.req.raw.body.read` works.
+
 - The default entrypoint is `index.rb`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.rb`.
 
 ## Contributing

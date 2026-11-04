@@ -21,6 +21,8 @@ struct RuntimeRequest {
   std::string bodyText;
   Json::Value bodyJson;
   std::string url;
+  // The underlying Drogon request, see context.req.raw
+  drogon::HttpRequestPtr raw;
 };
 } // namespace runtime
 #endif // CPP_RUNTIME_RUNTIMEREQUEST_H

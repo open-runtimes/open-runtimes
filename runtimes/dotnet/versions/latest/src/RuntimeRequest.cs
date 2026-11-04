@@ -15,6 +15,9 @@ namespace DotNetRuntime
         public string Url { get; private set; }
         public Dictionary<string, string> Headers { get; private set; }
 
+        // The underlying ASP.NET Core HttpRequest, see context.Req.Raw
+        public HttpRequest Raw { get; private set; }
+
         public object Body
         {
             get
@@ -56,9 +59,11 @@ namespace DotNetRuntime
             string queryString,
             string url,
             Dictionary<string, string> headers,
-            byte[] bodyBinary
+            byte[] bodyBinary,
+            HttpRequest raw
         )
         {
+            Raw = raw;
             BodyBinary = bodyBinary;
             Headers = headers;
             Method = method;

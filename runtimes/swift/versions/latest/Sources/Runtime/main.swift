@@ -170,7 +170,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         port: port,
         path: path,
         queryString: queryString,
-        query: query
+        query: query,
+        raw: req
     )
 
     let response = RuntimeResponse()

@@ -1,5 +1,7 @@
 package io.openruntimes.kotlin
 
+import io.javalin.http.Context
+
 data class RuntimeRequest(
     val method: String,
     val scheme: String,
@@ -11,6 +13,8 @@ data class RuntimeRequest(
     val headers: MutableMap<String, String>,
     val bodyBinary: ByteArray,
     val url: String,
+    // The underlying Javalin Context, see context.req.raw
+    val raw: Context,
 ) {
     val bodyText: String
         get() = bodyBinary.decodeToString()

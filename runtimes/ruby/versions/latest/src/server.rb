@@ -83,6 +83,8 @@ def action(request, response, logger)
   end
 
   body_binary = request.body.read
+  # Leave the body readable again through context.req.raw
+  request.body.rewind
 
   if body_binary.length > max_size
     raise 'Request body size exceeds the size limit.'
@@ -114,7 +116,7 @@ def action(request, response, logger)
   end
 
   context_req = RuntimeRequest.new(url, method, scheme, host, port, path, query, query_string, headers,
-                                   body_binary)
+                                   body_binary, request)
   context_res = RuntimeResponse.new
   context = RuntimeContext.new(context_req, context_res, logger)
 

@@ -104,6 +104,8 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     }
 
     byte[] bodyBinary = new byte[] { };
+    // Buffer the body so it stays readable through context.Req.Raw
+    request.EnableBuffering();
     Stream bodyStream = request.Body;
 
     using (MemoryStream memoryStream = new MemoryStream())
@@ -111,6 +113,8 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         await bodyStream.CopyToAsync(memoryStream);
         bodyBinary = memoryStream.ToArray();
     }
+
+    bodyStream.Position = 0;
     var headers = new Dictionary<string, string>();
     var method = request.Method;
 
@@ -197,7 +201,8 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         queryString,
         url,
         headers,
-        bodyBinary
+        bodyBinary,
+        request
     );
 
     var contextResponse = new RuntimeResponse();

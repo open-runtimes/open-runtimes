@@ -3,6 +3,7 @@ package io.openruntimes.java;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import io.javalin.http.Context;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ public class RuntimeRequest {
   private final Map<String, String> headers;
   private final byte[] bodyBinary;
   private final String url;
+  private final Context raw;
 
   public RuntimeRequest(
       String method,
@@ -30,7 +32,8 @@ public class RuntimeRequest {
       String queryString,
       Map<String, String> headers,
       byte[] bodyBinary,
-      String url) {
+      String url,
+      Context raw) {
     this.method = method;
     this.scheme = scheme;
     this.host = host;
@@ -41,6 +44,7 @@ public class RuntimeRequest {
     this.headers = headers;
     this.bodyBinary = bodyBinary;
     this.url = url;
+    this.raw = raw;
   }
 
   public String getMethod() {
@@ -110,5 +114,10 @@ public class RuntimeRequest {
 
   public String getUrl() {
     return url;
+  }
+
+  /** The underlying Javalin Context, see context.getReq().getRaw() */
+  public Context getRaw() {
+    return raw;
   }
 }

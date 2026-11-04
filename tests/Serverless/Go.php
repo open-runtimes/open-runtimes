@@ -7,6 +7,11 @@ use Tests\Serverless;
 
 class Go extends Serverless
 {
+    public function testRawRequest(): void
+    {
+        $this->markTestSkipped('context.req.raw needs a new release of the external types package first.');
+    }
+
     public function testSetCookie(): void
     {
         self::assertTrue(true); // Disable test till implemented

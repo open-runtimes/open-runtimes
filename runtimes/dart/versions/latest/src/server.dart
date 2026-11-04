@@ -182,6 +182,9 @@ Future<shelf.Response> action(Logger logger, dynamic req) async {
     headers: headers,
     bodyBinary: bodyBinary,
     url: url,
+    // The original body stream was consumed above; hand out a copy that
+    // carries the buffered body so it can be read again.
+    raw: req.change(body: bodyBinary),
   );
   RuntimeResponse contextRes = new RuntimeResponse();
   RuntimeContext context = new RuntimeContext(contextReq, contextRes, logger);

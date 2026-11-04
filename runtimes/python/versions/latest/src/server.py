@@ -35,6 +35,7 @@ async def action(logger, request: web_request.Request):
 
     context = Context(logger)
 
+    context.req.raw = request
     context.req.body_binary = await request.read()
     context.req.method = request.method
     context.req.headers = {}

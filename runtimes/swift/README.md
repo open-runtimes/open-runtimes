@@ -61,6 +61,8 @@ func main(req: RequestValue, res: RequestResponse) -> RequestResponse {
 
 - To handle dependencies, you need to have `Package.swift` file. Dependencies will be automatically installed.
 
+- The underlying [Vapor](https://vapor.codes/) `Request` is available as `context.req.raw`. It is passed through as-is, so unlike `context.req` it still carries the `x-open-runtimes-*` control headers.
+
 - The default entrypoint is `Sources/index.swift`. If your entrypoint differs, make sure to provide it in the JSON body of the request: `{ "file": "app.swift" }`.
 
 - Swift does not require `INTERNAL_RUNTIME_ENTRYPOINT` like other runtimes. In Swift, you only need to make sure a function called `main` is defined in any of your `.swift` files.

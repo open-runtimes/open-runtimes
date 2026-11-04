@@ -76,6 +76,14 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
             "queryString": context.req.queryString,
             "query": context.req.query,
         ])
+    case "rawRequest":
+        let raw = context.req.raw
+        return try context.res.json([
+            "method": raw.method.string,
+            "path": raw.url.path,
+            "bodyText": raw.body.string ?? "",
+            "controlHeader": raw.headers.first(name: "x-open-runtimes-custom-header") ?? "",
+        ])
     case "requestHeaders":
         return try context.res.json(context.req.headers)
     case "requestBodyText":

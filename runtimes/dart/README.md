@@ -88,6 +88,8 @@ Future<dynamic> main(context) async {
 
 - To handle dependencies, you need to have `pubspec.yaml` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="dart pub get"` during build.
 
+- The underlying [shelf](https://pub.dev/packages/shelf) `Request` is available as `context.req.raw`. It is a copy of the original request that carries the buffered body, so `context.req.raw.readAsString()` works. Unlike `context.req`, it still carries the `x-open-runtimes-*` control headers.
+
 - The default entrypoint is `lib/main.dart`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=lib/app.dart`.
 
 - Dart function is a Dart library package, which means, your code has to be inside `lib` folder. You can learn more in [Dart documentation](https://dart.dev/guides/libraries/create-library-packages).

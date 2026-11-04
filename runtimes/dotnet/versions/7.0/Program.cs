@@ -105,6 +105,8 @@ namespace DotNetRuntime
             }
 
             byte[] bodyBinary = new byte[] { };
+            // Buffer the body so it stays readable through context.Req.Raw
+            request.EnableBuffering();
             System.IO.Stream bodyStream = request.Body;
 
             using (MemoryStream memoryStream = new MemoryStream())
@@ -112,6 +114,8 @@ namespace DotNetRuntime
                 await bodyStream.CopyToAsync(memoryStream);
                 bodyBinary = memoryStream.ToArray();
             }
+
+            bodyStream.Position = 0;
 
             var headers = new Dictionary<string, string>();
             var method = request.Method;
@@ -199,7 +203,8 @@ namespace DotNetRuntime
                 queryString,
                 url,
                 headers,
-                bodyBinary
+                bodyBinary,
+                request
             );
 
             var contextResponse = new RuntimeResponse();

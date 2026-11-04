@@ -119,6 +119,17 @@ When you can have two!
                     ),
                 )
             }
+            "rawRequest" -> {
+                val raw = context.req.raw
+                return context.res.json(
+                    mutableMapOf(
+                        "method" to raw.method(),
+                        "path" to raw.path(),
+                        "bodyText" to raw.body(),
+                        "controlHeader" to (raw.header("x-open-runtimes-custom-header") ?: ""),
+                    ),
+                )
+            }
             "requestHeaders" -> {
                 return context.res.json(context.req.headers as MutableMap<String, Any>)
             }

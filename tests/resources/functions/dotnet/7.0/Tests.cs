@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -137,6 +138,27 @@ When you can have two!
                             { "x-custom", xCustom },
                             { "x-custom-uppercase", xCustomUppercase },
                             { "x-open-runtimes-custom", xOpenRuntimesCustom },
+                        }
+                    );
+                case "rawRequest":
+                    var raw = context.Req.Raw;
+                    raw.Body.Position = 0;
+                    var rawBody = await new StreamReader(raw.Body).ReadToEndAsync();
+                    return context.Res.Json(
+                        new Dictionary<string, object?>()
+                        {
+                            { "method", raw.Method },
+                            { "path", raw.Path.Value },
+                            { "bodyText", rawBody },
+                            {
+                                "controlHeader",
+                                raw.Headers.TryGetValue(
+                                    "x-open-runtimes-custom-header",
+                                    out var controlHeader
+                                )
+                                    ? controlHeader.ToString()
+                                    : ""
+                            },
                         }
                     );
                 case "requestHeaders":

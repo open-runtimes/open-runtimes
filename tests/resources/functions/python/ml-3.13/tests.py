@@ -79,6 +79,16 @@ When you can have two!
                 "host": context.req.host,
             }
         )
+    elif action == "rawRequest":
+        raw = context.req.raw
+        return context.res.json(
+            {
+                "method": raw.method,
+                "path": raw.path,
+                "bodyText": (await raw.read()).decode("utf-8"),
+                "controlHeader": raw.headers.get("x-open-runtimes-custom-header", ""),
+            }
+        )
     elif action == "requestHeaders":
         return context.res.json(context.req.headers)
     elif action == "requestBodyText":

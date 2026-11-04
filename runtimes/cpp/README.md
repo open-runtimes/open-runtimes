@@ -78,6 +78,8 @@ namespace runtime {
 
 - To handle dependencies, you need to include a `CMakeLists.txt` file. Dependencies will be automatically installed.
 
+- The underlying [Drogon](https://drogon.org/) `HttpRequestPtr` is available as `context.req.raw`. It is passed through as-is, so unlike `context.req` it still carries the `x-open-runtimes-*` control headers.
+
 - The default entrypoint is `index.cc`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.cc`.
 
 ## Contributing

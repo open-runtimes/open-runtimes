@@ -135,6 +135,27 @@ When you can have two!
                             { "x-open-runtimes-custom", xOpenRuntimesCustom },
                         }
                     );
+                case "rawRequest":
+                    var raw = context.Req.Raw;
+                    raw.Body.Position = 0;
+                    var rawBody = await new StreamReader(raw.Body).ReadToEndAsync();
+                    return context.Res.Json(
+                        new Dictionary<string, object?>()
+                        {
+                            { "method", raw.Method },
+                            { "path", raw.Path.Value },
+                            { "bodyText", rawBody },
+                            {
+                                "controlHeader",
+                                raw.Headers.TryGetValue(
+                                    "x-open-runtimes-custom-header",
+                                    out var controlHeader
+                                )
+                                    ? controlHeader.ToString()
+                                    : ""
+                            },
+                        }
+                    );
                 case "requestHeaders":
                     var json = new Dictionary<string, object>();
 

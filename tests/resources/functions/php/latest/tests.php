@@ -70,6 +70,15 @@ When you can have two!
             ]);
 
             return $context->res->text($context->req->url);
+        case 'rawRequest':
+            $raw = $context->req->raw;
+
+            return $context->res->json([
+                'method' => $raw->getMethod(),
+                'path' => $raw->server['path_info'],
+                'bodyText' => $raw->rawContent(),
+                'controlHeader' => $raw->header['x-open-runtimes-custom-header'] ?? '',
+            ]);
         case 'requestHeaders':
             return $context->res->json($context->req->headers);
         case 'requestBodyText':
