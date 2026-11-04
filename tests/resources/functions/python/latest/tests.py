@@ -85,6 +85,7 @@ When you can have two!
                 "method": raw.method,
                 "path": raw.path,
                 "bodyText": (await raw.read()).decode("utf-8"),
+                "controlHeader": raw.headers.get("x-open-runtimes-custom-header", ""),
             }
         )
     elif action == "requestHeaders":

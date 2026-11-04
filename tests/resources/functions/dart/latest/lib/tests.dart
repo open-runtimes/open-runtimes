@@ -114,6 +114,7 @@ When you can have two!
           'method': raw.method,
           'path': raw.requestedUri.path,
           'bodyText': await raw.readAsString(),
+          'controlHeader': raw.headers['x-open-runtimes-custom-header'] ?? '',
         });
       }
     case 'requestHeaders':

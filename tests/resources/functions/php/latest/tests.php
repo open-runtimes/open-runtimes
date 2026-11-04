@@ -77,6 +77,7 @@ When you can have two!
                 'method' => $raw->getMethod(),
                 'path' => $raw->server['path_info'],
                 'bodyText' => $raw->rawContent(),
+                'controlHeader' => $raw->header['x-open-runtimes-custom-header'] ?? '',
             ]);
         case 'requestHeaders':
             return $context->res->json($context->req->headers);

@@ -781,12 +781,14 @@ class Serverless extends Base
     
     public function testRawRequest(): void
     {
-        $response = Client::execute(body: 'Hello raw 👋', url: '/raw-path', headers: ['x-action' => 'rawRequest']);
+        $response = Client::execute(body: 'Hello raw 👋', url: '/raw-path', headers: ['x-action' => 'rawRequest', 'x-open-runtimes-custom-header' => 'passed-through']);
         self::assertEquals(200, $response['code'], $response['body'] . PHP_EOL . Client::getErrors($response['headers']['x-open-runtimes-log-id'] ?? ''));
         $body = \json_decode($response['body'], true);
         self::assertEquals('POST', $body['method']);
         self::assertEquals('/raw-path', $body['path']);
         self::assertEquals('Hello raw 👋', $body['bodyText']);
+        // Unlike context.req.headers, the raw request keeps the x-open-runtimes-* control headers
+        self::assertEquals('passed-through', $body['controlHeader']);
     }
 
     public function testSetCookie(): void

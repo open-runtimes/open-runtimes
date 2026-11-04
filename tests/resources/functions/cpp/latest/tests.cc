@@ -100,6 +100,7 @@ namespace runtime {
                 json["method"] = req.raw->getMethodString();
                 json["path"] = req.raw->getPath();
                 json["bodyText"] = std::string(req.raw->getBody());
+                json["controlHeader"] = req.raw->getHeader("x-open-runtimes-custom-header");
                 return res.json(json);
             } else if (action == "requestHeaders") {
                 return res.json(req.headers);

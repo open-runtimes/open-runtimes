@@ -120,6 +120,8 @@ public class Tests {
         json.put("method", raw.method());
         json.put("path", raw.path());
         json.put("bodyText", raw.body());
+        String controlHeader = raw.header("x-open-runtimes-custom-header");
+        json.put("controlHeader", controlHeader == null ? "" : controlHeader);
         return context.getRes().json(json);
       }
       case "requestHeaders" -> {

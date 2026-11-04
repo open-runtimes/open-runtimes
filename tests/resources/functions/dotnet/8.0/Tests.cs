@@ -145,6 +145,15 @@ When you can have two!
                             { "method", raw.Method },
                             { "path", raw.Path.Value },
                             { "bodyText", rawBody },
+                            {
+                                "controlHeader",
+                                raw.Headers.TryGetValue(
+                                    "x-open-runtimes-custom-header",
+                                    out var controlHeader
+                                )
+                                    ? controlHeader.ToString()
+                                    : ""
+                            },
                         }
                     );
                 case "requestHeaders":

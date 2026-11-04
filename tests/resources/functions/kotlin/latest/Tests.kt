@@ -126,6 +126,7 @@ When you can have two!
                         "method" to raw.method(),
                         "path" to raw.path(),
                         "bodyText" to raw.body(),
+                        "controlHeader" to (raw.header("x-open-runtimes-custom-header") ?: ""),
                     ),
                 )
             }

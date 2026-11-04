@@ -79,7 +79,8 @@ When you can have two!
       {
         'method': raw.request_method,
         'path': raw.path,
-        'bodyText': raw.body.read,
+        'bodyText': raw.body.read.force_encoding('UTF-8'),
+        'controlHeader': raw.env['HTTP_X_OPEN_RUNTIMES_CUSTOM_HEADER'] || '',
       }
     )
   when 'requestHeaders'
