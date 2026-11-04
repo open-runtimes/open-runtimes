@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -178,6 +179,11 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 	context.Res = openruntimes.ContextResponse{}
 
 	context.Req.SetBodyBinary(bodyBytes)
+
+	// The original body was consumed above; make it readable again through
+	// context.Req.Raw.
+	r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	context.Req.Raw = r
 
 	output := openruntimes.Response{
 		StatusCode: 500,

@@ -84,6 +84,8 @@ func Main(Context openruntimes.Context) openruntimes.Response {
 
 - To handle dependencies, you add them to `go.mod` file. Dependencies will be automatically installed.
 
+- The underlying `*http.Request` is available as `Context.Req.Raw` (types-for-go v4.0.9 and newer). It is passed through as-is, so unlike `Context.Req.Headers` it still carries the `x-open-runtimes-*` control headers. Its body is re-wound after the runtime has read it, so `io.ReadAll(Context.Req.Raw.Body)` works.
+
 - The default entrypoint is `main.go`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.go`.
 
 ## Contributing

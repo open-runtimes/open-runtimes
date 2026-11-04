@@ -85,6 +85,8 @@ path = "main.rs"  # or your entry file
 
 - To handle dependencies, add them to `Cargo.toml` file. Dependencies will be automatically installed during the build process.
 
+- The underlying `http::Request<Vec<u8>>` is available as `context.req.raw` (openruntimes-types-for-rust 1.0.3 and newer). It is the original request rebuilt with the buffered body, so `raw.body()`, `raw.uri()`, `raw.version()` and `raw.extensions()` are all available. Unlike `context.req.headers`, it still carries the `x-open-runtimes-*` control headers.
+
 - The default entrypoint is `main.rs`. If your entrypoint differs, make sure to configure it using `OPEN_RUNTIMES_ENTRYPOINT` environment variable during build, for instance, `OPEN_RUNTIMES_ENTRYPOINT=src/app.rs`.
 
 - **Logging:** Use `context.log()` and `context.error()` for structured logging. Native Rust output (`println!`, `eprintln!`, `dbg!`) is also captured during function execution and surfaced in request logs. See the [Logging](#logging) section for details.

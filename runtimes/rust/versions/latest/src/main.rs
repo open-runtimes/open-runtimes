@@ -273,7 +273,8 @@ async fn action(
     // multi-GB upload is rejected before it can fill memory.
     const MAX_BODY_SIZE: usize = 20 * 1024 * 1024;
 
-    let body_bytes = match Limited::new(req.into_body(), MAX_BODY_SIZE).collect().await {
+    let (parts, body) = req.into_parts();
+    let body_bytes = match Limited::new(body, MAX_BODY_SIZE).collect().await {
         Ok(collected) => collected.to_bytes().to_vec(),
         Err(err) => {
             if err.is::<http_body_util::LengthLimitError>() {
@@ -302,7 +303,10 @@ async fn action(
     context.req.path = path;
     context.req.query_string = query_string;
     context.req.query = query;
-    context.req.set_body_binary(body_bytes);
+    context.req.set_body_binary(body_bytes.clone());
+    // The original request, rebuilt with the buffered body so it can be read
+    // again through context.req.raw.
+    context.req.raw = Some(Request::from_parts(parts, body_bytes));
 
     // Execute user function with timeout
     let output = if let Some(timeout_secs) = safe_timeout {

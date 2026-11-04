@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -94,6 +95,18 @@ When you can have two!
 			"queryString": Context.Req.QueryString,
 			"scheme":      Context.Req.Scheme,
 			"host":        Context.Req.Host,
+		})
+	case "rawRequest":
+		raw := Context.Req.Raw
+		rawBody, err := io.ReadAll(raw.Body)
+		if err != nil {
+			return Context.Res.Text(err.Error(), Context.Res.WithStatusCode(500))
+		}
+		return Context.Res.Json(map[string]interface{}{
+			"method":        raw.Method,
+			"path":          raw.URL.Path,
+			"bodyText":      string(rawBody),
+			"controlHeader": raw.Header.Get("x-open-runtimes-custom-header"),
 		})
 	case "requestHeaders":
 		return Context.Res.Json(Context.Req.Headers)

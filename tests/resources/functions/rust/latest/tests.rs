@@ -130,6 +130,23 @@ When you can have two!
             None,
         ),
 
+        "rawRequest" => {
+            let raw = context.req.raw.as_ref().expect("context.req.raw is set");
+            context.res.json(
+                json!({
+                    "method": raw.method().as_str(),
+                    "path": raw.uri().path(),
+                    "bodyText": String::from_utf8_lossy(raw.body()).to_string(),
+                    "controlHeader": raw
+                        .headers()
+                        .get("x-open-runtimes-custom-header")
+                        .and_then(|value| value.to_str().ok())
+                        .unwrap_or(""),
+                }),
+                None,
+                None,
+            )
+        }
         "requestHeaders" => context.res.json(&context.req.headers, None, None),
 
         "requestBodyText" => context.res.text(context.req.body_text(), None, None),
