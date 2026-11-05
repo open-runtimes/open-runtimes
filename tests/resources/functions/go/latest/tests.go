@@ -145,6 +145,78 @@ When you can have two!
 	case "binaryResponse5":
 		bytes := []byte{0, 50, 255}
 		return Context.Res.Binary(bytes) // Just a filler
+	case "streamResponse":
+		return Context.Res.SendStream(func(yield func([]byte, error) bool) {
+			Context.Log("Stream log.")
+			if !yield([]byte("first\n"), nil) {
+				return
+			}
+			time.Sleep(time.Second)
+			if !yield([]byte("second\n"), nil) {
+				return
+			}
+			time.Sleep(time.Second)
+			yield([]byte("third\n"), nil)
+		}, Context.Res.WithStatusCode(201), Context.Res.WithHeaders(map[string]string{"x-stream": "yes"}))
+	case "streamException":
+		return Context.Res.SendStream(func(yield func([]byte, error) bool) {
+			if !yield([]byte("first\n"), nil) {
+				return
+			}
+			yield(nil, errors.New("Stream failed"))
+		})
+	case "streamTimeout":
+		time.Sleep(time.Second)
+		return Context.Res.SendStream(func(yield func([]byte, error) bool) {
+			if !yield([]byte("first\n"), nil) {
+				return
+			}
+			time.Sleep(5 * time.Second)
+			yield([]byte("second\n"), nil)
+		})
+	case "streamEmpty":
+		return Context.Res.SendStream(func(yield func([]byte, error) bool) {}, Context.Res.WithStatusCode(200))
+	case "streamSingle":
+		return Context.Res.SendStream(func(yield func([]byte, error) bool) {
+			yield([]byte("only\n"), nil)
+		})
+	case "streamLong":
+		return Context.Res.SendStream(func(yield func([]byte, error) bool) {
+			for i := 0; i < 10000; i++ {
+				if !yield([]byte(fmt.Sprintf("chunk-%d\n", i)), nil) {
+					return
+				}
+			}
+		})
+	case "streamBinary":
+		return Context.Res.SendStream(func(yield func([]byte, error) bool) {
+			low := make([]byte, 128)
+			high := make([]byte, 128)
+			for i := 0; i < 128; i++ {
+				low[i] = byte(i)
+				high[i] = byte(i + 128)
+			}
+			if !yield(low, nil) {
+				return
+			}
+			yield(high, nil)
+		})
+	case "streamJson":
+		return Context.Res.SendStream(func(yield func([]byte, error) bool) {
+			for n := 1; n <= 3; n++ {
+				if n > 1 {
+					time.Sleep(100 * time.Millisecond)
+				}
+				line, _ := json.Marshal(map[string]int{"n": n})
+				if !yield(append(line, '\n'), nil) {
+					return
+				}
+			}
+		}, Context.Res.WithHeaders(map[string]string{"content-type": "application/x-ndjson"}))
+	case "streamErrorStart":
+		return Context.Res.SendStream(func(yield func([]byte, error) bool) {
+			yield(nil, errors.New("Stream failed early"))
+		})
 	case "envVars":
 		var emptyVar *string
 		varValue := os.Getenv("NOT_DEFINED_VAR")
