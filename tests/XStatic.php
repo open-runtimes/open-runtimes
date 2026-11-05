@@ -10,6 +10,92 @@ error_reporting(E_ALL);
 
 class XStatic extends Base
 {
+    public function codePathLayouts(): array
+    {
+        return [
+            'code only' => [false, false],
+            'mixed volume' => [true, false],
+            'code only with symlinks' => [false, true],
+            'mixed volume with symlinks' => [true, true],
+        ];
+    }
+
+    /** @dataProvider codePathLayouts */
+    public function testMountedCodePath(bool $mixed, bool $followSymlinks): void
+    {
+        $image = trim(shell_exec("docker inspect --format='{{.Image}}' open-runtimes-test-serve") ?? '');
+        self::assertNotEmpty($image);
+        $script = <<<'BASH'
+set -e
+mkdir -p "$OPEN_RUNTIMES_CODE_PATH" /mnt/telemetry
+printf 'Mounted website' >"$OPEN_RUNTIMES_CODE_PATH/index.html"
+printf 'Mounted asset' >"$OPEN_RUNTIMES_CODE_PATH/asset.txt"
+mkdir -p "$OPEN_RUNTIMES_CODE_PATH/assets"
+printf 'Mounted asset' >"$OPEN_RUNTIMES_CODE_PATH/assets/nested.txt"
+ln -s "$OPEN_RUNTIMES_CODE_PATH/asset.txt" "$OPEN_RUNTIMES_CODE_PATH/absolute-link.txt"
+ln -s asset.txt "$OPEN_RUNTIMES_CODE_PATH/relative-link.txt"
+ln -s "$OPEN_RUNTIMES_CODE_PATH/assets" "$OPEN_RUNTIMES_CODE_PATH/linked-assets"
+printf 'Private external file' >/mnt/private.txt
+ln -s /mnt/private.txt "$OPEN_RUNTIMES_CODE_PATH/external-link.txt"
+ln -s "$OPEN_RUNTIMES_CODE_PATH/code.tar" "$OPEN_RUNTIMES_CODE_PATH/artifact-link.txt"
+if [ "$MIXED_CODE_VOLUME" = true ]; then
+    for artifact in code.sqfs code.tar code.tar.gz code.gz .extracted; do
+        printf 'Private deployment artifact' >"$OPEN_RUNTIMES_CODE_PATH/$artifact"
+    done
+fi
+: >"$OPEN_RUNTIMES_CODE_PATH/.open-runtimes"
+printf 'local_download=0.200\n' >/mnt/telemetry/timings.txt
+exec bash helpers/start.sh "bash helpers/server.sh"
+BASH;
+        $container = 'open-runtimes-test-static-code-path';
+        try {
+            exec('docker run -d --name ' . escapeshellarg($container)
+                . ' --network openruntimes --entrypoint bash'
+                . ' -e OPEN_RUNTIMES_CODE_PATH=' . escapeshellarg('/mnt/workspace/code with spaces')
+                . ' -e MIXED_CODE_VOLUME=' . ($mixed ? 'true' : 'false')
+                . ' -e OPEN_RUNTIMES_STATIC_FOLLOW_SYMLINKS=' . ($followSymlinks ? 'true' : 'false')
+                . ' -e OPEN_RUNTIMES_STATIC_FALLBACK=index.html'
+                . ' -e OPEN_RUNTIMES_SECRET=test-secret-key '
+                . escapeshellarg($image) . ' -c ' . escapeshellarg($script), $output, $code);
+            self::assertSame(0, $code, implode("\n", $output));
+            Client::$host = $container;
+            $this->awaitHostReady();
+
+            foreach (['/index.html' => 'Mounted website', '/asset.txt' => 'Mounted asset', '/missing' => 'Mounted website'] as $path => $body) {
+                $response = Client::execute(url: $path, method: 'GET');
+                self::assertEquals(200, $response['code']);
+                self::assertEquals($body, $response['body']);
+            }
+            foreach (['/absolute-link.txt', '/relative-link.txt', '/linked-assets/nested.txt'] as $path) {
+                $response = Client::execute(url: $path, method: 'GET');
+                if ($followSymlinks) {
+                    self::assertEquals(200, $response['code']);
+                    self::assertEquals('Mounted asset', $response['body']);
+                } else {
+                    self::assertStringNotContainsString('Mounted asset', $response['body']);
+                }
+            }
+            foreach (['/external-link.txt', '/artifact-link.txt'] as $path) {
+                $response = Client::execute(url: $path, method: 'GET');
+                self::assertStringNotContainsString('Private', $response['body']);
+            }
+            foreach (['code.sqfs', 'code.tar', 'code.tar.gz', 'code.gz', '.extracted'] as $artifact) {
+                foreach (['/' . $artifact, '/%' . bin2hex($artifact[0]) . substr($artifact, 1), '/./' . $artifact, '//' . $artifact] as $path) {
+                    $response = Client::execute(url: $path, method: 'GET');
+                    self::assertEquals(200, $response['code']);
+                    self::assertEquals('Mounted website', $response['body']);
+                }
+            }
+            $this->testHealth();
+            $response = Client::execute(url: '/__opr/timings', method: 'GET');
+            self::assertEquals(200, $response['code']);
+            self::assertStringContainsString('local_download=0.200', $response['body']);
+        } finally {
+            shell_exec('docker rm -f ' . escapeshellarg($container) . ' 2>&1');
+            Client::$host = 'open-runtimes-test-serve';
+        }
+    }
+
     public function testCacheHeader(): void
     {
         
