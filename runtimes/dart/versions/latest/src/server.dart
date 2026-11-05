@@ -89,8 +89,8 @@ Future<Uint8List> _readRequestBody(
 
 /// Converts a shelf Response returned by the function into the
 /// {body, statusCode, headers} shape that context.res.* produces, or the
-/// {stream, statusCode, headers} shape of context.res.sendStream() when the
-/// body length is unknown.
+/// {stream, statusCode, headers} shape of context.res.sendStream() unless the
+/// body is empty.
 Future<Map<String, dynamic>> fromNativeResponse(shelf.Response response) async {
   // Keep repeated headers (notably set-cookie) as lists instead of the
   // comma-joined form of response.headers. The server computes
@@ -103,7 +103,7 @@ Future<Map<String, dynamic>> fromNativeResponse(shelf.Response response) async {
     ..remove('content-length')
     ..remove('transfer-encoding');
 
-  if (response.contentLength == null) {
+  if (!response.isEmpty) {
     return {
       'stream': response.read(),
       'statusCode': response.statusCode,
