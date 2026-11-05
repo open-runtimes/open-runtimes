@@ -66,10 +66,11 @@ const config = require("./config");
 const isNativeResponse = (value) =>
   typeof Response !== "undefined" && value instanceof Response;
 
-// Converts a native Response into the internal { body, statusCode, headers }
+// Converts a native Response into the internal { stream, statusCode, headers }
 // shape so the rest of the pipeline (reserved header filtering, charset
-// defaults, logging headers) applies to it as well.
-const fromNativeResponse = async (response) => {
+// defaults, logging headers) applies to it as well. Its body goes through the
+// same streaming path as context.res.sendStream().
+const fromNativeResponse = (response) => {
   const headers = {};
   for (const [key, value] of response.headers) {
     headers[key] = value;
