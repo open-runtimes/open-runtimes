@@ -322,7 +322,56 @@ suspend fun action(
 
     ctx.header("x-open-runtimes-log-id", logger.id ?: "")
 
+    if (source != null) {
+        val remaining = if (safeTimeout > 0) (deadline - System.nanoTime()).nanoseconds else Duration.INFINITE
+        ctx.status(output.statusCode)
+        stream(ctx, source, context, logger, remaining)
+        return
+    }
+
     logger.end()
 
     ctx.status(output.statusCode).result(output.body)
+}
+
+suspend fun stream(
+    ctx: Context,
+    source: Flow<Any>,
+    context: RuntimeContext,
+    logger: RuntimeLogger,
+    timeout: Duration,
+) {
+    val out = ctx.res.outputStream
+    var failed = false
+
+    try {
+        val completed =
+            withTimeoutOrNull(timeout) {
+                source
+                    .catch { e ->
+                        val sw = StringWriter()
+                        val pw = PrintWriter(sw)
+                        e.printStackTrace(pw)
+
+                        context.error(sw.toString())
+                        failed = true
+                    }.collect { chunk ->
+                        out.write(if (chunk is ByteArray) chunk else chunk.toString().toByteArray())
+                        out.flush()
+                    }
+            }
+
+        if (completed == null) {
+            context.error("Execution timed out.")
+            failed = true
+        }
+    } catch (e: IOException) {
+        // The client disconnected
+    }
+
+    logger.end()
+
+    if (failed) {
+        Request.getBaseRequest(ctx.req).httpChannel.abort(IOException("Stream aborted"))
+    }
 }
