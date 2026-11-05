@@ -46,4 +46,16 @@ public class RuntimeResponse {
         headers["location"] = url
         return this.text("", statusCode, headers)
     }
+
+    fun sendStream(
+        source: Flow<Any>,
+        statusCode: Int = 200,
+        headers: Map<String, String> = mapOf(),
+    ): RuntimeOutput = RuntimeOutput(ByteArray(0), statusCode, headers, source)
+
+    fun sendStream(
+        source: Sequence<Any>,
+        statusCode: Int = 200,
+        headers: Map<String, String> = mapOf(),
+    ): RuntimeOutput = sendStream(source.asFlow(), statusCode, headers)
 }
