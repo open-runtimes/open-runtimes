@@ -302,6 +302,59 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 		outputHeaders["content-type"] = contentTypeValue + "; charset=utf-8"
 	}
 
+	if output.Stream != nil {
+		delete(outputHeaders, "content-length")
+
+		w.Header().Set("x-open-runtimes-log-id", logger.Id)
+		for key, value := range outputHeaders {
+			w.Header().Set(key, value)
+		}
+
+		w.WriteHeader(output.StatusCode)
+
+		var failure error
+		controller := http.NewResponseController(w)
+
+		if started {
+			w.Write(first)
+			controller.Flush()
+		}
+
+	write:
+		for {
+			select {
+			case chunk, ok := <-chunks:
+				if !ok {
+					failure = sourceErr
+					break write
+				}
+
+				w.Write(chunk)
+				if controller.Flush() != nil {
+					break write
+				}
+			case <-deadline:
+				failure = errors.New("Execution timed out.")
+				break write
+			case <-r.Context().Done():
+				break write
+			}
+		}
+		close(done)
+
+		if failure != nil {
+			context.Error(failure.Error())
+		}
+
+		logger.End()
+
+		if failure != nil {
+			panic(http.ErrAbortHandler)
+		}
+
+		return nil
+	}
+
 	logger.End()
 	w.Header().Set("x-open-runtimes-log-id", logger.Id)
 
