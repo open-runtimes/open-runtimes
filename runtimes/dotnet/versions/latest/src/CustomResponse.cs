@@ -22,7 +22,21 @@ namespace DotNetRuntime
             _headers = headers ?? new Dictionary<string, string>();
         }
 
-        public Task ExecuteAsync(HttpContext httpContext)
+        public CustomResponse(
+            IAsyncEnumerable<object> stream,
+            int statusCode,
+            Dictionary<string, string> headers,
+            RuntimeContext context,
+            DateTime? deadline
+        )
+            : this(new byte[0], statusCode, headers)
+        {
+            _stream = stream;
+            _context = context;
+            _deadline = deadline;
+        }
+
+        public async Task ExecuteAsync(HttpContext httpContext)
         {
             string contentTypeValue = "text/plain";
 
