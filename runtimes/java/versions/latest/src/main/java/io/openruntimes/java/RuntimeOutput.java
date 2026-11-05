@@ -26,6 +26,10 @@ public class RuntimeOutput {
     return this.body;
   }
 
+  public Iterable<?> getStream() {
+    return this.stream;
+  }
+
   public int getStatusCode() {
     return this.statusCode;
   }
