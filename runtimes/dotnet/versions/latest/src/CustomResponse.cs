@@ -7,6 +7,9 @@ namespace DotNetRuntime
         private readonly byte[] _body;
         private readonly int _statusCode;
         private readonly Dictionary<string, string> _headers;
+        private readonly IAsyncEnumerable<object>? _stream;
+        private readonly RuntimeContext? _context;
+        private readonly DateTime? _deadline;
 
         public CustomResponse(
             byte[] body,
