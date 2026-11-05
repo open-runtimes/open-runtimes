@@ -219,40 +219,73 @@ Future<shelf.Response> action(
   RuntimeResponse contextRes = new RuntimeResponse();
   RuntimeContext context = new RuntimeContext(contextReq, contextRes, logger);
 
+  final ZoneSpecification nativeLogs = ZoneSpecification(
+    print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+      logger.write(line, Logger.TYPE_LOG, true);
+    },
+  );
+  final Stopwatch execution = Stopwatch()..start();
+  Future<dynamic> execute() async {
+    dynamic result = await user_code.main(context);
+    if (result is shelf.Response) {
+      result = await fromNativeResponse(result);
+    }
+    return result;
+  }
+
   dynamic output = null;
+  StreamSubscription<List<int>>? subscription;
+  List<int>? first;
   try {
-    await runZoned(
-      () async {
-        Future<dynamic> execute() async {
-          dynamic result = await user_code.main(context);
-          if (result is shelf.Response) {
-            result = await fromNativeResponse(result);
-          }
-          return result;
-        }
+    await runZoned(() async {
+      if (safeTimeout != null) {
+        dynamic result = await Future.any(<Future<dynamic>>[
+          Future.delayed(Duration(seconds: safeTimeout)),
+          execute(),
+        ]);
 
-        if (safeTimeout != null) {
-          dynamic result = await Future.any(<Future<dynamic>>[
-            Future.delayed(Duration(seconds: safeTimeout)),
-            execute(),
-          ]);
-
-          if (result != null) {
-            output = result;
-          } else {
-            context.error('Execution timed out.');
-            output = context.res.text('', 500, const {});
-          }
+        if (result != null) {
+          output = result;
         } else {
-          output = await execute();
+          context.error('Execution timed out.');
+          output = context.res.text('', 500, const {});
         }
-      },
-      zoneSpecification: ZoneSpecification(
-        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-          logger.write(line, Logger.TYPE_LOG, true);
-        },
-      ),
-    );
+      } else {
+        output = await execute();
+      }
+
+      // Pull the first chunk before the status so early failures act like main.
+      if (output is Map && output['stream'] != null) {
+        final Completer<List<int>?> pulled = Completer();
+        subscription = (output['stream'] as Stream<dynamic>)
+            .map<List<int>>(
+              (chunk) => chunk is String ? utf8.encode(chunk) : chunk,
+            )
+            .listen(
+              (chunk) {
+                subscription!.pause();
+                pulled.complete(chunk);
+              },
+              onError: pulled.completeError,
+              onDone: () => pulled.complete(null),
+              cancelOnError: true,
+            );
+
+        Future<List<int>?> pull = pulled.future;
+        if (safeTimeout != null) {
+          pull = pull.timeout(
+            Duration(seconds: safeTimeout) - execution.elapsed,
+            onTimeout: () {
+              subscription!.cancel();
+              context.error('Execution timed out.');
+              output = context.res.text('', 500, const {});
+              return null;
+            },
+          );
+        }
+        first = await pull;
+      }
+    }, zoneSpecification: nativeLogs);
   } catch (e, s) {
     context.error(e.toString());
     context.error(s.toString());
