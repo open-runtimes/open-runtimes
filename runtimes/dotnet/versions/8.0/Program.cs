@@ -214,6 +214,7 @@ namespace DotNetRuntime
             logger.OverrideNativeLogs();
 
             RuntimeOutput? output = null;
+            DateTime? deadline = null;
             Handler? handler = null;
 
             // Guard: Try to load module
