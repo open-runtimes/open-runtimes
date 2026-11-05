@@ -176,9 +176,11 @@ Functions return whatever `context.res.*` produces. Runtimes whose HTTP library
 has a value-type response additionally accept that native response object and
 convert it to the same `{ body, statusCode, headers }` shape: a Fetch API
 `Response` in the JavaScript runtimes (Node.js, Bun, Deno), aiohttp's
-`web.Response` in Python and shelf's `Response` in Dart. The body is read into
-memory during the conversion; bodies that cannot be read (for example aiohttp's
-`StreamResponse`) are rejected with a clear error. Example user function:
+`web.Response` in Python and shelf's `Response` in Dart. The JavaScript runtimes
+send any non-empty body, and Dart a body of unknown length, through the same
+path as `context.res.sendStream()`. Other bodies are read into memory; Python
+rejects bodies it cannot read (for example aiohttp's `StreamResponse`) with a
+clear error. Example user function:
 
 ```js
 module.exports = async (context) => {
