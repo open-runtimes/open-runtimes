@@ -223,6 +223,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         } else {
             // swiftformat:disable:next hoistAwait, hoistTry
             output = try await annotateError(try await main(context: context))
+            // swiftformat:disable:next hoistAwait, hoistTry
+            first = try await annotateError(try await output.stream?())
         }
     } catch {
         context.error(error)
