@@ -330,6 +330,10 @@ public class Server {
         continue;
       }
 
+      if (output.getStream() != null && header.equals("content-length")) {
+        continue;
+      }
+
       if (header.equals("content-type") && !headerValue.startsWith("multipart/")) {
         headerValue = headerValue.toLowerCase();
 
