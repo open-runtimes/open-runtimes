@@ -144,6 +144,66 @@ When you can have two!
         ]),
         headers: {'content-type': 'text/plain'},
       );
+    case 'nativeResponseChunks':
+      {
+        Stream<List<int>> chunks() async* {
+          yield utf8.encode('first\n');
+          await Future.delayed(Duration(seconds: 1));
+          yield utf8.encode('second\n');
+          await Future.delayed(Duration(seconds: 1));
+          yield utf8.encode('third\n');
+        }
+
+        return shelf.Response(
+          201,
+          body: chunks(),
+          headers: {'x-stream': 'yes'},
+        );
+      }
+    case 'nativeResponseStreamLong':
+      {
+        Stream<List<int>> chunks() async* {
+          for (int i = 0; i < 10000; i++) {
+            yield utf8.encode('chunk-$i\n');
+          }
+        }
+
+        return shelf.Response.ok(chunks());
+      }
+    case 'nativeResponseStreamException':
+      {
+        Stream<List<int>> chunks() async* {
+          yield utf8.encode('first\n');
+          throw Exception('Stream failed');
+        }
+
+        return shelf.Response.ok(chunks());
+      }
+    case 'nativeResponseStreamErrorStart':
+      {
+        Stream<List<int>> chunks() async* {
+          throw Exception('Stream failed early');
+        }
+
+        return shelf.Response.ok(chunks());
+      }
+    case 'nativeResponseStreamTimeout':
+      {
+        Stream<List<int>> chunks() async* {
+          yield utf8.encode('first\n');
+          await Future.delayed(Duration(seconds: 5));
+          yield utf8.encode('second\n');
+        }
+
+        await Future.delayed(Duration(seconds: 1));
+        return shelf.Response.ok(chunks());
+      }
+    case 'nativeResponseStreamEmpty':
+      {
+        Stream<List<int>> chunks() async* {}
+
+        return shelf.Response.ok(chunks());
+      }
     case 'nativeResponseCookies':
       return shelf.Response.ok(
         'OK',

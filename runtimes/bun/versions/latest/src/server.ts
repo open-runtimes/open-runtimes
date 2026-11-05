@@ -12,14 +12,26 @@ const USER_CODE_PATH = "/usr/local/server/src/function";
 // { stream, statusCode, headers } shape so the rest of the pipeline (reserved
 // header filtering, charset defaults, logging headers) applies to it as well.
 // Its body goes through the same streaming path as context.res.sendStream().
-const fromNativeResponse = (response: Response) =>
-  response.body === null
-    ? { body: "", statusCode: response.status, headers: response.headers }
-    : {
-        stream: response.body,
-        statusCode: response.status,
-        headers: response.headers,
-      };
+const fromNativeResponse = (response: Response) => {
+  if (response.body === null) {
+    return { body: "", statusCode: response.status, headers: response.headers };
+  }
+
+  // Bun 1.0 also throws a failed pull() from the body's async iterator as an
+  // uncaught error, which stops the server, so the body is read with a reader.
+  const reader = response.body.getReader();
+  return {
+    stream: {
+      [Symbol.asyncIterator]: () => ({
+        next: () => reader.read(),
+        return: () =>
+          reader.cancel().then(() => ({ done: true, value: undefined })),
+      }),
+    },
+    statusCode: response.status,
+    headers: response.headers,
+  };
+};
 
 const action = async (logger: Logger, request: any) => {
   const timeout = request.headers.get(`x-open-runtimes-timeout`) ?? "";

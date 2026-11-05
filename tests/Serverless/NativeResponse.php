@@ -19,6 +19,14 @@ trait NativeResponse
         }
     }
 
+    private function skipWithoutNativeStream(): void
+    {
+        if (!\in_array($this->runtimeName, ['node', 'bun', 'deno', 'dart'])) {
+            $this->markTestSkipped('Only the JavaScript runtimes and Dart stream a native response body.');
+        }
+        $this->skipWithoutNativeResponse();
+    }
+
     public function testNativeResponse(): void
     {
         $this->skipWithoutNativeResponse();
@@ -80,10 +88,7 @@ trait NativeResponse
 
     public function testNativeResponseChunks(): void
     {
-        if (!\in_array($this->runtimeName, ['node', 'bun', 'deno'])) {
-            $this->markTestSkipped('Only the JavaScript runtimes stream a native response body.');
-        }
-        $this->skipWithoutNativeResponse();
+        $this->skipWithoutNativeStream();
 
         $start = \microtime(true);
         $received = '';
@@ -101,5 +106,69 @@ trait NativeResponse
         self::assertLessThan(0.5, $arrivals[0] - $start);
         self::assertEqualsWithDelta(1, $arrivals[1] - $arrivals[0], 0.4);
         self::assertEqualsWithDelta(1, $arrivals[2] - $arrivals[1], 0.4);
+    }
+
+    public function testNativeResponseStreamLong(): void
+    {
+        $this->skipWithoutNativeStream();
+
+        $expected = '';
+        for ($i = 0; $i < 10000; $i++) {
+            $expected .= "chunk-{$i}\n";
+        }
+
+        $response = Client::execute(headers: ['x-action' => 'nativeResponseStreamLong'], timeout: 10, bodyCallback: fn () => null);
+
+        self::assertEquals($expected, $response['body']);
+    }
+
+    public function testNativeResponseStreamException(): void
+    {
+        $this->skipWithoutNativeStream();
+
+        $response = Client::execute(headers: ['x-action' => 'nativeResponseStreamException'], bodyCallback: fn () => null);
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals("first\n", $response['body']);
+        self::assertStringContainsString('Stream failed', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+
+        // These servers can only end an errored response cleanly
+        if (!\in_array($this->runtimeName, ['bun', 'deno'])) {
+            self::assertNotNull($response['errorNumber']);
+        }
+    }
+
+    public function testNativeResponseStreamErrorStart(): void
+    {
+        $this->skipWithoutNativeStream();
+
+        $response = Client::execute(headers: ['x-action' => 'nativeResponseStreamErrorStart'], bodyCallback: fn () => null);
+
+        self::assertEquals(500, $response['code']);
+        self::assertEquals('', $response['body']);
+        self::assertStringContainsString('Stream failed early', Client::getErrors($response['headers']['x-open-runtimes-log-id']));
+    }
+
+    public function testNativeResponseStreamTimeout(): void
+    {
+        $this->skipWithoutNativeStream();
+
+        $start = \microtime(true);
+        $response = Client::execute(headers: ['x-action' => 'nativeResponseStreamTimeout', 'x-open-runtimes-timeout' => '2'], timeout: 10, bodyCallback: fn () => null);
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals("first\n", $response['body']);
+        self::assertLessThan(2.5, \microtime(true) - $start);
+        self::assertEquals(1, \substr_count(Client::getErrors($response['headers']['x-open-runtimes-log-id']), 'Execution timed out.'));
+    }
+
+    public function testNativeResponseStreamEmpty(): void
+    {
+        $this->skipWithoutNativeStream();
+
+        $response = Client::execute(headers: ['x-action' => 'nativeResponseStreamEmpty'], bodyCallback: fn () => null);
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals('', $response['body']);
     }
 }

@@ -272,6 +272,58 @@ When you can have two!
         }),
         { status: 201, headers: { "x-stream": "yes" } },
       );
+    case "nativeResponseStreamLong":
+      return new Response(
+        new ReadableStream({
+          start(controller) {
+            const encoder = new TextEncoder();
+            for (let i = 0; i < 10000; i++) {
+              controller.enqueue(encoder.encode(`chunk-${i}\n`));
+            }
+            controller.close();
+          },
+        }),
+      );
+    case "nativeResponseStreamException":
+      return new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode("first\n"));
+          },
+          pull() {
+            throw new Error("Stream failed");
+          },
+        }),
+      );
+    case "nativeResponseStreamErrorStart":
+      return new Response(
+        new ReadableStream({
+          pull() {
+            throw new Error("Stream failed early");
+          },
+        }),
+      );
+    case "nativeResponseStreamTimeout":
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return new Response(
+        new ReadableStream({
+          async start(controller) {
+            const encoder = new TextEncoder();
+            controller.enqueue(encoder.encode("first\n"));
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            controller.enqueue(encoder.encode("second\n"));
+            controller.close();
+          },
+        }),
+      );
+    case "nativeResponseStreamEmpty":
+      return new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.close();
+          },
+        }),
+      );
     case "nativeResponseEmpty":
       return new Response(null, { status: 204 });
     case "nativeResponseRedirect":
