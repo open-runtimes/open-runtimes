@@ -226,7 +226,6 @@ def action(request, response, logger)
     end
   end
 
-  logger.end
   response.headers['x-open-runtimes-log-id'] = logger.id
 
   response.headers['content-type'] = 'text/plain' if response.headers['content-type'].nil?
