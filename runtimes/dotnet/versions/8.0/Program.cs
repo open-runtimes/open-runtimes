@@ -266,6 +266,7 @@ namespace DotNetRuntime
                 {
                     if (safeTimout != -1)
                     {
+                        deadline = DateTime.UtcNow.AddSeconds(safeTimout);
                         var result = await await Task.WhenAny<RuntimeOutput?>(
                             Task.Run<RuntimeOutput?>(async () =>
                             {
