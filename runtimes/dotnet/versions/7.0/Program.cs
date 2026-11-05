@@ -214,11 +214,13 @@ namespace DotNetRuntime
             logger.OverrideNativeLogs();
 
             RuntimeOutput? output = null;
+            DateTime? deadline = null;
 
             try
             {
                 if (safeTimout != -1)
                 {
+                    deadline = DateTime.UtcNow.AddSeconds(safeTimout);
                     var result = await await Task.WhenAny<RuntimeOutput?>(
                         Task.Run<RuntimeOutput?>(async () =>
                         {
