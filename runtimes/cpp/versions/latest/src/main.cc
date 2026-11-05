@@ -360,6 +360,10 @@ int main()
                         } else
                         {
                             output = runtime::Handler::main(context);
+                            if (output.stream)
+                            {
+                                first = output.stream();
+                            }
                         }
                     } catch(const std::exception& e)
                     {
