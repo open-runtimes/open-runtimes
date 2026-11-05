@@ -337,6 +337,69 @@ export const action = async (logger: Logger, ctx: any) => {
   }
 
   ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
+
+  if (output.stream !== undefined && output.statusCode !== 204) {
+    ctx.response.headers.delete("content-length");
+
+    const iterator = output.stream;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    logger.overrideNativeLogs();
+
+    const finish = async () => {
+      clearTimeout(timer);
+      logger.revertNativeLogs();
+      await logger.end();
+    };
+
+    const body = new ReadableStream({
+      start(controller) {
+        if (deadline === null) {
+          return;
+        }
+
+        timer = setTimeout(async () => {
+          context.error("Execution timed out.");
+          Promise.resolve(iterator.return?.()).catch(() => {});
+          await finish().catch(() => {});
+          controller.error(new Error("Execution timed out."));
+        }, deadline - Date.now());
+      },
+      async pull(controller) {
+        let next;
+        try {
+          next = first ?? (await iterator.next());
+          first = null;
+        } catch (e: any) {
+          context.error(e.stack || e);
+          await finish();
+          controller.error(e);
+          return;
+        }
+
+        if (next.done) {
+          await finish();
+          controller.close();
+          return;
+        }
+
+        controller.enqueue(
+          typeof next.value === "string"
+            ? new TextEncoder().encode(next.value)
+            : next.value,
+        );
+      },
+      cancel() {
+        Promise.resolve(iterator.return?.()).catch(() => {});
+        return finish();
+      },
+    });
+
+    ctx.response.status = output.statusCode;
+    ctx.response.body = body;
+    return;
+  }
+
   await logger.end();
 
   ctx.response.status = output.statusCode;
