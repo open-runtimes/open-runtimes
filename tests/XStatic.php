@@ -10,6 +10,46 @@ error_reporting(E_ALL);
 
 class XStatic extends Base
 {
+    public function testMountedCodePath(): void
+    {
+        $image = trim(shell_exec("docker inspect --format='{{.Image}}' open-runtimes-test-serve") ?? '');
+        self::assertNotEmpty($image);
+        $script = <<<'BASH'
+set -e
+mkdir -p "$OPEN_RUNTIMES_CODE_PATH" /mnt/telemetry
+printf 'Mounted website' >"$OPEN_RUNTIMES_CODE_PATH/index.html"
+printf 'Mounted asset' >"$OPEN_RUNTIMES_CODE_PATH/asset.txt"
+: >"$OPEN_RUNTIMES_CODE_PATH/.open-runtimes"
+printf 'local_download=0.200\n' >/mnt/telemetry/timings.txt
+exec bash helpers/start.sh "bash helpers/server.sh"
+BASH;
+        $container = 'open-runtimes-test-static-code-path';
+        try {
+            exec('docker run -d --name ' . escapeshellarg($container)
+                . ' --network openruntimes --entrypoint bash'
+                . ' -e OPEN_RUNTIMES_CODE_PATH=' . escapeshellarg('/mnt/workspace/code with spaces')
+                . ' -e OPEN_RUNTIMES_STATIC_FALLBACK=index.html'
+                . ' -e OPEN_RUNTIMES_SECRET=test-secret-key '
+                . escapeshellarg($image) . ' -c ' . escapeshellarg($script), $output, $code);
+            self::assertSame(0, $code, implode("\n", $output));
+            Client::$host = $container;
+            $this->awaitHostReady();
+
+            foreach (['/index.html' => 'Mounted website', '/asset.txt' => 'Mounted asset', '/missing' => 'Mounted website'] as $path => $body) {
+                $response = Client::execute(url: $path, method: 'GET');
+                self::assertEquals(200, $response['code']);
+                self::assertEquals($body, $response['body']);
+            }
+            $this->testHealth();
+            $response = Client::execute(url: '/__opr/timings', method: 'GET');
+            self::assertEquals(200, $response['code']);
+            self::assertStringContainsString('local_download=0.200', $response['body']);
+        } finally {
+            shell_exec('docker rm -f ' . escapeshellarg($container) . ' 2>&1');
+            Client::$host = 'open-runtimes-test-serve';
+        }
+    }
+
     public function testCacheHeader(): void
     {
         

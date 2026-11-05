@@ -1,12 +1,16 @@
 #!/bin/bash
 set -e
-shopt -s dotglob
+
+ROOT=/usr/local/server/src/function
+if [ -d "$OPEN_RUNTIMES_CODE_PATH" ]; then
+	ROOT="$OPEN_RUNTIMES_CODE_PATH"
+fi
 
 # Write files to serve system routes
-mkdir -p /usr/local/server/src/function/__opr
-echo -n "OK" >/usr/local/server/src/function/__opr/health.txt
+mkdir -p "$ROOT/__opr"
+echo -n "OK" >"$ROOT/__opr/health.txt"
 if [ -f "/mnt/telemetry/timings.txt" ]; then
-	cp /mnt/telemetry/timings.txt /usr/local/server/src/function/__opr/timings.txt
+	cp /mnt/telemetry/timings.txt "$ROOT/__opr/timings.txt"
 fi
 
 # Basic auth
@@ -20,7 +24,7 @@ fi
 if [ -z "$OPEN_RUNTIMES_STATIC_FALLBACK" ]; then
 	PAGE_FALLBACK=""
 else
-	PAGE_FALLBACK="/usr/local/server/src/function/$OPEN_RUNTIMES_STATIC_FALLBACK"
+	PAGE_FALLBACK="$ROOT/$OPEN_RUNTIMES_STATIC_FALLBACK"
 fi
 
 # 404 page design fallback
@@ -43,7 +47,7 @@ sanitize_int() {
 }
 
 # Follow symlinks in the served dir. Off by default (path-escape defense);
-# enable when code is mounted as symlinks (e.g. sidecar), else those paths 404.
+# Enable only for links within the document root; external targets still 404.
 OPEN_RUNTIMES_STATIC_FOLLOW_SYMLINKS="$(echo "${OPEN_RUNTIMES_STATIC_FOLLOW_SYMLINKS:-false}" | tr '[:upper:]' '[:lower:]')"
 if [ "$OPEN_RUNTIMES_STATIC_FOLLOW_SYMLINKS" = "true" ]; then
 	DISABLE_SYMLINKS="false"
@@ -116,4 +120,4 @@ exec static-web-server \
 	--compression false \
 	--cache-control-headers false \
 	--config-file /tmp/config.toml \
-	-d /usr/local/server/src/function
+	-d "$ROOT"
