@@ -258,6 +258,7 @@ public class Server {
 
       try {
         if (safeTimeout > 0) {
+          deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(safeTimeout);
           Future<RuntimeOutput> future =
               executor.submit(
                   () -> {
