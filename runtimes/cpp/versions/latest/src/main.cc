@@ -350,7 +350,7 @@ int main()
 
                             std::future<void> waiter = std::async(std::launch::async, &std::thread::join, &thread);
 
-                            if (waiter.wait_for(std::chrono::seconds(timeout)) == std::future_status::timeout) {
+                            if (waiter.wait_until(deadline) == std::future_status::timeout) {
                                 context.error("Execution timed out.");
                                 output = context.res.text("", 500, {});
                                 pthread_cancel(thread.native_handle());
