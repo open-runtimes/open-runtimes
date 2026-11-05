@@ -83,11 +83,10 @@ const fromNativeResponse = (response) => {
       headers["set-cookie"] = cookies;
     }
   }
-  return {
-    body: Buffer.from(await response.arrayBuffer()),
-    statusCode: response.status,
-    headers,
-  };
+  if (response.body === null) {
+    return { body: "", statusCode: response.status, headers };
+  }
+  return { stream: response.body, statusCode: response.status, headers };
 };
 
 // The Fetch API Request constructor rejects these methods, so context.req.raw
