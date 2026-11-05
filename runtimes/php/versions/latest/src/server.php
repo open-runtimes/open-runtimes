@@ -201,12 +201,18 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
         $execute = function () use ($userFunction, &$output, $context, $logger) {
             $logger->overrideNativeLogs();
             $output = $userFunction($context);
+            // Pull the first chunk before the status is sent, so a source that fails early gets the error response.
+            if (isset($output['stream'])) {
+                $output['stream'] = new \NoRewindIterator((fn () => yield from $output['stream'])());
+                $output['stream']->valid();
+            }
             $logger->revertNativeLogs();
         };
 
         try {
             if ($safeTimeout !== null) {
                 $executed = false;
+                $deadline = \microtime(true) + $safeTimeout;
                 Swoole\Coroutine\batch([
                     function () use ($execute, &$executed) {
                         \call_user_func($execute);
