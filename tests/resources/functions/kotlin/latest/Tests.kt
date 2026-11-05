@@ -214,6 +214,85 @@ When you can have two!
                     ),
                 )
             }
+            "streamResponse" -> {
+                return context.res.sendStream(
+                    flow {
+                        context.log("Stream log.")
+                        emit("first\n")
+                        delay(1000)
+                        emit("second\n")
+                        delay(1000)
+                        emit("third\n")
+                    },
+                    201,
+                    mapOf("x-stream" to "yes"),
+                )
+            }
+            "streamException" -> {
+                return context.res.sendStream(
+                    flow {
+                        emit("first\n")
+                        throw Exception("Stream failed")
+                    },
+                )
+            }
+            "streamTimeout" -> {
+                delay(1000)
+                return context.res.sendStream(
+                    flow {
+                        emit("first\n")
+                        delay(5000)
+                        emit("second\n")
+                    },
+                )
+            }
+            "streamEmpty" -> {
+                return context.res.sendStream(emptyFlow(), 200)
+            }
+            "streamSingle" -> {
+                return context.res.sendStream(flowOf("only\n"), 200)
+            }
+            "streamLong" -> {
+                return context.res.sendStream(
+                    flow {
+                        for (i in 0 until 10000) {
+                            emit("chunk-$i\n")
+                        }
+                    },
+                    200,
+                )
+            }
+            "streamBinary" -> {
+                return context.res.sendStream(
+                    flowOf(
+                        ByteArray(128) { it.toByte() },
+                        ByteArray(128) { (it + 128).toByte() },
+                    ),
+                    200,
+                )
+            }
+            "streamJson" -> {
+                val gson = Gson()
+                return context.res.sendStream(
+                    flow {
+                        for (n in 1..3) {
+                            if (n > 1) {
+                                delay(100)
+                            }
+                            emit(gson.toJson(mapOf("n" to n)) + "\n")
+                        }
+                    },
+                    200,
+                    mapOf("content-type" to "application/x-ndjson"),
+                )
+            }
+            "streamErrorStart" -> {
+                return context.res.sendStream(
+                    flow<Any> {
+                        throw Exception("Stream failed early")
+                    },
+                )
+            }
             "envVars" -> {
                 return context.res.json(
                     mutableMapOf(
