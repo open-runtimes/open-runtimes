@@ -202,23 +202,74 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 				ch <- context.Res.Text("", context.Res.WithStatusCode(500))
 			}
 		}()
-		output = handler.Main(context)
-		ch <- output
+		ch <- handler.Main(context)
 	}
 
 	outputChan := make(chan openruntimes.Response, 1)
 
 	logger.OverrideNativeLogs()
 
+	var deadline <-chan time.Time
 	if safeTimeout != 0 {
-		go timeoutPromise(outputChan)
+		deadline = time.After(time.Duration(safeTimeout) * time.Second)
 	}
 
 	go actionPromise(outputChan)
 
-	output = <-outputChan
+	select {
+	case output = <-outputChan:
+	case <-deadline:
+		context.Error("Execution timed out.")
+		output = context.Res.Text("", context.Res.WithStatusCode(500))
+	}
 
 	logger.RevertNativeLogs()
+
+	chunks := make(chan []byte)
+	done := make(chan struct{})
+	var sourceErr error
+	var first []byte
+	started := false
+
+	if output.Stream != nil {
+		stream := output.Stream
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					sourceErr = fmt.Errorf("%v", r)
+				}
+				close(chunks)
+			}()
+
+			for chunk, err := range stream {
+				if err != nil {
+					sourceErr = err
+					return
+				}
+
+				select {
+				// The source may reuse the slice once yield returns.
+				case chunks <- bytes.Clone(chunk):
+				case <-done:
+					return
+				}
+			}
+		}()
+
+		// Pull the first chunk before the status so early failures act like main.
+		select {
+		case first, started = <-chunks:
+			if !started && sourceErr != nil {
+				context.Error(sourceErr.Error())
+				output = context.Res.Text("", context.Res.WithStatusCode(500))
+			}
+		case <-deadline:
+			close(done)
+			context.Error("Execution timed out.")
+			output = context.Res.Text("", context.Res.WithStatusCode(500))
+		case <-r.Context().Done():
+		}
+	}
 
 	if output.StatusCode == 0 {
 		output.StatusCode = 200
