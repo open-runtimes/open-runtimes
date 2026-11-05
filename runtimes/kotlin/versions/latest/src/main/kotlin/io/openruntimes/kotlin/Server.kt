@@ -266,6 +266,36 @@ suspend fun action(
         output = context.res.text("", 500, mutableMapOf())
     }
 
+    var source = output.stream
+    if (source != null) {
+        // Pull the first chunk before sending headers, so a failing source gets the error response
+        val remaining = if (safeTimeout > 0) (deadline - System.nanoTime()).nanoseconds else Duration.INFINITE
+        val chunks = source.buffer(Channel.RENDEZVOUS).produceIn(CoroutineScope(coroutineContext + Job()))
+        val first = withTimeoutOrNull(remaining) { chunks.receiveCatching() }
+        val exception = first?.exceptionOrNull()
+
+        if (first == null) {
+            chunks.cancel()
+            context.error("Execution timed out.")
+            output = context.res.text("", 500)
+            source = null
+        } else if (exception != null) {
+            val sw = StringWriter()
+            val pw = PrintWriter(sw)
+            exception.printStackTrace(pw)
+
+            context.error(sw.toString())
+            output = context.res.text("", 500, mutableMapOf())
+            source = null
+        } else {
+            source =
+                flow {
+                    first.getOrNull()?.let { emit(it) }
+                    emitAll(chunks)
+                }
+        }
+    }
+
     val resHeaders = output.headers.mapKeys { it.key.lowercase() }.toMutableMap()
 
     if (resHeaders["content-type"] == null) {
