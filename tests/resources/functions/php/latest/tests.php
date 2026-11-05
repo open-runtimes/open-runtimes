@@ -117,6 +117,61 @@ When you can have two!
             return $context->res->text($hash, 200, [
                 'x-method' => $context->req->method,
             ]);
+        case 'streamResponse':
+            return $context->res->sendStream((function () use ($context) {
+                $context->log('Stream log.');
+                yield "first\n";
+                \sleep(1);
+                yield "second\n";
+                \sleep(1);
+                yield "third\n";
+            })(), 201, ['x-stream' => 'yes']);
+        case 'streamException':
+            return $context->res->sendStream((function () {
+                yield "first\n";
+                throw new Exception('Stream failed');
+            })());
+        case 'streamTimeout':
+            \sleep(1);
+
+            return $context->res->sendStream((function () {
+                yield "first\n";
+                \sleep(5);
+                yield "second\n";
+            })());
+        case 'streamEmpty':
+            return $context->res->sendStream((function () {
+                yield from [];
+            })(), 200);
+        case 'streamSingle':
+            return $context->res->sendStream((function () {
+                yield "only\n";
+            })());
+        case 'streamLong':
+            return $context->res->sendStream((function () {
+                for ($i = 0; $i < 10000; $i++) {
+                    yield "chunk-{$i}\n";
+                }
+            })());
+        case 'streamBinary':
+            return $context->res->sendStream((function () {
+                yield pack('C*', ...range(0, 127));
+                yield pack('C*', ...range(128, 255));
+            })());
+        case 'streamJson':
+            return $context->res->sendStream((function () {
+                for ($n = 1; $n <= 3; $n++) {
+                    if ($n > 1) {
+                        \usleep(100000);
+                    }
+                    yield \json_encode(['n' => $n])."\n";
+                }
+            })(), 200, ['content-type' => 'application/x-ndjson']);
+        case 'streamErrorStart':
+            return $context->res->sendStream((function () {
+                throw new Exception('Stream failed early');
+                yield;
+            })());
         case 'envVars':
             $var = getenv('CUSTOM_ENV_VAR');
             $emptyVar = getenv('NOT_DEFINED_VAR');
