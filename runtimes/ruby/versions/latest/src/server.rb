@@ -238,6 +238,39 @@ def action(request, response, logger)
   end
 
   response.status = output['statusCode']
+
+  unless output['stream'].nil?
+    body = Enumerator.new do |out|
+      # Puma corks the socket, which holds each chunk back for up to 200ms
+      request.env['puma.socket'].setsockopt(Socket::IPPROTO_TCP, Socket::TCP_CORK, 0)
+      remaining = [deadline - Process.clock_gettime(Process::CLOCK_MONOTONIC), 0.001].max unless deadline.nil?
+
+      begin
+        Timeout.timeout(remaining) do
+          loop do
+            out << output['stream'].next.to_s
+          end
+        end
+      rescue Puma::ConnectionError
+        raise
+      rescue StandardError => e
+        if !deadline.nil? && Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+          context.error('Execution timed out.')
+        else
+          context.error(e.full_message + "\n" + e.backtrace.join("\n"))
+        end
+        raise Puma::ConnectionError
+      ensure
+        logger.end
+      end
+    end
+
+    # HEAD, 204 and 304 responses close the body without iterating it
+    response.body = Rack::BodyProxy.new(body) { logger.end }
+    return response
+  end
+
+  logger.end
   response.body = output['body']
   response
 end
