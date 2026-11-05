@@ -139,7 +139,8 @@ namespace DotNetRuntime
 
             if (failed)
             {
-                httpContext.Abort();
+                // Abort() can reset the socket before Kestrel sends what was already flushed
+                throw new IOException("Stream failed after the response started.");
             }
         }
     }
