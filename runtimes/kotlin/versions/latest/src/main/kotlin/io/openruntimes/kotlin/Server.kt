@@ -310,6 +310,10 @@ suspend fun action(
         }
     }
 
+    if (source != null) {
+        resHeaders.remove("content-length")
+    }
+
     resHeaders.forEach { (key, value) ->
         if (!key.startsWith("x-open-runtimes-")) {
             ctx.header(key, value)
