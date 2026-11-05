@@ -368,6 +368,12 @@ public class Server {
     }
     ctx.header("x-open-runtimes-log-id", logger.getId());
 
+    if (output.getStream() != null) {
+      ctx.status(output.getStatusCode());
+      stream(ctx, first, iterator, context, logger, safeTimeout, deadline);
+      return ctx;
+    }
+
     try {
       logger.end();
     } catch (IOException e) {
