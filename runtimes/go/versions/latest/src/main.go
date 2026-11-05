@@ -195,13 +195,6 @@ func action(w http.ResponseWriter, r *http.Request, logger openruntimes.Logger) 
 		Headers:    map[string]string{},
 	}
 
-	timeoutPromise := func(ch chan openruntimes.Response) {
-		time.Sleep(time.Duration(safeTimeout) * time.Second)
-
-		context.Error("Execution timed out.")
-		ch <- context.Res.Text("", context.Res.WithStatusCode(500))
-	}
-
 	actionPromise := func(ch chan openruntimes.Response) {
 		defer func() {
 			if r := recover(); r != nil {
