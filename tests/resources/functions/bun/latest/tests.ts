@@ -270,6 +270,21 @@ When you can have two!
 				}),
 				{ headers: { "content-type": "text/plain" } },
 			);
+		case "nativeResponseChunks":
+			return new Response(
+				new ReadableStream({
+					async start(controller) {
+						const encoder = new TextEncoder();
+						controller.enqueue(encoder.encode("first\n"));
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+						controller.enqueue(encoder.encode("second\n"));
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+						controller.enqueue(encoder.encode("third\n"));
+						controller.close();
+					},
+				}),
+				{ status: 201, headers: { "x-stream": "yes" } },
+			);
 		case "nativeResponseEmpty":
 			return new Response(null, { status: 204 });
 		case "nativeResponseRedirect":
