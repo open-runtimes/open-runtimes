@@ -179,6 +179,23 @@ def action(request, response, logger)
       else
         output = main(context)
       end
+
+      # Pull the first chunk before the status is sent, so a source that fails early gets the error response
+      unless output.nil? || output['stream'].nil?
+        output['stream'] = output['stream'].to_enum
+        remaining = [deadline - Process.clock_gettime(Process::CLOCK_MONOTONIC), 0.001].max unless deadline.nil?
+
+        begin
+          Timeout.timeout(remaining) { output['stream'].peek }
+        rescue StopIteration
+          # An empty source answers with an empty body
+        rescue Timeout::Error
+          raise if deadline.nil? || Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline
+
+          context.error('Execution timed out.')
+          output = context.res.text('', 500, {})
+        end
+      end
     rescue StandardError => e
       message = ""
       message += e.full_message
