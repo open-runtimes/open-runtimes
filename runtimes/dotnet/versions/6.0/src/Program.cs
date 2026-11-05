@@ -212,6 +212,7 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
     logger.OverrideNativeLogs();
 
     RuntimeOutput? output = null;
+    DateTime? deadline = null;
     Handler? handler = null;
 
     // Guard: Try to load module
