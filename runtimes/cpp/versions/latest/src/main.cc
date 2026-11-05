@@ -326,15 +326,23 @@ int main()
                     logger->overrideNativeLogs();
 
                     runtime::RuntimeOutput output;
+                    std::optional<std::string> first;
+                    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeout);
 
                     try {
                         if (timeout != -1)
                         {
                             std::promise<runtime::RuntimeOutput> promise;
                             std::future<runtime::RuntimeOutput> future = promise.get_future();
-                            std::thread thread([&context](std::promise<runtime::RuntimeOutput> promise) {
+                            std::thread thread([&context, &first](std::promise<runtime::RuntimeOutput> promise) {
                                 try {
-                                    promise.set_value(runtime::Handler::main(context));
+                                    runtime::RuntimeOutput result = runtime::Handler::main(context);
+                                    // Pull the first chunk before the status is sent, so a stream failing at once still answers 500
+                                    if (result.stream)
+                                    {
+                                        first = result.stream();
+                                    }
+                                    promise.set_value(result);
                                 } catch (...) {
                                     promise.set_exception(std::current_exception());
                                 }
