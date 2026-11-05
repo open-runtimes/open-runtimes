@@ -368,13 +368,20 @@ const action = async (logger, req, res) => {
         output = await userFunction(context);
       }
       if (isNativeResponse(output)) {
-        output = await fromNativeResponse(output);
+        output = fromNativeResponse(output);
+      }
+      if (output?.stream !== undefined) {
+        // Pulled before the status is sent, so a source that fails or stalls
+        // before its first chunk answers like a failed main function.
+        output.stream = Readable.from(output.stream)[Symbol.asyncIterator]();
+        first = await output.stream.next();
       }
     }
 
     try {
       if (safeTimeout !== null) {
         let executed = true;
+        deadline = Date.now() + safeTimeout * 1000;
 
         const timeoutPromise = new Promise((promiseRes) => {
           setTimeout(() => {
