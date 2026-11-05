@@ -183,6 +183,13 @@ export const action = async (logger: Logger, ctx: any) => {
         headers["location"] = url;
         return this.text("", statusCode, headers);
       },
+      sendStream: function (source: any, statusCode = 200, headers: any = {}) {
+        return {
+          stream: source,
+          statusCode: statusCode,
+          headers: headers,
+        };
+      },
     },
     log: function (...messages: any) {
       logger.write(messages, Logger.TYPE_LOG);
