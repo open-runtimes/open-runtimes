@@ -222,6 +222,95 @@ When you can have two!
           'x-method': context.req.method,
         });
       }
+    case 'streamResponse':
+      {
+        Stream<String> chunks() async* {
+          context.log('Stream log.');
+          yield 'first\n';
+          await Future.delayed(Duration(seconds: 1));
+          yield 'second\n';
+          await Future.delayed(Duration(seconds: 1));
+          yield 'third\n';
+        }
+
+        return context.res.sendStream(chunks(), 201, {'x-stream': 'yes'});
+      }
+    case 'streamException':
+      {
+        Stream<String> chunks() async* {
+          yield 'first\n';
+          throw Exception('Stream failed');
+        }
+
+        return context.res.sendStream(chunks());
+      }
+    case 'streamTimeout':
+      {
+        Stream<String> chunks() async* {
+          yield 'first\n';
+          await Future.delayed(Duration(seconds: 5));
+          yield 'second\n';
+        }
+
+        await Future.delayed(Duration(seconds: 1));
+        return context.res.sendStream(chunks());
+      }
+    case 'streamEmpty':
+      {
+        Stream<String> chunks() async* {}
+
+        return context.res.sendStream(chunks(), 200);
+      }
+    case 'streamSingle':
+      {
+        Stream<String> chunks() async* {
+          yield 'only\n';
+        }
+
+        return context.res.sendStream(chunks());
+      }
+    case 'streamLong':
+      {
+        Stream<String> chunks() async* {
+          for (int i = 0; i < 10000; i++) {
+            yield 'chunk-$i\n';
+          }
+        }
+
+        return context.res.sendStream(chunks());
+      }
+    case 'streamBinary':
+      {
+        Stream<List<int>> chunks() async* {
+          yield Uint8List.fromList(List<int>.generate(128, (i) => i));
+          yield Uint8List.fromList(List<int>.generate(128, (i) => i + 128));
+        }
+
+        return context.res.sendStream(chunks());
+      }
+    case 'streamJson':
+      {
+        Stream<String> chunks() async* {
+          for (int n = 1; n <= 3; n++) {
+            if (n > 1) {
+              await Future.delayed(Duration(milliseconds: 100));
+            }
+            yield jsonEncode({'n': n}) + '\n';
+          }
+        }
+
+        return context.res.sendStream(chunks(), 200, {
+          'content-type': 'application/x-ndjson',
+        });
+      }
+    case 'streamErrorStart':
+      {
+        Stream<String> chunks() async* {
+          throw Exception('Stream failed early');
+        }
+
+        return context.res.sendStream(chunks());
+      }
     case 'envVars':
       {
         return context.res.json({
