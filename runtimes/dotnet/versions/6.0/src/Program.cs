@@ -325,9 +325,20 @@ static async Task<IResult> Action(HttpRequest request, RuntimeLogger logger)
         }
     }
 
-    logger.End();
-
     outputHeaders.Add("x-open-runtimes-log-id", logger.id);
+
+    if (output.Stream != null)
+    {
+        return new CustomResponse(
+            output.Stream,
+            output.StatusCode,
+            outputHeaders,
+            context,
+            deadline
+        );
+    }
+
+    logger.End();
 
     return new CustomResponse(output.Body, output.StatusCode, outputHeaders);
 }
