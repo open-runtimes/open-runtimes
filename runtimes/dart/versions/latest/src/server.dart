@@ -332,6 +332,22 @@ Future<shelf.Response> action(
   responseHeaders['content-type'] = contentTypeValue;
 
   responseHeaders['x-open-runtimes-log-id'] = logger.id;
+
+  if (output['stream'] != null) {
+    responseHeaders.remove('content-length');
+
+    Duration? remaining = safeTimeout == null
+        ? null
+        : Duration(seconds: safeTimeout) - execution.elapsed;
+
+    return shelf.Response(
+      output['statusCode'],
+      body: _streamBody(subscription!, first, context, remaining, done),
+      headers: responseHeaders,
+      context: {'shelf.io.buffer_output': false},
+    );
+  }
+
   await logger.end();
 
   return shelf.Response(
