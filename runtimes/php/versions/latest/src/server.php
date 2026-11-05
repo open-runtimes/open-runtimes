@@ -257,6 +257,10 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
         $headers['content-type'] .= '; charset=utf-8';
     }
 
+    if (isset($output['stream'])) {
+        unset($headers['content-length']);
+    }
+
     foreach ($headers as $header => $value) {
         if (!(\str_starts_with($header, 'x-open-runtimes-'))) {
             $res->header($header, $value);
