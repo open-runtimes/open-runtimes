@@ -217,6 +217,7 @@ public class Server {
     RuntimeOutput output = null;
     Method classMethod = null;
     Object instance = null;
+    long deadline = 0;
 
     String entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
 
