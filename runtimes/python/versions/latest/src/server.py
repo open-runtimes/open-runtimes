@@ -184,6 +184,7 @@ async def action(logger, request: web_request.Request):
 
         try:
             if safeTimeout is not None:
+                deadline = time.monotonic() + safeTimeout
                 try:
                     output = await asyncio.wait_for(
                         execute(context), timeout=safeTimeout
