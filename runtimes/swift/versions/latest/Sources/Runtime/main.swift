@@ -188,16 +188,20 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     )
 
     var output: RuntimeOutput
+    var first: Data?
+    let deadline = safeTimeout > 0 ? Date(timeIntervalSinceNow: Double(safeTimeout)) : nil
 
     do {
-        if safeTimeout > 0 {
+        if let deadline {
             do {
-                output = try await withThrowingTaskGroup(of: RuntimeOutput.self) { group in
-                    let deadline = Date(timeIntervalSinceNow: Double(safeTimeout))
-
+                (output, first) = try await withThrowingTaskGroup(of: (RuntimeOutput, Data?).self) { group in
                     group.addTask {
                         // swiftformat:disable:next hoistAwait, hoistTry
-                        try await annotateError(try await main(context: context))
+                        let output = try await annotateError(try await main(context: context))
+                        // Pull the first chunk before the status is sent, so a stream failing at once still answers 500
+                        // swiftformat:disable:next hoistAwait, hoistTry
+                        let first = try await annotateError(try await output.stream?())
+                        return (output, first)
                     }
                     group.addTask {
                         let interval = deadline.timeIntervalSinceNow
