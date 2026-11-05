@@ -13,6 +13,14 @@ if [ -d "$OPEN_RUNTIMES_CODE_PATH" ]; then
 				set -o pipefail
 				tar -C "$OPEN_RUNTIMES_CODE_PATH" --exclude='./code.sqfs' --exclude='./code.tar' --exclude='./code.tar.gz' --exclude='./code.gz' --exclude='./.extracted' -cf - . |
 					tar -C "$ROOT" -xf -
+				# Rebase in-root links, including absolute targets, into the copy.
+				code_root=$(readlink -f "$OPEN_RUNTIMES_CODE_PATH")
+				find "$ROOT" -type l -print0 | while IFS= read -r -d '' link; do
+					target=$(readlink -f "$OPEN_RUNTIMES_CODE_PATH/${link#"$ROOT/"}") || continue
+					case "$target" in
+					"$code_root" | "$code_root"/*) ln -sfn "$ROOT${target#"$code_root"}" "$link" ;;
+					esac
+				done
 			)
 			break
 		fi

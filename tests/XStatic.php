@@ -12,11 +12,16 @@ class XStatic extends Base
 {
     public function codePathLayouts(): array
     {
-        return ['code only' => [false], 'mixed volume' => [true]];
+        return [
+            'code only' => [false, false],
+            'mixed volume' => [true, false],
+            'code only with symlinks' => [false, true],
+            'mixed volume with symlinks' => [true, true],
+        ];
     }
 
     /** @dataProvider codePathLayouts */
-    public function testMountedCodePath(bool $mixed): void
+    public function testMountedCodePath(bool $mixed, bool $followSymlinks): void
     {
         $image = trim(shell_exec("docker inspect --format='{{.Image}}' open-runtimes-test-serve") ?? '');
         self::assertNotEmpty($image);
@@ -25,6 +30,14 @@ set -e
 mkdir -p "$OPEN_RUNTIMES_CODE_PATH" /mnt/telemetry
 printf 'Mounted website' >"$OPEN_RUNTIMES_CODE_PATH/index.html"
 printf 'Mounted asset' >"$OPEN_RUNTIMES_CODE_PATH/asset.txt"
+mkdir -p "$OPEN_RUNTIMES_CODE_PATH/assets"
+printf 'Mounted asset' >"$OPEN_RUNTIMES_CODE_PATH/assets/nested.txt"
+ln -s "$OPEN_RUNTIMES_CODE_PATH/asset.txt" "$OPEN_RUNTIMES_CODE_PATH/absolute-link.txt"
+ln -s asset.txt "$OPEN_RUNTIMES_CODE_PATH/relative-link.txt"
+ln -s "$OPEN_RUNTIMES_CODE_PATH/assets" "$OPEN_RUNTIMES_CODE_PATH/linked-assets"
+printf 'Private external file' >/mnt/private.txt
+ln -s /mnt/private.txt "$OPEN_RUNTIMES_CODE_PATH/external-link.txt"
+ln -s "$OPEN_RUNTIMES_CODE_PATH/code.tar" "$OPEN_RUNTIMES_CODE_PATH/artifact-link.txt"
 if [ "$MIXED_CODE_VOLUME" = true ]; then
     for artifact in code.sqfs code.tar code.tar.gz code.gz .extracted; do
         printf 'Private deployment artifact' >"$OPEN_RUNTIMES_CODE_PATH/$artifact"
@@ -40,6 +53,7 @@ BASH;
                 . ' --network openruntimes --entrypoint bash'
                 . ' -e OPEN_RUNTIMES_CODE_PATH=' . escapeshellarg('/mnt/workspace/code with spaces')
                 . ' -e MIXED_CODE_VOLUME=' . ($mixed ? 'true' : 'false')
+                . ' -e OPEN_RUNTIMES_STATIC_FOLLOW_SYMLINKS=' . ($followSymlinks ? 'true' : 'false')
                 . ' -e OPEN_RUNTIMES_STATIC_FALLBACK=index.html'
                 . ' -e OPEN_RUNTIMES_SECRET=test-secret-key '
                 . escapeshellarg($image) . ' -c ' . escapeshellarg($script), $output, $code);
@@ -51,6 +65,19 @@ BASH;
                 $response = Client::execute(url: $path, method: 'GET');
                 self::assertEquals(200, $response['code']);
                 self::assertEquals($body, $response['body']);
+            }
+            foreach (['/absolute-link.txt', '/relative-link.txt', '/linked-assets/nested.txt'] as $path) {
+                $response = Client::execute(url: $path, method: 'GET');
+                if ($followSymlinks) {
+                    self::assertEquals(200, $response['code']);
+                    self::assertEquals('Mounted asset', $response['body']);
+                } else {
+                    self::assertStringNotContainsString('Mounted asset', $response['body']);
+                }
+            }
+            foreach (['/external-link.txt', '/artifact-link.txt'] as $path) {
+                $response = Client::execute(url: $path, method: 'GET');
+                self::assertStringNotContainsString('Private', $response['body']);
             }
             foreach (['code.sqfs', 'code.tar', 'code.tar.gz', 'code.gz', '.extracted'] as $artifact) {
                 foreach (['/' . $artifact, '/%' . bin2hex($artifact[0]) . substr($artifact, 1), '/./' . $artifact, '//' . $artifact] as $path) {
