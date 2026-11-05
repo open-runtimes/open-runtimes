@@ -211,7 +211,10 @@ async def action(logger, request: web_request.Request):
     output["body"] = output.get("body", "")
     output["statusCode"] = output.get("statusCode", 200)
     output["headers"] = output.get("headers", {})
-    resp = web.Response(body=output["body"], status=output["statusCode"])
+    if "stream" in output:
+        resp = web.StreamResponse(status=output["statusCode"])
+    else:
+        resp = web.Response(body=output["body"], status=output["statusCode"])
 
     for key in output["headers"].keys():
         if not key.lower().startswith("x-open-runtimes-"):
