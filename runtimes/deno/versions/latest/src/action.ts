@@ -255,7 +255,13 @@ export const action = async (logger: Logger, ctx: any) => {
     async function execute() {
       output = await userFunction(context);
       if (output instanceof Response) {
-        output = await fromNativeResponse(output);
+        output = fromNativeResponse(output);
+      }
+      if (output?.stream !== undefined && output.statusCode !== 204) {
+        // Pulled before the status is sent, so a source that fails or stalls
+        // before its first chunk answers like a failed main function.
+        output.stream = output.stream[Symbol.asyncIterator]();
+        first = await output.stream.next();
       }
     }
 
