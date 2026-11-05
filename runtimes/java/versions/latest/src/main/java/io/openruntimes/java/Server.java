@@ -282,6 +282,44 @@ public class Server {
       output = context.getRes().send("", 500);
     }
 
+    Iterator<?> iterator = null;
+    List<Object> first = new ArrayList<>();
+    if (output.getStream() != null) {
+      // Pull the first chunk before sending headers, so a failing source gets the error response
+      Iterable<?> source = output.getStream();
+      Callable<Iterator<?>> pull =
+          () -> {
+            Iterator<?> chunks = source.iterator();
+            if (chunks.hasNext()) {
+              first.add(chunks.next());
+            }
+            return chunks;
+          };
+
+      try {
+        if (safeTimeout > 0) {
+          Future<Iterator<?>> future = executor.submit(pull);
+          try {
+            iterator = future.get(deadline - System.nanoTime(), TimeUnit.NANOSECONDS);
+          } catch (TimeoutException e) {
+            future.cancel(true);
+            context.error("Execution timed out.");
+            output = context.getRes().send("", 500);
+          }
+        } else {
+          iterator = pull.call();
+        }
+      } catch (Exception e) {
+        Throwable cause = e instanceof ExecutionException ? e.getCause() : e;
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        cause.printStackTrace(pw);
+
+        context.error(sw.toString());
+        output = context.getRes().send("", 500);
+      }
+    }
+
     output.getHeaders().putIfAbsent("content-type", "text/plain");
 
     for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
