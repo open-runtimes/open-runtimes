@@ -113,7 +113,11 @@ Future<Map<String, dynamic>> fromNativeResponse(shelf.Response response) async {
   };
 }
 
-Future<shelf.Response> action(Logger logger, dynamic req) async {
+Future<shelf.Response> action(
+  Logger logger,
+  dynamic req,
+  Future<void> done,
+) async {
   int? safeTimeout = null;
   String timeout = req.headers['x-open-runtimes-timeout'] ?? '';
   if (timeout.isNotEmpty) {
