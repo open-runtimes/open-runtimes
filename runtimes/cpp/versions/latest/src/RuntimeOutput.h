@@ -1,7 +1,9 @@
 #ifndef CPP_RUNTIME_RUNTIMEOUTPUT_H
 #define CPP_RUNTIME_RUNTIMEOUTPUT_H
 
+#include <functional>
 #include <json/value.h>
+#include <optional>
 #include <string>
 
 namespace runtime {
