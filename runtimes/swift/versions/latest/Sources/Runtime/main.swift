@@ -71,6 +71,11 @@ func execute(req: Request) async throws -> Response {
     }
 }
 
+/// Vapor's body writer is not Sendable; it is only used on its own event loop.
+struct StreamWriter: @unchecked Sendable {
+    let writer: BodyStreamWriter
+}
+
 func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     var safeTimeout = -1
     let timeout = req.headers["x-open-runtimes-timeout"]
