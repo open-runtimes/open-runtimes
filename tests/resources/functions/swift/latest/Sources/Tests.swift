@@ -132,6 +132,84 @@ func main(context: RuntimeContext) async throws -> RuntimeOutput {
         return context.res.text(hex, statusCode: 200, headers: [
             "x-method": context.req.method,
         ])
+    case "streamResponse":
+        let chunks = AsyncStream<String> { continuation in
+            for chunk in ["first\n", "second\n", "third\n"] {
+                continuation.yield(chunk)
+            }
+            continuation.finish()
+        }.map { chunk in
+            if chunk == "first\n" {
+                context.log("Stream log.")
+            } else {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+            }
+            return chunk
+        }
+        return context.res.sendStream(chunks, statusCode: 201, headers: ["x-stream": "yes"])
+    case "streamException":
+        let chunks = AsyncThrowingStream<String, Error> { continuation in
+            continuation.yield("first\n")
+            continuation.finish(throwing: annotatedError(NSError(domain: "Stream failed", code: 500)))
+        }
+        return context.res.sendStream(chunks)
+    case "streamTimeout":
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        let chunks = AsyncStream<String> { continuation in
+            continuation.yield("first\n")
+            continuation.yield("second\n")
+            continuation.finish()
+        }.map { chunk in
+            if chunk == "second\n" {
+                try await Task.sleep(nanoseconds: 5_000_000_000)
+            }
+            return chunk
+        }
+        return context.res.sendStream(chunks)
+    case "streamEmpty":
+        let chunks = AsyncStream<String> { continuation in
+            continuation.finish()
+        }
+        return context.res.sendStream(chunks, statusCode: 200)
+    case "streamSingle":
+        let chunks = AsyncStream<String> { continuation in
+            continuation.yield("only\n")
+            continuation.finish()
+        }
+        return context.res.sendStream(chunks)
+    case "streamLong":
+        let chunks = AsyncStream<String> { continuation in
+            for index in 0 ..< 10000 {
+                continuation.yield("chunk-\(index)\n")
+            }
+            continuation.finish()
+        }
+        return context.res.sendStream(chunks)
+    case "streamBinary":
+        let chunks = AsyncStream<Data> { continuation in
+            continuation.yield(Data(UInt8(0) ... 127))
+            continuation.yield(Data(UInt8(128) ... 255))
+            continuation.finish()
+        }
+        return context.res.sendStream(chunks)
+    case "streamJson":
+        let chunks = AsyncStream<Int> { continuation in
+            for n in 1 ... 3 {
+                continuation.yield(n)
+            }
+            continuation.finish()
+        }.map { n in
+            if n > 1 {
+                try await Task.sleep(nanoseconds: 100_000_000)
+            }
+            return try JSONSerialization.data(withJSONObject: ["n": n]) + Data("\n".utf8)
+        }
+        return context.res.sendStream(chunks, statusCode: 200, headers: ["content-type": "application/x-ndjson"])
+    case "streamErrorStart":
+        let chunks = AsyncThrowingStream<String, Error> { continuation in
+            continuation.finish(throwing: annotatedError(NSError(domain: "Stream failed early", code: 500)))
+        }
+        return context.res.sendStream(chunks)
     case "envVars":
         return try context.res.json([
             "var": ProcessInfo.processInfo.environment["CUSTOM_ENV_VAR"],

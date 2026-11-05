@@ -116,6 +116,14 @@ class RuntimeResponse {
     var headersMerged = {...headers, 'location': url};
     return this.text('', statusCode, headersMerged);
   }
+
+  dynamic sendStream(
+    Stream<dynamic> source, [
+    int statusCode = 200,
+    Map<String, dynamic> headers = const {},
+  ]) {
+    return {'stream': source, 'statusCode': statusCode, 'headers': headers};
+  }
 }
 
 class RuntimeContext {

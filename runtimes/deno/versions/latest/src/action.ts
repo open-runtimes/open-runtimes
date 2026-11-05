@@ -10,13 +10,17 @@ const USER_CODE_PATH = "/usr/local/server/src/function";
 
 // User functions may return a native (Fetch API) Response instead of a
 // context.res.* result. Converts it into the internal
-// { body, statusCode, headers } shape so the rest of the pipeline (reserved
+// { stream, statusCode, headers } shape so the rest of the pipeline (reserved
 // header filtering, charset defaults, logging headers) applies to it as well.
-const fromNativeResponse = async (response: Response) => ({
-  body: new Uint8Array(await response.arrayBuffer()),
-  statusCode: response.status,
-  headers: response.headers,
-});
+// Its body goes through the same streaming path as context.res.sendStream().
+const fromNativeResponse = (response: Response) =>
+  response.body === null
+    ? { body: "", statusCode: response.status, headers: response.headers }
+    : {
+      stream: response.body,
+      statusCode: response.status,
+      headers: response.headers,
+    };
 
 export const action = async (logger: Logger, ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? "";
@@ -179,6 +183,13 @@ export const action = async (logger: Logger, ctx: any) => {
         headers["location"] = url;
         return this.text("", statusCode, headers);
       },
+      sendStream: function (source: any, statusCode = 200, headers: any = {}) {
+        return {
+          stream: source,
+          statusCode: statusCode,
+          headers: headers,
+        };
+      },
     },
     log: function (...messages: any) {
       logger.write(messages, Logger.TYPE_LOG);
@@ -192,6 +203,8 @@ export const action = async (logger: Logger, ctx: any) => {
 
   let output: any = null;
   let userFunction: any = null;
+  let deadline: number | null = null;
+  let first: any = null;
 
   const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
@@ -242,7 +255,13 @@ export const action = async (logger: Logger, ctx: any) => {
     async function execute() {
       output = await userFunction(context);
       if (output instanceof Response) {
-        output = await fromNativeResponse(output);
+        output = fromNativeResponse(output);
+      }
+      if (output?.stream !== undefined && output.statusCode !== 204) {
+        // Pulled before the status is sent, so a source that fails or stalls
+        // before its first chunk answers like a failed main function.
+        output.stream = output.stream[Symbol.asyncIterator]();
+        first = await output.stream.next();
       }
     }
 
@@ -250,6 +269,7 @@ export const action = async (logger: Logger, ctx: any) => {
       if (safeTimeout !== null) {
         const safeTimeoutConst: number = safeTimeout;
         let executed = true;
+        deadline = Date.now() + safeTimeoutConst * 1000;
 
         const timeoutPromise = new Promise((promiseRes) => {
           setTimeout(() => {
@@ -317,6 +337,69 @@ export const action = async (logger: Logger, ctx: any) => {
   }
 
   ctx.response.headers.set("x-open-runtimes-log-id", logger.id);
+
+  if (output.stream !== undefined && output.statusCode !== 204) {
+    ctx.response.headers.delete("content-length");
+
+    const iterator = output.stream;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    logger.overrideNativeLogs();
+
+    const finish = async () => {
+      clearTimeout(timer);
+      logger.revertNativeLogs();
+      await logger.end();
+    };
+
+    const body = new ReadableStream({
+      start(controller) {
+        if (deadline === null) {
+          return;
+        }
+
+        timer = setTimeout(async () => {
+          context.error("Execution timed out.");
+          Promise.resolve(iterator.return?.()).catch(() => {});
+          await finish().catch(() => {});
+          controller.error(new Error("Execution timed out."));
+        }, deadline - Date.now());
+      },
+      async pull(controller) {
+        let next;
+        try {
+          next = first ?? (await iterator.next());
+          first = null;
+        } catch (e: any) {
+          context.error(e.stack || e);
+          await finish();
+          controller.error(e);
+          return;
+        }
+
+        if (next.done) {
+          await finish();
+          controller.close();
+          return;
+        }
+
+        controller.enqueue(
+          typeof next.value === "string"
+            ? new TextEncoder().encode(next.value)
+            : next.value,
+        );
+      },
+      cancel() {
+        Promise.resolve(iterator.return?.()).catch(() => {});
+        return finish();
+      },
+    });
+
+    ctx.response.status = output.statusCode;
+    ctx.response.body = body;
+    return;
+  }
+
   await logger.end();
 
   ctx.response.status = output.statusCode;

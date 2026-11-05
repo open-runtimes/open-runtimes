@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 public class Tests {
   final Gson gson = new Gson();
@@ -148,6 +149,139 @@ public class Tests {
         String hex = bytesToHex(digestBytes).toLowerCase(Locale.ROOT);
         headers.put("x-method", context.getReq().getMethod());
         return context.getRes().text(hex, 200, headers);
+      case "streamResponse":
+        headers.put("x-stream", "yes");
+        String[] chunks = {"first\n", "second\n", "third\n"};
+        return context
+            .getRes()
+            .sendStream(
+                () ->
+                    new Iterator<String>() {
+                      private int index = 0;
+
+                      public boolean hasNext() {
+                        return index < chunks.length;
+                      }
+
+                      public String next() {
+                        if (index == 0) {
+                          context.log("Stream log.");
+                        } else {
+                          try {
+                            Thread.sleep(1000);
+                          } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                          }
+                        }
+                        return chunks[index++];
+                      }
+                    },
+                201,
+                headers);
+      case "streamException":
+        return context
+            .getRes()
+            .sendStream(
+                () ->
+                    new Iterator<String>() {
+                      private boolean sent = false;
+
+                      public boolean hasNext() {
+                        return true;
+                      }
+
+                      public String next() {
+                        if (sent) {
+                          throw new RuntimeException("Stream failed");
+                        }
+                        sent = true;
+                        return "first\n";
+                      }
+                    });
+      case "streamTimeout":
+        Thread.sleep(1000);
+        return context
+            .getRes()
+            .sendStream(
+                () ->
+                    new Iterator<String>() {
+                      private int index = 0;
+
+                      public boolean hasNext() {
+                        return index < 2;
+                      }
+
+                      public String next() {
+                        if (index++ == 0) {
+                          return "first\n";
+                        }
+                        try {
+                          Thread.sleep(5000);
+                        } catch (InterruptedException e) {
+                          throw new RuntimeException(e);
+                        }
+                        return "second\n";
+                      }
+                    });
+      case "streamEmpty":
+        return context.getRes().sendStream(Collections.<String>emptyList(), 200);
+      case "streamSingle":
+        return context.getRes().sendStream(Collections.singletonList("only\n"), 200);
+      case "streamLong":
+        return context
+            .getRes()
+            .sendStream(
+                () -> IntStream.range(0, 10000).mapToObj(i -> "chunk-" + i + "\n").iterator(), 200);
+      case "streamBinary":
+        byte[] low = new byte[128];
+        byte[] high = new byte[128];
+        for (int i = 0; i < 128; i++) {
+          low[i] = (byte) i;
+          high[i] = (byte) (i + 128);
+        }
+        return context.getRes().sendStream(Arrays.asList(low, high), 200);
+      case "streamJson":
+        headers.put("content-type", "application/x-ndjson");
+        return context
+            .getRes()
+            .sendStream(
+                () ->
+                    new Iterator<String>() {
+                      private int n = 0;
+
+                      public boolean hasNext() {
+                        return n < 3;
+                      }
+
+                      public String next() {
+                        if (n > 0) {
+                          try {
+                            Thread.sleep(100);
+                          } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                          }
+                        }
+                        Map<String, Object> line = new HashMap<>();
+                        line.put("n", ++n);
+                        return gson.toJson(line) + "\n";
+                      }
+                    },
+                200,
+                headers);
+      case "streamErrorStart":
+        return context
+            .getRes()
+            .sendStream(
+                () ->
+                    new Iterator<String>() {
+                      public boolean hasNext() {
+                        return true;
+                      }
+
+                      public String next() {
+                        throw new RuntimeException("Stream failed early");
+                      }
+                    });
       case "envVars":
         json.put("var", System.getenv().getOrDefault("CUSTOM_ENV_VAR", null));
         json.put("emptyVar", System.getenv().getOrDefault("NOT_DEFINED_VAR", null));

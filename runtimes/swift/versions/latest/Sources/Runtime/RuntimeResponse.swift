@@ -69,4 +69,39 @@ class RuntimeResponse {
 
         return text("", statusCode: statusCode, headers: outputHeaders)
     }
+
+    func sendStream<S: AsyncSequence & Sendable>(
+        _ source: S,
+        statusCode: Int = 200,
+        headers: [String: String] = [:]
+    ) -> RuntimeOutput where S.Element == Data {
+        let iterator = StreamIterator(source.makeAsyncIterator())
+        return RuntimeOutput(
+            body: Data(),
+            statusCode: statusCode,
+            headers: headers,
+            stream: { try await iterator.next() }
+        )
+    }
+
+    func sendStream<S: AsyncSequence & Sendable>(
+        _ source: S,
+        statusCode: Int = 200,
+        headers: [String: String] = [:]
+    ) -> RuntimeOutput where S.Element: StringProtocol & Sendable {
+        sendStream(source.map { Data($0.utf8) }, statusCode: statusCode, headers: headers)
+    }
+}
+
+/// Async iterators are not Sendable; the runtime pulls from one task at a time.
+final class StreamIterator<Iterator: AsyncIteratorProtocol>: @unchecked Sendable {
+    var iterator: Iterator
+
+    init(_ iterator: Iterator) {
+        self.iterator = iterator
+    }
+
+    func next() async throws -> Iterator.Element? {
+        try await iterator.next()
+    }
 }

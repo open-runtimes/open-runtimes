@@ -31,6 +31,13 @@ class Response:
         headers["location"] = url
         return self.text("", statusCode, headers)
 
+    def sendStream(self, source, statusCode=200, headers={}):
+        return {
+            "stream": source,
+            "statusCode": statusCode,
+            "headers": headers,
+        }
+
 
 class Request:
     # The underlying aiohttp.web.Request, see context.req.raw

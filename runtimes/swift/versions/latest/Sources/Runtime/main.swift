@@ -71,6 +71,11 @@ func execute(req: Request) async throws -> Response {
     }
 }
 
+/// Vapor's body writer is not Sendable; it is only used on its own event loop.
+struct StreamWriter: @unchecked Sendable {
+    let writer: BodyStreamWriter
+}
+
 func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     var safeTimeout = -1
     let timeout = req.headers["x-open-runtimes-timeout"]
@@ -183,16 +188,20 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
     )
 
     var output: RuntimeOutput
+    var first: Data?
+    let deadline = safeTimeout > 0 ? Date(timeIntervalSinceNow: Double(safeTimeout)) : nil
 
     do {
-        if safeTimeout > 0 {
+        if let deadline {
             do {
-                output = try await withThrowingTaskGroup(of: RuntimeOutput.self) { group in
-                    let deadline = Date(timeIntervalSinceNow: Double(safeTimeout))
-
+                (output, first) = try await withThrowingTaskGroup(of: (RuntimeOutput, Data?).self) { group in
                     group.addTask {
                         // swiftformat:disable:next hoistAwait, hoistTry
-                        try await annotateError(try await main(context: context))
+                        let output = try await annotateError(try await main(context: context))
+                        // Pull the first chunk before the status is sent, so a stream failing at once still answers 500
+                        // swiftformat:disable:next hoistAwait, hoistTry
+                        let first = try await annotateError(try await output.stream?())
+                        return (output, first)
                     }
                     group.addTask {
                         let interval = deadline.timeIntervalSinceNow
@@ -214,6 +223,8 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         } else {
             // swiftformat:disable:next hoistAwait, hoistTry
             output = try await annotateError(try await main(context: context))
+            // swiftformat:disable:next hoistAwait, hoistTry
+            first = try await annotateError(try await output.stream?())
         }
     } catch {
         context.error(error)
@@ -235,8 +246,75 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         )
     }
 
-    logger.end()
     outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
+
+    if let stream = output.stream {
+        return Response(
+            status: .custom(code: UInt(output.statusCode), reasonPhrase: ""),
+            headers: outputHeaders,
+            body: .init(stream: { [first] writer in
+                let streamWriter = StreamWriter(writer: writer)
+                let write: @Sendable (Data) async -> Bool = { data in
+                    // NIO encodes an empty chunk as the terminating chunk
+                    guard !data.isEmpty else {
+                        return true
+                    }
+                    do {
+                        try await streamWriter.writer.eventLoop.flatSubmit {
+                            streamWriter.writer.write(.buffer(ByteBuffer(bytes: data)))
+                        }.get()
+                        return true
+                    } catch {
+                        return false
+                    }
+                }
+
+                Task {
+                    do {
+                        let timedOut = try await withThrowingTaskGroup(of: Bool.self) { group in
+                            group.addTask {
+                                var chunk = first
+                                while let data = chunk {
+                                    try Task.checkCancellation()
+                                    guard await write(data) else {
+                                        break
+                                    }
+                                    // swiftformat:disable:next hoistAwait, hoistTry
+                                    chunk = try await annotateError(try await stream())
+                                }
+                                return false
+                            }
+                            if let deadline {
+                                group.addTask {
+                                    let interval = max(0, deadline.timeIntervalSinceNow)
+                                    try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+                                    return true
+                                }
+                            }
+
+                            let timedOut = try await group.next()!
+
+                            group.cancelAll()
+
+                            return timedOut
+                        }
+                        if timedOut {
+                            context.error("Execution timed out.")
+                        }
+                    } catch {
+                        context.error(error)
+                    }
+
+                    context.logger.end()
+                    streamWriter.writer.eventLoop.execute {
+                        streamWriter.writer.write(.end, promise: nil)
+                    }
+                }
+            })
+        )
+    }
+
+    logger.end()
 
     let code: HTTPResponseStatus = .custom(code: UInt(output.statusCode), reasonPhrase: "")
     let resBody: Response.Body = .init(data: output.body)

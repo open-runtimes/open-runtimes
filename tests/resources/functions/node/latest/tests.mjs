@@ -103,6 +103,77 @@ When you can have two!
 			return context.res.text(hash, 200, {
 				"x-method": context.req.method,
 			});
+		case "streamResponse":
+			return context.res.sendStream(
+				(async function* () {
+					context.log("Stream log.");
+					yield "first\n";
+					await new Promise((resolve) => setTimeout(resolve, 1000));
+					yield "second\n";
+					await new Promise((resolve) => setTimeout(resolve, 1000));
+					yield "third\n";
+				})(),
+				201,
+				{ "x-stream": "yes" },
+			);
+		case "streamException":
+			return context.res.sendStream(
+				(async function* () {
+					yield "first\n";
+					throw new Error("Stream failed");
+				})(),
+			);
+		case "streamTimeout":
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			return context.res.sendStream(
+				(async function* () {
+					yield "first\n";
+					await new Promise((resolve) => setTimeout(resolve, 5000));
+					yield "second\n";
+				})(),
+			);
+		case "streamEmpty":
+			return context.res.sendStream((async function* () {})(), 200);
+		case "streamSingle":
+			return context.res.sendStream(
+				(async function* () {
+					yield "only\n";
+				})(),
+			);
+		case "streamLong":
+			return context.res.sendStream(
+				(async function* () {
+					for (let i = 0; i < 10000; i++) {
+						yield `chunk-${i}\n`;
+					}
+				})(),
+			);
+		case "streamBinary":
+			return context.res.sendStream(
+				(async function* () {
+					yield Uint8Array.from({ length: 128 }, (_, i) => i);
+					yield Uint8Array.from({ length: 128 }, (_, i) => i + 128);
+				})(),
+			);
+		case "streamJson":
+			return context.res.sendStream(
+				(async function* () {
+					for (let n = 1; n <= 3; n++) {
+						if (n > 1) {
+							await new Promise((resolve) => setTimeout(resolve, 100));
+						}
+						yield JSON.stringify({ n }) + "\n";
+					}
+				})(),
+				200,
+				{ "content-type": "application/x-ndjson" },
+			);
+		case "streamErrorStart":
+			return context.res.sendStream(
+				(async function* () {
+					throw new Error("Stream failed early");
+				})(),
+			);
 		case "envVars":
 			return context.res.json({
 				var: process.env.CUSTOM_ENV_VAR,
@@ -211,6 +282,21 @@ When you can have two!
 					},
 				}),
 				{ headers: { "content-type": "text/plain" } },
+			);
+		case "nativeResponseChunks":
+			return new Response(
+				new ReadableStream({
+					async start(controller) {
+						const encoder = new TextEncoder();
+						controller.enqueue(encoder.encode("first\n"));
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+						controller.enqueue(encoder.encode("second\n"));
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+						controller.enqueue(encoder.encode("third\n"));
+						controller.close();
+					},
+				}),
+				{ status: 201, headers: { "x-stream": "yes" } },
 			);
 		case "nativeResponseEmpty":
 			return new Response(null, { status: 204 });

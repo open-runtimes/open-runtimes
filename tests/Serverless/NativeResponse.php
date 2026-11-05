@@ -77,4 +77,29 @@ trait NativeResponse
         self::assertEquals(200, $response['code']);
         self::assertEquals('Hello Stream', $response['body']);
     }
+
+    public function testNativeResponseChunks(): void
+    {
+        if (!\in_array($this->runtimeName, ['node', 'bun', 'deno'])) {
+            $this->markTestSkipped('Only the JavaScript runtimes stream a native response body.');
+        }
+        $this->skipWithoutNativeResponse();
+
+        $start = \microtime(true);
+        $received = '';
+        $arrivals = [];
+        $response = Client::execute(headers: ['x-action' => 'nativeResponseChunks'], timeout: 10, bodyCallback: function (string $chunk) use (&$received, &$arrivals) {
+            $received .= $chunk;
+            while (\count($arrivals) < \substr_count($received, "\n")) {
+                $arrivals[] = \microtime(true);
+            }
+        });
+
+        self::assertEquals(201, $response['code']);
+        self::assertEquals('yes', $response['headers']['x-stream']);
+        self::assertEquals("first\nsecond\nthird\n", $response['body']);
+        self::assertLessThan(0.5, $arrivals[0] - $start);
+        self::assertEqualsWithDelta(1, $arrivals[1] - $arrivals[0], 0.4);
+        self::assertEqualsWithDelta(1, $arrivals[2] - $arrivals[1], 0.4);
+    }
 }

@@ -326,15 +326,23 @@ int main()
                     logger->overrideNativeLogs();
 
                     runtime::RuntimeOutput output;
+                    std::optional<std::string> first;
+                    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeout);
 
                     try {
                         if (timeout != -1)
                         {
                             std::promise<runtime::RuntimeOutput> promise;
                             std::future<runtime::RuntimeOutput> future = promise.get_future();
-                            std::thread thread([&context](std::promise<runtime::RuntimeOutput> promise) {
+                            std::thread thread([&context, &first](std::promise<runtime::RuntimeOutput> promise) {
                                 try {
-                                    promise.set_value(runtime::Handler::main(context));
+                                    runtime::RuntimeOutput result = runtime::Handler::main(context);
+                                    // Pull the first chunk before the status is sent, so a stream failing at once still answers 500
+                                    if (result.stream)
+                                    {
+                                        first = result.stream();
+                                    }
+                                    promise.set_value(result);
                                 } catch (...) {
                                     promise.set_exception(std::current_exception());
                                 }
@@ -342,7 +350,7 @@ int main()
 
                             std::future<void> waiter = std::async(std::launch::async, &std::thread::join, &thread);
 
-                            if (waiter.wait_for(std::chrono::seconds(timeout)) == std::future_status::timeout) {
+                            if (waiter.wait_until(deadline) == std::future_status::timeout) {
                                 context.error("Execution timed out.");
                                 output = context.res.text("", 500, {});
                                 pthread_cancel(thread.native_handle());
@@ -352,6 +360,10 @@ int main()
                         } else
                         {
                             output = runtime::Handler::main(context);
+                            if (output.stream)
+                            {
+                                first = output.stream();
+                            }
                         }
                     } catch(const std::exception& e)
                     {
@@ -407,6 +419,58 @@ int main()
                     }
                     
                     res->setContentTypeString(contentTypeHeader);
+
+                    if (output.stream)
+                    {
+                        const std::shared_ptr<drogon::HttpResponse> streamRes = drogon::HttpResponse::newAsyncStreamResponse(
+                            [stream = output.stream, first, context, logger, timeout, deadline](drogon::ResponseStreamPtr responseStream) {
+                                std::thread([stream, first, context, logger, timeout, deadline, responseStream = std::move(responseStream)]() mutable {
+                                    std::thread thread([&]() {
+                                        try {
+                                            for (auto chunk = first; chunk; chunk = stream())
+                                            {
+                                                // drogon frames an empty chunk as the end of the stream
+                                                if (!chunk->empty() && !responseStream->send(*chunk))
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                        } catch (const std::exception &e)
+                                        {
+                                            context.error(e.what());
+                                        } catch (...)
+                                        {
+                                            context.error("Unknown exception");
+                                        }
+                                    });
+
+                                    std::future<void> waiter = std::async(std::launch::async, &std::thread::join, &thread);
+
+                                    if (timeout != -1 && waiter.wait_until(deadline) == std::future_status::timeout) {
+                                        context.error("Execution timed out.");
+                                        pthread_cancel(thread.native_handle());
+                                    }
+
+                                    waiter.wait();
+                                    logger->end();
+                                    responseStream->close();
+                                }).detach();
+                            }, true);
+
+                        for (const auto &[key, value] : res->headers())
+                        {
+                            if (key != "content-length")
+                            {
+                                streamRes->addHeader(key, value);
+                            }
+                        }
+
+                        streamRes->setContentTypeString(contentTypeHeader);
+                        streamRes->addHeader("x-open-runtimes-log-id", logger->id);
+                        streamRes->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
+                        callback(streamRes);
+                        return;
+                    }
 
                     logger->end();
                     res->addHeader("x-open-runtimes-log-id", logger->id);

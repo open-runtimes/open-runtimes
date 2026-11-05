@@ -6,14 +6,21 @@ import com.google.gson.ToNumberPolicy;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.eclipse.jetty.server.Request;
 
 public class Server {
   private static final Gson gsonInternal =
@@ -210,6 +217,7 @@ public class Server {
     RuntimeOutput output = null;
     Method classMethod = null;
     Object instance = null;
+    long deadline = 0;
 
     String entrypoint = System.getenv("OPEN_RUNTIMES_ENTRYPOINT");
 
@@ -250,6 +258,7 @@ public class Server {
 
       try {
         if (safeTimeout > 0) {
+          deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(safeTimeout);
           Future<RuntimeOutput> future =
               executor.submit(
                   () -> {
@@ -295,6 +304,44 @@ public class Server {
       output = context.getRes().send("", 500);
     }
 
+    Iterator<?> iterator = null;
+    List<Object> first = new ArrayList<>();
+    if (output.getStream() != null) {
+      // Pull the first chunk before sending headers, so a failing source gets the error response
+      Iterable<?> source = output.getStream();
+      Callable<Iterator<?>> pull =
+          () -> {
+            Iterator<?> chunks = source.iterator();
+            if (chunks.hasNext()) {
+              first.add(chunks.next());
+            }
+            return chunks;
+          };
+
+      try {
+        if (safeTimeout > 0) {
+          Future<Iterator<?>> future = executor.submit(pull);
+          try {
+            iterator = future.get(deadline - System.nanoTime(), TimeUnit.NANOSECONDS);
+          } catch (TimeoutException e) {
+            future.cancel(true);
+            context.error("Execution timed out.");
+            output = context.getRes().send("", 500);
+          }
+        } else {
+          iterator = pull.call();
+        }
+      } catch (Exception e) {
+        Throwable cause = e instanceof ExecutionException ? e.getCause() : e;
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        cause.printStackTrace(pw);
+
+        context.error(sw.toString());
+        output = context.getRes().send("", 500);
+      }
+    }
+
     output.getHeaders().putIfAbsent("content-type", "text/plain");
 
     for (Map.Entry<String, String> entry : output.getHeaders().entrySet()) {
@@ -302,6 +349,10 @@ public class Server {
       String headerValue = entry.getValue();
 
       if (header.startsWith("x-open-runtimes-")) {
+        continue;
+      }
+
+      if (output.getStream() != null && header.equals("content-length")) {
         continue;
       }
 
@@ -317,6 +368,12 @@ public class Server {
     }
     ctx.header("x-open-runtimes-log-id", logger.getId());
 
+    if (output.getStream() != null) {
+      ctx.status(output.getStatusCode());
+      stream(ctx, first, iterator, context, logger, safeTimeout, deadline);
+      return ctx;
+    }
+
     try {
       logger.end();
     } catch (IOException e) {
@@ -324,5 +381,74 @@ public class Server {
     }
 
     return ctx.status(output.getStatusCode()).result(output.getBody());
+  }
+
+  private static void stream(
+      Context ctx,
+      List<Object> first,
+      Iterator<?> iterator,
+      RuntimeContext context,
+      RuntimeLogger logger,
+      int safeTimeout,
+      long deadline) {
+    AtomicBoolean timedOut = new AtomicBoolean();
+    Callable<Void> write =
+        () -> {
+          OutputStream out = ctx.res.getOutputStream();
+          while (!timedOut.get() && (!first.isEmpty() || iterator.hasNext())) {
+            Object chunk = first.isEmpty() ? iterator.next() : first.remove(0);
+            if (timedOut.get()) {
+              break;
+            }
+            byte[] bytes =
+                chunk instanceof byte[]
+                    ? (byte[]) chunk
+                    : String.valueOf(chunk).getBytes(StandardCharsets.UTF_8);
+            try {
+              out.write(bytes);
+              out.flush();
+            } catch (IOException e) {
+              // Connection closed
+              break;
+            }
+          }
+          return null;
+        };
+
+    String failure = null;
+    try {
+      if (safeTimeout > 0) {
+        Future<Void> future = executor.submit(write);
+        try {
+          future.get(deadline - System.nanoTime(), TimeUnit.NANOSECONDS);
+        } catch (TimeoutException e) {
+          timedOut.set(true);
+          future.cancel(true);
+          failure = "Execution timed out.";
+        }
+      } else {
+        write.call();
+      }
+    } catch (Throwable e) {
+      Throwable cause = e instanceof ExecutionException ? e.getCause() : e;
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      cause.printStackTrace(pw);
+      failure = sw.toString();
+    }
+
+    if (failure != null) {
+      context.error(failure);
+    }
+
+    try {
+      logger.end();
+    } catch (IOException e) {
+      // Ignore missing logs
+    }
+
+    if (failure != null) {
+      Request.getBaseRequest(ctx.req).getHttpChannel().abort(new IOException(failure));
+    }
   }
 }

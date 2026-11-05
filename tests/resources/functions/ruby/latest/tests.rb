@@ -115,6 +115,62 @@ When you can have two!
         'x-method': context.req.method
       }
     )
+  when 'streamResponse'
+    chunks = Enumerator.new do |out|
+      context.log('Stream log.')
+      out << "first\n"
+      sleep 1
+      out << "second\n"
+      sleep 1
+      out << "third\n"
+    end
+    return context.res.send_stream(chunks, 201, { 'x-stream' => 'yes' })
+  when 'streamException'
+    chunks = Enumerator.new do |out|
+      out << "first\n"
+      raise 'Stream failed'
+    end
+    return context.res.send_stream(chunks)
+  when 'streamTimeout'
+    chunks = Enumerator.new do |out|
+      out << "first\n"
+      sleep 5
+      out << "second\n"
+    end
+    sleep 1
+    return context.res.send_stream(chunks)
+  when 'streamEmpty'
+    chunks = Enumerator.new { |out| }
+    return context.res.send_stream(chunks, 200)
+  when 'streamSingle'
+    chunks = Enumerator.new do |out|
+      out << "only\n"
+    end
+    return context.res.send_stream(chunks)
+  when 'streamLong'
+    chunks = Enumerator.new do |out|
+      10000.times { |i| out << "chunk-#{i}\n" }
+    end
+    return context.res.send_stream(chunks)
+  when 'streamBinary'
+    chunks = Enumerator.new do |out|
+      out << (0..127).to_a.pack('C*')
+      out << (128..255).to_a.pack('C*')
+    end
+    return context.res.send_stream(chunks)
+  when 'streamJson'
+    chunks = Enumerator.new do |out|
+      (1..3).each do |n|
+        sleep 0.1 if n > 1
+        out << JSON.generate({ 'n' => n }) + "\n"
+      end
+    end
+    return context.res.send_stream(chunks, 200, { 'content-type' => 'application/x-ndjson' })
+  when 'streamErrorStart'
+    chunks = Enumerator.new do |_out|
+      raise 'Stream failed early'
+    end
+    return context.res.send_stream(chunks)
   when 'envVars'
     return context.res.json(
       {

@@ -1,5 +1,6 @@
 const http = require("http");
 const fs = require("fs");
+const { Readable } = require("stream");
 
 const BODY_LIMIT = 20 * 1024 * 1024;
 
@@ -65,10 +66,11 @@ const config = require("./config");
 const isNativeResponse = (value) =>
   typeof Response !== "undefined" && value instanceof Response;
 
-// Converts a native Response into the internal { body, statusCode, headers }
+// Converts a native Response into the internal { stream, statusCode, headers }
 // shape so the rest of the pipeline (reserved header filtering, charset
-// defaults, logging headers) applies to it as well.
-const fromNativeResponse = async (response) => {
+// defaults, logging headers) applies to it as well. Its body goes through the
+// same streaming path as context.res.sendStream().
+const fromNativeResponse = (response) => {
   const headers = {};
   for (const [key, value] of response.headers) {
     headers[key] = value;
@@ -81,11 +83,10 @@ const fromNativeResponse = async (response) => {
       headers["set-cookie"] = cookies;
     }
   }
-  return {
-    body: Buffer.from(await response.arrayBuffer()),
-    statusCode: response.status,
-    headers,
-  };
+  if (response.body === null) {
+    return { body: "", statusCode: response.status, headers };
+  }
+  return { stream: response.body, statusCode: response.status, headers };
 };
 
 // The Fetch API Request constructor rejects these methods, so context.req.raw
@@ -287,6 +288,13 @@ const action = async (logger, req, res) => {
         headers["location"] = url;
         return this.text("", statusCode, headers);
       },
+      sendStream: function (source, statusCode = 200, headers = {}) {
+        return {
+          stream: source,
+          statusCode: statusCode,
+          headers: headers,
+        };
+      },
     },
     log: function (...messages) {
       logger.write(messages, Logger.TYPE_LOG);
@@ -300,6 +308,8 @@ const action = async (logger, req, res) => {
 
   let output = null;
   let userFunction = null;
+  let deadline = null;
+  let first = null;
 
   const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
@@ -358,13 +368,20 @@ const action = async (logger, req, res) => {
         output = await userFunction(context);
       }
       if (isNativeResponse(output)) {
-        output = await fromNativeResponse(output);
+        output = fromNativeResponse(output);
+      }
+      if (output?.stream !== undefined) {
+        // Pulled before the status is sent, so a source that fails or stalls
+        // before its first chunk answers like a failed main function.
+        output.stream = Readable.from(output.stream)[Symbol.asyncIterator]();
+        first = await output.stream.next();
       }
     }
 
     try {
       if (safeTimeout !== null) {
         let executed = true;
+        deadline = Date.now() + safeTimeout * 1000;
 
         const timeoutPromise = new Promise((promiseRes) => {
           setTimeout(() => {
@@ -419,6 +436,55 @@ const action = async (logger, req, res) => {
   }
 
   res.setHeader("x-open-runtimes-log-id", logger.id);
+
+  if (output.stream !== undefined) {
+    const source = Readable.from(output.stream);
+    res.removeHeader("content-length");
+    res.statusCode = output.statusCode;
+    res.flushHeaders();
+
+    let failed = false;
+    let timer = null;
+    logger.overrideNativeLogs();
+    try {
+      await new Promise((resolve, reject) => {
+        if (deadline !== null) {
+          timer = setTimeout(() => {
+            failed = true;
+            context.error("Execution timed out.");
+            resolve();
+          }, deadline - Date.now());
+        }
+        res.on("close", resolve);
+        if (res.destroyed) {
+          resolve();
+        }
+        source.on("end", resolve);
+        source.on("error", reject);
+        if (!first.done) {
+          res.write(first.value);
+        }
+        source.pipe(res, { end: false });
+      });
+    } catch (e) {
+      failed = true;
+      context.error(e.stack || e);
+    } finally {
+      clearTimeout(timer);
+      source.destroy();
+      logger.revertNativeLogs();
+    }
+
+    await logger.end();
+
+    if (failed) {
+      res.destroy();
+    } else {
+      res.end();
+    }
+    return;
+  }
+
   await logger.end();
 
   return send(res, output.statusCode, output.body);

@@ -1,7 +1,9 @@
 import asyncio
 import importlib
 import os
+import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 
 import config
 from aiohttp import web, web_exceptions, web_request
@@ -182,6 +184,7 @@ async def action(logger, request: web_request.Request):
 
         try:
             if safeTimeout is not None:
+                deadline = time.monotonic() + safeTimeout
                 try:
                     output = await asyncio.wait_for(
                         execute(context), timeout=safeTimeout
@@ -208,7 +211,10 @@ async def action(logger, request: web_request.Request):
     output["body"] = output.get("body", "")
     output["statusCode"] = output.get("statusCode", 200)
     output["headers"] = output.get("headers", {})
-    resp = web.Response(body=output["body"], status=output["statusCode"])
+    if "stream" in output:
+        resp = web.StreamResponse(status=output["statusCode"])
+    else:
+        resp = web.Response(body=output["body"], status=output["statusCode"])
 
     for key in output["headers"].keys():
         if not key.lower().startswith("x-open-runtimes-"):
@@ -229,9 +235,93 @@ async def action(logger, request: web_request.Request):
         resp.headers["content-type"] += "; charset=utf-8"
 
     resp.headers["x-open-runtimes-log-id"] = logger.id
+
+    if "stream" in output:
+        resp.headers.pop("content-length", None)
+
+        failed = False
+        logger.override_native_logs()
+        try:
+            if safeTimeout is not None:
+                try:
+                    await asyncio.wait_for(
+                        write(request, resp, output["stream"]),
+                        timeout=deadline - time.monotonic(),
+                    )
+                except asyncio.TimeoutError:
+                    context.error("Execution timed out.")
+                    failed = True
+            else:
+                await write(request, resp, output["stream"])
+        except Exception as e:
+            context.error(
+                "".join(traceback.TracebackException.from_exception(e).format())
+            )
+            failed = True
+        finally:
+            logger.revert_native_logs()
+
+        logger.end()
+
+        if failed and not resp.prepared:
+            return web.Response(
+                body=b"",
+                status=500,
+                headers={
+                    "content-type": "text/plain; charset=utf-8",
+                    "x-open-runtimes-log-id": logger.id,
+                },
+            )
+
+        if failed and request.transport is not None:
+            request.transport.close()
+
+        return resp
+
     logger.end()
 
     return resp
+
+
+async def write(request, resp, source):
+    if not hasattr(source, "__aiter__"):
+        source = pull(source)
+
+    try:
+        async for chunk in source:
+            try:
+                # Committed on the first chunk, so a source that fails before it still gets an error response
+                await resp.prepare(request)
+                await resp.write(
+                    chunk.encode("utf-8") if isinstance(chunk, str) else chunk
+                )
+            except ConnectionError:
+                return
+        try:
+            await resp.prepare(request)
+        except ConnectionError:
+            return
+    finally:
+        if hasattr(source, "aclose"):
+            await source.aclose()
+
+
+async def pull(source):
+    # A thread of its own keeps a blocking next() off the event loop and close() from overlapping it
+    loop = asyncio.get_running_loop()
+    executor = ThreadPoolExecutor(max_workers=1)
+    iterator = iter(source)
+    done = object()
+    try:
+        while True:
+            chunk = await loop.run_in_executor(executor, next, iterator, done)
+            if chunk is done:
+                return
+            yield chunk
+    finally:
+        if hasattr(iterator, "close"):
+            executor.submit(iterator.close)
+        executor.shutdown(wait=False)
 
 
 async def handler(request) -> web.Response:

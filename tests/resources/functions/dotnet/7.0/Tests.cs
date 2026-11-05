@@ -205,6 +205,98 @@ When you can have two!
                     }
                     string hex = BitConverter.ToString(hash).Replace("-", "").ToLower();
                     return context.Res.Text(hex, 200, new() { { "x-method", context.Req.Method } });
+                case "streamResponse":
+                    async IAsyncEnumerable<object> StreamChunks()
+                    {
+                        context.Log("Stream log.");
+                        yield return "first\n";
+                        await Task.Delay(1000);
+                        yield return "second\n";
+                        await Task.Delay(1000);
+                        yield return "third\n";
+                    }
+                    return context.Res.SendStream(
+                        StreamChunks(),
+                        201,
+                        new() { { "x-stream", "yes" } }
+                    );
+                case "streamException":
+                    async IAsyncEnumerable<object> FailingChunks()
+                    {
+                        yield return "first\n";
+                        throw new Exception("Stream failed");
+                    }
+                    return context.Res.SendStream(FailingChunks());
+                case "streamTimeout":
+                    async IAsyncEnumerable<object> SlowChunks()
+                    {
+                        yield return "first\n";
+                        await Task.Delay(5000);
+                        yield return "second\n";
+                    }
+                    await Task.Delay(1000);
+                    return context.Res.SendStream(SlowChunks());
+                case "streamEmpty":
+                    async IAsyncEnumerable<object> EmptyChunks()
+                    {
+                        yield break;
+                    }
+                    return context.Res.SendStream(EmptyChunks(), 200);
+                case "streamSingle":
+                    async IAsyncEnumerable<object> SingleChunk()
+                    {
+                        yield return "only\n";
+                    }
+                    return context.Res.SendStream(SingleChunk());
+                case "streamLong":
+                    async IAsyncEnumerable<object> LongChunks()
+                    {
+                        for (var i = 0; i < 10000; i++)
+                        {
+                            yield return "chunk-" + i + "\n";
+                        }
+                    }
+                    return context.Res.SendStream(LongChunks());
+                case "streamBinary":
+                    async IAsyncEnumerable<object> BinaryChunks()
+                    {
+                        var low = new byte[128];
+                        var high = new byte[128];
+                        for (var i = 0; i < 128; i++)
+                        {
+                            low[i] = (byte)i;
+                            high[i] = (byte)(i + 128);
+                        }
+                        yield return low;
+                        yield return high;
+                    }
+                    return context.Res.SendStream(BinaryChunks());
+                case "streamJson":
+                    async IAsyncEnumerable<object> JsonChunks()
+                    {
+                        for (var n = 1; n <= 3; n++)
+                        {
+                            if (n > 1)
+                            {
+                                await Task.Delay(100);
+                            }
+                            yield return JsonSerializer.Serialize(
+                                new Dictionary<string, object> { { "n", n } }
+                            ) + "\n";
+                        }
+                    }
+                    return context.Res.SendStream(
+                        JsonChunks(),
+                        200,
+                        new() { { "content-type", "application/x-ndjson" } }
+                    );
+                case "streamErrorStart":
+                    async IAsyncEnumerable<object> EarlyFailingChunks()
+                    {
+                        throw new Exception("Stream failed early");
+                        yield break;
+                    }
+                    return context.Res.SendStream(EarlyFailingChunks());
                 case "envVars":
                     return context.Res.Json(
                         new Dictionary<string, object?>()

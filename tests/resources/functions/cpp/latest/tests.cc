@@ -169,6 +169,92 @@ namespace runtime {
                 auto hex = Handler::md5HexDigest(bytes);
                 headers["x-method"] = req.method;
                 return context.res.text(hex, 200, headers);
+            } else if (action == "streamResponse") {
+                headers["x-stream"] = "yes";
+                return context.res.sendStream([context, index = 0]() mutable -> std::optional<std::string> {
+                    switch (index++) {
+                        case 0:
+                            context.log("Stream log.");
+                            return "first\n";
+                        case 1:
+                            std::this_thread::sleep_for(std::chrono::seconds(1));
+                            return "second\n";
+                        case 2:
+                            std::this_thread::sleep_for(std::chrono::seconds(1));
+                            return "third\n";
+                        default:
+                            return std::nullopt;
+                    }
+                }, 201, headers);
+            } else if (action == "streamException") {
+                return context.res.sendStream([index = 0]() mutable -> std::optional<std::string> {
+                    if (index++ == 0) {
+                        return "first\n";
+                    }
+                    throw std::runtime_error("Stream failed");
+                });
+            } else if (action == "streamTimeout") {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                return context.res.sendStream([index = 0]() mutable -> std::optional<std::string> {
+                    switch (index++) {
+                        case 0:
+                            return "first\n";
+                        case 1:
+                            std::this_thread::sleep_for(std::chrono::seconds(5));
+                            return "second\n";
+                        default:
+                            return std::nullopt;
+                    }
+                });
+            } else if (action == "streamEmpty") {
+                return context.res.sendStream([]() -> std::optional<std::string> {
+                    return std::nullopt;
+                }, 200);
+            } else if (action == "streamSingle") {
+                return context.res.sendStream([index = 0]() mutable -> std::optional<std::string> {
+                    if (index++ == 0) {
+                        return "only\n";
+                    }
+                    return std::nullopt;
+                });
+            } else if (action == "streamLong") {
+                return context.res.sendStream([index = 0]() mutable -> std::optional<std::string> {
+                    if (index < 10000) {
+                        return "chunk-" + std::to_string(index++) + "\n";
+                    }
+                    return std::nullopt;
+                });
+            } else if (action == "streamBinary") {
+                return context.res.sendStream([index = 0]() mutable -> std::optional<std::string> {
+                    if (index >= 2) {
+                        return std::nullopt;
+                    }
+                    std::string chunk;
+                    for (int byte = index * 128; byte < (index + 1) * 128; byte++) {
+                        chunk.push_back(static_cast<char>(byte));
+                    }
+                    index++;
+                    return chunk;
+                });
+            } else if (action == "streamJson") {
+                headers["content-type"] = "application/x-ndjson";
+                return context.res.sendStream([index = 0]() mutable -> std::optional<std::string> {
+                    if (index >= 3) {
+                        return std::nullopt;
+                    }
+                    if (index > 0) {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    }
+                    Json::Value line;
+                    line["n"] = ++index;
+                    Json::StreamWriterBuilder builder;
+                    builder["indentation"] = "";
+                    return Json::writeString(builder, line) + "\n";
+                }, 200, headers);
+            } else if (action == "streamErrorStart") {
+                return context.res.sendStream([]() -> std::optional<std::string> {
+                    throw std::runtime_error("Stream failed early");
+                });
             } else if (action == "envVars") {
                 auto customEnvVar = std::getenv("CUSTOM_ENV_VAR");
                 auto notDefinedVar = std::getenv("NOT_DEFINED_VAR");
