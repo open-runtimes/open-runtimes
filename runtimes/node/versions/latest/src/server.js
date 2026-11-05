@@ -288,6 +288,13 @@ const action = async (logger, req, res) => {
         headers["location"] = url;
         return this.text("", statusCode, headers);
       },
+      sendStream: function (source, statusCode = 200, headers = {}) {
+        return {
+          stream: source,
+          statusCode: statusCode,
+          headers: headers,
+        };
+      },
     },
     log: function (...messages) {
       logger.write(messages, Logger.TYPE_LOG);
