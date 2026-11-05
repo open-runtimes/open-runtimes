@@ -66,9 +66,22 @@ class Client {
             $optArray[CURLOPT_POSTFIELDS] = \is_array($body) ? \json_encode($body, JSON_FORCE_OBJECT) : $body;
         }
         
+        $streamed = '';
+        if ($bodyCallback !== null) {
+            unset($optArray[CURLOPT_RETURNTRANSFER]);
+            $optArray[CURLOPT_WRITEFUNCTION] = function ($curl, $data) use ($bodyCallback, &$streamed) {
+                $streamed .= $data;
+                $bodyCallback($data);
+                return \strlen($data);
+            };
+        }
+
         \curl_setopt_array($ch, $optArray);
 
         $body = curl_exec($ch);
+        if ($bodyCallback !== null) {
+            $body = $streamed;
+        }
         $code = curl_getinfo($ch, \CURLINFO_HTTP_CODE);
 
         $error = null;
