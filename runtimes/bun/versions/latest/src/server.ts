@@ -196,6 +196,8 @@ const action = async (logger: Logger, request: any) => {
 
   let output: any = null;
   let userFunction: any = null;
+  let deadline: number | null = null;
+  let first: any = null;
 
   const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
