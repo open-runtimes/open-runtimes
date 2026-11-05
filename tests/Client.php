@@ -7,7 +7,7 @@ class Client {
     public static $port = 3000;
     public static $secret = '';
 
-    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], int $timeout = 5) {
+    public static function execute($body = '', $url = '/', $method = 'POST', $headers = [], int $timeout = 5, ?callable $bodyCallback = null) {
         $ch = \curl_init();
 
         $initHeaders = [];
