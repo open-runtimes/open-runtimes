@@ -222,6 +222,8 @@ suspend fun action(
         output = context.res.text("", 503, mutableMapOf())
     }
 
+    val deadline = System.nanoTime() + safeTimeout.seconds.inWholeNanoseconds
+
     // Execute user function
     if (output == null && classMethod != null && instance != null) {
         try {
