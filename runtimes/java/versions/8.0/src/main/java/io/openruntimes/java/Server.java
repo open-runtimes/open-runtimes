@@ -382,4 +382,73 @@ public class Server {
 
     return ctx.status(output.getStatusCode()).result(output.getBody());
   }
+
+  private static void stream(
+      Context ctx,
+      List<Object> first,
+      Iterator<?> iterator,
+      RuntimeContext context,
+      RuntimeLogger logger,
+      int safeTimeout,
+      long deadline) {
+    AtomicBoolean timedOut = new AtomicBoolean();
+    Callable<Void> write =
+        () -> {
+          OutputStream out = ctx.res.getOutputStream();
+          while (!timedOut.get() && (!first.isEmpty() || iterator.hasNext())) {
+            Object chunk = first.isEmpty() ? iterator.next() : first.remove(0);
+            if (timedOut.get()) {
+              break;
+            }
+            byte[] bytes =
+                chunk instanceof byte[]
+                    ? (byte[]) chunk
+                    : String.valueOf(chunk).getBytes(StandardCharsets.UTF_8);
+            try {
+              out.write(bytes);
+              out.flush();
+            } catch (IOException e) {
+              // Connection closed
+              break;
+            }
+          }
+          return null;
+        };
+
+    String failure = null;
+    try {
+      if (safeTimeout > 0) {
+        Future<Void> future = executor.submit(write);
+        try {
+          future.get(deadline - System.nanoTime(), TimeUnit.NANOSECONDS);
+        } catch (TimeoutException e) {
+          timedOut.set(true);
+          future.cancel(true);
+          failure = "Execution timed out.";
+        }
+      } else {
+        write.call();
+      }
+    } catch (Throwable e) {
+      Throwable cause = e instanceof ExecutionException ? e.getCause() : e;
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      cause.printStackTrace(pw);
+      failure = sw.toString();
+    }
+
+    if (failure != null) {
+      context.error(failure);
+    }
+
+    try {
+      logger.end();
+    } catch (IOException e) {
+      // Ignore missing logs
+    }
+
+    if (failure != null) {
+      Request.getBaseRequest(ctx.req).getHttpChannel().abort(new IOException(failure));
+    }
+  }
 }
