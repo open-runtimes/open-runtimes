@@ -246,8 +246,75 @@ func action(logger: RuntimeLogger, req: Request) async throws -> Response {
         )
     }
 
-    logger.end()
     outputHeaders.add(name: "x-open-runtimes-log-id", value: logger.id)
+
+    if let stream = output.stream {
+        return Response(
+            status: .custom(code: UInt(output.statusCode), reasonPhrase: ""),
+            headers: outputHeaders,
+            body: .init(stream: { [first] writer in
+                let streamWriter = StreamWriter(writer: writer)
+                let write: @Sendable (Data) async -> Bool = { data in
+                    // NIO encodes an empty chunk as the terminating chunk
+                    guard !data.isEmpty else {
+                        return true
+                    }
+                    do {
+                        try await streamWriter.writer.eventLoop.flatSubmit {
+                            streamWriter.writer.write(.buffer(ByteBuffer(bytes: data)))
+                        }.get()
+                        return true
+                    } catch {
+                        return false
+                    }
+                }
+
+                Task {
+                    do {
+                        let timedOut = try await withThrowingTaskGroup(of: Bool.self) { group in
+                            group.addTask {
+                                var chunk = first
+                                while let data = chunk {
+                                    try Task.checkCancellation()
+                                    guard await write(data) else {
+                                        break
+                                    }
+                                    // swiftformat:disable:next hoistAwait, hoistTry
+                                    chunk = try await annotateError(try await stream())
+                                }
+                                return false
+                            }
+                            if let deadline {
+                                group.addTask {
+                                    let interval = max(0, deadline.timeIntervalSinceNow)
+                                    try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+                                    return true
+                                }
+                            }
+
+                            let timedOut = try await group.next()!
+
+                            group.cancelAll()
+
+                            return timedOut
+                        }
+                        if timedOut {
+                            context.error("Execution timed out.")
+                        }
+                    } catch {
+                        context.error(error)
+                    }
+
+                    context.logger.end()
+                    streamWriter.writer.eventLoop.execute {
+                        streamWriter.writer.write(.end, promise: nil)
+                    }
+                }
+            })
+        )
+    }
+
+    logger.end()
 
     let code: HTTPResponseStatus = .custom(code: UInt(output.statusCode), reasonPhrase: "")
     let resBody: Response.Body = .init(data: output.body)
