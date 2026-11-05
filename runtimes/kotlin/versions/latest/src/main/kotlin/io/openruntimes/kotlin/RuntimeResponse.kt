@@ -1,6 +1,8 @@
 package io.openruntimes.kotlin
 
 import com.google.gson.GsonBuilder
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 
 public class RuntimeResponse {
     companion object {
