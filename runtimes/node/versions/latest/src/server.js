@@ -308,6 +308,8 @@ const action = async (logger, req, res) => {
 
   let output = null;
   let userFunction = null;
+  let deadline = null;
+  let first = null;
 
   const entrypoint = config.entrypoint;
   const entrypointFilePath = USER_CODE_PATH + "/" + entrypoint;
