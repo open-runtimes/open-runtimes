@@ -65,6 +65,18 @@ export function overrideEmit(originalEmit) {
             res.setHeader("Content-Type", "text/plain");
             res.setHeader("Content-Length", 0);
             res.end("");
+
+            // User code still running would otherwise crash the server when it
+            // responds: headers are already sent, and nothing catches that throw.
+            for (const method of [
+              "setHeader",
+              "setHeaders",
+              "appendHeader",
+              "removeHeader",
+              "writeHead",
+            ]) {
+              res[method] = () => res;
+            }
           }
         }, req.safeTimeout * 1000);
       }
