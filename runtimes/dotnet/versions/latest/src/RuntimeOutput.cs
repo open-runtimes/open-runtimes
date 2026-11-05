@@ -13,5 +13,15 @@ namespace DotNetRuntime
             StatusCode = statusCode;
             Headers = headers;
         }
+
+        public RuntimeOutput(
+            IAsyncEnumerable<object> stream,
+            int statusCode,
+            Dictionary<string, string> headers
+        )
+            : this(new byte[0], statusCode, headers)
+        {
+            Stream = stream;
+        }
     }
 }
