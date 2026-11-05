@@ -59,9 +59,88 @@ namespace DotNetRuntime
 
             httpContext.Response.StatusCode = _statusCode;
             httpContext.Response.ContentType = contentTypeValue;
-            httpContext.Response.ContentLength = _body.Length;
 
-            return httpContext.Response.Body.WriteAsync(_body, 0, _body.Length);
+            if (_stream == null)
+            {
+                httpContext.Response.ContentLength = _body.Length;
+                await httpContext.Response.Body.WriteAsync(_body, 0, _body.Length);
+                return;
+            }
+
+            httpContext.Response.ContentLength = null;
+
+            using var stop = CancellationTokenSource.CreateLinkedTokenSource(
+                httpContext.RequestAborted
+            );
+            if (_deadline != null)
+            {
+                stop.CancelAfter(
+                    Math.Max(0, (int)(_deadline.Value - DateTime.UtcNow).TotalMilliseconds)
+                );
+            }
+
+            var chunks = _stream.GetAsyncEnumerator(stop.Token);
+            var next = chunks.MoveNextAsync().AsTask();
+            var failed = false;
+
+            try
+            {
+                // Pull the first chunk before headers so an early failure still gets a 500
+                await next.WaitAsync(stop.Token);
+                await httpContext.Response.Body.FlushAsync();
+
+                while (await next.WaitAsync(stop.Token))
+                {
+                    var bytes = chunks.Current is byte[] binary
+                        ? binary
+                        : Encoding.UTF8.GetBytes(chunks.Current?.ToString() ?? "");
+                    await httpContext.Response.Body.WriteAsync(bytes, stop.Token);
+                    next = chunks.MoveNextAsync().AsTask();
+                }
+            }
+            catch (OperationCanceledException) when (stop.IsCancellationRequested)
+            {
+                failed = true;
+                if (!httpContext.RequestAborted.IsCancellationRequested)
+                {
+                    _context!.Error("Execution timed out.");
+                }
+            }
+            catch (Exception e)
+            {
+                failed = true;
+                _context!.Error(e.ToString());
+            }
+            finally
+            {
+                // An async iterator throws if disposed while its MoveNextAsync is pending
+                _ = next.ContinueWith(_ => chunks.DisposeAsync().AsTask());
+            }
+
+            _context!.Logger.End();
+
+            if (
+                failed
+                && !httpContext.Response.HasStarted
+                && !httpContext.RequestAborted.IsCancellationRequested
+            )
+            {
+                httpContext.Response.Clear();
+                await new CustomResponse(
+                    new byte[0],
+                    500,
+                    new Dictionary<string, string>
+                    {
+                        { "x-open-runtimes-log-id", _context!.Logger.id },
+                    }
+                ).ExecuteAsync(httpContext);
+                return;
+            }
+
+            if (failed)
+            {
+                httpContext.Abort();
+            }
         }
     }
 }
