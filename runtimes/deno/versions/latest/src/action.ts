@@ -10,13 +10,17 @@ const USER_CODE_PATH = "/usr/local/server/src/function";
 
 // User functions may return a native (Fetch API) Response instead of a
 // context.res.* result. Converts it into the internal
-// { body, statusCode, headers } shape so the rest of the pipeline (reserved
+// { stream, statusCode, headers } shape so the rest of the pipeline (reserved
 // header filtering, charset defaults, logging headers) applies to it as well.
-const fromNativeResponse = async (response: Response) => ({
-  body: new Uint8Array(await response.arrayBuffer()),
-  statusCode: response.status,
-  headers: response.headers,
-});
+// Its body goes through the same streaming path as context.res.sendStream().
+const fromNativeResponse = (response: Response) =>
+  response.body === null
+    ? { body: "", statusCode: response.status, headers: response.headers }
+    : {
+      stream: response.body,
+      statusCode: response.status,
+      headers: response.headers,
+    };
 
 export const action = async (logger: Logger, ctx: any) => {
   const timeout = ctx.request.headers.get(`x-open-runtimes-timeout`) ?? "";
