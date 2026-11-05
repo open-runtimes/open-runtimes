@@ -4,6 +4,19 @@ set -e
 ROOT=/usr/local/server/src/function
 if [ -d "$OPEN_RUNTIMES_CODE_PATH" ]; then
 	ROOT="$OPEN_RUNTIMES_CODE_PATH"
+	# Mixed code/archive volumes need a filtered root, just like extraction's
+	# symlink tree. URI rewrites cannot hide artifacts from encoded requests.
+	for artifact in code.sqfs code.tar code.tar.gz code.gz .extracted; do
+		if [ -e "$ROOT/$artifact" ] || [ -L "$ROOT/$artifact" ]; then
+			ROOT=$(mktemp -d)
+			(
+				set -o pipefail
+				tar -C "$OPEN_RUNTIMES_CODE_PATH" --exclude='./code.sqfs' --exclude='./code.tar' --exclude='./code.tar.gz' --exclude='./code.gz' --exclude='./.extracted' -cf - . |
+					tar -C "$ROOT" -xf -
+			)
+			break
+		fi
+	done
 fi
 
 # Write files to serve system routes
@@ -98,7 +111,7 @@ source = "/__opr/health"
 destination = "/__opr/health.txt"
 
 [[advanced.rewrites]]
-source = "{**/.env*,/code.sqfs,/code.tar,/code.tar.gz,/code.gz,/.extracted}"
+source = "**/.env*"
 destination = "/tmp/__opr/empty"
 
 [[advanced.headers]]

@@ -10,7 +10,13 @@ error_reporting(E_ALL);
 
 class XStatic extends Base
 {
-    public function testMountedCodePath(): void
+    public function codePathLayouts(): array
+    {
+        return ['code only' => [false], 'mixed volume' => [true]];
+    }
+
+    /** @dataProvider codePathLayouts */
+    public function testMountedCodePath(bool $mixed): void
     {
         $image = trim(shell_exec("docker inspect --format='{{.Image}}' open-runtimes-test-serve") ?? '');
         self::assertNotEmpty($image);
@@ -19,9 +25,11 @@ set -e
 mkdir -p "$OPEN_RUNTIMES_CODE_PATH" /mnt/telemetry
 printf 'Mounted website' >"$OPEN_RUNTIMES_CODE_PATH/index.html"
 printf 'Mounted asset' >"$OPEN_RUNTIMES_CODE_PATH/asset.txt"
-for artifact in code.sqfs code.tar code.tar.gz code.gz .extracted; do
-    printf 'Private deployment artifact' >"$OPEN_RUNTIMES_CODE_PATH/$artifact"
-done
+if [ "$MIXED_CODE_VOLUME" = true ]; then
+    for artifact in code.sqfs code.tar code.tar.gz code.gz .extracted; do
+        printf 'Private deployment artifact' >"$OPEN_RUNTIMES_CODE_PATH/$artifact"
+    done
+fi
 : >"$OPEN_RUNTIMES_CODE_PATH/.open-runtimes"
 printf 'local_download=0.200\n' >/mnt/telemetry/timings.txt
 exec bash helpers/start.sh "bash helpers/server.sh"
@@ -31,6 +39,7 @@ BASH;
             exec('docker run -d --name ' . escapeshellarg($container)
                 . ' --network openruntimes --entrypoint bash'
                 . ' -e OPEN_RUNTIMES_CODE_PATH=' . escapeshellarg('/mnt/workspace/code with spaces')
+                . ' -e MIXED_CODE_VOLUME=' . ($mixed ? 'true' : 'false')
                 . ' -e OPEN_RUNTIMES_STATIC_FALLBACK=index.html'
                 . ' -e OPEN_RUNTIMES_SECRET=test-secret-key '
                 . escapeshellarg($image) . ' -c ' . escapeshellarg($script), $output, $code);
@@ -44,8 +53,11 @@ BASH;
                 self::assertEquals($body, $response['body']);
             }
             foreach (['code.sqfs', 'code.tar', 'code.tar.gz', 'code.gz', '.extracted'] as $artifact) {
-                $response = Client::execute(url: '/' . $artifact, method: 'GET');
-                self::assertStringNotContainsString('Private deployment artifact', $response['body']);
+                foreach (['/' . $artifact, '/%' . bin2hex($artifact[0]) . substr($artifact, 1), '/./' . $artifact, '//' . $artifact] as $path) {
+                    $response = Client::execute(url: $path, method: 'GET');
+                    self::assertEquals(200, $response['code']);
+                    self::assertEquals('Mounted website', $response['body']);
+                }
             }
             $this->testHealth();
             $response = Client::execute(url: '/__opr/timings', method: 'GET');
