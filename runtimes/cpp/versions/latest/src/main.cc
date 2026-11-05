@@ -420,6 +420,58 @@ int main()
                     
                     res->setContentTypeString(contentTypeHeader);
 
+                    if (output.stream)
+                    {
+                        const std::shared_ptr<drogon::HttpResponse> streamRes = drogon::HttpResponse::newAsyncStreamResponse(
+                            [stream = output.stream, first, context, logger, timeout, deadline](drogon::ResponseStreamPtr responseStream) {
+                                std::thread([stream, first, context, logger, timeout, deadline, responseStream = std::move(responseStream)]() mutable {
+                                    std::thread thread([&]() {
+                                        try {
+                                            for (auto chunk = first; chunk; chunk = stream())
+                                            {
+                                                // drogon frames an empty chunk as the end of the stream
+                                                if (!chunk->empty() && !responseStream->send(*chunk))
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                        } catch (const std::exception &e)
+                                        {
+                                            context.error(e.what());
+                                        } catch (...)
+                                        {
+                                            context.error("Unknown exception");
+                                        }
+                                    });
+
+                                    std::future<void> waiter = std::async(std::launch::async, &std::thread::join, &thread);
+
+                                    if (timeout != -1 && waiter.wait_until(deadline) == std::future_status::timeout) {
+                                        context.error("Execution timed out.");
+                                        pthread_cancel(thread.native_handle());
+                                    }
+
+                                    waiter.wait();
+                                    logger->end();
+                                    responseStream->close();
+                                }).detach();
+                            }, true);
+
+                        for (const auto &[key, value] : res->headers())
+                        {
+                            if (key != "content-length")
+                            {
+                                streamRes->addHeader(key, value);
+                            }
+                        }
+
+                        streamRes->setContentTypeString(contentTypeHeader);
+                        streamRes->addHeader("x-open-runtimes-log-id", logger->id);
+                        streamRes->setStatusCode(static_cast<drogon::HttpStatusCode>(output.statusCode));
+                        callback(streamRes);
+                        return;
+                    }
+
                     logger->end();
                     res->addHeader("x-open-runtimes-log-id", logger->id);
 
