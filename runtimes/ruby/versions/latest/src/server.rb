@@ -1,5 +1,6 @@
 require 'sinatra'
 require 'json'
+require 'timeout'
 
 require_relative 'config.rb'
 require_relative 'types.rb'
