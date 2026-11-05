@@ -1,0 +1,18 @@
+#!/bin/bash
+# Fail build if any command fails
+set -e
+shopt -s dotglob
+
+cd /usr/local/server/src/function/
+
+source /usr/local/server/helpers/javascript-runner/env.sh
+
+if [ -z "$OPEN_RUNTIMES_START_COMMAND" ]; then
+	START_COMMAND="$OPR_JAVASCRIPT_RUNNER $OPEN_RUNTIMES_ENTRYPOINT"
+else
+	START_COMMAND="$OPEN_RUNTIMES_START_COMMAND"
+fi
+
+HOST=0.0.0.0 \
+	PORT=3000 \
+	exec $START_COMMAND

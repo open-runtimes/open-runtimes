@@ -272,6 +272,15 @@ tools = "node --version && npm --version && npx --version && pnpm --version && y
 test = "SSR/Remix.php"
 output = "./build"
 
+[express]
+report_size = false
+runtime = { name = "node", version = "24" }
+entry = "server.js"
+commands = { install = "npm install", start = "bash helpers/express/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
+tools = "node --version && npm --version"
+test = "SSR/Express.php"
+
 [angular]
 report_size = false
 runtime = { name = "node", version = "24" }
