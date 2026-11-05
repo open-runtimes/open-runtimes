@@ -148,6 +148,77 @@ When you can have two!
         bytes_body = context.req.body_binary
         hex = md5(bytes_body).hexdigest()
         return context.res.text(hex, 200, {"x-method": context.req.method})
+    elif action == "streamResponse":
+
+        def chunks():
+            context.log("Stream log.")
+            yield "first\n"
+            time.sleep(1)
+            yield "second\n"
+            time.sleep(1)
+            yield "third\n"
+
+        return context.res.sendStream(chunks(), 201, {"x-stream": "yes"})
+    elif action == "streamException":
+
+        async def chunks():
+            yield "first\n"
+            raise Exception("Stream failed")
+
+        return context.res.sendStream(chunks())
+    elif action == "streamTimeout":
+
+        def chunks():
+            yield "first\n"
+            time.sleep(5)
+            yield "second\n"
+
+        await asyncio.sleep(1)
+        return context.res.sendStream(chunks())
+    elif action == "streamEmpty":
+
+        def chunks():
+            yield from ()
+
+        return context.res.sendStream(chunks(), 200)
+    elif action == "streamSingle":
+
+        def chunks():
+            yield "only\n"
+
+        return context.res.sendStream(chunks())
+    elif action == "streamLong":
+
+        def chunks():
+            for i in range(10000):
+                yield f"chunk-{i}\n"
+
+        return context.res.sendStream(chunks())
+    elif action == "streamBinary":
+
+        def chunks():
+            yield bytes(range(0, 128))
+            yield bytes(range(128, 256))
+
+        return context.res.sendStream(chunks())
+    elif action == "streamJson":
+
+        async def chunks():
+            for n in range(1, 4):
+                if n > 1:
+                    await asyncio.sleep(0.1)
+                yield json.dumps({"n": n}, separators=(",", ":")) + "\n"
+
+        return context.res.sendStream(
+            chunks(), 200, {"content-type": "application/x-ndjson"}
+        )
+    elif action == "streamErrorStart":
+
+        def chunks():
+            raise Exception("Stream failed early")
+            yield
+
+        return context.res.sendStream(chunks())
     elif action == "envVars":
         return context.res.json(
             {
