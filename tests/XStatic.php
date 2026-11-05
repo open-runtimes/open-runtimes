@@ -19,6 +19,9 @@ set -e
 mkdir -p "$OPEN_RUNTIMES_CODE_PATH" /mnt/telemetry
 printf 'Mounted website' >"$OPEN_RUNTIMES_CODE_PATH/index.html"
 printf 'Mounted asset' >"$OPEN_RUNTIMES_CODE_PATH/asset.txt"
+for artifact in code.sqfs code.tar code.tar.gz code.gz .extracted; do
+    printf 'Private deployment artifact' >"$OPEN_RUNTIMES_CODE_PATH/$artifact"
+done
 : >"$OPEN_RUNTIMES_CODE_PATH/.open-runtimes"
 printf 'local_download=0.200\n' >/mnt/telemetry/timings.txt
 exec bash helpers/start.sh "bash helpers/server.sh"
@@ -39,6 +42,10 @@ BASH;
                 $response = Client::execute(url: $path, method: 'GET');
                 self::assertEquals(200, $response['code']);
                 self::assertEquals($body, $response['body']);
+            }
+            foreach (['code.sqfs', 'code.tar', 'code.tar.gz', 'code.gz', '.extracted'] as $artifact) {
+                $response = Client::execute(url: '/' . $artifact, method: 'GET');
+                self::assertStringNotContainsString('Private deployment artifact', $response['body']);
             }
             $this->testHealth();
             $response = Client::execute(url: '/__opr/timings', method: 'GET');

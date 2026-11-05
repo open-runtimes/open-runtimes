@@ -98,7 +98,7 @@ source = "/__opr/health"
 destination = "/__opr/health.txt"
 
 [[advanced.rewrites]]
-source = "**/.env*"
+source = "{**/.env*,/code.sqfs,/code.tar,/code.tar.gz,/code.gz,/.extracted}"
 destination = "/tmp/__opr/empty"
 
 [[advanced.headers]]
