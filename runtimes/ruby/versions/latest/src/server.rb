@@ -167,6 +167,7 @@ def action(request, response, logger)
       logger.override_native_logs
 
       unless safe_timeout.nil?
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + safe_timeout
         results = execute(safe_timeout, context)
         executed = results[0]
         output = results[1]
