@@ -354,5 +354,10 @@ async def handler(request) -> web.Response:
     return resp
 
 
+async def started(_):
+    print("HTTP server successfully started!", flush=True)
+
+
 app = web.Application(client_max_size=20 * 1024 * 1024)
 app.router.add_route("*", r"/{handler:.*}", handler)
+app.on_startup.append(started)
