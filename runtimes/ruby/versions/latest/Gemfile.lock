@@ -5,28 +5,35 @@ GEM
       console (~> 1.10)
       io-event (~> 1.0.0)
       timers (~> 4.1)
+    base64 (0.3.0)
     console (1.17.2)
       fiber-annotation
       fiber-local
     fiber-annotation (0.2.0)
     fiber-local (1.0.0)
     io-event (1.0.9)
-    mustermann (3.0.0)
-      ruby2_keywords (~> 0.0.1)
+    logger (1.7.0)
+    mustermann (3.1.1)
     nio4r (2.7.5)
     ostruct (0.6.3)
     puma (7.2.1)
       nio4r (~> 2.0)
-    rack (2.2.7)
-    rack-protection (3.0.6)
-      rack
-    ruby2_keywords (0.0.5)
-    sinatra (3.0.6)
+    rack (3.2.8)
+    rack-protection (4.2.1)
+      base64 (>= 0.1.0)
+      logger (>= 1.6.0)
+      rack (>= 3.0.0, < 4)
+    rack-session (2.1.2)
+      base64 (>= 0.1.0)
+      rack (>= 3.0.0)
+    sinatra (4.2.1)
+      logger (>= 1.6.0)
       mustermann (~> 3.0)
-      rack (~> 2.2, >= 2.2.4)
-      rack-protection (= 3.0.6)
+      rack (>= 3.0.0, < 4)
+      rack-protection (= 4.2.1)
+      rack-session (>= 2.0.0, < 3)
       tilt (~> 2.0)
-    tilt (2.2.0)
+    tilt (2.9.0)
     timers (4.3.5)
 
 PLATFORMS
@@ -37,7 +44,7 @@ DEPENDENCIES
   async (~> 2.0)
   ostruct
   puma (~> 7.0)
-  sinatra (~> 3.0)
+  sinatra (~> 4.0)
 
 BUNDLED WITH
    2.3.7
