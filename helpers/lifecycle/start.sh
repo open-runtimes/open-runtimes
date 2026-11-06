@@ -30,6 +30,11 @@ opr_success "Runtime started."
 start_uptime=$(opr_uptime)
 export start_uptime
 
+# Ready lines: open-runtimes servers and framework wrappers, then servers that
+# print their own: Next.js standalone 13.4 and 13.5+, and "Listening on" from
+# Next.js 13.0-13.3, Nitro (TanStack Start standalone) and Puma.
+ready='HTTP server successfully started|server started on http://|started server on |Ready in |Listening on'
+
 # Tini forwards signals to the whole process group. Keep the shell and log
 # reader alive until the server finishes; the container manager owns the deadline.
 # Bash defers this trap during the pipeline, but exits if signaled before launch.
@@ -39,7 +44,7 @@ bash -c "$1" 2>&1 | {
 	recorded=false
 	while IFS= read -r line || [ -n "$line" ]; do
 		printf '%s\n' "$line"
-		if [ "$recorded" = false ] && [[ "$line" == *"HTTP server successfully started"* || "$line" == *"server started on http://"* ]]; then
+		if [ "$recorded" = false ] && [[ "$line" =~ $ready ]]; then
 			end_uptime=$(awk '{print $1}' /proc/uptime)
 			elapsed=$(awk "BEGIN{printf \"%.3f\", $end_uptime - $start_uptime}")
 			echo "startup=$elapsed" >>/mnt/telemetry/timings.txt
