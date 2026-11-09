@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/go-resty/resty/v2 v2.11.0
-	github.com/open-runtimes/types-for-go/v4 v4.0.10-0.20261105063246-b7ec9ceb1df5
+	github.com/open-runtimes/types-for-go/v4 v4.0.11
 )
 
 require (
