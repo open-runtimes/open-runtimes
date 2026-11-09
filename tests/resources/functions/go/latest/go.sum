@@ -1,7 +1,7 @@
 github.com/go-resty/resty/v2 v2.11.0 h1:i7jMfNOJYMp69lq7qozJP+bjgzfAzeOhuGlyDrqxT/8=
 github.com/go-resty/resty/v2 v2.11.0/go.mod h1:iiP/OpA0CkcL3IGt1O0+/SIItFUbkkyw5BGXiVdTu+A=
-github.com/open-runtimes/types-for-go/v4 v4.0.10-0.20261105063246-b7ec9ceb1df5 h1:pepC/wZlby0RdlAKqLy2Ak1D3u7UA0ue2CQPzyyoVq8=
-github.com/open-runtimes/types-for-go/v4 v4.0.10-0.20261105063246-b7ec9ceb1df5/go.mod h1:L6N4mNQFedFSlX5hOKmtjUTZdqD691YZlVtXOxC5DSw=
+github.com/open-runtimes/types-for-go/v4 v4.0.11 h1:jFAfLQG8ro5yDCPElmtoai5362ViDXQ+HS3TTw8K7RI=
+github.com/open-runtimes/types-for-go/v4 v4.0.11/go.mod h1:L6N4mNQFedFSlX5hOKmtjUTZdqD691YZlVtXOxC5DSw=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
