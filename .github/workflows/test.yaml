@@ -13,7 +13,7 @@ jobs:
       matrix: ${{ steps.prepare.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
       - name: Get changed files
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Install shfmt
         run: |
           wget -O shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Install shellcheck
         run: |
           wget -O shellcheck.tar.xz https://github.com/koalaman/shellcheck/releases/download/v0.9.0/shellcheck-v0.9.0.linux.x86_64.tar.xz
@@ -81,7 +81,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
       - name: Setup Composer
