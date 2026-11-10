@@ -171,6 +171,25 @@ When you can have two!
 					throw new Error("Stream failed early");
 				})(),
 			);
+		case "streamReturnAfterEnd": {
+			// Like AI SDK 5's textStream, return() throws once the source has ended.
+			const chunks = ["first\n", "second\n"];
+			let ended = false;
+			return context.res.sendStream({
+				[Symbol.asyncIterator]: () => ({
+					next: async () => {
+						ended = chunks.length === 0;
+						return { done: ended, value: chunks.shift() };
+					},
+					return: async () => {
+						if (ended) {
+							throw new Error("Iterator already ended");
+						}
+						return { done: true, value: undefined };
+					},
+				}),
+			});
+		}
 		case "envVars":
 			return context.res.json({
 				var: process.env.CUSTOM_ENV_VAR,
