@@ -89,11 +89,8 @@ const fromNativeResponse = (response) => {
   return { stream: response.body, statusCode: response.status, headers };
 };
 
-// Readable.from() calls its source's return() when it closes, even after the
-// source has finished, and some sources throw there: AI SDK 5's textStream
-// rejects with ERR_INVALID_STATE once its reader is released. Only stop the
-// source when the response ends before it does. Strings and buffers stay with
-// Readable.from(), which sends each as one chunk.
+// Readable.from() calls return() even after a source finished, which throws for
+// some iterators (AI SDK 5's textStream), so only call it on an early stop.
 const fromSource = (source) => {
   const method = source?.[Symbol.asyncIterator] ?? source?.[Symbol.iterator];
   if (
