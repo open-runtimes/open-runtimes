@@ -27,6 +27,15 @@ class Node extends Serverless
      * }
      */
      
+    public function testStreamReturnAfterEnd(): void
+    {
+        $response = Client::execute(headers: ['x-action' => 'streamReturnAfterEnd'], bodyCallback: fn () => null);
+
+        self::assertEquals(200, $response['code']);
+        self::assertEquals("first\nsecond\n", $response['body']);
+        self::assertNull($response['errorNumber']);
+    }
+
     public function testLogs(): void
     {
         $response = Client::execute(headers: ['x-action' => 'logs']);
