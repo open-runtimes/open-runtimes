@@ -89,6 +89,41 @@ const fromNativeResponse = (response) => {
   return { stream: response.body, statusCode: response.status, headers };
 };
 
+// Readable.from() calls its source's return() when it closes, even after the
+// source has finished, and some sources throw there: AI SDK 5's textStream
+// rejects with ERR_INVALID_STATE once its reader is released. Only stop the
+// source when the response ends before it does. Strings and buffers stay with
+// Readable.from(), which sends each as one chunk.
+const fromSource = (source) => {
+  const method = source?.[Symbol.asyncIterator] ?? source?.[Symbol.iterator];
+  if (
+    typeof source === "string" ||
+    source instanceof Uint8Array ||
+    typeof method !== "function"
+  ) {
+    return source;
+  }
+  const iterator = method.call(source);
+  return (async function* () {
+    let suspended = false;
+    try {
+      while (true) {
+        const { done, value } = await iterator.next();
+        if (done) {
+          return;
+        }
+        suspended = true;
+        yield value;
+        suspended = false;
+      }
+    } finally {
+      if (suspended) {
+        await iterator.return?.();
+      }
+    }
+  })();
+};
+
 // The Fetch API Request constructor rejects these methods, so context.req.raw
 // cannot be built for them.
 const FORBIDDEN_REQUEST_METHODS = ["CONNECT", "TRACE", "TRACK"];
@@ -373,7 +408,9 @@ const action = async (logger, req, res) => {
       if (output?.stream !== undefined) {
         // Pulled before the status is sent, so a source that fails or stalls
         // before its first chunk answers like a failed main function.
-        output.stream = Readable.from(output.stream)[Symbol.asyncIterator]();
+        output.stream = Readable.from(fromSource(output.stream))[
+          Symbol.asyncIterator
+        ]();
         first = await output.stream.next();
       }
     }
