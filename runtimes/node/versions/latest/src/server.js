@@ -101,24 +101,32 @@ const fromSource = (source) => {
     return source;
   }
   const iterator = method.call(source);
-  return (async function* () {
-    let suspended = false;
-    try {
-      while (true) {
-        const { done, value } = await iterator.next();
-        if (done) {
-          return;
-        }
-        suspended = true;
-        yield value;
-        suspended = false;
+  let finished = false;
+  return {
+    [Symbol.asyncIterator]() {
+      return this;
+    },
+    async next() {
+      if (finished) {
+        return { done: true, value: undefined };
       }
-    } finally {
-      if (suspended) {
+      try {
+        const result = await iterator.next();
+        finished = result.done === true;
+        return result;
+      } catch (error) {
+        finished = true;
+        throw error;
+      }
+    },
+    async return() {
+      if (!finished) {
+        finished = true;
         await iterator.return?.();
       }
-    }
-  })();
+      return { done: true, value: undefined };
+    },
+  };
 };
 
 // The Fetch API Request constructor rejects these methods, so context.req.raw
