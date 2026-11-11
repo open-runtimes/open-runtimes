@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
 # INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the
 # referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).
 ARG BASE_IMAGE
@@ -48,7 +48,7 @@ RUN \
   && apk del .deps \
   && rm -rf /var/cache/apk/*
 
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:latest@sha256:ca11f643d7791ebdd90a34fc20caf11380d434007ae539a9ea75cd9212e13dca /usr/bin/composer /usr/local/bin/composer
 
 RUN composer update --no-interaction --ignore-platform-reqs --optimize-autoloader --prefer-dist --no-dev
 RUN mv vendor vendor-server
