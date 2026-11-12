@@ -18,6 +18,9 @@ RUN npm install npm@${NPM_VERSION} -g && \
   test "$(npx --version)" = "${NPM_VERSION}" && \
   rm -rf /root/.npm
 RUN npm install pnpm@9.15.9 yarn modclean@2.1.2 -g
+# Install with the pnpm a project pins in packageManager: pnpm 9 cannot read
+# the lockfile newer pnpm writes for those projects and silently re-resolves.
+ENV npm_config_manage_package_manager_versions=true
 RUN bun install && npm install --no-save --prefix /usr/local/server @vercel/nft@^0.29.2
 
 ENV OPEN_RUNTIMES_SERVER_COMMAND="bun src/server.ts"
