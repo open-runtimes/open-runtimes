@@ -212,13 +212,23 @@ $action = function (Logger $logger, mixed $req, mixed $res) use (&$userFunction,
         try {
             if ($safeTimeout !== null) {
                 $executed = false;
+                $failure = null;
                 $deadline = \microtime(true) + $safeTimeout;
                 Swoole\Coroutine\batch([
-                    function () use ($execute, &$executed) {
-                        \call_user_func($execute);
+                    function () use ($execute, &$executed, &$failure) {
+                        // An exception leaving a batch() coroutine is fatal for the worker.
+                        try {
+                            \call_user_func($execute);
+                        } catch (\Throwable $e) {
+                            $failure = $e;
+                        }
                         $executed = true;
                     }
                 ], $safeTimeout);
+
+                if ($failure !== null) {
+                    throw $failure;
+                }
 
                 if (!$executed) {
                     $context->error('Execution timed out.');

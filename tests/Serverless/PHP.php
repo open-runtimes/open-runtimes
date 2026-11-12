@@ -12,6 +12,24 @@ class PHP extends Serverless
         self::assertTrue(true); // Disable test till implemented
     }
 
+    public function throwingActions(): array
+    {
+        return [
+            'plain throw' => ['errorTest'],
+            'stream throws before its first chunk' => ['streamErrorStart'],
+        ];
+    }
+
+    /** @dataProvider throwingActions */
+    public function testErrorWithTimeout(string $action): void
+    {
+        $response = Client::execute(headers: ['x-action' => $action, 'x-open-runtimes-timeout' => '5']);
+        self::assertEquals(500, $response['code']);
+
+        $response = Client::execute(headers: ['x-action' => 'plaintextResponse']);
+        self::assertEquals(200, $response['code']);
+    }
+
     public function testFatalError(): void
     {
         Client::$host = 'open-runtimes-test-serve-php-fatal';
