@@ -18,6 +18,9 @@ RUN npm install npm@${NPM_VERSION} -g && \
 # https://pnpm.io/installation#compatibility (node 16 needs pnpm 8)
 ARG PNPM_VERSION=9.15.9
 RUN npm install pnpm@${PNPM_VERSION} modclean@2.1.2 -g
+# Install with the pnpm a project pins in packageManager: pnpm 9 cannot read
+# the lockfile newer pnpm writes for those projects and silently re-resolves.
+ENV npm_config_manage_package_manager_versions=true
 
 # Node 26 dropped the bundled Yarn from the official images (Corepack went in
 # 25). Install it there to keep tooling parity; older bases already ship Yarn,
