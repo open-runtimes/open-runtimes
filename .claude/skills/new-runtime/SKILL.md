@@ -111,7 +111,7 @@ placed there overlays `versions/latest/` at image-build time.
 The server **must** implement this exact protocol. Study multiple existing servers (Go's `main.go`, Python's `server.py`, Ruby's `server.rb`, Kotlin's `Server.kt`) to understand the pattern precisely.
 
 **Startup:**
-- Print `HTTP server successfully started!` to stdout when ready (this string is detected by `helpers/start.sh` for telemetry)
+- Print `HTTP server successfully started!` to stdout once the server accepts connections (this string is detected by `helpers/lifecycle/start.sh` for the startup timing)
 - Listen on `0.0.0.0:3000`
 - Handle ALL HTTP methods on ALL paths
 
@@ -213,7 +213,7 @@ shopt -s dotglob
 **Start** (`helpers/start.sh "<start command>"`):
 
 - `start-prepare.sh` - after the archive is extracted, before the server starts: move dependencies or binaries into place, activate environments (see `runtimes/python/versions/latest/hooks/start-prepare.sh`).
-- `server.sh` - only when starting the server takes more than the single `OPEN_RUNTIMES_SERVER_COMMAND` from the Dockerfile (worker counts, `exec` with computed flags). When present it takes precedence over `OPEN_RUNTIMES_SERVER_COMMAND` in `helpers/server.sh`. It must print `HTTP server successfully started!` before `exec`ing the server if the server itself does not (see `runtimes/python/versions/latest/hooks/server.sh`).
+- `server.sh` - only when starting the server takes more than the single `OPEN_RUNTIMES_SERVER_COMMAND` from the Dockerfile (worker counts, `exec` with computed flags). When present it takes precedence over `OPEN_RUNTIMES_SERVER_COMMAND` in `helpers/server.sh`. The server itself prints `HTTP server successfully started!` once it listens; echoing it before `exec` records a startup of ~0 (python prints it from an aiohttp `on_startup` handler).
 
 Most interpreted runtimes need no hooks at all; a compiled runtime typically needs only `compile.sh`.
 
