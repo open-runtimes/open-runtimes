@@ -17,18 +17,21 @@ if (!existsSync(absoluteEntry)) {
   process.exit(1);
 }
 
-let result;
+// Node 20.19+ and 22.12+ also match "module-sync", older runtimes do not
+const fileList = new Set();
 try {
-  result = await nodeFileTrace([absoluteEntry], {
-    base: outputDir,
-    processCwd: outputDir,
-  });
+  for (const conditions of [["node"], ["node", "module-sync"]]) {
+    const result = await nodeFileTrace([absoluteEntry], {
+      base: outputDir,
+      processCwd: outputDir,
+      conditions,
+    });
+    for (const file of result.fileList) fileList.add(file);
+  }
 } catch (err) {
   console.error(`Trace failed: ${err.message}`);
   process.exit(2);
 }
-
-const { fileList } = result;
 
 // Collect files: resolve symlinks so targets are included too
 const files = new Set();
