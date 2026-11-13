@@ -88,7 +88,7 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 					echo "import \"$f\";" >>./.nft-entry.mjs
 				fi
 			done
-			grep -o 'from "[^"]*"' "$SSR_WRAPPER" | cut -d'"' -f2 | while read -r dep; do
+			grep -o -e 'from "[^"]*"' -e 'import("[^"]*"' "$SSR_WRAPPER" | cut -d'"' -f2 | while read -r dep; do
 				[[ "$dep" == ./* || "$dep" == ../* || "$dep" == /* ]] && continue
 				echo "import \"$dep\";"
 			done >>./.nft-entry.mjs
