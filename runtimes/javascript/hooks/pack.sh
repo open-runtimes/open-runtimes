@@ -112,9 +112,22 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 			return 0 2>/dev/null || exit 0
 		fi
 
+		# V8 caps its heap near 2 GB whatever the container has
+		NFT_MEMORY=$(awk '/^MemTotal:/ {print int($2 / 1024)}' /proc/meminfo 2>/dev/null || true)
+		for limit_file in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory/memory.limit_in_bytes; do
+			limit=$(cat "$limit_file" 2>/dev/null || true)
+			if [[ "$limit" =~ ^[0-9]+$ ]] && { [ -z "$NFT_MEMORY" ] || [ $((limit / 1048576)) -lt "$NFT_MEMORY" ]; }; then
+				NFT_MEMORY=$((limit / 1048576))
+			fi
+		done
+		NFT_HEAP=()
+		if [ -n "$NFT_MEMORY" ] && [ $((NFT_MEMORY * 3 / 4)) -gt 2048 ]; then
+			NFT_HEAP=("--max-old-space-size=$((NFT_MEMORY * 3 / 4))")
+		fi
+
 		# Run NFT — capture exit code without triggering set -e
 		NFT_EXIT=0
-		NODE_PATH=/usr/local/server/node_modules node /usr/local/server/src/nft.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
+		NODE_PATH=/usr/local/server/node_modules node "${NFT_HEAP[@]}" /usr/local/server/src/nft.mjs "$ENTRYPOINT" "$OUTPUT_DIR" || NFT_EXIT=$?
 
 		NFT_MANIFEST="$OUTPUT_DIR/.nft-files"
 
@@ -127,8 +140,12 @@ if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
 				fi
 			done
 		else
-			echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m NFT failed (exit $NFT_EXIT), skipping pruning. \e[0m"
-			rm -f "$OUTPUT_DIR/.nft-entry.mjs"
+			echo -e "\e[90m$(date +[%H:%M:%S]) \e[31m[\e[0mopen-runtimes\e[31m]\e[33m NFT failed (exit $NFT_EXIT), falling back to modclean. \e[0m"
+			rm -f "$OUTPUT_DIR/.nft-entry.mjs" "$NFT_MANIFEST"
+			if [[ "${OPEN_RUNTIMES_MODCLEAN,,}" != "disabled" ]]; then
+				modclean --patterns default:safe --no-progress --run
+				export OPEN_RUNTIMES_CLEANUP="modclean"
+			fi
 			return 0 2>/dev/null || exit 0
 		fi
 	fi
