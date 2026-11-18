@@ -1263,7 +1263,8 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "ghcr.io/adrianjagielak/flutter:3.50.0"
+        "BASE_IMAGE": "debian:12.15-slim",
+        "FLUTTER_VERSION": "3.50.0"
       },
       "platforms": [
         "linux/amd64",
