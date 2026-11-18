@@ -28,3 +28,16 @@ variable "SHA_SUFFIX" {
 target "_base" {
   context = "."
 }
+
+# The logs server runs beside every runtime, in its own container, so it is
+# one image for all of them rather than a layer in each. Not in the default
+# group: publish it with `runtime: logs`.
+target "logs" {
+  context    = "./logs"
+  dockerfile = "Dockerfile"
+  platforms  = ["linux/amd64", "linux/arm64"]
+  tags = [
+    "${REGISTRY}/logs:v1${TAG_SUFFIX}",
+    "${REGISTRY}/logs:v1${TAG_SUFFIX}${SHA_SUFFIX}",
+  ]
+}
