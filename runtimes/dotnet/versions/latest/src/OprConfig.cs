@@ -6,12 +6,14 @@ namespace DotNetRuntime
 {
     public static class OprConfig
     {
-        public static readonly String Secret =
-            Environment.GetEnvironmentVariable("OPEN_RUNTIMES_SECRET") ?? "";
-        public static readonly String Env =
-            Environment.GetEnvironmentVariable("OPEN_RUNTIMES_ENV") ?? "";
-        public static readonly String LogsDirectory =
-            Environment.GetEnvironmentVariable("OPEN_RUNTIMES_LOGS_DIRECTORY") ?? "/mnt/logs";
+        public static readonly String Secret = Environment.GetEnvironmentVariable(
+            "OPEN_RUNTIMES_SECRET"
+        ) ?? "";
+        public static readonly String Env = Environment.GetEnvironmentVariable("OPEN_RUNTIMES_ENV")
+            ?? "";
+        public static readonly String LogsDirectory = Environment.GetEnvironmentVariable(
+            "OPEN_RUNTIMES_LOGS_DIRECTORY"
+        ) ?? "/mnt/logs";
         public static readonly Dictionary<string, string> Headers = LoadHeaders();
 
         private static Dictionary<string, string> LoadHeaders()
@@ -26,8 +28,7 @@ namespace DotNetRuntime
 
             try
             {
-                var parsed =
-                    JsonSerializer.Deserialize<Dictionary<string, object>>(json)
+                var parsed = JsonSerializer.Deserialize<Dictionary<string, object>>(json)
                     ?? new Dictionary<string, object>();
                 foreach (KeyValuePair<string, object> entry in parsed)
                 {
