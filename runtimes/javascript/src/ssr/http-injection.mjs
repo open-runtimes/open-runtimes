@@ -12,6 +12,49 @@ import {
 } from "./system.mjs";
 import { Logger, loggingNamespace } from "./logger.mjs";
 
+// A handler that keeps running after its execution timed out can still try to
+// respond. The timeout already sent the response, so Node throws (for example
+// ERR_HTTP_HEADERS_SENT), from a place the user's code cannot catch, and the
+// server would stop for every other request. Report the error in the timed-out
+// execution's logs instead. Any other uncaught error behaves as it does without
+// the runtime.
+function reportLateError(error) {
+  const execution = loggingNamespace.getStore();
+  if (!execution?.timedOut) {
+    return false;
+  }
+
+  Logger.write(
+    execution.id,
+    ["Error after the execution timed out:", error],
+    Logger.TYPE_ERROR,
+  );
+  return true;
+}
+
+process.on("uncaughtException", (error) => {
+  if (reportLateError(error)) {
+    return;
+  }
+
+  // With no listener of the app's own, keep Node's default: print and exit.
+  if (process.listenerCount("uncaughtException") === 1) {
+    process.stderr.write(`${error?.stack ?? error}\n`);
+    process.exit(1);
+  }
+});
+
+process.on("unhandledRejection", (reason) => {
+  if (reportLateError(reason)) {
+    return;
+  }
+
+  // Node's default for an unhandled rejection is to raise it as an uncaught exception.
+  if (process.listenerCount("unhandledRejection") === 1) {
+    throw reason;
+  }
+});
+
 // Core: replace an http.Server's `emit` so "request" events flow through the
 // Open Runtimes contract before hitting the user-owned listener.
 export function overrideEmit(originalEmit) {
@@ -42,7 +85,9 @@ export function overrideEmit(originalEmit) {
 
     const self = this;
 
-    loggingNamespace.run({ id: req.loggerId }, () => {
+    const execution = { id: req.loggerId, timedOut: false };
+
+    loggingNamespace.run(execution, () => {
       Logger.overrideNativeLogs(loggingNamespace, req.loggerId);
 
       const dispatch = () => {
@@ -65,18 +110,7 @@ export function overrideEmit(originalEmit) {
             res.setHeader("Content-Type", "text/plain");
             res.setHeader("Content-Length", 0);
             res.end("");
-
-            // User code still running would otherwise crash the server when it
-            // responds: headers are already sent, and nothing catches that throw.
-            for (const method of [
-              "setHeader",
-              "setHeaders",
-              "appendHeader",
-              "removeHeader",
-              "writeHead",
-            ]) {
-              res[method] = () => res;
-            }
+            execution.timedOut = true;
           }
         }, req.safeTimeout * 1000);
       }
