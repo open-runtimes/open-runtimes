@@ -324,8 +324,7 @@ When you can have two!
                 var response = await http.GetStringAsync(
                     $"https://dummyjson.com/todos/{context.Req.BodyRaw}"
                 );
-                var todo =
-                    JsonSerializer.Deserialize<Dictionary<string, object>>(response)
+                var todo = JsonSerializer.Deserialize<Dictionary<string, object>>(response)
                     ?? new Dictionary<string, object>();
 
                 return context.Res.Json(new() { { "todo", todo } });

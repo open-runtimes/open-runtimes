@@ -141,9 +141,9 @@ namespace DotNetRuntime
                 enforcedHeadersString = "{}";
             }
 
-            Dictionary<string, object> enforcedHeaders =
-                JsonSerializer.Deserialize<Dictionary<string, object>>(enforcedHeadersString)
-                ?? new Dictionary<string, object>();
+            Dictionary<string, object> enforcedHeaders = JsonSerializer.Deserialize<
+                Dictionary<string, object>
+            >(enforcedHeadersString) ?? new Dictionary<string, object>();
             foreach (KeyValuePair<string, object> entry in enforcedHeaders)
             {
                 headers[entry.Key.ToLower()] = Convert.ToString(entry.Value);
