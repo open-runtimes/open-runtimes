@@ -274,6 +274,7 @@ output = "./build"
 
 [express]
 report_size = false
+drain = true
 runtime = { name = "node", version = "24" }
 entry = "server.js"
 commands = { install = "npm install", start = "bash helpers/express/server.sh" }

@@ -26,6 +26,8 @@ export interface Runtime {
     commands: RuntimeCommands;
     formatter: RuntimeFormatter;
     report_size?: boolean;
+    // SSR runtimes whose server drains active requests on SIGTERM, checked like Serverless ones
+    drain?: boolean;
     test_resource_dir?: string;
     shared?: string;
     build?: Record<string, any>;
@@ -55,6 +57,7 @@ export interface Entry {
     ENFORCED_RUNTIME: string;
     ENFORCED_VERSION: string;
     REPORT_SIZE: boolean;
+    DRAIN: boolean;
 
     // Derived (not consumed by the GitHub matrix itself)
     RUNTIME_FOLDER: string;
@@ -127,6 +130,7 @@ export function generateRuntimeObject(runtime: Runtime, key: string): Entry[] {
             ENFORCED_RUNTIME: enforcedRuntime,
             ENFORCED_VERSION: enforcedVersion,
             REPORT_SIZE: reportSize,
+            DRAIN: runtime.drain === true,
 
             RUNTIME_FOLDER: runtimeFolder,
             VERSION_FOLDER: versionFolder,

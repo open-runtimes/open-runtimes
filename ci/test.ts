@@ -278,7 +278,7 @@ console.log('Checking graceful shutdown ...');
 await checkShutdown(
     'open-runtimes-test-serve',
     `http://127.0.0.1:${process.env.HOST_PORT_MAIN ?? '3000'}`,
-    entry.TEST_CLASS.startsWith('Serverless/'),
+    entry.TEST_CLASS.startsWith('Serverless/') || entry.DRAIN,
 );
 
 down();
