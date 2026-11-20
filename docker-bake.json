@@ -206,7 +206,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:22.23.4-alpine3.24",
+        "BASE_IMAGE": "node:22.23.5-alpine3.24",
         "INSTALL_SSR_TOOLING": "true",
         "NPM_VERSION": "12.2.1"
       },
@@ -256,7 +256,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:24.22.1-alpine3.24",
+        "BASE_IMAGE": "node:24.22.3-alpine3.24",
         "INSTALL_SSR_TOOLING": "true",
         "NPM_VERSION": "12.2.1"
       },
@@ -306,7 +306,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "node:26.12.1-alpine3.24",
+        "BASE_IMAGE": "node:26.13.1-alpine3.24",
         "INSTALL_SSR_TOOLING": "true",
         "NPM_VERSION": "12.2.1",
         "YARN_VERSION": "1.22.22"
@@ -671,7 +671,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.15.1-alpine3.24"
+        "BASE_IMAGE": "python:3.15.2-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -694,7 +694,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.14.9-alpine3.24"
+        "BASE_IMAGE": "python:3.14.10-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -717,7 +717,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.13.17-alpine3.24"
+        "BASE_IMAGE": "python:3.13.18-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -740,7 +740,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.12.15-alpine3.24"
+        "BASE_IMAGE": "python:3.12.16-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -763,7 +763,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "python:3.11.17-alpine3.24"
+        "BASE_IMAGE": "python:3.11.18-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -857,7 +857,7 @@
         "version": "./runtimes/python/versions/ml-3.13"
       },
       "args": {
-        "BASE_IMAGE": "python:3.13.17-bookworm",
+        "BASE_IMAGE": "python:3.13.18-bookworm",
         "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
       },
       "platforms": [
@@ -881,7 +881,7 @@
         "version": "./runtimes/python/versions/ml-3.12"
       },
       "args": {
-        "BASE_IMAGE": "python:3.12.15-bookworm",
+        "BASE_IMAGE": "python:3.12.16-bookworm",
         "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
       },
       "platforms": [
@@ -905,7 +905,7 @@
         "version": "./runtimes/python/versions/ml-3.11"
       },
       "args": {
-        "BASE_IMAGE": "python:3.11.17-bookworm",
+        "BASE_IMAGE": "python:3.11.18-bookworm",
         "SYSTEM_PACKAGES": "gcc pkg-config libhdf5-dev"
       },
       "platforms": [
@@ -932,7 +932,7 @@
         "version": "./runtimes/dart/versions/3.13"
       },
       "args": {
-        "BASE_IMAGE": "dart:3.13.6"
+        "BASE_IMAGE": "dart:3.13.7"
       },
       "platforms": [
         "linux/amd64",
@@ -1263,7 +1263,7 @@
       },
       "args": {
         "BASE_IMAGE": "debian:12.15-slim",
-        "FLUTTER_VERSION": "3.47.7"
+        "FLUTTER_VERSION": "3.47.9"
       },
       "platforms": [
         "linux/amd64",
@@ -1671,7 +1671,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.4.27-cli-alpine3.24",
+        "BASE_IMAGE": "php:8.4.28-cli-alpine3.24",
         "PHP_SWOOLE_VERSION": "v6.1.10",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1696,7 +1696,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.3.36-cli-alpine3.24",
+        "BASE_IMAGE": "php:8.3.37-cli-alpine3.24",
         "PHP_SWOOLE_VERSION": "v5.1.8",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1721,7 +1721,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "php:8.2.35-cli-alpine3.24",
+        "BASE_IMAGE": "php:8.2.36-cli-alpine3.24",
         "PHP_SWOOLE_VERSION": "v5.1.8",
         "BUILD_PACKAGES": "linux-headers"
       },
@@ -1892,7 +1892,7 @@
         "version": "./runtimes/kotlin/versions/2.3"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:25.0.4.1_1-jdk-alpine-3.23"
+        "BASE_IMAGE": "eclipse-temurin:25.0.5_8-jdk-alpine-3.23"
       },
       "platforms": [
         "linux/amd64"
@@ -2029,7 +2029,7 @@
         "version": "./runtimes/java/versions/25"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:25.0.4.1_1-jdk-alpine-3.23",
+        "BASE_IMAGE": "eclipse-temurin:25.0.5_8-jdk-alpine-3.23",
         "SYSTEM_PACKAGES": "curl"
       },
       "platforms": [
@@ -2053,7 +2053,7 @@
         "version": "./runtimes/java/versions/21.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:21.0.12.1_1-jdk-alpine-3.23"
+        "BASE_IMAGE": "eclipse-temurin:21.0.13_9-jdk-alpine-3.23"
       },
       "platforms": [
         "linux/amd64",
@@ -2099,7 +2099,7 @@
         "version": "./runtimes/java/versions/17.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:17.0.20.1_1-jdk-jammy"
+        "BASE_IMAGE": "eclipse-temurin:17.0.21_9-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -2122,7 +2122,7 @@
         "version": "./runtimes/java/versions/11.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:11.0.32.1_1-jdk-jammy"
+        "BASE_IMAGE": "eclipse-temurin:11.0.33_10-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -2145,7 +2145,7 @@
         "version": "./runtimes/java/versions/8.0"
       },
       "args": {
-        "BASE_IMAGE": "eclipse-temurin:8u504-b01-jdk-jammy"
+        "BASE_IMAGE": "eclipse-temurin:8u512-b09-jdk-jammy"
       },
       "platforms": [
         "linux/amd64",
@@ -2171,7 +2171,7 @@
         "version": "./runtimes/cpp/versions/17"
       },
       "args": {
-        "BASE_IMAGE": "alpine:3.23.7"
+        "BASE_IMAGE": "alpine:3.23.8"
       },
       "platforms": [
         "linux/amd64",
@@ -2194,7 +2194,7 @@
         "version": "./runtimes/cpp/versions/20"
       },
       "args": {
-        "BASE_IMAGE": "alpine:3.23.7"
+        "BASE_IMAGE": "alpine:3.23.8"
       },
       "platforms": [
         "linux/amd64",
@@ -2217,7 +2217,7 @@
         "version": "./runtimes/cpp/versions/23"
       },
       "args": {
-        "BASE_IMAGE": "alpine:3.23.7"
+        "BASE_IMAGE": "alpine:3.23.8"
       },
       "platforms": [
         "linux/amd64",
@@ -2243,7 +2243,7 @@
         "version": "./runtimes/dotnet/versions/10"
       },
       "args": {
-        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:10.0.402-alpine3.24"
+        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:10.0.404-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -2266,7 +2266,7 @@
         "version": "./runtimes/dotnet/versions/8.0"
       },
       "args": {
-        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:8.0.426-alpine3.24"
+        "BASE_IMAGE": "mcr.microsoft.com/dotnet/sdk:8.0.428-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -2338,7 +2338,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "golang:1.27.3-alpine3.24"
+        "BASE_IMAGE": "golang:1.27.4-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -2361,7 +2361,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "golang:1.26.10-alpine3.24"
+        "BASE_IMAGE": "golang:1.26.11-alpine3.24"
       },
       "platforms": [
         "linux/amd64",
@@ -2456,7 +2456,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "oven/bun:1.4.4-alpine",
+        "BASE_IMAGE": "oven/bun:1.4.5-alpine",
         "NPM_VERSION": "12.2.1"
       },
       "platforms": [
@@ -2579,7 +2579,7 @@
         "version": "./docker/empty"
       },
       "args": {
-        "BASE_IMAGE": "joseluisq/static-web-server:2.44.1-alpine"
+        "BASE_IMAGE": "joseluisq/static-web-server:2.44.3-alpine"
       },
       "platforms": [
         "linux/amd64",
