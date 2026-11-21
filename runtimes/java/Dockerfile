@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:572cebbc2b15e6f84c077742952674889cb63cd5e9b80abdffcbe587b6f19183
 # INCLUDE directives below are resolved by `bun ci/bake.ts`, which inlines the
 # referenced *.dockerfile fragments into docker-bake.json (dockerfile-inline).
 ARG BASE_IMAGE
