@@ -1895,7 +1895,8 @@
         "BASE_IMAGE": "eclipse-temurin:25.0.5_8-jdk-alpine-3.23"
       },
       "platforms": [
-        "linux/amd64"
+        "linux/amd64",
+        "linux/arm64"
       ],
       "tags": [
         "${REGISTRY}/kotlin:v5-2.3${TAG_SUFFIX}",
@@ -1917,7 +1918,8 @@
         "BASE_IMAGE": "eclipse-temurin:22.0.2_9-jdk-alpine"
       },
       "platforms": [
-        "linux/amd64"
+        "linux/amd64",
+        "linux/arm64"
       ],
       "tags": [
         "${REGISTRY}/kotlin:v5-2.0${TAG_SUFFIX}",
