@@ -11,16 +11,9 @@ tmp_artifact="${OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT}.tmp"
 rm -f "$tmp_artifact"
 artifact_dir=$(dirname "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT")
 
+# stat, not wc -c: busybox wc reads the whole artifact to count it
 file_size() {
-	wc -c <"$1" | tr -d ' '
-}
-
-file_checksum() {
-	if command -v sha256sum >/dev/null 2>&1; then
-		sha256sum "$1" | cut -d ' ' -f 1
-	elif command -v shasum >/dev/null 2>&1; then
-		shasum -a 256 "$1" | cut -d ' ' -f 1
-	fi
+	stat -c %s "$1"
 }
 
 log_file_output() {
@@ -63,11 +56,9 @@ cleanup() {
 trap cleanup EXIT
 
 old_size=''
-old_checksum=''
 
 if [ -f "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT" ]; then
 	old_size=$(file_size "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT")
-	old_checksum=$(file_checksum "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT")
 fi
 
 if [ -n "${OPEN_RUNTIMES_BUILD_CACHE_SAVE_TIMEOUT_SECONDS:-}" ] && command -v timeout >/dev/null 2>&1; then
@@ -97,16 +88,11 @@ if "${mksquashfs_cmd[@]}" "$OPEN_RUNTIMES_BUILD_CACHE_ROOT" "$tmp_artifact" -com
 		fi
 
 		new_size=$(file_size "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT")
-		new_checksum=$(file_checksum "$OPEN_RUNTIMES_BUILD_CACHE_ARTIFACT")
 
-		if [ -n "$old_checksum" ] && [ "$old_checksum" = "$new_checksum" ]; then
-			log "Build cache save skipped: artifact unchanged ($new_size bytes)."
+		if [ -n "$old_size" ]; then
+			log "Build cache saved. ($old_size bytes -> $new_size bytes)"
 		else
-			if [ -n "$old_size" ]; then
-				log "Build cache saved. ($old_size bytes -> $new_size bytes)"
-			else
-				log "Build cache saved. ($new_size bytes)"
-			fi
+			log "Build cache saved. ($new_size bytes)"
 		fi
 	else
 		log 'Build cache warning: failed to save cache, build result preserved.'
