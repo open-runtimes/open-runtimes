@@ -19,12 +19,15 @@ if (!existsSync(absoluteEntry)) {
 
 // Node 20.19+ and 22.12+ also match "module-sync", older runtimes do not
 const fileList = new Set();
+// Shared so the second pass reuses the first one's file reads and parses
+const cache = {};
 try {
   for (const conditions of [["node"], ["node", "module-sync"]]) {
     const result = await nodeFileTrace([absoluteEntry], {
       base: outputDir,
       processCwd: outputDir,
       conditions,
+      cache,
     });
     for (const file of result.fileList) fileList.add(file);
   }
