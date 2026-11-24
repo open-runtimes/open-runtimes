@@ -260,6 +260,8 @@ const action = async (logger: Logger, request: any) => {
 
   // Execute user function
   if (output === null) {
+    const store = { headers };
+
     async function execute() {
       output = await userFunction(context);
       if (output instanceof Response) {
@@ -268,7 +270,14 @@ const action = async (logger: Logger, request: any) => {
       if (output?.stream !== undefined) {
         // Pulled before the status is sent, so a source that fails or stalls
         // before its first chunk answers like a failed main function.
-        output.stream = output.stream[Symbol.asyncIterator]();
+        // Chunks after the first are pulled once the function has returned,
+        // outside its async call chain, so every pull re-enters the request
+        // context.
+        const source = output.stream[Symbol.asyncIterator]();
+        output.stream = {
+          next: () => requestContext.run(store, () => source.next()),
+          return: () => requestContext.run(store, () => source.return?.()),
+        };
         first = await output.stream.next();
       }
     }
@@ -287,7 +296,7 @@ const action = async (logger: Logger, request: any) => {
         });
 
         await Promise.race([
-          requestContext.run({ headers }, execute),
+          requestContext.run(store, execute),
           timeoutPromise,
         ]);
 
@@ -296,7 +305,7 @@ const action = async (logger: Logger, request: any) => {
           output = context.res.text("", 500, {});
         }
       } else {
-        await requestContext.run({ headers }, execute);
+        await requestContext.run(store, execute);
       }
     } catch (e: any) {
       context.error(e.stack || e);

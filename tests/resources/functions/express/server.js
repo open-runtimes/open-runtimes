@@ -256,6 +256,19 @@ When you can have two!
     await wait(+(req.headers["x-delay"] ?? 0));
     res.json({ before, after: read() });
   },
+  requestContextStream: (req, res) => {
+    const read = () =>
+      globalThis[Symbol.for("open-runtimes.request-context")]?.get?.()
+        ?.headers?.["x-first-header"] ?? "none";
+    return stream(
+      res,
+      (async function* () {
+        yield `${read()}\n`;
+        await wait(200);
+        yield `${read()}\n`;
+      })(),
+    );
+  },
   errorTest: () => {
     console.log("Before error...");
     throw new Error("Error!");

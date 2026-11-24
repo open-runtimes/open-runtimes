@@ -404,6 +404,18 @@ When you can have two!
 			);
 			return context.res.json({ before, after: read() });
 		}
+		case "requestContextStream": {
+			const read = () =>
+				globalThis[Symbol.for("open-runtimes.request-context")]?.get?.()
+					?.headers?.["x-first-header"] ?? "none";
+			return context.res.sendStream(
+				(async function* () {
+					yield `${read()}\n`;
+					await new Promise((resolve) => setTimeout(resolve, 200));
+					yield `${read()}\n`;
+				})(),
+			);
+		}
 		case "errorTest":
 			context.log("Before error...");
 			throw new Error("Error!");

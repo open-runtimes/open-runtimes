@@ -24,6 +24,11 @@ trait RequestContext
         self::assertArrayNotHasKey('x-open-runtimes-custom-header', $body['before']);
         self::assertArrayNotHasKey('x-open-runtimes-secret', $body['before']);
 
+        // A streamed response still reads it for the chunks sent after the first
+        $response = Client::execute(headers: ['x-action' => 'requestContextStream', 'x-first-header' => 'first-value'], bodyCallback: fn () => null);
+        self::assertEquals(200, $response['code']);
+        self::assertEquals("first-value\nfirst-value\n", $response['body']);
+
         // Overlapping requests each read their own
         $requests = [];
         foreach (['slow' => '500', 'fast' => '0'] as $name => $delay) {

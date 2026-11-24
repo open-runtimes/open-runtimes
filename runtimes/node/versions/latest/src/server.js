@@ -111,6 +111,9 @@ const fromSource = (source) => {
     return source;
   }
   const iterator = method.call(source);
+  // Chunks after the first are pulled once the function has returned, outside
+  // its async call chain, so every pull re-enters the request context.
+  const store = requestContext.getStore();
   let finished = false;
   return {
     [Symbol.asyncIterator]() {
@@ -121,7 +124,7 @@ const fromSource = (source) => {
         return { done: true, value: undefined };
       }
       try {
-        const result = await iterator.next();
+        const result = await requestContext.run(store, () => iterator.next());
         finished = result.done === true;
         return result;
       } catch (error) {
@@ -132,7 +135,7 @@ const fromSource = (source) => {
     async return() {
       if (!finished) {
         finished = true;
-        await iterator.return?.();
+        await requestContext.run(store, () => iterator.return?.());
       }
       return { done: true, value: undefined };
     },
