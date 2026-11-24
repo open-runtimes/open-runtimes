@@ -225,6 +225,46 @@ class SSR extends CSR
         self::assertLessThan($fullCount, $nftCount, 'Expected fewer files in node_modules after NFT pruning');
     }
 
+    public function testProductionDependencies(): void
+    {
+        $directory = '/app/tests/.runtime/production-build/src';
+        $baseline = $this->listBuildArchiveEntries('/app/tests/.runtime/modclean-disabled-build/src');
+        $entries = $this->listBuildArchiveEntries($directory);
+
+        // Projects without a single lockfile fall back to NFT
+        $metadata = $this->readBuildArchiveFile($directory, '.open-runtimes');
+        if (!\str_contains($metadata, 'OPEN_RUNTIMES_CLEANUP=production')) {
+            self::assertStringContainsString('OPEN_RUNTIMES_CLEANUP=', $metadata);
+            return;
+        }
+
+        $count = \substr_count($entries, 'node_modules/');
+        self::assertGreaterThan(0, $count, 'Expected production dependencies in node_modules');
+        self::assertLessThan(\substr_count($baseline, 'node_modules/'), $count, 'Expected fewer files in node_modules without devDependencies');
+
+        $manifest = \json_decode(\file_get_contents($directory . '/package.json'), true);
+        foreach (\array_keys($manifest['dependencies'] ?? []) as $name) {
+            self::assertStringContainsString('node_modules/' . $name . '/package.json', $entries, "Expected dependency {$name}");
+        }
+
+        $dropped = \array_filter(
+            \array_keys($manifest['devDependencies'] ?? []),
+            fn (string $name) => \str_contains($baseline, 'node_modules/' . $name . '/package.json')
+                && !\str_contains($entries, 'node_modules/' . $name . '/package.json')
+        );
+        self::assertNotEmpty($dropped, 'Expected devDependencies to be left out');
+    }
+
+    protected function readBuildArchiveFile(string $directory, string $file): string
+    {
+        $squashfs = $directory . '/code.sqfs';
+        if (\is_file($squashfs) && \filesize($squashfs) > 0) {
+            return \shell_exec('unsquashfs -cat ' . \escapeshellarg($squashfs) . ' ' . \escapeshellarg($file) . ' 2>/dev/null') ?? '';
+        }
+
+        return \shell_exec('tar -xzOf ' . \escapeshellarg($directory . '/code.tar.gz') . ' ' . \escapeshellarg('./' . $file) . ' 2>/dev/null') ?? '';
+    }
+
     protected function listBuildArchiveEntries(string $directory): string
     {
         $squashfs = $directory . '/code.sqfs';

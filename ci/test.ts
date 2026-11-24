@@ -112,7 +112,7 @@ function stageFixtures(): void {
 // build so the main build's /mnt/code does not contain them (java/kotlin/dotnet
 // compile everything under the build directory — a nested copy of the sources
 // produces duplicate-class errors). Matches the legacy ci_tests.sh ordering.
-const variantDirs = ['no-export-build', 'modclean-disabled-build', 'nft-build'];
+const variantDirs = ['no-export-build', 'modclean-disabled-build', 'nft-build', 'production-build'];
 
 function stageVariant(variant: string): void {
     const runtimeDir = join(repoRoot, 'tests/.runtime');
@@ -263,6 +263,9 @@ if (entry.COMPOSE_PROFILES.includes('cleanup-variants')) {
     console.log('Building NFT-enabled test ...');
     stageVariant('nft-build');
     run([...compose, 'run', '--rm', 'build-nft']);
+    console.log('Building production-dependencies test ...');
+    stageVariant('production-build');
+    run([...compose, 'run', '--rm', 'build-production']);
 }
 
 console.log('Starting runtime servers ...');

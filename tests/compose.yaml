@@ -85,6 +85,20 @@ services:
       - /tmp/.build:/usr/local/server/.build
       - ./.runtime/nft-build/src:/mnt/code
 
+  # Build with a production-only reinstall from the lockfile
+  build-production:
+    <<: *build
+    profiles: [manual]
+    environment:
+      INSTALL_COMMAND: ${INSTALL_COMMAND}
+      OPEN_RUNTIMES_OUTPUT_DIRECTORY: ${OUTPUT_DIRECTORY}
+      OPEN_RUNTIMES_ENTRYPOINT: ${ENTRYPOINT}
+      OPEN_RUNTIMES_DEPENDENCIES: production
+      OPEN_RUNTIMES_NFT: enabled
+    volumes:
+      - /tmp/.build:/usr/local/server/.build
+      - ./.runtime/production-build/src:/mnt/code
+
   serve:
     <<: *runtime
     container_name: open-runtimes-test-serve
