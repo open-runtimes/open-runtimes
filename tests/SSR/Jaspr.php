@@ -53,4 +53,9 @@ class Jaspr extends SSR
     {
         $this->markTestSkipped('Dart builds have no node_modules to prune');
     }
+
+    public function testProductionDependencies(): void
+    {
+        $this->markTestSkipped('Dart builds have no node_modules to reinstall');
+    }
 }
