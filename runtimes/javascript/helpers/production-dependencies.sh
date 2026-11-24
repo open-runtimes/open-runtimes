@@ -116,7 +116,8 @@ yarn)
 	INSTALL=(yarn install --frozen-lockfile --production --non-interactive)
 	;;
 npm)
-	LOCKFILE=$(find_file package-lock.json || find_file npm-shrinkwrap.json) || skip "no npm lockfile"
+	# npm reads npm-shrinkwrap.json ahead of package-lock.json
+	LOCKFILE=$(find_file npm-shrinkwrap.json || find_file package-lock.json) || skip "no npm lockfile"
 	INSTALL=(npm ci --omit=dev --no-audit --no-fund)
 	;;
 esac

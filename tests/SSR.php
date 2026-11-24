@@ -231,24 +231,33 @@ class SSR extends CSR
         $baseline = $this->listBuildArchiveEntries('/app/tests/.runtime/modclean-disabled-build/src');
         $entries = $this->listBuildArchiveEntries($directory);
 
-        // Projects without a single lockfile fall back to NFT
+        // A single npm lockfile qualifies, except for Next.js; the rest fall back
+        $lockfiles = \array_filter(
+            ['package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lock', 'bun.lockb'],
+            fn (string $file) => \is_file($directory . '/' . $file)
+        );
+        $eligible = \array_values($lockfiles) === ['package-lock.json'] && !\str_contains($baseline, '.next/');
         $metadata = $this->readBuildArchiveFile($directory, '.open-runtimes');
-        if (!\str_contains($metadata, 'OPEN_RUNTIMES_CLEANUP=production')) {
-            self::assertStringContainsString('OPEN_RUNTIMES_CLEANUP=', $metadata);
+        if (!$eligible) {
+            self::assertStringNotContainsString('OPEN_RUNTIMES_CLEANUP=production', $metadata, 'Expected the fallback cleanup');
             return;
         }
+        self::assertStringContainsString('OPEN_RUNTIMES_CLEANUP=production', $metadata, 'Expected the production install');
 
         $count = \substr_count($entries, 'node_modules/');
         self::assertGreaterThan(0, $count, 'Expected production dependencies in node_modules');
-        self::assertLessThan(\substr_count($baseline, 'node_modules/'), $count, 'Expected fewer files in node_modules without devDependencies');
 
         $manifest = \json_decode(\file_get_contents($directory . '/package.json'), true);
         foreach (\array_keys($manifest['dependencies'] ?? []) as $name) {
             self::assertStringContainsString('node_modules/' . $name . '/package.json', $entries, "Expected dependency {$name}");
         }
 
+        if (empty($manifest['devDependencies'])) {
+            return;
+        }
+        self::assertLessThan(\substr_count($baseline, 'node_modules/'), $count, 'Expected fewer files in node_modules without devDependencies');
         $dropped = \array_filter(
-            \array_keys($manifest['devDependencies'] ?? []),
+            \array_keys($manifest['devDependencies']),
             fn (string $name) => \str_contains($baseline, 'node_modules/' . $name . '/package.json')
                 && !\str_contains($entries, 'node_modules/' . $name . '/package.json')
         );
