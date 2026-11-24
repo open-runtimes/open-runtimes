@@ -231,18 +231,25 @@ class SSR extends CSR
         $baseline = $this->listBuildArchiveEntries('/app/tests/.runtime/modclean-disabled-build/src');
         $entries = $this->listBuildArchiveEntries($directory);
 
-        // A single npm lockfile qualifies, except for Next.js; the rest fall back
-        $lockfiles = \array_filter(
+        // A single committed npm lockfile qualifies, except for Next.js. Other
+        // committed lockfiles fall back. Without one, the install command
+        // writes its own lockfile during the build, so either outcome is valid.
+        $lockfiles = \array_values(\array_filter(
             ['package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lock', 'bun.lockb'],
             fn (string $file) => \is_file($directory . '/' . $file)
-        );
-        $eligible = \array_values($lockfiles) === ['package-lock.json'] && !\str_contains($baseline, '.next/');
+        ));
+        $nextjs = \str_contains($baseline, '.next/');
         $metadata = $this->readBuildArchiveFile($directory, '.open-runtimes');
-        if (!$eligible) {
-            self::assertStringNotContainsString('OPEN_RUNTIMES_CLEANUP=production', $metadata, 'Expected the fallback cleanup');
+        $production = \str_contains($metadata, 'OPEN_RUNTIMES_CLEANUP=production');
+        if ($nextjs || ($lockfiles !== [] && $lockfiles !== ['package-lock.json'])) {
+            self::assertFalse($production, 'Expected the fallback cleanup');
             return;
         }
-        self::assertStringContainsString('OPEN_RUNTIMES_CLEANUP=production', $metadata, 'Expected the production install');
+        if ($lockfiles === ['package-lock.json']) {
+            self::assertTrue($production, 'Expected the production install');
+        } elseif (!$production) {
+            return;
+        }
 
         $count = \substr_count($entries, 'node_modules/');
         self::assertGreaterThan(0, $count, 'Expected production dependencies in node_modules');
