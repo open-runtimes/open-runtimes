@@ -55,6 +55,33 @@ process.on("unhandledRejection", (reason) => {
   }
 });
 
+// A library the app bundles (an SDK, for example) cannot import from the
+// runtime, so the request being served is published under a well-known global
+// symbol. It reads the same per-request store as the logs, so it is available
+// anywhere in the request's async call chain and nowhere else.
+globalThis[Symbol.for("open-runtimes.request-context")] = {
+  get: () => {
+    const execution = loggingNamespace.getStore();
+    if (!execution) {
+      return undefined;
+    }
+
+    execution.context ??= { headers: publicHeaders(execution.request) };
+    return execution.context;
+  },
+};
+
+// Request headers without the runtime's own control headers.
+function publicHeaders(req) {
+  const headers = {};
+  for (const [name, value] of Object.entries(req.headers)) {
+    if (!name.startsWith("x-open-runtimes-")) {
+      headers[name] = value;
+    }
+  }
+  return headers;
+}
+
 // Core: replace an http.Server's `emit` so "request" events flow through the
 // Open Runtimes contract before hitting the user-owned listener.
 export function overrideEmit(originalEmit) {
@@ -85,7 +112,7 @@ export function overrideEmit(originalEmit) {
 
     const self = this;
 
-    const execution = { id: req.loggerId, timedOut: false };
+    const execution = { id: req.loggerId, timedOut: false, request: req };
 
     loggingNamespace.run(execution, () => {
       Logger.overrideNativeLogs(loggingNamespace, req.loggerId);

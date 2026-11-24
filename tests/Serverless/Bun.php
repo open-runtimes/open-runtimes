@@ -8,4 +8,5 @@ class Bun extends Serverless
 {
     use NativeResponse;
     use RawRequest;
+    use RequestContext;
 }

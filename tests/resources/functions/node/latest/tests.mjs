@@ -394,6 +394,16 @@ When you can have two!
 				hasBody: raw.body !== null,
 			});
 		}
+		case "requestContext": {
+			const read = () =>
+				globalThis[Symbol.for("open-runtimes.request-context")]?.get?.()
+					?.headers ?? null;
+			const before = read();
+			await new Promise((resolve) =>
+				setTimeout(resolve, +(context.req.headers["x-delay"] ?? 0)),
+			);
+			return context.res.json({ before, after: read() });
+		}
 		case "errorTest":
 			context.log("Before error...");
 			throw new Error("Error!");

@@ -82,6 +82,13 @@ module.exports = async (context) => {
 };
 ```
 
+- A library the function bundles, such as an SDK, is not handed `context`. For those, the request being served is also published under a global symbol. While the function is running, `get()` returns the same headers as `context.req.headers`, anywhere in the execution's async call chain; outside an execution it returns `undefined`:
+
+```js
+const request = globalThis[Symbol.for("open-runtimes.request-context")].get();
+const userAgent = request?.headers["user-agent"];
+```
+
 - To handle dependencies, you need to have `package.json` file. To install those dependencies, pass `OPEN_RUNTIMES_BUILD_COMMAND="npm install"` during build.
 
 - The default entrypoint is `index.js`. If your entrypoint differs, make sure to configure it using `INTERNAL_RUNTIME_ENTRYPOINT` environment variable, for instance, `INTERNAL_RUNTIME_ENTRYPOINT=src/app.js`.

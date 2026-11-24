@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "./config";
 import { Logger } from "./logger";
 
@@ -6,6 +7,15 @@ import { Logger } from "./logger";
 const FORBIDDEN_REQUEST_METHODS = ["CONNECT", "TRACE", "TRACK"];
 
 const USER_CODE_PATH = "/usr/local/server/src/function";
+
+// A library the function bundles (an SDK, for example) is not handed the
+// context, so the request being served is published under a well-known global
+// symbol. It is available anywhere in the execution's async call chain and
+// nowhere else. Same contract as the SSR runtimes: src/ssr/http-injection.mjs.
+const requestContext = new AsyncLocalStorage<{ headers: any }>();
+(globalThis as any)[Symbol.for("open-runtimes.request-context")] = {
+  get: () => requestContext.getStore(),
+};
 
 // User functions may return a native (Fetch API) Response instead of a
 // context.res.* result. Converts it into the internal
@@ -276,14 +286,17 @@ const action = async (logger: Logger, request: any) => {
           }, safeTimeoutConst * 1000);
         });
 
-        await Promise.race([execute(), timeoutPromise]);
+        await Promise.race([
+          requestContext.run({ headers }, execute),
+          timeoutPromise,
+        ]);
 
         if (!executed) {
           context.error("Execution timed out.");
           output = context.res.text("", 500, {});
         }
       } else {
-        await execute();
+        await requestContext.run({ headers }, execute);
       }
     } catch (e: any) {
       context.error(e.stack || e);

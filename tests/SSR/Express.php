@@ -4,6 +4,7 @@ namespace Tests\SSR;
 
 use Tests\Client;
 use Tests\Serverless;
+use Tests\Serverless\RequestContext;
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -18,6 +19,8 @@ error_reporting(E_ALL);
  */
 class Express extends Serverless
 {
+    use RequestContext;
+
     public function testRouting(): void
     {
         $response = Client::execute(url: '/users/42?sort=asc', method: 'GET');

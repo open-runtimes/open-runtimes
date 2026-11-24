@@ -9,6 +9,7 @@ class Node extends Serverless
 {
     use NativeResponse;
     use RawRequest;
+    use RequestContext;
 
     public function testSetCookie(): void
     {

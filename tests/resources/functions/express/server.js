@@ -247,6 +247,15 @@ When you can have two!
   lateResponse: (req, res) => {
     setTimeout(() => text(res, "Late response."), 3000);
   },
+  // What a library bundled with the app reads, before and after an await
+  requestContext: async (req, res) => {
+    const read = () =>
+      globalThis[Symbol.for("open-runtimes.request-context")]?.get?.()
+        ?.headers ?? null;
+    const before = read();
+    await wait(+(req.headers["x-delay"] ?? 0));
+    res.json({ before, after: read() });
+  },
   errorTest: () => {
     console.log("Before error...");
     throw new Error("Error!");

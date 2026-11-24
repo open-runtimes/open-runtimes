@@ -1,6 +1,7 @@
 const http = require("http");
 const fs = require("fs");
 const { Readable } = require("stream");
+const { AsyncLocalStorage } = require("async_hooks");
 
 const BODY_LIMIT = 20 * 1024 * 1024;
 
@@ -60,6 +61,15 @@ const send = (res, statusCode, body = null) => {
 };
 const Logger = require("./logger");
 const config = require("./config");
+
+// A library the function bundles (an SDK, for example) is not handed the
+// context, so the request being served is published under a well-known global
+// symbol. It is available anywhere in the execution's async call chain and
+// nowhere else. Same contract as the SSR runtimes: src/ssr/http-injection.mjs.
+const requestContext = new AsyncLocalStorage();
+globalThis[Symbol.for("open-runtimes.request-context")] = {
+  get: () => requestContext.getStore(),
+};
 
 // User functions may return a native (Fetch API) Response instead of a
 // context.res.* result. The Response global only exists on Node.js 18+.
@@ -432,14 +442,17 @@ const action = async (logger, req, res) => {
           }, safeTimeout * 1000);
         });
 
-        await Promise.race([execute(), timeoutPromise]);
+        await Promise.race([
+          requestContext.run({ headers }, execute),
+          timeoutPromise,
+        ]);
 
         if (!executed) {
           context.error("Execution timed out.");
           output = context.res.text("", 500, {});
         }
       } else {
-        await execute();
+        await requestContext.run({ headers }, execute);
       }
     } catch (e) {
       context.error(e.stack || e);
