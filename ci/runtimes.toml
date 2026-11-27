@@ -282,6 +282,36 @@ formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .
 tools = "node --version && npm --version"
 test = "SSR/Express.php"
 
+[nestjs]
+report_size = false
+drain = true
+runtime = { name = "node", version = "24" }
+entry = "dist/main.js"
+commands = { install = "npm install && npm run build", start = "bash helpers/nestjs/server.sh" }
+formatter = { prepare = "npm i -g @biomejs/biome@2.6.2", check = "biome format .", write = "biome format --write ." }
+tools = "node --version && npm --version"
+test = "SSR/NestJS.php"
+
+[flask]
+report_size = false
+drain = true
+runtime = { name = "python", version = "3.14" }
+entry = "app.py"
+commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "bash helpers/flask/server.sh" }
+formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
+tools = "python --version && pip --version"
+test = "SSR/Flask.php"
+
+[django]
+report_size = false
+drain = true
+runtime = { name = "python", version = "3.14" }
+entry = "manage.py"
+commands = { install = "pip install --no-cache-dir -r requirements.txt", start = "bash helpers/django/server.sh" }
+formatter = { prepare = "pip install ruff", check = "ruff format --check", write = "ruff format" }
+tools = "python --version && pip --version"
+test = "SSR/Django.php"
+
 [angular]
 report_size = false
 runtime = { name = "node", version = "24" }
