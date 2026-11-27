@@ -267,8 +267,10 @@ def application(environ, start_response):
             if name.lower() != "x-open-runtimes-log-id"
         ] + [("x-open-runtimes-log-id", log_id)]
 
-        # The legacy write() callable: an app using it has started its response
+        # The legacy write() callable: an app using it has started its response,
+        # so the timeout ends here, as for a first chunk
         def write(data):
+            _cancel_timeout()
             return send()(data)
 
         return write
@@ -294,17 +296,22 @@ def application(environ, start_response):
         except StopIteration:
             first = None
         except Exception:
-            # Nothing has reached the client yet; a later failure aborts the stream
+            # Unless write() has sent something, nothing has reached the client
+            # yet; a later failure aborts the stream
             _write(log_id, traceback.format_exc(), TYPE_ERROR)
             close = getattr(body, "close", None)
             if close is not None:
                 close()
+            if sent:
+                raise
             return _error(start_response, log_id)
         _cancel_timeout()
         send()
         return _Body(body, chunks, first, log_id)
     except _Timeout:
         _write(log_id, "Execution timed out.\n", TYPE_ERROR)
+        if sent:
+            raise
         return _error(start_response, log_id)
     except Exception:
         _write(log_id, traceback.format_exc(), TYPE_ERROR)
