@@ -225,6 +225,62 @@ class SSR extends CSR
         self::assertLessThan($fullCount, $nftCount, 'Expected fewer files in node_modules after NFT pruning');
     }
 
+    public function testProductionDependencies(): void
+    {
+        $directory = '/app/tests/.runtime/production-build/src';
+        $baseline = $this->listBuildArchiveEntries('/app/tests/.runtime/modclean-disabled-build/src');
+        $entries = $this->listBuildArchiveEntries($directory);
+
+        // A single committed npm lockfile qualifies, except for Next.js. Other
+        // committed lockfiles fall back. Without one, the install command
+        // writes its own lockfile during the build, so either outcome is valid.
+        $lockfiles = \array_values(\array_filter(
+            ['package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lock', 'bun.lockb'],
+            fn (string $file) => \is_file($directory . '/' . $file)
+        ));
+        $nextjs = \str_contains($baseline, '.next/');
+        $metadata = $this->readBuildArchiveFile($directory, '.open-runtimes');
+        $production = \str_contains($metadata, 'OPEN_RUNTIMES_CLEANUP=production');
+        if ($nextjs || ($lockfiles !== [] && $lockfiles !== ['package-lock.json'])) {
+            self::assertFalse($production, 'Expected the fallback cleanup');
+            return;
+        }
+        if ($lockfiles === ['package-lock.json']) {
+            self::assertTrue($production, 'Expected the production install');
+        } elseif (!$production) {
+            return;
+        }
+
+        $count = \substr_count($entries, 'node_modules/');
+        self::assertGreaterThan(0, $count, 'Expected production dependencies in node_modules');
+
+        $manifest = \json_decode(\file_get_contents($directory . '/package.json'), true);
+        foreach (\array_keys($manifest['dependencies'] ?? []) as $name) {
+            self::assertStringContainsString('node_modules/' . $name . '/package.json', $entries, "Expected dependency {$name}");
+        }
+
+        if (empty($manifest['devDependencies'])) {
+            return;
+        }
+        self::assertLessThan(\substr_count($baseline, 'node_modules/'), $count, 'Expected fewer files in node_modules without devDependencies');
+        $dropped = \array_filter(
+            \array_keys($manifest['devDependencies']),
+            fn (string $name) => \str_contains($baseline, 'node_modules/' . $name . '/package.json')
+                && !\str_contains($entries, 'node_modules/' . $name . '/package.json')
+        );
+        self::assertNotEmpty($dropped, 'Expected devDependencies to be left out');
+    }
+
+    protected function readBuildArchiveFile(string $directory, string $file): string
+    {
+        $squashfs = $directory . '/code.sqfs';
+        if (\is_file($squashfs) && \filesize($squashfs) > 0) {
+            return \shell_exec('unsquashfs -cat ' . \escapeshellarg($squashfs) . ' ' . \escapeshellarg($file) . ' 2>/dev/null') ?? '';
+        }
+
+        return \shell_exec('tar -xzOf ' . \escapeshellarg($directory . '/code.tar.gz') . ' ' . \escapeshellarg('./' . $file) . ' 2>/dev/null') ?? '';
+    }
+
     protected function listBuildArchiveEntries(string $directory): string
     {
         $squashfs = $directory . '/code.sqfs';

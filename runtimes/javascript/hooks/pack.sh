@@ -1,6 +1,7 @@
 #!/bin/bash
 # Prune node_modules to reduce build output size
-# Strategies: NFT (opt-in tree-shaking) or modclean (default junk removal)
+# Strategies: production reinstall (opt-in), NFT (opt-in tree-shaking) or
+# modclean (default junk removal)
 
 export OPEN_RUNTIMES_CLEANUP="none"
 
@@ -16,6 +17,17 @@ if [ ! -d "$OUTPUT_DIR/node_modules" ]; then
 fi
 
 cd "$OUTPUT_DIR" || exit
+
+# ─── Production dependencies (opt-in) ────────────────────────────────────────
+# A fresh production-only install from the lockfile replaces the full install.
+# It skips NFT and modclean; projects it does not fit fall through to them.
+if [[ "${OPEN_RUNTIMES_DEPENDENCIES:-}" == "production" ]]; then
+	if bash /usr/local/server/helpers/production-dependencies.sh "$OUTPUT_DIR"; then
+		export OPEN_RUNTIMES_CLEANUP="production"
+		return 0 2>/dev/null || exit 0
+	fi
+	cd "$OUTPUT_DIR" || exit
+fi
 
 # ─── NFT (opt-in) ────────────────────────────────────────────────────────────
 if [[ "${OPEN_RUNTIMES_NFT:-}" == "enabled" ]]; then
