@@ -48,7 +48,14 @@ def _start_logging(status, log_id):
     if (status or "enabled") != "enabled":
         return ""
 
-    if not log_id:
+    # The id names the log files, so it may only hold letters, digits, `-` and
+    # `_`: no `/` or `.`, which could reach outside the logs directory. Anything
+    # else gets a generated id.
+    if not (
+        log_id
+        and log_id.isascii()
+        and log_id.replace("-", "").replace("_", "").isalnum()
+    ):
         log_id = "dev" if IS_DEVELOPMENT else _generate_id()
 
     return log_id
@@ -251,8 +258,6 @@ def application(environ, start_response):
         return sent[0]
 
     def start_app_response(status, headers, exc_info=None):
-        # The timeout covers the execution until its response starts, as for Node
-        _cancel_timeout()
         if exc_info is not None and sent:
             raise exc_info[1].with_traceback(exc_info[2])
         response["status"] = status
@@ -282,6 +287,8 @@ def application(environ, start_response):
     try:
         body = _app(environ, start_app_response)
         chunks = iter(body)
+        # The response starts with its first chunk: the timeout covers the
+        # execution until then, as for Node
         try:
             first = next(chunks)
         except StopIteration:
@@ -293,6 +300,7 @@ def application(environ, start_response):
             if close is not None:
                 close()
             return _error(start_response, log_id)
+        _cancel_timeout()
         send()
         return _Body(body, chunks, first, log_id)
     except _Timeout:
