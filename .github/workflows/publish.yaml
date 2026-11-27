@@ -69,12 +69,19 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN  }}
       - name: Build & push by digest
         id: build
+        # Registry build cache (mode=max) keeps unchanged layers at identical
+        # digests across releases, so Kubernetes nodes pull only changed layers.
+        # zstd compresses new layers for faster decompression on pull; base
+        # layers keep their upstream (gzip) digests so they stay shareable.
         run: |
           IMAGE=$(docker buildx bake --print "$TARGET" | jq -r --arg t "$TARGET" '.target[$t].tags[0] | split(":")[0]')
+          CACHE="openruntimes/buildcache:$TARGET-${PLATFORM//\//-}"
           docker buildx bake "$TARGET" \
             --set "*.platform=$PLATFORM" \
             --set "*.tags=" \
-            --set "*.output=type=image,name=$IMAGE,push-by-digest=true,name-canonical=true,push=true" \
+            --set "*.cache-from=type=registry,ref=$CACHE" \
+            --set "*.cache-to=type=registry,ref=$CACHE,mode=max,image-manifest=true,oci-mediatypes=true" \
+            --set "*.output=type=image,name=$IMAGE,push-by-digest=true,name-canonical=true,push=true,compression=zstd,oci-mediatypes=true" \
             --metadata-file metadata.json
           DIGEST=$(jq -r --arg t "$TARGET" '.[$t]."containerimage.digest"' metadata.json)
           mkdir -p /tmp/digests
