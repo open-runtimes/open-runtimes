@@ -114,7 +114,7 @@ jobs:
         # Fork PRs get a read-only token; posting the comment 403s there and
         # must not mask the test result.
         continue-on-error: true
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const { exitCode, stdout } = await exec.getExecOutput('docker', ['image', 'inspect', 'open-runtimes/test-runtime', '--format={{.Size}}'], { silent: true, ignoreReturnCode: true });
@@ -169,7 +169,7 @@ jobs:
           path: startup-metrics
       - name: Report startup time
         continue-on-error: true
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const fs = require('fs');
