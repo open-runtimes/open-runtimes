@@ -8,9 +8,9 @@
         "ext-swoole": "*"
     },
     "require-dev": {
-        "swoole/ide-helper": "4.6.7",
+        "swoole/ide-helper": "4.8.13",
         "phpunit/phpunit": "9.*.*",
-        "vimeo/psalm": "4.7.2"
+        "vimeo/psalm": "4.30.0"
     },
     "config": {
         "platform": {

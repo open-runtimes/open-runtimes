@@ -3,4 +3,4 @@ publish_to: none
 environment:
   sdk: '>=3.0.0 <4.0.0'
 dependencies:
-  dhttpd: 4.1.0
+  dhttpd: 4.3.0
