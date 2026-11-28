@@ -1,40 +1,43 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    async (2.0.0)
-      console (~> 1.10)
-      io-event (~> 1.0.0)
-      timers (~> 4.1)
-    base64 (0.3.0)
-    console (1.17.2)
+    async (2.46.0)
+      console (~> 1.29)
       fiber-annotation
-      fiber-local
+      io-event (~> 1.21)
+    base64 (0.3.0)
+    console (1.38.0)
+      fiber-annotation
+      fiber-local (~> 1.1)
+      json
     fiber-annotation (0.2.0)
-    fiber-local (1.0.0)
-    io-event (1.0.9)
+    fiber-local (1.1.0)
+      fiber-storage
+    fiber-storage (1.0.1)
+    io-event (1.22.3)
+    json (3.2.0)
     logger (1.7.0)
     mustermann (3.1.1)
     nio4r (2.7.5)
     ostruct (0.6.3)
-    puma (7.2.1)
+    puma (7.2.4)
       nio4r (~> 2.0)
-    rack (3.2.8)
-    rack-protection (4.2.1)
+    rack (3.2.9)
+    rack-protection (4.2.2)
       base64 (>= 0.1.0)
       logger (>= 1.6.0)
       rack (>= 3.0.0, < 4)
     rack-session (2.1.2)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
-    sinatra (4.2.1)
+    sinatra (4.2.2)
       logger (>= 1.6.0)
       mustermann (~> 3.0)
       rack (>= 3.0.0, < 4)
-      rack-protection (= 4.2.1)
+      rack-protection (= 4.2.2)
       rack-session (>= 2.0.0, < 3)
       tilt (~> 2.0)
     tilt (2.9.0)
-    timers (4.3.5)
 
 PLATFORMS
   arm64-darwin-21
